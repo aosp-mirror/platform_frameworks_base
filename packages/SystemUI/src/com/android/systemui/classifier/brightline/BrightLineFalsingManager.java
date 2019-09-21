@@ -35,6 +35,7 @@ import com.android.systemui.util.sensors.ProximitySensor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * FalsingManager designed to make clear why a touch was rejected.
@@ -42,7 +43,7 @@ import java.util.List;
 public class BrightLineFalsingManager implements FalsingManager {
 
     static final boolean DEBUG = false;
-    private static final String TAG = "FalsingManagerPlugin";
+    private static final String TAG = "FalsingManager";
 
     private final FalsingDataProvider mDataProvider;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -142,7 +143,15 @@ public class BrightLineFalsingManager implements FalsingManager {
         boolean r = !mJustUnlockedWithFace && mClassifiers.stream().anyMatch(falsingClassifier -> {
             boolean result = falsingClassifier.isFalseTouch();
             if (result) {
-                logInfo(falsingClassifier.getClass().getName() + ": true");
+                logInfo(String.format(
+                        (Locale) null,
+                        "{classifier=%s, interactionType=%d}",
+                        falsingClassifier.getClass().getName(),
+                        mDataProvider.getInteractionType()));
+                String reason = falsingClassifier.getReason();
+                if (reason != null) {
+                    logInfo(reason);
+                }
             } else {
                 logDebug(falsingClassifier.getClass().getName() + ": false");
             }

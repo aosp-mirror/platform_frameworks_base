@@ -95,8 +95,9 @@ class WindowlessWindowManager implements IWindowSession {
     public void remove(android.view.IWindow window) {}
 
     private boolean isOpaque(WindowManager.LayoutParams attrs) {
-        if (attrs.surfaceInsets.left != 0 || attrs.surfaceInsets.top != 0 ||
-                attrs.surfaceInsets.right != 0 || attrs.surfaceInsets.bottom != 0) {
+        if (attrs.surfaceInsets != null && attrs.surfaceInsets.left != 0 || 
+                attrs.surfaceInsets.top != 0 || attrs.surfaceInsets.right != 0 ||
+                attrs.surfaceInsets.bottom != 0) {
             return false;
         }
         return !PixelFormat.formatHasAlpha(attrs.format);
@@ -118,9 +119,15 @@ class WindowlessWindowManager implements IWindowSession {
                     "Invalid window token (never added or removed already)");
         }
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-        t.show(sc).setBufferSize(sc,
-                requestedWidth + attrs.surfaceInsets.left + attrs.surfaceInsets.right,
-                requestedHeight + attrs.surfaceInsets.top + attrs.surfaceInsets.bottom)
+
+        final Rect surfaceInsets = attrs.surfaceInsets;
+        int width = surfaceInsets != null ?
+                requestedWidth + surfaceInsets.left + surfaceInsets.right : requestedWidth;
+        int height = surfaceInsets != null ?
+                requestedHeight + surfaceInsets.top + surfaceInsets.bottom : requestedHeight;
+
+        t.show(sc)
+            .setBufferSize(sc, width, height)
             .setOpaque(sc, isOpaque(attrs))
             .apply();
         outSurfaceControl.copyFrom(sc);

@@ -2531,14 +2531,13 @@ public class DevicePolicyManager {
     public static final int PASSWORD_QUALITY_ALPHANUMERIC = 0x50000;
 
     /**
-     * Constant for {@link #setPasswordQuality}: the user must have entered a
-     * password containing at least a letter, a numerical digit and a special
-     * symbol, by default. With this password quality, passwords can be
-     * restricted to contain various sets of characters, like at least an
-     * uppercase letter, etc. These are specified using various methods,
-     * like {@link #setPasswordMinimumLowerCase(ComponentName, int)}. Note
-     * that quality constants are ordered so that higher values are more
-     * restrictive.
+     * Constant for {@link #setPasswordQuality}: allows the admin to set precisely how many
+     * characters of various types the password should contain to satisfy the policy. The admin
+     * should set these requirements via {@link #setPasswordMinimumLetters},
+     * {@link #setPasswordMinimumNumeric}, {@link #setPasswordMinimumSymbols},
+     * {@link #setPasswordMinimumUpperCase}, {@link #setPasswordMinimumLowerCase},
+     * {@link #setPasswordMinimumNonLetter}, and {@link #setPasswordMinimumLength}.
+     * Note that quality constants are ordered so that higher values are more restrictive.
      */
     public static final int PASSWORD_QUALITY_COMPLEX = 0x60000;
 
@@ -3186,10 +3185,7 @@ public class DevicePolicyManager {
      * same as any password in the history. Note that the current password will remain until the
      * user has set a new one, so the change does not take place immediately. To prompt the user for
      * a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
-     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This constraint is
-     * only imposed if the administrator has also requested either {@link #PASSWORD_QUALITY_NUMERIC}
-     * , {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX} {@link #PASSWORD_QUALITY_ALPHABETIC}, or
-     * {@link #PASSWORD_QUALITY_ALPHANUMERIC} with {@link #setPasswordQuality}.
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value.
      * <p>
      * On devices not supporting {@link PackageManager#FEATURE_SECURE_LOCK_SCREEN} feature, the
      * password history length is always 0.

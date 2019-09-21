@@ -608,6 +608,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         private void updateProxyState(long key, int proxyUid,
             @Nullable String proxyPackageName) {
+            if (proxyUid == Process.INVALID_UID) {
+                return;
+            }
+
             if (mProxyUids == null) {
                 mProxyUids = new LongSparseLongArray();
             }

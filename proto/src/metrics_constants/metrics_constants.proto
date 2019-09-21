@@ -7422,6 +7422,9 @@ message MetricsEvent {
     // OS: Q - QPR1
     ACTION_ACTIVITY_CHOOSER_PICKED_SYSTEM_TARGET = 1749;
 
+    // OPEN: Settings > System > Aware > Aware Display
+    // OS: Q
+    SETTINGS_AWARE_DISPLAY = 1750;
     // ---- End Q Constants, all Q constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

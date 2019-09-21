@@ -1999,8 +1999,8 @@ public class AppTransition implements Dump {
                             mNextAppTransitionFutureCallback, null /* finishedCallback */,
                             mNextAppTransitionScaleUp);
                     mNextAppTransitionFutureCallback = null;
+                    mService.requestTraversal();
                 }
-                mService.requestTraversal();
             });
         }
     }

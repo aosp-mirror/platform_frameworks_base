@@ -2671,7 +2671,7 @@ public class AppOpsManager {
          * @return The proxy UID.
          */
         public int getProxyUid() {
-            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+            return (int) findFirstNonNegativeForFlagsInStates(mProxyUids,
                     MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
         }
 
@@ -2693,7 +2693,7 @@ public class AppOpsManager {
          * @return The proxy UID.
          */
         public int getProxyUid(@UidState int uidState, @OpFlags int flags) {
-            return (int) findFirstNonNegativeForFlagsInStates(mDurations,
+            return (int) findFirstNonNegativeForFlagsInStates(mProxyUids,
                     uidState, uidState, flags);
         }
 
@@ -4254,8 +4254,8 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
      * @return The sum.
      */
@@ -4284,13 +4284,13 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
      * @return The non-negative value or -1.
      */
     private static long findFirstNonNegativeForFlagsInStates(@Nullable LongSparseLongArray counts,
-            @OpFlags int flags, @UidState int beginUidState, @UidState int endUidState) {
+            @UidState int beginUidState, @UidState int endUidState, @OpFlags int flags) {
         if (counts == null) {
             return -1;
         }
@@ -4316,14 +4316,14 @@ public class AppOpsManager {
      * end UID states.
      *
      * @param counts The data array.
+     * @param beginUidState The beginning UID state (inclusive).
+     * @param endUidState The end UID state (inclusive).
      * @param flags The UID flags.
-     * @param beginUidState The beginning UID state (exclusive).
-     * @param endUidState The end UID state.
      * @return The non-negative value or -1.
      */
     private static @Nullable String findFirstNonNullForFlagsInStates(
-            @Nullable LongSparseArray<String> counts, @OpFlags int flags,
-            @UidState int beginUidState, @UidState int endUidState) {
+            @Nullable LongSparseArray<String> counts, @UidState int beginUidState,
+            @UidState int endUidState, @OpFlags int flags) {
         if (counts == null) {
             return null;
         }

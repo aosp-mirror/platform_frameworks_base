@@ -70,11 +70,6 @@ public class WindowChangeAnimationSpec implements AnimationSpec {
     }
 
     @Override
-    public int getBackgroundColor() {
-        return 0;
-    }
-
-    @Override
     public long getDuration() {
         return mAnimation.getDuration();
     }

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -78,6 +77,7 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
 
         mBluetoothControllerImpl = new BluetoothControllerImpl(mContext,
                 mTestableLooper.getLooper(),
+                mTestableLooper.getLooper(),
                 mMockBluetoothManager);
     }
 
@@ -109,18 +109,13 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
         mBluetoothControllerImpl.addCallback(callback);
 
-        // Grab the main looper, we'll need it later.
-        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
-
         // Trigger the state getting.
         assertEquals(BluetoothDevice.BOND_NONE, mBluetoothControllerImpl.getBondState(device));
 
-        mTestableLooper.processMessages(1);
-        mainLooper.processAllMessages();
+        mTestableLooper.processAllMessages();
 
         assertEquals(BluetoothDevice.BOND_BONDED, mBluetoothControllerImpl.getBondState(device));
         verify(callback).onBluetoothDevicesChanged();
-        mainLooper.destroy();
     }
 
     @Test
@@ -130,20 +125,15 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
         mBluetoothControllerImpl.addCallback(callback);
 
-        // Grab the main looper, we'll need it later.
-        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
-
         // Trigger the state getting.
         assertEquals(BluetoothProfile.STATE_DISCONNECTED,
                 mBluetoothControllerImpl.getMaxConnectionState(device));
 
-        mTestableLooper.processMessages(1);
-        mainLooper.processAllMessages();
+        mTestableLooper.processAllMessages();
 
         assertEquals(BluetoothProfile.STATE_CONNECTED,
                 mBluetoothControllerImpl.getMaxConnectionState(device));
         verify(callback).onBluetoothDevicesChanged();
-        mainLooper.destroy();
     }
 
     @Test
@@ -153,19 +143,11 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
         mBluetoothControllerImpl.addCallback(callback);
 
-        // Grab the main looper, we'll need it later.
-        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
+        // Trigger the state getting.
+        assertEquals(BluetoothProfile.STATE_DISCONNECTED,
+                mBluetoothControllerImpl.getMaxConnectionState(null));
 
-        try {
-            // Trigger the state getting.
-            assertEquals(BluetoothProfile.STATE_DISCONNECTED,
-                    mBluetoothControllerImpl.getMaxConnectionState(null));
-
-            mTestableLooper.processMessages(1);
-            mainLooper.processAllMessages();
-        } finally {
-            mainLooper.destroy();
-        }
+        mTestableLooper.processAllMessages();
     }
 
     @Test
@@ -217,15 +199,8 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onAclConnectionStateChanged(device,
                 BluetoothProfile.STATE_CONNECTED);
 
-        // Grab the main looper, we'll need it later.
-        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
+        mTestableLooper.processAllMessages();
 
-        try {
-            mTestableLooper.processAllMessages();
-            mainLooper.processAllMessages();
-        } finally {
-            mainLooper.destroy();
-        }
         assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
         verify(callback, atLeastOnce()).onBluetoothStateChange(anyBoolean());
     }

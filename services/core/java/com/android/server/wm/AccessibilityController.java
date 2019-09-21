@@ -1106,13 +1106,9 @@ final class AccessibilityController {
 
         private final Point mTempPoint = new Point();
 
-        private final Rect mTempRect = new Rect();
-
         private final Region mTempRegion = new Region();
 
         private final Region mTempRegion1 = new Region();
-
-        private final Context mContext;
 
         private final WindowManagerService mService;
 
@@ -1127,7 +1123,6 @@ final class AccessibilityController {
         public WindowsForAccessibilityObserver(WindowManagerService windowManagerService,
                 int displayId,
                 WindowsForAccessibilityCallback callback) {
-            mContext = windowManagerService.mContext;
             mService = windowManagerService;
             mCallback = callback;
             mDisplayId = displayId;

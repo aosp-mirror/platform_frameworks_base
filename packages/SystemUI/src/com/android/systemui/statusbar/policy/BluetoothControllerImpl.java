@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import static com.android.systemui.Dependency.BG_LOOPER_NAME;
+import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -67,16 +68,18 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     private boolean mEnabled;
     private int mConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
 
-    private final H mHandler = new H(Looper.getMainLooper());
+    private final H mHandler;
     private int mState;
 
     /**
      */
     @Inject
     public BluetoothControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
+            @Named(MAIN_LOOPER_NAME) Looper mainLooper,
             @Nullable LocalBluetoothManager localBluetoothManager) {
         mLocalBluetoothManager = localBluetoothManager;
         mBgHandler = new Handler(bgLooper);
+        mHandler = new H(mainLooper);
         if (mLocalBluetoothManager != null) {
             mLocalBluetoothManager.getEventManager().registerCallback(this);
             mLocalBluetoothManager.getProfileManager().addServiceListener(this);

@@ -583,27 +583,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     };
 
-    private final Consumer<WindowState> mUpdateWallpaperForAnimator = w -> {
-        final WindowStateAnimator winAnimator = w.mWinAnimator;
-        if (winAnimator.mSurfaceController == null || !winAnimator.hasSurface()) {
-            return;
-        }
-
-        // If this window is animating, ensure the animation background is set.
-        final AnimationAdapter anim = w.mAppToken != null
-                ? w.mAppToken.getAnimation()
-                : w.getAnimation();
-        if (anim != null) {
-            final int color = anim.getBackgroundColor();
-            if (color != 0) {
-                final TaskStack stack = w.getStack();
-                if (stack != null) {
-                    stack.setAnimationBackground(winAnimator, color);
-                }
-            }
-        }
-    };
-
     private final Consumer<WindowState> mScheduleToastTimeout = w -> {
         final int lostFocusUid = mTmpWindow.mOwnerUid;
         final Handler handler = mWmService.mH;
@@ -2167,7 +2146,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      *               so only need to configure display.
      */
     void setForcedDensity(int density, int userId) {
-        final boolean clear = density == mInitialDisplayDensity;
         final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
         if (mWmService.mCurrentUserId == userId || updateCurrent) {
             mBaseDisplayDensity = density;
@@ -2382,12 +2360,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         super.switchUser();
         mWmService.mWindowsChanged = true;
         mDisplayPolicy.switchUser();
-    }
-
-    private void resetAnimationBackgroundAnimator() {
-        for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-            mTaskStackContainers.getChildAt(stackNdx).resetAnimationBackgroundAnimator();
-        }
     }
 
     @Override
@@ -3423,14 +3395,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(mUpdateWindowsForAnimator, true /* traverseTopToBottom */);
     }
 
-    /**
-     * Updates the {@link TaskStack#setAnimationBackground} for all windows.
-     */
-    void updateBackgroundForAnimator() {
-        resetAnimationBackgroundAnimator();
-        forAllWindows(mUpdateWallpaperForAnimator, true /* traverseTopToBottom */);
-    }
-
     boolean isInputMethodClientFocus(int uid, int pid) {
         final WindowState imFocus = computeImeTarget(false /* updateImeTarget */);
         if (imFocus == null) {
@@ -3881,21 +3845,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             syswin = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
-        }
-    }
-
-    private static final class ScreenshotApplicationState {
-        WindowState appWin;
-        int maxLayer;
-        int minLayer;
-        boolean screenshotReady;
-
-        void reset(boolean screenshotReady) {
-            appWin = null;
-            maxLayer = 0;
-            minLayer = 0;
-            this.screenshotReady = screenshotReady;
-            minLayer = (screenshotReady) ? 0 : Integer.MAX_VALUE;
         }
     }
 

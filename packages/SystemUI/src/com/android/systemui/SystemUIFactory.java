@@ -102,7 +102,10 @@ public class SystemUIFactory {
 
         // Every other part of our codebase currently relies on Dependency, so we
         // really need to ensure the Dependency gets initialized early on.
-        Dependency.initDependencies(mRootComponent);
+
+        Dependency dependency = new Dependency();
+        mRootComponent.createDependency().createSystemUI(dependency);
+        dependency.start();
     }
 
     protected void initWithRootComponent(@NonNull SystemUIRootComponent rootComponent) {

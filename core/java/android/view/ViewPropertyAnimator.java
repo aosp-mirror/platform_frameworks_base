@@ -1138,6 +1138,12 @@ public class ViewPropertyAnimator {
 
             boolean hardwareAccelerated = mView.isHardwareAccelerated();
 
+            // alpha requires slightly different treatment than the other (transform) properties.
+            // The logic in setAlpha() is not simply setting mAlpha, plus the invalidation
+            // logic is dependent on how the view handles an internal call to onSetAlpha().
+            // We track what kinds of properties are set, and how alpha is handled when it is
+            // set, and perform the invalidation steps appropriately.
+            boolean alphaHandled = false;
             if (!hardwareAccelerated) {
                 mView.invalidateParentCaches();
             }
@@ -1152,7 +1158,11 @@ public class ViewPropertyAnimator {
                 for (int i = 0; i < count; ++i) {
                     NameValuesHolder values = valueList.get(i);
                     float value = values.mFromValue + fraction * values.mDeltaValue;
-                    setValue(values.mNameConstant, value);
+                    if (values.mNameConstant == ALPHA) {
+                        alphaHandled = mView.setAlphaNoInvalidation(value);
+                    } else {
+                        setValue(values.mNameConstant, value);
+                    }
                 }
             }
             if ((propertyMask & TRANSFORM_MASK) != 0) {
@@ -1160,8 +1170,13 @@ public class ViewPropertyAnimator {
                     mView.mPrivateFlags |= View.PFLAG_DRAWN; // force another invalidation
                 }
             }
-
-            mView.invalidateViewProperty(false, false);
+            // invalidate(false) in all cases except if alphaHandled gets set to true
+            // via the call to setAlphaNoInvalidation(), above
+            if (alphaHandled) {
+                mView.invalidate(true);
+            } else {
+                mView.invalidateViewProperty(false, false);
+            }
             if (mUpdateListener != null) {
                 mUpdateListener.onAnimationUpdate(animation);
             }

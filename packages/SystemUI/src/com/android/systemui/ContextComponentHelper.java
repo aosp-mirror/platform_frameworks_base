@@ -16,12 +16,16 @@
 
 package com.android.systemui;
 
+import android.app.Activity;
 import android.app.Service;
 
 /**
  * Interface necessary to make Dagger happy. See {@link ContextComponentResolver}.
  */
 public interface ContextComponentHelper {
+    /** Turns a classname into an instance of the class or returns null. */
+    Activity resolveActivity(String className);
+
     /** Turns a classname into an instance of the class or returns null. */
     Service resolveService(String className);
 

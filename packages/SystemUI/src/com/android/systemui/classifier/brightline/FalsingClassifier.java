@@ -117,6 +117,14 @@ abstract class FalsingClassifier {
      */
     abstract boolean isFalseTouch();
 
+    /**
+     * Give the classifier a chance to log more details about why it triggered.
+     *
+     * This should only be called after a call to {@link #isFalseTouch()}, and only if
+     * {@link #isFalseTouch()} returns true;
+     */
+    abstract String getReason();
+
     static void logDebug(String msg) {
         BrightLineFalsingManager.logDebug(msg);
     }

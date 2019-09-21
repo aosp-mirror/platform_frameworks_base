@@ -981,10 +981,10 @@ public class BiometricService extends SystemService {
         mStatusBarService = mInjector.getStatusBarService();
 
         // Cache the authenticators
-        for (int i = 0; i < FEATURE_ID.length; i++) {
-            if (hasFeature(FEATURE_ID[i])) {
+        for (int featureId : FEATURE_ID) {
+            if (hasFeature(featureId)) {
                 Authenticator authenticator =
-                        new Authenticator(FEATURE_ID[i], getAuthenticator(FEATURE_ID[i]));
+                        new Authenticator(featureId, getAuthenticator(featureId));
                 mAuthenticators.add(authenticator);
             }
         }
@@ -1005,8 +1005,6 @@ public class BiometricService extends SystemService {
      * and the error containing one of the {@link BiometricConstants} errors.
      */
     private Pair<Integer, Integer> checkAndGetBiometricModality(int userId) {
-        int modality = TYPE_NONE;
-
         // No biometric features, send error
         if (mAuthenticators.isEmpty()) {
             return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
@@ -1022,10 +1020,11 @@ public class BiometricService extends SystemService {
         boolean hasTemplatesEnrolled = false;
         boolean enabledForApps = false;
 
+        int modality = TYPE_NONE;
         int firstHwAvailable = TYPE_NONE;
-        for (int i = 0; i < mAuthenticators.size(); i++) {
-            modality = mAuthenticators.get(i).getType();
-            BiometricAuthenticator authenticator = mAuthenticators.get(i).getAuthenticator();
+        for (Authenticator authenticatorWrapper : mAuthenticators) {
+            modality = authenticatorWrapper.getType();
+            BiometricAuthenticator authenticator = authenticatorWrapper.getAuthenticator();
             if (authenticator.isHardwareDetected()) {
                 isHardwareDetected = true;
                 if (firstHwAvailable == TYPE_NONE) {
@@ -1036,9 +1035,6 @@ public class BiometricService extends SystemService {
                 if (authenticator.hasEnrolledTemplates(userId)) {
                     hasTemplatesEnrolled = true;
                     if (isEnabledForApp(modality, userId)) {
-                        // TODO(b/110907543): When face settings (and other settings) have both a
-                        // user toggle as well as a work profile settings page, this needs to be
-                        // updated to reflect the correct setting.
                         enabledForApps = true;
                         break;
                     }
@@ -1555,7 +1551,7 @@ public class BiometricService extends SystemService {
     }
 
     /**
-     * authenticate() (above) which is called from BiometricPrompt determines which
+     * handleAuthenticate() (above) which is called from BiometricPrompt determines which
      * modality/modalities to start authenticating with. authenticateInternal() should only be
      * used for:
      * 1) Preparing <Biometric>Services for authentication when BiometricPrompt#authenticate is,

@@ -18,15 +18,23 @@ package com.android.server.om;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
+import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.util.TypedValue;
 
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implementation of 'cmd overlay' commands.
@@ -36,9 +44,11 @@ import java.util.Map;
  * for a list of available commands.
  */
 final class OverlayManagerShellCommand extends ShellCommand {
+    private final Context mContext;
     private final IOverlayManager mInterface;
 
-    OverlayManagerShellCommand(@NonNull final IOverlayManager iom) {
+    OverlayManagerShellCommand(@NonNull final Context ctx, @NonNull final IOverlayManager iom) {
+        mContext = ctx;
         mInterface = iom;
     }
 
@@ -60,6 +70,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runEnableExclusive();
                 case "set-priority":
                     return runSetPriority();
+                case "lookup":
+                    return runLookup();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -102,6 +114,10 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    'lowest', change priority of PACKAGE to the lowest priority.");
         out.println("    If PARENT is the special keyword 'highest', change priority of");
         out.println("    PACKAGE to the highest priority.");
+        out.println("  lookup [--verbose] PACKAGE-TO-LOAD PACKAGE:TYPE/NAME");
+        out.println("    Load a package and print the value of a given resource");
+        out.println("    applying the current configuration and enabled overlays.");
+        out.println("    For a more fine-grained alernative, use 'idmap2 lookup'.");
     }
 
     private int runList() throws RemoteException {
@@ -251,6 +267,94 @@ final class OverlayManagerShellCommand extends ShellCommand {
             return mInterface.setLowestPriority(packageName, userId) ? 0 : 1;
         } else {
             return mInterface.setPriority(packageName, newParentPackageName, userId) ? 0 : 1;
+        }
+    }
+
+    private int runLookup() throws RemoteException {
+        final PrintWriter out = getOutPrintWriter();
+        final PrintWriter err = getErrPrintWriter();
+
+        final boolean verbose = "--verbose".equals(getNextOption());
+
+        final String packageToLoad = getNextArgRequired();
+
+        final String fullyQualifiedResourceName = getNextArgRequired(); // package:type/name
+        final Pattern regex = Pattern.compile("(.*?):(.*?)/(.*?)");
+        final Matcher matcher = regex.matcher(fullyQualifiedResourceName);
+        if (!matcher.matches()) {
+            err.println("Error: bad resource name, doesn't match package:type/name");
+            return 1;
+        }
+
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm == null) {
+            err.println("Error: failed to get package manager");
+            return 1;
+        }
+
+        final Resources res;
+        try {
+            res = pm.getResourcesForApplication(packageToLoad);
+        } catch (PackageManager.NameNotFoundException e) {
+            err.println("Error: failed to get resources for package " + packageToLoad);
+            return 1;
+        }
+        final AssetManager assets = res.getAssets();
+        try {
+            assets.setResourceResolutionLoggingEnabled(true);
+
+            // first try as non-complex type ...
+            try {
+                final TypedValue value = new TypedValue();
+                res.getValue(fullyQualifiedResourceName, value, false /* resolveRefs */);
+                final CharSequence valueString = value.coerceToString();
+                final String resolution = assets.getLastResourceResolution();
+
+                res.getValue(fullyQualifiedResourceName, value, true /* resolveRefs */);
+                final CharSequence resolvedString = value.coerceToString();
+
+                if (verbose) {
+                    out.println(resolution);
+                }
+
+                if (valueString.equals(resolvedString)) {
+                    out.println(valueString);
+                } else {
+                    out.println(valueString + " -> " + resolvedString);
+                }
+                return 0;
+            } catch (Resources.NotFoundException e) {
+                // this is ok, resource could still be a complex type
+            }
+
+            // ... then try as complex type
+            try {
+
+                final String pkg = matcher.group(1);
+                final String type = matcher.group(2);
+                final String name = matcher.group(3);
+                final int resid = res.getIdentifier(name, type, pkg);
+                if (resid == 0) {
+                    throw new Resources.NotFoundException();
+                }
+                final TypedArray array = res.obtainTypedArray(resid);
+                if (verbose) {
+                    out.println(assets.getLastResourceResolution());
+                }
+                TypedValue tv = new TypedValue();
+                for (int i = 0; i < array.length(); i++) {
+                    array.getValue(i, tv);
+                    out.println(tv.coerceToString());
+                }
+                array.recycle();
+                return 0;
+            } catch (Resources.NotFoundException e) {
+                // give up
+                err.println("Error: failed to get the resource " + fullyQualifiedResourceName);
+                return 1;
+            }
+        } finally {
+            assets.setResourceResolutionLoggingEnabled(false);
         }
     }
 }

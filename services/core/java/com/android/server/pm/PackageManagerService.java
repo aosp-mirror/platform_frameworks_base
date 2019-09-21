@@ -17124,8 +17124,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
                     try {
                         VerityUtils.setUpFsverity(filePath, signaturePath);
-                    } catch (IOException | DigestException | NoSuchAlgorithmException
-                            | SecurityException e) {
+                    } catch (IOException e) {
                         throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
                                 "Failed to enable fs-verity: " + e);
                     }
@@ -19787,7 +19786,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public void sendSessionCommitBroadcast(PackageInstaller.SessionInfo sessionInfo, int userId) {
         UserManagerService ums = UserManagerService.getInstance();
-        if (ums != null) {
+        if (ums != null && !sessionInfo.isStaged()) {
             final UserInfo parent = ums.getProfileParent(userId);
             final int launcherUid = (parent != null) ? parent.id : userId;
             final ComponentName launcherComponent = getDefaultHomeActivity(launcherUid);
@@ -23391,10 +23390,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
 
-                final long caller = Binder.clearCallingIdentity();
-                final boolean instantApp = isInstantApp(callingPackage.packageName, userId);
-                Binder.restoreCallingIdentity(caller);
-                if (instantApp) {
+                if (isInstantApp(callingPackage.packageName, userId)) {
                     mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                             callingAppId, targetAppId);
                 } else {

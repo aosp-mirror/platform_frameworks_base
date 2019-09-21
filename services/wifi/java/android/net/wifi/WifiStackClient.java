@@ -21,6 +21,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.net.ConnectivityModuleConnector;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -56,13 +57,20 @@ public class WifiStackClient {
         public void onModuleServiceConnected(IBinder service) {
             Log.i(TAG, "Wifi stack connected");
 
-            registerWifiStackService(service);
-            IWifiStackConnector connector = IWifiStackConnector.Stub.asInterface(service);
-            registerApiServiceAndStart(connector, Context.WIFI_SERVICE);
-            registerApiServiceAndStart(connector, Context.WIFI_SCANNING_SERVICE);
-            registerApiServiceAndStart(connector, Context.WIFI_P2P_SERVICE);
-            registerApiServiceAndStart(connector, Context.WIFI_AWARE_SERVICE);
-            registerApiServiceAndStart(connector, Context.WIFI_RTT_RANGING_SERVICE);
+            // spin up a new thread to not block system_server main thread
+            HandlerThread thread = new HandlerThread("InitWifiServicesThread");
+            thread.start();
+            thread.getThreadHandler().post(() -> {
+                registerWifiStackService(service);
+                IWifiStackConnector connector = IWifiStackConnector.Stub.asInterface(service);
+                registerApiServiceAndStart(connector, Context.WIFI_SCANNING_SERVICE);
+                registerApiServiceAndStart(connector, Context.WIFI_SERVICE);
+                registerApiServiceAndStart(connector, Context.WIFI_P2P_SERVICE);
+                registerApiServiceAndStart(connector, Context.WIFI_AWARE_SERVICE);
+                registerApiServiceAndStart(connector, Context.WIFI_RTT_RANGING_SERVICE);
+
+                thread.quitSafely();
+            });
         }
     }
 

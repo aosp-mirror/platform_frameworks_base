@@ -18,7 +18,7 @@ java_sdk_library {
     name: "com.android.location.provider",
     srcs: [
         "java/**/*.java",
-        ":framework-srcs",
+        ":framework-all-sources",
     ],
     libs: [
         "androidx.annotation_annotation",

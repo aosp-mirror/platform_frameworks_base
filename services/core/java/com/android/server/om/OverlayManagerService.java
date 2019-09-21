@@ -744,7 +744,7 @@ public final class OverlayManagerService extends SystemService {
                 @NonNull final FileDescriptor out, @NonNull final FileDescriptor err,
                 @NonNull final String[] args, @NonNull final ShellCallback callback,
                 @NonNull final ResultReceiver resultReceiver) {
-            (new OverlayManagerShellCommand(this)).exec(
+            (new OverlayManagerShellCommand(getContext(), this)).exec(
                     this, in, out, err, args, callback, resultReceiver);
         }
 

@@ -79,6 +79,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     /**
      * Wrapped {@link ParcelFileDescriptor}, if any. Used to avoid
      * double-closing {@link #mFd}.
+     * mClosed is always true if mWrapped is non-null.
      */
     private final ParcelFileDescriptor mWrapped;
 
@@ -1023,6 +1024,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
         try {
             if (!mClosed) {
+                // mWrapped was and is null.
                 closeWithStatus(Status.LEAKED, null);
             }
         } finally {

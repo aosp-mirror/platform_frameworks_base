@@ -2480,17 +2480,15 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void activityRelaunchedLocked(IBinder token) {
-        mWindowManager.notifyAppRelaunchingFinished(token);
         final ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r != null) {
+            if (r.mAppWindowToken != null) {
+                r.mAppWindowToken.finishRelaunching();
+            }
             if (r.getActivityStack().shouldSleepOrShutDownActivities()) {
                 r.setSleeping(true, true);
             }
         }
-    }
-
-    void activityRelaunchingLocked(ActivityRecord r) {
-        mWindowManager.notifyAppRelaunching(r.appToken);
     }
 
     void logStackState() {

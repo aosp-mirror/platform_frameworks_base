@@ -37,8 +37,6 @@ import dagger.Component;
 @Component(modules = {
         DependencyProvider.class,
         DependencyBinder.class,
-        ServiceBinder.class,
-        SystemUIBinder.class,
         SystemUIFactory.ContextHolder.class,
         SystemUIModule.class,
         SystemUIDefaultModule.class})

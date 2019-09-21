@@ -2620,12 +2620,14 @@ message SettingsUIChanged {
 message TouchEventReported {
     /**
      * The fields latency_{min|max|mean|stdev} represent minimum, maximum, mean,
-     * and the standard deviation of latency between the kernel and framework
-     * for touchscreen events. The units are microseconds.
+     * and the standard deviation of the time spent processing touchscreen events
+     * in the kernel and inputflinger. The units are microseconds.
      *
-     * The number is measured as the difference between the time at which
-     * the input event was received in the evdev driver,
-     * and the time at which the input event was received in EventHub.
+     * On supported devices, the starting point is taken during the hard interrupt inside the
+     * kernel touch driver. On all other devices, the starting point is taken inside
+     * the kernel's input event subsystem upon receipt of the input event.
+     * The ending point is taken inside InputDispatcher, just after the input event
+     * is sent to the app.
      */
     // Minimum value
     optional float latency_min_micros = 1;

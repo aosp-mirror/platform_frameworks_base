@@ -520,11 +520,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** When true this window can be displayed on screens owther than mOwnerUid's */
     private boolean mShowToOwnerOnly;
 
-    // Whether the window was visible when we set the app to invisible last time. WM uses
-    // this as a hint to restore the surface (if available) for early animation next time
-    // the app is brought visible.
-    private boolean mWasVisibleBeforeClientHidden;
-
     // This window will be replaced due to relaunch. This allows window manager
     // to differentiate between simple removal of a window and replacement. In the latter case it
     // will preserve the old window until the new one is drawn.
@@ -2012,8 +2007,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             // Visibility of the removed window. Will be used later to update orientation later on.
             boolean wasVisible = false;
-
-            final int displayId = getDisplayId();
 
             // First, see if we need to run an animation. If we do, we have to hold off on removing the
             // window until the animation is done. If the display is frozen, just remove immediately,

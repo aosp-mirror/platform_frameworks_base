@@ -197,13 +197,21 @@ class ActivityTransitionState {
         mHasExited = false;
         ArrayList<String> sharedElementNames = mEnterActivityOptions.getSharedElementNames();
         ResultReceiver resultReceiver = mEnterActivityOptions.getResultReceiver();
-        if (mEnterActivityOptions.isReturning()) {
+        final boolean isReturning = mEnterActivityOptions.isReturning();
+        if (isReturning) {
             restoreExitedViews();
             activity.getWindow().getDecorView().setVisibility(View.VISIBLE);
         }
         mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
                 resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning(),
-                mEnterActivityOptions.isCrossTask());
+                mEnterActivityOptions.isCrossTask(),
+                () -> {
+                    if (isReturning) {
+                        // once it is done transitioning, we don't need the coordinator --
+                        // if we kept it around, it could leak Views
+                        mEnterTransitionCoordinator = null;
+                    }
+                });
         if (mEnterActivityOptions.isCrossTask()) {
             mExitingFrom = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
             mExitingTo = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());

@@ -85,8 +85,6 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     private Rect mTmpRect = new Rect();
     // For handling display rotations.
     private Rect mTmpRect2 = new Rect();
-    // For retrieving dim bounds
-    private Rect mTmpRect3 = new Rect();
 
     // Resize mode of the task. See {@link ActivityInfo#resizeMode}
     private int mResizeMode;

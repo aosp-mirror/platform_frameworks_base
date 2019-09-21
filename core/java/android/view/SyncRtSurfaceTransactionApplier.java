@@ -255,7 +255,7 @@ public class SyncRtSurfaceTransactionApplier {
             this.surface = surface;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
-            this.windowCrop = new Rect(windowCrop);
+            this.windowCrop = windowCrop != null ? new Rect(windowCrop) : null;
             this.layer = layer;
             this.cornerRadius = cornerRadius;
             this.visible = visible;

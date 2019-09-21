@@ -750,7 +750,10 @@ public class WifiScanner {
 
     /**
      * Enable/Disable wifi scanning.
-     *
+     * Note: WifiService calls this after any client interface mode changes (i.e. a new interface
+     * set up or an existing interface torn down)
+     * If there are >= 1 active client interface, invoke setScanningEnabled(true)
+     * If there are 0 active client interface, invoke setScanningEnabled(false)
      * {@hide}
      */
     @RequiresPermission(Manifest.permission.NETWORK_STACK)

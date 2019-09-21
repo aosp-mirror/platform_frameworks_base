@@ -26,13 +26,17 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.atLeast;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMoreInteractions;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -44,9 +48,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.IInterface;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseBooleanArray;
@@ -88,8 +95,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
             doReturn(mDisplayContent).when(mWm.mRoot).getDisplayContent(anyInt());
         }
         when(mMockRunner.asBinder()).thenReturn(new Binder());
-        mController = new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
-                DEFAULT_DISPLAY);
+        mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
+                DEFAULT_DISPLAY));
     }
 
     @Test
@@ -133,11 +140,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testIncludedApps_expectTargetAndVisible() {
         mWm.setRecentsAnimationController(mController);
-        final ActivityStack homStack = mDisplayContent.mAcitvityDisplay.getOrCreateStack(
+        final ActivityStack homeStack = mDisplayContent.mAcitvityDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         final AppWindowToken homeAppWindow =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
-                        .setStack(homStack)
+                        .setStack(homeStack)
                         .setCreateTask(true)
                         .build()
                         .mAppWindowToken;
@@ -154,6 +161,102 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         assertTrue(mController.isAnimatingTask(homeAppWindow.getTask()));
         assertTrue(mController.isAnimatingTask(appWindow.getTask()));
         assertFalse(mController.isAnimatingTask(hiddenAppWindow.getTask()));
+    }
+
+    @Test
+    public void testWallpaperIncluded_expectTarget() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityStack homeStack = mDisplayContent.mAcitvityDisplay.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final AppWindowToken homeAppWindow =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homeStack)
+                        .setCreateTask(true)
+                        .build()
+                        .mAppWindowToken;
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win1);
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+
+        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
+                mDisplayContent.getRotation());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.startAnimation();
+
+        // Ensure that we are animating the app and wallpaper target
+        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        assertTrue(mController.isAnimatingWallpaper(wallpaperWindowToken));
+    }
+
+    @Test
+    public void testWallpaperAnimatorCanceled_expectAnimationKeepsRunning() throws Exception {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityStack homeStack = mDisplayContent.mAcitvityDisplay.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final AppWindowToken homeAppWindow =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homeStack)
+                        .setCreateTask(true)
+                        .build()
+                        .mAppWindowToken;
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win1);
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+
+        mDisplayContent.getConfiguration().windowConfiguration.setRotation(
+                mDisplayContent.getRotation());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.startAnimation();
+
+        // Cancel the animation and ensure the controller is still running
+        wallpaperWindowToken.cancelAnimation();
+        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        assertFalse(mController.isAnimatingWallpaper(wallpaperWindowToken));
+        verify(mMockRunner, never()).onAnimationCanceled(null /* taskSnapshot */);
+    }
+
+    @Test
+    public void testFinish_expectTargetAndWallpaperAdaptersRemoved() {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityStack homeStack = mDisplayContent.mAcitvityDisplay.getOrCreateStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        final AppWindowToken homeAppWindow =
+                new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                        .setStack(homeStack)
+                        .setCreateTask(true)
+                        .build()
+                        .mAppWindowToken;
+        final WindowState hwin1 = createWindow(null, TYPE_BASE_APPLICATION, homeAppWindow, "hwin1");
+        homeAppWindow.addWindow(hwin1);
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
+        appWindow.addWindow(win1);
+        final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
+                mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
+        spyOn(mDisplayContent.mWallpaperController);
+        doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
+
+        // Start and finish the animation
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.startAnimation();
+        // Reset at this point since we may remove adapters that couldn't be created
+        reset(mController);
+        mController.cleanupAnimation(REORDER_MOVE_TO_TOP);
+
+        // Ensure that we remove the task (home & app) and wallpaper adapters
+        verify(mController, times(2)).removeAnimation(any());
+        verify(mController, times(1)).removeWallpaperAnimation(any());
     }
 
     @Test

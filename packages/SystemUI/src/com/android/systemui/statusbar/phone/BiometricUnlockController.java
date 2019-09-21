@@ -448,9 +448,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             } else if (!unlockingAllowed) {
                 return bypass ? MODE_SHOW_BOUNCER : MODE_NONE;
             } else if (mDozeScrimController.isPulsing()) {
-                // Let's not wake-up to lock screen when not bypassing, otherwise the notification
-                // would move as the user tried to tap it.
-                return bypass ? MODE_WAKE_AND_UNLOCK_PULSING : MODE_NONE;
+                return bypass ? MODE_WAKE_AND_UNLOCK_PULSING : MODE_ONLY_WAKE;
             } else {
                 if (bypass) {
                     // Wake-up fading out nicely

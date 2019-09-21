@@ -472,8 +472,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         final int count = mChildren.size();
         for (int i = 0; i < count; ++i) {
-            final DisplayContent dc = mChildren.get(i);
-            final int pendingChanges = animator.getPendingLayoutChanges(dc.getDisplayId());
+            final int pendingChanges = mChildren.get(i).pendingLayoutChanges;
             if ((pendingChanges & FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                 animator.mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;
             }

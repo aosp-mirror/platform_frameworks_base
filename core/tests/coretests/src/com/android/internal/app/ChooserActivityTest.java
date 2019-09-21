@@ -481,6 +481,36 @@ public class ChooserActivityTest {
     }
 
     @Test
+    public void copyTextToClipboardLogging() throws Exception {
+        Intent sendIntent = createSendTextIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(ChooserWrapperActivity.sOverrides.resolverListController.getResolversForIntent(
+            Mockito.anyBoolean(),
+            Mockito.anyBoolean(),
+            Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+
+        MetricsLogger mockLogger = sOverrides.metricsLogger;
+        ArgumentCaptor<LogMaker> logMakerCaptor = ArgumentCaptor.forClass(LogMaker.class);
+
+        final ChooserWrapperActivity activity = mActivityRule
+                .launchActivity(Intent.createChooser(sendIntent, null));
+        waitForIdle();
+
+        onView(withId(R.id.copy_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.copy_button)).perform(click());
+
+        verify(mockLogger, atLeastOnce()).write(logMakerCaptor.capture());
+        // First is  Activity shown, Second is "with preview"
+        assertThat(logMakerCaptor.getAllValues().get(2).getCategory(),
+                is(MetricsEvent.ACTION_ACTIVITY_CHOOSER_PICKED_SYSTEM_TARGET));
+        assertThat(logMakerCaptor
+                        .getAllValues().get(2)
+                        .getSubtype(),
+                is(1));
+    }
+
+    @Test
     public void oneVisibleImagePreview() throws InterruptedException {
         Uri uri = Uri.parse("android.resource://com.android.frameworks.coretests/"
                 + com.android.frameworks.coretests.R.drawable.test320x240);

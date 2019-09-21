@@ -54,6 +54,6 @@ oneway interface IRecentsAnimationRunner {
      */
     @UnsupportedAppUsage
     void onAnimationStart(in IRecentsAnimationController controller,
-            in RemoteAnimationTarget[] apps, in Rect homeContentInsets,
-            in Rect minimizedHomeBounds) = 2;
+            in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
+            in Rect homeContentInsets, in Rect minimizedHomeBounds) = 2;
 }

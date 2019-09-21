@@ -25,8 +25,6 @@ import dagger.Component;
         modules = {
                 DependencyProvider.class,
                 DependencyBinder.class,
-                ServiceBinder.class,
-                SystemUIBinder.class,
                 SystemUIFactory.ContextHolder.class,
                 SystemUIModule.class,
                 CarSystemUIModule.class

@@ -75,6 +75,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
     class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
         @Override
         public void onAnimationStart(RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
                 IRemoteAnimationFinishedCallback finishedCallback) {
             for (RemoteAnimationTarget target : apps) {
                 assertNotNull(target.startBounds);

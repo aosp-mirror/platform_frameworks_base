@@ -93,6 +93,8 @@ public class RecentsAnimationController implements DeathRecipient {
     private IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
+    private final ArrayList<WallpaperAnimationAdapter> mPendingWallpaperAnimations =
+            new ArrayList<>();
     private final int mDisplayId;
     private final Runnable mFailsafeRunnable = () ->
             cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "failSafeRunnable");
@@ -434,6 +436,13 @@ public class RecentsAnimationController implements DeathRecipient {
         mPendingAnimations.remove(taskAdapter);
     }
 
+    @VisibleForTesting
+    void removeWallpaperAnimation(WallpaperAnimationAdapter wallpaperAdapter) {
+        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "removeWallpaperAnimation()");
+        wallpaperAdapter.getLeashFinishedCallback().onAnimationFinished(wallpaperAdapter);
+        mPendingWallpaperAnimations.remove(wallpaperAdapter);
+    }
+
     void startAnimation() {
         if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "startAnimation(): mPendingStart=" + mPendingStart
                 + " mCanceled=" + mCanceled);
@@ -442,25 +451,18 @@ public class RecentsAnimationController implements DeathRecipient {
             return;
         }
         try {
-            final ArrayList<RemoteAnimationTarget> appAnimations = new ArrayList<>();
-            for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-                final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
-                final RemoteAnimationTarget target = taskAdapter.createRemoteAnimationApp();
-                if (target != null) {
-                    appAnimations.add(target);
-                } else {
-                    removeAnimation(taskAdapter);
-                }
-            }
+            // Create the app targets
+            final RemoteAnimationTarget[] appTargets = createAppAnimations();
 
             // Skip the animation if there is nothing to animate
-            if (appAnimations.isEmpty()) {
+            if (appTargets.length == 0) {
                 cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "startAnimation-noAppWindows");
                 return;
             }
 
-            final RemoteAnimationTarget[] appTargets = appAnimations.toArray(
-                    new RemoteAnimationTarget[appAnimations.size()]);
+            // Create the wallpaper targets
+            final RemoteAnimationTarget[] wallpaperTargets = createWallpaperAnimations();
+
             mPendingStart = false;
 
             // Perform layout if it was scheduled before to make sure that we get correct content
@@ -479,7 +481,8 @@ public class RecentsAnimationController implements DeathRecipient {
                 mService.getStableInsets(mDisplayId, mTmpRect);
                 contentInsets = mTmpRect;
             }
-            mRunner.onAnimationStart(mController, appTargets, contentInsets, minimizedHomeBounds);
+            mRunner.onAnimationStart(mController, appTargets, wallpaperTargets, contentInsets,
+                    minimizedHomeBounds);
             if (DEBUG_RECENTS_ANIMATIONS) {
                 Slog.d(TAG, "startAnimation(): Notify animation start:");
                 for (int i = 0; i < mPendingAnimations.size(); i++) {
@@ -493,6 +496,32 @@ public class RecentsAnimationController implements DeathRecipient {
         final SparseIntArray reasons = new SparseIntArray();
         reasons.put(WINDOWING_MODE_FULLSCREEN, APP_TRANSITION_RECENTS_ANIM);
         mService.mAtmInternal.notifyAppTransitionStarting(reasons, SystemClock.uptimeMillis());
+    }
+
+    private RemoteAnimationTarget[] createAppAnimations() {
+        final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
+        for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
+            final RemoteAnimationTarget target = taskAdapter.createRemoteAnimationTarget();
+            if (target != null) {
+                targets.add(target);
+            } else {
+                removeAnimation(taskAdapter);
+            }
+        }
+        return targets.toArray(new RemoteAnimationTarget[targets.size()]);
+    }
+
+    private RemoteAnimationTarget[] createWallpaperAnimations() {
+        if (DEBUG_RECENTS_ANIMATIONS) Slog.d(TAG, "createWallpaperAnimations()");
+        return WallpaperAnimationAdapter.startWallpaperAnimations(mService, 0L, 0L,
+                adapter -> {
+                    synchronized (mService.mGlobalLock) {
+                        // If the wallpaper animation is canceled, continue with the recents
+                        // animation
+                        mPendingWallpaperAnimations.remove(adapter);
+                    }
+                }, mPendingWallpaperAnimations);
     }
 
     void cancelAnimation(@ReorderMode int reorderMode, String reason) {
@@ -617,6 +646,11 @@ public class RecentsAnimationController implements DeathRecipient {
                 taskAdapter.mTask.dontAnimateDimExit();
             }
             removeAnimation(taskAdapter);
+        }
+
+        for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
+            final WallpaperAnimationAdapter wallpaperAdapter = mPendingWallpaperAnimations.get(i);
+            removeWallpaperAnimation(wallpaperAdapter);
         }
 
         // Clear any pending failsafe runnables
@@ -747,6 +781,15 @@ public class RecentsAnimationController implements DeathRecipient {
         return false;
     }
 
+    boolean isAnimatingWallpaper(WallpaperWindowToken token) {
+        for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
+            if (token == mPendingWallpaperAnimations.get(i).getToken()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isAnimatingApp(AppWindowToken appToken) {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final Task task = mPendingAnimations.get(i).mTask;
@@ -784,7 +827,7 @@ public class RecentsAnimationController implements DeathRecipient {
             mBounds.set(container.getDisplayedBounds());
         }
 
-        RemoteAnimationTarget createRemoteAnimationApp() {
+        RemoteAnimationTarget createRemoteAnimationTarget() {
             final AppWindowToken topApp = mTask.getTopVisibleAppToken();
             final WindowState mainWindow = topApp != null
                     ? topApp.findMainWindow()
@@ -811,11 +854,6 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public int getBackgroundColor() {
-            return 0;
-        }
-
-        @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
             // Restore z-layering, position and stack crop until client has a chance to modify it.
@@ -830,6 +868,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         @Override
         public void onAnimationCancelled(SurfaceControl animationLeash) {
+            // Cancel the animation immediately if any single task animator is canceled
             cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "taskAnimationAdapterCanceled");
         }
 

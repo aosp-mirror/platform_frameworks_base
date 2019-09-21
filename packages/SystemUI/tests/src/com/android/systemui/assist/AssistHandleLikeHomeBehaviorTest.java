@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 
 import org.junit.Before;
@@ -47,6 +48,7 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
 
     private AssistHandleLikeHomeBehavior mAssistHandleLikeHomeBehavior;
 
+    @Mock private StatusBarStateController mMockStatusBarStateController;
     @Mock private WakefulnessLifecycle mMockWakefulnessLifecycle;
     @Mock private SysUiState mMockSysUiState;
     @Mock private AssistHandleCallbacks mMockAssistHandleCallbacks;
@@ -55,7 +57,9 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mAssistHandleLikeHomeBehavior = new AssistHandleLikeHomeBehavior(
-                () -> mMockWakefulnessLifecycle, () -> mMockSysUiState);
+                () -> mMockStatusBarStateController,
+                () -> mMockWakefulnessLifecycle,
+                () -> mMockSysUiState);
     }
 
     @Test
@@ -66,6 +70,9 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
 
         // Assert
+        verify(mMockStatusBarStateController).isDozing();
+        verify(mMockStatusBarStateController).addCallback(
+                any(StatusBarStateController.StateListener.class));
         verify(mMockWakefulnessLifecycle).getWakefulness();
         verify(mMockWakefulnessLifecycle).addObserver(any(WakefulnessLifecycle.Observer.class));
         verify(mMockSysUiState).addCallback(any(SysUiState.SysUiStateCallback.class));
@@ -73,8 +80,9 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
     }
 
     @Test
-    public void onModeActivated_showsHandlesWhenAwake() {
+    public void onModeActivated_showsHandlesWhenFullyAwake() {
         // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(false);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
 
@@ -89,8 +97,24 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
     @Test
     public void onModeActivated_hidesHandlesWhenNotAwake() {
         // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(true);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_ASLEEP);
+
+        // Act
+        mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
+
+        // Assert
+        verify(mMockAssistHandleCallbacks).hide();
+        verifyNoMoreInteractions(mMockAssistHandleCallbacks);
+    }
+
+    @Test
+    public void onModeActivated_hidesHandlesWhenDozing() {
+        // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(true);
+        when(mMockWakefulnessLifecycle.getWakefulness())
+                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
 
         // Act
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
@@ -104,69 +128,121 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
     public void onModeDeactivated_stopsObserving() {
         // Arrange
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListener =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
         ArgumentCaptor<WakefulnessLifecycle.Observer> observer =
                 ArgumentCaptor.forClass(WakefulnessLifecycle.Observer.class);
         ArgumentCaptor<SysUiState.SysUiStateCallback> sysUiStateCallback =
                 ArgumentCaptor.forClass(SysUiState.SysUiStateCallback.class);
+        verify(mMockStatusBarStateController).addCallback(stateListener.capture());
         verify(mMockWakefulnessLifecycle).addObserver(observer.capture());
         verify(mMockSysUiState).addCallback(sysUiStateCallback.capture());
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         mAssistHandleLikeHomeBehavior.onModeDeactivated();
 
         // Assert
+        verify(mMockStatusBarStateController).removeCallback(eq(stateListener.getValue()));
         verify(mMockWakefulnessLifecycle).removeObserver(eq(observer.getValue()));
         verify(mMockSysUiState).removeCallback(eq(sysUiStateCallback.getValue()));
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 
     @Test
     public void onAssistantGesturePerformed_doesNothing() {
         // Arrange
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         mAssistHandleLikeHomeBehavior.onAssistantGesturePerformed();
 
         // Assert
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 
     @Test
     public void onAssistHandlesRequested_doesNothing() {
         // Arrange
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         mAssistHandleLikeHomeBehavior.onAssistHandlesRequested();
 
         // Assert
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 
     @Test
-    public void onWake_handlesShow() {
+    public void onBothAwakeAndUnDoze_handlesShow() {
         // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(true);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_ASLEEP);
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListener =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
         ArgumentCaptor<WakefulnessLifecycle.Observer> observer =
                 ArgumentCaptor.forClass(WakefulnessLifecycle.Observer.class);
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
+        verify(mMockStatusBarStateController).addCallback(stateListener.capture());
         verify(mMockWakefulnessLifecycle).addObserver(observer.capture());
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
-        observer.getValue().onStartedWakingUp();
+        observer.getValue().onFinishedWakingUp();
 
         // Assert
+        verify(mMockAssistHandleCallbacks).hide();
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
+
+        // Arrange
+        observer.getValue().onFinishedGoingToSleep();
+        reset(mMockAssistHandleCallbacks);
+
+        // Act
+        stateListener.getValue().onDozingChanged(false);
+
+        // Assert
+        verify(mMockAssistHandleCallbacks).hide();
+        verifyNoMoreInteractions(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         observer.getValue().onFinishedWakingUp();
@@ -174,19 +250,30 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         // Assert
         verify(mMockAssistHandleCallbacks).showAndStay();
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 
     @Test
-    public void onSleep_handlesHide() {
+    public void onSleepOrDoze_handlesHide() {
         // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(false);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
+        ArgumentCaptor<StatusBarStateController.StateListener> stateListener =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
         ArgumentCaptor<WakefulnessLifecycle.Observer> observer =
                 ArgumentCaptor.forClass(WakefulnessLifecycle.Observer.class);
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
+        verify(mMockStatusBarStateController).addCallback(stateListener.capture());
         verify(mMockWakefulnessLifecycle).addObserver(observer.capture());
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         observer.getValue().onStartedGoingToSleep();
@@ -194,26 +281,42 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         // Assert
         verify(mMockAssistHandleCallbacks).hide();
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
+
+        // Arrange
+        observer.getValue().onFinishedWakingUp();
+        reset(mMockAssistHandleCallbacks);
 
         // Act
-        observer.getValue().onFinishedGoingToSleep();
+        stateListener.getValue().onDozingChanged(true);
 
         // Assert
+        verify(mMockAssistHandleCallbacks).hide();
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 
     @Test
     public void onHomeHandleHide_handlesHide() {
         // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(false);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
         ArgumentCaptor<SysUiState.SysUiStateCallback> sysUiStateCallback =
                 ArgumentCaptor.forClass(SysUiState.SysUiStateCallback.class);
         mAssistHandleLikeHomeBehavior.onModeActivated(mContext, mMockAssistHandleCallbacks);
         verify(mMockSysUiState).addCallback(sysUiStateCallback.capture());
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         sysUiStateCallback.getValue().onSystemUiStateChanged(
@@ -222,12 +325,16 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         // Assert
         verify(mMockAssistHandleCallbacks).hide();
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 
     @Test
     public void onHomeHandleUnhide_handlesShow() {
         // Arrange
+        when(mMockStatusBarStateController.isDozing()).thenReturn(false);
         when(mMockWakefulnessLifecycle.getWakefulness())
                 .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE);
         ArgumentCaptor<SysUiState.SysUiStateCallback> sysUiStateCallback =
@@ -236,7 +343,11 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         verify(mMockSysUiState).addCallback(sysUiStateCallback.capture());
         sysUiStateCallback.getValue().onSystemUiStateChanged(
                 QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN);
-        reset(mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+        reset(
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
 
         // Act
         sysUiStateCallback.getValue().onSystemUiStateChanged(
@@ -245,6 +356,9 @@ public class AssistHandleLikeHomeBehaviorTest extends SysuiTestCase {
         // Assert
         verify(mMockAssistHandleCallbacks).showAndStay();
         verifyNoMoreInteractions(
-                mMockWakefulnessLifecycle, mMockSysUiState, mMockAssistHandleCallbacks);
+                mMockStatusBarStateController,
+                mMockWakefulnessLifecycle,
+                mMockSysUiState,
+                mMockAssistHandleCallbacks);
     }
 }

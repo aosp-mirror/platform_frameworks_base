@@ -13325,7 +13325,8 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        if (mBatteryStatsHistory.getActiveFile() == null) {
+        final AtomicFile activeHistoryFile = mBatteryStatsHistory.getActiveFile();
+        if (activeHistoryFile == null) {
             Slog.w(TAG,
                     "readLocked: no history file associated with this instance");
             return;
@@ -13336,14 +13337,16 @@ public class BatteryStatsImpl extends BatteryStats {
         Parcel stats = Parcel.obtain();
         try {
             final long start = SystemClock.uptimeMillis();
-            byte[] raw = mStatsFile.readFully();
-            stats.unmarshall(raw, 0, raw.length);
-            stats.setDataPosition(0);
-            readSummaryFromParcel(stats);
-            if (DEBUG) {
-                Slog.d(TAG, "readLocked stats file:" + mStatsFile.getBaseFile().getPath()
-                        + " bytes:" + raw.length + " takes ms:" + (SystemClock.uptimeMillis()
-                        - start));
+            if (mStatsFile.exists()) {
+                byte[] raw = mStatsFile.readFully();
+                stats.unmarshall(raw, 0, raw.length);
+                stats.setDataPosition(0);
+                readSummaryFromParcel(stats);
+                if (DEBUG) {
+                    Slog.d(TAG, "readLocked stats file:" + mStatsFile.getBaseFile().getPath()
+                            + " bytes:" + raw.length + " takes ms:" + (SystemClock.uptimeMillis()
+                            - start));
+                }
             }
         } catch (Exception e) {
             Slog.e(TAG, "Error reading battery statistics", e);
@@ -13355,17 +13358,19 @@ public class BatteryStatsImpl extends BatteryStats {
         Parcel history = Parcel.obtain();
         try {
             final long start = SystemClock.uptimeMillis();
-            byte[] raw = mBatteryStatsHistory.getActiveFile().readFully();
-            if (raw.length > 0) {
-                history.unmarshall(raw, 0, raw.length);
-                history.setDataPosition(0);
-                readHistoryBuffer(history, true);
-            }
-            if (DEBUG) {
-                Slog.d(TAG, "readLocked history file::"
-                        + mBatteryStatsHistory.getActiveFile().getBaseFile().getPath()
-                        + " bytes:" + raw.length + " takes ms:" + (SystemClock.uptimeMillis()
-                        - start));
+            if (activeHistoryFile.exists()) {
+                byte[] raw = activeHistoryFile.readFully();
+                if (raw.length > 0) {
+                    history.unmarshall(raw, 0, raw.length);
+                    history.setDataPosition(0);
+                    readHistoryBuffer(history, true);
+                }
+                if (DEBUG) {
+                    Slog.d(TAG, "readLocked history file::"
+                            + activeHistoryFile.getBaseFile().getPath()
+                            + " bytes:" + raw.length + " takes ms:" + (SystemClock.uptimeMillis()
+                            - start));
+                }
             }
         } catch (Exception e) {
             Slog.e(TAG, "Error reading battery history", e);
