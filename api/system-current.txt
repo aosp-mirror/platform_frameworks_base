@@ -8108,7 +8108,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean disableDataConnectivity();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean enableDataConnectivity();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean enableModemForSlot(int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enableVideoCalling(boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void enableVideoCalling(boolean);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getAidForAppType(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
@@ -8155,7 +8155,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
-    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean rebootRadio();
