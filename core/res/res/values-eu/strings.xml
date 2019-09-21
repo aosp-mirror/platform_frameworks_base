@@ -1636,7 +1636,7 @@
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN kode okerra."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kodeak 8 zenbaki izan behar ditu."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betirako desgaituko da SIMa."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodeak ez datoz bat"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Eredua marrazteko saiakera gehiegi egin dira"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>

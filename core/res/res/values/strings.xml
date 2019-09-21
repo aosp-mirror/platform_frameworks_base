@@ -5009,9 +5009,9 @@
     <string name="importance_from_person">This is important because of the people involved.</string>
 
     <!-- Message to user that app trying to create user for an account that already exists. [CHAR LIMIT=none] -->
-    <string name="user_creation_account_exists">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar@gmail.com">%2$s</xliff:g> ?</string>
+    <string name="user_creation_account_exists">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar@gmail.com">%2$s</xliff:g> (a User with this account already exists) ?</string>
     <!-- Message to user that app is trying to create user for a specified account. [CHAR LIMIT=none] -->
-    <string name="user_creation_adding">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar">%2$s</xliff:g> (a User with this account already exists) ?</string>
+    <string name="user_creation_adding">Allow <xliff:g id="app" example="Gmail">%1$s</xliff:g> to create a new User with <xliff:g id="account" example="foobar@gmail.com">%2$s</xliff:g> ?</string>
 
     <!-- Locale picker strings -->
 

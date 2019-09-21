@@ -80,6 +80,7 @@ public class InflatedSmartReplies {
      */
     public static InflatedSmartReplies inflate(
             Context context,
+            Context packageContext,
             NotificationEntry entry,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
@@ -108,9 +109,9 @@ public class InflatedSmartReplies {
         }
         if (newSmartRepliesAndActions.smartActions != null) {
             suggestionButtons.addAll(
-                    smartReplyView.inflateSmartActions(newSmartRepliesAndActions.smartActions,
-                            smartReplyController, entry, headsUpManager,
-                            delayOnClickListener));
+                    smartReplyView.inflateSmartActions(packageContext,
+                            newSmartRepliesAndActions.smartActions, smartReplyController, entry,
+                            headsUpManager, delayOnClickListener));
         }
 
         return new InflatedSmartReplies(smartReplyView, suggestionButtons,
