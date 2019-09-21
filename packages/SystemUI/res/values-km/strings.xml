@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"បោះ​បង់​"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"បញ្ជាក់"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ព្យាយាម​ម្ដង​ទៀត"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"កន្លែង​ទំនេរ សូមចុច​ដើម្បីបោះបង់​ការផ្ទៀងផ្ទាត់"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"ចុចដើម្បីបោះបង់​ការផ្ទៀងផ្ទាត់"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"សូម​ព្យាយាម​ម្ដងទៀត"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"កំពុង​ផ្ទៀងផ្ទាត់​មុខរបស់អ្នក"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"បានផ្ទៀងផ្ទាត់​មុខ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"បានបញ្ជាក់"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ចុច \"បញ្ជាក់\" ដើម្បីបញ្ចប់"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"បាន​ផ្ទៀងផ្ទាត់"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ប៉ះ​ឧបករណ៍​ចាប់ស្នាម​ម្រាមដៃ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"រូបតំណាង​ស្នាម​ម្រាមដៃ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"កំពុងស្វែងរកអ្នក…"</string>
@@ -543,8 +544,8 @@
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកការដៅ។ អូសឡើងលើ​ឱ្យជាប់ ដើម្បី​ដក​ការដៅ។"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការ​ដៅ។ សូម​សង្កត់​ប៊ូតុង​ទិដ្ឋភាពរួម​​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុច​ប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"ដើម្បី​ដក​ការ​ដៅ​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យ​ជាប់"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ដើម្បី​ដក​ការ​ដៅ​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យ​ជាប់"</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"ដើម្បី​ដកខ្ទាស់​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យ​ជាប់"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ដើម្បី​ដកខ្ទាស់​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យ​ជាប់"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"អូសឡើងលើ​ឱ្យជាប់ ដើម្បី​ដកការដៅ​អេក្រង់​នេះ"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ទេ អរគុណ"</string>

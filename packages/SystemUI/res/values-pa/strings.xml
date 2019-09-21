@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"ਰੱਦ ਕਰੋ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"ਪੁਸ਼ਟੀ ਕਰੋ"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ਖਾਲੀ ਖੇਤਰ, ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"ਪ੍ਰਮਾਣੀਕਰਨ ਰੱਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ਤੁਹਾਡਾ ਚਿਹਰਾ ਲੱਭਿਆ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਿਰਤ ਹੋਇਆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ਪੁਸ਼ਟੀ ਕੀਤੀ ਗਈ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ਪੂਰਾ ਕਰਨ ਲਈ ਪੁਸ਼ਟੀ ਕਰੋ \'ਤੇ ਟੈਪ ਕਰੋ"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ਪ੍ਰਮਾਣਿਤ ਹੋਇਆ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਸੈਂਸਰ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ਤੁਹਾਡੀ ਪਛਾਣ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
@@ -401,7 +402,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"ਹੇਠਾਂ ਘੱਟ ਲਾਜ਼ਮੀ ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"ਖੋਲ੍ਹਣ ਲਈ ਦੁਬਾਰਾ ਟੈਪ ਕਰੋ"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"ਖੋਲ੍ਹਣ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰਨ ਲਈ ਉੱਤੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"ਇਸ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਬੰਧਨ ਤੁਹਾਡੇ ਸੰਗਠਨ ਵੱਲੋਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"ਇਹ ਡੀਵਾਈਸ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> ਵੱਲੋਂ ਪ੍ਰਬੰਧਿਤ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="phone_hint" msgid="4872890986869209950">"ਫ਼ੋਨ ਲਈ ਪ੍ਰਤੀਕ ਤੋਂ ਸਵਾਈਪ ਕਰੋ"</string>

@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"रद्द गर्नुहोस्"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"पुष्टि गर्नुहोस्"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"फेरि प्रयास गर्नुहोस्"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"खाली क्षेत्र, प्रमाणीकरण रद्द गर्न ट्याप गर्नुहोस्"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"प्रमाणीकरण रद्द गर्न ट्याप गर्नुहोस्"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"कृपया फेरि प्रयास गर्नुहोस्"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"तपाईंको अनुहार खोज्दै"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"अनुहार प्रमाणीकरण गरियो"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"पुष्टि भयो"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"पूरा गर्नका लागि पुष्टि गर्नुहोस् नामक विकल्पमा ट्याप गर्नुहोस्"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"प्रमाणीकरण गरियो"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फिंगरप्रिन्ट सेन्सरमा छुनुहोस्‌"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फिंगरप्रिन्ट जनाउने आइकन"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"तपाईंलाई खोज्दै…"</string>
@@ -544,7 +545,7 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न गृह नामक बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"यस स्क्रिनलाई अनपनि गर्न पछाडि र परिदृश्य नामक बटनहरूलाई छोइराख्नुहोस्"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"यस स्क्रिनलाई अनपनि गर्न पछाडि र गृह नामक बटनहरूलाई छोइराख्नुहोस्"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"यस स्क्रिनलाई अनपिन गर्न पछाडि र गृह नामक बटनहरूलाई छोइराख्नुहोस्"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"यो स्क्रिन अनपिन गर्न माथितिर स्वाइप गरी थिचिराख्नुहोस्"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"धन्यवाद पर्दैन"</string>

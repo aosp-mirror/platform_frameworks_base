@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Отказ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Потвърждаване"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Нов опит"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Празна област. Докоснете, за да анулирате удостоверяването"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Докоснете, за да анулирате удостоверяването"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Моля, опитайте отново"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Лицето ви се търси"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Лицето е удостоверено"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Потвърдено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Докоснете „Потвърждаване“ за завършване"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Удостоверено"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Докоснете сензора за отпечатъци"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Икона за отпечатък"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Търсим ви…"</string>
@@ -401,7 +402,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Докоснете отново, за да отворите"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Прекарайте пръст нагоре, за да отключите"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"Прекарайте пръст нагоре, за да опитате отново"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Плъзнете бързо нагоре, за да опитате отново"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Това устройство се управлява от организацията ви"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Това устройство се управлява от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Плъзнете с пръст от иконата, за да използвате телефона"</string>

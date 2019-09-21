@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"אישור"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ניסיון נוסף"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"אזור ריק, יש להקיש עליו כדי לבטל את האימות"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"יש להקיש כדי לבטל את האימות"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"עליך לנסות שוב"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"המערכת מחפשת את הפנים שלך"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"זיהוי הפנים בוצע"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"מאושר"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"יש להקיש על \'אישור\' לסיום"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"מאומת"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"יש לגעת בחיישן טביעות האצבע"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"סמל טביעת אצבע"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"מחפש אותך…"</string>
@@ -463,7 +464,7 @@
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"בזמן הקלטה או העברה, השירות שמספק את הפונקציה הזו יכול לקלוט מידע רגיש שמוצג במסך או מופעל מהמכשיר שלך, כולל מידע רגיש כמו אודיו, סיסמאות, פרטי תשלום, תמונות והודעות."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"חשיפת מידע רגיש בזמן העברה/הקלטה"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"אל תציג שוב"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"נקה הכל"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"ניקוי הכל"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"ניהול"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"התראות שקטות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"ניקוי כל ההתראות השקטות"</string>
@@ -625,7 +626,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"הצג שניות בשעון בשורת הסטטוס. פעולה זו עשויה להשפיע על אורך חיי הסוללה."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"סידור מחדש של הגדרות מהירות"</string>
     <string name="show_brightness" msgid="6613930842805942519">"הצג בהירות בהגדרות מהירות"</string>
-    <string name="experimental" msgid="6198182315536726162">"ניסיוניות"</string>
+    <string name="experimental" msgid="6198182315536726162">"ניסיוני"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"‏האם להפעיל את ה-Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"‏כדי לחבר את המקלדת לטאבלט, תחילה עליך להפעיל את ה-Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"הפעל"</string>

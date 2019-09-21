@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"ரத்துசெய்"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"உறுதிப்படுத்துக"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"மீண்டும் முயல்க"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"காலியான பகுதி, அங்கீகாரத்தை ரத்துசெய்யத் தட்டவும்"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"பயோமெட்ரிக் அடையாளத்தை ரத்துசெய்ய தட்டவும்"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"மீண்டும் முயலவும்"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"உங்கள் முகத்தை அங்கீகரிக்கிறது"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"உறுதிப்படுத்தப்பட்டது"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"முடிக்க \'உறுதிப்படுத்து\' என்பதை தட்டவும்"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"கைரேகை ஐகான்"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"உங்கள் முகத்தைத் தேடுகிறது…"</string>
@@ -506,18 +507,18 @@
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"உங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், ஆப்ஸ், சாதனத்துடன் தொடர்புடைய டேட்டா, சாதன இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"மேலும் அறிக"</string>
-    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்த ஆப்ஸால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN அமைப்புகளைத் திற"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"நம்பகமான அனுமதிச் சான்றுகளைத் திற"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"உங்கள் நிர்வாகி நெட்வொர்க் பதிவெடுத்தலை இயக்கியுள்ளார், இது சாதனத்தில் ட்ராஃபிக்கைக் கண்காணிக்கும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN இணைப்பை அமைக்க, பயன்பாட்டிற்கு அனுமதி வழங்கியுள்ளீர்கள்.\n\nஇந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட, உங்கள் சாதனத்தையும் நெட்வொர்க் செயல்பாட்டையும் கண்காணிக்க முடியும்."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"VPN இணைப்பை அமைக்க, பயன்பாட்டிற்கு அனுமதி வழங்கியுள்ளீர்கள்.\n\nஇந்த ஆப்ஸால் மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட, உங்கள் சாதனத்தையும் நெட்வொர்க் செயல்பாட்டையும் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது.\n\nஉங்கள் நிர்வாகியால் பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்.\n\nஉங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய VPN உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள்."</string>
-    <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
-    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்த ஆப்ஸால், மின்னஞ்சல்கள், பயன்பாடுகள் மற்றும் இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"<xliff:g id="APPLICATION">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்த ஆப்ஸால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_app_work" msgid="4612997849787922906">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nமேலும் தகவலுக்கு, நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"உங்கள் பணிக் கணக்கை <xliff:g id="ORGANIZATION">%1$s</xliff:g> நிர்வகிக்கிறது. மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் பணி நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> உடன் அது இணைக்கப்பட்டுள்ளது.\n\nஉங்கள் தனிப்பட்ட நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்கக்கூடிய <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> உடனும் இணைக்கப்பட்டுள்ளீர்கள்."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="2712865815371519117">"TrustAgent இதைத் திறந்தே வைத்துள்ளது"</string>

@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Annuller"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bekræft"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Prøv igen"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Tomt område. Tryk for at annullere godkendelsen."</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Tryk for at annullere godkendelsen"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Prøv igen"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Søger efter dit ansigt"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Ansigtet er godkendt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bekræftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tryk på Bekræft for at udføre"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Godkendt"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Sæt fingeren på fingeraftrykslæseren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon for fingeraftryk"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Forsøger at finde dig…"</string>
@@ -544,7 +545,7 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage, og hold fingeren nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Dette fastholder skærmen i visningen, indtil du frigør den. Hold Startskærm nede for at frigøre skærmen."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Hold knapperne Tilbage og Oversigt nede for at frigøre skærmen"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Hold knapperne Tilbage og Startskærm nede for at frigøre skærmen"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Hold knapperne Tilbage og Hjem nede for at frigøre skærmen"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Stryg opad, og hold fingeren nede for at frigøre denne skærm"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK, det er forstået"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nej tak"</string>

@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Bekor qilish"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"OK"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Qayta urinish"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Boʻsh hudud, tekshiruvni bekor qilish uchun bosing"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Tekshiruvni bekor qilish uchun bosing"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Qayta urining"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Yuz tekshirilmoqda"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Yuzingiz aniqlandi"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Tasdiqlangan"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tasdiqlash uchun tegining"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Tasdiqlandi"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Barmoq izi skaneriga tegining"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Barmoq izi belgisi"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Yuzingiz tekshirilmoqda…"</string>
@@ -401,7 +402,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Kam ahamiyatli bildirishnomalarni pastda ko‘rsatish"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ochish uchun yana bosing"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Ochish uchun tepaga suring"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"Tepaga suring va qayta urining"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Qayta urinish uchun tepaga suring"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Bu – tashkilotingiz tomonidan boshqariladigan qurilma"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Bu – <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tomonidan boshqariladigan qurilma"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefonni ochish uchun suring"</string>

@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"გაუქმება"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"დადასტურება"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ხელახლა ცდა"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"დაფიქსირდა ცარიელი უბანი, შეეხეთ ამოცნობის გასაუქმებლად"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"შეეხეთ ავტორიზაციის გასაუქმებლად"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"გთხოვთ, ცადოთ ხელახლა"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"მიმდინარეობს თქვენი სახის ძებნა"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"სახის ამოცნობილია"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"დადასტურებული"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"დასასრულებლად შეეხეთ „დადასტურებას“"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ავტორიზებულია"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"შეეხეთ თითის ანაბეჭდის სენსორს"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"თითის ანაბეჭდის ხატულა"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"მიმდინარეობს თქვენი ძიება…"</string>

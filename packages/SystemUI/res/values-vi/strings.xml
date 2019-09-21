@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Hủy"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Xác nhận"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Thử lại"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Vùng trống, nhấn để hủy quá trình xác thực"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Nhấn để hủy quá trình xác thực"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Vui lòng thử lại"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Đang tìm khuôn mặt của bạn"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Đã xác thực khuôn mặt"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Ðã xác nhận"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Nhấn vào Xác nhận để hoàn tất"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Đã xác thực"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Chạm vào cảm biến vân tay"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Biểu tượng vân tay"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Đang tìm kiếm bạn…"</string>
