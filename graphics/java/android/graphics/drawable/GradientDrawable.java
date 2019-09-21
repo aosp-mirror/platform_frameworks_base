@@ -207,7 +207,7 @@ public class GradientDrawable extends Drawable {
     }
 
     public GradientDrawable() {
-        this(new GradientState(Orientation.LEFT_RIGHT, null), null);
+        this(new GradientState(Orientation.TOP_BOTTOM, null), null);
     }
 
     /**
