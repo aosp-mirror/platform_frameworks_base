@@ -39,6 +39,13 @@ import java.util.HashMap;
  * Gives access to the system properties store.  The system properties
  * store contains a list of string key-value pairs.
  *
+ * <p>Use this class only for the system properties that are local. e.g., within
+ * an app, a partition, or a module. For system properties used across the
+ * boundaries, formally define them in <code>*.sysprop</code> files and use the
+ * auto-generated methods. For more information, see <a href=
+ * "https://source.android.com/devices/architecture/sysprops-apis">Implementing
+ * System Properties as APIs</a>.</p>
+ *
  * {@hide}
  */
 @SystemApi
