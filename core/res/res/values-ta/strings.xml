@@ -340,9 +340,9 @@
     <string name="permlab_answerPhoneCalls" msgid="4077162841226223337">"ஃபோன் அழைப்புகளுக்குப் பதிலளி"</string>
     <string name="permdesc_answerPhoneCalls" msgid="2901889867993572266">"உள்வரும் ஃபோன் அழைப்பிற்குப் பதிலளிக்க, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"உரைச் செய்திகளை (SMS) பெறுதல்"</string>
-    <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிப்பதற்கு அல்லது நீக்குவதற்குப் பயன்பாட்டால் முடியும் என்பதாகும்."</string>
+    <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிப்பதற்கு அல்லது நீக்குவதற்கு ஆப்ஸால் முடியும் என்பதாகும்."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"உரைச் செய்திகளை (MMS) பெறுதல்"</string>
-    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்கவோ, நீக்கவோ பயன்பாட்டால் முடியும் என்பதாகும்."</string>
+    <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS செய்திகளைப் பெற, செயற்படுத்தப் ஆப்ஸை அனுமதிக்கிறது. இதற்கு அர்த்தம் உங்கள் சாதனத்திற்கு அனுப்பப்படும் செய்திகளை உங்களுக்குக் காட்டாமல் கண்காணிக்கவோ, நீக்கவோ ஆப்ஸால் முடியும் என்பதாகும்."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"செல் அலைபரப்புச் செய்திகளைப் படித்தல்"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"உங்கள் சாதனத்தில் பெறப்படும் செல் அலைபரப்புச் செய்திகளைப் படிப்பதற்குப் ஆப்ஸை அனுமதிக்கிறது. அவசரநிலை சூழ்நிலைகளை உங்களுக்கு எச்சரிக்கைச் செய்வதற்கு சில இடங்களில் செல் அலைபரப்பு விழிப்பூட்டல்கள் வழங்கப்படும். அவசரநிலை மொபைல் அலைபரப்புப் பெறப்படும்போது உங்கள் சாதனத்தின் செயல்திறன் அல்லது செயல்பாட்டுடன் தீங்கிழைக்கும் பயன்பாடுகள் அதைத் தடுக்கலாம்."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"குழுசேர்ந்த ஊட்டங்களைப் படித்தல்"</string>
@@ -1889,8 +1889,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"வகைப்படுத்தப்படாதவை"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (இந்தக் கணக்கில் ஏற்கனவே ஒரு பயனர் உள்ளார்) மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"மொழியைச் சேர்"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"மண்டல விருப்பம்"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"மொழி பெயரை உள்ளிடுக"</string>

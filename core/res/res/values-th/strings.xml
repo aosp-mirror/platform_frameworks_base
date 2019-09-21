@@ -1256,7 +1256,7 @@
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"เชื่อมต่อ"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"เครือข่ายทั้งหมด"</string>
     <string name="wifi_suggestion_title" msgid="6396033039578436801">"อนุญาตให้เชื่อมต่อเครือข่าย Wi-Fi ที่แนะนำไหม"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"เครือข่ายที่แนะนำ <xliff:g id="NAME">%s</xliff:g> อุปกรณ์อาจเชื่อมต่อโดยอัตโนมัติ"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"เครือข่ายที่แนะนำโดย <xliff:g id="NAME">%s</xliff:g> และอุปกรณ์อาจเชื่อมต่อโดยอัตโนมัติ"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"อนุญาต"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"ไม่เป็นไร"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi จะเปิดโดยอัตโนมัติ"</string>
@@ -1888,8 +1888,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ไม่จัดอยู่ในหมวดหมู่ใดๆ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"คุณตั้งค่าความสำคัญของการแจ้งเตือนเหล่านี้"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ข้อความนี้สำคัญเนื่องจากบุคคลที่เกี่ยวข้อง"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> (มีผู้ใช้ที่มีบัญชีนี้อยู่แล้ว) ไหม"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"เพิ่มภาษา"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ค่ากำหนดภูมิภาค"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"พิมพ์ชื่อภาษา"</string>

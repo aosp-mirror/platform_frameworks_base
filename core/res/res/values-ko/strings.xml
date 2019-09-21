@@ -1343,7 +1343,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"권한 필요 없음"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"비용이 부과될 수 있습니다."</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"이 기기를 USB로 충전"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"이 기기를 USB로 충전 중"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB를 통해 연결된 기기 충전"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB 파일 전송 사용 설정됨"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB를 통해 PTP 사용 설정됨"</string>
@@ -1888,8 +1888,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(이 계정의 사용자가 이미 있음)(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"언어 추가"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"지역 환경설정"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"언어 이름 입력"</string>

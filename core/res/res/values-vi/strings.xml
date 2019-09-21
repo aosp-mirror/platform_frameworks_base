@@ -1670,8 +1670,8 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Đã tắt phím tắt trợ năng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Nhấn và giữ đồng thời cả hai phím âm lượng trong 3 giây để sử dụng <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Chọn dịch vụ sẽ sử dụng khi bạn nhấn vào nút hỗ trợ tiếp cận:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận (vuốt lên từ cuối màn hình bằng 2 ngón tay):"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận (vuốt lên từ cuối màn hình bằng 3 ngón tay):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận này (vuốt lên từ cuối màn hình bằng 2 ngón tay):"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Chọn dịch vụ sẽ sử dụng với cử chỉ hỗ trợ tiếp cận này (vuốt lên từ cuối màn hình bằng 3 ngón tay):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Để chuyển đổi giữa các dịch vụ, hãy chạm và giữ nút hỗ trợ tiếp cận."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Để chuyển đổi giữa các dịch vụ, hãy vuốt lên và giữ bằng 2 ngón tay."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Để chuyển đổi giữa các dịch vụ, hãy vuốt lên và giữ bằng 3 ngón tay."</string>
@@ -1888,8 +1888,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Chưa được phân loại"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Thông báo này quan trọng vì những người có liên quan."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (người dùng có tài khoản này đã tồn tại)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Thêm ngôn ngữ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Tùy chọn khu vực"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Nhập tên ngôn ngữ"</string>

@@ -1670,7 +1670,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Juurdepääsetavuse otsetee lülitas teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> välja"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> kasutamiseks hoidke kolm sekundit all mõlemat helitugevuse klahvi"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Valige, millist teenust kasutada, kui puudutate juurdepääsetavuse nuppu:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Valige, millist teenust kasutada koos juurdepääsetavuse liigutusega (pühkige kahe sõrmega ekraanikuval alt üles):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Valige, millist teenust kasutada koos juurdepääsetavuse liigutusega (kahe sõrmega ekraanikuval alt üles pühkimine):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Valige, millist teenust kasutada koos juurdepääsetavuse liigutusega (kolme sõrmega ekraanikuval alt üles pühkimine):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Teenuste vahel vahetamiseks vajutage pikalt juurdepääsetavuse nuppu."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Teenuste vahel vahetamiseks pühkige kahe sõrmega üles ja hoidke."</string>
@@ -1888,8 +1888,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Kategoriseerimata"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Teie määrasite nende märguannete tähtsuse."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"See on tähtis osalevate inimeste tõttu."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g> (selle kontoga kasutaja on juba olemas)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Keele lisamine"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Piirkonnaeelistus"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Sisestage keele nimi"</string>

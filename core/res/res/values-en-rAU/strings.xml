@@ -551,10 +551,10 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Fingerprint icon"</string>
-    <string name="permlab_manageFace" msgid="7262837876352591553">"manage Face Unlock hardware"</string>
+    <string name="permlab_manageFace" msgid="7262837876352591553">"manage face unlock hardware"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Allows the app to invoke methods to add and delete facial templates for use."</string>
-    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"use Face Unlock hardware"</string>
-    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Allows the app to use Face Unlock hardware for authentication"</string>
+    <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"use face unlock hardware"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="4712947955047607722">"Allows the app to use face unlock hardware for authentication"</string>
     <string name="face_recalibrate_notification_name" msgid="1913676850645544352">"Face unlock"</string>
     <string name="face_recalibrate_notification_title" msgid="4087620069451499365">"Re-enrol your face"</string>
     <string name="face_recalibrate_notification_content" msgid="5530308842361499835">"To improve recognition, please re-enrol your face"</string>
@@ -581,15 +581,15 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="396883585636963908">"Can’t verify face. Hardware not available."</string>
-    <string name="face_error_timeout" msgid="981512090365729465">"Try Face Unlock again."</string>
+    <string name="face_error_timeout" msgid="981512090365729465">"Try face unlock again."</string>
     <string name="face_error_no_space" msgid="2712120617457553825">"Can’t store new face data. Delete an old one first."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Face operation cancelled."</string>
-    <string name="face_error_user_canceled" msgid="5317030072349668946">"Face Unlock cancelled by user."</string>
+    <string name="face_error_user_canceled" msgid="5317030072349668946">"Face unlock cancelled by user."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Too many attempts. Try again later."</string>
-    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Too many attempts. Face Unlock disabled."</string>
+    <string name="face_error_lockout_permanent" msgid="4723594314443097159">"Too many attempts. Face unlock disabled."</string>
     <string name="face_error_unable_to_process" msgid="4940944939691171539">"Can’t verify face. Try again."</string>
-    <string name="face_error_not_enrolled" msgid="4016937174832839540">"You haven’t set up Face Unlock."</string>
-    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Face Unlock is not supported on this device."</string>
+    <string name="face_error_not_enrolled" msgid="4016937174832839540">"You haven’t set up face unlock."</string>
+    <string name="face_error_hw_not_present" msgid="8302690289757559738">"Face unlock is not supported on this device."</string>
     <string name="face_name_template" msgid="7004562145809595384">"Face <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -818,7 +818,7 @@
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Try again"</string>
     <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Try again"</string>
     <string name="lockscreen_storage_locked" msgid="9167551160010625200">"Unlock for all features and data"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximum Face Unlock attempts exceeded"</string>
+    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximum face unlock attempts exceeded"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"No SIM card"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No SIM card in tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="1943633865476989599">"No SIM card in TV."</string>
@@ -1888,8 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Uncategorised"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"You set the importance of these notifications."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"This is important because of the people involved."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> (a User with this account already exists) ?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> (a User with this account already exists)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Add a language"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Region preference"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Type language name"</string>

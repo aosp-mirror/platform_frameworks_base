@@ -1255,8 +1255,8 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"అన్ని నెట్‌వర్క్‌లు చూడటానికి నొక్కండి"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"కనెక్ట్ చేయి"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"అన్ని నెట్‌వర్క్‌లు"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"సూచించిన Wi‑Fi నెట్‌వర్క్‍లను అనుమతించాలా?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> సూచించిన నెట్ వర్క్ లు పరికరం ఆటోమేటిక్ గా కనెక్ట్ కాకపోవచ్చు."</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"సూచించిన Wi‑Fi నెట్‌వర్క్‌లను అనుమతించాలా?"</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> సూచించిన నెట్‌వర్క్‌లు. పరికరం ఆటోమేటిక్‌గా కనెక్ట్ అవచ్చు."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"అనుమతించు"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"వద్దు"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
@@ -1671,7 +1671,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>ని ఉపయోగించడానికి వాల్యూమ్ కీలు రెండింటినీ 3 సెకన్లు నొక్కి ఉంచండి"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"యాక్సెసిబిలిటీ బటన్‌ను మీరు నొక్కినప్పుడు ఉపయోగించాల్సిన ఒక ఫీచర్‌ను ఎంచుకోండి:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"యాక్సెసిబిలిటీ సంజ్ఞతో ఉపయోగించడానికి ఒక సేవను ఎంచుకోండి (రెండు చేతి వేళ్లతో స్క్రీన్‌ను కింద నుండి పైకి స్వైప్ చేయండి):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"యాక్సెసిబిలిటీ సంజ్ఞతో ఉపయోగించడానికి ఒక సేవను ఎంచుకోండి (రెండు వేళ్లతో స్క్రీన్‌ను కింద నుండి పైకి స్వైప్ చేయండి):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"యాక్సెసిబిలిటీ సంజ్ఞతో ఉపయోగించడానికి ఒక సేవను ఎంచుకోండి (మూడు చేతి వేళ్లతో స్క్రీన్‌ను కింద నుండి పైకి స్వైప్ చేయండి):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"సేవల మధ్య మారడానికి, యాక్సెసిబిలిటీ బటన్‌ను నొక్కి &amp; పట్టుకోండి."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"సేవల మధ్య మారడానికి, రెండు చేతి వేళ్ళతో పైకి స్వైప్ చేసి పట్టుకోండి."</string>
@@ -1889,8 +1889,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"వర్గీకరించబడలేదు"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>
