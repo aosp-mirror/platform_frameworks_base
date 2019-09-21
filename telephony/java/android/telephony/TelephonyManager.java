@@ -67,6 +67,7 @@ import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
+import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
@@ -8579,7 +8580,12 @@ public class TelephonyManager {
         return -1;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telephony.ims.ImsMmTelManager#setVtSettingEnabled(boolean)}
+     * instead.
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void enableVideoCalling(boolean enable) {
@@ -8592,7 +8598,14 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link ImsMmTelManager#isVtSettingEnabled()} instead to check if the user
+     * has enabled the Video Calling setting, {@link ImsMmTelManager#isAvailable(int, int)} to
+     * determine if video calling is available, or {@link ImsMmTelManager#isCapable(int, int)} to
+     * determine if video calling is capable.
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -8712,6 +8725,7 @@ public class TelephonyManager {
      * @param subId Subscription ID
      * @return true if IMS status is registered, false if the IMS status is not registered or a
      * RemoteException occurred.
+     * Use {@link ImsMmTelManager.RegistrationCallback} instead.
      * @hide
      */
     public boolean isImsRegistered(int subId) {
@@ -8748,6 +8762,8 @@ public class TelephonyManager {
      * used during creation, the default subscription ID will be used.
      * @return true if Voice over LTE is available or false if it is unavailable or unknown.
      * @see SubscriptionManager#getDefaultSubscriptionId()
+     * <p>
+     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
     @UnsupportedAppUsage
@@ -8767,6 +8783,7 @@ public class TelephonyManager {
      * used during creation, the default subscription ID will be used. To query the
      * underlying technology that VT is available on, use {@link #getImsRegTechnologyForMmTel}.
      * @return true if VT is available, or false if it is unavailable or unknown.
+     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
     @UnsupportedAppUsage
@@ -8782,6 +8799,7 @@ public class TelephonyManager {
      * Returns the Status of Wi-Fi calling (Voice over WiFi) for the subscription ID specified.
      * @param subId the subscription ID.
      * @return true if VoWiFi is available, or false if it is unavailable or unknown.
+     * Use {@link ImsMmTelManager#isAvailable(int, int)} instead.
      * @hide
      */
     @UnsupportedAppUsage
@@ -8802,6 +8820,7 @@ public class TelephonyManager {
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN} for IWLAN registration, or
      *  - {@link ImsRegistrationImplBase#REGISTRATION_TECH_NONE} if we are not registered or the
      *  result is unavailable.
+     *  Use {@link ImsMmTelManager.RegistrationCallback} instead.
      *  @hide
      */
     public @ImsRegistrationImplBase.ImsRegistrationTech int getImsRegTechnologyForMmTel() {
