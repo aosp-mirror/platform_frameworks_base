@@ -169,7 +169,7 @@
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Այս խոսքային սինթեզի գործիքը կարող է հավաքել այն ամենը, ինչ արտասանված է, այդ թվում` անձնական տվյալներ, ինչպիսիք են գաղտնաբառն ու բանկային քարտի համարները: Սկզբնաբյուրը <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> շարժիչն է: Միացնե՞լ խոսքի սինթեզի շարժիչի օգտագործումը:"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Այս լեզուն պահանջում է աշխատող ցանցային կապ գրվածքից խոսք ելքի համար:"</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Սա խոսքային սինթեզի մի նմուշ է:"</string>
-    <string name="tts_status_title" msgid="7268566550242584413">"Լռելյայն լեզվի կարգավիճակը"</string>
+    <string name="tts_status_title" msgid="7268566550242584413">"Կանխադրված լեզվի կարգավիճակը"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g>-ը լիովին աջակցվում է"</string>
     <string name="tts_status_requires_network" msgid="6042500821503226892">"<xliff:g id="LOCALE">%1$s</xliff:g>-ը պահանջում է ցանցային կապ"</string>
     <string name="tts_status_not_supported" msgid="4491154212762472495">"<xliff:g id="LOCALE">%1$s</xliff:g>-ը չի աջակցվում"</string>
@@ -201,9 +201,9 @@
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN-ի կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Այս օգտատերը չի կարող փոխել մոդեմի ռեժիմի կարգավորումները"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Մուտքի կետի անվան կարգավորումները հասանելի չեն այս օգտատիրոջը"</string>
-    <string name="enable_adb" msgid="7982306934419797485">"USB վրիպազերծում"</string>
+    <string name="enable_adb" msgid="7982306934419797485">"USB-ով վրիպազերծում"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Միացնել վրիպազերծման ռեժիմը, երբ USB-ն միացված է"</string>
-    <string name="clear_adb_keys" msgid="4038889221503122743">"Չեղարկել USB վրիպազերծման լիազորումները"</string>
+    <string name="clear_adb_keys" msgid="4038889221503122743">"Չեղարկել USB-ով վրիպազերծման թույլտվությունները"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Սխալի հաղորդման դյուրանցում"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Գործարկման ցանկում ցույց տալ կոճակը՝ վրիպակների հաղորդման համար"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Մնալ արթուն"</string>
@@ -263,9 +263,9 @@
     <string name="debug_view_attributes" msgid="6485448367803310384">"Միացնել ցուցադրման հատկանիշների ստուգումը"</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Միշտ ակտիվացրած պահել բջջային տվյալները, նույնիսկ Wi‑Fi-ը միացրած ժամանակ (ցանցերի միջև արագ փոխարկման համար):"</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Օգտագործել սարքակազմի արագացման միացումը, եթե հասանելի է"</string>
-    <string name="adb_warning_title" msgid="6234463310896563253">"Թույլատրե՞լ USB վրիպազերծումը:"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB վրիպազերծումը միայն ծրագրավորման նպատակների համար է: Օգտագործեք այն ձեր համակարգչից տվյալները ձեր սարք պատճենելու համար, առանց ծանուցման ձեր սարքի վրա ծրագրեր տեղադրելու և տվյալների մատյանը ընթերցելու համար:"</string>
-    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Փակե՞լ USB-ի վրիպազերծման մուտքը` անջատելով այն բոլոր համակարգիչներից, որտեղ նախկինում թույլատրել էիք:"</string>
+    <string name="adb_warning_title" msgid="6234463310896563253">"Թույլատրե՞լ USB-ով վրիպազերծումը:"</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB-ով վրիպազերծումը միայն ծրագրավորման նպատակների համար է: Օգտագործեք այն ձեր համակարգչից տվյալները ձեր սարք պատճենելու համար, առանց ծանուցման ձեր սարքի վրա ծրագրեր տեղադրելու և տվյալների մատյանը ընթերցելու համար:"</string>
+    <string name="adb_keys_warning_message" msgid="5659849457135841625">"Չեղարկե՞լ USB-ով վրիպազերծման հասանելիությունը` անջատելով այն բոլոր համակարգիչներից, որտեղ նախկինում թույլատրել էիք:"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Ընդունե՞լ ծրագրավորման կարգավորումներ:"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Այս կարգավորումները միայն ծրագրավորման նպատակների համար են նախատեսված: Դրանք կարող են խանգարել ձեր սարքի կամ ծրագրի աշխատանքին:"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ստուգել հավելվածները USB-ի նկատմամբ"</string>
