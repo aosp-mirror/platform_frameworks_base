@@ -285,11 +285,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 case MSG_UPDATE_DEFAULT_SUB: {
                     int newDefaultPhoneId = msg.arg1;
-                    int newDefaultSubId = (Integer)(msg.obj);
+                    int newDefaultSubId = msg.arg2;
                     if (VDBG) {
                         log("MSG_UPDATE_DEFAULT_SUB:current mDefaultSubId=" + mDefaultSubId
-                            + " current mDefaultPhoneId=" + mDefaultPhoneId + " newDefaultSubId= "
-                            + newDefaultSubId + " newDefaultPhoneId=" + newDefaultPhoneId);
+                                + " current mDefaultPhoneId=" + mDefaultPhoneId
+                                + " newDefaultSubId=" + newDefaultSubId
+                                + " newDefaultPhoneId=" + newDefaultPhoneId);
                     }
 
                     //Due to possible risk condition,(notify call back using the new
@@ -306,7 +307,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     mDefaultSubId = newDefaultSubId;
                     mDefaultPhoneId = newDefaultPhoneId;
                     mLocalLog.log("Default subscription updated: mDefaultPhoneId="
-                            + mDefaultPhoneId + ", mDefaultSubId" + mDefaultSubId);
+                            + mDefaultPhoneId + ", mDefaultSubId=" + mDefaultSubId);
                 }
             }
         }
@@ -336,22 +337,25 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
                 if (DBG) log("onReceive: userHandle=" + userHandle);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_SWITCHED, userHandle, 0));
-            } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED)) {
-                Integer newDefaultSubIdObj = new Integer(intent.getIntExtra(
-                        PhoneConstants.SUBSCRIPTION_KEY,
-                        SubscriptionManager.getDefaultSubscriptionId()));
-                int newDefaultPhoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY,
-                    SubscriptionManager.getPhoneId(mDefaultSubId));
+            } else if (action.equals(SubscriptionManager.ACTION_DEFAULT_SUBSCRIPTION_CHANGED)) {
+                int newDefaultSubId = intent.getIntExtra(
+                        SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+                        SubscriptionManager.getDefaultSubscriptionId());
+                int newDefaultPhoneId = intent.getIntExtra(
+                        PhoneConstants.PHONE_KEY,
+                        SubscriptionManager.getPhoneId(newDefaultSubId));
                 if (DBG) {
                     log("onReceive:current mDefaultSubId=" + mDefaultSubId
-                        + " current mDefaultPhoneId=" + mDefaultPhoneId + " newDefaultSubId= "
-                        + newDefaultSubIdObj + " newDefaultPhoneId=" + newDefaultPhoneId);
+                            + " current mDefaultPhoneId=" + mDefaultPhoneId
+                            + " newDefaultSubId=" + newDefaultSubId
+                            + " newDefaultPhoneId=" + newDefaultPhoneId);
                 }
 
-                if(validatePhoneId(newDefaultPhoneId) && (!newDefaultSubIdObj.equals(mDefaultSubId)
-                        || (newDefaultPhoneId != mDefaultPhoneId))) {
+                if (validatePhoneId(newDefaultPhoneId)
+                        && (newDefaultSubId != mDefaultSubId
+                                || newDefaultPhoneId != mDefaultPhoneId)) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB,
-                            newDefaultPhoneId, 0, newDefaultSubIdObj));
+                            newDefaultPhoneId, newDefaultSubId));
                 }
             }
         }
@@ -450,7 +454,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
-        filter.addAction(TelephonyIntents.ACTION_DEFAULT_SUBSCRIPTION_CHANGED);
+        filter.addAction(SubscriptionManager.ACTION_DEFAULT_SUBSCRIPTION_CHANGED);
         log("systemRunning register for intents");
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
