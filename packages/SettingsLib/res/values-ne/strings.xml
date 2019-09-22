@@ -153,7 +153,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"केही पूर्वनिर्धारितहरू सेट गरिएका छन्"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"कुनै पूर्वनिर्धारित सेट गरिएको छैन"</string>
     <string name="tts_settings" msgid="8186971894801348327">"पाठ-वाचन सेटिङहरू"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"पाठवाचकको उत्पादन"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"पाठवाचकको आउटपुट"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"वाणी दर"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"पाठ वाचन हुने गति"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"पिच"</string>

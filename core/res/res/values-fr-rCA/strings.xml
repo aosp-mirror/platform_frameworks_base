@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Mode TTY HCO demandé par un pair"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Mode TTY VCO demandé par un pair"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Mode TTY DÉSACTIVÉ demandé par un pair"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Google Voice"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"Voix"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Données"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Télécopie"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
@@ -1672,10 +1672,10 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Le raccourci d\'accessibilité a désactivé la fonction <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"Maintenez enfoncées les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"Choisissez un service à utiliser lorsque vous touchez le bouton d\'accessibilité :"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer deux doigts du bas de l\'écran vers le haut) :"</string>
-    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer trois doigts du bas de l\'écran vers le haut) :"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer l\'écran de bas en haut avec deux doigts) :"</string>
+    <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Choisissez un service à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer l\'écran de bas en haut avec trois doigts) :"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Pour basculer entre les services, maintenez le doigt sur le bouton d\'accessibilité."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pour basculer entre les services, balayez deux doigts vers le haut et maintenez-les sur l\'écran."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Pour basculer entre les services, balayez l\'écrfan vers le haut avec deux doigts et maintenez-les-y."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Pour changer de service, balayez trois doigts vers le haut et maintenez-les sur l\'écran."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Zoom"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -1890,8 +1890,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Sans catégorie"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vous définissez l\'importance de ces notifications."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ces notifications sont importantes en raison des participants."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil d\'utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Un utilisateur associé à ce compte existe déjà.)"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Entrez la langue"</string>

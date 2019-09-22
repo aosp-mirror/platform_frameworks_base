@@ -1638,7 +1638,7 @@
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"PIN kode okerra."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Idatzi 4 eta 8 zenbaki arteko PINa."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"PUK kodeak 8 zenbaki izan behar ditu."</string>
-    <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betirako desgaituko da SIMa."</string>
+    <string name="kg_invalid_puk" msgid="3638289409676051243">"Idatzi berriro PUK kode zuzena. Hainbat saiakera oker eginez gero, betiko desgaituko da SIMa."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodeak ez datoz bat"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Eredua marrazteko saiakera gehiegi egin dira"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"Desblokeatzeko, hasi saioa Google kontuarekin."</string>
@@ -1891,8 +1891,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Garrantzitsua da eragiten dien pertsonengatik."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu? (Badago kontu hori duen erabiltzaile bat)"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Gehitu hizkuntza"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>

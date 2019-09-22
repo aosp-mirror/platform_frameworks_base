@@ -292,7 +292,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; اجازه داده شود به تقویم شما دسترسی پیدا کند؟"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"پیامک"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"ارسال و مشاهده پیامک‌ها"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏به &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود پیامک‌ها را ارسال و مشاهده کند؟"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"‏به «&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt;» اجازه داده شود پیامک ارسال و مشاهده کند؟"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"حافظه"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"دسترسی به عکس‌ها، رسانه‌ها و فایل‌های روی دستگاهتان"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"‏به برنامه &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; اجازه داده شود به عکس‌ها، رسانه، و فایل‌های موجود در دستگاهتان دسترسی داشته باشد؟"</string>
@@ -1810,8 +1810,8 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
     <string name="confirm_battery_saver" msgid="639106420541753635">"تأیید"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"بهینه‌سازی باتری فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های با مصرف بالای نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد. "<annotation id="url">"بیشتر بدانید"</annotation></string>
-    <string name="battery_saver_description" msgid="6413346684861241431">"بهینه‌سازی باتری فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های با مصرف بالای نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="2108984221113106294">"«بهینه‌سازی باتری» فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های پرمصرف نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد. "<annotation id="url">"بیشتر بدانید"</annotation></string>
+    <string name="battery_saver_description" msgid="6413346684861241431">"«بهینه‌سازی باتری» فعالیت پس‌زمینه، برخی جلوه‌های دیداری، و سایر ویژگی‌های پرمصرف نیرو را خاموش یا محدود می‌کند تا عمر باتری افزایش یابد."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه ازطرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آن‌ها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
@@ -1890,8 +1890,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"دسته‌بندی‌نشده"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"به دلیل افراد درگیر مهم است."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> اضافه کند؟"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> ایجاد کند (کاربری با این حساب از قبل وجود دارد)؟"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"افزودن زبان"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"نام زبان را تایپ کنید"</string>
@@ -2006,15 +2008,15 @@
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"نمایش روی برنامه‌های دیگر در صفحه‌نمایش"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
-    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"جهت افزایش عمر باتری، بهینه‌سازی باتری فعال شد"</string>
+    <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>
     <string name="battery_saver_notification_channel_name" msgid="2083316159716201806">"بهینه‌سازی باتری"</string>
-    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"تا وقتی شارژ باتری دوباره به سطح پایین نرسد، بهینه‌سازی باتری مجدداً فعال نخواهد شد"</string>
-    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"باتری تا سطحی کافی شارژ شده است. تا وقتی شارژ باتری دوباره به سطح پایین نرسد، بهینه‌سازی باتری مجدداً فعال نخواهد شد."</string>
+    <string name="battery_saver_sticky_disabled_notification_title" msgid="6376147579378764641">"تا وقتی شارژ باتری دوباره به سطح پایین نرسد، «بهینه‌سازی باتری» مجدداً فعال نخواهد شد"</string>
+    <string name="battery_saver_sticky_disabled_notification_summary" msgid="8090192609249817945">"باتری درحد کافی شارژ شده است. تا وقتی شارژ باتری دوباره به سطح پایین نرسد، «بهینه‌سازی باتری» مجدداً فعال نخواهد شد."</string>
     <string name="battery_saver_charged_notification_title" product="default" msgid="2960978289873161288">"تلفن <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> شارژ شد"</string>
     <string name="battery_saver_charged_notification_title" product="tablet" msgid="7555713825806482451">"رایانه لوحی <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> شارژ شد"</string>
     <string name="battery_saver_charged_notification_title" product="device" msgid="5954873381559605660">"دستگاه <xliff:g id="CHARGE_LEVEL">%1$s</xliff:g> شارژ شد"</string>
-    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"بهینه‌سازی باتری خاموش است. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
-    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"بهینه‌سازی باتری خاموش شد. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
+    <string name="battery_saver_off_notification_summary" msgid="1374222493681267143">"«بهینه‌سازی باتری» خاموش است. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
+    <string name="battery_saver_off_alternative_notification_summary" msgid="4340727818546508436">"«بهینه‌سازی باتری» خاموش شد. ویژگی‌ها دیگر محدود نمی‌شوند."</string>
     <string name="mime_type_folder" msgid="7111951698626315204">"پوشه"</string>
     <string name="mime_type_apk" msgid="5518003630972506900">"‏برنامه Android"</string>
     <string name="mime_type_generic" msgid="6833871596845900027">"فایل"</string>

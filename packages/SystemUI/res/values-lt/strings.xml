@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Atšaukti"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Patvirtinkite"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Bandyti dar kartą"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Tuščia sritis; palieskite, kad atšauktumėte autentifikavimą"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Palieskite, jei norite atšaukti autentifikavimą"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Bandykite dar kartą"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Ieškoma veido"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Veidas autentifikuotas"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Patvirtinta"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Paliesk. „Patvirtinti“, kad užbaigtumėte"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Autentifikuota"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Palieskite piršto antspaudo jutiklį"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Piršto antspaudo piktograma"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Ieškoma jūsų…"</string>
@@ -511,7 +512,7 @@
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"„<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>“ naudoja „<xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g>“ įrenginiui tvarkyti."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"Administrat. gali stebėti ir tvark. nustat., įmonės prieigos par., progr., su įreng. susietus duomenis ir įreng. vietovės inform."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
-    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinoti daugiau"</string>
+    <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinokite daugiau"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Atidaryti VPN nustatymus"</string>

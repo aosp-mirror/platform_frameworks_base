@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Ακύρωση"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Επιβεβαίωση"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Δοκιμάστε ξανά"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Κενή περιοχή, πατήστε για ακύρωση ελέγχου ταυτότητας"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Πατήστε για ακύρωση του ελέγχου ταυτότητας"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Δοκιμάστε ξανά"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Αναζήτηση για το πρόσωπό σας"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Έγινε έλεγχος ταυτότητας προσώπου"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Επιβεβαιώθηκε"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Πατήστε Επιβεβαίωση για ολοκλήρωση"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Ολοκληρώθηκε ο έλεγχος ταυτότητας"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Αγγίξτε τον αισθητήρα δακτυλικών αποτυπωμάτων"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Εικονίδιο δακτυλικών αποτυπωμάτων"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Αναζήτηση για εσάς…"</string>

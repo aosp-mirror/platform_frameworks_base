@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"రద్దు చేయి"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"నిర్ధారించు"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"మళ్లీ ప్రయత్నించు"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ఖాళీ ప్రదేశం, ప్రామాణీకరణను రద్దు చేయడానికి నొక్కండి"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"ప్రామాణీకరణను రద్దు చేయడానికి నొక్కండి"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"దయచేసి మళ్ళీ ప్రయత్నించండి"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"మీ ముఖాన్ని క్యాప్చర్ చేస్తోంది"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ముఖం ప్రామాణీకరించబడింది"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"నిర్ధారించబడింది"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"పూర్తి చేయడానికి \"నిర్ధారించు\" నొక్కండి"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ప్రామాణీకరించబడింది"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"వేలిముద్ర సెన్సార్‌ను తాకండి"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"వేలిముద్ర చిహ్నం"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"మీ కోసం చూస్తోంది…"</string>

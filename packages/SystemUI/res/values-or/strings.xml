@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"କ୍ୟାନ୍ସଲ୍‍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"ନିଶ୍ଚିତ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ଖାଲି ଅଞ୍ଚଳ, ପ୍ରାମାଣିକତା ବାତିଲ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"ପ୍ରାମାଣିକତା ବାତିଲ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ଆପଣଙ୍କର ମୁହଁକୁ ପ୍ରମାଣ କରୁଛି"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ମୁହଁ ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ସୁନିଶ୍ଚିତ କରାଯାଇଛି"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ସୁନିଶ୍ଚିତ କରନ୍ତୁରେ ଟାପ୍ କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ଆପଣଙ୍କୁ ଚିହ୍ନଟ କରୁଛି…"</string>

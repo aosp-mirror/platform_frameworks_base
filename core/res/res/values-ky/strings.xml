@@ -1257,7 +1257,7 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Бардык тармактарды көрүү үчүн басыңыз"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Туташуу"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Бардык тармактар"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Сунушталган Wi‑Fi тармактарына туташтырылсынбы?"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"Сунушталган Wi‑Fi тармактарына туташасызбы?"</string>
     <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> сунуштаган тармактар. Түзмөк автоматтык түрдө туташышы мүмкүн."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Уруксат берүү"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Жок, рахмат"</string>
@@ -1346,7 +1346,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Эч уруксаттын кереги жок"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"бул үчүн акы алынышы мүмкүн"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Жарайт"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Бул түзмөк USB аркылуу кубатталууда"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"USB аркылуу кубатталууда"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"USB аркылуу туташкан түзмөк кубатталууда"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"USB аркылуу файл өткөрүү режими күйгүзүлдү"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"USB аркылуу PTP режими күйгүзүлдү"</string>
@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Аналогдук аудио жабдуу табылды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Мүчүлүштүктөрдү USB аркылуу оңдоо иштетилген"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB аркылуу мүчүлүштүктөрдү оңдоону өчүрүү үчүн таптаңыз"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB арклуу мүчүлштктрдү оңдоону өчрүү үчүн басып коюңуз"</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
     <skip />
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Сыноо программасынын режими иштетилди"</string>
@@ -1892,8 +1892,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Категорияларга бөлүнгөн эмес"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Бул эскертмелердин маанилүүлүгүн белгиледиңиз."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Булар сиз үчүн маанилүү адамдар."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту менен жаңы колдонуучу түзө берсинби?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> колдонмосуна <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту үчүн жаңы колдонуучу түзгөнгө уруксат бересизби (мындай аккаунту бар колдонуучу мурунтан эле бар)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Тил кошуу"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Чөлкөмдүк жөндөөлөр"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Тилди киргизиңиз"</string>

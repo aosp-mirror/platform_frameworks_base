@@ -1063,10 +1063,10 @@
       <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> minutami</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
-      <item quantity="one">pred <xliff:g id="COUNT_1">%d</xliff:g> uro</item>
-      <item quantity="two">pred <xliff:g id="COUNT_1">%d</xliff:g> urama</item>
-      <item quantity="few">pred <xliff:g id="COUNT_1">%d</xliff:g> urami</item>
-      <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> urami</item>
+      <item quantity="one">pred <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="two">pred <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="few">pred <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="other">pred <xliff:g id="COUNT_1">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
       <item quantity="one">pred <xliff:g id="COUNT_1">%d</xliff:g> dnevom</item>
@@ -1302,7 +1302,7 @@
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Vzpostavi povezavo"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Vsa omrežja"</string>
     <string name="wifi_suggestion_title" msgid="6396033039578436801">"Želite dovoliti predlagana omrežja Wi-Fi?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> – predlagana omrežja Naprava se lahko poveže samodejno."</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> – predlagana omrežja. Naprava se lahko poveže samodejno."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Dovoli"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Ne, hvala"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>
@@ -1539,7 +1539,7 @@
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Končano"</string>
     <string name="progress_erasing" msgid="2569962663843586562">"Brisanje skupne shrambe …"</string>
-    <string name="share" msgid="1778686618230011964">"Deli z dr."</string>
+    <string name="share" msgid="1778686618230011964">"Deli"</string>
     <string name="find" msgid="4808270900322985960">"Najdi"</string>
     <string name="websearch" msgid="4337157977400211589">"Spletno iskanje"</string>
     <string name="find_next" msgid="5742124618942193978">"Najdi naslednje"</string>
@@ -1958,8 +1958,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nekategorizirano"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vi določite raven pomembnosti teh obvestil."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Pomembno zaradi udeleženih ljudi."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Dovolite, da aplikacija <xliff:g id="APP">%1$s</xliff:g> ustvari novega uporabnika za račun <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Dovolite aplikaciji <xliff:g id="APP">%1$s</xliff:g>, da ustvari novega uporabnika za račun <xliff:g id="ACCOUNT">%2$s</xliff:g> (uporabnik s tem računom že obstaja)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Dodajanje jezika"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Nastavitev območja"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Vnesite ime jezika"</string>

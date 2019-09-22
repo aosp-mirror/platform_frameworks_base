@@ -96,7 +96,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsionet e transferimit të dosjeve të USB-së"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lidh si një lexues \"media\" (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montoje si kamerë (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instalo apl. \"Transferimi i skedarëve\" për \"Mac\""</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instalo \"Transferimi i skedarëve të Android\" për Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Prapa"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Faqja bazë"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyja"</string>
@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Anulo"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Konfirmo"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Provo përsëri"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Rajon bosh, trokit për të anuluar vërtetimin"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Trokit për të anuluar vërtetimin"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Provo përsëri"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Po kërkon për fytyrën tënde"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Fytyra u vërtetua"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Konfirmuar"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Trokit \"Konfirmo\" për ta përfunduar"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"U vërtetua"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Prek sensorin e gjurmës së gishtit"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona e gjurmës së gishtit"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Po të kërkojmë…"</string>

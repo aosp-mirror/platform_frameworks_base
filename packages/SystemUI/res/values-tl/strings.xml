@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Kanselahin"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Kumpirmahin"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Subukang muli"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Walang laman na rehiyon, mag-tap para kanselahin ang pag-authenticate"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"I-tap para kanselahin ang pag-authenticate"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Pakisubukan ulit"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Hinahanap ang iyong mukha"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Na-authenticate ang mukha"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Nakumpirma"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"I-tap ang Kumpirmahin para kumpletuhin"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Na-authenticate"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Pindutin ang fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icon ng fingerprint"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Hinahanap ka…"</string>

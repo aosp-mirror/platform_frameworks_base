@@ -1891,8 +1891,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Óflokkað"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Þú stilltir mikilvægi þessara tilkynninga."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Þetta er mikilvægt vegna fólksins sem tekur þátt í þessu."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> (notandi með þennan reikning er þegar fyrir hendi)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Bæta við tungumáli"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Svæðisval"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Sláðu inn heiti tungumáls"</string>

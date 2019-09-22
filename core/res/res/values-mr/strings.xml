@@ -1673,7 +1673,7 @@
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केली"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="8376923232350078434">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> वापरण्यासाठी दोन्ही व्हॉल्युम की तीन सेकंद दाबा आणि धरून ठेवा"</string>
     <string name="accessibility_button_prompt_text" msgid="1176658502969738564">"तुम्ही अ‍ॅक्सेसिबिलिटी बटण दाबल्यावर वापरण्यासाठी वैशिष्ट्य निवडा:"</string>
-    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्या सोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने दोन बोटांनी स्वाइप करा):"</string>
+    <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्यासोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने दोन बोटांनी स्वाइप करा):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"अ‍ॅक्सेसिबिलिटी जेश्चर ज्या सोबत वापराचे आहे अशी सेवा निवडा (स्क्रीनच्या खालच्या बाजूने तीन बोटांनी स्वाइप करा):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"सेवांदरम्यान स्विच करण्यासाठी, अ‍ॅक्सेसिबिलिटी बटणाला स्पर्श करा आणि धरून ठेवा."</string>
     <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"सेवांदरम्यान स्विच करण्यासाठी, दोन बोटांनी वरच्या दिशेला स्वाइप करा आणि धरून ठेवा."</string>
@@ -1891,8 +1891,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"वर्गीकरण न केलेले"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"तुम्ही या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून विद्यमान आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"एक भाषा जोडा"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>
