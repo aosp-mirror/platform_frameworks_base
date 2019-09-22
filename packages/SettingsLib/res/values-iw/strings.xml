@@ -342,7 +342,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"הוגדרה סיסמת גיבוי חדשה"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"הסיסמה החדשה והאישור אינם תואמים"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"הגדרת סיסמת גיבוי נכשלה"</string>
-    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"טוען…"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"בטעינה…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"דינמי (ברירת מחדל)"</item>
     <item msgid="8446070607501413455">"טבעי"</item>
@@ -405,7 +405,7 @@
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> עד לטעינה מלאה"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> עד לטעינה מלאה"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"לא ידוע"</string>
-    <string name="battery_info_status_charging" msgid="1705179948350365604">"טוען"</string>
+    <string name="battery_info_status_charging" msgid="1705179948350365604">"בטעינה"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"בטעינה"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"לא בטעינה"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"המכשיר מחובר, אבל לא ניתן לטעון עכשיו"</string>

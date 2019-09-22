@@ -402,7 +402,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g>ம் ஆகும்"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஆகிறது"</string>
@@ -437,7 +437,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"சாதன மொழிகளைப் பயன்படுத்து"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> க்கான அமைப்புகளைத் திறப்பதில் தோல்வி"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"இந்த உள்ளீட்டு முறையானது, கடவுச்சொற்கள் மற்றும் கிரெடிட் கார்டு எண்கள் போன்ற தனிப்பட்ட தகவல் உள்பட நீங்கள் உள்ளிடும் எல்லா உரையையும் சேகரிக்கக்கூடும். இது <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> பயன்பாட்டிலிருந்து வந்துள்ளது. இந்த உள்ளீட்டு முறையைப் பயன்படுத்தவா?"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்தப் பயன்பாட்டால் தொடங்க முடியாது"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"குறிப்பு: மறுதொடக்கம் செய்த பிறகு, மொபைலைத் திறக்கும் வரை இந்த ஆப்ஸால் தொடங்க முடியாது"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"IMS பதிவின் நிலை"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"பதிவு செய்யப்பட்டது"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"பதிவு செய்யப்படவில்லை"</string>
