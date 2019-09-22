@@ -1889,8 +1889,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"အမျိုးအစားမခွဲရသေးပါ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ကို <xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ဖန်တီးခွင့်ပြုမလား။"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ကို <xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ် ဖန်တီးခွင့်ပြုမလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်)။"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ဘာသာစကားအမည် ထည့်ပါ"</string>
