@@ -474,7 +474,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"للسماح للتطبيق باستخدام مرسل الأشعة تحت الحمراء الخاص بالجهاز اللوحي."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="2752076865253892198">"‏للسماح للتطبيق باستخدام مُرسِل الأشعة تحت الحمراء في جهاز Android TV."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"للسماح للتطبيق باستخدام مرسل الأشعة تحت الحمراء الخاص بالهاتف."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"تعيين الخلفية"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"ضبط الخلفية"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"للسماح للتطبيق بتعيين خلفية النظام."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"تعديل حجم الخلفية"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"للسماح للتطبيق بتعيين تلميحات حجم خلفية النظام."</string>
@@ -1346,7 +1346,7 @@
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"اتصال"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"جميع الشبكات"</string>
     <string name="wifi_suggestion_title" msgid="6396033039578436801">"‏هل تريد السماح لشبكات Wi‑Fi المقترحة؟"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> الشبكات المقترحة. قد يتم توصيل الجهاز تلقائيًا."</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"شبكات <xliff:g id="NAME">%s</xliff:g> المقترحة - قد يتم توصيل الجهاز تلقائيًا."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"سماح"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"لا، شكرًا"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏سيتم تشغيل شبكة Wi-Fi تلقائيًا."</string>
@@ -2026,8 +2026,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"غير مصنفة"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"لقد عيَّنت أهمية هذه الإشعارات."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g>؟"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>

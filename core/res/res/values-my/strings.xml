@@ -1257,7 +1257,7 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ကွန်ရက်အားလုံးကို ကြည့်ရန် တို့ပါ"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"ချိတ်ဆက်ရန်"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"ကွန်ရက်အားလုံး"</string>
-    <string name="wifi_suggestion_title" msgid="6396033039578436801">"အကြံပြုထားသည့် Wi‑Fi ကွန်ရက်များကို ခွင့်ပြုလိုပါသလား။"</string>
+    <string name="wifi_suggestion_title" msgid="6396033039578436801">"အကြံပြုထားသည့် Wi‑Fi ကွန်ရက်များ ခွင့်ပြုမလား။"</string>
     <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> သည် ကွန်ရက်များကို အကြံပြုထားသည်။ စက်သည် အလိုအလျောက် ချိတ်ဆက်နိုင်သည်။"</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"ခွင့်ပြုရန်"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"မလိုပါ"</string>
@@ -1891,8 +1891,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"အမျိုးအစားမခွဲရသေးပါ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ကို <xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ဖန်တီးခွင့်ပြုမလား။"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ကို <xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ် ဖန်တီးခွင့်ပြုမလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်)။"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ဘာသာစကားအမည် ထည့်ပါ"</string>

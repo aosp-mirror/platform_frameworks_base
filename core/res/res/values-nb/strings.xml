@@ -292,7 +292,7 @@
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til kalenderen din?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sende og se SMS-meldinger?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sende og se tekstmeldinger?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medieinnhold og filer på enheten din"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til bilder, medier og filer på enheten din?"</string>
@@ -1890,8 +1890,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Uten kategori"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Du angir viktigheten for disse varslene."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dette er viktig på grunn av folkene som er involvert."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Det finnes allerede en bruker med denne kontoen.)"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Legg til et språk"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regionsinnstilling"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Skriv inn språknavn"</string>

@@ -1675,7 +1675,7 @@
     <string name="accessibility_gesture_prompt_text" msgid="8259145549733019401">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="1041435574275047665">"Επιλέξτε μια υπηρεσία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με τρία δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_button_instructional_text" msgid="7003212763213614833">"Για εναλλαγή μεταξύ υπηρεσιών, αγγίξτε παρατεταμένα το κουμπί προσβασιμότητας."</string>
-    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω."</string>
+    <string name="accessibility_gesture_instructional_text" msgid="5261788874937410950">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με δύο δάχτυλα προς τα επάνω και μην τα απομακρύνετε από την οθόνη."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="4969448938984394550">"Για εναλλαγή μεταξύ υπηρεσιών, σύρετε παρατεταμένα με τρία δάχτυλα προς τα επάνω."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Μεγιστοποίηση"</string>
     <string name="user_switched" msgid="3768006783166984410">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
@@ -1890,8 +1890,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Μη κατηγοριοποιημένο"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν το λογαριασμό);"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Προσθήκη γλώσσας"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Προτίμηση περιοχής"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Εισαγ. όνομα γλώσσας"</string>

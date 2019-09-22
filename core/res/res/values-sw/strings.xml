@@ -1890,8 +1890,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Ambazo aina haijabainishwa"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iunde Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iunde Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g> (Je, akaunti hii tayari ina Mtumiaji)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Ongeza lugha"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Mapendeleo ya eneo"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Weka jina la lugha"</string>

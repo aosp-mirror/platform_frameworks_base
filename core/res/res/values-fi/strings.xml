@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; yhteystietojesi käyttöoikeuden?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Sijainti"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"käyttää laitteen sijaintia"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tämän laitteen sijainnin käyttöoikeuden?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; oikeuden nähdä tämän laitteen sijainnin?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Sovellus saa sijainnin käyttöoikeuden vain silloin, kun käytät sovellusta"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; käyttää laitteen sijaintia &lt;b&gt;aina&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Sovellus saa tällä hetkellä sijainnin käyttöoikeuden vain, jos käytät sovellusta"</string>
@@ -1890,8 +1890,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Luokittelematon"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Voit valita näiden ilmoitusten tärkeyden."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tämä on tärkeää siihen liittyvien ihmisten perusteella."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g> (tilillä on jo käyttäjä)?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Lisää kieli"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Alueasetus"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Anna kielen nimi"</string>
