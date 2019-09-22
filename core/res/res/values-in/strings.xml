@@ -1256,7 +1256,7 @@
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Hubungkan"</string>
     <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Semua jaringan"</string>
     <string name="wifi_suggestion_title" msgid="6396033039578436801">"Izinkan jaringan Wi-Fi yang disarankan?"</string>
-    <string name="wifi_suggestion_content" msgid="5603992011371520746">"<xliff:g id="NAME">%s</xliff:g> jaringan yang disarankan. Perangkat dapat terhubung secara otomatis."</string>
+    <string name="wifi_suggestion_content" msgid="5603992011371520746">"Jaringan yang disarankan <xliff:g id="NAME">%s</xliff:g>. Perangkat dapat terhubung secara otomatis."</string>
     <string name="wifi_suggestion_action_allow_app" msgid="7978995387498669901">"Izinkan"</string>
     <string name="wifi_suggestion_action_disallow_app" msgid="6434097275967940372">"Lain kali"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi akan aktif otomatis"</string>
@@ -1888,8 +1888,10 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Belum dikategorikan"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Anda menyetel nilai penting notifikasi ini."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ini penting karena orang-orang yang terlibat."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akun ini sudah ada) ?"</string>
+    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (9089159170398841763) -->
+    <skip />
     <string name="language_selection_title" msgid="2680677278159281088">"Tambahkan bahasa"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferensi wilayah"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Ketik nama bahasa"</string>
