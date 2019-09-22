@@ -66,11 +66,11 @@
     <dimen name="status_bar_horizontal_padding">2.5dp</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">13.0dp</dimen>
+    <dimen name="status_bar_battery_icon_height">12.0dp</dimen>
 
     <!-- Width of the battery icon in the status bar. The battery drawable assumes a 12x20 canvas,
     so the width of the icon should be 13.0dp * (12.0 / 20.0) -->
-    <dimen name="status_bar_battery_icon_width">7.8dp</dimen>
+    <dimen name="status_bar_battery_icon_width">7.2dp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
@@ -697,7 +697,7 @@
     <dimen name="qs_date_time_translation">8dp</dimen>
 
     <!-- Padding before battery level text in status bar, QS, and Keyguard -->
-    <dimen name="battery_level_padding_start">4dp</dimen>
+    <dimen name="battery_level_padding_start">6dp</dimen>
 
     <!-- The top padding of the clear all button -->
     <dimen name="clear_all_padding_top">12dp</dimen>
