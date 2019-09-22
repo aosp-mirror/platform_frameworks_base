@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Жокко чыгаруу"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Ырастоо"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Кайталоо"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Бош жер калып калды, аутентификацияны жокко чыгаруу үчүн таптап коюңуз"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Аныктыгын текшерүүнү жокко чыгаруу үчүн таптаңыз"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Кайра аракет кылыңыз"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Жүзүңүз изделүүдө"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Жүздүн аныктыгы текшерилди"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Ырасталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Бүтүрүү үчүн \"Ырастоо\" баскычын басыңыз"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Аныктыгы текшерилди"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Манжа изинин сенсорун басыңыз"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Манжа изинин сүрөтчөсү"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Жүзүңүз изделүүдө…"</string>
@@ -401,7 +402,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Анчейин шашылыш эмес эскертмелер төмөндө"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Ачуу үчүн кайра таптап коюңуз"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Ачуу үчүн өйдө сүрүңүз"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"Кайра аракет кылуу үчүн экранды өйдө сүрүңүз"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Кайталоо үчүн экранды өйдө сүрүңүз"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Бул түзмөк уюмуңуз тарабынан башкарылат"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Бул түзмөк <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> тарабынан башкарылат"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Сүрөтчөнү серпип телефонго өтүңүз"</string>
@@ -457,7 +458,7 @@
     <string name="media_projection_dialog_service_text" msgid="3075544489835858258">"Жаздырып же тышкы экранга чыгаруу учурунда, бул функцияны аткарып жаткан колдонмо ойноткон аудиоңуз, сырсөздөрүңүз, төлөө маалыматыңыз, сүрөттөрүңүз жана билдирүүлөрүңүз сыяктуу экранда көрсөтүлгөн купуя маалыматты жаздырып калышы мүмкүн."</string>
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Тышкы экранга чыгарууда/жаздырууда купуя маалыматты ачыктоо"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Экинчи көрсөтүлбөсүн"</string>
-    <string name="clear_all_notifications_text" msgid="814192889771462828">"Бардыгын тазалап салуу"</string>
+    <string name="clear_all_notifications_text" msgid="814192889771462828">"Баарын тазалап салуу"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"Башкаруу"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"Үнсүз билдирмелер"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Маанилүү эмес билдирмелердин баарын өчүрүү"</string>

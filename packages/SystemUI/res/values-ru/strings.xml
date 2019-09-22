@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Отмена"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Подтвердить"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Повторить попытку"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Пустая область. Нажмите на нее, чтобы отменить аутентификацию."</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Нажмите, чтобы отменить аутентификацию"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Повторите попытку"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Распознавание лица"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Лицо распознано"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Нажмите \"Подтвердить\""</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Аутентификация выполнена"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Прикоснитесь к сканеру отпечатков пальцев."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок отпечатка пальца"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Поиск лица…"</string>
@@ -405,7 +406,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные уведомления"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Проведите вверх, чтобы открыть"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"Чтобы повторить попытку, проведите по экрану вверх."</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Чтобы повторить попытку, проведите вверх"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Этим устройством управляет ваша организация"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Этим устройством управляет компания \"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>\""</string>
     <string name="phone_hint" msgid="4872890986869209950">"Телефон: проведите от значка"</string>
@@ -549,8 +550,8 @@
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Экран будет зафиксирован, пока вы не отмените блокировку (для этого нужно провести вверх и удерживать)."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\""</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\""</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Чтобы открепить этот экран, проведите по нему вверх и задержите руку в крайнем положении."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ОК"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Нет, спасибо"</string>

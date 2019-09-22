@@ -39,7 +39,7 @@
     <string name="battery_saver_start_action" msgid="8187820911065797519">"절전 모드 사용 설정"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"설정"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"자동 화면 회전"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"화면 자동 회전"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"무시"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"자동"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"알림"</string>
@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"취소"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"확인"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"다시 시도하세요."</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"비어 있는 공간, 탭하여 인증 취소"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"탭하여 인증 취소"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"다시 시도해 주세요."</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"얼굴을 찾는 중"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"얼굴이 인증되었습니다."</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"확인함"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"완료하려면 확인을 탭하세요."</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"인증됨"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"지문 센서를 터치하세요."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"지문 아이콘"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"찾는 중..."</string>
@@ -401,7 +402,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"다시 탭하여 열기"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"위로 스와이프하여 열기"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"위로 스와이프하여 다시 시도해 주세요."</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"위로 스와이프하여 다시 시도해 주세요"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"조직에서 관리하는 기기입니다."</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>에서 관리하는 기기입니다."</string>
     <string name="phone_hint" msgid="4872890986869209950">"전화 기능을 사용하려면 아이콘에서 스와이프하세요."</string>

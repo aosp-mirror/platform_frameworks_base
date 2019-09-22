@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"ರದ್ದುಮಾಡಿ"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"ದೃಢೀಕರಿಸಿ"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"ಖಾಲಿ ಪ್ರದೇಶ, ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"ದೃಢೀಕರಣವನ್ನು ರದ್ದುಗೊಳಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"ನಿಮ್ಮ ಮುಖದ ದೃಢೀಕರಣಕ್ಕಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"ಮುಖವನ್ನು ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -450,7 +451,7 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುವುದು."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟಿಂಗ್ ಮಾಡುವಾಗ, ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯಂತಹ ಆಡಿಯೋ, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಮಾಡಿದ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಿಂದ ಪ್ಲೇ ಮಾಡಿದ ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು."</string>

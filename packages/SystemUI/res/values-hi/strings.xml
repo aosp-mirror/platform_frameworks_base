@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"रद्द करें"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"पुष्टि करें"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"फिर से कोशिश करें"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"कोई चेहरा नहीं मिला, टैप करके पुष्टि की प्रक्रिया रद्द करें"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"पुष्टि की प्रक्रिया रद्द करने के लिए टैप करें"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"कृपया फिर से कोशिश करें"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"आपके चेहरे की पुष्टि की जा रही है"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"चेहरे की पुष्टि हो गई"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"पुष्टि हो गई"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"\'पुष्टि करें\' पर टैप करके पूरा करें"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"पुष्टि हो गई"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फ़िंगरप्रिंट सेंसर को छुएं"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फ़िंगरप्रिंट आइकॉन"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"आपको पहचान रहा है…"</string>
@@ -401,7 +402,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"खोलने के लिए फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"खोलने के लिए ऊपर स्वाइप करें"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"फिर से कोशिश करने के लिए स्वाइप करें"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"इस डिवाइस का प्रबंधन आपका संगठन करता है"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"इस डिवाइस के प्रबंधक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> हैं"</string>
     <string name="phone_hint" msgid="4872890986869209950">"फ़ोन के लिए आइकॉन से स्वाइप करें"</string>

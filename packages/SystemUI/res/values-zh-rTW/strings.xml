@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"確認"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"再試一次"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"空白的區域，輕觸即可取消驗證"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"輕觸即可取消驗證"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"請再試一次"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"正在尋找你的臉孔"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"臉孔驗證成功"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"確認完畢"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"輕觸 [確認] 完成驗證設定"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"已通過驗證"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"請輕觸指紋感應器"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋圖示"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"正在尋找你的臉孔…"</string>

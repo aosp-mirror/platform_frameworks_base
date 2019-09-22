@@ -119,12 +119,13 @@
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Confirmar"</string>
     <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Tentar novamente"</string>
-    <string name="biometric_dialog_empty_space_description" msgid="7997936968009073717">"Região vazia. Toque nela para cancelar a autenticação"</string>
+    <string name="biometric_dialog_empty_space_description" msgid="6337699671577692511">"Toque para cancelar a autenticação"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4497694707475970790">"Tente novamente"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="4512727754496228488">"Procurando seu rosto"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Rosto autenticado"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmada"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Toque em \"Confirmar\" para concluir"</string>
+    <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Autenticado"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toque no sensor de impressão digital"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícone de impressão digital"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Procurando você…"</string>
@@ -544,7 +545,7 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ela é mantida à vista até que seja liberada. Toque em Visão geral e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Ela é mantida à vista até que seja liberada. Toque em Início e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Para liberar esta tela, mantenha os botões Voltar e Visão geral pressionados"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para liberar essa tela, toque nos botões Voltar e Início e mantenha-os pressionados"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Para liberar esta tela, mantenha os botões Voltar e Início pressionados"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Para liberar esta tela, deslize para cima e pressione"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Não, obrigado"</string>
