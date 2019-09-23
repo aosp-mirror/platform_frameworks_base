@@ -155,7 +155,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The implementation of the volume manager service.
+ * The implementation of the audio service for volume, audio focus, device management...
  * <p>
  * This implementation focuses on delivering a responsive UI. Most methods are
  * asynchronous to external calls. For example, the task of setting a volume
