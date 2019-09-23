@@ -69,6 +69,7 @@ cc_library {
             static_libs: [
                 "libandroidfw",
                 "libbase",
+                "libcutils",
                 "libutils",
                 "libziparchive",
             ],
@@ -121,6 +122,7 @@ cc_test {
             static_libs: [
                 "libandroidfw",
                 "libbase",
+                "libcutils",
                 "libidmap2",
                 "liblog",
                 "libutils",
@@ -163,6 +165,7 @@ cc_binary {
             static_libs: [
                 "libandroidfw",
                 "libbase",
+                "libcutils",
                 "libidmap2",
                 "liblog",
                 "libutils",
