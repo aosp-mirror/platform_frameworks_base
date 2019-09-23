@@ -469,10 +469,11 @@ public class AudioService extends IAudioService.Stub
 
     // List of binder death handlers for setMode() client processes.
     // The last process to have called setMode() is at the top of the list.
-    private final ArrayList<SetModeDeathHandler> mSetModeDeathHandlers =
+    // package-private so it can be accessed in AudioDeviceBroker.getSetModeDeathHandlers
+    //TODO candidate to be moved to separate class that handles synchronization
+    @GuardedBy("mDeviceBroker.mSetModeLock")
+    /*package*/ final ArrayList<SetModeDeathHandler> mSetModeDeathHandlers =
             new ArrayList<SetModeDeathHandler>();
-
-    private volatile int mCurrentModeOwnerPid = 0;
 
     // true if boot sequence has been completed
     private boolean mSystemReady;
@@ -3149,9 +3150,14 @@ public class AudioService extends IAudioService.Stub
      * @return 0 if nobody owns the mode
      */
     /*package*/ int getModeOwnerPid() {
-        return  mCurrentModeOwnerPid;
+        int modeOwnerPid = 0;
+        try {
+            modeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
+        } catch (Exception e) {
+            // nothing to do, modeOwnerPid is not modified
+        }
+        return modeOwnerPid;
     }
-
 
     private class SetModeDeathHandler implements IBinder.DeathRecipient {
         private IBinder mCb; // To be notified of client's death
@@ -3166,7 +3172,7 @@ public class AudioService extends IAudioService.Stub
         public void binderDied() {
             int oldModeOwnerPid = 0;
             int newModeOwnerPid = 0;
-            synchronized (mSetModeDeathHandlers) {
+            synchronized (mDeviceBroker.mSetModeLock) {
                 Log.w(TAG, "setMode() client died");
                 if (!mSetModeDeathHandlers.isEmpty()) {
                     oldModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
@@ -3177,15 +3183,11 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     newModeOwnerPid = setModeInt(AudioSystem.MODE_NORMAL, mCb, mPid, TAG);
                 }
-
-                if (newModeOwnerPid != oldModeOwnerPid) {
-                    mCurrentModeOwnerPid = newModeOwnerPid;
-                    // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
-                    // connections not started by the application changing the mode when pid changes
-                    if (newModeOwnerPid != 0) {
-                        mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
-                    }
-                }
+            }
+            // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
+            // SCO connections not started by the application changing the mode when pid changes
+            if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
+                mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
             }
         }
 
@@ -3208,17 +3210,15 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#setMode(int) */
     public void setMode(int mode, IBinder cb, String callingPackage) {
-        if (DEBUG_MODE) {
-            Log.v(TAG, "setMode(mode=" + mode + ", callingPackage=" + callingPackage + ")");
-        }
+        if (DEBUG_MODE) { Log.v(TAG, "setMode(mode=" + mode + ", callingPackage=" + callingPackage + ")"); }
         if (!checkAudioSettingsPermission("setMode()")) {
             return;
         }
 
-        if ((mode == AudioSystem.MODE_IN_CALL)
-                && (mContext.checkCallingOrSelfPermission(
+        if ( (mode == AudioSystem.MODE_IN_CALL) &&
+                (mContext.checkCallingOrSelfPermission(
                         android.Manifest.permission.MODIFY_PHONE_STATE)
-                        != PackageManager.PERMISSION_GRANTED)) {
+                            != PackageManager.PERMISSION_GRANTED)) {
             Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: setMode(MODE_IN_CALL) from pid="
                     + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
             return;
@@ -3230,7 +3230,7 @@ public class AudioService extends IAudioService.Stub
 
         int oldModeOwnerPid = 0;
         int newModeOwnerPid = 0;
-        synchronized (mSetModeDeathHandlers) {
+        synchronized (mDeviceBroker.mSetModeLock) {
             if (!mSetModeDeathHandlers.isEmpty()) {
                 oldModeOwnerPid = mSetModeDeathHandlers.get(0).getPid();
             }
@@ -3238,21 +3238,17 @@ public class AudioService extends IAudioService.Stub
                 mode = mMode;
             }
             newModeOwnerPid = setModeInt(mode, cb, Binder.getCallingPid(), callingPackage);
-
-            if (newModeOwnerPid != oldModeOwnerPid) {
-                mCurrentModeOwnerPid = newModeOwnerPid;
-                // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
-                // SCO connections not started by the application changing the mode when pid changes
-                if (newModeOwnerPid != 0) {
-                    mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
-                }
-            }
+        }
+        // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
+        // SCO connections not started by the application changing the mode when pid changes
+        if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
+            mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
         }
     }
 
     // setModeInt() returns a valid PID if the audio mode was successfully set to
     // any mode other than NORMAL.
-    @GuardedBy("mSetModeDeathHandlers")
+    @GuardedBy("mDeviceBroker.mSetModeLock")
     private int setModeInt(int mode, IBinder cb, int pid, String caller) {
         if (DEBUG_MODE) { Log.v(TAG, "setModeInt(mode=" + mode + ", pid=" + pid + ", caller="
                 + caller + ")"); }
@@ -3591,7 +3587,9 @@ public class AudioService extends IAudioService.Stub
                 !mSystemReady) {
             return;
         }
-        mDeviceBroker.startBluetoothScoForClient_Sync(cb, scoAudioMode, eventSource);
+        synchronized (mDeviceBroker.mSetModeLock) {
+            mDeviceBroker.startBluetoothScoForClient_Sync(cb, scoAudioMode, eventSource);
+        }
     }
 
     /** @see AudioManager#stopBluetoothSco() */
@@ -3603,7 +3601,9 @@ public class AudioService extends IAudioService.Stub
         final String eventSource =  new StringBuilder("stopBluetoothSco()")
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
-        mDeviceBroker.stopBluetoothScoForClient_Sync(cb, eventSource);
+        synchronized (mDeviceBroker.mSetModeLock) {
+            mDeviceBroker.stopBluetoothScoForClient_Sync(cb, eventSource);
+        }
     }
 
 
@@ -4352,7 +4352,7 @@ public class AudioService extends IAudioService.Stub
 
     // NOTE: Locking order for synchronized objects related to volume or ringer mode management:
     //  1 mScoclient OR mSafeMediaVolumeState
-    //  2   mSetModeDeathHandlers
+    //  2   mSetModeLock
     //  3     mSettingsLock
     //  4       VolumeStreamState.class
     private class VolumeStreamState {
