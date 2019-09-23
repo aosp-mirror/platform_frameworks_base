@@ -72,7 +72,6 @@ public class DozeTriggers implements DozeMachine.Part {
     private final AmbientDisplayConfiguration mConfig;
     private final DozeParameters mDozeParameters;
     private final AsyncSensorManager mSensorManager;
-    private final Handler mHandler;
     private final WakeLock mWakeLock;
     private final boolean mAllowPulseTriggers;
     private final UiModeManager mUiModeManager;
@@ -89,14 +88,14 @@ public class DozeTriggers implements DozeMachine.Part {
     public DozeTriggers(Context context, DozeMachine machine, DozeHost dozeHost,
             AlarmManager alarmManager, AmbientDisplayConfiguration config,
             DozeParameters dozeParameters, AsyncSensorManager sensorManager, Handler handler,
-            WakeLock wakeLock, boolean allowPulseTriggers, DockManager dockManager) {
+            WakeLock wakeLock, boolean allowPulseTriggers, DockManager dockManager,
+            ProximitySensor proximitySensor) {
         mContext = context;
         mMachine = machine;
         mDozeHost = dozeHost;
         mConfig = config;
         mDozeParameters = dozeParameters;
         mSensorManager = sensorManager;
-        mHandler = handler;
         mWakeLock = wakeLock;
         mAllowPulseTriggers = allowPulseTriggers;
         mDozeSensors = new DozeSensors(context, alarmManager, mSensorManager, dozeParameters,
@@ -104,9 +103,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 dozeParameters.getPolicy());
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
         mDockManager = dockManager;
-        mProxCheck = new ProximitySensor.ProximityCheck(
-                new ProximitySensor(mContext, mSensorManager, null),
-                mHandler);
+        mProxCheck = new ProximitySensor.ProximityCheck(proximitySensor, handler);
     }
 
     private void onNotification(Runnable onPulseSuppressedListener) {
@@ -182,7 +179,7 @@ public class DozeTriggers implements DozeMachine.Part {
             }
         } else {
             proximityCheckThenCall((result) -> {
-                if (result) {
+                if (result != null && result) {
                     // In pocket, drop event.
                     return;
                 }
@@ -271,7 +268,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
         if (wake) {
             proximityCheckThenCall((result) -> {
-                if (result) {
+                if (result !=  null && result) {
                     // In pocket, drop event.
                     return;
                 }
@@ -380,7 +377,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
         mPulsePending = true;
         proximityCheckThenCall((result) -> {
-            if (result) {
+            if (result != null && result) {
                 // in pocket, abort pulse
                 DozeLog.tracePulseDropped(mContext, "inPocket");
                 mPulsePending = false;

@@ -47,7 +47,7 @@ public class ProximitySensorTest extends SysuiTestCase {
         AsyncSensorManager asyncSensorManager = new AsyncSensorManager(
                 sensorManager, null, new Handler());
         mFakeProximitySensor = sensorManager.getFakeProximitySensor();
-        mProximitySensor = new ProximitySensor(getContext(), asyncSensorManager, null);
+        mProximitySensor = new ProximitySensor(getContext(), asyncSensorManager);
     }
 
     @Test
