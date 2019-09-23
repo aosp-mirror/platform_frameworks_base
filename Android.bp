@@ -1511,3 +1511,25 @@ genrule {
         targets: ["droidcore"],
     },
 }
+
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-telephony-stack-shared-srcs",
+    srcs: [
+        "core/java/android/os/RegistrantList.java",
+        "core/java/android/os/Registrant.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/android/util/Slog.java",
+        "core/java/android/util/TimeUtils.java",
+        "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/XmlUtils.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/DumpUtils.java"
+    ],
+}
+
