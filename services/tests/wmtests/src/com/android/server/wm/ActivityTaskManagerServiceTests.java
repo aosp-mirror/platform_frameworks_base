@@ -26,6 +26,7 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link ActivityTaskManagerService} class.
@@ -34,6 +35,7 @@ import org.junit.Test;
  *  atest WmTests:ActivityTaskManagerServiceTests
  */
 @MediumTest
+@RunWith(WindowTestRunner.class)
 public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
 
     @Before

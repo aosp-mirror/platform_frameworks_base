@@ -40,31 +40,17 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.testing.DexmakerShareClassLoaderRule;
 import android.view.DisplayInfo;
 
 import com.android.server.AttributeCache;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 
 /**
  * A base class to handle common operations in activity related unit tests.
  */
-class ActivityTestsBase {
-
-    @Rule
-    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
-            new DexmakerShareClassLoaderRule();
-
-    @Rule
-    public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
-
-    @WindowTestRunner.MethodWrapperRule
-    public final WindowManagerGlobalLockRule mLockRule =
-            new WindowManagerGlobalLockRule(mSystemServicesTestRule);
-
+class ActivityTestsBase extends SystemServiceTestsBase {
     final Context mContext = getInstrumentation().getTargetContext();
 
     ActivityTaskManagerService mService;

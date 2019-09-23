@@ -32,15 +32,17 @@ import androidx.test.filters.SmallTest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link DisplayContent.TaskStackContainers} container in {@link DisplayContent}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskStackContainersTests
+ *  atest WmTests:TaskStackContainersTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskStackContainersTests extends WindowTestsBase {
 
     private TaskStack mPinnedStack;

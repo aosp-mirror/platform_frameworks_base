@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
@@ -43,6 +44,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class AppTransitionControllerTest extends WindowTestsBase {
 
     private AppTransitionController mAppTransitionController;
@@ -55,73 +57,63 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTranslucentOpen() {
-        synchronized (mWm.mGlobalLock) {
-            final AppWindowToken behind = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            translucentOpening.setOccludesParent(false);
-            translucentOpening.setHidden(true);
-            mDisplayContent.mOpeningApps.add(behind);
-            mDisplayContent.mOpeningApps.add(translucentOpening);
-            assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
-                    mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
-                            TRANSIT_TASK_OPEN));
-        }
+        final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        translucentOpening.setOccludesParent(false);
+        translucentOpening.setHidden(true);
+        mDisplayContent.mOpeningApps.add(behind);
+        mDisplayContent.mOpeningApps.add(translucentOpening);
+        assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
+                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(TRANSIT_TASK_OPEN));
     }
 
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTranslucentClose() {
-        synchronized (mWm.mGlobalLock) {
-            final AppWindowToken behind = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            final AppWindowToken translucentClosing = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            translucentClosing.setOccludesParent(false);
-            mDisplayContent.mClosingApps.add(translucentClosing);
-            assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
-                    mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
-                            TRANSIT_TASK_CLOSE));
-        }
+        final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final AppWindowToken translucentClosing = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        translucentClosing.setOccludesParent(false);
+        mDisplayContent.mClosingApps.add(translucentClosing);
+        assertEquals(WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE,
+                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(TRANSIT_TASK_CLOSE));
     }
 
     @Test
     @FlakyTest(bugId = 131005232)
     public void testChangeIsNotOverwritten() {
-        synchronized (mWm.mGlobalLock) {
-            final AppWindowToken behind = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-            translucentOpening.setOccludesParent(false);
-            translucentOpening.setHidden(true);
-            mDisplayContent.mOpeningApps.add(behind);
-            mDisplayContent.mOpeningApps.add(translucentOpening);
-            assertEquals(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
-                    mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
-                            TRANSIT_TASK_CHANGE_WINDOWING_MODE));
-        }
+        final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        translucentOpening.setOccludesParent(false);
+        translucentOpening.setHidden(true);
+        mDisplayContent.mOpeningApps.add(behind);
+        mDisplayContent.mOpeningApps.add(translucentOpening);
+        assertEquals(TRANSIT_TASK_CHANGE_WINDOWING_MODE,
+                mAppTransitionController.maybeUpdateTransitToTranslucentAnim(
+                        TRANSIT_TASK_CHANGE_WINDOWING_MODE));
     }
 
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTransitWithinTask() {
-        synchronized (mWm.mGlobalLock) {
-            final AppWindowToken opening = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-            opening.setOccludesParent(false);
-            final AppWindowToken closing = createAppWindowToken(mDisplayContent,
-                    WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
-            closing.setOccludesParent(false);
-            Task task = opening.getTask();
-            mDisplayContent.mOpeningApps.add(opening);
-            mDisplayContent.mClosingApps.add(closing);
-            assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
-            closing.getTask().removeChild(closing);
-            task.addChild(closing, 0);
-            assertTrue(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
-            assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_TASK_OPEN, task));
-        }
+        final AppWindowToken opening = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
+        opening.setOccludesParent(false);
+        final AppWindowToken closing = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
+        closing.setOccludesParent(false);
+        final Task task = opening.getTask();
+        mDisplayContent.mOpeningApps.add(opening);
+        mDisplayContent.mClosingApps.add(closing);
+        assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
+        closing.getTask().removeChild(closing);
+        task.addChild(closing, 0);
+        assertTrue(mAppTransitionController.isTransitWithinTask(TRANSIT_ACTIVITY_OPEN, task));
+        assertFalse(mAppTransitionController.isTransitWithinTask(TRANSIT_TASK_OPEN, task));
     }
 }

@@ -34,15 +34,17 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link TaskStack} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskStackTests
+ *  atest WmTests:TaskStackTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskStackTests extends WindowTestsBase {
 
     @Test
@@ -176,13 +178,8 @@ public class TaskStackTests extends WindowTestsBase {
     public void testStackOutset() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final int stackOutset = 10;
-        // Clear the handler and hold the lock for mock, to prevent multi-thread issue.
-        waitUntilHandlersIdle();
-        synchronized (mWm.mGlobalLock) {
-            spyOn(stack);
-
-            doReturn(stackOutset).when(stack).getStackOutset();
-        }
+        spyOn(stack);
+        doReturn(stackOutset).when(stack).getStackOutset();
 
         final Rect stackBounds = new Rect(200, 200, 800, 1000);
         // Update surface position and size by the given bounds.

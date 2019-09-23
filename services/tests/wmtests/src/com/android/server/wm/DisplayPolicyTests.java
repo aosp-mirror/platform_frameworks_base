@@ -54,9 +54,11 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class DisplayPolicyTests extends WindowTestsBase {
 
     private WindowState createOpaqueFullscreen(boolean hasLightNavBar) {
@@ -225,13 +227,10 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final WindowState activity = createApplicationWindow();
         final WindowState toast = createToastWindow();
 
-        synchronized (mWm.mGlobalLock) {
-            policy.adjustWindowParamsLw(
-                    toast, toast.mAttrs, 0 /* callingPid */, 0 /* callingUid */);
+        policy.adjustWindowParamsLw(toast, toast.mAttrs, 0 /* callingPid */, 0 /* callingUid */);
 
-            assertTrue(policy.canToastShowWhenLocked(0 /* callingUid */));
-            assertNotEquals(0, toast.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED);
-        }
+        assertTrue(policy.canToastShowWhenLocked(0 /* callingUid */));
+        assertNotEquals(0, toast.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED);
     }
 
     private WindowState createToastWindow() {

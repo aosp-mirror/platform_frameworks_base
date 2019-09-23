@@ -24,15 +24,17 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link AppTransition}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:UnknownAppVisibilityControllerTest
+ *  atest WmTests:UnknownAppVisibilityControllerTest
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
 
     @Before
@@ -48,7 +50,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
         mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token);
 
         // Make sure our handler processed the message.
-        mWm.mH.runWithScissors(() -> { }, 0);
+        waitHandlerIdle(mWm.mH);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
@@ -64,7 +66,7 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
         mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token2);
 
         // Make sure our handler processed the message.
-        mWm.mH.runWithScissors(() -> { }, 0);
+        waitHandlerIdle(mWm.mH);
         assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 

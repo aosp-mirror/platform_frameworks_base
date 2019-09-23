@@ -24,11 +24,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
@@ -49,6 +47,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -62,6 +61,7 @@ import java.util.concurrent.TimeUnit;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityDisplayTests extends ActivityTestsBase {
 
     @Test
@@ -142,30 +142,24 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         // Create a display which supports system decoration and allows reparenting stacks to
         // another display when the display is removed.
         final ActivityDisplay display = createNewActivityDisplay();
-        spyOn(display);
         doReturn(false).when(display).shouldDestroyContentOnRemove();
         doReturn(true).when(display).supportsSystemDecorations();
         mRootActivityContainer.addChild(display, ActivityDisplay.POSITION_TOP);
 
         // Put home stack on the display.
-        final ActivityStack homeStack = display.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(homeStack).build();
-        new ActivityBuilder(mService).setTask(task).build();
-        display.removeChild(homeStack);
-        final ActivityStack spiedHomeStack = spy(homeStack);
-        display.addChild(spiedHomeStack, ActivityDisplay.POSITION_TOP);
-        reset(spiedHomeStack);
+        final ActivityStack homeStack = new StackBuilder(mRootActivityContainer)
+                .setDisplay(display).setActivityType(ACTIVITY_TYPE_HOME).build();
 
         // Put a finishing standard activity which will be reparented.
         final ActivityStack stack = createFullscreenStackWithSimpleActivityAt(display);
         stack.topRunningActivityLocked().makeFinishingLocked();
 
+        clearInvocations(homeStack);
         display.remove();
 
         // The removed display should have no focused stack and its home stack should never resume.
         assertNull(display.getFocusedStack());
-        verify(spiedHomeStack, never()).resumeTopActivityUncheckedLocked(any(), any());
+        verify(homeStack, never()).resumeTopActivityUncheckedLocked(any(), any());
     }
 
     private ActivityStack createFullscreenStackWithSimpleActivityAt(ActivityDisplay display) {

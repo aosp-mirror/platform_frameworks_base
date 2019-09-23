@@ -26,13 +26,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import android.content.pm.ApplicationInfo;
 import android.platform.test.annotations.Presubmit;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mockito;
 
@@ -43,6 +43,7 @@ import org.mockito.Mockito;
  *  atest WmTests:WindowProcessControllerTests
  */
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowProcessControllerTests extends ActivityTestsBase {
 
     WindowProcessController mWpc;
@@ -97,7 +98,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
     public void testSetRunningRecentsAnimation() {
         mWpc.setRunningRecentsAnimation(true);
         mWpc.setRunningRecentsAnimation(false);
-        mService.mH.runWithScissors(() -> {}, 0);
+        waitHandlerIdle(mService.mH);
 
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
         orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(true));
@@ -108,7 +109,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
     public void testSetRunningRemoteAnimation() {
         mWpc.setRunningRemoteAnimation(true);
         mWpc.setRunningRemoteAnimation(false);
-        mService.mH.runWithScissors(() -> {}, 0);
+        waitHandlerIdle(mService.mH);
 
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
         orderVerifier.verify(mMockListener).setRunningRemoteAnimation(eq(true));
@@ -122,7 +123,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
 
         mWpc.setRunningRecentsAnimation(false);
         mWpc.setRunningRemoteAnimation(false);
-        mService.mH.runWithScissors(() -> {}, 0);
+        waitHandlerIdle(mService.mH);
 
         InOrder orderVerifier = Mockito.inOrder(mMockListener);
         orderVerifier.verify(mMockListener, times(3)).setRunningRemoteAnimation(eq(true));
