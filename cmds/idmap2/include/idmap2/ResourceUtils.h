@@ -37,14 +37,16 @@ typedef uint16_t EntryId;     // eeee in 0xpptteeee
 
 namespace utils {
 
+StringPiece DataTypeToString(uint8_t data_type);
+
 struct OverlayManifestInfo {
-  std::string target_package;  // NOLINT(misc-non-private-member-variables-in-classes)
-  std::string target_name;     // NOLINT(misc-non-private-member-variables-in-classes)
-  std::string requiredSystemPropertyName;  // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_package;               // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string target_name;                  // NOLINT(misc-non-private-member-variables-in-classes)
+  std::string requiredSystemPropertyName;   // NOLINT(misc-non-private-member-variables-in-classes)
   std::string requiredSystemPropertyValue;  // NOLINT(misc-non-private-member-variables-in-classes)
-  uint32_t resource_mapping;   // NOLINT(misc-non-private-member-variables-in-classes)
-  bool is_static;              // NOLINT(misc-non-private-member-variables-in-classes)
-  int priority = -1;           // NOLINT(misc-non-private-member-variables-in-classes)
+  uint32_t resource_mapping;                // NOLINT(misc-non-private-member-variables-in-classes)
+  bool is_static;                           // NOLINT(misc-non-private-member-variables-in-classes)
+  int priority = -1;                        // NOLINT(misc-non-private-member-variables-in-classes)
 };
 
 Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,

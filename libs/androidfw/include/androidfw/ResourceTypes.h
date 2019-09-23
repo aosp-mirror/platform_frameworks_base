@@ -39,7 +39,7 @@
 namespace android {
 
 constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const static uint32_t kIdmapCurrentVersion = 0x00000001u;
+constexpr const static uint32_t kIdmapCurrentVersion = 0x00000002u;
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of

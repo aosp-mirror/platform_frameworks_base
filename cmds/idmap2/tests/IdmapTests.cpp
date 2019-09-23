@@ -31,10 +31,20 @@
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
 
+using android::Res_value;
 using ::testing::IsNull;
 using ::testing::NotNull;
 
 namespace android::idmap2 {
+
+#define ASSERT_TARGET_ENTRY(entry, target_resid, type, value) \
+  ASSERT_EQ(entry.target_id, target_resid);                   \
+  ASSERT_EQ(entry.data_type, type);                           \
+  ASSERT_EQ(entry.data_value, value)
+
+#define ASSERT_OVERLAY_ENTRY(entry, overlay_resid, target_resid) \
+  ASSERT_EQ(entry.overlay_id, overlay_resid);                    \
+  ASSERT_EQ(entry.target_id, target_resid)
 
 TEST(IdmapTests, TestCanonicalIdmapPathFor) {
   ASSERT_EQ(Idmap::CanonicalIdmapPathFor("/foo", "/vendor/overlay/bar.apk"),
@@ -47,11 +57,11 @@ TEST(IdmapTests, CreateIdmapHeaderFromBinaryStream) {
   std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(stream);
   ASSERT_THAT(header, NotNull());
   ASSERT_EQ(header->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(header->GetVersion(), 0x01U);
+  ASSERT_EQ(header->GetVersion(), 0x02U);
   ASSERT_EQ(header->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(header->GetOverlayCrc(), 0x5678U);
-  ASSERT_EQ(header->GetTargetPath().to_string(), "target.apk");
-  ASSERT_EQ(header->GetOverlayPath().to_string(), "overlay.apk");
+  ASSERT_EQ(header->GetTargetPath().to_string(), "targetX.apk");
+  ASSERT_EQ(header->GetOverlayPath().to_string(), "overlayX.apk");
 }
 
 TEST(IdmapTests, FailToCreateIdmapHeaderFromBinaryStreamIfPathTooLong) {
@@ -73,23 +83,8 @@ TEST(IdmapTests, CreateIdmapDataHeaderFromBinaryStream) {
 
   std::unique_ptr<const IdmapData::Header> header = IdmapData::Header::FromBinaryStream(stream);
   ASSERT_THAT(header, NotNull());
-  ASSERT_EQ(header->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(header->GetTypeCount(), 2U);
-}
-
-TEST(IdmapTests, CreateIdmapDataResourceTypeFromBinaryStream) {
-  const size_t offset = 0x214;
-  std::string raw(reinterpret_cast<const char*>(idmap_raw_data + offset),
-                  idmap_raw_data_len - offset);
-  std::istringstream stream(raw);
-
-  std::unique_ptr<const IdmapData::TypeEntry> data = IdmapData::TypeEntry::FromBinaryStream(stream);
-  ASSERT_THAT(data, NotNull());
-  ASSERT_EQ(data->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(data->GetOverlayTypeId(), 0x02U);
-  ASSERT_EQ(data->GetEntryCount(), 1U);
-  ASSERT_EQ(data->GetEntryOffset(), 0U);
-  ASSERT_EQ(data->GetEntry(0), 0U);
+  ASSERT_EQ(header->GetTargetEntryCount(), 0x03);
+  ASSERT_EQ(header->GetOverlayEntryCount(), 0x03);
 }
 
 TEST(IdmapTests, CreateIdmapDataFromBinaryStream) {
@@ -100,24 +95,21 @@ TEST(IdmapTests, CreateIdmapDataFromBinaryStream) {
 
   std::unique_ptr<const IdmapData> data = IdmapData::FromBinaryStream(stream);
   ASSERT_THAT(data, NotNull());
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 2U);
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 2U);
 
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 1U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 0U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);
+  const auto& target_entries = data->GetTargetEntries();
+  ASSERT_EQ(target_entries.size(), 3U);
+  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f020000, 0x01 /* Res_value::TYPE_REFERENCE */,
+                      0x7f020000);
+  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f030000, 0x01 /* Res_value::TYPE_REFERENCE */,
+                      0x7f030000);
+  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f030002, 0x01 /* Res_value::TYPE_REFERENCE */,
+                      0x7f030001);
 
-  ASSERT_EQ(types[1]->GetTargetTypeId(), 0x03U);
-  ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x03U);
-  ASSERT_EQ(types[1]->GetEntryCount(), 3U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 3U);
-  ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);
-  ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);
-  ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);
+  const auto& overlay_entries = data->GetOverlayEntries();
+  ASSERT_EQ(target_entries.size(), 3U);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x7f020000, 0x7f020000);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x7f030000, 0x7f030000);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x7f030001, 0x7f030002);
 }
 
 TEST(IdmapTests, CreateIdmapFromBinaryStream) {
@@ -130,34 +122,29 @@ TEST(IdmapTests, CreateIdmapFromBinaryStream) {
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x01U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x02U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x1234U);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0x5678U);
-  ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), "target.apk");
-  ASSERT_EQ(idmap->GetHeader()->GetOverlayPath().to_string(), "overlay.apk");
+  ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), "targetX.apk");
+  ASSERT_EQ(idmap->GetHeader()->GetOverlayPath().to_string(), "overlayX.apk");
 
   const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
   ASSERT_EQ(dataBlocks.size(), 1U);
 
   const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 2U);
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 2U);
+  ASSERT_THAT(data, NotNull());
 
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 1U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 0U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);
+  const auto& target_entries = data->GetTargetEntries();
+  ASSERT_EQ(target_entries.size(), 3U);
+  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f020000, Res_value::TYPE_REFERENCE, 0x7f020000);
+  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f030000, Res_value::TYPE_REFERENCE, 0x7f030000);
+  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f030002, Res_value::TYPE_REFERENCE, 0x7f030001);
 
-  ASSERT_EQ(types[1]->GetTargetTypeId(), 0x03U);
-  ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x03U);
-  ASSERT_EQ(types[1]->GetEntryCount(), 3U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 3U);
-  ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);
-  ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);
-  ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);
+  const auto& overlay_entries = data->GetOverlayEntries();
+  ASSERT_EQ(target_entries.size(), 3U);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x7f020000, 0x7f020000);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x7f030000, 0x7f030000);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x7f030001, 0x7f030002);
 }
 
 TEST(IdmapTests, GracefullyFailToCreateIdmapFromCorruptBinaryStream) {
@@ -169,300 +156,140 @@ TEST(IdmapTests, GracefullyFailToCreateIdmapFromCorruptBinaryStream) {
   ASSERT_FALSE(result);
 }
 
-void CreateIdmap(const StringPiece& target_apk_path, const StringPiece& overlay_apk_path,
-                 const PolicyBitmask& fulfilled_policies, bool enforce_overlayable,
-                 std::unique_ptr<const Idmap>* out_idmap) {
-  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path.to_string());
-  ASSERT_THAT(target_apk, NotNull());
-
-  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path.to_string());
-  ASSERT_THAT(overlay_apk, NotNull());
-
-  auto result =
-      Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, enforce_overlayable);
-  *out_idmap = result ? std::move(*result) : nullptr;
-}
-
-TEST(IdmapTests, CreateIdmapFromApkAssets) {
-  std::unique_ptr<const Idmap> idmap;
+TEST(IdmapTests, CreateIdmapHeaderFromApkAssets) {
   std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
   std::string overlay_apk_path = GetTestDataPath() + "/overlay/overlay.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_PUBLIC,
-              /* enforce_overlayable */ true, &idmap);
+
+  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
+  ASSERT_THAT(target_apk, NotNull());
+
+  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+  ASSERT_THAT(overlay_apk, NotNull());
+
+  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+                                           /* enforce_overlayable */ true);
+  ASSERT_TRUE(idmap_result) << idmap_result.GetErrorMessage();
+  auto& idmap = *idmap_result;
+  ASSERT_THAT(idmap, NotNull());
 
   ASSERT_THAT(idmap->GetHeader(), NotNull());
   ASSERT_EQ(idmap->GetHeader()->GetMagic(), 0x504d4449U);
-  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x01U);
+  ASSERT_EQ(idmap->GetHeader()->GetVersion(), 0x02U);
   ASSERT_EQ(idmap->GetHeader()->GetTargetCrc(), 0x76a20829);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayCrc(), 0xc054fb26);
   ASSERT_EQ(idmap->GetHeader()->GetTargetPath().to_string(), target_apk_path);
   ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
-  ASSERT_EQ(idmap->GetHeader()->GetOverlayPath(), overlay_apk_path);
-
-  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
-  ASSERT_EQ(dataBlocks.size(), 1U);
-
-  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
-
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 2U);
-
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 2U);
-
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 1U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 0U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);
-
-  ASSERT_EQ(types[1]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x02U);
-  ASSERT_EQ(types[1]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 12U);
-  ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);
-  ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);
-  ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);
-  ASSERT_EQ(types[1]->GetEntry(3), 0x0002U);
 }
 
-// Overlays should abide by all overlayable restrictions if enforcement of overlayable is enabled.
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublic) {
-  std::unique_ptr<const Idmap> idmap;
+Result<std::unique_ptr<const IdmapData>> TestIdmapDataFromApkAssets(
+    const android::StringPiece& local_target_apk_path,
+    const android::StringPiece& local_overlay_apk_path, const OverlayManifestInfo& overlay_info,
+    const PolicyBitmask& fulfilled_policies, bool enforce_overlayable) {
+  const std::string target_apk_path(GetTestDataPath() + local_target_apk_path.data());
+  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
+  if (!target_apk) {
+    return Error(R"(Failed to load target apk "%s")", target_apk_path.data());
+  }
+
+  const std::string overlay_apk_path(GetTestDataPath() + local_overlay_apk_path.data());
+  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+  if (!overlay_apk) {
+    return Error(R"(Failed to load overlay apk "%s")", overlay_apk_path.data());
+  }
+
+  auto mapping = ResourceMapping::FromApkAssets(*target_apk, *overlay_apk, overlay_info,
+                                                fulfilled_policies, enforce_overlayable);
+
+  if (!mapping) {
+    return mapping.GetError();
+  }
+
+  return IdmapData::FromResourceMapping(*mapping);
+}
+
+TEST(IdmapTests, CreateIdmapDataFromApkAssets) {
   std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
-  std::string overlay_apk_path = GetTestDataPath() + "/system-overlay/system-overlay.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path,
-              PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_PUBLIC,
-              /* enforce_overlayable */ true, &idmap);
+  std::string overlay_apk_path = GetTestDataPath() + "/overlay/overlay.apk";
+
+  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
+  ASSERT_THAT(target_apk, NotNull());
+
+  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
+  ASSERT_THAT(overlay_apk, NotNull());
+
+  auto idmap_result = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+                                           /* enforce_overlayable */ true);
+  ASSERT_TRUE(idmap_result) << idmap_result.GetErrorMessage();
+  auto& idmap = *idmap_result;
   ASSERT_THAT(idmap, NotNull());
 
   const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
   ASSERT_EQ(dataBlocks.size(), 1U);
 
   const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
+  ASSERT_THAT(data, NotNull());
 
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
+  const auto& target_entries = data->GetTargetEntries();
+  ASSERT_EQ(target_entries.size(), 4U);
+  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f010000);
+  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020000);
+  ASSERT_TARGET_ENTRY(target_entries[2], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020001);
+  ASSERT_TARGET_ENTRY(target_entries[3], 0x7f02000f, Res_value::TYPE_DYNAMIC_REFERENCE, 0x7f020002);
 
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 1U);
-
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 8U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);   // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(1), kNoEntry);  // string/policy_signature
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0001U);   // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(3), 0x0002U);   // string/policy_system_vendor
+  const auto& overlay_entries = data->GetOverlayEntries();
+  ASSERT_EQ(target_entries.size(), 4U);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x7f010000, 0x7f010000);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[1], 0x7f020000, 0x7f02000c);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[2], 0x7f020001, 0x7f02000e);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[3], 0x7f020002, 0x7f02000f);
 }
 
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySignature) {
-  std::unique_ptr<const Idmap> idmap;
-  std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
-  std::string overlay_apk_path = GetTestDataPath() + "/signature-overlay/signature-overlay.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path,
-              PolicyFlags::POLICY_PUBLIC | PolicyFlags::POLICY_SIGNATURE,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
+TEST(IdmapTests, CreateIdmapDataDoNotRewriteNonOverlayResourceId) {
+  OverlayManifestInfo info{};
+  info.target_package = "test.target";
+  info.target_name = "TestResources";
+  info.resource_mapping = 0x7f030002;  // xml/overlays_different_packages
+  auto idmap_data = TestIdmapDataFromApkAssets("/target/target.apk", "/overlay/overlay.apk", info,
+                                               PolicyFlags::POLICY_PUBLIC,
+                                               /* enforce_overlayable */ false);
 
-  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
-  ASSERT_EQ(dataBlocks.size(), 1U);
+  ASSERT_TRUE(idmap_data) << idmap_data.GetErrorMessage();
+  auto& data = *idmap_data;
 
-  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
+  const auto& target_entries = data->GetTargetEntries();
+  ASSERT_EQ(target_entries.size(), 2U);
+  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f02000c, Res_value::TYPE_REFERENCE,
+                      0x0104000a);  // string/str1 -> android:string/ok
+  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000e, Res_value::TYPE_DYNAMIC_REFERENCE,
+                      0x7f020001);  // string/str3 -> string/str4
 
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
-
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 1U);
-
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 1U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 9U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/policy_signature
+  const auto& overlay_entries = data->GetOverlayEntries();
+  ASSERT_EQ(overlay_entries.size(), 1U);
+  ASSERT_OVERLAY_ENTRY(overlay_entries[0], 0x7f020001, 0x7f02000e);  // string/str3 <- string/str4
 }
 
-// Overlays should abide by all overlayable restrictions if enforcement of overlayable is enabled.
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalid) {
-  std::unique_ptr<const Idmap> idmap;
-  std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
-  std::string overlay_apk_path =
-      GetTestDataPath() + "/system-overlay-invalid/system-overlay-invalid.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path,
-              PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_PUBLIC,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
+TEST(IdmapTests, CreateIdmapDataInlineResources) {
+  OverlayManifestInfo info{};
+  info.target_package = "test.target";
+  info.target_name = "TestResources";
+  info.resource_mapping = 0x7f030000;  // xml/overlays_inline
+  auto idmap_data = TestIdmapDataFromApkAssets("/target/target.apk", "/overlay/overlay.apk", info,
+                                               PolicyFlags::POLICY_PUBLIC,
+                                               /* enforce_overlayable */ false);
 
-  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
-  ASSERT_EQ(dataBlocks.size(), 1U);
+  ASSERT_TRUE(idmap_data) << idmap_data.GetErrorMessage();
+  auto& data = *idmap_data;
 
-  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
+  constexpr size_t overlay_string_pool_size = 8U;
+  const auto& target_entries = data->GetTargetEntries();
+  ASSERT_EQ(target_entries.size(), 2U);
+  ASSERT_TARGET_ENTRY(target_entries[0], 0x7f010000, Res_value::TYPE_INT_DEC,
+                      73U);  // integer/int1 -> 73
+  ASSERT_TARGET_ENTRY(target_entries[1], 0x7f02000c, Res_value::TYPE_STRING,
+                      overlay_string_pool_size + 0U);  // string/str1 -> "Hello World"
 
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
-
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 1U);
-
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 8U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0005U);   // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(1), kNoEntry);  // string/policy_signature
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0007U);   // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(3), 0x0008U);   // string/policy_system_vendor
-}
-
-// Overlays should ignore all overlayable restrictions if enforcement of overlayable is disabled.
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsPolicySystemPublicInvalidIgnoreOverlayable) {
-  std::unique_ptr<const Idmap> idmap;
-  std::string target_apk_path = GetTestDataPath() + "/target/target.apk";
-  std::string overlay_apk_path =
-      GetTestDataPath() + "/system-overlay-invalid/system-overlay-invalid.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path,
-              PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_PUBLIC,
-              /* enforce_overlayable */ false, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-
-  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
-  ASSERT_EQ(dataBlocks.size(), 1U);
-
-  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
-
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
-
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 1U);
-
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 9U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 3U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/not_overlayable
-  ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/policy_odm
-  ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_oem
-  ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/other
-  ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_product
-  ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_public
-  ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_signature
-  ASSERT_EQ(types[0]->GetEntry(7), 0x0007U);  // string/policy_system
-  ASSERT_EQ(types[0]->GetEntry(8), 0x0008U);  // string/policy_system_vendor
-}
-
-// Overlays that do not specify a target <overlayable> can overlay resources defined as overlayable.
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsNoDefinedOverlayableAndNoTargetName) {
-  std::unique_ptr<const Idmap> idmap;
-  std::string target_apk_path = GetTestDataPath() + "/target/target-no-overlayable.apk";
-  std::string overlay_apk_path = GetTestDataPath() + "/overlay/overlay-no-name.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_PUBLIC,
-              /* enforce_overlayable */ false, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-
-  const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
-  ASSERT_EQ(dataBlocks.size(), 1U);
-
-  const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
-
-  ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-  ASSERT_EQ(data->GetHeader()->GetTypeCount(), 2U);
-
-  const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-  ASSERT_EQ(types.size(), 2U);
-
-  ASSERT_EQ(types[0]->GetTargetTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-  ASSERT_EQ(types[0]->GetEntryCount(), 1U);
-  ASSERT_EQ(types[0]->GetEntryOffset(), 0U);
-  ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/int1
-
-  ASSERT_EQ(types[1]->GetTargetTypeId(), 0x02U);
-  ASSERT_EQ(types[1]->GetOverlayTypeId(), 0x02U);
-  ASSERT_EQ(types[1]->GetEntryCount(), 4U);
-  ASSERT_EQ(types[1]->GetEntryOffset(), 12U);
-  ASSERT_EQ(types[1]->GetEntry(0), 0x0000U);   // string/str1
-  ASSERT_EQ(types[1]->GetEntry(1), kNoEntry);  // string/str2
-  ASSERT_EQ(types[1]->GetEntry(2), 0x0001U);   // string/str3
-  ASSERT_EQ(types[1]->GetEntry(3), 0x0002U);   // string/str4
-}
-
-// Overlays that are not pre-installed and are not signed with the same signature as the target
-// cannot overlay packages that have not defined overlayable resources.
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsDefaultPoliciesPublicFail) {
-  std::unique_ptr<const Idmap> idmap;
-  std::string target_apk_path = GetTestDataPath() + "/target/target-no-overlayable.apk";
-  std::string overlay_apk_path = GetTestDataPath() + "/overlay/overlay-no-name.apk";
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_PUBLIC,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, IsNull());
-}
-
-// Overlays that are pre-installed or are signed with the same signature as the target can overlay
-// packages that have not defined overlayable resources.
-TEST(IdmapOverlayableTests, CreateIdmapFromApkAssetsDefaultPolicies) {
-  std::unique_ptr<const Idmap> idmap;
-  std::string target_apk_path = GetTestDataPath() + "/target/target-no-overlayable.apk";
-  std::string overlay_apk_path =
-      GetTestDataPath() + "/system-overlay-invalid/system-overlay-invalid.apk";
-
-  auto CheckEntries = [&]() -> void {
-    const std::vector<std::unique_ptr<const IdmapData>>& dataBlocks = idmap->GetData();
-    ASSERT_EQ(dataBlocks.size(), 1U);
-
-    const std::unique_ptr<const IdmapData>& data = dataBlocks[0];
-    ASSERT_EQ(data->GetHeader()->GetTargetPackageId(), 0x7fU);
-    ASSERT_EQ(data->GetHeader()->GetTypeCount(), 1U);
-
-    const std::vector<std::unique_ptr<const IdmapData::TypeEntry>>& types = data->GetTypeEntries();
-    ASSERT_EQ(types.size(), 1U);
-
-    ASSERT_EQ(types[0]->GetTargetTypeId(), 0x02U);
-    ASSERT_EQ(types[0]->GetOverlayTypeId(), 0x01U);
-    ASSERT_EQ(types[0]->GetEntryCount(), 9U);
-    ASSERT_EQ(types[0]->GetEntryOffset(), 3U);
-    ASSERT_EQ(types[0]->GetEntry(0), 0x0000U);  // string/not_overlayable
-    ASSERT_EQ(types[0]->GetEntry(1), 0x0001U);  // string/policy_odm
-    ASSERT_EQ(types[0]->GetEntry(2), 0x0002U);  // string/policy_oem
-    ASSERT_EQ(types[0]->GetEntry(3), 0x0003U);  // string/other
-    ASSERT_EQ(types[0]->GetEntry(4), 0x0004U);  // string/policy_product
-    ASSERT_EQ(types[0]->GetEntry(5), 0x0005U);  // string/policy_public
-    ASSERT_EQ(types[0]->GetEntry(6), 0x0006U);  // string/policy_signature
-    ASSERT_EQ(types[0]->GetEntry(7), 0x0007U);  // string/policy_system
-    ASSERT_EQ(types[0]->GetEntry(8), 0x0008U);  // string/policy_system_vendor
-  };
-
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_SIGNATURE,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-  CheckEntries();
-
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_PRODUCT_PARTITION,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-  CheckEntries();
-
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_SYSTEM_PARTITION,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-  CheckEntries();
-
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_VENDOR_PARTITION,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-  CheckEntries();
-
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_ODM_PARTITION,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-  CheckEntries();
-
-  CreateIdmap(target_apk_path, overlay_apk_path, PolicyFlags::POLICY_OEM_PARTITION,
-              /* enforce_overlayable */ true, &idmap);
-  ASSERT_THAT(idmap, NotNull());
-  CheckEntries();
+  const auto& overlay_entries = data->GetOverlayEntries();
+  ASSERT_EQ(overlay_entries.size(), 0U);
 }
 
 TEST(IdmapTests, FailToCreateIdmapFromApkAssetsIfPathTooLong) {
@@ -602,10 +429,6 @@ class TestVisitor : public Visitor {
     stream_ << "TestVisitor::visit(IdmapData::Header)" << std::endl;
   }
 
-  void visit(const IdmapData::TypeEntry& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapData::TypeEntry)" << std::endl;
-  }
-
  private:
   std::ostream& stream_;
 };
@@ -622,12 +445,10 @@ TEST(IdmapTests, TestVisitor) {
   (*idmap)->accept(&visitor);
 
   ASSERT_EQ(test_stream.str(),
-            "TestVisitor::visit(Idmap)\n"
             "TestVisitor::visit(IdmapHeader)\n"
-            "TestVisitor::visit(IdmapData)\n"
+            "TestVisitor::visit(Idmap)\n"
             "TestVisitor::visit(IdmapData::Header)\n"
-            "TestVisitor::visit(IdmapData::TypeEntry)\n"
-            "TestVisitor::visit(IdmapData::TypeEntry)\n");
+            "TestVisitor::visit(IdmapData)\n");
 }
 
 }  // namespace android::idmap2

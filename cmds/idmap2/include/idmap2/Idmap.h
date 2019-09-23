@@ -41,6 +41,18 @@
  * # idmap file format changelog
  * ## v1
  * - Identical to idmap v1.
+ * ## v2
+ * - Entries are no longer separated by type into type specific data blocks.
+ * - Added overlay-indexed target resource id lookup capabilities.
+ * - Target and overlay entries are stored as a sparse array in the data block. The target entries
+ *   array maps from target resource id to overlay data type and value and the array is sorted by
+ *   target resource id. The overlay entries array maps from overlay resource id to target resource
+ *   id and the array is sorted by overlay resource id. It is important for both arrays to be sorted
+ *   to allow for O(log(number_of_overlaid_resources)) performance when looking up resource
+ *   mappings at runtime.
+ * - Idmap can now encode a type and value to override a resource without needing a table entry.
+ * - A string pool block is included to retrieve the value of strings that do not have a resource
+ *   table entry.
  */
 
 #ifndef IDMAP2_INCLUDE_IDMAP2_IDMAP_H_
@@ -125,7 +137,6 @@ class IdmapHeader {
   friend Idmap;
   DISALLOW_COPY_AND_ASSIGN(IdmapHeader);
 };
-
 class IdmapData {
  public:
   class Header {
@@ -136,60 +147,51 @@ class IdmapData {
       return target_package_id_;
     }
 
-    inline uint16_t GetTypeCount() const {
-      return type_count_;
+    inline PackageId GetOverlayPackageId() const {
+      return overlay_package_id_;
+    }
+
+    inline uint32_t GetTargetEntryCount() const {
+      return target_entry_count;
+    }
+
+    inline uint32_t GetOverlayEntryCount() const {
+      return overlay_entry_count;
+    }
+
+    inline uint32_t GetStringPoolIndexOffset() const {
+      return string_pool_index_offset;
+    }
+
+    inline uint32_t GetStringPoolLength() const {
+      return string_pool_len;
     }
 
     void accept(Visitor* v) const;
 
    private:
-    Header() {
-    }
-
     PackageId target_package_id_;
-    uint16_t type_count_;
+    PackageId overlay_package_id_;
+    uint32_t target_entry_count;
+    uint32_t overlay_entry_count;
+    uint32_t string_pool_index_offset;
+    uint32_t string_pool_len;
+    Header() = default;
 
+    friend Idmap;
     friend IdmapData;
     DISALLOW_COPY_AND_ASSIGN(Header);
   };
 
-  class TypeEntry {
-   public:
-    static std::unique_ptr<const TypeEntry> FromBinaryStream(std::istream& stream);
+  struct TargetEntry {
+    ResourceId target_id;
+    TargetValue::DataType data_type;
+    TargetValue::DataValue data_value;
+  };
 
-    inline TypeId GetTargetTypeId() const {
-      return target_type_id_;
-    }
-
-    inline TypeId GetOverlayTypeId() const {
-      return overlay_type_id_;
-    }
-
-    inline uint16_t GetEntryCount() const {
-      return entries_.size();
-    }
-
-    inline uint16_t GetEntryOffset() const {
-      return entry_offset_;
-    }
-
-    inline EntryId GetEntry(size_t i) const {
-      return i < entries_.size() ? entries_[i] : 0xffffu;
-    }
-
-    void accept(Visitor* v) const;
-
-   private:
-    TypeEntry() {
-    }
-
-    TypeId target_type_id_;
-    TypeId overlay_type_id_;
-    uint16_t entry_offset_;
-    std::vector<EntryId> entries_;
-
-    friend IdmapData;
-    DISALLOW_COPY_AND_ASSIGN(TypeEntry);
+  struct OverlayEntry {
+    ResourceId overlay_id;
+    ResourceId target_id;
   };
 
   static std::unique_ptr<const IdmapData> FromBinaryStream(std::istream& stream);
@@ -201,8 +203,16 @@ class IdmapData {
     return header_;
   }
 
-  inline const std::vector<std::unique_ptr<const TypeEntry>>& GetTypeEntries() const {
-    return type_entries_;
+  inline const std::vector<TargetEntry>& GetTargetEntries() const {
+    return target_entries_;
+  }
+
+  inline const std::vector<OverlayEntry>& GetOverlayEntries() const {
+    return overlay_entries_;
+  }
+
+  inline const void* GetStringPoolData() const {
+    return string_pool_.get();
   }
 
   void accept(Visitor* v) const;
@@ -212,7 +222,9 @@ class IdmapData {
   }
 
   std::unique_ptr<const Header> header_;
-  std::vector<std::unique_ptr<const TypeEntry>> type_entries_;
+  std::vector<TargetEntry> target_entries_;
+  std::vector<OverlayEntry> overlay_entries_;
+  std::unique_ptr<uint8_t[]> string_pool_;
 
   friend Idmap;
   DISALLOW_COPY_AND_ASSIGN(IdmapData);
@@ -262,7 +274,6 @@ class Visitor {
   virtual void visit(const IdmapHeader& header) = 0;
   virtual void visit(const IdmapData& data) = 0;
   virtual void visit(const IdmapData::Header& header) = 0;
-  virtual void visit(const IdmapData::TypeEntry& type_entry) = 0;
 };
 
 }  // namespace android::idmap2

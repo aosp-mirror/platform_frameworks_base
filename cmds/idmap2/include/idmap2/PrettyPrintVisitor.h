@@ -38,13 +38,11 @@ class PrettyPrintVisitor : public Visitor {
   void visit(const IdmapHeader& header) override;
   void visit(const IdmapData& data) override;
   void visit(const IdmapData::Header& header) override;
-  void visit(const IdmapData::TypeEntry& type_entry) override;
 
  private:
   std::ostream& stream_;
   std::unique_ptr<const ApkAssets> target_apk_;
   AssetManager2 target_am_;
-  PackageId last_seen_package_id_;
 };
 
 }  // namespace idmap2

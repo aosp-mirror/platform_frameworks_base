@@ -47,11 +47,21 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   (*idmap)->accept(&visitor);
 
   ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000004: 00000001  version\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000004: 00000002  version\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000008: 76a20829  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: c054fb26  overlay crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021c: 00000000  0x7f010000 -> 0x7f010000 integer/int1\n"),
+  ASSERT_NE(stream.str().find("0000000c: e3c188b6  overlay crc\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000210:       7f  target package id\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000211:       7f  overlay package id\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000212: 00000004  target entry count\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000216: 00000004  overlay entry count\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000021a: 00000008  string pool index offset\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000021e: 000000b4  string pool byte length\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000222: 7f010000  target id: integer/int1\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000226:       07  type: reference (dynamic)\n"),
             std::string::npos);
+  ASSERT_NE(stream.str().find("00000227: 7f010000  value: integer/int1\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000246: 7f010000  overlay id: integer/int1\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000024a: 7f010000  target id: integer/int1\n"), std::string::npos);
 }
 
 TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
@@ -68,10 +78,21 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
   (*idmap)->accept(&visitor);
 
   ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000004: 00000001  version\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000004: 00000002  version\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000008: 00001234  target crc\n"), std::string::npos);
   ASSERT_NE(stream.str().find("0000000c: 00005678  overlay crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021c: 00000000  0x7f020000 -> 0x7f020000\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000210:       7f  target package id\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000211:       7f  overlay package id\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000212: 00000003  target entry count\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000216: 00000003  overlay entry count\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000021a: 00000000  string pool index offset\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000021e: 00000000  string pool byte length\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000222: 7f020000  target id\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000226:       01  type: reference\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000227: 7f020000  value\n"), std::string::npos);
+
+  ASSERT_NE(stream.str().find("0000023d: 7f020000  overlay id\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("00000241: 7f020000  target id\n"), std::string::npos);
 }
 
 }  // namespace android::idmap2

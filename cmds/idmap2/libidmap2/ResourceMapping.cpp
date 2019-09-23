@@ -192,9 +192,14 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
     // Only rewrite resources defined within the overlay package to their corresponding target
     // resource ids at runtime.
     bool rewrite_overlay_reference =
-        (overlay_resource->dataType == Res_value::TYPE_REFERENCE)
+        (overlay_resource->dataType == Res_value::TYPE_REFERENCE ||
+         overlay_resource->dataType == Res_value::TYPE_DYNAMIC_REFERENCE)
             ? overlay_package_id == EXTRACT_PACKAGE(overlay_resource->data)
             : false;
+    
+    if (rewrite_overlay_reference) {
+      overlay_resource->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
+    }
 
     resource_mapping.AddMapping(target_id, overlay_resource->dataType, overlay_resource->data,
                                 rewrite_overlay_reference);
@@ -224,7 +229,7 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMappingLegacy(
     }
 
     resource_mapping.AddMapping(target_resource, Res_value::TYPE_REFERENCE, overlay_resid,
-                                /* rewrite_overlay_reference */ true);
+                                /* rewrite_overlay_reference */ false);
   }
 
   return resource_mapping;
@@ -378,7 +383,8 @@ Result<Unit> ResourceMapping::AddMapping(ResourceId target_resource,
 
   target_map_.insert(std::make_pair(target_resource, TargetValue{data_type, data_value}));
 
-  if (rewrite_overlay_reference && data_type == Res_value::TYPE_REFERENCE) {
+  if (rewrite_overlay_reference &&
+      (data_type == Res_value::TYPE_REFERENCE || data_type == Res_value::TYPE_DYNAMIC_REFERENCE)) {
     overlay_map_.insert(std::make_pair(data_value, target_resource));
   }
 
@@ -394,8 +400,8 @@ void ResourceMapping::RemoveMapping(ResourceId target_resource) {
   const TargetValue value = target_iter->second;
   target_map_.erase(target_iter);
 
-  // Remove rewriting of overlay resource id to target resource id.
-  if (value.data_type != Res_value::TYPE_REFERENCE) {
+  if (value.data_type != Res_value::TYPE_REFERENCE &&
+      value.data_type != Res_value::TYPE_DYNAMIC_REFERENCE) {
     return;
   }
 

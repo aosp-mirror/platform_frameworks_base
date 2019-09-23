@@ -33,6 +33,40 @@ using android::util::Utf16ToUtf8;
 
 namespace android::idmap2::utils {
 
+StringPiece DataTypeToString(uint8_t data_type) {
+  switch (data_type) {
+    case Res_value::TYPE_NULL:
+      return "null";
+    case Res_value::TYPE_REFERENCE:
+      return "reference";
+    case Res_value::TYPE_ATTRIBUTE:
+      return "attribute";
+    case Res_value::TYPE_STRING:
+      return "string";
+    case Res_value::TYPE_FLOAT:
+      return "float";
+    case Res_value::TYPE_DIMENSION:
+      return "dimension";
+    case Res_value::TYPE_FRACTION:
+      return "fraction";
+    case Res_value::TYPE_DYNAMIC_REFERENCE:
+      return "reference (dynamic)";
+    case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
+      return "attribute (dynamic)";
+    case Res_value::TYPE_INT_DEC:
+    case Res_value::TYPE_INT_HEX:
+      return "integer";
+    case Res_value::TYPE_INT_BOOLEAN:
+      return "boolean";
+    case Res_value::TYPE_INT_COLOR_ARGB8:
+    case Res_value::TYPE_INT_COLOR_RGB8:
+    case Res_value::TYPE_INT_COLOR_RGB4:
+      return "color";
+    default:
+      return "unknown";
+  }
+}
+
 Result<std::string> ResToTypeEntryName(const AssetManager2& am, uint32_t resid) {
   AssetManager2::ResourceName name;
   if (!am.GetResourceName(resid, &name)) {
@@ -129,7 +163,7 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const std::string& path,
     info.requiredSystemPropertyName = *result_str;
   }
 
-   if (auto result_str = overlay_it->GetAttributeStringValue("requiredSystemPropertyValue")) {
+  if (auto result_str = overlay_it->GetAttributeStringValue("requiredSystemPropertyValue")) {
     info.requiredSystemPropertyValue = *result_str;
   }
 
