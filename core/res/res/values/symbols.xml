@@ -744,6 +744,7 @@
   <java-symbol type="string" name="config_ethernet_iface_regex" />
   <java-symbol type="array" name="config_ethernet_interfaces" />
   <java-symbol type="array" name="config_wakeonlan_supported_interfaces" />
+  <java-symbol type="string" name="cellbroadcast_default_package" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
