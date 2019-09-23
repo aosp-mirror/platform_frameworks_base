@@ -76,7 +76,7 @@ class SettingsProtoDumpUtil {
                 ConfigSettingsProto.RUNTIME_NATIVE_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
                 ConfigSettingsProto.RUNTIME_NATIVE_BOOT_SETTINGS);
-        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_STORAGE,
+        namespaceToFieldMap.put(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 ConfigSettingsProto.STORAGE_SETTINGS);
         namespaceToFieldMap.put(DeviceConfig.NAMESPACE_SYSTEMUI,
                 ConfigSettingsProto.SYSTEMUI_SETTINGS);
