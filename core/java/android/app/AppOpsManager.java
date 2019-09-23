@@ -853,12 +853,14 @@ public class AppOpsManager {
     public static final int OP_ACCESS_ACCESSIBILITY = 88;
     /** @hide Read the device identifiers (IMEI / MEID, IMSI, SIM / Build serial) */
     public static final int OP_READ_DEVICE_IDENTIFIERS = 89;
+    /** @hide Read location metadata from media */
+    public static final int OP_ACCESS_MEDIA_LOCATION = 90;
     /** @hide Query all apps on device, regardless of declarations in the calling app manifest */
-    public static final int OP_QUERY_ALL_PACKAGES = 90;
+    public static final int OP_QUERY_ALL_PACKAGES = 91;
 
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 91;
+    public static final int _NUM_OP = 92;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1134,6 +1136,8 @@ public class AppOpsManager {
     /** @hide Has a legacy (non-isolated) view of storage. */
     @SystemApi @TestApi
     public static final String OPSTR_LEGACY_STORAGE = "android:legacy_storage";
+    /** @hide Read location metadata from media */
+    public static final String OPSTR_ACCESS_MEDIA_LOCATION = "android:access_media_location";
 
     /** @hide Interact with accessibility. */
     @SystemApi
@@ -1180,6 +1184,7 @@ public class AppOpsManager {
             // Storage
             OP_READ_EXTERNAL_STORAGE,
             OP_WRITE_EXTERNAL_STORAGE,
+            OP_ACCESS_MEDIA_LOCATION,
             // Location
             OP_COARSE_LOCATION,
             OP_FINE_LOCATION,
@@ -1322,6 +1327,7 @@ public class AppOpsManager {
             OP_LEGACY_STORAGE,                  // LEGACY_STORAGE
             OP_ACCESS_ACCESSIBILITY,            // ACCESS_ACCESSIBILITY
             OP_READ_DEVICE_IDENTIFIERS,         // READ_DEVICE_IDENTIFIERS
+            OP_ACCESS_MEDIA_LOCATION,           // ACCESS_MEDIA_LOCATION
             OP_QUERY_ALL_PACKAGES,              // QUERY_ALL_PACKAGES
     };
 
@@ -1419,6 +1425,7 @@ public class AppOpsManager {
             OPSTR_LEGACY_STORAGE,
             OPSTR_ACCESS_ACCESSIBILITY,
             OPSTR_READ_DEVICE_IDENTIFIERS,
+            OPSTR_ACCESS_MEDIA_LOCATION,
             OPSTR_QUERY_ALL_PACKAGES,
     };
 
@@ -1517,6 +1524,7 @@ public class AppOpsManager {
             "LEGACY_STORAGE",
             "ACCESS_ACCESSIBILITY",
             "READ_DEVICE_IDENTIFIERS",
+            "ACCESS_MEDIA_LOCATION",
             "QUERY_ALL_PACKAGES",
     };
 
@@ -1616,6 +1624,7 @@ public class AppOpsManager {
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
             null, // no direct permission for OP_READ_DEVICE_IDENTIFIERS
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
             null, // no permission for OP_QUERY_ALL_PACKAGES
     };
 
@@ -1715,6 +1724,7 @@ public class AppOpsManager {
             null, // LEGACY_STORAGE
             null, // ACCESS_ACCESSIBILITY
             null, // READ_DEVICE_IDENTIFIERS
+            null, // ACCESS_MEDIA_LOCATION
             null, // QUERY_ALL_PACKAGES
     };
 
@@ -1813,6 +1823,7 @@ public class AppOpsManager {
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
             false, // QUERY_ALL_PACKAGES
     };
 
@@ -1910,6 +1921,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // LEGACY_STORAGE
             AppOpsManager.MODE_ALLOWED, // ACCESS_ACCESSIBILITY
             AppOpsManager.MODE_ERRORED, // READ_DEVICE_IDENTIFIERS
+            AppOpsManager.MODE_ALLOWED, // ALLOW_MEDIA_LOCATION
             AppOpsManager.MODE_DEFAULT, // QUERY_ALL_PACKAGES
     };
 
@@ -2011,6 +2023,7 @@ public class AppOpsManager {
             false, // LEGACY_STORAGE
             false, // ACCESS_ACCESSIBILITY
             false, // READ_DEVICE_IDENTIFIERS
+            false, // ACCESS_MEDIA_LOCATION
             false, // QUERY_ALL_PACKAGES
     };
 
