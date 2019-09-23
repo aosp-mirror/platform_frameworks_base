@@ -78,7 +78,10 @@ public class CryptoTestUtils {
             int orderingType,
             ChunksMetadataProto.Chunk... chunks) {
         ChunksMetadataProto.ChunkListing chunkListing = new ChunksMetadataProto.ChunkListing();
-        chunkListing.fingerprintMixerSalt = Arrays.copyOf(fingerprintSalt, fingerprintSalt.length);
+        chunkListing.fingerprintMixerSalt =
+                fingerprintSalt == null
+                        ? null
+                        : Arrays.copyOf(fingerprintSalt, fingerprintSalt.length);
         chunkListing.cipherType = cipherType;
         chunkListing.chunkOrderingType = orderingType;
         chunkListing.chunks = chunks;
