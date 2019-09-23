@@ -569,6 +569,7 @@ void SkiaPipeline::renderOverdraw(const LayerUpdateQueue& layers, const SkRect& 
     // Set up the overdraw canvas.
     SkImageInfo offscreenInfo = SkImageInfo::MakeA8(surface->width(), surface->height());
     sk_sp<SkSurface> offscreen = surface->makeSurface(offscreenInfo);
+    LOG_ALWAYS_FATAL_IF(!offscreen, "Failed to create offscreen SkSurface for overdraw viz.");
     SkOverdrawCanvas overdrawCanvas(offscreen->getCanvas());
 
     // Fake a redraw to replay the draw commands.  This will increment the alpha channel
