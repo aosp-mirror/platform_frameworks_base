@@ -34,6 +34,12 @@ final class ProcfsMemoryUtil {
 
     private static final Pattern RSS_HIGH_WATER_MARK_IN_KILOBYTES =
             Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
+    private static final Pattern RSS_IN_KILOBYTES =
+            Pattern.compile("VmRSS:\\s*(\\d+)\\s*kB");
+    private static final Pattern ANON_RSS_IN_KILOBYTES =
+            Pattern.compile("RssAnon:\\s*(\\d+)\\s*kB");
+    private static final Pattern SWAP_IN_KILOBYTES =
+            Pattern.compile("VmSwap:\\s*(\\d+)\\s*kB");
 
     private ProcfsMemoryUtil() {}
 
@@ -52,16 +58,25 @@ final class ProcfsMemoryUtil {
      */
     @VisibleForTesting
     static int parseVmHWMFromStatus(String contents) {
-        if (contents.isEmpty()) {
-            return 0;
-        }
-        final Matcher matcher = RSS_HIGH_WATER_MARK_IN_KILOBYTES.matcher(contents);
-        try {
-            return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "Failed to parse value", e);
-            return 0;
-        }
+        return tryParseInt(contents, RSS_HIGH_WATER_MARK_IN_KILOBYTES);
+    }
+
+    /**
+     * Reads memory stat of a process from procfs. Returns values of the VmRss, AnonRSS, VmSwap
+     * fields in /proc/pid/status in kilobytes or 0 if not available.
+     */
+    static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
+        final String statusPath = String.format(Locale.US, STATUS_FILE_FMT, pid);
+        return parseMemorySnapshotFromStatus(readFile(statusPath));
+    }
+
+    @VisibleForTesting
+    static MemorySnapshot parseMemorySnapshotFromStatus(String contents) {
+        final MemorySnapshot snapshot = new MemorySnapshot();
+        snapshot.rssInKilobytes = tryParseInt(contents, RSS_IN_KILOBYTES);
+        snapshot.anonRssInKilobytes = tryParseInt(contents, ANON_RSS_IN_KILOBYTES);
+        snapshot.swapInKilobytes = tryParseInt(contents, SWAP_IN_KILOBYTES);
+        return snapshot;
     }
 
     private static String readFile(String path) {
@@ -70,6 +85,29 @@ final class ProcfsMemoryUtil {
             return FileUtils.readTextFile(file, 0 /* max */, null /* ellipsis */);
         } catch (IOException e) {
             return "";
+        }
+    }
+
+    private static int tryParseInt(String contents, Pattern pattern) {
+        if (contents.isEmpty()) {
+            return 0;
+        }
+        final Matcher matcher = pattern.matcher(contents);
+        try {
+            return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse value", e);
+            return 0;
+        }
+    }
+
+    static final class MemorySnapshot {
+        public int rssInKilobytes;
+        public int anonRssInKilobytes;
+        public int swapInKilobytes;
+
+        boolean isEmpty() {
+            return (anonRssInKilobytes + swapInKilobytes) == 0;
         }
     }
 }

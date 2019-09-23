@@ -153,6 +153,9 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.additiveFields = {3},
           .puller =
                   new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
+        // process_memory_snapshot
+        {android::util::PROCESS_MEMORY_SNAPSHOT,
+         {.puller = new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_SNAPSHOT)}},
         // system_ion_heap_size
         {android::util::SYSTEM_ION_HEAP_SIZE,
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_ION_HEAP_SIZE)}},
