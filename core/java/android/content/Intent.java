@@ -4665,6 +4665,59 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_VR_HOME = "android.intent.category.VR_HOME";
+
+    /**
+     * The accessibility shortcut is a global gesture for users with disabilities to trigger an
+     * important for them accessibility feature to help developers determine whether they want to
+     * make their activity a shortcut target.
+     * <p>
+     * An activity of interest to users with accessibility needs may request to be the target of
+     * the accessibility shortcut. It handles intent {@link #ACTION_MAIN} with this category,
+     * which will be dispatched by the system when the user activates the shortcut when it is
+     * configured to point at this target.
+     * </p>
+     * <p>
+     * An activity declared itself to be a target of the shortcut in AndroidManifest.xml. It must
+     * also do two things:
+     * <ul>
+     *     <ol>
+     *         Specify that it handles the <code>android.intent.action.MAIN</code>
+     *         {@link android.content.Intent}
+     *         with category <code>android.intent.category.ACCESSIBILITY_SHORTCUT_TARGET</code>.
+     *     </ol>
+     *     <ol>
+     *         Provide a meta-data entry <code>android.accessibilityshortcut.target</code> in the
+     *         manifest when declaring the activity.
+     *     </ol>
+     * </ul>
+     * If either of these items is missing, the system will ignore the accessibility shortcut
+     * target. Following is an example declaration:
+     * </p>
+     * <pre>
+     * &lt;activity android:name=".MainActivity"
+     * . . .
+     *   &lt;intent-filter&gt;
+     *       &lt;action android:name="android.intent.action.MAIN" /&gt;
+     *       &lt;category android:name="android.intent.category.ACCESSIBILITY_SHORTCUT_TARGET" /&gt;
+     *   &lt;/intent-filter&gt;
+     *   &lt;meta-data android:name="android.accessibilityshortcut.target"
+     *                   android:resource="@xml/accessibilityshortcut" /&gt;
+     * &lt;/activity&gt;
+     * </pre>
+     * <p> This is a sample XML file configuring a accessibility shortcut target: </p>
+     * <pre>
+     * &lt;accessibility-shortcut-target
+     *     android:description="@string/shortcut_target_description"
+     *     android:summary="@string/shortcut_target_summary" /&gt;
+     * </pre>
+     * <p>
+     * Both description and summary are necessary. The system will ignore the accessibility
+     * shortcut target if they are missing.
+     * </p>
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_ACCESSIBILITY_SHORTCUT_TARGET =
+            "android.intent.category.ACCESSIBILITY_SHORTCUT_TARGET";
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Application launch intent categories (see addCategory()).

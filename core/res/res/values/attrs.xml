@@ -3755,6 +3755,16 @@
         <attr name="summary" />
     </declare-styleable>
 
+    <!-- Use <code>accessibility-shortcut-target</code> as the root tag of the XML resource that
+         describes an activity, which is referenced from the
+         <code>android.accessibilityshortcut.target</code> meta-data entry. -->
+    <declare-styleable name="AccessibilityShortcutTarget">
+        <!-- Short description of the target of accessibility shortcut purpose or behavior.-->
+        <attr name="description" />
+        <!-- Brief summary of the target of accessibility shortcut purpose or behavior. -->
+        <attr name="summary" />
+    </declare-styleable>
+
     <!-- Use <code>print-service</code> as the root tag of the XML resource that
          describes an {@link android.printservice.PrintService} service, which is
          referenced from its {@link android.printservice.PrintService#SERVICE_META_DATA}

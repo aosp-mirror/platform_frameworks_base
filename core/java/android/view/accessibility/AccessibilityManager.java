@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
+import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,9 +31,13 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.os.Binder;
@@ -56,6 +61,9 @@ import android.view.accessibility.AccessibilityEvent.EventType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -1253,6 +1261,64 @@ public final class AccessibilityManager {
             } catch (RemoteException re) {
                 re.rethrowFromSystemServer();
             }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the {@link AccessibilityShortcutInfo}s of the installed accessibility shortcut
+     * targets, for specific user.
+     *
+     * @param context The context of the application.
+     * @param userId The user id.
+     * @return A list with {@link AccessibilityShortcutInfo}s.
+     * @hide
+     */
+    @NonNull
+    public List<AccessibilityShortcutInfo> getInstalledAccessibilityShortcutListAsUser(
+            @NonNull Context context, @UserIdInt int userId) {
+        final List<AccessibilityShortcutInfo> shortcutInfos = new ArrayList<>();
+        final int flags = PackageManager.GET_ACTIVITIES
+                | PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        final Intent actionMain = new Intent(Intent.ACTION_MAIN);
+        actionMain.addCategory(Intent.CATEGORY_ACCESSIBILITY_SHORTCUT_TARGET);
+
+        final PackageManager packageManager = context.getPackageManager();
+        final List<ResolveInfo> installedShortcutList =
+                packageManager.queryIntentActivitiesAsUser(actionMain, flags, userId);
+        for (int i = 0; i < installedShortcutList.size(); i++) {
+            final AccessibilityShortcutInfo shortcutInfo =
+                    getShortcutInfo(context, installedShortcutList.get(i));
+            if (shortcutInfo != null) {
+                shortcutInfos.add(shortcutInfo);
+            }
+        }
+        return shortcutInfos;
+    }
+
+    /**
+     * Returns an {@link AccessibilityShortcutInfo} according to the given {@link ResolveInfo} of
+     * an activity.
+     *
+     * @param context The context of the application.
+     * @param resolveInfo The resolve info of an activity.
+     * @return The AccessibilityShortcutInfo.
+     */
+    @Nullable
+    private AccessibilityShortcutInfo getShortcutInfo(@NonNull Context context,
+            @NonNull ResolveInfo resolveInfo) {
+        final ActivityInfo activityInfo = resolveInfo.activityInfo;
+        if (activityInfo == null || activityInfo.metaData == null
+                || activityInfo.metaData.getInt(AccessibilityShortcutInfo.META_DATA) == 0) {
+            return null;
+        }
+        try {
+            return new AccessibilityShortcutInfo(context, activityInfo);
+        } catch (XmlPullParserException | IOException exp) {
+            Log.e(LOG_TAG, "Error while initializing AccessibilityShortcutInfo", exp);
         }
         return null;
     }
