@@ -59,6 +59,16 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
     return JenkinsHashWhiten(hash);
 }
 
+bool filterValues(const Matcher& matcherField, const vector<FieldValue>& values, Value* output) {
+    for (const auto& value : values) {
+        if (value.mField.matches(matcherField)) {
+            (*output) = value.mValue;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>& values,
                   HashableDimensionKey* output) {
     size_t num_matches = 0;

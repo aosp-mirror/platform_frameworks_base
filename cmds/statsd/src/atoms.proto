@@ -3069,9 +3069,9 @@ message PictureInPictureStateChanged {
  *     services/core/java/com/android/server/wm/Session.java
  */
 message OverlayStateChanged {
-    optional int32 uid = 1 [(is_uid) = true];
+    optional int32 uid = 1 [(state_field_option).option = PRIMARY, (is_uid) = true];
 
-    optional string package_name = 2;
+    optional string package_name = 2 [(state_field_option).option = PRIMARY];
 
     optional bool using_alert_window = 3;
 
@@ -3079,7 +3079,7 @@ message OverlayStateChanged {
         ENTERED = 1;
         EXITED = 2;
     }
-    optional State state = 4;
+    optional State state = 4 [(state_field_option).option = EXCLUSIVE];
 }
 
 /*
