@@ -78,6 +78,8 @@ final class SaveUi {
     private static final int THEME_ID_DARK =
             com.android.internal.R.style.Theme_DeviceDefault_Autofill_Save;
 
+    private static final int SCROLL_BAR_DEFAULT_DELAY_BEFORE_FADE_MS = 500;
+
     public interface OnSaveListener {
         void onSave();
         void onCancel(IntentSender listener);
@@ -252,6 +254,8 @@ final class SaveUi {
                         new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT));
                 subtitleContainer.setVisibility(View.VISIBLE);
+                subtitleContainer.setScrollBarDefaultDelayBeforeFade(
+                        SCROLL_BAR_DEFAULT_DELAY_BEFORE_FADE_MS);
             }
             if (sDebug) Slog.d(TAG, "on constructor: title=" + mTitle + ", subTitle=" + mSubTitle);
         }
@@ -429,6 +433,9 @@ final class SaveUi {
                     saveUiView.findViewById(R.id.autofill_save_custom_subtitle);
             subtitleContainer.addView(customSubtitleView);
             subtitleContainer.setVisibility(View.VISIBLE);
+            subtitleContainer.setScrollBarDefaultDelayBeforeFade(
+                    SCROLL_BAR_DEFAULT_DELAY_BEFORE_FADE_MS);
+
             return true;
         } catch (Exception e) {
             Slog.e(TAG, "Error applying custom description. ", e);
