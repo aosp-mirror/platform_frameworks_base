@@ -45,8 +45,6 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
 
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
@@ -250,28 +248,22 @@ public class AppDataRollbackHelperTest {
         dataForRestore.info.getPackages().add(pendingRestore);
         dataForRestore.info.getPackages().add(wasRecentlyRestored);
 
-        Set<Rollback> changed = helper.commitPendingBackupAndRestoreForUser(37,
-                Arrays.asList(dataWithPendingBackup, dataWithRecentRestore, dataForDifferentUser,
-                    dataForRestore));
         InOrder inOrder = Mockito.inOrder(installer);
 
         // Check that pending backup and restore for the same package mutually destroyed each other.
+        assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataWithRecentRestore));
         assertEquals(-1, wasRecentlyRestored.getPendingBackups().indexOf(37));
         assertNull(wasRecentlyRestored.getRestoreInfo(37));
 
         // Check that backup was performed.
+        assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataWithPendingBackup));
         inOrder.verify(installer).snapshotAppData(eq("com.foo"), eq(37), eq(101),
                 eq(Installer.FLAG_STORAGE_CE));
         assertEquals(-1, pendingBackup.getPendingBackups().indexOf(37));
         assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
-        // Check that changed returns correct Rollback.
-        assertEquals(3, changed.size());
-        assertTrue(changed.contains(dataWithPendingBackup));
-        assertTrue(changed.contains(dataWithRecentRestore));
-        assertTrue(changed.contains(dataForRestore));
-
         // Check that restore was performed.
+        assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataForRestore));
         inOrder.verify(installer).restoreAppDataSnapshot(
                 eq("com.abc"), eq(57) /* appId */, eq("seInfo"), eq(37) /* userId */,
                 eq(17239) /* rollbackId */, eq(Installer.FLAG_STORAGE_CE));
