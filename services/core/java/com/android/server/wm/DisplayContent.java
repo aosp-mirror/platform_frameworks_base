@@ -1145,7 +1145,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void initializeDisplayOverrideConfiguration() {
         if (mAcitvityDisplay != null) {
-            mAcitvityDisplay.onInitializeOverrideConfiguration(getRequestedOverrideConfiguration());
+            mAcitvityDisplay.getRequestedOverrideConfiguration()
+                    .updateFrom(getRequestedOverrideConfiguration());
         }
     }
 

@@ -84,8 +84,7 @@ import java.util.ArrayList;
  * Exactly one of these classes per Display in the system. Capable of holding zero or more
  * attached {@link ActivityStack}s.
  */
-class ActivityDisplay extends ConfigurationContainer<ActivityStack>
-        implements WindowContainerListener {
+class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityDisplay" : TAG_ATM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -201,11 +200,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
     }
 
-    @Override
-    public void onInitializeOverrideConfiguration(Configuration config) {
-        getRequestedOverrideConfiguration().updateFrom(config);
-    }
-
     void addChild(ActivityStack stack, int position) {
         if (position == POSITION_BOTTOM) {
             position = 0;
@@ -291,9 +285,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
 
         // Since positionChildAt() is called during the creation process of pinned stacks,
-        // ActivityStack#getStack() can be null. In this special case,
-        // since DisplayContest#positionStackAt() is called in TaskStack#onConfigurationChanged(),
-        // we don't have to call WindowContainerController#positionChildAt() here.
+        // ActivityStack#getStack() can be null.
         if (stack.getTaskStack() != null && mDisplayContent != null) {
             mDisplayContent.positionStackAt(insertPosition,
                     stack.getTaskStack(), includingParents);
@@ -1202,8 +1194,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         // Stacks could be reparented from the removed display to other display. While
         // reparenting the last stack of the removed display, the remove display is ready to be
         // released (no more ActivityStack). But, we cannot release it at that moment or the
-        // related WindowContainer and WindowContainerController will also be removed. So, we
-        // set display as removed after reparenting stack finished.
+        // related WindowContainer will also be removed. So, we set display as removed after
+        // reparenting stack finished.
         final ActivityDisplay toDisplay = mRootActivityContainer.getDefaultDisplay();
         mRootActivityContainer.mStackSupervisor.beginDeferResume();
         try {

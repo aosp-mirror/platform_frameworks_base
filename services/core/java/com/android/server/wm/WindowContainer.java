@@ -106,9 +106,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private final Pools.SynchronizedPool<ForAllWindowsConsumerWrapper> mConsumerWrapperPool =
             new Pools.SynchronizedPool<>(3);
 
-    // The owner/creator for this container. No controller if null.
-    WindowContainerController mController;
-
     // The display this window container is on.
     protected DisplayContent mDisplayContent;
 
@@ -356,11 +353,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mParent != null) {
             mParent.removeChild(this);
         }
-
-        if (mController != null) {
-            setController(null);
-        }
-
     }
 
     /**
@@ -1003,23 +995,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parents.addLast(current);
             current = current.mParent;
         } while (current != null);
-    }
-
-    WindowContainerController getController() {
-        return mController;
-    }
-
-    void setController(WindowContainerController controller) {
-        if (mController != null && controller != null) {
-            throw new IllegalArgumentException("Can't set controller=" + mController
-                    + " for container=" + this + " Already set to=" + mController);
-        }
-        if (controller != null) {
-            controller.setContainer(this);
-        } else if (mController != null) {
-            mController.setContainer(null);
-        }
-        mController = controller;
     }
 
     SurfaceControl.Builder makeSurface() {
