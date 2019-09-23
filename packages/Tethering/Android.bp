@@ -72,6 +72,7 @@ filegroup {
     srcs: [
         "src/com/android/server/connectivity/tethering/EntitlementManager.java",
         "src/com/android/server/connectivity/tethering/TetheringConfiguration.java",
+        "src/com/android/server/connectivity/tethering/UpstreamNetworkMonitor.java",
     ],
 }
 
@@ -84,5 +85,6 @@ filegroup {
         "src/android/net/ip/IpServer.java",
         "src/android/net/ip/RouterAdvertisementDaemon.java",
         "src/android/net/util/InterfaceSet.java",
+        "src/android/net/util/PrefixUtils.java",
     ],
 }
