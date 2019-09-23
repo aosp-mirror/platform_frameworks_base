@@ -370,7 +370,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext = context;
         mBatteryStats = BatteryStatsService.getService();
 
-        int numPhones = TelephonyManager.getDefault().getPhoneCount();
+        int numPhones = TelephonyManager.getDefault().getMaxPhoneCount();
         if (DBG) log("TelephonyRegistry: ctor numPhones=" + numPhones);
         mNumPhones = numPhones;
         mCallState = new int[numPhones];

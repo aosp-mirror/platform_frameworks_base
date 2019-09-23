@@ -2096,13 +2096,26 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean isValidSlotIndex(int slotIndex) {
-        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSimCount();
+        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getMaxPhoneCount();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
-        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getPhoneCount();
+        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getMaxPhoneCount();
+    }
+
+    /**
+     * When getPhoneCount and getMaxPhoneCount return different value, isValidPhoneId being true
+     * doesn't mean the phoneId has a corresponding active slot / logical modem. If a DSDS capable
+     * device is in single SIM mode, phoneId=1 is valid but not active.
+     *
+     * TODO: b/139642279 combine with SubscriptionManager#isValidPhoneId when phone objects
+     * are dynamically allocated instead of always based on getMaxPhoneCount.
+     * @hide
+     */
+    public static boolean isActivePhoneId(int slotIndex) {
+        return slotIndex < TelephonyManager.getDefault().getPhoneCount();
     }
 
     /** @hide */
