@@ -16,7 +16,7 @@ android_robolectric_test {
     name: "BackupEncryptionRoboTests",
     srcs: [
         "src/**/*.java",
-        ":FrameworksServicesRoboShadows",
+//        ":FrameworksServicesRoboShadows",
     ],
     java_resource_dirs: ["config"],
     libs: [
