@@ -167,12 +167,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
+    public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
+            int policyFlags) {
         return 0;
     }
 
     @Override
-    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
+    public KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags) {
         return null;
     }
 
