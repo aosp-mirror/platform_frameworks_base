@@ -19,10 +19,9 @@
 java_sdk_library {
     name: "android.test.mock",
 
-    srcs: [
-        "src/**/*.java",
-        ":framework-all-sources",
-    ],
+    srcs: ["src/**/*.java"],
+    api_srcs: [":framework-all-sources"],
+    libs: ["framework-all"],
 
     api_packages: [
         "android.test.mock",
