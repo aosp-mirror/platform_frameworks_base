@@ -1551,7 +1551,8 @@ public class DevicePolicyManager {
      * scopes will be sent in an {@code ArrayList<String>} extra identified by the
      * {@link #EXTRA_DELEGATION_SCOPES} key.
      *
-     * <p class=”note”> Note: This is a protected intent that can only be sent by the system.</p>
+     * <p class="note"><b>Note:</b> This is a protected intent that can only be sent by the
+     * system.</p>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_APPLICATION_DELEGATION_SCOPES_CHANGED =
@@ -2609,6 +2610,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality. One of {@link #PASSWORD_QUALITY_UNSPECIFIED},
+     *            {@link #PASSWORD_QUALITY_BIOMETRIC_WEAK},
      *            {@link #PASSWORD_QUALITY_SOMETHING}, {@link #PASSWORD_QUALITY_NUMERIC},
      *            {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}, {@link #PASSWORD_QUALITY_ALPHABETIC},
      *            {@link #PASSWORD_QUALITY_ALPHANUMERIC} or {@link #PASSWORD_QUALITY_COMPLEX}.
