@@ -115,15 +115,16 @@ public class CallbackHandlerTest extends SysuiTestCase {
         IconState qs = new IconState(true, 1, "");
         boolean in = true;
         boolean out = true;
-        String typeDescription = "Test 1";
-        String description = "Test 2";
+        CharSequence typeDescription = "Test 1";
+        CharSequence typeDescriptionHtml = "<b>Test 1</b>";
+        CharSequence description = "Test 2";
         int type = TelephonyIcons.ICON_1X;
         int qsType = TelephonyIcons.ICON_1X;
         boolean wide = true;
         int subId = 5;
         boolean roaming = true;
         mHandler.setMobileDataIndicators(status, qs, type, qsType, in, out, typeDescription,
-                description, wide, subId, roaming);
+                typeDescriptionHtml, description, wide, subId, roaming);
         waitForCallbacks();
 
         ArgumentCaptor<IconState> statusArg = ArgumentCaptor.forClass(IconState.class);
@@ -132,14 +133,16 @@ public class CallbackHandlerTest extends SysuiTestCase {
         ArgumentCaptor<Integer> qsTypeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> inArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<String> typeContentArg = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<CharSequence> typeContentArg = ArgumentCaptor.forClass(CharSequence.class);
+        ArgumentCaptor<CharSequence> typeContentHtmlArg =
+                ArgumentCaptor.forClass(CharSequence.class);
+        ArgumentCaptor<CharSequence> descArg = ArgumentCaptor.forClass(CharSequence.class);
         ArgumentCaptor<Boolean> wideArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Integer> subIdArg = ArgumentCaptor.forClass(Integer.class);
         Mockito.verify(mSignalCallback).setMobileDataIndicators(statusArg.capture(),
                 qsArg.capture(), typeIconArg.capture(), qsTypeIconArg.capture(), inArg.capture(),
-                outArg.capture(), typeContentArg.capture(), descArg.capture(), wideArg.capture(),
-                subIdArg.capture(), eq(roaming));
+                outArg.capture(), typeContentArg.capture(), typeContentHtmlArg.capture(),
+                descArg.capture(), wideArg.capture(), subIdArg.capture(), eq(roaming));
         assertEquals(status, statusArg.getValue());
         assertEquals(qs, qsArg.getValue());
         assertEquals(type, (int) typeIconArg.getValue());
@@ -147,6 +150,7 @@ public class CallbackHandlerTest extends SysuiTestCase {
         assertEquals(in, (boolean) inArg.getValue());
         assertEquals(out, (boolean) outArg.getValue());
         assertEquals(typeDescription, typeContentArg.getValue());
+        assertEquals(typeDescriptionHtml, typeContentHtmlArg.getValue());
         assertEquals(description, descArg.getValue());
         assertEquals(wide, (boolean) wideArg.getValue());
         assertEquals(subId, (int) subIdArg.getValue());
