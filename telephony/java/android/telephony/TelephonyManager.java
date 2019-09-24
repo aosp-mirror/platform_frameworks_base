@@ -2449,41 +2449,37 @@ public class TelephonyManager {
      * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
      */
     public String getNetworkCountryIso() {
-        return getNetworkCountryIsoForPhone(getPhoneId());
+        return getNetworkCountryIso(getPhoneId());
     }
 
     /**
-     * Returns the ISO country code equivalent of the MCC (Mobile Country Code) of the current
+     * Returns the ISO-3166 country code equivalent of the MCC (Mobile Country Code) of the current
      * registered operator or the cell nearby, if available.
      * <p>
+     * The ISO-3166 country code is provided in lowercase 2 character format.
+     * <p>
+     * Note: In multi-sim, this returns a shared emergency network country iso from other
+     * subscription if the subscription used to create the TelephonyManager doesn't camp on
+     * a network due to some reason (e.g. pin/puk locked), or sim is absent in the corresponding
+     * slot.
      * Note: Result may be unreliable on CDMA networks (use {@link #getPhoneType()} to determine
      * if on a CDMA network).
-     *
-     * @param subId for which Network CountryIso is returned
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public String getNetworkCountryIso(int subId) {
-        return getNetworkCountryIsoForPhone(getPhoneId(subId));
-    }
-
-    /**
-     * Returns the ISO country code equivalent of the current registered
-     * operator's MCC (Mobile Country Code) of a subscription.
      * <p>
-     * Availability: Only when user is registered to a network. Result may be
-     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
-     * on a CDMA network).
      *
-     * @param phoneId for which Network CountryIso is returned
+     * @param slotIndex the SIM slot index to get network country ISO.
+     *
+     * @return the lowercase 2 character ISO-3166 country code, or empty string if not available.
+     *
+     * {@hide}
      */
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public String getNetworkCountryIsoForPhone(int phoneId) {
+    @SystemApi
+    @TestApi
+    @NonNull
+    public String getNetworkCountryIso(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony == null) return "";
-            return telephony.getNetworkCountryIsoForPhone(phoneId);
+            return telephony.getNetworkCountryIsoForPhone(slotIndex);
         } catch (RemoteException ex) {
             return "";
         }
