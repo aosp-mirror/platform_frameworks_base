@@ -46,12 +46,11 @@ enum {
 #define DEFAULT_BYTES_SIZE_LIMIT (96 * 1024 * 1024)        // 96MB
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
-// Skip these sections for dumpstate only. Dumpstate allows 10s max for each service to dump.
+// Skip these sections (for dumpstate only)
 // Skip logs (1100 - 1108) and traces (1200 - 1202) because they are already in the bug report.
-// Skip 3018 because it takes too long.
-#define SKIPPED_SECTIONS { 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, /* Logs */ \
-                           1200, 1201, 1202, /* Native, hal, java traces */ \
-                           3018  /* "meminfo -a --proto" */ }
+#define SKIPPED_DUMPSTATE_SECTIONS { \
+            1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, /* Logs */ \
+            1200, 1201, 1202, /* Native, hal, java traces */ }
 
 namespace android {
 namespace os {
@@ -307,6 +306,39 @@ Status IncidentService::reportIncidentToStream(const IncidentReportArgs& args,
     return Status::ok();
 }
 
+Status IncidentService::reportIncidentToDumpstate(const unique_fd& stream,
+        const sp<IIncidentReportStatusListener>& listener) {
+    uid_t caller = IPCThreadState::self()->getCallingUid();
+    if (caller != AID_ROOT && caller != AID_SHELL) {
+        ALOGW("Calling uid %d does not have permission: only ROOT or SHELL allowed", caller);
+        return Status::fromExceptionCode(Status::EX_SECURITY, "Only ROOT or SHELL allowed");
+    }
+
+    ALOGD("Stream incident report to dumpstate");
+    IncidentReportArgs incidentArgs;
+    // Privacy policy for dumpstate incident reports is always EXPLICIT.
+    incidentArgs.setPrivacyPolicy(PRIVACY_POLICY_EXPLICIT);
+
+    int skipped[] = SKIPPED_DUMPSTATE_SECTIONS;
+    for (const Section** section = SECTION_LIST; *section; section++) {
+        const int id = (*section)->id;
+        if (std::find(std::begin(skipped), std::end(skipped), id) == std::end(skipped)
+                && !section_requires_specific_mention(id)) {
+            incidentArgs.addSection(id);
+        }
+    }
+
+    // The ReportRequest takes ownership of the fd, so we need to dup it.
+    int fd = dup(stream.get());
+    if (fd < 0) {
+        return Status::fromStatusT(-errno);
+    }
+
+    mHandler->scheduleStreamingReport(incidentArgs, listener, fd);
+
+    return Status::ok();
+}
+
 Status IncidentService::systemRunning() {
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
@@ -548,43 +580,6 @@ status_t IncidentService::cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<Str
     } else {
         return cmd_help(out);
     }
-    return NO_ERROR;
-}
-
-status_t IncidentService::dump(int fd, const Vector<String16>& args) {
-    if (std::find(args.begin(), args.end(), String16("--proto")) == args.end()) {
-        ALOGD("Skip dumping incident. Only proto format is supported.");
-        dprintf(fd, "Incident dump only supports proto version.\n");
-        return NO_ERROR;
-    }
-
-    ALOGD("Dump incident proto");
-    IncidentReportArgs incidentArgs;
-    incidentArgs.setPrivacyPolicy(PRIVACY_POLICY_EXPLICIT);
-    int skipped[] = SKIPPED_SECTIONS;
-    for (const Section** section = SECTION_LIST; *section; section++) {
-        const int id = (*section)->id;
-        if (std::find(std::begin(skipped), std::end(skipped), id) == std::end(skipped)
-                && !section_requires_specific_mention(id)) {
-            incidentArgs.addSection(id);
-        }
-    }
-
-    if (!checkIncidentPermissions(incidentArgs).isOk()) {
-        return PERMISSION_DENIED;
-    }
-
-    // The ReportRequest takes ownership of the fd, so we need to dup it.
-    int fd1 = dup(fd);
-    if (fd1 < 0) {
-        return -errno;
-    }
-
-    // TODO: Remove this.  Someone even dumpstate, wanting to get an incident report
-    // should use the API.  That will take making dumpstated call the API, which is a
-    // good thing.  It also means it won't be subject to the timeout.
-    mHandler->scheduleStreamingReport(incidentArgs, NULL, fd1);
-
     return NO_ERROR;
 }
 
