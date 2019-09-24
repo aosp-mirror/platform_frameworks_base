@@ -58,8 +58,8 @@ import java.util.concurrent.Executors;
  * Abstract base class for the TextClassifier service.
  *
  * <p>A TextClassifier service provides text classification related features for the system.
- * The system's default TextClassifierService is configured in
- * {@code config_defaultTextClassifierService}. If this config has no value, a
+ * The system's default TextClassifierService provider is configured in
+ * {@code config_defaultTextClassifierPackage}. If this config has no value, a
  * {@link android.view.textclassifier.TextClassifierImpl} is loaded in the calling app's process.
  *
  * <p>See: {@link TextClassifier}.
