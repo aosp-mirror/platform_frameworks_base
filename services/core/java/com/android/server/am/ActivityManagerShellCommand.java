@@ -1016,18 +1016,23 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runBugReport(PrintWriter pw) throws RemoteException {
         String opt;
-        int bugreportType = ActivityManager.BUGREPORT_OPTION_FULL;
+        boolean fullBugreport = true;
         while ((opt=getNextOption()) != null) {
             if (opt.equals("--progress")) {
-                bugreportType = ActivityManager.BUGREPORT_OPTION_INTERACTIVE;
+                fullBugreport = false;
+                mInterface.requestInteractiveBugReport();
             } else if (opt.equals("--telephony")) {
-                bugreportType = ActivityManager.BUGREPORT_OPTION_TELEPHONY;
+                fullBugreport = false;
+                // no title and description specified
+                mInterface.requestTelephonyBugReport("" /* no title */, "" /* no descriptions */);
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
             }
         }
-        mInterface.requestBugReport(bugreportType);
+        if (fullBugreport) {
+            mInterface.requestFullBugReport();
+        }
         pw.println("Your lovely bug report is being created; please be patient.");
         return 0;
     }

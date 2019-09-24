@@ -7389,8 +7389,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long callingIdentity = mInjector.binderClearCallingIdentity();
         try {
-            mInjector.getIActivityManager().requestBugReport(
-                    ActivityManager.BUGREPORT_OPTION_REMOTE);
+            mInjector.getIActivityManager().requestRemoteBugReport();
 
             mRemoteBugreportServiceIsActive.set(true);
             mRemoteBugreportSharingAccepted.set(false);

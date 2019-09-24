@@ -665,8 +665,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         // Take an "interactive" bugreport.
                         MetricsLogger.action(mContext,
                                 MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE);
-                        ActivityManager.getService().requestBugReport(
-                                ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
+                        ActivityManager.getService().requestInteractiveBugReport();
                     } catch (RemoteException e) {
                     }
                 }
@@ -683,8 +682,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             try {
                 // Take a "full" bugreport.
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_BUGREPORT_FROM_POWER_MENU_FULL);
-                ActivityManager.getService().requestBugReport(
-                        ActivityManager.BUGREPORT_OPTION_FULL);
+                ActivityManager.getService().requestFullBugReport();
             } catch (RemoteException e) {
             }
             return false;
