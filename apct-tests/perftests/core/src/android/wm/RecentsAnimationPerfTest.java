@@ -39,7 +39,7 @@ import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.ManualBenchmarkState.ManualBenchmarkTest;
 import android.perftests.utils.PerfManualStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 import android.util.Pair;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
@@ -77,8 +77,8 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
 
     @Rule
-    public final ActivityTestRule<StubActivity> mActivityRule = new ActivityTestRule<>(
-            StubActivity.class, false /* initialTouchMode */, false /* launchActivity */);
+    public final ActivityTestRule<PerfTestActivity> mActivityRule = new ActivityTestRule<>(
+            PerfTestActivity.class, false /* initialTouchMode */, false /* launchActivity */);
 
     private long mMeasuredTimeNs;
     private LifecycleListener mLifecycleListener;

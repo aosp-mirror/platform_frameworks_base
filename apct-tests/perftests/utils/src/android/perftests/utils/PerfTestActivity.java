@@ -20,11 +20,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-public class StubActivity extends Activity {
+public class PerfTestActivity extends Activity {
     public static Intent createLaunchIntent(Context context) {
         final Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setClass(context, StubActivity.class);
+        intent.setClass(context, PerfTestActivity.class);
         return intent;
     }
 }

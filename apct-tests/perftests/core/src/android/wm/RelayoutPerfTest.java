@@ -24,7 +24,7 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.perftests.utils.StubActivity;
+import android.perftests.utils.PerfTestActivity;
 import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.IWindow;
@@ -57,8 +57,8 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
     public final PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
     @Rule
-    public final ActivityTestRule<StubActivity> mActivityRule =
-            new ActivityTestRule<>(StubActivity.class);
+    public final ActivityTestRule<PerfTestActivity> mActivityRule =
+            new ActivityTestRule<>(PerfTestActivity.class);
 
     /** This is only a placement to match the input parameters from {@link #getParameters}. */
     @Parameterized.Parameter(0)
