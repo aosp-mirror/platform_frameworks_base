@@ -1729,10 +1729,13 @@ public class UsageStatsService extends SystemService implements
         public void registerAppUsageLimitObserver(int observerId, String[] packages,
                 long timeLimitMs, long timeUsedMs, PendingIntent callbackIntent,
                 String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
+            final DevicePolicyManagerInternal dpmInternal = getDpmInternal();
             if (!hasPermissions(callingPackage,
-                    Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)) {
-                throw new SecurityException("Caller doesn't have both SUSPEND_APPS and "
-                        + "OBSERVE_APP_USAGE permissions");
+                    Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)
+                    && (dpmInternal != null && !dpmInternal.isActiveSupervisionApp(callingUid))) {
+                throw new SecurityException("Caller must be the active supervision app or "
+                        + "it must have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions");
             }
 
             if (packages == null || packages.length == 0) {
@@ -1741,7 +1744,6 @@ public class UsageStatsService extends SystemService implements
             if (callbackIntent == null && timeUsedMs < timeLimitMs) {
                 throw new NullPointerException("callbackIntent can't be null");
             }
-            final int callingUid = Binder.getCallingUid();
             final int userId = UserHandle.getUserId(callingUid);
             final long token = Binder.clearCallingIdentity();
             try {
@@ -1754,13 +1756,15 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public void unregisterAppUsageLimitObserver(int observerId, String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
+            final DevicePolicyManagerInternal dpmInternal = getDpmInternal();
             if (!hasPermissions(callingPackage,
-                    Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)) {
-                throw new SecurityException("Caller doesn't have both SUSPEND_APPS and "
-                        + "OBSERVE_APP_USAGE permissions");
+                    Manifest.permission.SUSPEND_APPS, Manifest.permission.OBSERVE_APP_USAGE)
+                    && (dpmInternal != null && !dpmInternal.isActiveSupervisionApp(callingUid))) {
+                throw new SecurityException("Caller must be the active supervision app or "
+                        + "it must have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions");
             }
 
-            final int callingUid = Binder.getCallingUid();
             final int userId = UserHandle.getUserId(callingUid);
             final long token = Binder.clearCallingIdentity();
             try {
