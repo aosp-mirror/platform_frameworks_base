@@ -709,7 +709,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         public void binderDied() {
             synchronized (AppOpsService.this) {
                 for (int i=mStartedOps.size()-1; i>=0; i--) {
-                    finishOperationLocked(mStartedOps.get(i), /*finishNested*/ true);
+                    final Op op = mStartedOps.get(i);
+                    finishOperationLocked(op, /*finishNested*/ true);
+                    if (op.startNesting <= 0) {
+                        scheduleOpActiveChangedIfNeededLocked(op.op, op.uidState.uid,
+                                op.packageName, false);
+                    }
                 }
                 mClients.remove(mAppToken);
             }
