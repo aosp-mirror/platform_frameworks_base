@@ -1163,9 +1163,9 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
         setenv("ANDROID_ROOT", rootDir, 1);
     }
 
-    const char* runtimeRootDir = getenv("ANDROID_RUNTIME_ROOT");
-    if (runtimeRootDir == NULL) {
-        LOG_FATAL("No runtime directory specified with ANDROID_RUNTIME_ROOT environment variable.");
+    const char* artRootDir = getenv("ANDROID_ART_ROOT");
+    if (artRootDir == NULL) {
+        LOG_FATAL("No ART directory specified with ANDROID_ART_ROOT environment variable.");
         return;
     }
 
