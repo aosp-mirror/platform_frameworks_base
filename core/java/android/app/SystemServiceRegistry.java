@@ -152,6 +152,7 @@ import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
 import android.os.storage.StorageManager;
+import android.os.telephony.TelephonyRegistryManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -605,6 +606,13 @@ public final class SystemServiceRegistry {
             public TelephonyManager createService(ContextImpl ctx) {
                 return new TelephonyManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.TELEPHONY_REGISTRY_SERVICE, TelephonyRegistryManager.class,
+            new CachedServiceFetcher<TelephonyRegistryManager>() {
+                @Override
+                public TelephonyRegistryManager createService(ContextImpl ctx) {
+                    return new TelephonyRegistryManager();
+                }});
 
         registerService(Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class,
                 new CachedServiceFetcher<SubscriptionManager>() {

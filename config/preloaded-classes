@@ -4838,7 +4838,6 @@ com.android.internal.telephony.PhoneConstantConversions
 com.android.internal.telephony.PhoneConstants$DataState
 com.android.internal.telephony.PhoneConstants$State
 com.android.internal.telephony.PhoneFactory
-com.android.internal.telephony.PhoneInternalInterface$DataActivityState
 com.android.internal.telephony.PhoneInternalInterface
 com.android.internal.telephony.PhoneNotifier
 com.android.internal.telephony.PhoneStateIntentReceiver
