@@ -92,7 +92,7 @@ public class UsbPermissionActivity extends AlertActivity
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
         } else {
             boolean hasRecordPermission =
-                    PermissionChecker.checkPermission(
+                    PermissionChecker.checkPermissionForPreflight(
                             this, android.Manifest.permission.RECORD_AUDIO, -1, aInfo.uid,
                             mPackageName)
                             == android.content.pm.PackageManager.PERMISSION_GRANTED;
