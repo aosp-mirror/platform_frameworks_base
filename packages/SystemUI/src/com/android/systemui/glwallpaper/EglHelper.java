@@ -63,6 +63,7 @@ public class EglHelper {
     // Below two constants make drawing at low priority, so other things can preempt our drawing.
     private static final int EGL_CONTEXT_PRIORITY_LEVEL_IMG = 0x3100;
     private static final int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
+    private static final boolean DEBUG = true;
 
     private EGLDisplay mEglDisplay;
     private EGLConfig mEglConfig;
@@ -146,6 +147,10 @@ public class EglHelper {
      * @return true if EglSurface is ready.
      */
     public boolean createEglSurface(SurfaceHolder surfaceHolder) {
+        if (DEBUG) {
+            Log.d(TAG, "createEglSurface start");
+        }
+
         if (hasEglDisplay()) {
             mEglSurface = eglCreateWindowSurface(mEglDisplay, mEglConfig, surfaceHolder, null, 0);
         } else {
@@ -163,6 +168,9 @@ public class EglHelper {
             return false;
         }
 
+        if (DEBUG) {
+            Log.d(TAG, "createEglSurface done");
+        }
         return true;
     }
 
@@ -190,6 +198,10 @@ public class EglHelper {
      * @return true if EglContext is ready.
      */
     public boolean createEglContext() {
+        if (DEBUG) {
+            Log.d(TAG, "createEglContext start");
+        }
+
         int[] attrib_list = new int[] {EGL_CONTEXT_CLIENT_VERSION, 2,
                 EGL_CONTEXT_PRIORITY_LEVEL_IMG, EGL_CONTEXT_PRIORITY_LOW_IMG, EGL_NONE};
         if (hasEglDisplay()) {
@@ -202,6 +214,10 @@ public class EglHelper {
         if (mEglContext == EGL_NO_CONTEXT) {
             Log.w(TAG, "eglCreateContext failed: " + GLUtils.getEGLErrorString(eglGetError()));
             return false;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "createEglContext done");
         }
         return true;
     }
