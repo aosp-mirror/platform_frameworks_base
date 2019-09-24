@@ -31,20 +31,33 @@ import com.android.internal.os.KernelSingleUidTimeReader.Injector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Collection;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class KernelSingleUidTimeReaderTest {
     private final static int TEST_UID = 2222;
     private final static int TEST_FREQ_COUNT = 5;
 
     private KernelSingleUidTimeReader mReader;
     private TestInjector mInjector;
+    protected boolean mUseBpf;
+
+    @Parameters(name="useBpf={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] { {true}, {false} });
+    }
+
+    public KernelSingleUidTimeReaderTest(boolean useBpf) {
+        mUseBpf = useBpf;
+    }
 
     @Before
     public void setUp() {
@@ -273,6 +286,7 @@ public class KernelSingleUidTimeReaderTest {
 
     class TestInjector extends Injector {
         private byte[] mData;
+        private long[] mBpfData;
         private boolean mThrowExcpetion;
 
         @Override
@@ -284,6 +298,14 @@ public class KernelSingleUidTimeReaderTest {
             }
         }
 
+        @Override
+        public long[] readBpfData(int uid) {
+            if (!mUseBpf || mBpfData == null) {
+                return new long[0];
+            }
+            return mBpfData;
+        }
+
         public void setData(long[] cpuTimes) {
             final ByteBuffer buffer = ByteBuffer.allocate(cpuTimes.length * Long.BYTES);
             buffer.order(ByteOrder.nativeOrder());
@@ -291,6 +313,7 @@ public class KernelSingleUidTimeReaderTest {
                 buffer.putLong(time / 10);
             }
             mData = buffer.array();
+            mBpfData = cpuTimes.clone();
         }
 
         public void letReadDataThrowException(boolean throwException) {
