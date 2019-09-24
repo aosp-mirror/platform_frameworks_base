@@ -59,13 +59,23 @@ public class WifiScanner {
     /** 5 GHz band excluding DFS channels */
     public static final int WIFI_BAND_5_GHZ = 2;            /* 5 GHz band without DFS channels */
     /** DFS channels from 5 GHz band only */
-    public static final int WIFI_BAND_5_GHZ_DFS_ONLY  = 4;  /* 5 GHz band with DFS channels */
+    public static final int WIFI_BAND_5_GHZ_DFS_ONLY  = 4;  /* 5 GHz band DFS channels */
+    /**
+     * 2.4Ghz band + DFS channels from 5 GHz band only
+     * @hide
+     */
+    public static final int WIFI_BAND_24_GHZ_WITH_5GHZ_DFS  = 5;
     /** 5 GHz band including DFS channels */
     public static final int WIFI_BAND_5_GHZ_WITH_DFS  = 6;  /* 5 GHz band with DFS channels */
     /** Both 2.4 GHz band and 5 GHz band; no DFS channels */
     public static final int WIFI_BAND_BOTH = 3;             /* both bands without DFS channels */
     /** Both 2.4 GHz band and 5 GHz band; with DFS channels */
     public static final int WIFI_BAND_BOTH_WITH_DFS = 7;    /* both bands with DFS channels */
+    /**
+     * Max band value
+     * @hide
+     */
+    public static final int WIFI_BAND_MAX = 8;
 
     /** Minimum supported scanning period */
     public static final int MIN_SCAN_PERIOD_MS = 1000;      /* minimum supported period */
