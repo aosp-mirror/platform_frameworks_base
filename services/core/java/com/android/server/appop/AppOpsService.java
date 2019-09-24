@@ -708,7 +708,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     final Op op = mStartedOps.get(i);
                     finishOperationLocked(op, /*finishNested*/ true);
                     if (op.startNesting <= 0) {
-                        scheduleOpActiveChangedIfNeededLocked(op.op, op.uid, op.packageName, false);
+                        scheduleOpActiveChangedIfNeededLocked(op.op, op.uidState.uid,
+                                op.packageName, false);
                     }
                 }
                 mClients.remove(mAppToken);
