@@ -19,8 +19,24 @@ package android.perftests.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.view.WindowManager;
 
+/**
+ * A simple activity used for testing, e.g. performance of activity switching, or as a base
+ * container of testing view.
+ */
 public class PerfTestActivity extends Activity {
+    public static final String INTENT_EXTRA_KEEP_SCREEN_ON = "keep_screen_on";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getIntent().getBooleanExtra(INTENT_EXTRA_KEEP_SCREEN_ON, false)) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
     public static Intent createLaunchIntent(Context context) {
         final Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
