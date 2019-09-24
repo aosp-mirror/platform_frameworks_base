@@ -1858,25 +1858,27 @@ final class ActivityRecord extends ConfigurationContainer {
         // implied that the current finishing activity should be added into stopping list rather
         // than destroy immediately.
         final boolean isNextNotYetVisible = next != null && (!next.nowVisible || !next.visible);
-        final ActivityStack stack = getActivityStack();
-        final boolean notFocusedStack = stack != mRootActivityContainer.getTopDisplayFocusedStack();
+        final boolean notGlobalFocusedStack =
+                getActivityStack() != mRootActivityContainer.getTopDisplayFocusedStack();
         if (isVisible && isNextNotYetVisible) {
+            // Add this activity to the list of stopping activities. It will be processed and
+            // destroyed when the next activity reports idle.
             addToStopping(false /* scheduleIdle */, false /* idleDelayed */,
                     "completeFinishing");
-            if (DEBUG_STATES) {
-                Slog.v(TAG_STATES, "Moving to STOPPING: " + this + " (finish requested)");
-            }
             setState(STOPPING, "completeFinishing");
-            if (notFocusedStack) {
+            if (notGlobalFocusedStack) {
+                // Ensuring visibility and configuration only for non-focused stacks since this
+                // method call is relatively expensive and not necessary for focused stacks.
                 mRootActivityContainer.ensureVisibilityAndConfig(next, getDisplayId(),
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
-        } else if (isVisible && isState(PAUSED) && getActivityStack().isFocusedStackOnDisplay()
-                && !inPinnedWindowingMode()) {
-            // TODO(b/137329632): Currently non-focused stack is handled differently.
-            addToFinishingAndWaitForIdle();
+        } else if (addToFinishingAndWaitForIdle()) {
+            // We added this activity to the finishing list and something else is becoming resumed.
+            // The activity will complete finishing when the next activity reports idle. No need to
+            // do anything else here.
         } else {
-            // Not waiting for the next one to become visible - finish right away.
+            // Not waiting for the next one to become visible, and nothing else will be resumed in
+            // place of this activity - requesting destruction right away.
             activityRemoved = destroyIfPossible(reason);
         }
 
@@ -1933,13 +1935,20 @@ final class ActivityRecord extends ConfigurationContainer {
         return activityRemoved;
     }
 
+    /**
+     * Add this activity to the list of finishing and trigger resuming of activities in focused
+     * stacks.
+     * @return {@code true} if some other activity is being resumed as a result of this call.
+     */
     @VisibleForTesting
-    void addToFinishingAndWaitForIdle() {
+    boolean addToFinishingAndWaitForIdle() {
         if (DEBUG_STATES) Slog.v(TAG, "Enqueueing pending finish: " + this);
         setState(FINISHING, "addToFinishingAndWaitForIdle");
-        mStackSupervisor.mFinishingActivities.add(this);
+        if (!mStackSupervisor.mFinishingActivities.contains(this)) {
+            mStackSupervisor.mFinishingActivities.add(this);
+        }
         resumeKeyDispatchingLocked();
-        mRootActivityContainer.resumeFocusedStacksTopActivities();
+        return mRootActivityContainer.resumeFocusedStacksTopActivities();
     }
 
     /**
