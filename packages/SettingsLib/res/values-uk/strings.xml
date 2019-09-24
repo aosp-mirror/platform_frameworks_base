@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Неможливо здійснити сканування мереж"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Немає"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Збережено"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Від’єднано"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Вимкнено"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Помилка конфігурації IP-адреси"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Не під’єднано через низьку якість мережі"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Доступ через %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Торкніться, щоб увійти"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Під’єднано, але немає доступу до Інтернету"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Обмежене з’єднання"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Немає Інтернету"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Потрібно ввійти в обліковий запис"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Точка доступу тимчасово переповнена"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> під’єднано (без медіа), заряд акумулятора – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> під’єднано (без телефона й медіа), заряд акумулятора – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активовано, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряду акумулятора"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Активний. Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> заряду акумулятора, П: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> заряду акумулятора"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряду акумулятора"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"Л: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> заряду акумулятора, П: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> заряду акумулятора"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активовано"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Звук медіа-файлів"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонні дзвінки"</string>
@@ -204,13 +202,13 @@
     <string name="tethering_settings_not_available" msgid="6765770438438291012">"Цей користувач не може налаштовувати режим модема"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Цей користувач не може налаштовувати назву точки доступу"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Налагодження USB"</string>
-    <string name="enable_adb_summary" msgid="4881186971746056635">"Увімк. режим налагодження, коли телефон підключено через USB"</string>
+    <string name="enable_adb_summary" msgid="4881186971746056635">"Вмикати налагодження, коли телефон підключено через USB"</string>
     <string name="clear_adb_keys" msgid="4038889221503122743">"Скасувати доступ до налагодження USB"</string>
     <string name="bugreport_in_power" msgid="7923901846375587241">"Ярлик звіту про помилки"</string>
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"Показувати в меню живлення кнопку створення звіту про помилки"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"Залишати активним"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Екран не засинатиме під час заряджання"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Увімкнути журнал відстеження інтерфейсу Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Журнал інтерфейсу Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Отримання пакетів Bluetooth. (Змінивши це налаштування, увімкніть Bluetooth.)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Розблокування виробником"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Дозволити розблокування завантажувача"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Мережі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертифікація бездрот. екрана"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Докладний запис у журнал Wi-Fi"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Зменшити радіус пошуку мереж Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Не вимикати мобільне передавання даних"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратне прискорення під час використання телефона в режимі модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показувати пристрої Bluetooth без назв"</string>
@@ -240,7 +239,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Активувати LDAC для аудіо Bluetooth\nВибір кодека: якість відтворення"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Трансляція: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Приватна DNS"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Виберіть режим \"Приватна DNS\""</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Режим приватної системи DNS"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Вимкнено"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматично"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Ім’я хосту приватного постачальника послуг DNS"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не вдалося під’єднатися"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Зменшує споживання заряду акумулятора й підвищує ефективність роботи мережі"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"З тарифікацією трафіку"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без тарифікації трафіку"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Розміри буфера журналу"</string>
@@ -282,7 +282,7 @@
     <string name="debug_app_set" msgid="2063077997870280017">"Програма для налагодження: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Вибір додатка"</string>
     <string name="no_application" msgid="2813387563129153880">"Нічого"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Зачекайте на налагоджувач"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Очікування налагоджувача"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Додаток очікує підключення налагоджувача"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Ввід"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Рисування"</string>
@@ -314,7 +314,7 @@
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Застосовувати макет письма справа наліво для всіх мов"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Примус. запустити 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Увімкнути 4x MSAA в програмах OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="505954950474595172">"Налагодити операції непрямокутної обрізки"</string>
+    <string name="show_non_rect_clip" msgid="505954950474595172">"Налагодити непрямокутну обрізку"</string>
     <string name="track_frame_time" msgid="6094365083096851167">"Обробка HWUI за профілем"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Увімкнути шари налагодження ГП"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Дозвольте завантажувати шари налагодження ГП для додатків налагодження"</string>
@@ -345,7 +345,7 @@
     <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Завантаження…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Насичений (за умовчанням)"</item>
-    <item msgid="8446070607501413455">"Природний"</item>
+    <item msgid="8446070607501413455">"Природні"</item>
     <item msgid="6553408765810699025">"Стандартний"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
@@ -357,8 +357,8 @@
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивний додаток. Торкніться, щоб активувати."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активний додаток. Торкніться, щоб дезактивувати."</string>
     <string name="standby_bucket_summary" msgid="6567835350910684727">"Режим очікування: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
-    <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені служби"</string>
-    <string name="runningservices_settings_summary" msgid="854608995821032748">"Перегляд і керування запущеними службами"</string>
+    <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені сервіси"</string>
+    <string name="runningservices_settings_summary" msgid="854608995821032748">"Переглянути й налаштувати запущені сервіси"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Налаштувати застосування WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="5466970498308266359">"Ця опція більше не дійсна. Повторіть спробу."</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Вистачить приблизно до <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Вистачить приблизно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Подовжити час роботи акумулятора до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Залишилося менше ніж <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Залишилося менше ніж <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Залишилося понад <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -415,7 +414,7 @@
     <string name="disabled" msgid="9206776641295849915">"Вимкнено"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Дозволено"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Заборонено"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Установлювати невідомі додатки"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Встановлювати невідомі додатки"</string>
     <string name="home" msgid="3256884684164448244">"Головний екран налаштувань"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
@@ -465,8 +464,7 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Тривалість"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Запитувати щоразу"</string>
-    <string name="zen_mode_forever" msgid="2704305038191592967">"Доки ви не вимкнете"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"Доки не вимкнути"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Щойно"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Цей пристрій"</string>
 </resources>

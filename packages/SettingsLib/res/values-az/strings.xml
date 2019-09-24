@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Şəbəkə axtarmaq olmur"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Heç biri"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Yadda saxlanılan"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Bağlantı kəsildi"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiv"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP Konfiqurasiya Uğursuzluğu"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Şəbəkə keyfiyyəti aşağı olduğuna görə qoşulmadı"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s vasitəsilə əlçatandır"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Qeydiyyatdan keçmək üçün klikləyin"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Qoşuludur, internet yoxdur"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Məhdud bağlantı"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"İnternet yoxdur"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Giriş tələb olunur"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Giriş nöqtəsi müvəqqəti olaraq doludur"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Qoşuludur (media yoxdur), batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Qoşuludur (telefon və ya media yoxdur), batareya <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktiv, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batareya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batareya"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batareya, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batareya"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Media audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefon zəngləri"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Şəbəkələşmə"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Simsiz displey sertifikatlaşması"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Çoxsözlü Girişə icazə verin"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi skanlamasının tənzimlənməsi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil data həmişə aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Birləşmə üçün avadanlıq akselerasiyası"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth cihazlarını adsız göstərin"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Qoşulmaq mümkün olmadı"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Batareya istifadəsini azaldır &amp; şəbəkə performansını yaxşılaşdırır"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Ödənişli"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Limitsiz"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger bufer ölçüləri"</string>
@@ -291,7 +291,7 @@
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Monitorinq"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Məhdud rejim aktivdir"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Əsas axında tətbiqlərin əlavə əməliyyatlar etməsi zamanı ekran işartısı olsun"</string>
-    <string name="pointer_location" msgid="6084434787496938001">"Pointer yeri"</string>
+    <string name="pointer_location" msgid="6084434787496938001">"Kursor yeri"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Cari əlaqə datasını göstərən ekran örtüyü"</string>
     <string name="show_touches" msgid="2642976305235070316">"Tıklamaları göstərin"</string>
     <string name="show_touches_summary" msgid="6101183132903926324">"Tıklamalar üçün vizual cavab rəylərini göstərin"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Təxminən <xliff:g id="TIME">%1$s</xliff:g> olana qədər davam edəcək"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"<xliff:g id="TIME">%1$s</xliff:g> olana qədər"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Batareya istifadəsini <xliff:g id="TIME">%1$s</xliff:g> vaxtından etibarən artırın"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Qalan vaxt <xliff:g id="THRESHOLD">%1$s</xliff:g> və daha azdır"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Qalan vaxt <xliff:g id="THRESHOLD">%1$s</xliff:g> və daha azdır (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Qalan vaxt <xliff:g id="TIME_REMAINING">%1$s</xliff:g> və daha çoxdur (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Hər dəfə soruşun"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Deaktiv edənə qədər"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"İndicə"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Bu cihaz"</string>
 </resources>
