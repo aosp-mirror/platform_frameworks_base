@@ -147,6 +147,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
@@ -222,7 +223,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.statusbar.policy.KeyguardStateControllerImpl;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
@@ -390,6 +390,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Inject
     @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME)
     boolean mAllowNotificationLongPress;
+
+    @VisibleForTesting
+    BroadcastDispatcher mBroadcastDispatcher;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -665,6 +668,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
+        mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
         if (sliceProvider != null) {
             sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
@@ -1046,11 +1050,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         // receive broadcasts
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
-        context.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+        registerBroadcastReceiver();
 
         IntentFilter demoFilter = new IntentFilter();
         if (DEBUG_MEDIA_FAKE_ARTWORK) {
@@ -1069,6 +1069,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+    }
+
+    @VisibleForTesting
+    protected void registerBroadcastReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(DevicePolicyManager.ACTION_SHOW_DEVICE_MONITORING_DIALOG);
+        mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, null, UserHandle.ALL);
     }
 
     protected QS createDefaultQSFragment() {

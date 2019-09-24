@@ -90,6 +90,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
@@ -187,7 +188,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-        context.registerReceiver(mBroadcastReceiver, filter);
+        Dependency.get(BroadcastDispatcher.class).registerReceiver(mBroadcastReceiver, filter);
 
         ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +46,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -59,6 +62,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Digital clock for the status bar.
@@ -107,15 +113,20 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
      */
     private int mNonAdaptedColor;
 
-    public Clock(Context context) {
-        this(context, null);
-    }
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     public Clock(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        this(context, attrs, null);
     }
 
-    public Clock(Context context, AttributeSet attrs, int defStyle) {
+    @Inject
+    public Clock(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            BroadcastDispatcher broadcastDispatcher) {
+        this(context, attrs, 0, broadcastDispatcher);
+    }
+
+    public Clock(Context context, AttributeSet attrs, int defStyle,
+            BroadcastDispatcher broadcastDispatcher) {
         super(context, attrs, defStyle);
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs,
@@ -134,6 +145,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 mCurrentUserId = newUserId;
             }
         };
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     @Override
@@ -358,11 +370,11 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 }
                 IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
                 filter.addAction(Intent.ACTION_SCREEN_ON);
-                mContext.registerReceiver(mScreenReceiver, filter);
+                mBroadcastDispatcher.registerReceiver(mScreenReceiver, filter);
             }
         } else {
             if (mSecondsHandler != null) {
-                mContext.unregisterReceiver(mScreenReceiver);
+                mBroadcastDispatcher.unregisterReceiver(mScreenReceiver);
                 mSecondsHandler.removeCallbacks(mSecondTick);
                 mSecondsHandler = null;
                 updateClock();

@@ -17,6 +17,7 @@
 package com.android.systemui;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.power.PowerUI;
 
 import dagger.Binds;
 import dagger.Module;
@@ -33,4 +34,10 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(KeyguardViewMediator.class)
     public abstract SystemUI bindKeyguardViewMediator(KeyguardViewMediator sysui);
+
+    /** Inject into PowerUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(PowerUI.class)
+    public abstract SystemUI bindPowerUI(PowerUI sysui);
 }

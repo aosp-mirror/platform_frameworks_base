@@ -59,6 +59,7 @@ import com.android.settingslib.volume.MediaSessions;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
@@ -137,9 +138,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private UserActivityListener mUserActivityListener;
 
     protected final VC mVolumeController = new VC();
+    protected final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
-    public VolumeDialogControllerImpl(Context context) {
+    public VolumeDialogControllerImpl(Context context, BroadcastDispatcher broadcastDispatcher) {
         mContext = context.getApplicationContext();
         mNotificationManager = (NotificationManager) mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
@@ -152,6 +154,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mAudio = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mNoMan = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mObserver = new SettingObserver(mWorker);
+        mBroadcastDispatcher = broadcastDispatcher;
         mObserver.init();
         mReceiver.init();
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
@@ -1004,11 +1007,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            mContext.registerReceiver(this, filter, null, mWorker);
+            mBroadcastDispatcher.registerReceiver(this, filter, mWorker);
         }
 
         public void destroy() {
-            mContext.unregisterReceiver(this);
+            mBroadcastDispatcher.unregisterReceiver(this);
         }
 
         @Override

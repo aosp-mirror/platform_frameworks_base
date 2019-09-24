@@ -41,7 +41,9 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
@@ -51,6 +53,7 @@ import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.service.dreams.IDreamManager;
 import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
@@ -75,6 +78,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -171,6 +175,8 @@ public class StatusBarTest extends SysuiTestCase {
     private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock
     private StatusBarWindowView mStatusBarWindowView;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -199,6 +205,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
         mDependency.injectTestDependency(NotificationAlertingManager.class,
                 mNotificationAlertingManager);
+        mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
@@ -263,7 +270,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mDozeScrimController, mock(NotificationShelf.class),
                 mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
                 mock(BubbleController.class), mock(NavigationBarController.class),
-                mock(AutoHideController.class), mKeyguardUpdateMonitor, mStatusBarWindowView);
+                mock(AutoHideController.class), mKeyguardUpdateMonitor, mStatusBarWindowView,
+                mBroadcastDispatcher);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         SystemUIFactory.getInstance().getRootComponent()
@@ -774,6 +782,16 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mNotificationPanelView, never()).expand(anyBoolean());
     }
 
+    @Test
+    public void testRegisterBroadcastsonDispatcher() {
+        mStatusBar.registerBroadcastReceiver();
+        verify(mBroadcastDispatcher).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class),
+                eq(null),
+                any(UserHandle.class));
+    }
+
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 KeyguardIndicationController key,
@@ -801,7 +819,8 @@ public class StatusBarTest extends SysuiTestCase {
                 NavigationBarController navBarController,
                 AutoHideController autoHideController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
-                StatusBarWindowView statusBarWindow) {
+                StatusBarWindowView statusBarWindow,
+                BroadcastDispatcher broadcastDispatcher) {
             mStatusBarKeyguardViewManager = man;
             mKeyguardIndicationController = key;
             mStackScroller = stack;
@@ -835,6 +854,7 @@ public class StatusBarTest extends SysuiTestCase {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mStatusBarWindow = statusBarWindow;
             mDozeServiceHost.mWakeLockScreenPerformsAuth = false;
+            mBroadcastDispatcher = broadcastDispatcher;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
