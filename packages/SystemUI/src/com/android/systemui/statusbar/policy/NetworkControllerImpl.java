@@ -1001,6 +1001,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("4g") ? TelephonyIcons.FOUR_G :
                             datatype.equals("4g+") ? TelephonyIcons.FOUR_G_PLUS :
                             datatype.equals("5g") ? TelephonyIcons.NR_5G :
+                            datatype.equals("5ge") ? TelephonyIcons.LTE_CA_5G_E :
                             datatype.equals("5g+") ? TelephonyIcons.NR_5G_PLUS :
                             datatype.equals("e") ? TelephonyIcons.E :
                             datatype.equals("g") ? TelephonyIcons.G :
