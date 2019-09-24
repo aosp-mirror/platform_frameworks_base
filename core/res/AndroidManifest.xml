@@ -643,6 +643,7 @@
     <!-- Grouping for platform runtime permissions is not accessible to apps
          @hide
          @SystemApi
+         @TestApi
     -->
     <permission-group android:name="android.permission-group.UNDEFINED"
         android:priority="100" />
