@@ -64,11 +64,13 @@ import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
 import android.net.wifi.WifiManager.OnWifiUsabilityStatsListener;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.TrafficStateCallback;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.test.TestLooper;
 
 import androidx.test.filters.SmallTest;
@@ -971,25 +973,6 @@ public class WifiManagerTest {
     }
 
     /**
-     * Verify that calls WifiServiceImpl to set country code when no exception happens.
-     */
-    @Test
-    public void testSetWifiCountryCode() throws Exception {
-        mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
-        verify(mWifiService).setCountryCode(TEST_COUNTRY_CODE);
-    }
-
-    /**
-     * Verify that WifiManager.setCountryCode() rethrows exceptions if caller does not
-     * have necessary permissions.
-     */
-    @Test(expected = SecurityException.class)
-    public void testSetWifiCountryCodeFailedOnSecurityException() throws Exception {
-        doThrow(new SecurityException()).when(mWifiService).setCountryCode(anyString());
-        mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
-    }
-
-    /**
      * Test that calls to get the current WPS config token return null and do not have any
      * interactions with WifiServiceImpl.
      */
@@ -1645,5 +1628,98 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
         verify(mWifiService).setWifiEnabled(mContext.getOpPackageName(), true);
         assertTrue(mWifiManager.setWifiEnabled(false));
         verify(mWifiService).setWifiEnabled(mContext.getOpPackageName(), false);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#connect(int, WifiManager.ActionListener)}
+     */
+    @Test
+    public void testConnectWithListener() throws Exception {
+        WifiManager.ActionListener externalListener = mock(WifiManager.ActionListener.class);
+        mWifiManager.connect(TEST_NETWORK_ID, externalListener);
+
+        ArgumentCaptor<IActionListener> binderListenerCaptor =
+                ArgumentCaptor.forClass(IActionListener.class);
+        verify(mWifiService).connect(eq(null), eq(TEST_NETWORK_ID), any(Binder.class),
+                binderListenerCaptor.capture(), anyInt());
+        assertNotNull(binderListenerCaptor.getValue());
+
+        // Trigger on success.
+        binderListenerCaptor.getValue().onSuccess();
+        mLooper.dispatchAll();
+        verify(externalListener).onSuccess();
+
+        // Trigger on failure.
+        binderListenerCaptor.getValue().onFailure(WifiManager.BUSY);
+        mLooper.dispatchAll();
+        verify(externalListener).onFailure(WifiManager.BUSY);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#connect(int, WifiManager.ActionListener)}
+     */
+    @Test
+    public void testConnectWithListenerHandleSecurityException() throws Exception {
+        doThrow(new SecurityException()).when(mWifiService)
+                .connect(eq(null), anyInt(), any(IBinder.class),
+                        any(IActionListener.class), anyInt());
+        WifiManager.ActionListener externalListener = mock(WifiManager.ActionListener.class);
+        mWifiManager.connect(TEST_NETWORK_ID, externalListener);
+
+        mLooper.dispatchAll();
+        verify(externalListener).onFailure(WifiManager.NOT_AUTHORIZED);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#connect(int, WifiManager.ActionListener)}
+     */
+    @Test
+    public void testConnectWithListenerHandleRemoteException() throws Exception {
+        doThrow(new RemoteException()).when(mWifiService)
+                .connect(eq(null), anyInt(), any(IBinder.class),
+                        any(IActionListener.class), anyInt());
+        WifiManager.ActionListener externalListener = mock(WifiManager.ActionListener.class);
+        mWifiManager.connect(TEST_NETWORK_ID, externalListener);
+
+        mLooper.dispatchAll();
+        verify(externalListener).onFailure(WifiManager.ERROR);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#connect(int, WifiManager.ActionListener)}
+     */
+    @Test
+    public void testConnectWithoutListener() throws Exception {
+        WifiConfiguration configuration = new WifiConfiguration();
+        mWifiManager.connect(configuration, null);
+
+        verify(mWifiService).connect(configuration, WifiConfiguration.INVALID_NETWORK_ID, null,
+                null, 0);
+    }
+
+    /**
+     * Test behavior of {@link WifiManager#getTxPacketCount(WifiManager.TxPacketCountListener)}
+     */
+    @Test
+    public void testGetTxPacketCount() throws Exception {
+        WifiManager.TxPacketCountListener externalListener =
+                mock(WifiManager.TxPacketCountListener.class);
+        mWifiManager.getTxPacketCount(externalListener);
+
+        ArgumentCaptor<ITxPacketCountListener> binderListenerCaptor =
+                ArgumentCaptor.forClass(ITxPacketCountListener.class);
+        verify(mWifiService).getTxPacketCount(anyString(), any(Binder.class),
+                binderListenerCaptor.capture(), anyInt());
+        assertNotNull(binderListenerCaptor.getValue());
+
+        // Trigger on success.
+        binderListenerCaptor.getValue().onSuccess(6);
+        mLooper.dispatchAll();
+        verify(externalListener).onSuccess(6);
+
+        // Trigger on failure.
+        binderListenerCaptor.getValue().onFailure(WifiManager.BUSY);
+        mLooper.dispatchAll();
+        verify(externalListener).onFailure(WifiManager.BUSY);
     }
 }

@@ -210,33 +210,36 @@ public class TestLooper {
         /**
          * Run method for the auto dispatch thread.
          * The thread loops a maximum of MAX_LOOPS times with a 10ms sleep between loops.
-         * The thread continues looping and attempting to dispatch all messages until at
-         * least one message has been dispatched.
+         * The thread continues looping and attempting to dispatch all messages until
+         * {@link #stopAutoDispatch()} has been invoked.
          */
         @Override
         public void run() {
             int dispatchCount = 0;
             for (int i = 0; i < MAX_LOOPS; i++) {
                 try {
-                    dispatchCount = dispatchAll();
+                    dispatchCount += dispatchAll();
                 } catch (RuntimeException e) {
                     mAutoDispatchException = e;
-                }
-                Log.d(TAG, "dispatched " + dispatchCount + " messages");
-                if (dispatchCount > 0) {
                     return;
                 }
+                Log.d(TAG, "dispatched " + dispatchCount + " messages");
                 try {
                     Thread.sleep(LOOP_SLEEP_TIME_MS);
                 } catch (InterruptedException e) {
-                    mAutoDispatchException = new IllegalStateException(
-                            "stopAutoDispatch called before any messages were dispatched.");
+                    if (dispatchCount == 0) {
+                        Log.e(TAG, "stopAutoDispatch called before any messages were dispatched.");
+                        mAutoDispatchException = new IllegalStateException(
+                                "stopAutoDispatch called before any messages were dispatched.");
+                    }
                     return;
                 }
             }
-            Log.e(TAG, "AutoDispatchThread did not dispatch any messages.");
-            mAutoDispatchException = new IllegalStateException(
-                    "TestLooper did not dispatch any messages before exiting.");
+            if (dispatchCount == 0) {
+                Log.e(TAG, "AutoDispatchThread did not dispatch any messages.");
+                mAutoDispatchException = new IllegalStateException(
+                        "TestLooper did not dispatch any messages before exiting.");
+            }
         }
 
         /**
@@ -286,5 +289,18 @@ public class TestLooper {
             throw new IllegalStateException(
                     "stopAutoDispatch called without startAutoDispatch.");
         }
+    }
+
+    /**
+     * If an AutoDispatchThread is currently running, stop and clean up.
+     * This method ignores exceptions raised for indicating that no messages were dispatched.
+     */
+    public void stopAutoDispatchAndIgnoreExceptions() {
+        try {
+            stopAutoDispatch();
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "stopAutoDispatch", e);
+        }
+
     }
 }
