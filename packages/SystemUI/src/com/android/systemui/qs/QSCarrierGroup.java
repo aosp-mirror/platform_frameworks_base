@@ -18,11 +18,16 @@ package com.android.systemui.qs;
 
 import static com.android.systemui.Dependency.BG_HANDLER;
 import static com.android.systemui.Dependency.BG_HANDLER_NAME;
+import static com.android.systemui.Dependency.MAIN_LOOPER;
+import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
+import android.annotation.MainThread;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.AttributeSet;
@@ -39,6 +44,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 
+import java.util.function.Consumer;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -46,7 +53,6 @@ import javax.inject.Named;
  * Displays Carrier name and network status in QS
  */
 public class QSCarrierGroup extends LinearLayout implements
-        CarrierTextController.CarrierTextCallback,
         NetworkController.SignalCallback, View.OnClickListener {
 
     private static final String TAG = "QSCarrierGroup";
@@ -56,12 +62,14 @@ public class QSCarrierGroup extends LinearLayout implements
     private static final int SIM_SLOTS = 3;
     private final NetworkController mNetworkController;
     private final Handler mBgHandler;
+    private final H mMainHandler;
 
     private View[] mCarrierDividers = new View[SIM_SLOTS - 1];
     private QSCarrier[] mCarrierGroups = new QSCarrier[SIM_SLOTS];
     private TextView mNoSimTextView;
     private final CellSignalState[] mInfos = new CellSignalState[SIM_SLOTS];
     private CarrierTextController mCarrierTextController;
+    private CarrierTextController.CarrierTextCallback mCallback;
     private ActivityStarter mActivityStarter;
 
     private boolean mListening;
@@ -69,11 +77,19 @@ public class QSCarrierGroup extends LinearLayout implements
     @Inject
     public QSCarrierGroup(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             NetworkController networkController, ActivityStarter activityStarter,
-            @Named(BG_HANDLER_NAME) Handler handler) {
+            @Named(BG_HANDLER_NAME) Handler handler,
+            @Named(MAIN_LOOPER_NAME) Looper looper) {
         super(context, attrs);
         mNetworkController = networkController;
         mActivityStarter = activityStarter;
         mBgHandler = handler;
+        mMainHandler = new H(looper, this::handleUpdateCarrierInfo, this::handleUpdateState);
+        mCallback = new Callback(mMainHandler);
+    }
+
+    @VisibleForTesting
+    protected CarrierTextController.CarrierTextCallback getCallback() {
+        return mCallback;
     }
 
     @VisibleForTesting
@@ -81,7 +97,8 @@ public class QSCarrierGroup extends LinearLayout implements
         this(context, attrs,
                 Dependency.get(NetworkController.class),
                 Dependency.get(ActivityStarter.class),
-                Dependency.get(BG_HANDLER));
+                Dependency.get(BG_HANDLER),
+                Dependency.get(MAIN_LOOPER));
     }
 
     @Override
@@ -136,14 +153,20 @@ public class QSCarrierGroup extends LinearLayout implements
             if (mNetworkController.hasVoiceCallingFeature()) {
                 mNetworkController.addCallback(this);
             }
-            mCarrierTextController.setListening(this);
+            mCarrierTextController.setListening(mCallback);
         } else {
             mNetworkController.removeCallback(this);
             mCarrierTextController.setListening(null);
         }
     }
 
+    @MainThread
     private void handleUpdateState() {
+        if (!mMainHandler.getLooper().isCurrentThread()) {
+            mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
+            return;
+        }
+
         for (int i = 0; i < SIM_SLOTS; i++) {
             mCarrierGroups[i].updateState(mInfos[i]);
         }
@@ -163,8 +186,13 @@ public class QSCarrierGroup extends LinearLayout implements
         return SubscriptionManager.getSlotIndex(subscriptionId);
     }
 
-    @Override
-    public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
+    @MainThread
+    private void handleUpdateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
+        if (!mMainHandler.getLooper().isCurrentThread()) {
+            mMainHandler.obtainMessage(H.MSG_UPDATE_CARRIER_INFO, info).sendToTarget();
+            return;
+        }
+
         mNoSimTextView.setVisibility(View.GONE);
         if (!info.airplaneMode && info.anySimReady) {
             boolean[] slotSeen = new boolean[SIM_SLOTS];
@@ -207,7 +235,7 @@ public class QSCarrierGroup extends LinearLayout implements
             mNoSimTextView.setText(info.carrierText);
             mNoSimTextView.setVisibility(View.VISIBLE);
         }
-        handleUpdateState();
+        handleUpdateState(); // handleUpdateCarrierInfo is always called from main thread.
     }
 
     @Override
@@ -230,7 +258,7 @@ public class QSCarrierGroup extends LinearLayout implements
         mInfos[slotIndex].contentDescription = statusIcon.contentDescription;
         mInfos[slotIndex].typeContentDescription = typeContentDescription;
         mInfos[slotIndex].roaming = roaming;
-        handleUpdateState();
+        mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
     }
 
     @Override
@@ -240,7 +268,7 @@ public class QSCarrierGroup extends LinearLayout implements
                 mInfos[i].visible = false;
             }
         }
-        handleUpdateState();
+        mMainHandler.obtainMessage(H.MSG_UPDATE_STATE).sendToTarget();
     }
 
     static final class CellSignalState {
@@ -249,5 +277,48 @@ public class QSCarrierGroup extends LinearLayout implements
         String contentDescription;
         String typeContentDescription;
         boolean roaming;
+    }
+
+    private static class H extends Handler {
+        private Consumer<CarrierTextController.CarrierTextCallbackInfo> mUpdateCarrierInfo;
+        private Runnable mUpdateState;
+        static final int MSG_UPDATE_CARRIER_INFO = 0;
+        static final int MSG_UPDATE_STATE = 1;
+
+        H(Looper looper,
+                Consumer<CarrierTextController.CarrierTextCallbackInfo> updateCarrierInfo,
+                Runnable updateState) {
+            super(looper);
+            mUpdateCarrierInfo = updateCarrierInfo;
+            mUpdateState = updateState;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_UPDATE_CARRIER_INFO:
+                    mUpdateCarrierInfo.accept(
+                            (CarrierTextController.CarrierTextCallbackInfo) msg.obj);
+                    break;
+                case MSG_UPDATE_STATE:
+                    mUpdateState.run();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    private static class Callback implements CarrierTextController.CarrierTextCallback {
+        private H mMainHandler;
+
+        Callback(H handler) {
+            mMainHandler = handler;
+        }
+
+        @Override
+        public void updateCarrierInfo(CarrierTextController.CarrierTextCallbackInfo info) {
+            mMainHandler.obtainMessage(H.MSG_UPDATE_CARRIER_INFO, info).sendToTarget();
+        }
     }
 }
