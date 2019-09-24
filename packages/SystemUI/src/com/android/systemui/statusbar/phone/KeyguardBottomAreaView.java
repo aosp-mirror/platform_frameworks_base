@@ -80,6 +80,7 @@ import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
@@ -89,7 +90,7 @@ import com.android.systemui.tuner.TunerService;
  * text.
  */
 public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickListener,
-        UnlockMethodCache.OnUnlockMethodChangedListener,
+        KeyguardStateController.Callback,
         AccessibilityController.AccessibilityStateChangedCallback {
 
     final static String TAG = "StatusBar/KeyguardBottomAreaView";
@@ -116,7 +117,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
     private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
 
-    private final UnlockMethodCache mUnlockMethodCache;
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
     private ViewGroup mIndicationArea;
@@ -128,6 +128,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private View mCameraPreview;
 
     private ActivityStarter mActivityStarter;
+    private KeyguardStateController mKeyguardStateController;
     private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
@@ -183,7 +184,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mUnlockMethodCache = UnlockMethodCache.getInstance(getContext());
     }
 
     private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
@@ -239,6 +239,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mBurnInYOffset = getResources().getDimensionPixelSize(
                 R.dimen.default_burn_in_prevention_offset);
         updateCameraVisibility();
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
+        mKeyguardStateController.addCallback(this);
         setClipChildren(false);
         setClipToPadding(false);
         inflateCameraPreview();
@@ -276,13 +278,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         getContext().registerReceiverAsUser(mDevicePolicyReceiver,
                 UserHandle.ALL, filter, null, null);
         Dependency.get(KeyguardUpdateMonitor.class).registerCallback(mUpdateMonitorCallback);
-        mUnlockMethodCache.addListener(this);
+        mKeyguardStateController.addCallback(this);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mUnlockMethodCache.removeListener(this);
+        mKeyguardStateController.removeCallback(this);
         mAccessibilityController.removeStateChangedCallback(this);
         mRightExtension.destroy();
         mLeftExtension.destroy();
@@ -544,7 +546,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 mAssistManager.launchVoiceAssistFromKeyguard();
             }
         };
-        if (mStatusBar.isKeyguardCurrentlySecure()) {
+        if (!mKeyguardStateController.canDismissLockScreen()) {
             AsyncTask.execute(runnable);
         } else {
             boolean dismissShade = !TextUtils.isEmpty(mRightButtonStr)
@@ -609,7 +611,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     @Override
-    public void onUnlockMethodStateChanged() {
+    public void onUnlockedChanged() {
         updateCameraVisibility();
     }
 
@@ -811,11 +813,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
         @Override
         public Intent getIntent() {
-            KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-            boolean canSkipBouncer = updateMonitor.getUserCanSkipBouncer(
-                    KeyguardUpdateMonitor.getCurrentUser());
-            boolean secure = mUnlockMethodCache.isMethodSecure();
-            return (secure && !canSkipBouncer) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
+            boolean canDismissLs = mKeyguardStateController.canDismissLockScreen();
+            boolean secure = mKeyguardStateController.isMethodSecure();
+            return (secure && !canDismissLs) ? SECURE_CAMERA_INTENT : INSECURE_CAMERA_INTENT;
         }
     }
 

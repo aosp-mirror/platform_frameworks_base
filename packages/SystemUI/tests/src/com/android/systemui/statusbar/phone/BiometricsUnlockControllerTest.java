@@ -39,6 +39,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +71,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private StatusBar mStatusBar;
     @Mock
-    private UnlockMethodCache mUnlockMethodCache;
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private Handler mHandler;
     @Mock
@@ -82,7 +83,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
-        when(mUnlockMethodCache.isFaceAuthEnabled()).thenReturn(true);
+        when(mKeyguardStateController.isFaceAuthEnabled()).thenReturn(true);
         when(mKeyguardBypassController.onBiometricAuthenticated(any())).thenReturn(true);
         when(mKeyguardBypassController.canPlaySubtleWindowAnimations()).thenReturn(true);
         mContext.addMockSystemService(PowerManager.class, mPowerManager);
@@ -90,7 +91,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         mDependency.injectTestDependency(StatusBarWindowController.class,
                 mStatusBarWindowController);
         mBiometricUnlockController = new BiometricUnlockController(mContext, mDozeScrimController,
-                mKeyguardViewMediator, mScrimController, mStatusBar, mUnlockMethodCache,
+                mKeyguardViewMediator, mScrimController, mStatusBar, mKeyguardStateController,
                 mHandler, mUpdateMonitor, 0 /* wakeUpDelay */, mKeyguardBypassController);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }

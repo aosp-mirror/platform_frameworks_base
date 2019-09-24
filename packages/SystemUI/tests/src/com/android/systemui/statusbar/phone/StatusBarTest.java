@@ -110,7 +110,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 import org.junit.Before;
@@ -131,7 +131,7 @@ import java.util.HashSet;
 @RunWithLooper
 public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private UnlockMethodCache mUnlockMethodCache;
+    @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
     @Mock private NotificationStackScrollLayout mStackScroller;
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
@@ -191,7 +191,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mViewHierarchyManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
-        mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitor.class));
         mDependency.injectTestDependency(AppOpsController.class, mock(AppOpsController.class));
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
@@ -253,7 +252,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mHeadsUpManager, mHeadsUpSuppressor);
 
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-        mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
+        mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager,
                 mKeyguardIndicationController, mStackScroller,
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
@@ -270,6 +269,7 @@ public class StatusBarTest extends SysuiTestCase {
         SystemUIFactory.getInstance().getRootComponent()
                 .getStatusBarInjector()
                 .createStatusBar(mStatusBar);
+        mStatusBar.mKeyguardStateController = mKeyguardStateController;
         mStatusBar.setHeadsUpManager(mHeadsUpManager);
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
@@ -313,11 +313,11 @@ public class StatusBarTest extends SysuiTestCase {
     public void lockscreenStateMetrics_notShowing() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
-        when(mUnlockMethodCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mUnlockMethodCache.isMethodSecure()).thenReturn(false);
+        when(mKeyguardStateController.isMethodSecure()).thenReturn(false);
         mStatusBar.onKeyguardViewManagerStatesUpdated();
 
         MetricsAsserts.assertHasLog("missing hidden insecure lockscreen log",
@@ -331,11 +331,11 @@ public class StatusBarTest extends SysuiTestCase {
     public void lockscreenStateMetrics_notShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
-        when(mUnlockMethodCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(false);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mUnlockMethodCache.isMethodSecure()).thenReturn(true);
+        when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
         mStatusBar.onKeyguardViewManagerStatesUpdated();
 
@@ -350,11 +350,11 @@ public class StatusBarTest extends SysuiTestCase {
     public void lockscreenStateMetrics_isShowing() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
-        when(mUnlockMethodCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mUnlockMethodCache.isMethodSecure()).thenReturn(false);
+        when(mKeyguardStateController.isMethodSecure()).thenReturn(false);
 
         mStatusBar.onKeyguardViewManagerStatesUpdated();
 
@@ -369,11 +369,11 @@ public class StatusBarTest extends SysuiTestCase {
     public void lockscreenStateMetrics_isShowing_secure() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
-        when(mUnlockMethodCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
-        when(mUnlockMethodCache.isMethodSecure()).thenReturn(true);
+        when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
         mStatusBar.onKeyguardViewManagerStatesUpdated();
 
@@ -388,11 +388,11 @@ public class StatusBarTest extends SysuiTestCase {
     public void lockscreenStateMetrics_isShowingBouncer() {
         // uninteresting state, except that fingerprint must be non-zero
         when(mStatusBarKeyguardViewManager.isOccluded()).thenReturn(false);
-        when(mUnlockMethodCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         // interesting state
         when(mStatusBarKeyguardViewManager.isShowing()).thenReturn(true);
         when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
-        when(mUnlockMethodCache.isMethodSecure()).thenReturn(true);
+        when(mKeyguardStateController.isMethodSecure()).thenReturn(true);
 
         mStatusBar.onKeyguardViewManagerStatesUpdated();
 
@@ -776,7 +776,7 @@ public class StatusBarTest extends SysuiTestCase {
 
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
-                UnlockMethodCache unlock, KeyguardIndicationController key,
+                KeyguardIndicationController key,
                 NotificationStackScrollLayout stack,
                 PowerManager pm, NotificationPanelView panelView,
                 IStatusBarService barService, NotificationListener notificationListener,
@@ -803,7 +803,6 @@ public class StatusBarTest extends SysuiTestCase {
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
                 StatusBarWindowView statusBarWindow) {
             mStatusBarKeyguardViewManager = man;
-            mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
             mStackScroller = stack;
             mPowerManager = pm;

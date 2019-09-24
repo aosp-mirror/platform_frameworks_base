@@ -57,8 +57,8 @@ import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.AccessibilityController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -72,7 +72,7 @@ import java.util.IllegalFormatConversionException;
  * Controls the indications and error messages shown on the Keyguard
  */
 public class KeyguardIndicationController implements StateListener,
-        UnlockMethodCache.OnUnlockMethodChangedListener {
+        KeyguardStateController.Callback {
 
     private static final String TAG = "KeyguardIndication";
     private static final boolean DEBUG_CHARGING_SPEED = false;
@@ -86,7 +86,7 @@ public class KeyguardIndicationController implements StateListener,
     private final Context mContext;
     private final ShadeController mShadeController;
     private final AccessibilityController mAccessibilityController;
-    private final UnlockMethodCache mUnlockMethodCache;
+    private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private ViewGroup mIndicationArea;
@@ -137,7 +137,7 @@ public class KeyguardIndicationController implements StateListener,
                 WakeLock.createPartial(context, "Doze:KeyguardIndication"),
                 Dependency.get(ShadeController.class),
                 Dependency.get(AccessibilityController.class),
-                UnlockMethodCache.getInstance(context),
+                Dependency.get(KeyguardStateController.class),
                 Dependency.get(StatusBarStateController.class),
                 Dependency.get(KeyguardUpdateMonitor.class));
     }
@@ -148,14 +148,15 @@ public class KeyguardIndicationController implements StateListener,
     @VisibleForTesting
     KeyguardIndicationController(Context context, ViewGroup indicationArea, LockIcon lockIcon,
             LockPatternUtils lockPatternUtils, WakeLock wakeLock, ShadeController shadeController,
-            AccessibilityController accessibilityController, UnlockMethodCache unlockMethodCache,
+            AccessibilityController accessibilityController,
+            KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mLockIcon = lockIcon;
         mShadeController = shadeController;
         mAccessibilityController = accessibilityController;
-        mUnlockMethodCache = unlockMethodCache;
+        mKeyguardStateController = keyguardStateController;
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         // lock icon is not used on all form factors.
@@ -181,7 +182,7 @@ public class KeyguardIndicationController implements StateListener,
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
         mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
         mStatusBarStateController.addCallback(this);
-        mUnlockMethodCache.addListener(this);
+        mKeyguardStateController.addCallback(this);
     }
 
     public void setIndicationArea(ViewGroup indicationArea) {
@@ -583,7 +584,7 @@ public class KeyguardIndicationController implements StateListener,
     }
 
     @Override
-    public void onUnlockMethodStateChanged() {
+    public void onUnlockedChanged() {
         updateIndication(!mDozing);
     }
 

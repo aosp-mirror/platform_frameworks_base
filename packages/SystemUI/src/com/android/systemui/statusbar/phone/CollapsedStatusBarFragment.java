@@ -38,7 +38,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
@@ -57,7 +57,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public static final int FADE_IN_DELAY = 50;
     private PhoneStatusBarView mStatusBar;
     private StatusBarStateController mStatusBarStateController;
-    private KeyguardMonitor mKeyguardMonitor;
+    private KeyguardStateController mKeyguardStateController;
     private NetworkController mNetworkController;
     private LinearLayout mSystemIconArea;
     private View mClockView;
@@ -79,7 +79,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         mStatusBarComponent = SysUiServiceProvider.getComponent(getContext(), StatusBar.class);
@@ -207,8 +207,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_CLOCK;
         }
 
-        if (!mKeyguardMonitor.isLaunchTransitionFadingAway()
-                && !mKeyguardMonitor.isKeyguardFadingAway()
+        if (!mKeyguardStateController.isLaunchTransitionFadingAway()
+                && !mKeyguardStateController.isKeyguardFadingAway()
                 && shouldHideNotificationIcons()
                 && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                         && headsUpVisible)) {
@@ -268,7 +268,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * don't set the clock GONE otherwise it'll mess up the animation.
      */
     private int clockHiddenMode() {
-        if (!mStatusBar.isClosed() && !mKeyguardMonitor.isShowing()
+        if (!mStatusBar.isClosed() && !mKeyguardStateController.isShowing()
                 && !mStatusBarStateController.isDozing()) {
             return View.INVISIBLE;
         }
@@ -345,11 +345,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 .withEndAction(null);
 
         // Synchronize the motion with the Keyguard fading if necessary.
-        if (mKeyguardMonitor.isKeyguardFadingAway()) {
+        if (mKeyguardStateController.isKeyguardFadingAway()) {
             v.animate()
-                    .setDuration(mKeyguardMonitor.getKeyguardFadingAwayDuration())
+                    .setDuration(mKeyguardStateController.getKeyguardFadingAwayDuration())
                     .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                    .setStartDelay(mKeyguardMonitor.getKeyguardFadingAwayDelay())
+                    .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
                     .start();
         }
     }

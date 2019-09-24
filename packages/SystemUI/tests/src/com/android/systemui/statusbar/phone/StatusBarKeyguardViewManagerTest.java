@@ -46,6 +46,7 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,6 +65,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private LockPatternUtils mLockPatternUtils;
     @Mock
     private KeyguardBouncer mBouncer;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
     @Mock
     private StatusBar mStatusBar;
     @Mock
@@ -90,6 +93,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarWindowController.class);
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
+        mDependency.injectTestDependency(KeyguardStateController.class, mKeyguardStateController);
         when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));
         when(mLockIconContainer.animate()).thenReturn(mock(ViewPropertyAnimator.class,
                 RETURNS_DEEP_STUBS));
@@ -169,7 +173,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void onPanelExpansionChanged_showsBouncerWhenSwiping() {
-        when(mStatusBar.isKeyguardCurrentlySecure()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(0.5f /* expansion */,
                 true /* tracking */);
         verify(mBouncer).show(eq(false), eq(false));

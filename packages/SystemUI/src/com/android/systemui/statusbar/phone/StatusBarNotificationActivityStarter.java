@@ -68,7 +68,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 /**
  * Status bar implementation of {@link NotificationActivityStarter}.
@@ -84,7 +84,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final ShadeController mShadeController;
-    private final KeyguardMonitor mKeyguardMonitor;
+    private final KeyguardStateController mKeyguardStateController;
     private final ActivityStarter mActivityStarter;
     private final NotificationEntryManager mEntryManager;
     private final StatusBarStateController mStatusBarStateController;
@@ -125,7 +125,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             NotificationGroupManager groupManager,
             NotificationLockscreenUserManager lockscreenUserManager,
             ShadeController shadeController,
-            KeyguardMonitor keyguardMonitor,
+            KeyguardStateController keyguardStateController,
             NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             MetricsLogger metricsLogger,
             LockPatternUtils lockPatternUtils,
@@ -145,7 +145,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mRemoteInputManager = remoteInputManager;
         mLockscreenUserManager = lockscreenUserManager;
         mShadeController = shadeController;
-        mKeyguardMonitor = keyguardMonitor;
+        mKeyguardStateController = keyguardStateController;
         mActivityStarter = activityStarter;
         mEntryManager = entryManager;
         mStatusBarStateController = statusBarStateController;
@@ -204,7 +204,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 && mActivityIntentHelper.wouldLaunchResolverActivity(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         final boolean wasOccluded = mShadeController.isOccluded();
-        boolean showOverLockscreen = mKeyguardMonitor.isShowing() && intent != null
+        boolean showOverLockscreen = mKeyguardStateController.isShowing() && intent != null
                 && mActivityIntentHelper.wouldShowOverLockscreen(intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         ActivityStarter.OnDismissAction postKeyguardAction =
@@ -258,7 +258,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (showOverLockscreen) {
             mShadeController.addPostCollapseAction(runnable);
             mShadeController.collapsePanel(true /* animate */);
-        } else if (mKeyguardMonitor.isShowing()
+        } else if (mKeyguardStateController.isShowing()
                 && mShadeController.isOccluded()) {
             mShadeController.addAfterKeyguardGoneRunnable(runnable);
             mShadeController.collapsePanel();

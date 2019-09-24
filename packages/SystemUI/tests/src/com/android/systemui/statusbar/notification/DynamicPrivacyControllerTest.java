@@ -26,21 +26,16 @@ import static org.mockito.Mockito.when;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import dagger.Lazy;
 
 
 @SmallTest
@@ -49,19 +44,17 @@ import dagger.Lazy;
 public class DynamicPrivacyControllerTest extends SysuiTestCase {
 
     private DynamicPrivacyController mDynamicPrivacyController;
-    private UnlockMethodCache mCache = mock(UnlockMethodCache.class);
     private NotificationLockscreenUserManager mLockScreenUserManager
             = mock(NotificationLockscreenUserManager.class);
     private DynamicPrivacyController.Listener mListener
             = mock(DynamicPrivacyController.Listener.class);
-    private KeyguardMonitor mKeyguardMonitor = mock(KeyguardMonitor.class);
+    private KeyguardStateController mKeyguardStateController = mock(KeyguardStateController.class);
 
     @Before
     public void setUp() throws Exception {
-        when(mCache.canSkipBouncer()).thenReturn(false);
-        when(mKeyguardMonitor.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         mDynamicPrivacyController = new DynamicPrivacyController(
-                mLockScreenUserManager, mKeyguardMonitor, mCache,
+                mLockScreenUserManager, mKeyguardStateController,
                 mock(StatusBarStateController.class));
         mDynamicPrivacyController.setStatusBarKeyguardViewManager(
                 mock(StatusBarKeyguardViewManager.class));
@@ -71,7 +64,7 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
     @Test
     public void testDynamicFalseWhenCannotSkipBouncer() {
         enableDynamicPrivacy();
-        when(mCache.canSkipBouncer()).thenReturn(false);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
         Assert.assertFalse("can't skip bouncer but is dynamically unlocked",
                 mDynamicPrivacyController.isDynamicallyUnlocked());
     }
@@ -79,16 +72,16 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
     @Test
     public void testDynamicTrueWhenCanSkipBouncer() {
         enableDynamicPrivacy();
-        when(mCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         Assert.assertTrue("Isn't dynamically unlocked even though we can skip bouncer",
                 mDynamicPrivacyController.isDynamicallyUnlocked());
     }
 
     @Test
     public void testNotifiedWhenEnabled() {
-        when(mCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         enableDynamicPrivacy();
-        mDynamicPrivacyController.onUnlockMethodStateChanged();
+        mDynamicPrivacyController.onUnlockedChanged();
         verify(mListener).onDynamicPrivacyChanged();
     }
 
@@ -99,10 +92,10 @@ public class DynamicPrivacyControllerTest extends SysuiTestCase {
 
     @Test
     public void testNotNotifiedWithoutNotifications() {
-        when(mCache.canSkipBouncer()).thenReturn(true);
+        when(mKeyguardStateController.canDismissLockScreen()).thenReturn(true);
         when(mLockScreenUserManager.shouldHideNotifications(anyInt())).thenReturn(
                 true);
-        mDynamicPrivacyController.onUnlockMethodStateChanged();
+        mDynamicPrivacyController.onUnlockedChanged();
         verifyNoMoreInteractions(mListener);
     }
 }

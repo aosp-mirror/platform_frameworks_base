@@ -31,7 +31,7 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -47,7 +47,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
 
     private final Handler mHandler;
     private final DarkIntensityApplier mApplier;
-    private final KeyguardMonitor mKeyguardMonitor;
+    private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
 
     private boolean mTransitionDeferring;
@@ -73,7 +73,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     public LightBarTransitionsController(Context context, DarkIntensityApplier applier) {
         mApplier = applier;
         mHandler = new Handler();
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mStatusBarStateController = Dependency.get(StatusBarStateController.class);
         SysUiServiceProvider.getComponent(context, CommandQueue.class)
                 .addCallback(this);
@@ -101,7 +101,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
 
     @Override
     public void appTransitionPending(int displayId, boolean forced) {
-        if (mDisplayId != displayId || mKeyguardMonitor.isKeyguardGoingAway() && !forced) {
+        if (mDisplayId != displayId || mKeyguardStateController.isKeyguardGoingAway() && !forced) {
             return;
         }
         mTransitionPending = true;
@@ -123,7 +123,7 @@ public class LightBarTransitionsController implements Dumpable, Callbacks,
     @Override
     public void appTransitionStarting(int displayId, long startTime, long duration,
             boolean forced) {
-        if (mDisplayId != displayId || mKeyguardMonitor.isKeyguardGoingAway() && !forced) {
+        if (mDisplayId != displayId || mKeyguardStateController.isKeyguardGoingAway() && !forced) {
             return;
         }
         if (mTransitionPending && mTintChangePending) {

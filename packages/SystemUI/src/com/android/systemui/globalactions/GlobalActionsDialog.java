@@ -96,8 +96,8 @@ import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
-import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.util.leak.RotationUtils;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
@@ -213,14 +213,17 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         Dependency.get(ConfigurationController.class).addCallback(this);
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
-        UnlockMethodCache unlockMethodCache = UnlockMethodCache.getInstance(context);
-        unlockMethodCache.addListener(
-                () -> {
-                    if (mDialog != null && mDialog.mPanelController != null) {
-                        boolean locked = !unlockMethodCache.canSkipBouncer();
-                        mDialog.mPanelController.onDeviceLockStateChanged(locked);
-                    }
-                });
+        KeyguardStateController keyguardStateController =
+                Dependency.get(KeyguardStateController.class);
+        keyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onUnlockedChanged() {
+                if (mDialog != null && mDialog.mPanelController != null) {
+                    boolean locked = !keyguardStateController.canDismissLockScreen();
+                    mDialog.mPanelController.onDeviceLockStateChanged(locked);
+                }
+            }
+        });
     }
 
     /**
