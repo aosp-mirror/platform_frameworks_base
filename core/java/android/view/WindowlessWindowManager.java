@@ -39,11 +39,19 @@ import java.util.HashMap;
 class WindowlessWindowManager implements IWindowSession {
     private final static String TAG = "WindowlessWindowManager";
 
+    private class State {
+        SurfaceControl mSurfaceControl;
+        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
+        State(SurfaceControl sc, WindowManager.LayoutParams p) {
+            mSurfaceControl = sc;
+            mParams.copyFrom(p);
+        }
+    };
     /**
      * Used to store SurfaceControl we've built for clients to
      * reconfigure them if relayout is called.
      */
-    final HashMap<IBinder, SurfaceControl> mScForWindow = new HashMap<IBinder, SurfaceControl>();
+    final HashMap<IBinder, State> mStateForWindow = new HashMap<IBinder, State>();
 
     public interface ResizeCompleteCallback {
         public void finished(SurfaceControl.Transaction completion);
@@ -89,7 +97,7 @@ class WindowlessWindowManager implements IWindowSession {
             .setName(attrs.getTitle().toString());
         final SurfaceControl sc = b.build();
         synchronized (this) {
-            mScForWindow.put(window.asBinder(), sc);
+            mStateForWindow.put(window.asBinder(), new State(sc, attrs));
         }
 
         if ((attrs.inputFeatures &
@@ -125,21 +133,27 @@ class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
+    public int relayout(IWindow window, int seq, WindowManager.LayoutParams inAttrs,
             int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
             Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
-        SurfaceControl sc = null;
+        State state = null;
         synchronized (this) {
-            sc = mScForWindow.get(window.asBinder());
+            state = mStateForWindow.get(window.asBinder());
         }
-        if (sc == null) {
+        if (state == null) {
             throw new IllegalArgumentException(
                     "Invalid window token (never added or removed already)");
         }
+        SurfaceControl sc = state.mSurfaceControl;
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+
+        if (inAttrs != null) {
+            state.mParams.copyFrom(inAttrs);
+        }
+        WindowManager.LayoutParams attrs = state.mParams;
 
         final Rect surfaceInsets = attrs.surfaceInsets;
         int width = surfaceInsets != null ?
