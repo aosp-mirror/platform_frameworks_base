@@ -74,7 +74,6 @@
 #include <android-base/strings.h>
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
-#include <cutils/ashmem.h>
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
 #include <private/android_filesystem_config.h>
@@ -1590,11 +1589,6 @@ static void com_android_internal_os_Zygote_nativeInitNativeState(JNIEnv* env, jc
   if (!SetTaskProfiles(0, {})) {
     ZygoteFailure(env, "zygote", nullptr, "Zygote SetTaskProfiles failed");
   }
-
-  /*
-   * ashmem initialization to avoid dlopen overhead
-   */
-  ashmem_init();
 }
 
 /**
