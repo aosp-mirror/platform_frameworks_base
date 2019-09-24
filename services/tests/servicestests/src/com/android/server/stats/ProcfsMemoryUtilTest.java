@@ -16,7 +16,6 @@
 package com.android.server.stats;
 
 import static com.android.server.stats.ProcfsMemoryUtil.parseMemorySnapshotFromStatus;
-import static com.android.server.stats.ProcfsMemoryUtil.parseVmHWMFromStatus;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -80,45 +79,25 @@ public class ProcfsMemoryUtilTest {
             + "nonvoluntary_ctxt_switches:\t104\n";
 
     @Test
-    public void testParseVmHWMFromStatus_parsesCorrectValue() {
-        assertThat(parseVmHWMFromStatus(STATUS_CONTENTS)).isEqualTo(137668);
-    }
-
-    @Test
-    public void testParseVmHWMFromStatus_invalidValue() {
-        assertThat(parseVmHWMFromStatus("test\nVmHWM: x0x0x\ntest")).isEqualTo(0);
-    }
-
-    @Test
-    public void testParseVmHWMFromStatus_emptyContents() {
-        assertThat(parseVmHWMFromStatus("")).isEqualTo(0);
-    }
-
-    @Test
     public void testParseMemorySnapshotFromStatus_parsesCorrectValue() {
         MemorySnapshot snapshot = parseMemorySnapshotFromStatus(STATUS_CONTENTS);
+        assertThat(snapshot.uid).isEqualTo(10083);
+        assertThat(snapshot.rssHighWaterMarkInKilobytes).isEqualTo(137668);
         assertThat(snapshot.rssInKilobytes).isEqualTo(126776);
         assertThat(snapshot.anonRssInKilobytes).isEqualTo(37860);
         assertThat(snapshot.swapInKilobytes).isEqualTo(22);
-        assertThat(snapshot.isEmpty()).isFalse();
     }
 
     @Test
     public void testParseMemorySnapshotFromStatus_invalidValue() {
         MemorySnapshot snapshot =
                 parseMemorySnapshotFromStatus("test\nVmRSS:\tx0x0x\nVmSwap:\t1 kB\ntest");
-        assertThat(snapshot.rssInKilobytes).isEqualTo(0);
-        assertThat(snapshot.anonRssInKilobytes).isEqualTo(0);
-        assertThat(snapshot.swapInKilobytes).isEqualTo(1);
-        assertThat(snapshot.isEmpty()).isFalse();
+        assertThat(snapshot).isNull();
     }
 
     @Test
     public void testParseMemorySnapshotFromStatus_emptyContents() {
         MemorySnapshot snapshot = parseMemorySnapshotFromStatus("");
-        assertThat(snapshot.rssInKilobytes).isEqualTo(0);
-        assertThat(snapshot.anonRssInKilobytes).isEqualTo(0);
-        assertThat(snapshot.swapInKilobytes).isEqualTo(0);
-        assertThat(snapshot.isEmpty()).isTrue();
+        assertThat(snapshot).isNull();
     }
 }
