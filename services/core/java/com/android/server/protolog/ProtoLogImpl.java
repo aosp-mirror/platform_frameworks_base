@@ -110,6 +110,12 @@ public class ProtoLogImpl {
         getSingleInstance().log(LogLevel.WTF, group, messageHash, paramsMask, messageString, args);
     }
 
+    /** Returns true iff logging is enabled for the given {@code IProtoLogGroup}. */
+    public static boolean isEnabled(IProtoLogGroup group) {
+        return group.isLogToProto()
+                || (group.isLogToProto() && getSingleInstance().isProtoEnabled());
+    }
+
     private static final int BUFFER_CAPACITY = 1024 * 1024;
     private static final String LOG_FILENAME = "/data/misc/wmtrace/wm_log.pb";
     private static final String VIEWER_CONFIG_FILENAME = "/system/etc/protolog.conf.json.gz";
@@ -222,48 +228,50 @@ public class ProtoLogImpl {
             os.write(MESSAGE_HASH, messageHash);
             os.write(ELAPSED_REALTIME_NANOS, SystemClock.elapsedRealtimeNanos());
 
-            int argIndex = 0;
-            ArrayList<Long> longParams = new ArrayList<>();
-            ArrayList<Double> doubleParams = new ArrayList<>();
-            ArrayList<Boolean> booleanParams = new ArrayList<>();
-            for (Object o : args) {
-                int type = LogDataType.bitmaskToLogDataType(paramsMask, argIndex);
-                try {
-                    switch (type) {
-                        case LogDataType.STRING:
-                            os.write(STR_PARAMS, o.toString());
-                            break;
-                        case LogDataType.LONG:
-                            longParams.add(((Number) o).longValue());
-                            break;
-                        case LogDataType.DOUBLE:
-                            doubleParams.add(((Number) o).doubleValue());
-                            break;
-                        case LogDataType.BOOLEAN:
-                            booleanParams.add((boolean) o);
-                            break;
+            if (args != null) {
+                int argIndex = 0;
+                ArrayList<Long> longParams = new ArrayList<>();
+                ArrayList<Double> doubleParams = new ArrayList<>();
+                ArrayList<Boolean> booleanParams = new ArrayList<>();
+                for (Object o : args) {
+                    int type = LogDataType.bitmaskToLogDataType(paramsMask, argIndex);
+                    try {
+                        switch (type) {
+                            case LogDataType.STRING:
+                                os.write(STR_PARAMS, o.toString());
+                                break;
+                            case LogDataType.LONG:
+                                longParams.add(((Number) o).longValue());
+                                break;
+                            case LogDataType.DOUBLE:
+                                doubleParams.add(((Number) o).doubleValue());
+                                break;
+                            case LogDataType.BOOLEAN:
+                                booleanParams.add((boolean) o);
+                                break;
+                        }
+                    } catch (ClassCastException ex) {
+                        // Should not happen unless there is an error in the ProtoLogTool.
+                        os.write(STR_PARAMS, "(INVALID PARAMS_MASK) " + o.toString());
+                        Slog.e(TAG, "Invalid ProtoLog paramsMask", ex);
                     }
-                } catch (ClassCastException ex) {
-                    // Should not happen unless there is an error in the ProtoLogTool.
-                    os.write(STR_PARAMS, "(INVALID PARAMS_MASK) " + o.toString());
-                    Slog.e(TAG, "Invalid ProtoLog paramsMask", ex);
+                    argIndex++;
                 }
-                argIndex++;
-            }
-            if (longParams.size() > 0) {
-                os.writePackedSInt64(SINT64_PARAMS,
-                        longParams.stream().mapToLong(i -> i).toArray());
-            }
-            if (doubleParams.size() > 0) {
-                os.writePackedDouble(DOUBLE_PARAMS,
-                        doubleParams.stream().mapToDouble(i -> i).toArray());
-            }
-            if (booleanParams.size() > 0) {
-                boolean[] arr = new boolean[booleanParams.size()];
-                for (int i = 0; i < booleanParams.size(); i++) {
-                    arr[i] = booleanParams.get(i);
+                if (longParams.size() > 0) {
+                    os.writePackedSInt64(SINT64_PARAMS,
+                            longParams.stream().mapToLong(i -> i).toArray());
                 }
-                os.writePackedBool(BOOLEAN_PARAMS, arr);
+                if (doubleParams.size() > 0) {
+                    os.writePackedDouble(DOUBLE_PARAMS,
+                            doubleParams.stream().mapToDouble(i -> i).toArray());
+                }
+                if (booleanParams.size() > 0) {
+                    boolean[] arr = new boolean[booleanParams.size()];
+                    for (int i = 0; i < booleanParams.size(); i++) {
+                        arr[i] = booleanParams.get(i);
+                    }
+                    os.writePackedBool(BOOLEAN_PARAMS, arr);
+                }
             }
             os.end(token);
             mBuffer.add(os);

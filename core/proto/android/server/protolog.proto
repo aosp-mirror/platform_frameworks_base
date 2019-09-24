@@ -23,7 +23,7 @@ option java_multiple_files = true;
 /* represents a single log entry */
 message ProtoLogMessage {
     /* log statement identifier, created from message string and log level. */
-    optional fixed32 message_hash = 1;
+    optional sfixed32 message_hash = 1;
     /* log time, relative to the elapsed system time clock. */
     optional fixed64 elapsed_realtime_nanos = 2;
     /* string parameters passed to the log call. */

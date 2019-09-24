@@ -20,6 +20,7 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.StringLiteralExpr
 
 object CodeUtils {
@@ -27,8 +28,9 @@ object CodeUtils {
      * Returns a stable hash of a string.
      * We reimplement String::hashCode() for readability reasons.
      */
-    fun hash(str: String, level: LogLevel): Int {
-        return (level.name + str).map { c -> c.toInt() }.reduce { h, c -> h * 31 + c }
+    fun hash(position: String, messageString: String, logLevel: LogLevel, logGroup: LogGroup): Int {
+        return (position + messageString + logLevel.name + logGroup.name)
+                .map { c -> c.toInt() }.reduce { h, c -> h * 31 + c }
     }
 
     fun isWildcardStaticImported(code: CompilationUnit, className: String): Boolean {
@@ -69,6 +71,13 @@ object CodeUtils {
             }
             else -> throw InvalidProtoLogCallException("messageString must be a string literal " +
                     "or concatenation of string literals.", expr)
+        }
+    }
+
+    fun getPositionString(call: MethodCallExpr, fileName: String): String {
+        return when {
+            call.range.isPresent -> "$fileName:${call.range.get().begin.line}"
+            else -> fileName
         }
     }
 }

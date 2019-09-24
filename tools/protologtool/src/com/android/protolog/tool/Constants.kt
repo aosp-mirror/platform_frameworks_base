@@ -19,6 +19,6 @@ package com.android.protolog.tool
 object Constants {
         const val NAME = "protologtool"
         const val VERSION = "1.0.0"
-        const val IS_LOG_TO_ANY_METHOD = "isLogToAny"
+        const val IS_ENABLED_METHOD = "isEnabled"
         const val ENUM_VALUES_METHOD = "values"
 }

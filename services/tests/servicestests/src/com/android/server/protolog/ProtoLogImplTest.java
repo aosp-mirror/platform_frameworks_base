@@ -351,7 +351,7 @@ public class ProtoLogImplTest {
             ProtoLogData data = readProtoLogSingle(ip);
             assertNotNull(data);
             assertEquals(1234, data.mMessageHash.longValue());
-            assertTrue(before < data.mElapsedTime && data.mElapsedTime < after);
+            assertTrue(before <= data.mElapsedTime && data.mElapsedTime <= after);
             assertArrayEquals(new String[]{"test"}, data.mStrParams.toArray());
             assertArrayEquals(new Long[]{1L, 2L, 3L}, data.mSint64Params.toArray());
             assertArrayEquals(new Double[]{0.4, 0.5, 0.6}, data.mDoubleParams.toArray());
@@ -376,7 +376,7 @@ public class ProtoLogImplTest {
             ProtoLogData data = readProtoLogSingle(ip);
             assertNotNull(data);
             assertEquals(1234, data.mMessageHash.longValue());
-            assertTrue(before < data.mElapsedTime && data.mElapsedTime < after);
+            assertTrue(before <= data.mElapsedTime && data.mElapsedTime <= after);
             assertArrayEquals(new String[]{"test", "(INVALID PARAMS_MASK) true"},
                     data.mStrParams.toArray());
             assertArrayEquals(new Long[]{1L}, data.mSint64Params.toArray());

@@ -78,7 +78,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 835524026, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -88,7 +88,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -986393606, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 805272208, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -100,8 +100,8 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 835524026, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 835524026, 9, "test %d %f", protoLogParam0, protoLogParam1); }
-                    if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 835524026, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -154595499, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -111,7 +111,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (TEST_GROUP.isLogToAny()) { org.example.ProtoLogImpl.w(TEST_GROUP, 1282022424, 0, "test", (Object[]) null); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { org.example.ProtoLogImpl.w(TEST_GROUP, 1913810354, 0, "test", (Object[]) null); }
                 }
             }
             """.trimIndent()
@@ -121,7 +121,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 835524026, 9, null, protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, null, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -131,7 +131,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (TEST_GROUP.isLogToAny()) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, -986393606, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 805272208, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -160,10 +160,13 @@ class SourceTransformerTest {
             }
             """.trimIndent()
         /* ktlint-enable max-line-length */
+
+        private const val PATH = "com.example.Test.java"
     }
 
     private val processor: ProtoLogCallProcessor = Mockito.mock(ProtoLogCallProcessor::class.java)
-    private val sourceJarWriter = SourceTransformer("org.example.ProtoLogImpl", processor)
+    private val implPath = "org.example.ProtoLogImpl"
+    private val sourceJarWriter = SourceTransformer(implPath, processor)
 
     private fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
 
@@ -181,13 +184,13 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE, code)
+        val out = sourceJarWriter.processClass(TEST_CODE, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("TEST_GROUP.${Constants.IS_LOG_TO_ANY_METHOD}()",
+        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
                 ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(3, ifStmt.thenStmt.childNodes.size)
@@ -196,7 +199,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("835524026", methodCall.arguments[1].toString())
+        assertEquals("1922613844", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
         assertEquals("\"test %d %f\"", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -223,13 +226,13 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTICALLS, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTICALLS, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(3, ifStmts.size)
         val ifStmt = ifStmts[1]
-        assertEquals("TEST_GROUP.${Constants.IS_LOG_TO_ANY_METHOD}()",
+        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
                 ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(3, ifStmt.thenStmt.childNodes.size)
@@ -238,7 +241,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("835524026", methodCall.arguments[1].toString())
+        assertEquals("1922613844", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
         assertEquals("\"test %d %f\"", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -261,13 +264,13 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("TEST_GROUP.${Constants.IS_LOG_TO_ANY_METHOD}()",
+        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
                 ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(4, ifStmt.thenStmt.childNodes.size)
@@ -276,7 +279,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(7, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("-986393606", methodCall.arguments[1].toString())
+        assertEquals("805272208", methodCall.arguments[1].toString())
         assertEquals(0b001001.toString(), methodCall.arguments[2].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
         assertEquals("protoLogParam1", methodCall.arguments[5].toString())
@@ -298,13 +301,13 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_NO_PARAMS, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_NO_PARAMS, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("TEST_GROUP.${Constants.IS_LOG_TO_ANY_METHOD}()",
+        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
                 ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(1, ifStmt.thenStmt.childNodes.size)
@@ -313,7 +316,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(5, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("1282022424", methodCall.arguments[1].toString())
+        assertEquals("1913810354", methodCall.arguments[1].toString())
         assertEquals(0.toString(), methodCall.arguments[2].toString())
         assertEquals(TRANSFORMED_CODE_NO_PARAMS, out)
     }
@@ -332,13 +335,13 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE, code)
+        val out = sourceJarWriter.processClass(TEST_CODE, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("TEST_GROUP.${Constants.IS_LOG_TO_ANY_METHOD}()",
+        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
                 ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(3, ifStmt.thenStmt.childNodes.size)
@@ -347,7 +350,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("835524026", methodCall.arguments[1].toString())
+        assertEquals("1922613844", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
         assertEquals("null", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -370,13 +373,13 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("TEST_GROUP.${Constants.IS_LOG_TO_ANY_METHOD}()",
+        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
                 ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(4, ifStmt.thenStmt.childNodes.size)
@@ -385,7 +388,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(7, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("-986393606", methodCall.arguments[1].toString())
+        assertEquals("805272208", methodCall.arguments[1].toString())
         assertEquals(0b001001.toString(), methodCall.arguments[2].toString())
         assertEquals("null", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -408,7 +411,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE, code)
+        val out = sourceJarWriter.processClass(TEST_CODE, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
@@ -433,7 +436,7 @@ class SourceTransformerTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, code)
+        val out = sourceJarWriter.processClass(TEST_CODE_MULTILINE, PATH, code)
         code = StaticJavaParser.parse(out)
 
         val ifStmts = code.findAll(IfStmt::class.java)
