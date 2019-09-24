@@ -162,6 +162,14 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-telephony-common-sources",
+    srcs: [
+        "telephony/common/**/*.java",
+    ],
+    path: "telephony/common",
+}
+
+filegroup {
     name: "framework-wifi-sources",
     srcs: [
         "wifi/java/**/*.java",
@@ -189,6 +197,7 @@ filegroup {
         ":framework-rs-sources",
         ":framework-sax-sources",
         ":framework-telecomm-sources",
+        ":framework-telephony-common-sources",
         ":framework-telephony-sources",
         ":framework-wifi-sources",
         ":PacProcessor-aidl-sources",
@@ -814,6 +823,7 @@ frameworks_base_subdirs = [
     "opengl/java",
     "sax/java",
     "telecomm/java",
+    "telephony/common",
     "telephony/java",
     "wifi/java",
     "lowpan/java",
