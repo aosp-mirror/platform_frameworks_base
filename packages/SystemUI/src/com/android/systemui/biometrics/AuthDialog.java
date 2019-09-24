@@ -124,4 +124,14 @@ public interface AuthDialog {
      * Get the client's package name
      */
     String getOpPackageName();
+
+    /**
+     * Animate to credential UI. Typically called after biometric is locked out.
+     */
+    void animateToCredentialUI();
+
+    /**
+     * @return true if device credential is allowed.
+     */
+    boolean isAllowDeviceCredentials();
 }

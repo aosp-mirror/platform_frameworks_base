@@ -82,7 +82,7 @@ public class AuthContainerView extends LinearLayout
     private final CredentialCallback mCredentialCallback;
 
     @VisibleForTesting final FrameLayout mFrameLayout;
-    private final AuthBiometricView mBiometricView;
+    @VisibleForTesting AuthBiometricView mBiometricView;
     @VisibleForTesting AuthCredentialView mCredentialView;
 
     private final ImageView mBackgroundView;
@@ -275,6 +275,12 @@ public class AuthContainerView extends LinearLayout
         requestFocus();
     }
 
+    @Override
+    public boolean isAllowDeviceCredentials() {
+        return mConfig.mBiometricPromptBundle
+                .getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
+    }
+
     private void addBiometricView() {
         mBiometricView.setRequireConfirmation(mConfig.mRequireConfirmation);
         mBiometricView.setPanelController(mPanelController);
@@ -427,6 +433,11 @@ public class AuthContainerView extends LinearLayout
     @Override
     public String getOpPackageName() {
         return mConfig.mOpPackageName;
+    }
+
+    @Override
+    public void animateToCredentialUI() {
+        mBiometricView.startTransitionToCredentialUI();
     }
 
     @VisibleForTesting

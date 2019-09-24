@@ -22,8 +22,10 @@ import static junit.framework.TestCase.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +35,7 @@ import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
@@ -193,13 +196,67 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testOnErrorInvoked_whenSystemRequested() throws Exception {
         showDialog(BiometricPrompt.TYPE_FACE);
+        final int error = 1;
         final String errMessage = "error message";
-        mBiometricDialogImpl.onBiometricError(errMessage);
+        mBiometricDialogImpl.onBiometricError(error, errMessage);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(mDialog1).onError(captor.capture());
 
         assertEquals(captor.getValue(), errMessage);
+    }
+
+    @Test
+    public void testErrorLockout_whenCredentialAllowed_AnimatesToCredentialUI() throws Exception {
+        showDialog(BiometricPrompt.TYPE_FACE);
+        final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
+        final String errorString = "lockout";
+
+        when(mDialog1.isAllowDeviceCredentials()).thenReturn(true);
+
+        mBiometricDialogImpl.onBiometricError(error, errorString);
+        verify(mDialog1, never()).onError(anyString());
+        verify(mDialog1).animateToCredentialUI();
+    }
+
+    @Test
+    public void testErrorLockoutPermanent_whenCredentialAllowed_AnimatesToCredentialUI()
+            throws Exception {
+        showDialog(BiometricPrompt.TYPE_FACE);
+        final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+        final String errorString = "lockout_permanent";
+
+        when(mDialog1.isAllowDeviceCredentials()).thenReturn(true);
+
+        mBiometricDialogImpl.onBiometricError(error, errorString);
+        verify(mDialog1, never()).onError(anyString());
+        verify(mDialog1).animateToCredentialUI();
+    }
+
+    @Test
+    public void testErrorLockout_whenCredentialNotAllowed_sendsOnError() throws Exception {
+        showDialog(BiometricPrompt.TYPE_FACE);
+        final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
+        final String errorString = "lockout";
+
+        when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
+
+        mBiometricDialogImpl.onBiometricError(error, errorString);
+        verify(mDialog1).onError(eq(errorString));
+        verify(mDialog1, never()).animateToCredentialUI();
+    }
+
+    @Test
+    public void testErrorLockoutPermanent_whenCredentialNotAllowed_sendsOnError() throws Exception {
+        showDialog(BiometricPrompt.TYPE_FACE);
+        final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+        final String errorString = "lockout_permanent";
+
+        when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
+
+        mBiometricDialogImpl.onBiometricError(error, errorString);
+        verify(mDialog1).onError(eq(errorString));
+        verify(mDialog1, never()).animateToCredentialUI();
     }
 
     @Test

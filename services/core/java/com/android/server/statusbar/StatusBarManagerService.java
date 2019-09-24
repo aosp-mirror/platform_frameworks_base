@@ -644,11 +644,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBiometricError(String error) {
+    public void onBiometricError(int errorCode, String error) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.onBiometricError(error);
+                mBar.onBiometricError(errorCode, error);
             } catch (RemoteException ex) {
             }
         }

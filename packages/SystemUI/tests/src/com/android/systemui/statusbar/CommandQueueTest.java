@@ -394,10 +394,11 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricError() {
+        final int errorCode = 1;
         String errorMessage = "test_error_message";
-        mCommandQueue.onBiometricError(errorMessage);
+        mCommandQueue.onBiometricError(errorCode, errorMessage);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricError(eq(errorMessage));
+        verify(mCallbacks).onBiometricError(eq(errorCode), eq(errorMessage));
     }
 
     @Test

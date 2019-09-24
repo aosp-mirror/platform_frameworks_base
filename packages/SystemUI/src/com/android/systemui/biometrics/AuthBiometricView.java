@@ -584,11 +584,7 @@ public abstract class AuthBiometricView extends LinearLayout {
                 mCallback.onAction(Callback.ACTION_USER_CANCELED);
             } else {
                 if (isDeviceCredentialAllowed()) {
-                    updateSize(AuthDialog.SIZE_LARGE);
-                    mHandler.postDelayed(() -> {
-                        mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
-                    }, mInjector.getAnimateCredentialStartDelayMs());
-
+                    startTransitionToCredentialUI();
                 } else {
                     mCallback.onAction(Callback.ACTION_BUTTON_NEGATIVE);
                 }
@@ -605,6 +601,16 @@ public abstract class AuthBiometricView extends LinearLayout {
             mTryAgainButton.setVisibility(View.GONE);
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         });
+    }
+
+    /**
+     * Kicks off the animation process and invokes the callback.
+     */
+    void startTransitionToCredentialUI() {
+        updateSize(AuthDialog.SIZE_LARGE);
+        mHandler.postDelayed(() -> {
+            mCallback.onAction(Callback.ACTION_USE_DEVICE_CREDENTIAL);
+        }, mInjector.getAnimateCredentialStartDelayMs());
     }
 
     @Override

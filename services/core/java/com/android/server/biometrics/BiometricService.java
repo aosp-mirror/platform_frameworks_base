@@ -210,6 +210,9 @@ public class BiometricService extends SystemService {
             return false;
         }
 
+        boolean isAllowDeviceCredential() {
+            return mBundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
+        }
     }
 
     private final Injector mInjector;
@@ -1129,17 +1132,23 @@ public class BiometricService extends SystemService {
         // of their intended receivers.
         try {
             if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
-
                 mCurrentAuthSession.mErrorEscrow = error;
                 mCurrentAuthSession.mErrorStringEscrow = message;
 
                 if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
-                    mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
-
-                    if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                        mStatusBarService.hideBiometricDialog();
+                    final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                            || error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+                    if (mCurrentAuthSession.isAllowDeviceCredential() && errorLockout) {
+                        // SystemUI handles transition from biometric to device credential.
+                        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                        mStatusBarService.onBiometricError(error, message);
                     } else {
-                        mStatusBarService.onBiometricError(message);
+                        mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
+                        if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
+                            mStatusBarService.hideBiometricDialog();
+                        } else {
+                            mStatusBarService.onBiometricError(error, message);
+                        }
                     }
                 } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
                     // In the "try again" state, we should forward canceled errors to
@@ -1164,6 +1173,8 @@ public class BiometricService extends SystemService {
                     Slog.e(TAG, "Impossible pending session error state: "
                             + mPendingAuthSession.mState);
                 }
+            } else {
+                Slog.e(TAG, "Unknown cookie: " + cookie);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);

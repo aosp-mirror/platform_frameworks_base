@@ -18,8 +18,10 @@ package com.android.systemui.biometrics;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -48,6 +50,7 @@ public class AuthContainerViewTest extends SysuiTestCase {
         AuthContainerView.Config config = new AuthContainerView.Config();
         config.mContext = mContext;
         config.mCallback = mCallback;
+        config.mModalityMask |= BiometricAuthenticator.TYPE_FINGERPRINT;
         mAuthContainer = new TestableAuthContainer(config);
     }
 
@@ -95,6 +98,13 @@ public class AuthContainerViewTest extends SysuiTestCase {
         // Credential view is attached to the frame layout
         waitForIdleSync();
         assertEquals(mAuthContainer.mFrameLayout, mAuthContainer.mCredentialView.getParent());
+    }
+
+    @Test
+    public void testAnimateToCredentialUI_invokesStartTransitionToCredentialUI() {
+        mAuthContainer.mBiometricView = mock(AuthBiometricView.class);
+        mAuthContainer.animateToCredentialUI();
+        verify(mAuthContainer.mBiometricView).startTransitionToCredentialUI();
     }
 
     private class TestableAuthContainer extends AuthContainerView {

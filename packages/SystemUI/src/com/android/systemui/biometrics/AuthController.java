@@ -23,6 +23,7 @@ import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
@@ -242,9 +243,16 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void onBiometricError(String error) {
-        if (DEBUG) Log.d(TAG, "onBiometricError: " + error);
-        mCurrentDialog.onError(error);
+    public void onBiometricError(int errorCode, String error) {
+        if (DEBUG) Log.d(TAG, "onBiometricError: " + errorCode + ", " + error);
+
+        final boolean isLockout = errorCode == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                || errorCode == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+        if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
+            mCurrentDialog.animateToCredentialUI();
+        } else {
+            mCurrentDialog.onError(error);
+        }
     }
 
     @Override

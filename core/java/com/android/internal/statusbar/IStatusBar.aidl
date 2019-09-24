@@ -159,7 +159,7 @@ oneway interface IStatusBar
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
     void onBiometricHelp(String message);
     // Used to set a message - the dialog will dismiss after a certain amount of time
-    void onBiometricError(String error);
+    void onBiometricError(int errorCode, String error);
     // Used to hide the biometric dialog when the AuthenticationClient is stopped
     void hideBiometricDialog();
 
