@@ -170,39 +170,3 @@ android_app {
     required: ["privapp_whitelist_com.android.systemui"],
 
 }
-
-// Only used for products that are shipping legacy Recents
-android_app {
-    name: "SystemUIWithLegacyRecents",
-    overrides: [
-        "SystemUI",
-    ],
-
-    platform_apis: true,
-    certificate: "platform",
-    privileged: true,
-
-    dxflags: ["--multi-dex"],
-    optimize: {
-        proguard_flags_files: ["proguard.flags", "legacy/recents/proguard.flags"],
-    },
-
-    static_libs: [
-        "SystemUI-core",
-    ],
-    libs: [
-        "telephony-common",
-    ],
-
-    kotlincflags: ["-Xjvm-default=enable"],
-
-    srcs: [
-        "legacy/recents/src/**/*.java",
-        "legacy/recents/src/**/I*.aidl",
-    ],
-    resource_dirs: [
-        "legacy/recents/res",
-    ],
-
-    manifest: "legacy/recents/AndroidManifest.xml",
-}
