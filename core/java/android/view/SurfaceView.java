@@ -675,6 +675,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mTmpTransaction.remove(mBackgroundControl);
                 mBackgroundControl = null;
             }
+            mSurface.release();
             mTmpTransaction.apply();
         }
     }
@@ -962,7 +963,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 } finally {
                     mIsCreating = false;
                     if (mSurfaceControl != null && !mSurfaceCreated) {
-                        mSurface.release();
                         releaseSurfaces();
                     }
                 }
@@ -1143,6 +1143,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     mRtTransaction.remove(mBackgroundControl);
                     mSurfaceControl = null;
                     mBackgroundControl = null;
+                    mSurface.release();
                 }
                 mRtHandlingPositionUpdates = false;
             }
