@@ -274,6 +274,7 @@ public class ConnectivityServiceTest {
     private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
     private static final String WIFI_IFNAME = "test_wlan0";
+    private static final String WIFI_WOL_IFNAME = "test_wlan_wol";
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     private MockContext mServiceContext;
@@ -341,6 +342,12 @@ public class ConnectivityServiceTest {
                             "wifi,1,1,1,-1,true",
                             "mobile,0,0,0,-1,true",
                             "mobile_mms,2,0,2,60000,true",
+                    });
+
+            when(mResources.getStringArray(
+                    com.android.internal.R.array.config_wakeonlan_supported_interfaces))
+                    .thenReturn(new String[]{
+                            WIFI_WOL_IFNAME,
                     });
 
             mContentResolver = new MockContentResolver();
@@ -5945,6 +5952,24 @@ public class ConnectivityServiceTest {
         assertContainsExactly(uidCaptor.getValue(), APP1_UID, APP2_UID);
         inOrder.verify(mMockNetd).firewallAddUidInterfaceRules(eq("tun0"), uidCaptor.capture());
         assertContainsExactly(uidCaptor.getValue(), APP2_UID);
+    }
+
+    @Test
+    public void testLinkPropertiesWithWakeOnLanForActiveNetwork() throws Exception {
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+
+        LinkProperties wifiLp = new LinkProperties();
+        wifiLp.setInterfaceName(WIFI_WOL_IFNAME);
+        wifiLp.setWakeOnLanSupported(false);
+
+        // Default network switch should update ifaces.
+        mWiFiNetworkAgent.connect(false);
+        mWiFiNetworkAgent.sendLinkProperties(wifiLp);
+        waitForIdle();
+
+        // ConnectivityService should have changed the WakeOnLanSupported to true
+        wifiLp.setWakeOnLanSupported(true);
+        assertEquals(wifiLp, mService.getActiveLinkProperties());
     }
 
 
