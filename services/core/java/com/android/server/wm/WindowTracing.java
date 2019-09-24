@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.os.Build.IS_USER;
 
 import static com.android.server.wm.WindowManagerTraceFileProto.ENTRY;
+import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER;
+import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_H;
+import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_L;
 import static com.android.server.wm.WindowManagerTraceProto.ELAPSED_REALTIME_NANOS;
 import static com.android.server.wm.WindowManagerTraceProto.WHERE;
 import static com.android.server.wm.WindowManagerTraceProto.WINDOW_MANAGER_SERVICE;
@@ -30,6 +33,9 @@ import android.os.Trace;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
+
+import com.android.server.protolog.ProtoLogImpl;
+import com.android.server.utils.TraceBuffer;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,6 +56,7 @@ class WindowTracing {
     private static final int BUFFER_CAPACITY_ALL = 4096 * 1024;
     private static final String TRACE_FILENAME = "/data/misc/wmtrace/wm_trace.pb";
     private static final String TAG = "WindowTracing";
+    private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
     private final WindowManagerService mService;
     private final Choreographer mChoreographer;
@@ -57,7 +64,7 @@ class WindowTracing {
 
     private final Object mEnabledLock = new Object();
     private final File mTraceFile;
-    private final WindowTraceBuffer mBuffer;
+    private final com.android.server.utils.TraceBuffer mBuffer;
     private final Choreographer.FrameCallback mFrameCallback = (frameTimeNanos) ->
             log("onFrame" /* where */);
 
@@ -84,7 +91,7 @@ class WindowTracing {
         mService = service;
         mGlobalLock = globalLock;
         mTraceFile = file;
-        mBuffer = new WindowTraceBuffer(bufferCapacity);
+        mBuffer = new TraceBuffer(bufferCapacity);
         setLogLevel(WindowTraceLogLevel.TRIM, null /* pw */);
     }
 
@@ -94,6 +101,7 @@ class WindowTracing {
             return;
         }
         synchronized (mEnabledLock) {
+            ProtoLogImpl.getSingleInstance().startProtoLog(pw);
             logAndPrintln(pw, "Start tracing to " + mTraceFile + ".");
             mBuffer.resetBuffer();
             mEnabled = mEnabledLockFree = true;
@@ -132,6 +140,7 @@ class WindowTracing {
                 logAndPrintln(pw, "Trace written to " + mTraceFile + ".");
             }
         }
+        ProtoLogImpl.getSingleInstance().stopProtoLog(pw, writeToFile);
     }
 
     private void setLogLevel(@WindowTraceLogLevel int logLevel, PrintWriter pw) {
@@ -317,6 +326,7 @@ class WindowTracing {
         synchronized (mEnabledLock) {
             writeTraceToFileLocked();
         }
+        ProtoLogImpl.getSingleInstance().writeProtoLogToFile();
     }
 
     private void logAndPrintln(@Nullable PrintWriter pw, String msg) {
@@ -334,7 +344,9 @@ class WindowTracing {
     private void writeTraceToFileLocked() {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "writeTraceToFileLocked");
-            mBuffer.writeTraceToFile(mTraceFile);
+            ProtoOutputStream proto = new ProtoOutputStream();
+            proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+            mBuffer.writeTraceToFile(mTraceFile, proto);
         } catch (IOException e) {
             Log.e(TAG, "Unable to write buffer to file", e);
         } finally {

@@ -30,9 +30,9 @@ cc_library_static {
 }
 
 java_library_host {
-    name: "windowmanager-log-proto",
+    name: "protolog-proto",
     srcs: [
-        "android/server/windowmanagerlog.proto"
+        "android/server/protolog.proto"
     ],
     proto: {
         type: "full",
