@@ -24,7 +24,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTIO
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
@@ -1514,7 +1514,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         // These are flags that can change base on user actions.
         final int userSettableMask = FLAG_PERMISSION_USER_SET
                 | FLAG_PERMISSION_USER_FIXED
-                | FLAG_PERMISSION_REVOKE_ON_UPGRADE
+                | FLAG_PERMISSION_REVOKED_COMPAT
                 | FLAG_PERMISSION_REVIEW_REQUIRED;
 
         final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
@@ -1624,7 +1624,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
             final int targetSdk = mPackageManagerInt.getUidTargetSdkVersion(uid);
             final int flags = (targetSdk < Build.VERSION_CODES.M && bp.isRuntime())
-                    ? FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKE_ON_UPGRADE
+                    ? FLAG_PERMISSION_REVIEW_REQUIRED | FLAG_PERMISSION_REVOKED_COMPAT
                     : 0;
 
             updatePermissionFlagsInternal(
@@ -2536,8 +2536,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                         wasChanged = true;
                                     }
 
-                                    if ((flags & FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0) {
-                                        flags &= ~FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                                    if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0) {
+                                        flags &= ~FLAG_PERMISSION_REVOKED_COMPAT;
                                         wasChanged = true;
                                     // Hard restricted permissions cannot be held.
                                     } else if (!permissionPolicyInitialized
@@ -2556,7 +2556,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                                 bp.getSourcePackageName())) {
                                             if (!bp.isRemoved()) {
                                                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED
-                                                        | FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                                                        | FLAG_PERMISSION_REVOKED_COMPAT;
                                                 wasChanged = true;
                                             }
                                         }
@@ -2671,8 +2671,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                         wasChanged = true;
                                     }
 
-                                    if ((flags & FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0) {
-                                        flags &= ~FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                                    if ((flags & FLAG_PERMISSION_REVOKED_COMPAT) != 0) {
+                                        flags &= ~FLAG_PERMISSION_REVOKED_COMPAT;
                                         wasChanged = true;
                                     // Hard restricted permissions cannot be held.
                                     } else if (!permissionPolicyInitialized ||

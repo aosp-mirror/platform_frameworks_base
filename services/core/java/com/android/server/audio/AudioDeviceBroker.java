@@ -57,6 +57,13 @@ import java.io.PrintWriter;
     private final @NonNull AudioService mAudioService;
     private final @NonNull Context mContext;
 
+    /** Forced device usage for communications sent to AudioSystem */
+    private int mForcedUseForComm;
+    /**
+     * Externally reported force device usage state returned by getters: always consistent
+     * with requests by setters */
+    private int mForcedUseForCommExt;
+
     // Manages all connected devices, only ever accessed on the message loop
     private final AudioDeviceInventory mDeviceInventory;
     // Manages notifications to BT service
@@ -64,34 +71,24 @@ import java.io.PrintWriter;
 
 
     //-------------------------------------------------------------------
-    /**
-     * Lock to guard:
-     * - any changes to the message queue: enqueueing or removing any message
-     * - state of A2DP enabled
-     * - force use for communication + SCO changes
-     */
-    private final Object mDeviceBrokerLock = new Object();
-
-    @GuardedBy("mDeviceBrokerLock")
+    // we use a different lock than mDeviceStateLock so as not to create
+    // lock contention between enqueueing a message and handling them
+    private static final Object sLastDeviceConnectionMsgTimeLock = new Object();
+    @GuardedBy("sLastDeviceConnectionMsgTimeLock")
     private static long sLastDeviceConnectMsgTime = 0;
 
+    // General lock to be taken whenever the state of the audio devices is to be checked or changed
+    private final Object mDeviceStateLock = new Object();
 
-    /** Request to override default use of A2DP for media */
-    @GuardedBy("mDeviceBrokerLock")
+    // Request to override default use of A2DP for media.
+    @GuardedBy("mDeviceStateLock")
     private boolean mBluetoothA2dpEnabled;
 
-    /** Forced device usage for communications sent to AudioSystem */
-    @GuardedBy("mDeviceBrokerLock")
-    private int mForcedUseForComm;
-    /**
-     * Externally reported force device usage state returned by getters: always consistent
-     * with requests by setters */
-    @GuardedBy("mDeviceBrokerLock")
-    private int mForcedUseForCommExt;
-
+    // lock always taken when accessing AudioService.mSetModeDeathHandlers
+    // TODO do not "share" the lock between AudioService and BtHelpr, see b/123769055
+    /*package*/ final Object mSetModeLock = new Object();
 
     //-------------------------------------------------------------------
-    /** Normal constructor used by AudioService */
     /*package*/ AudioDeviceBroker(@NonNull Context context, @NonNull AudioService service) {
         mContext = context;
         mAudioService = service;
@@ -130,37 +127,36 @@ import java.io.PrintWriter;
     // All post* methods are asynchronous
 
     /*package*/ void onSystemReady() {
-        mBtHelper.onSystemReady();
+        synchronized (mSetModeLock) {
+            synchronized (mDeviceStateLock) {
+                mBtHelper.onSystemReady();
+            }
+        }
     }
 
     /*package*/ void onAudioServerDied() {
         // Restore forced usage for communications and record
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             AudioSystem.setParameters(
                     "BT_SCO=" + (mForcedUseForComm == AudioSystem.FORCE_BT_SCO ? "on" : "off"));
             onSetForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, "onAudioServerDied");
             onSetForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm, "onAudioServerDied");
-
-            // restore devices
-            sendMsgNoDelay(MSG_RESTORE_DEVICES, SENDMSG_REPLACE);
         }
+        // restore devices
+        sendMsgNoDelay(MSG_RESTORE_DEVICES, SENDMSG_REPLACE);
     }
 
     /*package*/ void setForceUse_Async(int useCase, int config, String eventSource) {
-        synchronized (mDeviceBrokerLock) {
-            sendIILMsgNoDelay(MSG_IIL_SET_FORCE_USE, SENDMSG_QUEUE,
-                    useCase, config, eventSource);
-        }
+        sendIILMsgNoDelay(MSG_IIL_SET_FORCE_USE, SENDMSG_QUEUE,
+                useCase, config, eventSource);
     }
 
     /*package*/ void toggleHdmiIfConnected_Async() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_TOGGLE_HDMI, SENDMSG_QUEUE);
-        }
+        sendMsgNoDelay(MSG_TOGGLE_HDMI, SENDMSG_QUEUE);
     }
 
     /*package*/ void disconnectAllBluetoothProfiles() {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             mBtHelper.disconnectAllBluetoothProfiles();
         }
     }
@@ -172,11 +168,15 @@ import java.io.PrintWriter;
      * @param intent
      */
     /*package*/ void receiveBtEvent(@NonNull Intent intent) {
-        mBtHelper.receiveBtEvent(intent);
+        synchronized (mSetModeLock) {
+            synchronized (mDeviceStateLock) {
+                mBtHelper.receiveBtEvent(intent);
+            }
+        }
     }
 
     /*package*/ void setBluetoothA2dpOn_Async(boolean on, String source) {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             if (mBluetoothA2dpEnabled == on) {
                 return;
             }
@@ -196,7 +196,7 @@ import java.io.PrintWriter;
      * @return true if speakerphone state changed
      */
     /*package*/ boolean setSpeakerphoneOn(boolean on, String eventSource) {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             final boolean wasOn = isSpeakerphoneOn();
             if (on) {
                 if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
@@ -214,7 +214,7 @@ import java.io.PrintWriter;
     }
 
     /*package*/ boolean isSpeakerphoneOn() {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             return (mForcedUseForCommExt == AudioSystem.FORCE_SPEAKER);
         }
     }
@@ -223,7 +223,9 @@ import java.io.PrintWriter;
             @AudioService.ConnectionState int state, String address, String name,
             String caller) {
         //TODO move logging here just like in setBluetooth* methods
-        mDeviceInventory.setWiredDeviceConnectionState(type, state, address, name, caller);
+        synchronized (mDeviceStateLock) {
+            mDeviceInventory.setWiredDeviceConnectionState(type, state, address, name, caller);
+        }
     }
 
     private static final class BtDeviceConnectionInfo {
@@ -257,24 +259,27 @@ import java.io.PrintWriter;
         final BtDeviceConnectionInfo info = new BtDeviceConnectionInfo(device, state, profile,
                 suppressNoisyIntent, a2dpVolume);
 
-        synchronized (mDeviceBrokerLock) {
-            // when receiving a request to change the connection state of a device, this last
-            // request is the source of truth, so cancel all previous requests
-            mBrokerHandler.removeMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
-                    device);
-            mBrokerHandler.removeMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION,
-                    device);
-            mBrokerHandler.removeMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED,
-                    device);
-            mBrokerHandler.removeMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
-                    device);
+        // when receiving a request to change the connection state of a device, this last request
+        // is the source of truth, so cancel all previous requests
+        removeAllA2dpConnectionEvents(device);
 
-            sendLMsgNoDelay(
-                    state == BluetoothProfile.STATE_CONNECTED
-                            ? MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION
-                            : MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
-                    SENDMSG_QUEUE, info);
-        }
+        sendLMsgNoDelay(
+                state == BluetoothProfile.STATE_CONNECTED
+                        ? MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION
+                        : MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
+                SENDMSG_QUEUE, info);
+    }
+
+    /** remove all previously scheduled connection and disconnection events for the given device */
+    private void removeAllA2dpConnectionEvents(@NonNull BluetoothDevice device) {
+        mBrokerHandler.removeMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
+                device);
+        mBrokerHandler.removeMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION,
+                device);
+        mBrokerHandler.removeMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED,
+                device);
+        mBrokerHandler.removeMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
+                device);
     }
 
     private static final class HearingAidDeviceConnectionInfo {
@@ -300,27 +305,25 @@ import java.io.PrintWriter;
             boolean suppressNoisyIntent, int musicDevice, @NonNull String eventSource) {
         final HearingAidDeviceConnectionInfo info = new HearingAidDeviceConnectionInfo(
                 device, state, suppressNoisyIntent, musicDevice, eventSource);
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT, SENDMSG_QUEUE, info);
-        }
+        sendLMsgNoDelay(MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT, SENDMSG_QUEUE, info);
     }
 
     // never called by system components
     /*package*/ void setBluetoothScoOnByApp(boolean on) {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             mForcedUseForCommExt = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
         }
     }
 
     /*package*/ boolean isBluetoothScoOnForApp() {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             return mForcedUseForCommExt == AudioSystem.FORCE_BT_SCO;
         }
     }
 
     /*package*/ void setBluetoothScoOn(boolean on, String eventSource) {
         //Log.i(TAG, "setBluetoothScoOnInt: " + on + " " + eventSource);
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             if (on) {
                 // do not accept SCO ON if SCO audio is not connected
                 if (!mBtHelper.isBluetoothScoOn()) {
@@ -343,55 +346,58 @@ import java.io.PrintWriter;
     }
 
     /*package*/ AudioRoutesInfo startWatchingRoutes(IAudioRoutesObserver observer) {
-        return mDeviceInventory.startWatchingRoutes(observer);
-
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.startWatchingRoutes(observer);
+        }
     }
 
     /*package*/ AudioRoutesInfo getCurAudioRoutes() {
-        return mDeviceInventory.getCurAudioRoutes();
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.getCurAudioRoutes();
+        }
     }
 
     /*package*/ boolean isAvrcpAbsoluteVolumeSupported() {
-        return mBtHelper.isAvrcpAbsoluteVolumeSupported();
+        synchronized (mDeviceStateLock) {
+            return mBtHelper.isAvrcpAbsoluteVolumeSupported();
+        }
     }
 
     /*package*/ boolean isBluetoothA2dpOn() {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             return mBluetoothA2dpEnabled;
         }
     }
 
     /*package*/ void postSetAvrcpAbsoluteVolumeIndex(int index) {
-        synchronized (mDeviceBrokerLock) {
-            sendIMsgNoDelay(MSG_I_SET_AVRCP_ABSOLUTE_VOLUME, SENDMSG_REPLACE, index);
-        }
+        sendIMsgNoDelay(MSG_I_SET_AVRCP_ABSOLUTE_VOLUME, SENDMSG_REPLACE, index);
     }
 
     /*package*/ void postSetHearingAidVolumeIndex(int index, int streamType) {
-        synchronized (mDeviceBrokerLock) {
-            sendIIMsgNoDelay(MSG_II_SET_HEARING_AID_VOLUME, SENDMSG_REPLACE, index, streamType);
-        }
+        sendIIMsgNoDelay(MSG_II_SET_HEARING_AID_VOLUME, SENDMSG_REPLACE, index, streamType);
     }
 
     /*package*/ void postDisconnectBluetoothSco(int exceptPid) {
-        synchronized (mDeviceBrokerLock) {
-            sendIMsgNoDelay(MSG_I_DISCONNECT_BT_SCO, SENDMSG_REPLACE, exceptPid);
-        }
+        sendIMsgNoDelay(MSG_I_DISCONNECT_BT_SCO, SENDMSG_REPLACE, exceptPid);
     }
 
     /*package*/ void postBluetoothA2dpDeviceConfigChange(@NonNull BluetoothDevice device) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_A2DP_DEVICE_CONFIG_CHANGE, SENDMSG_QUEUE, device);
+        sendLMsgNoDelay(MSG_L_A2DP_DEVICE_CONFIG_CHANGE, SENDMSG_QUEUE, device);
+    }
+
+    @GuardedBy("mSetModeLock")
+    /*package*/ void startBluetoothScoForClient_Sync(IBinder cb, int scoAudioMode,
+                @NonNull String eventSource) {
+        synchronized (mDeviceStateLock) {
+            mBtHelper.startBluetoothScoForClient(cb, scoAudioMode, eventSource);
         }
     }
 
-    /*package*/ void startBluetoothScoForClient_Sync(IBinder cb, int scoAudioMode,
-                @NonNull String eventSource) {
-        mBtHelper.startBluetoothScoForClient(cb, scoAudioMode, eventSource);
-    }
-
+    @GuardedBy("mSetModeLock")
     /*package*/ void stopBluetoothScoForClient_Sync(IBinder cb, @NonNull String eventSource) {
-        mBtHelper.stopBluetoothScoForClient(cb, eventSource);
+        synchronized (mDeviceStateLock) {
+            mBtHelper.stopBluetoothScoForClient(cb, eventSource);
+        }
     }
 
     //---------------------------------------------------------------------
@@ -454,109 +460,77 @@ import java.io.PrintWriter;
     //---------------------------------------------------------------------
     // Message handling on behalf of helper classes
     /*package*/ void postBroadcastScoConnectionState(int state) {
-        synchronized (mDeviceBrokerLock) {
-            sendIMsgNoDelay(MSG_I_BROADCAST_BT_CONNECTION_STATE, SENDMSG_QUEUE, state);
-        }
+        sendIMsgNoDelay(MSG_I_BROADCAST_BT_CONNECTION_STATE, SENDMSG_QUEUE, state);
     }
 
     /*package*/ void postBroadcastBecomingNoisy() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_BROADCAST_AUDIO_BECOMING_NOISY, SENDMSG_REPLACE);
-        }
+        sendMsgNoDelay(MSG_BROADCAST_AUDIO_BECOMING_NOISY, SENDMSG_REPLACE);
     }
 
     /*package*/ void postA2dpSinkConnection(@AudioService.BtProfileConnectionState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo, int delay) {
-        synchronized (mDeviceBrokerLock) {
-            sendILMsg(state == BluetoothA2dp.STATE_CONNECTED
-                            ? MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED
-                            : MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
-                    SENDMSG_QUEUE,
-                    state, btDeviceInfo, delay);
-        }
+        sendILMsg(state == BluetoothA2dp.STATE_CONNECTED
+                        ? MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED
+                        : MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
+                SENDMSG_QUEUE,
+                state, btDeviceInfo, delay);
     }
 
     /*package*/ void postA2dpSourceConnection(@AudioService.BtProfileConnectionState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo, int delay) {
-        synchronized (mDeviceBrokerLock) {
-            sendILMsg(MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE, SENDMSG_QUEUE,
-                    state, btDeviceInfo, delay);
-        }
+        sendILMsg(MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE, SENDMSG_QUEUE,
+                state, btDeviceInfo, delay);
     }
 
     /*package*/ void postSetWiredDeviceConnectionState(
             AudioDeviceInventory.WiredDeviceConnectionState connectionState, int delay) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsg(MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE, SENDMSG_QUEUE,
-                    connectionState, delay);
-        }
+        sendLMsg(MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE, SENDMSG_QUEUE, connectionState, delay);
     }
 
     /*package*/ void postSetHearingAidConnectionState(
             @AudioService.BtProfileConnectionState int state,
             @NonNull BluetoothDevice device, int delay) {
-        synchronized (mDeviceBrokerLock) {
-            sendILMsg(MSG_IL_SET_HEARING_AID_CONNECTION_STATE, SENDMSG_QUEUE,
-                    state,
-                    device,
-                    delay);
-        }
+        sendILMsg(MSG_IL_SET_HEARING_AID_CONNECTION_STATE, SENDMSG_QUEUE,
+                state,
+                device,
+                delay);
     }
 
     /*package*/ void postDisconnectA2dp() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_DISCONNECT_A2DP, SENDMSG_QUEUE);
-        }
+        sendMsgNoDelay(MSG_DISCONNECT_A2DP, SENDMSG_QUEUE);
     }
 
     /*package*/ void postDisconnectA2dpSink() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_DISCONNECT_A2DP_SINK, SENDMSG_QUEUE);
-        }
+        sendMsgNoDelay(MSG_DISCONNECT_A2DP_SINK, SENDMSG_QUEUE);
     }
 
     /*package*/ void postDisconnectHearingAid() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_DISCONNECT_BT_HEARING_AID, SENDMSG_QUEUE);
-        }
+        sendMsgNoDelay(MSG_DISCONNECT_BT_HEARING_AID, SENDMSG_QUEUE);
     }
 
     /*package*/ void postDisconnectHeadset() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_DISCONNECT_BT_HEADSET, SENDMSG_QUEUE);
-        }
+        sendMsgNoDelay(MSG_DISCONNECT_BT_HEADSET, SENDMSG_QUEUE);
     }
 
     /*package*/ void postBtA2dpProfileConnected(BluetoothA2dp a2dpProfile) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP, SENDMSG_QUEUE, a2dpProfile);
-        }
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP, SENDMSG_QUEUE, a2dpProfile);
     }
 
     /*package*/ void postBtA2dpSinkProfileConnected(BluetoothProfile profile) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK, SENDMSG_QUEUE, profile);
-        }
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK, SENDMSG_QUEUE, profile);
     }
 
     /*package*/ void postBtHeasetProfileConnected(BluetoothHeadset headsetProfile) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET, SENDMSG_QUEUE,
-                    headsetProfile);
-        }
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET, SENDMSG_QUEUE, headsetProfile);
     }
 
     /*package*/ void postBtHearingAidProfileConnected(BluetoothHearingAid hearingAidProfile) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID, SENDMSG_QUEUE,
-                    hearingAidProfile);
-        }
+        sendLMsgNoDelay(MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID, SENDMSG_QUEUE,
+                hearingAidProfile);
     }
 
     /*package*/ void postScoClientDied(Object obj) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_SCOCLIENT_DIED, SENDMSG_QUEUE, obj);
-        }
+        sendLMsgNoDelay(MSG_L_SCOCLIENT_DIED, SENDMSG_QUEUE, obj);
     }
 
     //---------------------------------------------------------------------
@@ -571,7 +545,7 @@ import java.io.PrintWriter;
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).append(" src:").append(source).toString();
 
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             mBluetoothA2dpEnabled = on;
             mBrokerHandler.removeMessages(MSG_IIL_SET_FORCE_BT_A2DP_USE);
             onSetForceUse(
@@ -583,85 +557,71 @@ import java.io.PrintWriter;
 
     /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
                                                        String deviceName) {
-        return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName);
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName);
+        }
     }
 
     /*package*/ void postSetA2dpSourceConnectionState(@BluetoothProfile.BtProfileState int state,
             @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
         final int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
-        synchronized (mDeviceBrokerLock) {
-            sendILMsgNoDelay(MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE, SENDMSG_QUEUE, state,
-                    btDeviceInfo);
-        }
+        sendILMsgNoDelay(MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE, SENDMSG_QUEUE, state,
+                btDeviceInfo);
     }
 
     /*package*/ void handleFailureToConnectToBtHeadsetService(int delay) {
-        synchronized (mDeviceBrokerLock) {
-            sendMsg(MSG_BT_HEADSET_CNCT_FAILED, SENDMSG_REPLACE, delay);
-        }
+        sendMsg(MSG_BT_HEADSET_CNCT_FAILED, SENDMSG_REPLACE, delay);
     }
 
     /*package*/ void handleCancelFailureToConnectToBtHeadsetService() {
-        synchronized (mDeviceBrokerLock) {
-            mBrokerHandler.removeMessages(MSG_BT_HEADSET_CNCT_FAILED);
-        }
+        mBrokerHandler.removeMessages(MSG_BT_HEADSET_CNCT_FAILED);
     }
 
     /*package*/ void postReportNewRoutes() {
-        synchronized (mDeviceBrokerLock) {
-            sendMsgNoDelay(MSG_REPORT_NEW_ROUTES, SENDMSG_NOOP);
-        }
+        sendMsgNoDelay(MSG_REPORT_NEW_ROUTES, SENDMSG_NOOP);
     }
 
     /*package*/ void cancelA2dpDockTimeout() {
-        synchronized (mDeviceBrokerLock) {
-            mBrokerHandler.removeMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
-        }
+        mBrokerHandler.removeMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
     }
 
-    // FIXME: used by?
     /*package*/ void postA2dpActiveDeviceChange(
                     @NonNull BtHelper.BluetoothA2dpDeviceInfo btDeviceInfo) {
-        synchronized (mDeviceBrokerLock) {
-            sendLMsgNoDelay(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE, SENDMSG_QUEUE, btDeviceInfo);
-        }
+        sendLMsgNoDelay(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE, SENDMSG_QUEUE, btDeviceInfo);
     }
 
     /*package*/ boolean hasScheduledA2dpDockTimeout() {
-        synchronized (mDeviceBrokerLock) {
-            return mBrokerHandler.hasMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
-        }
+        return mBrokerHandler.hasMessages(MSG_IL_BTA2DP_DOCK_TIMEOUT);
     }
 
     // must be called synchronized on mConnectedDevices
     /*package*/ boolean hasScheduledA2dpSinkConnectionState(BluetoothDevice btDevice) {
-        synchronized (mDeviceBrokerLock) {
-            return (mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED,
-                    new BtHelper.BluetoothA2dpDeviceInfo(btDevice))
-                    || mBrokerHandler.hasMessages(
-                            MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
-                            new BtHelper.BluetoothA2dpDeviceInfo(btDevice)));
-        }
+        return (mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED,
+                        new BtHelper.BluetoothA2dpDeviceInfo(btDevice))
+                || mBrokerHandler.hasMessages(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED,
+                        new BtHelper.BluetoothA2dpDeviceInfo(btDevice)));
     }
 
     /*package*/ void setA2dpDockTimeout(String address, int a2dpCodec, int delayMs) {
-        synchronized (mDeviceBrokerLock) {
-            sendILMsg(MSG_IL_BTA2DP_DOCK_TIMEOUT, SENDMSG_QUEUE, a2dpCodec, address, delayMs);
-        }
+        sendILMsg(MSG_IL_BTA2DP_DOCK_TIMEOUT, SENDMSG_QUEUE, a2dpCodec, address, delayMs);
     }
 
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean supported) {
-        mBtHelper.setAvrcpAbsoluteVolumeSupported(supported);
+        synchronized (mDeviceStateLock) {
+            mBtHelper.setAvrcpAbsoluteVolumeSupported(supported);
+        }
     }
 
     /*package*/ boolean getBluetoothA2dpEnabled() {
-        synchronized (mDeviceBrokerLock) {
+        synchronized (mDeviceStateLock) {
             return mBluetoothA2dpEnabled;
         }
     }
 
     /*package*/ int getA2dpCodec(@NonNull BluetoothDevice device) {
-        return mBtHelper.getA2dpCodec(device);
+        synchronized (mDeviceStateLock) {
+            return mBtHelper.getA2dpCodec(device);
+        }
     }
 
     /*package*/ void dump(PrintWriter pw, String prefix) {
@@ -749,50 +709,68 @@ import java.io.PrintWriter;
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_RESTORE_DEVICES:
-                    mDeviceInventory.onRestoreDevices();
-                    mBtHelper.onAudioServerDiedRestoreA2dp();
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onRestoreDevices();
+                        mBtHelper.onAudioServerDiedRestoreA2dp();
+                    }
                     break;
                 case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
-                    mDeviceInventory.onSetWiredDeviceConnectionState(
-                            (AudioDeviceInventory.WiredDeviceConnectionState) msg.obj);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onSetWiredDeviceConnectionState(
+                                (AudioDeviceInventory.WiredDeviceConnectionState) msg.obj);
+                    }
                     break;
                 case MSG_I_BROADCAST_BT_CONNECTION_STATE:
-                    mBtHelper.onBroadcastScoConnectionState(msg.arg1);
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onBroadcastScoConnectionState(msg.arg1);
+                    }
                     break;
                 case MSG_IIL_SET_FORCE_USE: // intended fall-through
                 case MSG_IIL_SET_FORCE_BT_A2DP_USE:
                     onSetForceUse(msg.arg1, msg.arg2, (String) msg.obj);
                     break;
                 case MSG_REPORT_NEW_ROUTES:
-                    mDeviceInventory.onReportNewRoutes();
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onReportNewRoutes();
+                    }
                     break;
                 case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED:
                 case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
-                    mDeviceInventory.onSetA2dpSinkConnectionState(
-                            (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onSetA2dpSinkConnectionState(
+                                (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1);
+                    }
                     break;
                 case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
-                    mDeviceInventory.onSetA2dpSourceConnectionState(
-                            (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onSetA2dpSourceConnectionState(
+                                (BtHelper.BluetoothA2dpDeviceInfo) msg.obj, msg.arg1);
+                    }
                     break;
                 case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
-                    mDeviceInventory.onSetHearingAidConnectionState(
-                            (BluetoothDevice) msg.obj, msg.arg1,
-                            mAudioService.getHearingAidStreamType());
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onSetHearingAidConnectionState(
+                                (BluetoothDevice) msg.obj, msg.arg1,
+                                mAudioService.getHearingAidStreamType());
+                    }
                     break;
                 case MSG_BT_HEADSET_CNCT_FAILED:
-                    mBtHelper.resetBluetoothSco();
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.resetBluetoothSco();
+                        }
+                    }
                     break;
                 case MSG_IL_BTA2DP_DOCK_TIMEOUT:
                     // msg.obj  == address of BTA2DP device
-                    mDeviceInventory.onMakeA2dpDeviceUnavailableNow((String) msg.obj, msg.arg1);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onMakeA2dpDeviceUnavailableNow((String) msg.obj, msg.arg1);
+                    }
                     break;
                 case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
                     final int a2dpCodec;
                     final BluetoothDevice btDevice = (BluetoothDevice) msg.obj;
-                    synchronized (mDeviceBrokerLock) {
-                        // FIXME why isn't the codec coming with the request? lock shouldn't be
-                        // needed here
+                    synchronized (mDeviceStateLock) {
                         a2dpCodec = mBtHelper.getA2dpCodec(btDevice);
                         mDeviceInventory.onBluetoothA2dpActiveDeviceChange(
                                 new BtHelper.BluetoothA2dpDeviceInfo(btDevice, -1, a2dpCodec),
@@ -803,48 +781,84 @@ import java.io.PrintWriter;
                     onSendBecomingNoisyIntent();
                     break;
                 case MSG_II_SET_HEARING_AID_VOLUME:
-                    mBtHelper.setHearingAidVolume(msg.arg1, msg.arg2);
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.setHearingAidVolume(msg.arg1, msg.arg2);
+                    }
                     break;
                 case MSG_I_SET_AVRCP_ABSOLUTE_VOLUME:
-                    mBtHelper.setAvrcpAbsoluteVolumeIndex(msg.arg1);
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.setAvrcpAbsoluteVolumeIndex(msg.arg1);
+                    }
                     break;
                 case MSG_I_DISCONNECT_BT_SCO:
-                    mBtHelper.disconnectBluetoothSco(msg.arg1);
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.disconnectBluetoothSco(msg.arg1);
+                        }
+                    }
                     break;
                 case MSG_L_SCOCLIENT_DIED:
-                    mBtHelper.scoClientDied(msg.obj);
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.scoClientDied(msg.obj);
+                        }
+                    }
                     break;
                 case MSG_TOGGLE_HDMI:
-                    mDeviceInventory.onToggleHdmi();
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onToggleHdmi();
+                    }
                     break;
                 case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
-                    mDeviceInventory.onBluetoothA2dpActiveDeviceChange(
-                            (BtHelper.BluetoothA2dpDeviceInfo) msg.obj,
-                            BtHelper.EVENT_ACTIVE_DEVICE_CHANGE);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.onBluetoothA2dpActiveDeviceChange(
+                                (BtHelper.BluetoothA2dpDeviceInfo) msg.obj,
+                                 BtHelper.EVENT_ACTIVE_DEVICE_CHANGE);
+                    }
                     break;
                 case MSG_DISCONNECT_A2DP:
-                    mDeviceInventory.disconnectA2dp();
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.disconnectA2dp();
+                    }
                     break;
                 case MSG_DISCONNECT_A2DP_SINK:
-                    mDeviceInventory.disconnectA2dpSink();
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.disconnectA2dpSink();
+                    }
                     break;
                 case MSG_DISCONNECT_BT_HEARING_AID:
-                    mDeviceInventory.disconnectHearingAid();
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.disconnectHearingAid();
+                    }
                     break;
                 case MSG_DISCONNECT_BT_HEADSET:
-                    mBtHelper.disconnectHeadset();
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.disconnectHeadset();
+                        }
+                    }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP:
-                    mBtHelper.onA2dpProfileConnected((BluetoothA2dp) msg.obj);
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onA2dpProfileConnected((BluetoothA2dp) msg.obj);
+                    }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_A2DP_SINK:
-                    mBtHelper.onA2dpSinkProfileConnected((BluetoothProfile) msg.obj);
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onA2dpSinkProfileConnected((BluetoothProfile) msg.obj);
+                    }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEARING_AID:
-                    mBtHelper.onHearingAidProfileConnected((BluetoothHearingAid) msg.obj);
+                    synchronized (mDeviceStateLock) {
+                        mBtHelper.onHearingAidProfileConnected((BluetoothHearingAid) msg.obj);
+                    }
                     break;
                 case MSG_L_BT_SERVICE_CONNECTED_PROFILE_HEADSET:
-                    mBtHelper.onHeadsetProfileConnected((BluetoothHeadset) msg.obj);
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mBtHelper.onHeadsetProfileConnected((BluetoothHeadset) msg.obj);
+                        }
+                    }
                     break;
                 case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION:
                 case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION: {
@@ -857,9 +871,11 @@ import java.io.PrintWriter;
                                     + " addr=" + info.mDevice.getAddress()
                                     + " prof=" + info.mProfile + " supprNoisy=" + info.mSupprNoisy
                                     + " vol=" + info.mVolume)).printLog(TAG));
-                    mDeviceInventory.setBluetoothA2dpDeviceConnectionState(
-                            info.mDevice, info.mState, info.mProfile, info.mSupprNoisy,
-                            AudioSystem.DEVICE_NONE, info.mVolume);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.setBluetoothA2dpDeviceConnectionState(
+                                info.mDevice, info.mState, info.mProfile, info.mSupprNoisy,
+                                AudioSystem.DEVICE_NONE, info.mVolume);
+                    }
                 } break;
                 case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT: {
                     final HearingAidDeviceConnectionInfo info =
@@ -869,8 +885,10 @@ import java.io.PrintWriter;
                                     + " addr=" + info.mDevice.getAddress()
                                     + " supprNoisy=" + info.mSupprNoisy
                                     + " src=" + info.mEventSource)).printLog(TAG));
-                    mDeviceInventory.setBluetoothHearingAidDeviceConnectionState(
-                            info.mDevice, info.mState, info.mSupprNoisy, info.mMusicDevice);
+                    synchronized (mDeviceStateLock) {
+                        mDeviceInventory.setBluetoothHearingAidDeviceConnectionState(
+                                info.mDevice, info.mState, info.mSupprNoisy, info.mMusicDevice);
+                    }
                 } break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
@@ -955,57 +973,46 @@ import java.io.PrintWriter;
     /** If the msg is already queued, queue this one and leave the old. */
     private static final int SENDMSG_QUEUE = 2;
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendMsg(int msg, int existingMsgPolicy, int delay) {
         sendIILMsg(msg, existingMsgPolicy, 0, 0, null, delay);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendILMsg(int msg, int existingMsgPolicy, int arg, Object obj, int delay) {
         sendIILMsg(msg, existingMsgPolicy, arg, 0, obj, delay);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendLMsg(int msg, int existingMsgPolicy, Object obj, int delay) {
         sendIILMsg(msg, existingMsgPolicy, 0, 0, obj, delay);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendIMsg(int msg, int existingMsgPolicy, int arg, int delay) {
         sendIILMsg(msg, existingMsgPolicy, arg, 0, null, delay);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendMsgNoDelay(int msg, int existingMsgPolicy) {
         sendIILMsg(msg, existingMsgPolicy, 0, 0, null, 0);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendIMsgNoDelay(int msg, int existingMsgPolicy, int arg) {
         sendIILMsg(msg, existingMsgPolicy, arg, 0, null, 0);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendIIMsgNoDelay(int msg, int existingMsgPolicy, int arg1, int arg2) {
         sendIILMsg(msg, existingMsgPolicy, arg1, arg2, null, 0);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendILMsgNoDelay(int msg, int existingMsgPolicy, int arg, Object obj) {
         sendIILMsg(msg, existingMsgPolicy, arg, 0, obj, 0);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendLMsgNoDelay(int msg, int existingMsgPolicy, Object obj) {
         sendIILMsg(msg, existingMsgPolicy, 0, 0, obj, 0);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendIILMsgNoDelay(int msg, int existingMsgPolicy, int arg1, int arg2, Object obj) {
         sendIILMsg(msg, existingMsgPolicy, arg1, arg2, obj, 0);
     }
 
-    @GuardedBy("mDeviceBrokerLock")
     private void sendIILMsg(int msg, int existingMsgPolicy, int arg1, int arg2, Object obj,
                             int delay) {
         if (existingMsgPolicy == SENDMSG_REPLACE) {
@@ -1024,29 +1031,31 @@ import java.io.PrintWriter;
             Binder.restoreCallingIdentity(identity);
         }
 
-        long time = SystemClock.uptimeMillis() + delay;
+        synchronized (sLastDeviceConnectionMsgTimeLock) {
+            long time = SystemClock.uptimeMillis() + delay;
 
-        switch (msg) {
-            case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
-            case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED:
-            case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
-            case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
-            case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
-            case MSG_IL_BTA2DP_DOCK_TIMEOUT:
-            case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
-            case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
-                if (sLastDeviceConnectMsgTime >= time) {
-                    // add a little delay to make sure messages are ordered as expected
-                    time = sLastDeviceConnectMsgTime + 30;
-                }
-                sLastDeviceConnectMsgTime = time;
-                break;
-            default:
-                break;
+            switch (msg) {
+                case MSG_IL_SET_A2DP_SOURCE_CONNECTION_STATE:
+                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED:
+                case MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED:
+                case MSG_IL_SET_HEARING_AID_CONNECTION_STATE:
+                case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
+                case MSG_IL_BTA2DP_DOCK_TIMEOUT:
+                case MSG_L_A2DP_DEVICE_CONFIG_CHANGE:
+                case MSG_L_A2DP_ACTIVE_DEVICE_CHANGE:
+                    if (sLastDeviceConnectMsgTime >= time) {
+                        // add a little delay to make sure messages are ordered as expected
+                        time = sLastDeviceConnectMsgTime + 30;
+                    }
+                    sLastDeviceConnectMsgTime = time;
+                    break;
+                default:
+                    break;
+            }
+
+            mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj),
+                    time);
         }
-
-        mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj),
-                time);
     }
 
     //-------------------------------------------------------------

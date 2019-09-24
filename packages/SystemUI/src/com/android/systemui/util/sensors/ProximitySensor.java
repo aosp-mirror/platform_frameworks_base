@@ -24,8 +24,8 @@ import android.hardware.SensorManager;
 import android.os.Handler;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
-import com.android.systemui.shared.plugins.PluginManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public class ProximitySensor {
     private final float mMaxRange;
     private List<ProximitySensorListener> mListeners = new ArrayList<>();
     private String mTag = null;
-    private ProximityEvent mLastEvent;
+    @VisibleForTesting ProximityEvent mLastEvent;
     private int mSensorDelay = SensorManager.SENSOR_DELAY_NORMAL;
     private boolean mPaused;
     private boolean mRegistered;
@@ -64,8 +64,7 @@ public class ProximitySensor {
     };
 
     @Inject
-    public ProximitySensor(
-            Context context, AsyncSensorManager sensorManager, PluginManager pluginManager) {
+    public ProximitySensor(Context context, AsyncSensorManager sensorManager) {
         mSensorManager = sensorManager;
         Sensor sensor = findBrightnessSensor(context);
 
@@ -146,17 +145,17 @@ public class ProximitySensor {
             return false;
         }
 
-        logDebug("Using brightness sensor? " + mUsingBrightnessSensor);
         mListeners.add(listener);
         registerInternal();
 
         return true;
     }
 
-    private void registerInternal() {
+    protected void registerInternal() {
         if (mRegistered || mPaused || mListeners.isEmpty()) {
             return;
         }
+        logDebug("Using brightness sensor? " + mUsingBrightnessSensor);
         logDebug("Registering sensor listener");
         mRegistered = true;
         mSensorManager.registerListener(mSensorEventListener, mSensor, mSensorDelay);
@@ -175,7 +174,7 @@ public class ProximitySensor {
         }
     }
 
-    private void unregisterInternal() {
+    protected void unregisterInternal() {
         if (!mRegistered) {
             return;
         }

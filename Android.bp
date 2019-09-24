@@ -899,8 +899,10 @@ metalava_framework_docs_args += " --replace-documentation " +
 
 packages_to_document = [
     "android",
+    "dalvik",
     "java",
     "javax",
+    "junit",
     "org.apache.http",
     "org.json",
     "org.w3c.dom",
@@ -931,7 +933,7 @@ stubs_defaults {
         "sdk-dir",
         "api-versions-jars-dir",
     ],
-    previous_api: ":last-released-public-api",
+    previous_api: ":last-released-public-api-for-metalava-annotations",
     merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
@@ -988,7 +990,7 @@ stubs_defaults {
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":last-released-public-api-for-metalava-annotations",
     merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
@@ -1324,7 +1326,7 @@ droidstubs {
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":last-released-public-api-for-metalava-annotations",
     merge_annotations_dirs: [
         "metalava-manual",
         "ojluni-annotated-sdk-stubs",
@@ -1511,3 +1513,25 @@ genrule {
         targets: ["droidcore"],
     },
 }
+
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-telephony-stack-shared-srcs",
+    srcs: [
+        "core/java/android/os/RegistrantList.java",
+        "core/java/android/os/Registrant.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/android/util/Slog.java",
+        "core/java/android/util/TimeUtils.java",
+        "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/XmlUtils.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/DumpUtils.java"
+    ],
+}
+

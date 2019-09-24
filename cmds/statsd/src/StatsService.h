@@ -432,6 +432,10 @@ private:
 
     sp<ShellSubscriber> mShellSubscriber;
 
+    /**
+     * Mutex for setting the shell subscriber
+     */
+    mutable mutex mShellSubscriberMutex;
     std::shared_ptr<LogEventQueue> mEventQueue;
 
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);

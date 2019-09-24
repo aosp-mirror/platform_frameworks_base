@@ -46,6 +46,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     private static final String TAG = ImageWallpaperRenderer.class.getSimpleName();
     private static final float SCALE_VIEWPORT_MIN = 1f;
     private static final float SCALE_VIEWPORT_MAX = 1.1f;
+    private static final boolean DEBUG = true;
 
     private final WallpaperManager mWallpaperManager;
     private final ImageGLProgram mProgram;
@@ -107,6 +108,9 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
     }
 
     private boolean loadBitmap() {
+        if (DEBUG) {
+            Log.d(TAG, "loadBitmap: mBitmap=" + mBitmap);
+        }
         if (mWallpaperManager != null && mBitmap == null) {
             mBitmap = mWallpaperManager.getBitmap();
             mWallpaperManager.forgetLoadedWallpaper();
@@ -118,6 +122,9 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
                         : mBitmap.getWidth();
                 mSurfaceSize.set(0, 0, surfaceWidth, surfaceHeight);
             }
+        }
+        if (DEBUG) {
+            Log.d(TAG, "loadBitmap done");
         }
         return mBitmap != null;
     }
@@ -223,6 +230,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         out.print(prefix); out.print("mXOffset="); out.print(mXOffset);
         out.print(prefix); out.print("mYOffset="); out.print(mYOffset);
         out.print(prefix); out.print("threshold="); out.print(mImageProcessHelper.getThreshold());
+        out.print(prefix); out.print("mReveal="); out.print(mImageRevealHelper.getReveal());
         mWallpaper.dump(prefix, fd, out, args);
     }
 }

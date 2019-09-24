@@ -27,6 +27,8 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseLongArray;
 
+import com.android.internal.annotations.GuardedBy;
+
 import libcore.io.IoUtils;
 
 import org.json.JSONArray;
@@ -250,6 +252,7 @@ class RollbackStore {
     /**
      * Saves the given rollback to persistent storage.
      */
+    @GuardedBy("rollback.getLock")
     void saveRollback(Rollback rollback) throws IOException {
         try {
             JSONObject dataJson = new JSONObject();

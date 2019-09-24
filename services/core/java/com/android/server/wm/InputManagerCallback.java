@@ -181,9 +181,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public long interceptKeyBeforeDispatching(
-            IBinder focus, KeyEvent event, int policyFlags) {
-        WindowState windowState = mService.windowForClientLocked(null, focus, false);
-        return mService.mPolicy.interceptKeyBeforeDispatching(windowState, event, policyFlags);
+            IBinder focusedToken, KeyEvent event, int policyFlags) {
+        return mService.mPolicy.interceptKeyBeforeDispatching(focusedToken, event, policyFlags);
     }
 
     /**
@@ -192,9 +191,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public KeyEvent dispatchUnhandledKey(
-            IBinder focus, KeyEvent event, int policyFlags) {
-        WindowState windowState = mService.windowForClientLocked(null, focus, false);
-        return mService.mPolicy.dispatchUnhandledKey(windowState, event, policyFlags);
+            IBinder focusedToken, KeyEvent event, int policyFlags) {
+        return mService.mPolicy.dispatchUnhandledKey(focusedToken, event, policyFlags);
     }
 
     /** Callback to get pointer layer. */

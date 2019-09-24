@@ -29,6 +29,7 @@ import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
+import static com.android.server.stats.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 import static com.android.server.stats.ProcfsMemoryUtil.readRssHighWaterMarkFromProcfs;
 
 import android.annotation.NonNull;
@@ -141,6 +142,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.role.RoleManagerInternal;
 import com.android.server.stats.IonMemoryUtil.IonAllocations;
+import com.android.server.stats.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -1270,6 +1272,47 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         SystemProperties.set("sys.rss_hwm_reset.on", "1");
     }
 
+    private void pullProcessMemorySnapshot(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        List<ProcessMemoryState> managedProcessList =
+                LocalServices.getService(
+                        ActivityManagerInternal.class).getMemoryStateForProcesses();
+        for (ProcessMemoryState managedProcess : managedProcessList) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(managedProcess.uid);
+            e.writeString(managedProcess.processName);
+            e.writeInt(managedProcess.pid);
+            e.writeInt(managedProcess.oomScore);
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
+            if (snapshot.isEmpty()) {
+                continue;
+            }
+            e.writeInt(snapshot.rssInKilobytes);
+            e.writeInt(snapshot.anonRssInKilobytes);
+            e.writeInt(snapshot.swapInKilobytes);
+            e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
+            pulledData.add(e);
+        }
+        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
+        for (int pid : pids) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(getUidForPid(pid));
+            e.writeString(readCmdlineFromProcfs(pid));
+            e.writeInt(pid);
+            e.writeInt(-1001);  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
+            if (snapshot.isEmpty()) {
+                continue;
+            }
+            e.writeInt(snapshot.rssInKilobytes);
+            e.writeInt(snapshot.anonRssInKilobytes);
+            e.writeInt(snapshot.swapInKilobytes);
+            e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
+            pulledData.add(e);
+        }
+    }
+
     private void pullSystemIonHeapSize(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -2350,6 +2393,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
                 pullProcessMemoryHighWaterMark(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_MEMORY_SNAPSHOT: {
+                pullProcessMemorySnapshot(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.SYSTEM_ION_HEAP_SIZE: {

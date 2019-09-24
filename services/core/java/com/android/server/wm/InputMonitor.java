@@ -528,6 +528,10 @@ final class InputMonitor {
             populateInputWindowHandle(
                     inputWindowHandle, w, flags, type, isVisible, hasFocus, hasWallpaper);
 
+            // register key interception info
+            mService.mKeyInterceptionInfoForToken.put(inputWindowHandle.token,
+                    w.getKeyInterceptionInfo());
+
             if (w.mWinAnimator.hasSurface()) {
                 mInputTransaction.setInputWindowInfo(
                         w.mWinAnimator.mSurfaceController.mSurfaceControl, inputWindowHandle);

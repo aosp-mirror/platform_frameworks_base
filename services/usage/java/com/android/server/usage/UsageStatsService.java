@@ -340,6 +340,10 @@ public class UsageStatsService extends SystemService implements
             mUserUnlockedStates.put(userId, true);
             final UserUsageStatsService userService = getUserDataAndInitializeIfNeededLocked(
                     userId, System.currentTimeMillis());
+            if (userService == null) {
+                Slog.i(TAG, "Attempted to unlock stopped or removed user " + userId);
+                return;
+            }
             userService.userUnlocked(System.currentTimeMillis());
             // Process all the pending reported events
             while (pendingEvents.peek() != null) {
@@ -456,7 +460,17 @@ public class UsageStatsService extends SystemService implements
                     "usagestats");
             service = new UserUsageStatsService(getContext(), userId, usageStatsDir, this);
             if (mUserUnlockedStates.get(userId)) {
-                service.init(currentTimeMillis);
+                try {
+                    service.init(currentTimeMillis);
+                } catch (Exception e) {
+                    if (mUserManager.isUserUnlocked(userId)) {
+                        throw e; // rethrow exception - user is unlocked
+                    } else {
+                        Slog.w(TAG, "Attempted to initialize service for "
+                                + "stopped or removed user " + userId);
+                        return null;
+                    }
+                }
             }
             mUserState.put(userId, service);
         }
@@ -779,6 +793,9 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            if (service == null) {
+                return; // user was stopped or removed
+            }
             service.reportEvent(event);
 
             mAppStandby.reportEvent(event, elapsedRealtime, userId);
@@ -841,6 +858,9 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            if (service == null) {
+                return null; // user was stopped or removed
+            }
             List<UsageStats> list = service.queryUsageStats(bucketType, beginTime, endTime);
             if (list == null) {
                 return null;
@@ -873,6 +893,9 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            if (service == null) {
+                return null; // user was stopped or removed
+            }
             return service.queryConfigurationStats(bucketType, beginTime, endTime);
         }
     }
@@ -890,6 +913,9 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            if (service == null) {
+                return null; // user was stopped or removed
+            }
             return service.queryEventStats(bucketType, beginTime, endTime);
         }
     }
@@ -907,6 +933,9 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            if (service == null) {
+                return null; // user was stopped or removed
+            }
             return service.queryEvents(beginTime, endTime, shouldObfuscateInstantApps);
         }
     }
@@ -924,6 +953,9 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, System.currentTimeMillis());
+            if (service == null) {
+                return null; // user was stopped or removed
+            }
             return service.queryEventsForPackage(beginTime, endTime, packageName, includeTaskRoot);
         }
     }
@@ -1113,7 +1145,15 @@ public class UsageStatsService extends SystemService implements
                     flushToDisk();
                     break;
                 case MSG_UNLOCKED_USER:
-                    onUserUnlocked(msg.arg1);
+                    try {
+                        onUserUnlocked(msg.arg1);
+                    } catch (Exception e) {
+                        if (mUserManager.isUserUnlocked(msg.arg1)) {
+                            throw e; // rethrow exception - user is unlocked
+                        } else {
+                            Slog.w(TAG, "Attempted to unlock stopped or removed user " + msg.arg1);
+                        }
+                    }
                     break;
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
@@ -1986,6 +2026,9 @@ public class UsageStatsService extends SystemService implements
                 if (user == UserHandle.USER_SYSTEM) {
                     final UserUsageStatsService userStats = getUserDataAndInitializeIfNeededLocked(
                             user, System.currentTimeMillis());
+                    if (userStats == null) {
+                        return null; // user was stopped or removed
+                    }
                     return userStats.getBackupPayload(key);
                 } else {
                     return null;
@@ -2004,6 +2047,9 @@ public class UsageStatsService extends SystemService implements
                 if (user == UserHandle.USER_SYSTEM) {
                     final UserUsageStatsService userStats = getUserDataAndInitializeIfNeededLocked(
                             user, System.currentTimeMillis());
+                    if (userStats == null) {
+                        return; // user was stopped or removed
+                    }
                     userStats.applyRestoredPayload(key, payload);
                 }
             }

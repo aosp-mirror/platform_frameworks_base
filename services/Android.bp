@@ -47,6 +47,11 @@ java_library {
         "compat-changeid-annotation-processor",
     ],
 
+    required: [
+      // Required by services.backup
+      "BackupEncryption",
+    ],
+
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
 

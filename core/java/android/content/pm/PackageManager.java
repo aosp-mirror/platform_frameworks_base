@@ -3078,8 +3078,11 @@ public abstract class PackageManager {
      * because the app was updated to support runtime permissions, the
      * the permission will be revoked in the upgrade process.
      *
+     * @deprecated Renamed to {@link #FLAG_PERMISSION_REVOKED_COMPAT}.
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @TestApi
     public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE =  1 << 3;
@@ -3202,6 +3205,18 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_GRANTED_BY_ROLE =  1 << 15;
 
     /**
+     * Permission flag: The permission should have been revoked but is kept granted for
+     * compatibility. The data protected by the permission should be protected by a no-op (empty
+     * list, default error, etc) instead of crashing the client. The permission will be revoked if
+     * the app is upgraded to supports it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int FLAG_PERMISSION_REVOKED_COMPAT =  FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+
+    /**
      * Permission flags: Bitwise or of all permission flags allowing an
      * exemption for a restricted permission.
      * @hide
@@ -3241,7 +3256,8 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT
             | FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT
             | FLAG_PERMISSION_APPLY_RESTRICTION
-            | FLAG_PERMISSION_GRANTED_BY_ROLE;
+            | FLAG_PERMISSION_GRANTED_BY_ROLE
+            | FLAG_PERMISSION_REVOKED_COMPAT;
 
     /**
      * Injected activity in app that forwards user to setting activity of that app.
@@ -4017,7 +4033,8 @@ public abstract class PackageManager {
             FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT,
             FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT,
             FLAG_PERMISSION_APPLY_RESTRICTION,
-            FLAG_PERMISSION_GRANTED_BY_ROLE
+            FLAG_PERMISSION_GRANTED_BY_ROLE,
+            FLAG_PERMISSION_REVOKED_COMPAT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -7086,7 +7103,6 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_POLICY_FIXED: return "POLICY_FIXED";
             case FLAG_PERMISSION_SYSTEM_FIXED: return "SYSTEM_FIXED";
             case FLAG_PERMISSION_USER_SET: return "USER_SET";
-            case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "REVOKE_ON_UPGRADE";
             case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
             case FLAG_PERMISSION_REVIEW_REQUIRED: return "REVIEW_REQUIRED";
             case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
@@ -7097,6 +7113,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT: return "RESTRICTION_UPGRADE_EXEMPT";
             case FLAG_PERMISSION_APPLY_RESTRICTION: return "APPLY_RESTRICTION";
             case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
+            case FLAG_PERMISSION_REVOKED_COMPAT: return "REVOKED_COMPAT";
             default: return Integer.toString(flag);
         }
     }

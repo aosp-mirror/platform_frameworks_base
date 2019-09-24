@@ -15,11 +15,14 @@
  */
 package com.android.server.stats;
 
+import static com.android.server.stats.ProcfsMemoryUtil.parseMemorySnapshotFromStatus;
 import static com.android.server.stats.ProcfsMemoryUtil.parseVmHWMFromStatus;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.filters.SmallTest;
+
+import com.android.server.stats.ProcfsMemoryUtil.MemorySnapshot;
 
 import org.junit.Test;
 
@@ -89,5 +92,33 @@ public class ProcfsMemoryUtilTest {
     @Test
     public void testParseVmHWMFromStatus_emptyContents() {
         assertThat(parseVmHWMFromStatus("")).isEqualTo(0);
+    }
+
+    @Test
+    public void testParseMemorySnapshotFromStatus_parsesCorrectValue() {
+        MemorySnapshot snapshot = parseMemorySnapshotFromStatus(STATUS_CONTENTS);
+        assertThat(snapshot.rssInKilobytes).isEqualTo(126776);
+        assertThat(snapshot.anonRssInKilobytes).isEqualTo(37860);
+        assertThat(snapshot.swapInKilobytes).isEqualTo(22);
+        assertThat(snapshot.isEmpty()).isFalse();
+    }
+
+    @Test
+    public void testParseMemorySnapshotFromStatus_invalidValue() {
+        MemorySnapshot snapshot =
+                parseMemorySnapshotFromStatus("test\nVmRSS:\tx0x0x\nVmSwap:\t1 kB\ntest");
+        assertThat(snapshot.rssInKilobytes).isEqualTo(0);
+        assertThat(snapshot.anonRssInKilobytes).isEqualTo(0);
+        assertThat(snapshot.swapInKilobytes).isEqualTo(1);
+        assertThat(snapshot.isEmpty()).isFalse();
+    }
+
+    @Test
+    public void testParseMemorySnapshotFromStatus_emptyContents() {
+        MemorySnapshot snapshot = parseMemorySnapshotFromStatus("");
+        assertThat(snapshot.rssInKilobytes).isEqualTo(0);
+        assertThat(snapshot.anonRssInKilobytes).isEqualTo(0);
+        assertThat(snapshot.swapInKilobytes).isEqualTo(0);
+        assertThat(snapshot.isEmpty()).isTrue();
     }
 }

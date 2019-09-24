@@ -30,6 +30,7 @@ import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.WindowInfo;
 
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
@@ -519,4 +520,10 @@ public abstract class WindowManagerInternal {
      */
     public abstract boolean isTouchableDisplay(int displayId);
 
+    /**
+     * Returns the info associated with the input token used to determine if a key should be
+     * intercepted. This info can be accessed without holding the global wm lock.
+     */
+    public abstract @Nullable KeyInterceptionInfo
+            getKeyInterceptionInfoFromToken(IBinder inputToken);
 }

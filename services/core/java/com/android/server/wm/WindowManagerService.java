@@ -248,6 +248,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LatencyTracker;
@@ -284,8 +285,10 @@ import java.net.Socket;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -406,6 +409,14 @@ public class WindowManagerService extends IWindowManager.Stub
     // VR Vr2d Display Id.
     int mVr2dDisplayId = INVALID_DISPLAY;
     boolean mVrModeEnabled = false;
+
+    /**
+     * Tracks a map of input tokens to info that is used to decide whether to intercept
+     * a key event.
+     */
+    final Map<IBinder, KeyInterceptionInfo> mKeyInterceptionInfoForToken =
+            Collections.synchronizedMap(new ArrayMap<>());
+
 
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
         @Override
@@ -7359,6 +7370,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 return configuration != null
                         && configuration.touchscreen == Configuration.TOUCHSCREEN_FINGER;
             }
+        }
+
+        @Override
+        public @Nullable KeyInterceptionInfo getKeyInterceptionInfoFromToken(IBinder inputToken) {
+            return mKeyInterceptionInfoForToken.get(inputToken);
         }
     }
 

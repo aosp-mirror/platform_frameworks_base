@@ -42,9 +42,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.SensorManagerPlugin;
-import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
@@ -147,8 +145,7 @@ public class DozeSensors {
                         false /* touchscreen */, mConfig.getWakeLockScreenDebounce()),
         };
 
-        mProximitySensor = new ProximitySensor(
-                context, sensorManager, Dependency.get(PluginManager.class));
+        mProximitySensor = new ProximitySensor(context, sensorManager);
 
         mProximitySensor.register(
                 proximityEvent -> mProxCallback.accept(!proximityEvent.getNear()));

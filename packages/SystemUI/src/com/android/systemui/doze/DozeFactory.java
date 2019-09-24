@@ -34,6 +34,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.sensors.AsyncSensorManager;
+import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -97,7 +98,8 @@ public class DozeFactory {
             DockManager dockManager) {
         boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, alarmManager, config, params,
-                sensorManager, handler, wakeLock, allowPulseTriggers, dockManager);
+                sensorManager, handler, wakeLock, allowPulseTriggers, dockManager,
+                new ProximitySensor(context, sensorManager));
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,

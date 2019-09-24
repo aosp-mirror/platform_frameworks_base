@@ -340,7 +340,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10064
+    // Next: 10065
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -406,6 +406,7 @@ message Atom {
         ProcessSystemIonHeapSize process_system_ion_heap_size = 10061;
         SurfaceflingerStatsGlobalInfo surfaceflinger_stats_global_info = 10062;
         SurfaceflingerStatsLayerInfo surfaceflinger_stats_layer_info = 10063;
+        ProcessMemorySnapshot process_memory_snapshot = 10064;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3069,9 +3070,9 @@ message PictureInPictureStateChanged {
  *     services/core/java/com/android/server/wm/Session.java
  */
 message OverlayStateChanged {
-    optional int32 uid = 1 [(is_uid) = true];
+    optional int32 uid = 1 [(state_field_option).option = PRIMARY, (is_uid) = true];
 
-    optional string package_name = 2;
+    optional string package_name = 2 [(state_field_option).option = PRIMARY];
 
     optional bool using_alert_window = 3;
 
@@ -3079,7 +3080,7 @@ message OverlayStateChanged {
         ENTERED = 1;
         EXITED = 2;
     }
-    optional State state = 4;
+    optional State state = 4 [(state_field_option).option = EXCLUSIVE];
 }
 
 /*
@@ -4105,6 +4106,46 @@ message ProcessMemoryHighWaterMark {
     // RSS high-water mark. Peak RSS usage of the process. Read from the VmHWM field in
     // /proc/PID/status.
     optional int32 rss_high_water_mark_in_kilobytes = 4;
+}
+
+/*
+ * Logs the memory stats for a process.
+ *
+ * Pulled from StatsCompanionService for all managed processes (from ActivityManagerService)
+ * and for selected native processes.
+ */
+message ProcessMemorySnapshot {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name.
+    // Usually package name or process cmdline.
+    // Provided by ActivityManagerService or read from /proc/PID/cmdline.
+    optional string process_name = 2;
+
+    // The pid of the process.
+    // Allows to disambiguate instances of the process.
+    optional int32 pid = 3;
+
+    // The current OOM score adjustment value.
+    // Read from ProcessRecord for managed processes.
+    // Placeholder -1001 (OOM_SCORE_ADJ_MIN - 1, outside of allowed range) for native ones.
+    optional int32 oom_score_adj = 4;
+
+    // The current RSS of the process.
+    // VmRSS from /proc/pid/status.
+    optional int32 rss_in_kilobytes = 5;
+
+    // The current anon RSS of the process.
+    // RssAnon from /proc/pid/status.
+    optional int32 anon_rss_in_kilobytes = 6;
+
+    // The current swap size of the process.
+    // VmSwap from /proc/pid/status.
+    optional int32 swap_in_kilobytes = 7;
+
+    // The sum of rss_in_kilobytes and swap_in_kilobytes.
+    optional int32 anon_rss_and_swap_in_kilobytes = 8;
 }
 
 /*
