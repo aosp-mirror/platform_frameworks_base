@@ -611,7 +611,7 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
     @Override
     public SurfaceControl getAnimationLeashParent() {
-        if (!WindowManagerService.sHierarchicalAnimations) {
+        if (WindowManagerService.sHierarchicalAnimations) {
             return super.getAnimationLeashParent();
         }
         // Currently, only the recents animation will create animation leashes for tasks. In this
