@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.CameraInfo;
 import android.hardware.CameraStatus;
@@ -47,6 +48,7 @@ import android.view.WindowManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -106,6 +108,21 @@ public final class CameraManager {
     @NonNull
     public String[] getCameraIdList() throws CameraAccessException {
         return CameraManagerGlobal.get().getCameraIdList();
+    }
+
+    /**
+     * Similar to getCameraIdList(). However, getCamerIdListNoLazy() necessarily communicates with
+     * cameraserver in order to get the list of camera ids. This is to faciliate testing since some
+     * camera ids may go 'offline' without callbacks from cameraserver because of changes in
+     * SYSTEM_CAMERA permissions (though this is not a changeable permission, tests may call
+     * adopt(drop)ShellPermissionIdentity() and effectively change their permissions). This call
+     * affects the camera ids returned by getCameraIdList() as well. Tests which do adopt shell
+     * permission identity should not mix getCameraIdList() and getCameraListNoLazyCalls().
+     */
+    /** @hide */
+    @TestApi
+    public String[] getCameraIdListNoLazy() throws CameraAccessException {
+        return CameraManagerGlobal.get().getCameraIdListNoLazy();
     }
 
     /**
@@ -995,35 +1012,27 @@ public final class CameraManager {
                 // Camera service is now down, leave mCameraService as null
             }
         }
-
-        /**
-         * Get a list of all camera IDs that are at least PRESENT; ignore devices that are
-         * NOT_PRESENT or ENUMERATING, since they cannot be used by anyone.
-         */
-        public String[] getCameraIdList() {
+        private String[] extractCameraIdListLocked() {
             String[] cameraIds = null;
-            synchronized(mLock) {
-                // Try to make sure we have an up-to-date list of camera devices.
-                connectCameraServiceLocked();
-
-                int idCount = 0;
-                for (int i = 0; i < mDeviceStatus.size(); i++) {
-                    int status = mDeviceStatus.valueAt(i);
-                    if (status == ICameraServiceListener.STATUS_NOT_PRESENT ||
-                            status == ICameraServiceListener.STATUS_ENUMERATING) continue;
-                    idCount++;
-                }
-                cameraIds = new String[idCount];
-                idCount = 0;
-                for (int i = 0; i < mDeviceStatus.size(); i++) {
-                    int status = mDeviceStatus.valueAt(i);
-                    if (status == ICameraServiceListener.STATUS_NOT_PRESENT ||
-                            status == ICameraServiceListener.STATUS_ENUMERATING) continue;
-                    cameraIds[idCount] = mDeviceStatus.keyAt(i);
-                    idCount++;
-                }
+            int idCount = 0;
+            for (int i = 0; i < mDeviceStatus.size(); i++) {
+                int status = mDeviceStatus.valueAt(i);
+                if (status == ICameraServiceListener.STATUS_NOT_PRESENT
+                        || status == ICameraServiceListener.STATUS_ENUMERATING) continue;
+                idCount++;
             }
-
+            cameraIds = new String[idCount];
+            idCount = 0;
+            for (int i = 0; i < mDeviceStatus.size(); i++) {
+                int status = mDeviceStatus.valueAt(i);
+                if (status == ICameraServiceListener.STATUS_NOT_PRESENT
+                        || status == ICameraServiceListener.STATUS_ENUMERATING) continue;
+                cameraIds[idCount] = mDeviceStatus.keyAt(i);
+                idCount++;
+            }
+            return cameraIds;
+        }
+        private static void sortCameraIds(String[] cameraIds) {
             // The sort logic must match the logic in
             // libcameraservice/common/CameraProviderManager.cpp::getAPI1CompatibleCameraDeviceIds
             Arrays.sort(cameraIds, new Comparator<String>() {
@@ -1054,6 +1063,89 @@ public final class CameraManager {
                             return s1.compareTo(s2);
                         }
                     }});
+
+        }
+
+        public static boolean cameraStatusesContains(CameraStatus[] cameraStatuses, String id) {
+            for (CameraStatus c : cameraStatuses) {
+                if (c.cameraId.equals(id)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public String[] getCameraIdListNoLazy() {
+            CameraStatus[] cameraStatuses;
+            ICameraServiceListener.Stub testListener = new ICameraServiceListener.Stub() {
+                @Override
+                public void onStatusChanged(int status, String id) throws RemoteException {
+                }
+                @Override
+                public void onTorchStatusChanged(int status, String id) throws RemoteException {
+                }
+                @Override
+                public void onCameraAccessPrioritiesChanged() {
+                }};
+
+            String[] cameraIds = null;
+            synchronized (mLock) {
+                connectCameraServiceLocked();
+                try {
+                    // The purpose of the addListener, removeListener pair here is to get a fresh
+                    // list of camera ids from cameraserver. We do this since for in test processes,
+                    // changes can happen w.r.t non-changeable permissions (eg: SYSTEM_CAMERA
+                    // permissions can be effectively changed by calling
+                    // adopt(drop)ShellPermissionIdentity()).
+                    // Camera devices, which have their discovery affected by these permission
+                    // changes, will not have clients get callbacks informing them about these
+                    // devices going offline (in real world scenarios, these permissions aren't
+                    // changeable). Future calls to getCameraIdList() will reflect the changes in
+                    // the camera id list after getCameraIdListNoLazy() is called.
+                    cameraStatuses = mCameraService.addListener(testListener);
+                    mCameraService.removeListener(testListener);
+                    for (CameraStatus c : cameraStatuses) {
+                        onStatusChangedLocked(c.status, c.cameraId);
+                    }
+                    Set<String> deviceCameraIds = mDeviceStatus.keySet();
+                    ArrayList<String> deviceIdsToRemove = new ArrayList<String>();
+                    for (String deviceCameraId : deviceCameraIds) {
+                        // Its possible that a device id was removed without a callback notifying
+                        // us. This may happen in case a process 'drops' system camera permissions
+                        // (even though the permission isn't a changeable one, tests may call
+                        // adoptShellPermissionIdentity() and then dropShellPermissionIdentity().
+                        if (!cameraStatusesContains(cameraStatuses, deviceCameraId)) {
+                            deviceIdsToRemove.add(deviceCameraId);
+                        }
+                    }
+                    for (String id : deviceIdsToRemove) {
+                        onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, id);
+                    }
+                } catch (ServiceSpecificException e) {
+                    // Unexpected failure
+                    throw new IllegalStateException("Failed to register a camera service listener",
+                            e);
+                } catch (RemoteException e) {
+                    // Camera service is now down, leave mCameraService as null
+                }
+                cameraIds = extractCameraIdListLocked();
+            }
+            sortCameraIds(cameraIds);
+            return cameraIds;
+        }
+
+        /**
+         * Get a list of all camera IDs that are at least PRESENT; ignore devices that are
+         * NOT_PRESENT or ENUMERATING, since they cannot be used by anyone.
+         */
+        public String[] getCameraIdList() {
+            String[] cameraIds = null;
+            synchronized (mLock) {
+                // Try to make sure we have an up-to-date list of camera devices.
+                connectCameraServiceLocked();
+                cameraIds = extractCameraIdListLocked();
+            }
+            sortCameraIds(cameraIds);
             return cameraIds;
         }
 
