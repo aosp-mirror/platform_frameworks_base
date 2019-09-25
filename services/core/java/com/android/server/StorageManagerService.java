@@ -196,6 +196,9 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ZRAM_ENABLED_PROPERTY =
             "persist.sys.zram_enabled";
 
+    private static final boolean IS_FUSE_ENABLED =
+            SystemProperties.getBoolean("persist.sys.fuse", false);
+
     private static final boolean ENABLE_ISOLATED_STORAGE = StorageManager.hasIsolatedStorage();
 
     /**
@@ -345,6 +348,9 @@ class StorageManagerService extends IStorageManager.Stub
     private IPackageMoveObserver mMoveCallback;
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
+
+    @Nullable
+    private volatile String mMediaStoreAuthorityPackageName = null;
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -1661,6 +1667,15 @@ class StorageManagerService extends IStorageManager.Stub
                 ServiceManager.getService("package"));
         mIAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
+
+        ProviderInfo provider = mPmInternal.resolveContentProvider(
+                MediaStore.AUTHORITY, PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.getUserId(UserHandle.USER_SYSTEM));
+        if (provider != null) {
+            mMediaStoreAuthorityPackageName = provider.packageName;
+        }
+
         try {
             mIAppOpsService.startWatchingMode(OP_REQUEST_INSTALL_PACKAGES, null, mAppOpsCallback);
             mIAppOpsService.startWatchingMode(OP_LEGACY_STORAGE, null, mAppOpsCallback);
@@ -3670,6 +3685,11 @@ class StorageManagerService extends IStorageManager.Stub
 
             if (mPmInternal.isInstantApp(packageName, UserHandle.getUserId(uid))) {
                 return Zygote.MOUNT_EXTERNAL_NONE;
+            }
+
+            if (IS_FUSE_ENABLED && packageName.equals(mMediaStoreAuthorityPackageName)) {
+                // Determine if caller requires pass_through mount
+                return Zygote.MOUNT_EXTERNAL_PASS_THROUGH;
             }
 
             // Determine if caller is holding runtime permission
