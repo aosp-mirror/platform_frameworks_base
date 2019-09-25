@@ -107,6 +107,11 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
         requestUpdateSamplingListener();
     }
 
+    void stopAndDestroy() {
+        stop();
+        mSamplingListener.destroy();
+    }
+
     @Override
     public void onViewAttachedToWindow(View view) {
         requestUpdateSamplingListener();
@@ -114,8 +119,7 @@ public class NavBarTintController implements View.OnAttachStateChangeListener,
 
     @Override
     public void onViewDetachedFromWindow(View view) {
-        // Defer calling updateSamplingListener the attach info has not yet been reset
-        requestUpdateSamplingListener();
+        stopAndDestroy();
     }
 
     @Override
