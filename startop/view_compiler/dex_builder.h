@@ -140,6 +140,29 @@ class Value {
   constexpr Value(size_t value, Kind kind) : value_{value}, kind_{kind} {}
 };
 
+// Represents an allocated register returned by MethodBuilder::AllocRegister
+class LiveRegister {
+  friend class MethodBuilder;
+
+ public:
+  LiveRegister(LiveRegister&& other) : liveness_{other.liveness_}, index_{other.index_} {
+    other.index_ = {};
+  };
+  ~LiveRegister() {
+    if (index_.has_value()) {
+      (*liveness_)[*index_] = false;
+    }
+  };
+
+  operator const Value() const { return Value::Local(*index_); }
+
+ private:
+  LiveRegister(std::vector<bool>* liveness, size_t index) : liveness_{liveness}, index_{index} {}
+
+  std::vector<bool>* const liveness_;
+  std::optional<size_t> index_;
+};
+
 // A virtual instruction. We convert these to real instructions in MethodBuilder::Encode.
 // Virtual instructions are needed to keep track of information that is not known until all of the
 // code is generated. This information includes things like how many local registers are created and
@@ -178,7 +201,8 @@ class Instruction {
   }
   // For most instructions, which take some number of arguments and have an optional return value.
   template <typename... T>
-  static inline Instruction OpWithArgs(Op opcode, std::optional<const Value> dest, T... args) {
+  static inline Instruction OpWithArgs(Op opcode, std::optional<const Value> dest,
+                                       const T&... args) {
     return Instruction{opcode, /*index_argument=*/0, /*result_is_object=*/false, dest, args...};
   }
 
@@ -199,14 +223,14 @@ class Instruction {
   template <typename... T>
   static inline Instruction InvokeVirtualObject(size_t index_argument,
                                                 std::optional<const Value> dest, Value this_arg,
-                                                T... args) {
+                                                const T&... args) {
     return Instruction{
         Op::kInvokeVirtual, index_argument, /*result_is_object=*/true, dest, this_arg, args...};
   }
   // For direct calls (basically, constructors).
   template <typename... T>
   static inline Instruction InvokeDirect(size_t index_argument, std::optional<const Value> dest,
-                                         Value this_arg, T... args) {
+                                         Value this_arg, const T&... args) {
     return Instruction{
         Op::kInvokeDirect, index_argument, /*result_is_object=*/false, dest, this_arg, args...};
   }
@@ -234,7 +258,7 @@ class Instruction {
   // For static calls.
   template <typename... T>
   static inline Instruction InvokeInterface(size_t index_argument, std::optional<const Value> dest,
-                                            T... args) {
+                                            const T&... args) {
     return Instruction{
         Op::kInvokeInterface, index_argument, /*result_is_object=*/false, dest, args...};
   }
@@ -277,7 +301,7 @@ class Instruction {
 
   template <typename... T>
   inline Instruction(Op opcode, size_t index_argument, bool result_is_object,
-                               std::optional<const Value> dest, T... args)
+                     std::optional<const Value> dest, const T&... args)
       : opcode_{opcode},
         index_argument_{index_argument},
         result_is_object_{result_is_object},
@@ -309,10 +333,8 @@ class MethodBuilder {
   // Encode the method into DEX format.
   ir::EncodedMethod* Encode();
 
-  // Create a new register to be used to storing values. Note that these are not SSA registers, like
-  // might be expected in similar code generators. This does no liveness tracking or anything, so
-  // it's up to the caller to reuse registers as appropriate.
-  Value MakeRegister();
+  // Create a new register to be used to storing values.
+  LiveRegister AllocRegister();
 
   Value MakeLabel();
 
@@ -329,7 +351,7 @@ class MethodBuilder {
   void BuildConst4(Value target, int value);
   void BuildConstString(Value target, const std::string& value);
   template <typename... T>
-  void BuildNew(Value target, TypeDescriptor type, Prototype constructor, T... args);
+  void BuildNew(Value target, TypeDescriptor type, Prototype constructor, const T&... args);
 
   // TODO: add builders for more instructions
 
@@ -427,7 +449,7 @@ class MethodBuilder {
     static_assert(num_regs <= kMaxScratchRegisters);
     std::array<Value, num_regs> regs;
     for (size_t i = 0; i < num_regs; ++i) {
-      regs[i] = std::move(Value::Local(num_registers_ + i));
+      regs[i] = std::move(Value::Local(NumRegisters() + i));
     }
     return regs;
   }
@@ -457,8 +479,9 @@ class MethodBuilder {
   // around to make legal DEX code.
   static constexpr size_t kMaxScratchRegisters = 5;
 
-  // How many registers we've allocated
-  size_t num_registers_{0};
+  size_t NumRegisters() const {
+    return register_liveness_.size();
+  }
 
   // Stores information needed to back-patch a label once it is bound. We need to know the start of
   // the instruction that refers to the label, and the offset to where the actual label value should
@@ -478,6 +501,8 @@ class MethodBuilder {
   // During encoding, keep track of the largest number of arguments needed, so we can use it for our
   // outs count
   size_t max_args_{0};
+
+  std::vector<bool> register_liveness_;
 };
 
 // A helper to build class definitions.
@@ -576,7 +601,8 @@ class DexBuilder {
 };
 
 template <typename... T>
-void MethodBuilder::BuildNew(Value target, TypeDescriptor type, Prototype constructor, T... args) {
+void MethodBuilder::BuildNew(Value target, TypeDescriptor type, Prototype constructor,
+                             const T&... args) {
   MethodDeclData constructor_data{dex_->GetOrDeclareMethod(type, "<init>", constructor)};
   // allocate the object
   ir::Type* type_def = dex_->GetOrAddType(type.descriptor());

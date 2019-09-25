@@ -161,7 +161,7 @@ void WriteTestDexFile(const string& filename) {
 
   MethodBuilder method{cbuilder.CreateMethod("foo", Prototype{TypeDescriptor::Int(), string_type})};
 
-  Value result = method.MakeRegister();
+  LiveRegister result = method.AllocRegister();
 
   MethodDeclData string_length =
       dex_file.GetOrDeclareMethod(string_type, "length", Prototype{TypeDescriptor::Int()});
@@ -314,7 +314,7 @@ ir::EncodedMethod* MethodBuilder::Encode() {
   CHECK(decl_->prototype != nullptr);
   size_t const num_args =
       decl_->prototype->param_types != nullptr ? decl_->prototype->param_types->types.size() : 0;
-  code->registers = num_registers_ + num_args + kMaxScratchRegisters;
+  code->registers = NumRegisters() + num_args + kMaxScratchRegisters;
   code->ins_count = num_args;
   EncodeInstructions();
   code->instructions = slicer::ArrayView<const ::dex::u2>(buffer_.data(), buffer_.size());
@@ -327,7 +327,20 @@ ir::EncodedMethod* MethodBuilder::Encode() {
   return method;
 }
 
-Value MethodBuilder::MakeRegister() { return Value::Local(num_registers_++); }
+LiveRegister MethodBuilder::AllocRegister() {
+  // Find a free register
+  for (size_t i = 0; i < register_liveness_.size(); ++i) {
+    if (!register_liveness_[i]) {
+      register_liveness_[i] = true;
+      return LiveRegister{&register_liveness_, i};
+    }
+  }
+
+  // If we get here, all the registers are in use, so we have to allocate a new
+  // one.
+  register_liveness_.push_back(true);
+  return LiveRegister{&register_liveness_, register_liveness_.size() - 1};
+}
 
 Value MethodBuilder::MakeLabel() {
   labels_.push_back({});
@@ -600,7 +613,7 @@ size_t MethodBuilder::RegisterValue(const Value& value) const {
   if (value.is_register()) {
     return value.value();
   } else if (value.is_parameter()) {
-    return value.value() + num_registers_ + kMaxScratchRegisters;
+    return value.value() + NumRegisters() + kMaxScratchRegisters;
   }
   CHECK(false && "Must be either a parameter or a register");
   return 0;
