@@ -1056,26 +1056,6 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * @hide
-     * Returns Randomized MAC address to use with the network.
-     * If it is not set/valid, creates a new randomized address.
-     * If it can't generate a valid mac, returns the default MAC.
-     */
-    public @NonNull MacAddress getOrCreateRandomizedMacAddress() {
-        int randomMacGenerationCount = 0;
-        while (!isValidMacAddressForRandomization(mRandomizedMacAddress)
-                && randomMacGenerationCount < MAXIMUM_RANDOM_MAC_GENERATION_RETRY) {
-            mRandomizedMacAddress = MacAddress.createRandomUnicastAddress();
-            randomMacGenerationCount++;
-        }
-
-        if (!isValidMacAddressForRandomization(mRandomizedMacAddress)) {
-            mRandomizedMacAddress = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
-        }
-        return mRandomizedMacAddress;
-    }
-
-    /**
      * Returns MAC address set to be the local randomized MAC address.
      * Depending on user preference, the device may or may not use the returned MAC address for
      * connections to this network.
