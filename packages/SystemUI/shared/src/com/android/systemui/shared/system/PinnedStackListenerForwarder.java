@@ -69,13 +69,6 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
     }
 
     @Override
-    public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
-        for (PinnedStackListener listener : mListeners) {
-            listener.onShelfVisibilityChanged(shelfVisible, shelfHeight);
-        }
-    }
-
-    @Override
     public void onMinimizedStateChanged(boolean isMinimized) {
         for (PinnedStackListener listener : mListeners) {
             listener.onMinimizedStateChanged(isMinimized);
@@ -142,8 +135,6 @@ public class PinnedStackListenerForwarder extends IPinnedStackListener.Stub {
                 boolean fromShelfAdjustment) {}
 
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
-
-        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {}
 
         public void onMinimizedStateChanged(boolean isMinimized) {}
 

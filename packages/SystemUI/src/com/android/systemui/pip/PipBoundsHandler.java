@@ -55,6 +55,12 @@ public class PipBoundsHandler {
     private final Rect mTmpInsets = new Rect();
     private final Point mTmpDisplaySize = new Point();
 
+    /**
+     * Tracks the destination bounds, used for any following
+     * {@link #onMovementBoundsChanged(Rect, Rect, Rect, DisplayInfo)} calculations.
+     */
+    private final Rect mLastDestinationBounds = new Rect();
+
     private IPinnedStackController mPinnedStackController;
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
@@ -120,19 +126,26 @@ public class PipBoundsHandler {
     }
 
     /**
+     * Sets both shelf visibility and its height if applicable.
+     * @return {@code true} if the internal shelf state is changed, {@code false} otherwise.
+     */
+    public boolean setShelfHeight(boolean shelfVisible, int shelfHeight) {
+        final boolean shelfShowing = shelfVisible && shelfHeight > 0;
+        if (shelfShowing == mIsShelfShowing && shelfHeight == mShelfHeight) {
+            return false;
+        }
+
+        mIsShelfShowing = shelfVisible;
+        mShelfHeight = shelfHeight;
+        return true;
+    }
+
+    /**
      * Responds to IPinnedStackListener on IME visibility change.
      */
     public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
         mIsImeShowing = imeVisible;
         mImeHeight = imeHeight;
-    }
-
-    /**
-     * Responds to IPinnedStackListener on shelf visibility change.
-     */
-    public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
-        mIsShelfShowing = shelfVisible;
-        mShelfHeight = shelfHeight;
     }
 
     /**
@@ -185,6 +198,10 @@ public class PipBoundsHandler {
         mLastPipComponentName = null;
     }
 
+    public Rect getLastDestinationBounds() {
+        return mLastDestinationBounds;
+    }
+
     /**
      * Responds to IPinnedStackListener on {@link DisplayInfo} change.
      * It will normally follow up with a
@@ -232,6 +249,7 @@ public class PipBoundsHandler {
         try {
             mPinnedStackController.startAnimation(destinationBounds, sourceRectHint,
                     -1 /* animationDuration */);
+            mLastDestinationBounds.set(destinationBounds);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to start PiP animation from SysUI", e);
         }

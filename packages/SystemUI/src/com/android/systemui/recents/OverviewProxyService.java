@@ -58,6 +58,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.pip.PipUI;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
@@ -348,6 +349,20 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setShelfHeight(boolean visible, int shelfHeight) {
+            if (!verifyCaller("setShelfHeight")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                final PipUI component = SysUiServiceProvider.getComponent(mContext, PipUI.class);
+                component.setShelfHeight(visible, shelfHeight);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
