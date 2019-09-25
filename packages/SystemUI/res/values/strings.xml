@@ -440,6 +440,9 @@
     <!-- Content description of the data connection type 5Ge. [CHAR LIMIT=NONE] -->
     <string name="data_connection_5ge" translate="false">5Ge</string>
 
+    <!-- Content description of the data connection type 5Ge with HTML styling. DO NOT TRANSLATE [CHAR LIMIT=NONE] -->
+    <string name="data_connection_5ge_html" translate="false"> &lt;i>5G &lt;small>E&lt;/small>&lt;/i> </string>
+
     <!-- Content description of the data connection type 5G. [CHAR LIMIT=NONE] -->
     <string name="data_connection_5g" translate="false">5G</string>
 
