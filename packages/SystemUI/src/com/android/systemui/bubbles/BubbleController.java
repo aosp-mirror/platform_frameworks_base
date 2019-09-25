@@ -126,8 +126,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_GROUP_CANCELLED = 9;
     static final int DISMISS_INVALID_INTENT = 10;
 
-    public static final int MAX_BUBBLES = 5; // TODO: actually enforce this
-
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
     private final BubbleTaskStackListener mTaskStackListener;
