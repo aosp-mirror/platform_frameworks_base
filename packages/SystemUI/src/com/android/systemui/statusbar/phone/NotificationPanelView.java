@@ -652,8 +652,7 @@ public class NotificationPanelView extends PanelView implements
             mNotificationStackScroller.setLayoutParams(lp);
         }
         int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
-        int topMargin =
-                res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
+        int topMargin = sideMargin;
         lp = (FrameLayout.LayoutParams) mPluginFrame.getLayoutParams();
         if (lp.width != qsWidth || lp.gravity != panelGravity || lp.leftMargin != sideMargin
                 || lp.rightMargin != sideMargin || lp.topMargin != topMargin) {
@@ -796,6 +795,7 @@ public class NotificationPanelView extends PanelView implements
         int oldMaxHeight = mQsMaxExpansionHeight;
         if (mQs != null) {
             mQsMinExpansionHeight = mKeyguardShowing ? 0 : mQs.getQsMinExpansionHeight();
+            mNPVPluginManager.setYOffset(mQsMinExpansionHeight);
             mQsMinExpansionHeight += mNPVPluginManager.getHeight();
             mQsMaxExpansionHeight = mQs.getDesiredHeight();
             mNotificationStackScroller.setMaxTopPadding(
