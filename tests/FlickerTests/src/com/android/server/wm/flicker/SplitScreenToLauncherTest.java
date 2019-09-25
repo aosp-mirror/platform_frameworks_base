@@ -25,8 +25,11 @@ import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 /**
  * Test open app to split screen.
@@ -34,16 +37,19 @@ import org.junit.runner.RunWith;
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 140856143)
+@Ignore("Waiting bug feedback")
 public class SplitScreenToLauncherTest extends FlickerTestBase {
 
     public SplitScreenToLauncherTest() {
-        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
     @Before
     public void runTransition() {
-        super.runTransition(splitScreenToLauncher(testApp, uiDevice).includeJankyRuns().build());
+        super.runTransition(splitScreenToLauncher(mTestApp, mUiDevice).includeJankyRuns().build());
     }
 
     @Test
@@ -62,13 +68,12 @@ public class SplitScreenToLauncherTest extends FlickerTestBase {
                 .forAllEntries());
     }
 
-    @FlakyTest(bugId = 79686616)
     @Test
     public void checkVisibility_appLayerBecomesInVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(testApp.getPackage())
+                .showsLayer(mTestApp.getPackage())
                 .then()
-                .hidesLayer(testApp.getPackage())
+                .hidesLayer(mTestApp.getPackage())
                 .forAllEntries());
     }
 

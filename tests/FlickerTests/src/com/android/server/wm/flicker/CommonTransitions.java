@@ -67,7 +67,7 @@ class CommonTransitions {
                     device.setOrientationNatural();
             }
             // Wait for animation to complete
-            sleep(3000);
+            sleep(1000);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -216,10 +216,10 @@ class CommonTransitions {
 
     static TransitionBuilder resizeSplitScreen(IAppHelper testAppTop, IAppHelper testAppBottom,
             UiDevice device, Rational startRatio, Rational stopRatio) {
-        String testTag = "resizeSplitScreen_" + testAppTop.getLauncherName() + "_" +
-                testAppBottom.getLauncherName() + "_" +
-                startRatio.toString().replace("/", ":") + "_to_" +
-                stopRatio.toString().replace("/", ":");
+        String testTag = "resizeSplitScreen_" + testAppTop.getLauncherName() + "_"
+                + testAppBottom.getLauncherName() + "_"
+                + startRatio.toString().replace("/", ":") + "_to_"
+                + stopRatio.toString().replace("/", ":");
         return TransitionRunner.newBuilder()
                 .withTag(testTag)
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
@@ -231,7 +231,7 @@ class CommonTransitions {
                 .runBefore(() -> launchSplitScreen(device))
                 .runBefore(() -> {
                     UiObject2 snapshot = device.findObject(
-                            By.res("com.google.android.apps.nexuslauncher", "snapshot"));
+                            By.res(device.getLauncherPackageName(), "snapshot"));
                     snapshot.click();
                 })
                 .runBefore(() -> AutomationUtils.resizeSplitScreen(device, startRatio))
