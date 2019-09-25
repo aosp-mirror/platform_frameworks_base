@@ -37,6 +37,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
+import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -232,5 +233,10 @@ public class NavigationBarController implements Callbacks {
     /** @return {@link NavigationBarFragment} on the default display. */
     public NavigationBarFragment getDefaultNavigationBarFragment() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
+    }
+
+    /** @return {@link AssistHandleViewController} (only on the default display). */
+    public AssistHandleViewController getAssistHandlerViewController() {
+        return getDefaultNavigationBarFragment().getAssistHandlerViewController();
     }
 }

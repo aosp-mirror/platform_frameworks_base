@@ -38,9 +38,9 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.ScreenDecorations;
-import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.statusbar.NavigationBarController;
 
 import java.util.Locale;
 
@@ -163,9 +163,11 @@ public class DefaultUiController implements AssistManager.UiController {
     }
 
     private void updateAssistHandleVisibility() {
-        ScreenDecorations decorations = SysUiServiceProvider.getComponent(mRoot.getContext(),
-                ScreenDecorations.class);
-        decorations.setAssistHintBlocked(mInvocationInProgress);
+        AssistHandleViewController controller = Dependency.get(NavigationBarController.class)
+                .getAssistHandlerViewController();
+        if (controller != null) {
+            controller.setAssistHintBlocked(mInvocationInProgress);
+        }
     }
 
     private void attach() {

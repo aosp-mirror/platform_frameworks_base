@@ -32,7 +32,6 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
-import com.android.systemui.ScreenDecorations;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 
@@ -71,7 +70,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private final Handler mHandler;
     private final Runnable mHideHandles = this::hideHandles;
     private final Runnable mShowAndGo = this::showAndGoInternal;
-    private final Provider<ScreenDecorations> mScreenDecorations;
+    private final Provider<AssistHandleViewController> mAssistHandleViewController;
     private final PhenotypeHelper mPhenotypeHelper;
     private final Map<AssistHandleBehavior, BehaviorController> mBehaviorMap;
 
@@ -90,7 +89,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             Context context,
             AssistUtils assistUtils,
             @Named(ASSIST_HANDLE_THREAD_NAME) Handler handler,
-            Provider<ScreenDecorations> screenDecorations,
+            Provider<AssistHandleViewController> assistHandleViewController,
             PhenotypeHelper phenotypeHelper,
             Map<AssistHandleBehavior, BehaviorController> behaviorMap,
             NavigationModeController navigationModeController,
@@ -98,7 +97,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mContext = context;
         mAssistUtils = assistUtils;
         mHandler = handler;
-        mScreenDecorations = screenDecorations;
+        mAssistHandleViewController = assistHandleViewController;
         mPhenotypeHelper = phenotypeHelper;
         mBehaviorMap = behaviorMap;
 
@@ -229,12 +228,13 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         }
 
         if (handlesUnblocked(ignoreThreshold)) {
-            ScreenDecorations screenDecorations = mScreenDecorations.get();
-            if (screenDecorations == null) {
-                Log.w(TAG, "Couldn't show handles, ScreenDecorations unavailable");
+            mHandlesShowing = true;
+            AssistHandleViewController assistHandleViewController =
+                    mAssistHandleViewController.get();
+            if (assistHandleViewController == null) {
+                Log.w(TAG, "Couldn't show handles, AssistHandleViewController unavailable");
             } else {
-                mHandlesShowing = true;
-                screenDecorations.setAssistHintVisible(true);
+                assistHandleViewController.setAssistHintVisible(true);
             }
         }
     }
@@ -244,13 +244,14 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             return;
         }
 
-        ScreenDecorations screenDecorations = mScreenDecorations.get();
-        if (screenDecorations == null) {
-            Log.w(TAG, "Couldn't hide handles, ScreenDecorations unavailable");
+        mHandlesShowing = false;
+        mHandlesLastHiddenAt = SystemClock.elapsedRealtime();
+        AssistHandleViewController assistHandleViewController =
+                mAssistHandleViewController.get();
+        if (assistHandleViewController == null) {
+            Log.w(TAG, "Couldn't show handles, AssistHandleViewController unavailable");
         } else {
-            mHandlesShowing = false;
-            mHandlesLastHiddenAt = SystemClock.elapsedRealtime();
-            screenDecorations.setAssistHintVisible(false);
+            assistHandleViewController.setAssistHintVisible(false);
         }
     }
 
