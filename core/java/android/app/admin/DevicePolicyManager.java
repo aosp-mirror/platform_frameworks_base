@@ -2079,7 +2079,8 @@ public class DevicePolicyManager {
         ID_TYPE_BASE_INFO,
         ID_TYPE_SERIAL,
         ID_TYPE_IMEI,
-        ID_TYPE_MEID
+        ID_TYPE_MEID,
+        ID_TYPE_INDIVIDUAL_ATTESTATION
     })
     public @interface AttestationIdType {}
 
@@ -2112,6 +2113,14 @@ public class DevicePolicyManager {
      * @see #generateKeyPair
      */
     public static final int ID_TYPE_MEID = 8;
+
+    /**
+     * Specifies that the device should attest using an individual attestation certificate.
+     * For use with {@link #generateKeyPair}.
+     *
+     * @see #generateKeyPair
+     */
+    public static final int ID_TYPE_INDIVIDUAL_ATTESTATION = 16;
 
     /**
      * Service-specific error code for {@link #generateKeyPair}:
@@ -4892,24 +4901,47 @@ public class DevicePolicyManager {
      * have been given to access the key and certificates associated with this alias will be
      * revoked.
      *
+     * <p>Attestation: to enable attestation, set an attestation challenge in {@code keySpec} via
+     * {@link KeyGenParameterSpec.Builder#setAttestationChallenge}. By specifying flags to the
+     * {@code idAttestationFlags} parameter, it is possible to request the device's unique
+     * identity to be included in the attestation record.
+     *
+     * <p>Specific identifiers can be included in the attestation record, and an individual
+     * attestation certificate can be used to sign the attestation record. To find out if the device
+     * supports these features, refer to {@link #isDeviceIdAttestationSupported()} and
+     * {@link #isUniqueDeviceAttestationSupported()}.
+     *
+     * <p>Device owner, profile owner and their delegated certificate installer can use
+     * {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information
+     * including manufacturer, model, brand, device and product in the attestation record.
+     * Only device owner and their delegated certificate installer can use
+     * {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request
+     * unique device identifiers to be attested (the serial number, IMEI and MEID correspondingly),
+     * if supported by the device (see {@link #isDeviceIdAttestationSupported()}).
+     * Additionally, device owner and their delegated certificate installer can also request the
+     * attestation record to be signed using an individual attestation certificate by specifying
+     * the {@link #ID_TYPE_INDIVIDUAL_ATTESTATION} flag (if supported by the device, see
+     * {@link #isUniqueDeviceAttestationSupported()}).
+     * <p>
+     * If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
+     * is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
+     * <p>
+     * Attestation using {@link #ID_TYPE_INDIVIDUAL_ATTESTATION} can only be requested if
+     * key generation is done in StrongBox.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
      * @param algorithm The key generation algorithm, see {@link java.security.KeyPairGenerator}.
      * @param keySpec Specification of the key to generate, see
      * {@link java.security.KeyPairGenerator}.
-     * @param idAttestationFlags A bitmask of all the identifiers that should be included in the
+     * @param idAttestationFlags A bitmask of the identifiers that should be included in the
      *        attestation record ({@code ID_TYPE_BASE_INFO}, {@code ID_TYPE_SERIAL},
-     *        {@code ID_TYPE_IMEI} and {@code ID_TYPE_MEID}), or {@code 0} if no device
-     *        identification is required in the attestation record.
-     *        Device owner, profile owner and their delegated certificate installer can use
-     *        {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information
-     *        including manufacturer, model, brand, device and product in the attestation record.
-     *        Only device owner and their delegated certificate installer can use
-     *        {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request
-     *        unique device identifiers to be attested.
+     *        {@code ID_TYPE_IMEI} and {@code ID_TYPE_MEID}), and
+     *        {@code ID_TYPE_INDIVIDUAL_ATTESTATION} if the attestation record should be signed
+     *        using an individual attestation certificate.
      *        <p>
-     *        If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
-     *        is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
+     *        {@code 0} should be passed in if no device identification is required in the
+     *        attestation record and the batch attestation certificate should be used.
      *        <p>
      *        If any flag is specified, then an attestation challenge must be included in the
      *        {@code keySpec}.
@@ -5051,12 +5083,27 @@ public class DevicePolicyManager {
 
     /**
      * Returns {@code true} if the device supports attestation of device identifiers in addition
-     * to key attestation.
+     * to key attestation. See
+     * {@link #generateKeyPair(ComponentName, String, KeyGenParameterSpec, int)}
      * @return {@code true} if Device ID attestation is supported.
      */
     public boolean isDeviceIdAttestationSupported() {
         PackageManager pm = mContext.getPackageManager();
         return pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ID_ATTESTATION);
+    }
+
+    /**
+     * Returns {@code true} if the StrongBox Keymaster implementation on the device was provisioned
+     * with an individual attestation certificate and can sign attestation records using it (as
+     * attestation using an individual attestation certificate is a feature only Keymaster
+     * implementations with StrongBox security level can implement).
+     * For use prior to calling
+     * {@link #generateKeyPair(ComponentName, String, KeyGenParameterSpec, int)}.
+     * @return {@code true} if individual attestation is supported.
+     */
+    public boolean isUniqueDeviceAttestationSupported() {
+        PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_UNIQUE_ATTESTATION);
     }
 
     /**
