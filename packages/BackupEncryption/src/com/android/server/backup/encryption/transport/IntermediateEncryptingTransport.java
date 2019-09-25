@@ -16,7 +16,10 @@
 
 package com.android.server.backup.encryption.transport;
 
+import static com.android.server.backup.encryption.BackupEncryptionService.TAG;
+
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
@@ -47,6 +50,7 @@ public class IntermediateEncryptingTransport extends DelegatingTransport {
     }
 
     private void connect() throws RemoteException {
+        Log.i(TAG, "connecting " + mTransportClient);
         synchronized (mConnectLock) {
             if (mRealTransport == null) {
                 mRealTransport = mTransportClient.connect("IntermediateEncryptingTransport");

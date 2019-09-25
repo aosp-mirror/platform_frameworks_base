@@ -72,6 +72,7 @@ public class IntermediateEncryptingTransportManager {
      * Create an instance of {@link IntermediateEncryptingTransport}.
      */
     private IntermediateEncryptingTransport create(Intent realTransportIntent) {
+        Log.d(TAG, "create: intent:" + realTransportIntent);
         return new IntermediateEncryptingTransport(mTransportClientManager.getTransportClient(
                 realTransportIntent.getComponent(), realTransportIntent.getExtras(), CALLER));
     }
