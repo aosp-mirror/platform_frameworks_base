@@ -250,6 +250,9 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final IBinder mUserRestriconToken = new Binder();
 
+    /** Installs system packages based on user-type. */
+    private final UserSystemPackageInstaller mSystemPackageInstaller;
+
     /**
      * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
      */
@@ -550,6 +553,7 @@ public class UserManagerService extends IUserManager.Stub {
             readUserListLP();
             sInstance = this;
         }
+        mSystemPackageInstaller = new UserSystemPackageInstaller(this);
         mLocalService = new LocalService();
         LocalServices.addService(UserManagerInternal.class, mLocalService);
         mLockPatternUtils = new LockPatternUtils(mContext);
@@ -2842,8 +2846,10 @@ public class UserManagerService extends IUserManager.Stub {
                     StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             t.traceEnd();
 
+            final Set<String> installablePackages =
+                    mSystemPackageInstaller.getInstallablePackagesForUserType(flags);
             t.traceBegin("PM.createNewUser");
-            mPm.createNewUser(userId, disallowedPackages);
+            mPm.createNewUser(userId, installablePackages, disallowedPackages);
             t.traceEnd();
 
             userInfo.partial = false;
@@ -2875,6 +2881,11 @@ public class UserManagerService extends IUserManager.Stub {
             Binder.restoreCallingIdentity(ident);
         }
         return userInfo;
+    }
+
+    /** Install/uninstall system packages for all users based on their user-type, as applicable. */
+    boolean installWhitelistedSystemPackages(boolean isFirstBoot, boolean isUpgrade) {
+        return mSystemPackageInstaller.installWhitelistedSystemPackages(isFirstBoot, isUpgrade);
     }
 
     @VisibleForTesting
@@ -3863,6 +3874,10 @@ public class UserManagerService extends IUserManager.Stub {
         pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
         pw.println("  Is headless-system mode: " + UserManager.isHeadlessSystemUserMode());
         pw.println("  User version: " + mUserVersion);
+
+        // Dump package whitelist
+        pw.println();
+        mSystemPackageInstaller.dump(pw);
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
