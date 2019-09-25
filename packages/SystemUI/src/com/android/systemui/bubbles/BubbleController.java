@@ -18,7 +18,6 @@ package com.android.systemui.bubbles;
 
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
@@ -959,16 +958,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
         if (!ActivityInfo.isResizeableMode(info.resizeMode)) {
             Log.w(TAG, "Unable to send as bubble -- activity is not resizable for intent: "
-                    + intent);
-            return false;
-        }
-        if (info.documentLaunchMode != DOCUMENT_LAUNCH_ALWAYS) {
-            Log.w(TAG, "Unable to send as bubble -- activity is not documentLaunchMode=always "
-                    + "for intent: " + intent);
-            return false;
-        }
-        if ((info.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
-            Log.w(TAG, "Unable to send as bubble -- activity is not embeddable for intent: "
                     + intent);
             return false;
         }

@@ -130,7 +130,7 @@ package android.app {
     method public void startActivity(@NonNull android.content.Intent);
     method public void startActivity(@NonNull android.content.Intent, android.os.UserHandle);
     method public void startActivity(@NonNull android.app.PendingIntent);
-    method public void startActivity(@NonNull android.app.PendingIntent, @NonNull android.app.ActivityOptions);
+    method public void startActivity(@NonNull android.app.PendingIntent, @Nullable android.content.Intent, @NonNull android.app.ActivityOptions);
   }
 
   public abstract static class ActivityView.StateCallback {

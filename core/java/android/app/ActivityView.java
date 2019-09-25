@@ -22,6 +22,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLI
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.ActivityManager.StackInfo;
 import android.content.ComponentName;
@@ -324,16 +325,17 @@ public class ActivityView extends ViewGroup {
      * this method can be called.
      *
      * @param pendingIntent Intent used to launch an activity.
+     * @param fillInIntent Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}.
      * @param options options for the activity
      *
      * @see StateCallback
      * @see #startActivity(Intent)
      */
-    public void startActivity(@NonNull PendingIntent pendingIntent,
+    public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @NonNull ActivityOptions options) {
         options.setLaunchDisplayId(mVirtualDisplay.getDisplay().getDisplayId());
         try {
-            pendingIntent.send(null /* context */, 0 /* code */, null /* intent */,
+            pendingIntent.send(getContext(), 0 /* code */, fillInIntent,
                     null /* onFinished */, null /* handler */, null /* requiredPermission */,
                     options.toBundle());
         } catch (PendingIntent.CanceledException e) {
