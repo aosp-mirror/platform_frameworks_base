@@ -69,19 +69,21 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     /**
      * @hide
      */
-    public static final String KEY_POSITIVE_TEXT = "positive_text";
-    /**
-     * @hide
-     */
     public static final String KEY_NEGATIVE_TEXT = "negative_text";
     /**
      * @hide
      */
     public static final String KEY_REQUIRE_CONFIRMATION = "require_confirmation";
     /**
+     * This is deprecated. Internally we should use {@link #KEY_AUTHENTICATORS_ALLOWED}
      * @hide
      */
     public static final String KEY_ALLOW_DEVICE_CREDENTIAL = "allow_device_credential";
+    /**
+     * If this key is set, we will ignore {@link #KEY_ALLOW_DEVICE_CREDENTIAL}
+     * @hide
+     */
+    public static final String KEY_AUTHENTICATORS_ALLOWED = "authenticators_allowed";
 
     /**
      * Error/help message will show for this amount of time.
@@ -203,30 +205,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Optional: Set the text for the positive button. If not set, the positive button
-         * will not show.
-         * @param text
-         * @return
-         * @hide
-         */
-        @NonNull public Builder setPositiveButton(@NonNull CharSequence text,
-                @NonNull @CallbackExecutor Executor executor,
-                @NonNull DialogInterface.OnClickListener listener) {
-            if (TextUtils.isEmpty(text)) {
-                throw new IllegalArgumentException("Text must be set and non-empty");
-            }
-            if (executor == null) {
-                throw new IllegalArgumentException("Executor must not be null");
-            }
-            if (listener == null) {
-                throw new IllegalArgumentException("Listener must not be null");
-            }
-            mBundle.putCharSequence(KEY_POSITIVE_TEXT, text);
-            mPositiveButtonInfo = new ButtonInfo(executor, listener);
-            return this;
-        }
-
-        /**
          * Required: Set the text for the negative button. This would typically be used as a
          * "Cancel" button, but may be also used to show an alternative method for authentication,
          * such as screen that asks for a backup password.
@@ -306,15 +284,19 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
             final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE);
-            final boolean enableFallback = mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL);
+            final boolean allowCredential = mBundle.getBoolean(KEY_ALLOW_DEVICE_CREDENTIAL);
+            final Object authenticatorsAllowed = mBundle.get(KEY_AUTHENTICATORS_ALLOWED);
 
             if (TextUtils.isEmpty(title) && !useDefaultTitle) {
                 throw new IllegalArgumentException("Title must be set and non-empty");
-            } else if (TextUtils.isEmpty(negative) && !enableFallback) {
+            } else if (TextUtils.isEmpty(negative) && !allowCredential) {
                 throw new IllegalArgumentException("Negative text must be set and non-empty");
-            } else if (!TextUtils.isEmpty(negative) && enableFallback) {
+            } else if (!TextUtils.isEmpty(negative) && allowCredential) {
                 throw new IllegalArgumentException("Can't have both negative button behavior"
                         + " and device credential enabled");
+            } else if (authenticatorsAllowed != null && allowCredential) {
+                throw new IllegalArgumentException("setAuthenticatorsAllowed and"
+                        + " setDeviceCredentialAllowed should not be used simultaneously");
             }
             return new BiometricPrompt(mContext, mBundle, mPositiveButtonInfo, mNegativeButtonInfo);
         }

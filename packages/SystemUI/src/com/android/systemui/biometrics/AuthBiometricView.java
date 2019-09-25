@@ -754,6 +754,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     private boolean isDeviceCredentialAllowed() {
-        return mBiometricPromptBundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
+        return Utils.isDeviceCredentialAllowed(mBiometricPromptBundle);
     }
 }

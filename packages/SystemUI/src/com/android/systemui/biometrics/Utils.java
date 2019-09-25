@@ -19,6 +19,9 @@ package com.android.systemui.biometrics;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
 import android.content.Context;
+import android.hardware.biometrics.Authenticator;
+import android.hardware.biometrics.BiometricPrompt;
+import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,5 +48,19 @@ public class Utils {
         event.setContentChangeTypes(CONTENT_CHANGE_TYPE_SUBTREE);
         view.sendAccessibilityEventUnchecked(event);
         view.notifySubtreeAccessibilityStateChanged(view, view, CONTENT_CHANGE_TYPE_SUBTREE);
+    }
+
+    static boolean isDeviceCredentialAllowed(Bundle biometricPromptBundle) {
+        final int authenticators = getAuthenticators(biometricPromptBundle);
+        return (authenticators & Authenticator.TYPE_CREDENTIAL) != 0;
+    }
+
+    static boolean isBiometricAllowed(Bundle biometricPromptBundle) {
+        final int authenticators = getAuthenticators(biometricPromptBundle);
+        return (authenticators & Authenticator.TYPE_BIOMETRIC) != 0;
+    }
+
+    static int getAuthenticators(Bundle biometricPromptBundle) {
+        return biometricPromptBundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
     }
 }

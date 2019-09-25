@@ -31,6 +31,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
@@ -211,7 +212,8 @@ public class BiometricService extends SystemService {
         }
 
         boolean isAllowDeviceCredential() {
-            return mBundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
+            final int authenticators = mBundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+            return (authenticators & Authenticator.TYPE_CREDENTIAL) != 0;
         }
     }
 
@@ -237,7 +239,7 @@ public class BiometricService extends SystemService {
 
     // Get and cache the available authenticator (manager) classes. Used since aidl doesn't support
     // polymorphism :/
-    final ArrayList<Authenticator> mAuthenticators = new ArrayList<>();
+    final ArrayList<AuthenticatorWrapper> mAuthenticators = new ArrayList<>();
 
     // The current authentication session, null if idle/done. We need to track both the current
     // and pending sessions since errors may be sent to either.
@@ -346,11 +348,11 @@ public class BiometricService extends SystemService {
         }
     };
 
-    private final class Authenticator {
+    private final class AuthenticatorWrapper {
         final int mType;
         final BiometricAuthenticator mAuthenticator;
 
-        Authenticator(int type, BiometricAuthenticator authenticator) {
+        AuthenticatorWrapper(int type, BiometricAuthenticator authenticator) {
             mType = type;
             mAuthenticator = authenticator;
         }
@@ -607,6 +609,12 @@ public class BiometricService extends SystemService {
                 return;
             }
 
+            if (bundle.get(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED) != null) {
+                checkInternalPermission();
+            }
+
+            combineAuthenticatorBundles(bundle);
+
             // Check the usage of this in system server. Need to remove this check if it becomes
             // a public API.
             final boolean useDefaultTitle =
@@ -840,8 +848,8 @@ public class BiometricService extends SystemService {
         // Cache the authenticators
         for (int featureId : FEATURE_ID) {
             if (hasFeature(featureId)) {
-                Authenticator authenticator =
-                        new Authenticator(featureId, getAuthenticator(featureId));
+                AuthenticatorWrapper authenticator =
+                        new AuthenticatorWrapper(featureId, getAuthenticator(featureId));
                 mAuthenticators.add(authenticator);
             }
         }
@@ -879,7 +887,7 @@ public class BiometricService extends SystemService {
 
         int modality = TYPE_NONE;
         int firstHwAvailable = TYPE_NONE;
-        for (Authenticator authenticatorWrapper : mAuthenticators) {
+        for (AuthenticatorWrapper authenticatorWrapper : mAuthenticators) {
             modality = authenticatorWrapper.getType();
             BiometricAuthenticator authenticator = authenticatorWrapper.getAuthenticator();
             if (authenticator.isHardwareDetected()) {
@@ -1145,7 +1153,7 @@ public class BiometricService extends SystemService {
                     } else {
                         mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
                         if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
-                            mStatusBarService.hideBiometricDialog();
+                            mStatusBarService.hideAuthenticationDialog();
                         } else {
                             mStatusBarService.onBiometricError(error, message);
                         }
@@ -1155,7 +1163,7 @@ public class BiometricService extends SystemService {
                     // the client and and clean up. The only error we should get here is
                     // ERROR_CANCELED due to another client kicking us out.
                     mCurrentAuthSession.mClientReceiver.onError(error, message);
-                    mStatusBarService.hideBiometricDialog();
+                    mStatusBarService.hideAuthenticationDialog();
                     mCurrentAuthSession = null;
                 } else if (mCurrentAuthSession.mState == STATE_SHOWING_DEVICE_CREDENTIAL) {
                     Slog.d(TAG, "Biometric canceled, ignoring from state: "
@@ -1167,8 +1175,32 @@ public class BiometricService extends SystemService {
             } else if (mPendingAuthSession != null
                     && mPendingAuthSession.containsCookie(cookie)) {
                 if (mPendingAuthSession.mState == STATE_AUTH_CALLED) {
-                    mPendingAuthSession.mClientReceiver.onError(error, message);
-                    mPendingAuthSession = null;
+                    // If any error is received while preparing the auth session (lockout, etc),
+                    // and if device credential is allowed, just show the credential UI.
+                    if (mPendingAuthSession.isAllowDeviceCredential()) {
+                        int authenticators = mPendingAuthSession.mBundle
+                                .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+                        // Disallow biometric and notify SystemUI to show the authentication prompt.
+                        authenticators &= ~Authenticator.TYPE_BIOMETRIC;
+                        mPendingAuthSession.mBundle.putInt(
+                                BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                                authenticators);
+
+                        mCurrentAuthSession = mPendingAuthSession;
+                        mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                        mPendingAuthSession = null;
+
+                        mStatusBarService.showAuthenticationDialog(
+                                mCurrentAuthSession.mBundle,
+                                mInternalReceiver,
+                                0 /* biometricModality */,
+                                false /* requireConfirmation */,
+                                mCurrentAuthSession.mUserId,
+                                mCurrentAuthSession.mOpPackageName);
+                    } else {
+                        mPendingAuthSession.mClientReceiver.onError(error, message);
+                        mPendingAuthSession = null;
+                    }
                 } else {
                     Slog.e(TAG, "Impossible pending session error state: "
                             + mPendingAuthSession.mState);
@@ -1286,8 +1318,20 @@ public class BiometricService extends SystemService {
         mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
     }
 
+    /**
+     * Invoked when each service has notified that its client is ready to be started. When
+     * all biometrics are ready, this invokes the SystemUI dialog through StatusBar.
+     */
     private void handleOnReadyForAuthentication(int cookie, boolean requireConfirmation,
             int userId) {
+        if (mPendingAuthSession == null) {
+            // Only should happen if a biometric was locked out when authenticate() was invoked.
+            // In that case, if device credentials are allowed, the UI is already showing. If not
+            // allowed, the error has already been returned to the caller.
+            Slog.w(TAG, "Pending auth session null");
+            return;
+        }
+
         Iterator it = mPendingAuthSession.mModalitiesWaiting.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, Integer> pair = (Map.Entry) it.next();
@@ -1329,7 +1373,7 @@ public class BiometricService extends SystemService {
                 }
 
                 if (!continuing) {
-                    mStatusBarService.showBiometricDialog(mCurrentAuthSession.mBundle,
+                    mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
                             mInternalReceiver, modality, requireConfirmation, userId,
                             mCurrentAuthSession.mOpPackageName);
                 }
@@ -1452,7 +1496,7 @@ public class BiometricService extends SystemService {
                 );
 
                 mCurrentAuthSession = null;
-                mStatusBarService.hideBiometricDialog();
+                mStatusBarService.hideAuthenticationDialog();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception", e);
             }
@@ -1491,5 +1535,39 @@ public class BiometricService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to cancel authentication");
         }
+    }
+
+
+    /**
+     * Combine {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
+     * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible
+     * enough.
+     */
+    @VisibleForTesting
+    static void combineAuthenticatorBundles(Bundle bundle) {
+        boolean biometricEnabled = true; // enabled by default
+        boolean credentialEnabled = false; // disabled by default
+        if (bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false)) {
+            credentialEnabled = true;
+        }
+        if (bundle.get(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED) != null) {
+            final int authenticatorFlags =
+                    bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+            biometricEnabled = (authenticatorFlags & Authenticator.TYPE_BIOMETRIC) != 0;
+            // Using both KEY_ALLOW_DEVICE_CREDENTIAL and KEY_AUTHENTICATORS_ALLOWED together
+            // is not supported. Default to overwriting.
+            credentialEnabled = (authenticatorFlags & Authenticator.TYPE_CREDENTIAL) != 0;
+        }
+
+        bundle.remove(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
+
+        int authenticators = 0;
+        if (biometricEnabled) {
+            authenticators |= Authenticator.TYPE_BIOMETRIC;
+        }
+        if (credentialEnabled) {
+            authenticators |= Authenticator.TYPE_CREDENTIAL;
+        }
+        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
     }
 }

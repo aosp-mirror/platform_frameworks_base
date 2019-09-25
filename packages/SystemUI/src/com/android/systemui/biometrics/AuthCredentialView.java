@@ -59,6 +59,7 @@ public class AuthCredentialView extends LinearLayout {
     private Bundle mBiometricPromptBundle;
     private AuthPanelController mPanelController;
     private boolean mShouldAnimatePanel;
+    private boolean mShouldAnimateContents;
 
     private TextView mTitleView;
     private TextView mSubtitleView;
@@ -220,6 +221,10 @@ public class AuthCredentialView extends LinearLayout {
         mShouldAnimatePanel = animatePanel;
     }
 
+    void setShouldAnimateContents(boolean animateContents) {
+        mShouldAnimateContents = animateContents;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -230,18 +235,21 @@ public class AuthCredentialView extends LinearLayout {
         setTextOrHide(mDescriptionView,
                 mBiometricPromptBundle.getString(BiometricPrompt.KEY_DESCRIPTION));
 
-        setTranslationY(getResources()
-                .getDimension(R.dimen.biometric_dialog_credential_translation_offset));
-        setAlpha(0);
+        // Only animate this if we're transitioning from a biometric view.
+        if (mShouldAnimateContents) {
+            setTranslationY(getResources()
+                    .getDimension(R.dimen.biometric_dialog_credential_translation_offset));
+            setAlpha(0);
 
-        postOnAnimation(() -> {
-           animate().translationY(0)
-                   .setDuration(AuthDialog.ANIMATE_CREDENTIAL_INITIAL_DURATION_MS)
-                   .alpha(1.f)
-                   .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
-                   .withLayer()
-                   .start();
-        });
+            postOnAnimation(() -> {
+                animate().translationY(0)
+                        .setDuration(AuthDialog.ANIMATE_CREDENTIAL_INITIAL_DURATION_MS)
+                        .alpha(1.f)
+                        .setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN)
+                        .withLayer()
+                        .start();
+            });
+        }
     }
 
     @Override

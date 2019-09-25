@@ -24,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -291,11 +292,13 @@ public class AuthBiometricViewTest extends SysuiTestCase {
     private Bundle buildBiometricPromptBundle(boolean allowDeviceCredential) {
         Bundle bundle = new Bundle();
         bundle.putCharSequence(BiometricPrompt.KEY_TITLE, "Title");
+        int authenticators = Authenticator.TYPE_BIOMETRIC;
         if (allowDeviceCredential) {
-            bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
+            authenticators |= Authenticator.TYPE_CREDENTIAL;
         } else {
             bundle.putCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT, "Negative");
         }
+        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
         return bundle;
     }
 

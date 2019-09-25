@@ -23,6 +23,7 @@ import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -200,16 +201,19 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int type, boolean requireConfirmation, int userId, String opPackageName) {
+    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName) {
+        final int authenticators = Utils.getAuthenticators(bundle);
+
         if (DEBUG) {
-            Log.d(TAG, "showBiometricDialog, type: " + type
+            Log.d(TAG, "showAuthenticationDialog, authenticators: " + authenticators
+                    + ", biometricModality: " + biometricModality
                     + ", requireConfirmation: " + requireConfirmation);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
         args.arg2 = receiver;
-        args.argi1 = type;
+        args.argi1 = biometricModality;
         args.arg3 = requireConfirmation;
         args.argi2 = userId;
         args.arg4 = opPackageName;
@@ -219,8 +223,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             Log.w(TAG, "mCurrentDialog: " + mCurrentDialog);
             skipAnimation = true;
         }
-        showDialog(args, skipAnimation, null /* savedState */,
-                AuthContainerView.Builder.INITIAL_VIEW_BIOMETRIC);
+
+        showDialog(args, skipAnimation, null /* savedState */);
     }
 
     @Override
@@ -256,14 +260,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void hideBiometricDialog() {
-        if (DEBUG) Log.d(TAG, "hideBiometricDialog");
+    public void hideAuthenticationDialog() {
+        if (DEBUG) Log.d(TAG, "hideAuthenticationDialog");
 
         mCurrentDialog.dismissFromSystemServer();
     }
 
-    private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState,
-            @AuthContainerView.Builder.InitialView int initialView) {
+    private void showDialog(SomeArgs args, boolean skipAnimation, Bundle savedState) {
         mCurrentDialogArgs = args;
         final int type = args.argi1;
         final Bundle biometricPromptBundle = (Bundle) args.arg1;
@@ -278,8 +281,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 userId,
                 type,
                 opPackageName,
-                skipAnimation,
-                initialView);
+                skipAnimation);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type: " + type);
@@ -287,12 +289,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
 
         if (DEBUG) {
-            Log.d(TAG, "showDialog, "
+            Log.d(TAG, "showDialog: " + args
                     + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog
-                    + " type: " + type
-                    + " initialView: " + initialView);
+                    + " type: " + type);
         }
 
         if (mCurrentDialog != null) {
@@ -334,21 +335,20 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     != AuthContainerView.STATE_ANIMATING_OUT) {
                 final boolean credentialShowing =
                         savedState.getBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING);
+                if (credentialShowing) {
+                    // TODO: Clean this up
+                    Bundle bundle = (Bundle) mCurrentDialogArgs.arg1;
+                    bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                            Authenticator.TYPE_CREDENTIAL);
+                }
 
-                // We can assume if credential is showing, then biometric doesn't need to be shown,
-                // since credential is always after biometric.
-                final int initialView = credentialShowing
-                        ? AuthContainerView.Builder.INITIAL_VIEW_CREDENTIAL
-                        : AuthContainerView.Builder.INITIAL_VIEW_BIOMETRIC;
-
-                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState, initialView);
+                showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
             }
         }
     }
 
     protected AuthDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
-            int userId, int type, String opPackageName, boolean skipIntro,
-            @AuthContainerView.Builder.InitialView int initialView) {
+            int userId, int type, String opPackageName, boolean skipIntro) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
                 .setBiometricPromptBundle(biometricPromptBundle)
@@ -356,7 +356,6 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .setUserId(userId)
                 .setOpPackageName(opPackageName)
                 .setSkipIntro(skipIntro)
-                .setInitialView(initialView)
                 .build(type);
     }
 }

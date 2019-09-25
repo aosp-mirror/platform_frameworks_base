@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -35,6 +36,7 @@ import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -72,7 +74,7 @@ public class AuthControllerTest extends SysuiTestCase {
     @Mock
     private AuthDialog mDialog2;
 
-    private TestableBiometricDialogImpl mBiometricDialogImpl;
+    private TestableAuthController mAuthController;
 
 
     @Before
@@ -93,63 +95,66 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDialog1.getOpPackageName()).thenReturn("Dialog1");
         when(mDialog2.getOpPackageName()).thenReturn("Dialog2");
 
-        mBiometricDialogImpl = new TestableBiometricDialogImpl(new MockInjector());
-        mBiometricDialogImpl.mContext = context;
-        mBiometricDialogImpl.mComponents = mContext.getComponents();
+        when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
+        when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
 
-        mBiometricDialogImpl.start();
+        mAuthController = new TestableAuthController(new MockInjector());
+        mAuthController.mContext = context;
+        mAuthController.mComponents = mContext.getComponents();
+
+        mAuthController.start();
     }
 
     // Callback tests
 
     @Test
     public void testSendsReasonUserCanceled_whenDismissedByUserCancel() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
     }
 
     @Test
     public void testSendsReasonNegative_whenDismissedByButtonNegative() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
     }
 
     @Test
     public void testSendsReasonConfirmed_whenDismissedByButtonPositive() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
     }
 
     @Test
     public void testSendsReasonConfirmNotRequired_whenDismissedByAuthenticated() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
         verify(mReceiver).onDialogDismissed(
                 BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
     }
 
     @Test
     public void testSendsReasonError_whenDismissedByError() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_ERROR);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_ERROR);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_ERROR);
     }
 
     @Test
     public void testSendsReasonServerRequested_whenDismissedByServer() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
     }
 
     @Test
     public void testSendsReasonCredentialConfirmed_whenDeviceCredentialAuthenticated()
             throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
         verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
     }
 
@@ -158,22 +163,22 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testShowInvoked_whenSystemRequested()
             throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         verify(mDialog1).show(any(), any());
     }
 
     @Test
-    public void testOnAuthenticationSucceededInvoked_whenSystemRequested() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.onBiometricAuthenticated(true, null /* failureReason */);
+    public void testOnAuthenticationSucceededInvoked_whenSystemRequested() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.onBiometricAuthenticated(true, null /* failureReason */);
         verify(mDialog1).onAuthenticationSucceeded();
     }
 
     @Test
-    public void testOnAuthenticationFailedInvoked_whenSystemRequested() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testOnAuthenticationFailedInvoked_whenSystemRequested() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final String failureReason = "failure reason";
-        mBiometricDialogImpl.onBiometricAuthenticated(false, failureReason);
+        mAuthController.onBiometricAuthenticated(false, failureReason);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(mDialog1).onAuthenticationFailed(captor.capture());
@@ -182,10 +187,10 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnHelpInvoked_whenSystemRequested() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testOnHelpInvoked_whenSystemRequested() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final String helpMessage = "help";
-        mBiometricDialogImpl.onBiometricHelp(helpMessage);
+        mAuthController.onBiometricHelp(helpMessage);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(mDialog1).onHelp(captor.capture());
@@ -194,11 +199,11 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnErrorInvoked_whenSystemRequested() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testOnErrorInvoked_whenSystemRequested() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = 1;
         final String errMessage = "error message";
-        mBiometricDialogImpl.onBiometricError(error, errMessage);
+        mAuthController.onBiometricError(error, errMessage);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(mDialog1).onError(captor.capture());
@@ -207,83 +212,82 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testErrorLockout_whenCredentialAllowed_AnimatesToCredentialUI() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testErrorLockout_whenCredentialAllowed_AnimatesToCredentialUI() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
         final String errorString = "lockout";
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(true);
 
-        mBiometricDialogImpl.onBiometricError(error, errorString);
+        mAuthController.onBiometricError(error, errorString);
         verify(mDialog1, never()).onError(anyString());
         verify(mDialog1).animateToCredentialUI();
     }
 
     @Test
-    public void testErrorLockoutPermanent_whenCredentialAllowed_AnimatesToCredentialUI()
-            throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testErrorLockoutPermanent_whenCredentialAllowed_AnimatesToCredentialUI() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
         final String errorString = "lockout_permanent";
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(true);
 
-        mBiometricDialogImpl.onBiometricError(error, errorString);
+        mAuthController.onBiometricError(error, errorString);
         verify(mDialog1, never()).onError(anyString());
         verify(mDialog1).animateToCredentialUI();
     }
 
     @Test
-    public void testErrorLockout_whenCredentialNotAllowed_sendsOnError() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testErrorLockout_whenCredentialNotAllowed_sendsOnError() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
         final String errorString = "lockout";
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
 
-        mBiometricDialogImpl.onBiometricError(error, errorString);
+        mAuthController.onBiometricError(error, errorString);
         verify(mDialog1).onError(eq(errorString));
         verify(mDialog1, never()).animateToCredentialUI();
     }
 
     @Test
-    public void testErrorLockoutPermanent_whenCredentialNotAllowed_sendsOnError() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testErrorLockoutPermanent_whenCredentialNotAllowed_sendsOnError() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
         final String errorString = "lockout_permanent";
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
 
-        mBiometricDialogImpl.onBiometricError(error, errorString);
+        mAuthController.onBiometricError(error, errorString);
         verify(mDialog1).onError(eq(errorString));
         verify(mDialog1, never()).animateToCredentialUI();
     }
 
     @Test
-    public void testDismissWithoutCallbackInvoked_whenSystemRequested() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.hideBiometricDialog();
+    public void testDismissWithoutCallbackInvoked_whenSystemRequested() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.hideAuthenticationDialog();
         verify(mDialog1).dismissFromSystemServer();
     }
 
     @Test
-    public void testClientNotified_whenDismissedBySystemServer() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
-        mBiometricDialogImpl.hideBiometricDialog();
+    public void testClientNotified_whenDismissedBySystemServer() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        mAuthController.hideAuthenticationDialog();
         verify(mDialog1).dismissFromSystemServer();
 
-        assertNotNull(mBiometricDialogImpl.mCurrentDialog);
-        assertNotNull(mBiometricDialogImpl.mReceiver);
+        assertNotNull(mAuthController.mCurrentDialog);
+        assertNotNull(mAuthController.mReceiver);
     }
 
     // Corner case tests
 
     @Test
-    public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testShowNewDialog_beforeOldDialogDismissed_SkipsAnimations() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         verify(mDialog1).show(any(), any());
 
-        showDialog(BiometricPrompt.TYPE_FACE);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
 
         // First dialog should be dismissed without animation
         verify(mDialog1).dismissWithoutCallback(eq(false) /* animate */);
@@ -293,11 +297,20 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testConfigurationPersists_whenOnConfigurationChanged() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+    public void testConfigurationPersists_whenOnConfigurationChanged() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         verify(mDialog1).show(any(), any());
 
-        mBiometricDialogImpl.onConfigurationChanged(new Configuration());
+        // Return that the UI is in "showing" state
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            Bundle savedState = (Bundle) args[0];
+            savedState.putInt(
+                    AuthDialog.KEY_CONTAINER_STATE, AuthContainerView.STATE_SHOWING);
+            return null; // onSaveState returns void
+        }).when(mDialog1).onSaveState(any());
+
+        mAuthController.onConfigurationChanged(new Configuration());
 
         ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
         verify(mDialog1).onSaveState(captor.capture());
@@ -314,37 +327,63 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testConfigurationPersists_whenBiometricFallbackToCredential() {
+        showDialog(Authenticator.TYPE_CREDENTIAL | Authenticator.TYPE_BIOMETRIC,
+                BiometricPrompt.TYPE_FACE);
+        verify(mDialog1).show(any(), any());
+
+        // Pretend that the UI is now showing device credential UI.
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            Bundle savedState = (Bundle) args[0];
+            savedState.putInt(
+                    AuthDialog.KEY_CONTAINER_STATE, AuthContainerView.STATE_SHOWING);
+            savedState.putBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING, true);
+            return null; // onSaveState returns void
+        }).when(mDialog1).onSaveState(any());
+
+        mAuthController.onConfigurationChanged(new Configuration());
+
+        // Check that the new dialog was initialized to the credential UI.
+        ArgumentCaptor<Bundle> captor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mDialog2).show(any(), captor.capture());
+        assertEquals(Authenticator.TYPE_CREDENTIAL,
+                mAuthController.mLastBiometricPromptBundle
+                        .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+    }
+
+    @Test
     public void testClientNotified_whenTaskStackChangesDuringAuthentication() throws Exception {
-        showDialog(BiometricPrompt.TYPE_FACE);
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
 
         List<ActivityManager.RunningTaskInfo> tasks = new ArrayList<>();
         ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
         taskInfo.topActivity = mock(ComponentName.class);
         when(taskInfo.topActivity.getPackageName()).thenReturn("other_package");
         tasks.add(taskInfo);
-        when(mBiometricDialogImpl.mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
+        when(mAuthController.mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
 
-        mBiometricDialogImpl.mTaskStackListener.onTaskStackChanged();
+        mAuthController.mTaskStackListener.onTaskStackChanged();
         waitForIdleSync();
 
-        assertNull(mBiometricDialogImpl.mCurrentDialog);
-        assertNull(mBiometricDialogImpl.mReceiver);
+        assertNull(mAuthController.mCurrentDialog);
+        assertNull(mAuthController.mReceiver);
         verify(mDialog1).dismissWithoutCallback(true /* animate */);
         verify(mReceiver).onDialogDismissed(eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL));
     }
 
     // Helpers
 
-    private void showDialog(int type) {
-        mBiometricDialogImpl.showBiometricDialog(createTestDialogBundle(),
+    private void showDialog(int authenticators, int biometricModality) {
+        mAuthController.showAuthenticationDialog(createTestDialogBundle(authenticators),
                 mReceiver /* receiver */,
-                type,
+                biometricModality,
                 true /* requireConfirmation */,
                 0 /* userId */,
                 "testPackage");
     }
 
-    private Bundle createTestDialogBundle() {
+    private Bundle createTestDialogBundle(int authenticators) {
         Bundle bundle = new Bundle();
 
         bundle.putCharSequence(BiometricPrompt.KEY_TITLE, "Title");
@@ -356,20 +395,26 @@ public class AuthControllerTest extends SysuiTestCase {
         // by user settings, and should be tested in BiometricService.
         bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true);
 
+        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
+
         return bundle;
     }
 
-    private final class TestableBiometricDialogImpl extends AuthController {
+    private final class TestableAuthController extends AuthController {
         private int mBuildCount = 0;
+        private Bundle mLastBiometricPromptBundle;
 
-        public TestableBiometricDialogImpl(Injector injector) {
+        public TestableAuthController(Injector injector) {
             super(injector);
         }
 
         @Override
         protected AuthDialog buildDialog(Bundle biometricPromptBundle,
                 boolean requireConfirmation, int userId, int type, String opPackageName,
-                boolean skipIntro, @AuthContainerView.Builder.InitialView int initialView) {
+                boolean skipIntro) {
+
+            mLastBiometricPromptBundle = biometricPromptBundle;
+
             AuthDialog dialog;
             if (mBuildCount == 0) {
                 dialog = mDialog1;

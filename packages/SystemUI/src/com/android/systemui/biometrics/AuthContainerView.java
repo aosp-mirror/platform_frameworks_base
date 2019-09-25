@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
@@ -74,6 +75,7 @@ public class AuthContainerView extends LinearLayout
     @interface ContainerState {}
 
     final Config mConfig;
+    private final Injector mInjector;
     private final IBinder mWindowToken = new Binder();
     private final WindowManager mWindowManager;
     private final AuthPanelController mPanelController;
@@ -82,11 +84,11 @@ public class AuthContainerView extends LinearLayout
     private final CredentialCallback mCredentialCallback;
 
     @VisibleForTesting final FrameLayout mFrameLayout;
-    @VisibleForTesting AuthBiometricView mBiometricView;
-    @VisibleForTesting AuthCredentialView mCredentialView;
+    @VisibleForTesting @Nullable AuthBiometricView mBiometricView;
+    @VisibleForTesting @Nullable AuthCredentialView mCredentialView;
 
     private final ImageView mBackgroundView;
-    private final ScrollView mBiometricScrollView;
+    @VisibleForTesting final ScrollView mBiometricScrollView;
     private final View mPanelView;
 
     private final float mTranslationY;
@@ -107,24 +109,10 @@ public class AuthContainerView extends LinearLayout
         String mOpPackageName;
         int mModalityMask;
         boolean mSkipIntro;
-        @Builder.InitialView int mInitialView;
     }
 
     public static class Builder {
         Config mConfig;
-
-        /**
-         * Start the prompt with biometric UI. May flow to credential view if
-         * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)} is set to true.
-         */
-        public static final int INITIAL_VIEW_BIOMETRIC = 1;
-        /**
-         * Start the prompt with credential UI
-         */
-        public static final int INITIAL_VIEW_CREDENTIAL = 2;
-        @Retention(RetentionPolicy.SOURCE)
-        @IntDef({INITIAL_VIEW_BIOMETRIC, INITIAL_VIEW_CREDENTIAL})
-        @interface InitialView {}
 
         public Builder(Context context) {
             mConfig = new Config();
@@ -161,14 +149,32 @@ public class AuthContainerView extends LinearLayout
             return this;
         }
 
-        public Builder setInitialView(@InitialView int initialView) {
-            mConfig.mInitialView = initialView;
-            return this;
-        }
-
         public AuthContainerView build(int modalityMask) {
             mConfig.mModalityMask = modalityMask;
-            return new AuthContainerView(mConfig);
+            return new AuthContainerView(mConfig, new Injector());
+        }
+    }
+
+    public static class Injector {
+        ScrollView getBiometricScrollView(FrameLayout parent) {
+            return parent.findViewById(R.id.biometric_scrollview);
+        }
+
+        FrameLayout inflateContainerView(LayoutInflater factory, ViewGroup root) {
+            return (FrameLayout) factory.inflate(
+                    R.layout.auth_container_view, root, false /* attachToRoot */);
+        }
+
+        AuthPanelController getPanelController(Context context, View panelView) {
+            return new AuthPanelController(context, panelView);
+        }
+
+        ImageView getBackgroundView(FrameLayout parent) {
+            return parent.findViewById(R.id.background);
+        }
+
+        View getPanelView(FrameLayout parent) {
+            return parent.findViewById(R.id.panel);
         }
     }
 
@@ -194,7 +200,7 @@ public class AuthContainerView extends LinearLayout
                     break;
                 case AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL:
                     mConfig.mCallback.onDeviceCredentialPressed();
-                    addCredentialView(false /* animatePanel */);
+                    addCredentialView(false /* animatePanel */, true /* animateContents */);
                     break;
                 default:
                     Log.e(TAG, "Unhandled action: " + action);
@@ -210,10 +216,12 @@ public class AuthContainerView extends LinearLayout
     }
 
     @VisibleForTesting
-    AuthContainerView(Config config) {
+    AuthContainerView(Config config, Injector injector) {
         super(config.mContext);
 
         mConfig = config;
+        mInjector = injector;
+
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
 
@@ -224,29 +232,30 @@ public class AuthContainerView extends LinearLayout
         mCredentialCallback = new CredentialCallback();
 
         final LayoutInflater factory = LayoutInflater.from(mContext);
-        mFrameLayout = (FrameLayout) factory.inflate(
-                R.layout.auth_container_view, this, false /* attachToRoot */);
+        mFrameLayout = mInjector.inflateContainerView(factory, this);
 
-        mPanelView = mFrameLayout.findViewById(R.id.panel);
-        mPanelController = new AuthPanelController(mContext, mPanelView);
+        mPanelView = mInjector.getPanelView(mFrameLayout);
+        mPanelController = mInjector.getPanelController(mContext, mPanelView);
 
-        // TODO: Update with new controllers if multi-modal authentication can occur simultaneously
-        if (config.mModalityMask == BiometricAuthenticator.TYPE_FINGERPRINT) {
-            mBiometricView = (AuthBiometricFingerprintView)
-                    factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
-        } else if (config.mModalityMask == BiometricAuthenticator.TYPE_FACE) {
-            mBiometricView = (AuthBiometricFaceView)
-                    factory.inflate(R.layout.auth_biometric_face_view, null, false);
-        } else {
-            Log.e(TAG, "Unsupported modality mask: " + config.mModalityMask);
-            mBiometricView = null;
-            mBackgroundView = null;
-            mBiometricScrollView = null;
-            return;
+        // Inflate biometric view only if necessary.
+        if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
+            if (config.mModalityMask == BiometricAuthenticator.TYPE_FINGERPRINT) {
+                mBiometricView = (AuthBiometricFingerprintView)
+                        factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+            } else if (config.mModalityMask == BiometricAuthenticator.TYPE_FACE) {
+                mBiometricView = (AuthBiometricFaceView)
+                        factory.inflate(R.layout.auth_biometric_face_view, null, false);
+            } else {
+                Log.e(TAG, "Unsupported biometric modality: " + config.mModalityMask);
+                mBiometricView = null;
+                mBackgroundView = null;
+                mBiometricScrollView = null;
+                return;
+            }
         }
 
-        mBiometricScrollView = mFrameLayout.findViewById(R.id.biometric_scrollview);
-        mBackgroundView = mFrameLayout.findViewById(R.id.background);
+        mBiometricScrollView = mInjector.getBiometricScrollView(mFrameLayout);
+        mBackgroundView = mInjector.getBackgroundView(mFrameLayout);
 
         UserManager userManager = mContext.getSystemService(UserManager.class);
         DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
@@ -277,8 +286,7 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public boolean isAllowDeviceCredentials() {
-        return mConfig.mBiometricPromptBundle
-                .getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
+        return Utils.isDeviceCredentialAllowed(mConfig.mBiometricPromptBundle);
     }
 
     private void addBiometricView() {
@@ -297,7 +305,7 @@ public class AuthContainerView extends LinearLayout
      * it should own the panel expansion.
      * @param animatePanel if the credential view needs to own the panel expansion animation
      */
-    private void addCredentialView(boolean animatePanel) {
+    private void addCredentialView(boolean animatePanel, boolean animateContents) {
         final LayoutInflater factory = LayoutInflater.from(mContext);
         mCredentialView = (AuthCredentialView) factory.inflate(
                 R.layout.auth_credential_view, null, false);
@@ -305,6 +313,7 @@ public class AuthContainerView extends LinearLayout
         mCredentialView.setCallback(mCredentialCallback);
         mCredentialView.setBiometricPromptBundle(mConfig.mBiometricPromptBundle);
         mCredentialView.setPanelController(mPanelController, animatePanel);
+        mCredentialView.setShouldAnimateContents(animateContents);
         mFrameLayout.addView(mCredentialView);
     }
 
@@ -317,22 +326,21 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
+        onAttachedToWindowInternal();
+    }
+
+    @VisibleForTesting
+    void onAttachedToWindowInternal() {
         mWakefulnessLifecycle.addObserver(this);
 
-        Log.v(TAG, "Initial view: " + mConfig.mInitialView);
-
-        switch (mConfig.mInitialView) {
-            case Builder.INITIAL_VIEW_BIOMETRIC:
-                addBiometricView();
-                break;
-            case Builder.INITIAL_VIEW_CREDENTIAL:
-                addCredentialView(true /* animatePanel */);
-                break;
-            default:
-                Log.e(TAG, "Initial view not supported: " + mConfig.mInitialView);
-                break;
+        if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
+            addBiometricView();
+        } else if (Utils.isDeviceCredentialAllowed(mConfig.mBiometricPromptBundle)) {
+            addCredentialView(true /* animatePanel */, false /* animateContents */);
+        } else {
+            throw new IllegalStateException("Unknown configuration: "
+                    + Utils.getAuthenticators(mConfig.mBiometricPromptBundle));
         }
-
 
         if (mConfig.mSkipIntro) {
             mContainerState = STATE_SHOWING;
@@ -358,6 +366,15 @@ public class AuthContainerView extends LinearLayout
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .start();
+                if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
+                    mCredentialView.setY(mTranslationY);
+                    mCredentialView.animate()
+                            .translationY(0)
+                            .setDuration(ANIMATION_DURATION_SHOW_MS)
+                            .setInterpolator(mLinearOutSlowIn)
+                            .withLayer()
+                            .start();
+                }
                 animate()
                         .alpha(1f)
                         .setDuration(ANIMATION_DURATION_SHOW_MS)
@@ -381,7 +398,9 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void show(WindowManager wm, @Nullable Bundle savedState) {
-        mBiometricView.restoreState(savedState);
+        if (mBiometricView != null) {
+            mBiometricView.restoreState(savedState);
+        }
         wm.addView(this, getLayoutParams(mWindowToken));
     }
 
@@ -427,7 +446,10 @@ public class AuthContainerView extends LinearLayout
         outState.putBoolean(AuthDialog.KEY_BIOMETRIC_SHOWING,
                 mBiometricView != null && mCredentialView == null);
         outState.putBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING, mCredentialView != null);
-        mBiometricView.onSaveState(outState);
+
+        if (mBiometricView != null) {
+            mBiometricView.onSaveState(outState);
+        }
     }
 
     @Override
@@ -525,7 +547,9 @@ public class AuthContainerView extends LinearLayout
             return;
         }
         mContainerState = STATE_SHOWING;
-        mBiometricView.onDialogAnimatedIn();
+        if (mBiometricView != null) {
+            mBiometricView.onDialogAnimatedIn();
+        }
     }
 
     /**

@@ -367,12 +367,13 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowBiometricDialog() {
+    public void testShowAuthenticationDialog() {
         Bundle bundle = new Bundle();
         String packageName = "test";
-        mCommandQueue.showBiometricDialog(bundle, null /* receiver */, 1, true, 3, packageName);
+        mCommandQueue.showAuthenticationDialog(bundle, null /* receiver */, 1, true, 3,
+                packageName);
         waitForIdleSync();
-        verify(mCallbacks).showBiometricDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
+        verify(mCallbacks).showAuthenticationDialog(eq(bundle), eq(null), eq(1), eq(true), eq(3),
                 eq(packageName));
     }
 
@@ -402,9 +403,9 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHideBiometricDialog() {
-        mCommandQueue.hideBiometricDialog();
+    public void testHideAuthenticationDialog() {
+        mCommandQueue.hideAuthenticationDialog();
         waitForIdleSync();
-        verify(mCallbacks).hideBiometricDialog();
+        verify(mCallbacks).hideAuthenticationDialog();
     }
 }
