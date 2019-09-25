@@ -7881,14 +7881,6 @@ public final class Settings {
         public static final String DEVICE_PAIRED = "device_paired";
 
         /**
-         * Integer state indicating whether package verifier is enabled.
-         * TODO(b/34259924): Remove this setting.
-         *
-         * @hide
-         */
-        public static final String PACKAGE_VERIFIER_STATE = "package_verifier_state";
-
-        /**
          * Specifies additional package name for broadcasting the CMAS messages.
          * @hide
          */
