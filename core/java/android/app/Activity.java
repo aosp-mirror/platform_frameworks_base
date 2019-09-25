@@ -1925,11 +1925,15 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Like {@link #isVoiceInteraction}, but only returns true if this is also the root
-     * of a voice interaction.  That is, returns true if this activity was directly
+     * Like {@link #isVoiceInteraction}, but only returns {@code true} if this is also the root
+     * of a voice interaction.  That is, returns {@code true} if this activity was directly
      * started by the voice interaction service as the initiation of a voice interaction.
      * Otherwise, for example if it was started by another activity while under voice
-     * interaction, returns false.
+     * interaction, returns {@code false}.
+     * If the activity {@link android.R.styleable#AndroidManifestActivity_launchMode launchMode} is
+     * {@code singleTask}, it forces the activity to launch in a new task, separate from the one
+     * that started it. Therefore, there is no longer a relationship between them, and
+     * {@link #isVoiceInteractionRoot()} return {@code false} in this case.
      */
     public boolean isVoiceInteractionRoot() {
         try {
