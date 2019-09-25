@@ -16,20 +16,23 @@
 
 package com.android.server.wm.flicker;
 
+import static androidx.test.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.server.wm.flicker.helpers.AutomationUtils.setDefaultWait;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import android.os.Bundle;
 import android.platform.helpers.IAppHelper;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
-
-import androidx.test.InstrumentationRegistry;
 
 import com.android.server.wm.flicker.TransitionRunner.TransitionResult;
 
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,10 +54,16 @@ public class FlickerTestBase {
     static final String DOCKED_STACK_DIVIDER = "DockedStackDivider";
     private static HashMap<String, List<TransitionResult>> transitionResults =
             new HashMap<>();
-    IAppHelper testApp;
-    UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-    private List<TransitionResult> results;
-    private TransitionResult lastResult = null;
+    IAppHelper mTestApp;
+    UiDevice mUiDevice;
+    private List<TransitionResult> mResults;
+    private TransitionResult mLastResult = null;
+
+    @Before
+    public void setUp() {
+        InstrumentationRegistry.registerInstance(getInstrumentation(), new Bundle());
+        mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+    }
 
     /**
      * Teardown any system settings and clean up test artifacts from the file system.
@@ -91,14 +100,14 @@ public class FlickerTestBase {
      */
     void runTransition(TransitionRunner transition) {
         if (transitionResults.containsKey(transition.getTestTag())) {
-            results = transitionResults.get(transition.getTestTag());
+            mResults = transitionResults.get(transition.getTestTag());
             return;
         }
-        results = transition.run().getResults();
+        mResults = transition.run().getResults();
         /* Fail if we don't have any results due to jank */
         assertWithMessage("No results to test because all transition runs were invalid because "
-                + "of Jank").that(results).isNotEmpty();
-        transitionResults.put(transition.getTestTag(), results);
+                + "of Jank").that(mResults).isNotEmpty();
+        transitionResults.put(transition.getTestTag(), mResults);
     }
 
     /**
@@ -106,11 +115,11 @@ public class FlickerTestBase {
      */
     void checkResults(Consumer<TransitionResult> assertion) {
 
-        for (TransitionResult result : results) {
-            lastResult = result;
+        for (TransitionResult result : mResults) {
+            mLastResult = result;
             assertion.accept(result);
         }
-        lastResult = null;
+        mLastResult = null;
     }
 
     /**
@@ -119,8 +128,8 @@ public class FlickerTestBase {
      */
     @After
     public void markArtifactsForSaving() {
-        if (lastResult != null) {
-            lastResult.flagForSaving();
+        if (mLastResult != null) {
+            mLastResult.flagForSaving();
         }
     }
 }
