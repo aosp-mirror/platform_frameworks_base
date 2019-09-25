@@ -1169,6 +1169,12 @@ void AndroidRuntime::start(const char* className, const Vector<String8>& options
         return;
     }
 
+    const char* i18nRootDir = getenv("ANDROID_I18N_ROOT");
+    if (i18nRootDir == NULL) {
+        LOG_FATAL("No runtime directory specified with ANDROID_I18N_ROOT environment variable.");
+        return;
+    }
+
     const char* tzdataRootDir = getenv("ANDROID_TZDATA_ROOT");
     if (tzdataRootDir == NULL) {
         LOG_FATAL("No tz data directory specified with ANDROID_TZDATA_ROOT environment variable.");
