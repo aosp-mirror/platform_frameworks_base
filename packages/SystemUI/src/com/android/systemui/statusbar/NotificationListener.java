@@ -21,6 +21,7 @@ import static com.android.systemui.statusbar.notification.NotificationEntryManag
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_CHILD_NOTIFICATIONS;
 
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.ComponentName;
@@ -57,8 +58,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
 
-    private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
     private final Context mContext;
+    private final ArrayList<NotificationSettingsListener> mSettingsListeners = new ArrayList<>();
+    @Nullable private NotifServiceListener mDownstreamListener;
 
     @Inject
     public NotificationListener(Context context) {
@@ -67,6 +69,10 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
     public void addNotificationSettingsListener(NotificationSettingsListener listener) {
         mSettingsListeners.add(listener);
+    }
+
+    public void setDownstreamListener(NotifServiceListener downstreamListener) {
+        mDownstreamListener = downstreamListener;
     }
 
     @Override
@@ -81,6 +87,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         final RankingMap currentRanking = getCurrentRanking();
         Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
             for (StatusBarNotification sbn : notifications) {
+                if (mDownstreamListener != null) {
+                    mDownstreamListener.onNotificationPosted(sbn, currentRanking);
+                }
                 mEntryManager.addNotification(sbn, currentRanking);
             }
         });
@@ -95,6 +104,11 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (sbn != null && !onPluginNotificationPosted(sbn, rankingMap)) {
             Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
+
+                if (mDownstreamListener != null) {
+                    mDownstreamListener.onNotificationPosted(sbn, rankingMap);
+                }
+
                 String key = sbn.getKey();
                 boolean isUpdate =
                         mEntryManager.getNotificationData().get(key) != null;
@@ -133,6 +147,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             final String key = sbn.getKey();
             Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+                if (mDownstreamListener != null) {
+                    mDownstreamListener.onNotificationRemoved(sbn, rankingMap, reason);
+                }
                 mEntryManager.removeNotification(key, rankingMap, reason);
             });
         }
@@ -149,6 +166,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
             Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+                if (mDownstreamListener != null) {
+                    mDownstreamListener.onNotificationRankingUpdate(rankingMap);
+                }
                 mEntryManager.updateNotificationRanking(r);
             });
         }
@@ -174,5 +194,13 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     public interface NotificationSettingsListener {
 
         default void onStatusBarIconsBehaviorChanged(boolean hideSilentStatusIcons) { }
+    }
+
+    /** Interface for listening to add/remove events that we receive from NotificationManager. */
+    public interface NotifServiceListener {
+        void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap);
+        void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap);
+        void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason);
+        void onNotificationRankingUpdate(RankingMap rankingMap);
     }
 }
