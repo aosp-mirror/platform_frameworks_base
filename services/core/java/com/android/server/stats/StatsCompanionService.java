@@ -24,11 +24,10 @@ import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
+import static com.android.server.stats.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
 import android.annotation.NonNull;
@@ -1193,46 +1192,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(memoryStat.rssInBytes);
             e.writeLong(memoryStat.cacheInBytes);
             e.writeLong(memoryStat.swapInBytes);
-            e.writeLong(0);  // unused
-            e.writeLong(memoryStat.startTimeNanos);
-            e.writeInt(anonAndSwapInKilobytes(memoryStat));
+            e.writeLong(-1);  // unused
+            e.writeLong(-1);  // unused
+            e.writeInt(-1);  // unsed
             pulledData.add(e);
         }
-    }
-
-    private void pullNativeProcessMemoryState(
-            int tagId, long elapsedNanos, long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
-        for (int pid : pids) {
-            String processName = readCmdlineFromProcfs(pid);
-            MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
-            if (memoryStat == null) {
-                continue;
-            }
-            int uid = getUidForPid(pid);
-            // Sometimes we get here a process that is not included in the whitelist. It comes
-            // from forking the zygote for an app. We can ignore that sample because this process
-            // is collected by ProcessMemoryState.
-            if (isAppUid(uid)) {
-                continue;
-            }
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(uid);
-            e.writeString(processName);
-            e.writeLong(memoryStat.pgfault);
-            e.writeLong(memoryStat.pgmajfault);
-            e.writeLong(memoryStat.rssInBytes);
-            e.writeLong(0);  // unused
-            e.writeLong(memoryStat.startTimeNanos);
-            e.writeLong(memoryStat.swapInBytes);
-            e.writeInt(anonAndSwapInKilobytes(memoryStat));
-            pulledData.add(e);
-        }
-    }
-
-    private static int anonAndSwapInKilobytes(MemoryStat memoryStat) {
-        return (int) ((memoryStat.anonRssInBytes + memoryStat.swapInBytes) / 1024);
     }
 
     private void pullProcessMemoryHighWaterMark(
@@ -2403,10 +2367,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROCESS_MEMORY_STATE: {
                 pullProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-            case StatsLog.NATIVE_PROCESS_MEMORY_STATE: {
-                pullNativeProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.PROCESS_MEMORY_HIGH_WATER_MARK: {
