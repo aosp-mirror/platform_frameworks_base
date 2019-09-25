@@ -829,7 +829,11 @@ public class NavigationBarView extends FrameLayout implements
         mRecentsOnboarding.onNavigationModeChanged(mNavBarMode);
         getRotateSuggestionButton().onNavigationModeChanged(mNavBarMode);
 
-        mRegionSamplingHelper.start(mSamplingBounds);
+        if (isGesturalMode(mNavBarMode)) {
+            mRegionSamplingHelper.start(mSamplingBounds);
+        } else {
+            mRegionSamplingHelper.stop();
+        }
     }
 
     public void setAccessibilityButtonState(final boolean visible, final boolean longClickable) {
