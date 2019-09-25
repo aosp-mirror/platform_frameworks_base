@@ -16,7 +16,11 @@
 
 package com.android.server.backup.testing;
 
+import com.android.server.backup.encryption.chunk.ChunkHash;
+import com.android.server.backup.encryption.protos.nano.ChunksMetadataProto;
+
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.crypto.KeyGenerator;
@@ -41,5 +45,16 @@ public class CryptoTestUtils {
         Random random = new Random();
         random.nextBytes(bytes);
         return bytes;
+    }
+
+    public static ChunksMetadataProto.Chunk newChunk(ChunkHash hash, int length) {
+        return newChunk(hash.getHash(), length);
+    }
+
+    public static ChunksMetadataProto.Chunk newChunk(byte[] hash, int length) {
+        ChunksMetadataProto.Chunk newChunk = new ChunksMetadataProto.Chunk();
+        newChunk.hash = Arrays.copyOf(hash, hash.length);
+        newChunk.length = length;
+        return newChunk;
     }
 }
