@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.os.Handler;
 import android.telephony.SubscriptionManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -28,6 +29,7 @@ import android.view.LayoutInflater;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.CarrierTextController;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -45,13 +47,20 @@ import org.mockito.stubbing.Answer;
 public class QSCarrierGroupTest extends LeakCheckedTest {
 
     private QSCarrierGroup mCarrierGroup;
+    private CarrierTextController.CarrierTextCallback mCallback;
+    private TestableLooper mTestableLooper;
 
     @Before
     public void setup() throws Exception {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
-        TestableLooper.get(this).runWithLooper(
+        mTestableLooper = TestableLooper.get(this);
+        mDependency.injectTestDependency(
+                Dependency.BG_HANDLER, new Handler(mTestableLooper.getLooper()));
+        mDependency.injectTestDependency(Dependency.MAIN_LOOPER, mTestableLooper.getLooper());
+        mTestableLooper.runWithLooper(
                 () -> mCarrierGroup = (QSCarrierGroup) LayoutInflater.from(mContext).inflate(
                         R.layout.qs_carrier_group, null));
+        mCallback = mCarrierGroup.getCallback();
     }
 
     @Test // throws no Exception
@@ -72,7 +81,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{""},
                 false,
                 new int[]{0});
-        spiedCarrierGroup.updateCarrierInfo(c1);
+        mCallback.updateCarrierInfo(c1);
 
         // listOfCarriers length 1, subscriptionIds length 1, anySims true
         CarrierTextController.CarrierTextCallbackInfo
@@ -81,7 +90,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{""},
                 true,
                 new int[]{0});
-        spiedCarrierGroup.updateCarrierInfo(c2);
+        mCallback.updateCarrierInfo(c2);
 
         // listOfCarriers length 2, subscriptionIds length 2, anySims false
         CarrierTextController.CarrierTextCallbackInfo
@@ -90,7 +99,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{"", ""},
                 false,
                 new int[]{0, 1});
-        spiedCarrierGroup.updateCarrierInfo(c3);
+        mCallback.updateCarrierInfo(c3);
 
         // listOfCarriers length 2, subscriptionIds length 2, anySims true
         CarrierTextController.CarrierTextCallbackInfo
@@ -99,7 +108,9 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{"", ""},
                 true,
                 new int[]{0, 1});
-        spiedCarrierGroup.updateCarrierInfo(c4);
+        mCallback.updateCarrierInfo(c4);
+
+        mTestableLooper.processAllMessages();
     }
 
     @Test // throws no Exception
@@ -120,7 +131,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{"", ""},
                 false,
                 new int[]{0});
-        spiedCarrierGroup.updateCarrierInfo(c1);
+        mCallback.updateCarrierInfo(c1);
 
         // listOfCarriers length 2, subscriptionIds length 1, anySims true
         CarrierTextController.CarrierTextCallbackInfo
@@ -129,7 +140,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{"", ""},
                 true,
                 new int[]{0});
-        spiedCarrierGroup.updateCarrierInfo(c2);
+        mCallback.updateCarrierInfo(c2);
 
         // listOfCarriers length 1, subscriptionIds length 2, anySims false
         CarrierTextController.CarrierTextCallbackInfo
@@ -138,7 +149,7 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{""},
                 false,
                 new int[]{0, 1});
-        spiedCarrierGroup.updateCarrierInfo(c3);
+        mCallback.updateCarrierInfo(c3);
 
         // listOfCarriers length 1, subscriptionIds length 2, anySims true
         CarrierTextController.CarrierTextCallbackInfo
@@ -147,7 +158,8 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{""},
                 true,
                 new int[]{0, 1});
-        spiedCarrierGroup.updateCarrierInfo(c4);
+        mCallback.updateCarrierInfo(c4);
+        mTestableLooper.processAllMessages();
     }
 
     @Test // throws no Exception
@@ -161,7 +173,8 @@ public class QSCarrierGroupTest extends LeakCheckedTest {
                 new CharSequence[]{"", ""},
                 true,
                 new int[]{0, 1});
-        spiedCarrierGroup.updateCarrierInfo(c4);
+        mCallback.updateCarrierInfo(c4);
+        mTestableLooper.processAllMessages();
     }
 
     @Test // throws no Exception
