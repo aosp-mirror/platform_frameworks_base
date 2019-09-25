@@ -1,87 +1,10 @@
-// AIDL interfaces between the core system and the networking mainline module.
-aidl_interface {
-    name: "ipmemorystore-aidl-interfaces",
-    local_include_dir: "java",
-    srcs: [
-        "java/android/net/IIpMemoryStore.aidl",
-        "java/android/net/IIpMemoryStoreCallbacks.aidl",
-        "java/android/net/ipmemorystore/**/*.aidl",
-    ],
-    backend: {
-        ndk: {
-            enabled: false,
-        },
-        cpp: {
-            enabled: false,
-        },
-    },
-    api_dir: "aidl/ipmemorystore",
-    versions: [
-        "1",
-        "2",
-        "3",
-    ],
-}
-
-aidl_interface {
-    name: "networkstack-aidl-interfaces",
-    local_include_dir: "java",
-    include_dirs: ["frameworks/base/core/java"], // For framework parcelables.
-    srcs: [
-        "java/android/net/DhcpResultsParcelable.aidl",
-        "java/android/net/INetworkMonitor.aidl",
-        "java/android/net/INetworkMonitorCallbacks.aidl",
-        "java/android/net/INetworkStackConnector.aidl",
-        "java/android/net/INetworkStackStatusCallback.aidl",
-        "java/android/net/InitialConfigurationParcelable.aidl",
-        "java/android/net/NattKeepalivePacketDataParcelable.aidl",
-        "java/android/net/PrivateDnsConfigParcel.aidl",
-        "java/android/net/ProvisioningConfigurationParcelable.aidl",
-        "java/android/net/TcpKeepalivePacketDataParcelable.aidl",
-        "java/android/net/dhcp/DhcpServingParamsParcel.aidl",
-        "java/android/net/dhcp/IDhcpServer.aidl",
-        "java/android/net/dhcp/IDhcpServerCallbacks.aidl",
-        "java/android/net/ip/IIpClient.aidl",
-        "java/android/net/ip/IIpClientCallbacks.aidl",
-    ],
-    backend: {
-        ndk: {
-            enabled: false,
-        },
-        cpp: {
-            enabled: false,
-        },
-    },
-    api_dir: "aidl/networkstack",
-    imports: ["ipmemorystore-aidl-interfaces"],
-    versions: [
-        "1",
-        "2",
-        "3",
-    ],
-}
-
 java_library_static {
     name: "services.net",
     srcs: ["java/**/*.java"],
     static_libs: [
         "dnsresolver_aidl_interface-V2-java",
-        "ipmemorystore-client",
         "netd_aidl_interface-java",
-        "networkstack-aidl-interfaces-V3-java",
-    ],
-}
-
-java_library_static {
-    name: "ipmemorystore-client",
-    sdk_version: "system_current",
-    srcs: [
-        ":framework-annotations",
-        "java/android/net/IpMemoryStoreClient.java",
-        "java/android/net/ipmemorystore/**/*.java",
-    ],
-    static_libs: [
-        "ipmemorystore-aidl-interfaces-V3-java",
+        "networkstack-client",
     ],
 }
 
