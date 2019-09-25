@@ -6118,9 +6118,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    public void grantImplicitAccess(int userId, Intent intent, int callingAppId, int targetAppId) {
+    public void grantImplicitAccess(int userId, Intent intent, int callingUid, int targetAppId) {
         getPackageManagerInternalLocked().
-                grantImplicitAccess(userId, intent, callingAppId, targetAppId);
+                grantImplicitAccess(userId, intent, callingUid, targetAppId);
     }
 
     /**
