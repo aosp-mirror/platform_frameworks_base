@@ -66,10 +66,18 @@ public class BootImageProfileTest implements IDeviceTest {
         String res;
         res = mTestDevice.executeShellCommand("truncate -s 0 " + SYSTEM_SERVER_PROFILE).trim();
         assertTrue(res, res.length() == 0);
-        // Force save profiles in case the system just started.
+        // Wait up to 20 seconds for the profile to be saved.
+        for (int i = 0; i < 20; ++i) {
+            // Force save the profile since we truncated it.
+            forceSaveProfile("system_server");
+            String s = mTestDevice.executeShellCommand("wc -c <" + SYSTEM_SERVER_PROFILE).trim();
+            if (!"0".equals(s)) {
+                break;
+            }
+            Thread.sleep(1000);
+        }
+        // In case the profile is partially saved, wait an extra second.
         Thread.sleep(1000);
-        forceSaveProfile("system_server");
-        Thread.sleep(2000);
         // Validate that the profile is non empty.
         res = mTestDevice.executeShellCommand("profman --dump-only --profile-file="
                 + SYSTEM_SERVER_PROFILE);
