@@ -1868,6 +1868,13 @@
         android:description="@string/permdesc_vibrate"
         android:protectionLevel="normal|instant" />
 
+    <!-- Allows access to the vibrator always-on settings.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.VIBRATE_ALWAYS_ON"
+        android:protectionLevel="signature" />
+
     <!-- Allows using PowerManager WakeLocks to keep processor from sleeping or screen
          from dimming.
          <p>Protection level: normal
