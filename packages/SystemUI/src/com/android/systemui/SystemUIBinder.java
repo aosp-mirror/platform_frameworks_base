@@ -18,6 +18,8 @@ package com.android.systemui;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsModule;
 
 import dagger.Binds;
 import dagger.Module;
@@ -27,7 +29,7 @@ import dagger.multibindings.IntoMap;
 /**
  * SystemUI objects that are injectable should go here.
  */
-@Module
+@Module(includes = {RecentsModule.class})
 public abstract class SystemUIBinder {
     /** Inject into KeyguardViewMediator. */
     @Binds
@@ -40,4 +42,10 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(PowerUI.class)
     public abstract SystemUI bindPowerUI(PowerUI sysui);
+
+    /** Inject into StatusBar. */
+    @Binds
+    @IntoMap
+    @ClassKey(Recents.class)
+    public abstract SystemUI bindRecents(Recents sysui);
 }

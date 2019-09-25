@@ -27,7 +27,6 @@ import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
-import com.android.systemui.Dependency
 
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
@@ -58,7 +57,8 @@ constructor(
     private val bypassController: KeyguardBypassController,
     private val headsUpManager: HeadsUpManagerPhone,
     private val roundnessManager: NotificationRoundnessManager,
-    private val statusBarStateController: StatusBarStateController
+    private val statusBarStateController: StatusBarStateController,
+    private val falsingManager: FalsingManager
 ) : Gefingerpoken {
     companion object {
         private val RUBBERBAND_FACTOR_STATIC = 0.25f
@@ -99,7 +99,6 @@ constructor(
     private val mTemp2 = IntArray(2)
     private var mDraggedFarEnough: Boolean = false
     private var mStartingChild: ExpandableView? = null
-    private val mFalsingManager: FalsingManager
     private var mPulsing: Boolean = false
     var isWakingToShadeLocked: Boolean = false
         private set
@@ -109,7 +108,7 @@ constructor(
     private var velocityTracker: VelocityTracker? = null
 
     private val isFalseTouch: Boolean
-        get() = mFalsingManager.isFalseTouch
+        get() = falsingManager.isFalseTouch
     var qsExpanded: Boolean = false
     var pulseExpandAbortListener: Runnable? = null
     var bouncerShowing: Boolean = false
@@ -118,7 +117,6 @@ constructor(
         mMinDragDistance = context.resources.getDimensionPixelSize(
                 R.dimen.keyguard_drag_down_min_distance)
         mTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
-        mFalsingManager = Dependency.get(FalsingManager::class.java)
         mPowerManager = context.getSystemService(PowerManager::class.java)
     }
 
@@ -151,7 +149,7 @@ constructor(
             MotionEvent.ACTION_MOVE -> {
                 val h = y - mInitialTouchY
                 if (h > mTouchSlop && h > Math.abs(x - mInitialTouchX)) {
-                    mFalsingManager.onStartExpandingFromPulse()
+                    falsingManager.onStartExpandingFromPulse()
                     isExpanding = true
                     captureStartingChild(mInitialTouchX, mInitialTouchY)
                     mInitialTouchY = y
@@ -192,7 +190,7 @@ constructor(
                 velocityTracker!!.computeCurrentVelocity(1000 /* units */)
                 val canExpand = moveDistance > 0 && velocityTracker!!.getYVelocity() > -1000 &&
                         statusBarStateController.state != StatusBarState.SHADE
-                if (!mFalsingManager.isUnlockingDisabled && !isFalseTouch && canExpand) {
+                if (!falsingManager.isUnlockingDisabled && !isFalseTouch && canExpand) {
                     finishExpansion()
                 } else {
                     cancelExpansion()
@@ -297,7 +295,7 @@ constructor(
 
     private fun cancelExpansion() {
         isExpanding = false
-        mFalsingManager.onExpansionFromPulseStopped()
+        falsingManager.onExpansionFromPulseStopped()
         if (mStartingChild != null) {
             reset(mStartingChild!!)
             mStartingChild = null
