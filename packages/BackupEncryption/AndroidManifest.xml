@@ -20,5 +20,14 @@
     package="com.android.server.backup.encryption"
     android:sharedUserId="android.uid.system" >
 
-    <application android:allowBackup="false" />
+    <application android:allowBackup="false" >
+        <!-- This service does not need to be exported because it shares uid with the system server
+        which is the only client. -->
+        <service android:name=".BackupEncryptionService"
+                 android:exported="false">
+            <intent-filter>
+                <action android:name="android.encryption.BACKUP_ENCRYPTION" />
+            </intent-filter>
+        </service>
+    </application>
 </manifest>
