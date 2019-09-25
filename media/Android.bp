@@ -63,26 +63,6 @@ filegroup {
     path: "apex/java",
 }
 
-filegroup {
-    name: "mediaplayer2-srcs",
-    srcs: [
-        "apex/java/android/media/CloseGuard.java",
-        "apex/java/android/media/DataSourceCallback.java",
-        "apex/java/android/media/DataSourceDesc.java",
-        "apex/java/android/media/UriDataSourceDesc.java",
-        "apex/java/android/media/FileDataSourceDesc.java",
-        "apex/java/android/media/Media2Utils.java",
-        "apex/java/android/media/MediaPlayer2Utils.java",
-        "apex/java/android/media/MediaPlayer2.java",
-        "apex/java/android/media/Media2HTTPService.java",
-        "apex/java/android/media/Media2HTTPConnection.java",
-        "apex/java/android/media/RoutingDelegate.java",
-        "apex/java/android/media/BufferingParams.java",
-        "apex/java/android/media/ProxyDataSourceCallback.java",
-    ],
-    path: "apex/java",
-}
-
 metalava_updatable_media_args = " --error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
     "--hide MissingPermission --hide BroadcastBehavior " +
