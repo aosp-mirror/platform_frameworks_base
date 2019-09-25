@@ -49,14 +49,14 @@ object ProtoLogTool {
             val file = File(path)
             val text = file.readText()
             val code = StaticJavaParser.parse(text)
-            val outSrc = when {
-                containsProtoLogText(text, command.protoLogClassNameArg) ->
-                    transformer.processClass(text, code)
-                else -> text
-            }
             val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
                     .get().nameAsString else ""
             val newPath = pack.replace('.', '/') + '/' + file.name
+            val outSrc = when {
+                containsProtoLogText(text, command.protoLogClassNameArg) ->
+                    transformer.processClass(text, newPath, code)
+                else -> text
+            }
             outJar.putNextEntry(ZipEntry(newPath))
             outJar.write(outSrc.toByteArray())
             outJar.closeEntry()
@@ -76,7 +76,11 @@ object ProtoLogTool {
             val file = File(path)
             val text = file.readText()
             if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                builder.processClass(StaticJavaParser.parse(text))
+                val code = StaticJavaParser.parse(text)
+                val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
+                        .get().nameAsString else ""
+                val newPath = pack.replace('.', '/') + '/' + file.name
+                builder.processClass(code, newPath)
             }
         }
         val out = FileOutputStream(command.viewerConfigJsonArg)

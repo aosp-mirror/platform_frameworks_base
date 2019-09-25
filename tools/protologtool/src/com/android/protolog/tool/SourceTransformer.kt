@@ -16,7 +16,7 @@
 
 package com.android.protolog.tool
 
-import com.android.protolog.tool.Constants.IS_LOG_TO_ANY_METHOD
+import com.android.protolog.tool.Constants.IS_ENABLED_METHOD
 import com.android.server.protolog.common.LogDataType
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
@@ -73,7 +73,8 @@ class SourceTransformer(
         }
         val ifStmt: IfStmt
         if (group.enabled) {
-            val hash = CodeUtils.hash(messageString, level)
+            val position = CodeUtils.getPositionString(call, fileName)
+            val hash = CodeUtils.hash(position, messageString, level, group)
             val newCall = call.clone()
             if (!group.textEnabled) {
                 // Remove message string if text logging is not enabled by default.
@@ -90,12 +91,12 @@ class SourceTransformer(
             // Out: ProtoLog.e(GROUP, 1234, 0, null, arg)
             newCall.arguments.add(2, IntegerLiteralExpr(typeMask))
             // Replace call to a stub method with an actual implementation.
-            // Out: com.android.server.wm.ProtoLogImpl.e(GROUP, 1234, null, arg)
+            // Out: com.android.server.protolog.ProtoLogImpl.e(GROUP, 1234, null, arg)
             newCall.setScope(protoLogImplClassNode)
-            // Create a call to GROUP.isLogAny()
-            // Out: GROUP.isLogAny()
-            val isLogAnyExpr = MethodCallExpr(newCall.arguments[0].clone(),
-                    SimpleName(IS_LOG_TO_ANY_METHOD))
+            // Create a call to ProtoLogImpl.isEnabled(GROUP)
+            // Out: com.android.server.protolog.ProtoLogImpl.isEnabled(GROUP)
+            val isLogEnabled = MethodCallExpr(protoLogImplClassNode, IS_ENABLED_METHOD,
+                NodeList<Expression>(newCall.arguments[0].clone()))
             if (argTypes.size != call.arguments.size - 2) {
                 throw InvalidProtoLogCallException(
                         "Number of arguments does not mach format string", call)
@@ -120,11 +121,11 @@ class SourceTransformer(
             }
             blockStmt.addStatement(ExpressionStmt(newCall))
             // Create an IF-statement with the previously created condition.
-            // Out: if (GROUP.isLogAny()) {
+            // Out: if (com.android.server.protolog.ProtoLogImpl.isEnabled(GROUP)) {
             //          long protoLogParam0 = arg;
-            //          com.android.server.wm.ProtoLogImpl.e(GROUP, 1234, 0, null, protoLogParam0);
+            //          com.android.server.protolog.ProtoLogImpl.e(GROUP, 1234, 0, null, protoLogParam0);
             //      }
-            ifStmt = IfStmt(isLogAnyExpr, blockStmt, null)
+            ifStmt = IfStmt(isLogEnabled, blockStmt, null)
         } else {
             // Surround with if (false).
             val newCall = parentStmt.clone()
@@ -212,12 +213,15 @@ class SourceTransformer(
             StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogImplClassName)
     private var processedCode: MutableList<String> = mutableListOf()
     private var offsets: IntArray = IntArray(0)
+    private var fileName: String = ""
 
     fun processClass(
         code: String,
+        path: String,
         compilationUnit: CompilationUnit =
                StaticJavaParser.parse(code)
     ): String {
+        fileName = path
         processedCode = code.split('\n').toMutableList()
         offsets = IntArray(processedCode.size)
         LexicalPreservingPrinter.setup(compilationUnit)
