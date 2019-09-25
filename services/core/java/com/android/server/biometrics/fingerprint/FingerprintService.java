@@ -350,7 +350,7 @@ public class FingerprintService extends BiometricServiceBase {
 
         // TODO: refactor out common code here
         @Override // Binder call
-        public boolean isHardwareDetected(long deviceId, String opPackageName) {
+        public boolean isHardwareDetected(String opPackageName) {
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
                     Binder.getCallingUid(), Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
