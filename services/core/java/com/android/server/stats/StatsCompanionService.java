@@ -30,7 +30,6 @@ import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.stats.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
 import static com.android.server.stats.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
-import static com.android.server.stats.ProcfsMemoryUtil.readRssHighWaterMarkFromProcfs;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -245,6 +244,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             "zygote",
             "zygote64",
     };
+    /**
+     * Lowest available uid for apps.
+     *
+     * <p>Used to quickly discard memory snapshots of the zygote forks from native process
+     * measurements.
+     */
+    private static final int MIN_APP_UID = 10_000;
 
     private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
 
@@ -1197,20 +1203,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullNativeProcessMemoryState(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        final List<String> processNames = Arrays.asList(MEMORY_INTERESTING_NATIVE_PROCESSES);
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
-        for (int i = 0; i < pids.length; i++) {
-            int pid = pids[i];
+        for (int pid : pids) {
+            String processName = readCmdlineFromProcfs(pid);
             MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
             if (memoryStat == null) {
                 continue;
             }
             int uid = getUidForPid(pid);
-            String processName = readCmdlineFromProcfs(pid);
-            // Sometimes we get here processName that is not included in the whitelist. It comes
+            // Sometimes we get here a process that is not included in the whitelist. It comes
             // from forking the zygote for an app. We can ignore that sample because this process
             // is collected by ProcessMemoryState.
-            if (!processNames.contains(processName)) {
+            if (isAppUid(uid)) {
                 continue;
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
@@ -1238,34 +1242,37 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 LocalServices.getService(
                         ActivityManagerInternal.class).getMemoryStateForProcesses();
         for (ProcessMemoryState managedProcess : managedProcessList) {
-            final int rssHighWaterMarkInKilobytes =
-                    readRssHighWaterMarkFromProcfs(managedProcess.pid);
-            if (rssHighWaterMarkInKilobytes == 0) {
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
+            if (snapshot == null) {
                 continue;
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(managedProcess.uid);
             e.writeString(managedProcess.processName);
             // RSS high-water mark in bytes.
-            e.writeLong((long) rssHighWaterMarkInKilobytes * 1024L);
-            e.writeInt(rssHighWaterMarkInKilobytes);
+            e.writeLong((long) snapshot.rssHighWaterMarkInKilobytes * 1024L);
+            e.writeInt(snapshot.rssHighWaterMarkInKilobytes);
             pulledData.add(e);
         }
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
-        for (int i = 0; i < pids.length; i++) {
-            final int pid = pids[i];
-            final int uid = getUidForPid(pid);
+        for (int pid : pids) {
             final String processName = readCmdlineFromProcfs(pid);
-            final int rssHighWaterMarkInKilobytes = readRssHighWaterMarkFromProcfs(pid);
-            if (rssHighWaterMarkInKilobytes == 0) {
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
+            if (snapshot == null) {
+                continue;
+            }
+            // Sometimes we get here a process that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (isAppUid(snapshot.uid)) {
                 continue;
             }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(uid);
+            e.writeInt(snapshot.uid);
             e.writeString(processName);
             // RSS high-water mark in bytes.
-            e.writeLong((long) rssHighWaterMarkInKilobytes * 1024L);
-            e.writeInt(rssHighWaterMarkInKilobytes);
+            e.writeLong((long) snapshot.rssHighWaterMarkInKilobytes * 1024L);
+            e.writeInt(snapshot.rssHighWaterMarkInKilobytes);
             pulledData.add(e);
         }
         // Invoke rss_hwm_reset binary to reset RSS HWM counters for all processes.
@@ -1279,15 +1286,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 LocalServices.getService(
                         ActivityManagerInternal.class).getMemoryStateForProcesses();
         for (ProcessMemoryState managedProcess : managedProcessList) {
+            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
+            if (snapshot == null) {
+                continue;
+            }
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeInt(managedProcess.uid);
             e.writeString(managedProcess.processName);
             e.writeInt(managedProcess.pid);
             e.writeInt(managedProcess.oomScore);
-            final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(managedProcess.pid);
-            if (snapshot.isEmpty()) {
-                continue;
-            }
             e.writeInt(snapshot.rssInKilobytes);
             e.writeInt(snapshot.anonRssInKilobytes);
             e.writeInt(snapshot.swapInKilobytes);
@@ -1296,21 +1303,32 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
         int[] pids = getPidsForCommands(MEMORY_INTERESTING_NATIVE_PROCESSES);
         for (int pid : pids) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(getUidForPid(pid));
-            e.writeString(readCmdlineFromProcfs(pid));
-            e.writeInt(pid);
-            e.writeInt(-1001);  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
+            final String processName = readCmdlineFromProcfs(pid);
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
-            if (snapshot.isEmpty()) {
+            if (snapshot == null) {
                 continue;
             }
+            // Sometimes we get here a process that is not included in the whitelist. It comes
+            // from forking the zygote for an app. We can ignore that sample because this process
+            // is collected by ProcessMemoryState.
+            if (isAppUid(snapshot.uid)) {
+                continue;
+            }
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(snapshot.uid);
+            e.writeString(processName);
+            e.writeInt(pid);
+            e.writeInt(-1001);  // Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.
             e.writeInt(snapshot.rssInKilobytes);
             e.writeInt(snapshot.anonRssInKilobytes);
             e.writeInt(snapshot.swapInKilobytes);
             e.writeInt(snapshot.anonRssInKilobytes + snapshot.swapInKilobytes);
             pulledData.add(e);
         }
+    }
+
+    private static boolean isAppUid(int uid) {
+        return uid >= MIN_APP_UID;
     }
 
     private void pullSystemIonHeapSize(

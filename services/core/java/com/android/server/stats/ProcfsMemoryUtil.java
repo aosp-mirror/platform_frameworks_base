@@ -15,6 +15,7 @@
  */
 package com.android.server.stats;
 
+import android.annotation.Nullable;
 import android.os.FileUtils;
 import android.util.Slog;
 
@@ -22,61 +23,53 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 final class ProcfsMemoryUtil {
     private static final String TAG = "ProcfsMemoryUtil";
 
-    /** Path to procfs status file: /proc/pid/status. */
-    private static final String STATUS_FILE_FMT = "/proc/%d/status";
-
-    private static final Pattern RSS_HIGH_WATER_MARK_IN_KILOBYTES =
-            Pattern.compile("VmHWM:\\s*(\\d+)\\s*kB");
-    private static final Pattern RSS_IN_KILOBYTES =
-            Pattern.compile("VmRSS:\\s*(\\d+)\\s*kB");
-    private static final Pattern ANON_RSS_IN_KILOBYTES =
-            Pattern.compile("RssAnon:\\s*(\\d+)\\s*kB");
-    private static final Pattern SWAP_IN_KILOBYTES =
-            Pattern.compile("VmSwap:\\s*(\\d+)\\s*kB");
+    private static final Pattern STATUS_MEMORY_STATS =
+            Pattern.compile(String.join(
+                    ".*",
+                    "Uid:\\s*(\\d+)\\s*",
+                    "VmHWM:\\s*(\\d+)\\s*kB",
+                    "VmRSS:\\s*(\\d+)\\s*kB",
+                    "RssAnon:\\s*(\\d+)\\s*kB",
+                    "VmSwap:\\s*(\\d+)\\s*kB"), Pattern.DOTALL);
 
     private ProcfsMemoryUtil() {}
 
     /**
-     * Reads RSS high-water mark of a process from procfs. Returns value of the VmHWM field in
-     * /proc/PID/status in kilobytes or 0 if not available.
+     * Reads memory stats of a process from procfs. Returns values of the VmHWM, VmRss, AnonRSS,
+     * VmSwap fields in /proc/pid/status in kilobytes or null if not available.
      */
-    static int readRssHighWaterMarkFromProcfs(int pid) {
-        final String statusPath = String.format(Locale.US, STATUS_FILE_FMT, pid);
-        return parseVmHWMFromStatus(readFile(statusPath));
-    }
-
-    /**
-     * Parses RSS high-water mark out from the contents of the /proc/pid/status file in procfs. The
-     * returned value is in kilobytes.
-     */
-    @VisibleForTesting
-    static int parseVmHWMFromStatus(String contents) {
-        return tryParseInt(contents, RSS_HIGH_WATER_MARK_IN_KILOBYTES);
-    }
-
-    /**
-     * Reads memory stat of a process from procfs. Returns values of the VmRss, AnonRSS, VmSwap
-     * fields in /proc/pid/status in kilobytes or 0 if not available.
-     */
+    @Nullable
     static MemorySnapshot readMemorySnapshotFromProcfs(int pid) {
-        final String statusPath = String.format(Locale.US, STATUS_FILE_FMT, pid);
-        return parseMemorySnapshotFromStatus(readFile(statusPath));
+        return parseMemorySnapshotFromStatus(readFile("/proc/" + pid + "/status"));
     }
 
     @VisibleForTesting
+    @Nullable
     static MemorySnapshot parseMemorySnapshotFromStatus(String contents) {
-        final MemorySnapshot snapshot = new MemorySnapshot();
-        snapshot.rssInKilobytes = tryParseInt(contents, RSS_IN_KILOBYTES);
-        snapshot.anonRssInKilobytes = tryParseInt(contents, ANON_RSS_IN_KILOBYTES);
-        snapshot.swapInKilobytes = tryParseInt(contents, SWAP_IN_KILOBYTES);
-        return snapshot;
+        if (contents.isEmpty()) {
+            return null;
+        }
+        try {
+            final Matcher matcher = STATUS_MEMORY_STATS.matcher(contents);
+            if (matcher.find()) {
+                final MemorySnapshot snapshot = new MemorySnapshot();
+                snapshot.uid = Integer.parseInt(matcher.group(1));
+                snapshot.rssHighWaterMarkInKilobytes = Integer.parseInt(matcher.group(2));
+                snapshot.rssInKilobytes = Integer.parseInt(matcher.group(3));
+                snapshot.anonRssInKilobytes = Integer.parseInt(matcher.group(4));
+                snapshot.swapInKilobytes = Integer.parseInt(matcher.group(5));
+                return snapshot;
+            }
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse value", e);
+        }
+        return null;
     }
 
     private static String readFile(String path) {
@@ -88,26 +81,11 @@ final class ProcfsMemoryUtil {
         }
     }
 
-    private static int tryParseInt(String contents, Pattern pattern) {
-        if (contents.isEmpty()) {
-            return 0;
-        }
-        final Matcher matcher = pattern.matcher(contents);
-        try {
-            return matcher.find() ? Integer.parseInt(matcher.group(1)) : 0;
-        } catch (NumberFormatException e) {
-            Slog.e(TAG, "Failed to parse value", e);
-            return 0;
-        }
-    }
-
     static final class MemorySnapshot {
+        public int uid;
+        public int rssHighWaterMarkInKilobytes;
         public int rssInKilobytes;
         public int anonRssInKilobytes;
         public int swapInKilobytes;
-
-        boolean isEmpty() {
-            return (anonRssInKilobytes + swapInKilobytes) == 0;
-        }
     }
 }
