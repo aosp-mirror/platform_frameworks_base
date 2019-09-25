@@ -230,6 +230,10 @@ message SystemMessage {
     // Package: android
     NOTE_TEST_HARNESS_MODE_ENABLED = 54;
 
+    // Inform the user that Serial Console is active.
+    // Package: android
+    NOTE_SERIAL_CONSOLE_ENABLED = 55;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
