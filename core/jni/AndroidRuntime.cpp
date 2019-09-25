@@ -696,26 +696,32 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     // Read if we are using the profile configuration, do this at the start since the last ART args
     // take precedence.
     property_get("dalvik.vm.profilebootclasspath", propBuf, "");
-    std::string profile_boot_class_path = propBuf;
+    std::string profile_boot_class_path_flag = propBuf;
     // Empty means the property is unset and we should default to the phenotype property.
     // The possible values are {"true", "false", ""}
-    if (profile_boot_class_path.empty()) {
-        profile_boot_class_path = server_configurable_flags::GetServerConfigurableFlag(
+    if (profile_boot_class_path_flag.empty()) {
+        profile_boot_class_path_flag = server_configurable_flags::GetServerConfigurableFlag(
                 RUNTIME_NATIVE_BOOT_NAMESPACE,
                 PROFILE_BOOT_CLASS_PATH,
                 /*default_value=*/ "");
     }
-    if (profile_boot_class_path == "true") {
+    const bool profile_boot_class_path = (profile_boot_class_path_flag == "true");
+    if (profile_boot_class_path) {
+        addOption("-Xcompiler-option");
+        addOption("--count-hotness-in-compiled-code");
         addOption("-Xps-profile-boot-class-path");
         addOption("-Xps-profile-aot-code");
         addOption("-Xjitsaveprofilinginfo");
     }
 
-    std::string use_apex_image =
+    std::string use_apex_image_flag =
         server_configurable_flags::GetServerConfigurableFlag(RUNTIME_NATIVE_BOOT_NAMESPACE,
                                                              ENABLE_APEX_IMAGE,
                                                              /*default_value=*/ "");
-    if (use_apex_image == "true") {
+    // Use the APEX boot image for boot class path profiling to get JIT samples on BCP methods.
+    // Also use the APEX boot image if it's explicitly enabled via configuration flag.
+    const bool use_apex_image = profile_boot_class_path || (use_apex_image_flag == "true");
+    if (use_apex_image) {
         addOption(kApexImageOption);
         ALOGI("Using Apex boot image: '%s'\n", kApexImageOption);
     } else if (parseRuntimeOption("dalvik.vm.boot-image", bootImageBuf, "-Ximage:")) {
