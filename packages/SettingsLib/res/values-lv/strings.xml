@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Nevar skenēt tīklus"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Nav"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Saglabāts"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Savienojums pārtraukts"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Atspējots"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP konfigurācijas kļūme"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Savienojums nav izveidots zemas kvalitātes tīkla dēļ"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Pieejams, izmantojot %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Pieskarieties, lai reģistrētos"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Savienojums izveidots, nav piekļuves internetam"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Ierobežots savienojums"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nav piekļuves internetam"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Nepieciešama pierakstīšanās"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Piekļuves punkts īslaicīgi ir pilns"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Savienojums izveidots (<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>) (nav multivide), akumulatora uzlādes līmenis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Savienojums izveidots (nav tālrunis vai multivide) (<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>), akumulatora uzlādes līmenis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktīvs, akumulatora uzlādes līmenis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktīvs, L: akumulatora uzlādes līmenis <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: akumulatora uzlādes līmenis <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Akumulatora uzlādes līmenis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"L: akumulatora uzlādes līmenis <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: akumulatora uzlādes līmenis <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktīvs"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Multivides audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Tālruņa zvani"</string>
@@ -222,6 +220,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Tīklošana"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Bezvadu attēlošanas sertifikācija"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Iespējot Wi‑Fi detalizēto reģistrēšanu"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Wi‑Fi meklēšanas ierobežošana"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Vienmēr aktīvs mobilo datu savienojums"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Paātrināta aparatūras darbība piesaistei"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Rādīt Bluetooth ierīces bez nosaukumiem"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nevarēja izveidot savienojumu."</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rādīt bezvadu attēlošanas sertifikācijas iespējas"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Palieliniet Wi‑Fi reģistrēšanas līmeni; rādīt katram SSID RSSI Wi‑Fi atlasītājā."</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Samazina akumulatora izlādi un uzlabo tīkla veiktspēju"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Maksas"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bezmaksas"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Reģistrētāja buferu lielumi"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Darbosies aptuveni līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Līdz <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Palielināt akumulatora darbības ilgumu, lai ierīce turpinātu darboties pēc <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Atlikušais laiks — mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Atlicis mazāk nekā <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Atlicis vairāk nekā <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -404,7 +403,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Iespējams, ierīce drīz izslēgsies (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> — <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Atlikušais laiks līdz pilnai uzlādei: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>, kamēr pilnībā uzlādēts"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> līdz pilnīgai uzlādei"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Nezināms"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Uzlāde"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"notiek uzlāde"</string>
@@ -466,6 +465,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Vaicāt katru reizi"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Līdz brīdim, kad izslēgsiet"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Tikko"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Šī ierīce"</string>
 </resources>

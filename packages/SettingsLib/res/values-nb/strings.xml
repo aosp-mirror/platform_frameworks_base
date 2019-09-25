@@ -23,6 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Kan ikke søke etter nettverk"</string>
     <string name="wifi_security_none" msgid="7985461072596594400">"Ingen"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Lagret"</string>
+    <string name="wifi_disconnected" msgid="8085419869003922556">"Frakoblet"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Slått av"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-konfigurasjonsfeil"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="5168315140978066096">"Ikke tilkoblet på grunn av nettverk av lav kvalitet"</string>
@@ -42,8 +43,7 @@
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tilgjengelig via %1$s"</string>
     <string name="tap_to_sign_up" msgid="6449724763052579434">"Trykk for å registrere deg"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Tilkoblet – ingen Internett-tilgang"</string>
-    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
-    <skip />
+    <string name="wifi_limited_connection" msgid="7717855024753201527">"Begrenset tilkobling"</string>
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Ingen internettilkobling"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Pålogging kreves"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Tilgangspunktet er midlertidig fullt"</string>
@@ -75,11 +75,9 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Koblet til (ingen medier), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Koblet til (ingen telefon eller medier), batteri <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
-    <skip />
+    <string name="bluetooth_active_battery_level_untethered" msgid="6662649951391456747">"Aktiv, V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered" msgid="5974406100211667177">"V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonsamtaler"</string>
@@ -216,12 +214,13 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Tillat at oppstartsinnlasteren låses opp"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Vil du tillate OEM-opplåsing?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"ADVARSEL: Funksjoner for enhetsbeskyttelse fungerer ikke på denne enheten mens denne innstillingen er slått på."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Velg app for falsk plassering"</string>
-    <string name="mock_location_app_not_set" msgid="809543285495344223">"Ingen app for falsk plassering er angitt"</string>
-    <string name="mock_location_app_set" msgid="8966420655295102685">"Prøveplasseringsapp: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Velg app for fiktiv plassering"</string>
+    <string name="mock_location_app_not_set" msgid="809543285495344223">"Ingen app for fiktiv plassering er angitt"</string>
+    <string name="mock_location_app_set" msgid="8966420655295102685">"App for fiktiv plassering: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Trådløs skjermsertifisering"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktiver detaljert Wi-Fi-loggføring"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Slå på detaljert Wi-Fi-loggføring"</string>
+    <string name="wifi_scan_throttling" msgid="160014287416479843">"Begrensning av Wi‑Fi-skanning"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Vis Bluetooth-enheter uten navn"</string>
@@ -248,6 +247,7 @@
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
+    <string name="wifi_scan_throttling_summary" msgid="4461922728822495763">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Med datamåling"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"Uten datamåling"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Bufferstørrelser for logg"</string>
@@ -269,7 +269,7 @@
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du aktivere utviklingsinnstillingene?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse innstillingene er bare beregnet for bruk under programutvikling. De kan forårsake problemer med enheten din og tilhørende apper."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Bekreft apper via USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT for skadelig adferd."</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT, for skadelig atferd."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-enheter uten navn (bare MAC-adresser) vises"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Slår av funksjonen for absolutt volum via Bluetooth i tilfelle det oppstår volumrelaterte problemer med eksterne enheter, for eksempel uakseptabelt høyt volum eller mangel på kontroll."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
@@ -297,18 +297,18 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Vis visuell tilbakemelding for trykk"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Vis overflateoppdateringer"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Fremhev hele vindusoverflater når de oppdateres"</string>
-    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Vis «Se oppdateringer»"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Vis visningsoppdateringer"</string>
     <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Fremhev visninger i vinduer når de tegnes"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Vis maskinvarelag-oppdat."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Maskinvarelag blinker grønt under oppdatering"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Feilsøk GPU-overtrekk"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Feilsøk GPU-overtegning"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Slå av maskinvareoverlegg"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Bruk alltid GPU for skjermsammensetting"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simuler fargeområde"</string>
     <string name="enable_opengl_traces_title" msgid="6790444011053219871">"Slå på OpenGL-spor"</string>
     <string name="usb_audio_disable_routing" msgid="8114498436003102671">"Slå av lydomkobling via USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Slå av automatisk lydomkobling til USB-enheter"</string>
-    <string name="debug_layout" msgid="5981361776594526155">"Vis kantene i utformingen"</string>
+    <string name="debug_layout" msgid="5981361776594526155">"Vis layoutgrenser"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Vis kanter, marger osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tving layoutretning for RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tving RTL-retning på skjermen for alle språk"</string>
@@ -320,7 +320,7 @@
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillat GPU-feilsøkingslag for feilsøkingsapper"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Animasjonsskala for vindu"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Animasjonsskala for overgang"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala for animasjon"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Varighetsskala for animasjoner"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simulering av sekundærskjermer"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apper"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ikke behold aktiviteter"</string>
@@ -337,7 +337,7 @@
     <string name="enable_freeform_support" msgid="1461893351278940416">"Slå på vinduer i fritt format"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Slå på støtte for vinduer i eksperimentelt fritt format."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Passord for sikkerhetskopiering på datamaskin"</string>
-    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Fullstendig sikkerhetskopiering på datamaskin beskyttes ikke for øyeblikket."</string>
+    <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Fullstendig sikkerhetskopiering på datamaskin er ikke beskyttet"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Trykk for å endre eller fjerne passordet for fullstendige sikkerhetskopier på datamaskinen"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nytt passord for sikkerhetskopiering er angitt."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Gjentakelsen av passordet er ikke identisk med det første du skrev inn"</string>
@@ -390,8 +390,7 @@
     <string name="power_discharge_by" msgid="6453537733650125582">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="107616694963545745">"Skal vare til omtrent <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Til <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
-    <skip />
+    <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Forleng batterilevetiden til etter <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Mindre enn <xliff:g id="THRESHOLD">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -465,6 +464,5 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Spør hver gang"</string>
     <string name="zen_mode_forever" msgid="2704305038191592967">"Til du slår av"</string>
     <string name="time_unit_just_now" msgid="6363336622778342422">"Nå nettopp"</string>
-    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="1636276898262571213">"Denne enheten"</string>
 </resources>
