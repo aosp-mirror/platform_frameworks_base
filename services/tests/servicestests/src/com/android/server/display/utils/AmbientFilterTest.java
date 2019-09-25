@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display.whitebalance;
+package com.android.server.display.utils;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +38,7 @@ import org.junit.runners.JUnit4;
 public final class AmbientFilterTest {
     private ContextWrapper mContextSpy;
     private Resources mResourcesSpy;
+    private static String TAG = "AmbientFilterTest";
 
     @Before
     public void setUp() throws Exception {
@@ -54,7 +55,7 @@ public final class AmbientFilterTest {
         final int prediction_time = 100;  // Hardcoded in AmbientFilter: prediction of how long the
                                           // latest prediction will last before a new prediction.
         setMockValues(mResourcesSpy, horizon, intercept);
-        AmbientFilter filter = DisplayWhiteBalanceFactory.createBrightnessFilter(mResourcesSpy);
+        AmbientFilter filter = AmbientFilterFactory.createBrightnessFilter(TAG, mResourcesSpy);
 
         // Add first value and verify
         filter.addValue(time_start, 30);
@@ -85,7 +86,7 @@ public final class AmbientFilterTest {
         final int prediction_time = 100;
 
         setMockValues(mResourcesSpy, horizon, intercept);
-        AmbientFilter filter = DisplayWhiteBalanceFactory.createBrightnessFilter(mResourcesSpy);
+        AmbientFilter filter = AmbientFilterFactory.createBrightnessFilter(TAG, mResourcesSpy);
 
         // Add first value and verify
         filter.addValue(time_start, 30);

@@ -49,8 +49,9 @@ import android.view.DisplayInfo;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.R;
+import com.android.server.display.utils.AmbientFilter;
+import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
-import com.android.server.display.whitebalance.AmbientFilter;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -970,7 +971,7 @@ public class DisplayModeDirector {
                 if (lightSensor != null) {
                     final Resources res = mContext.getResources();
 
-                    mAmbientFilter = DisplayWhiteBalanceFactory.createBrightnessFilter(res);
+                    mAmbientFilter = AmbientFilterFactory.createBrightnessFilter(TAG, res);
                     mLightSensor = lightSensor;
 
                     onScreenOn(isDefaultDisplayOn());
