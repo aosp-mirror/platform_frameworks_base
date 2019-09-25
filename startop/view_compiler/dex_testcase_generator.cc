@@ -47,7 +47,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   // int return5() { return 5; }
   auto return5{cbuilder.CreateMethod("return5", Prototype{TypeDescriptor::Int()})};
   {
-    Value r{return5.MakeRegister()};
+    LiveRegister r{return5.AllocRegister()};
     return5.BuildConst4(r, 5);
     return5.BuildReturn(r);
   }
@@ -57,9 +57,9 @@ void GenerateSimpleTestCases(const string& outdir) {
   auto integer_type{TypeDescriptor::FromClassname("java.lang.Integer")};
   auto returnInteger5{cbuilder.CreateMethod("returnInteger5", Prototype{integer_type})};
   [&](MethodBuilder& method) {
-    Value five{method.MakeRegister()};
+    LiveRegister five{method.AllocRegister()};
     method.BuildConst4(five, 5);
-    Value object{method.MakeRegister()};
+    LiveRegister object{method.AllocRegister()};
     method.BuildNew(
         object, integer_type, Prototype{TypeDescriptor::Void(), TypeDescriptor::Int()}, five);
     method.BuildReturn(object, /*is_object=*/true);
@@ -80,7 +80,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   auto returnStringLength{
       cbuilder.CreateMethod("returnStringLength", Prototype{TypeDescriptor::Int(), string_type})};
   {
-    Value result = returnStringLength.MakeRegister();
+    LiveRegister result = returnStringLength.AllocRegister();
     returnStringLength.AddInstruction(
         Instruction::InvokeVirtual(string_length.id, result, Value::Parameter(0)));
     returnStringLength.BuildReturn(result);
@@ -91,7 +91,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   MethodBuilder returnIfZero{cbuilder.CreateMethod(
       "returnIfZero", Prototype{TypeDescriptor::Int(), TypeDescriptor::Int()})};
   {
-    Value resultIfZero{returnIfZero.MakeRegister()};
+    LiveRegister resultIfZero{returnIfZero.AllocRegister()};
     Value else_target{returnIfZero.MakeLabel()};
     returnIfZero.AddInstruction(Instruction::OpWithArgs(
         Instruction::Op::kBranchEqz, /*dest=*/{}, Value::Parameter(0), else_target));
@@ -112,7 +112,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   MethodBuilder returnIfNotZero{cbuilder.CreateMethod(
       "returnIfNotZero", Prototype{TypeDescriptor::Int(), TypeDescriptor::Int()})};
   {
-    Value resultIfNotZero{returnIfNotZero.MakeRegister()};
+    LiveRegister resultIfNotZero{returnIfNotZero.AllocRegister()};
     Value else_target{returnIfNotZero.MakeLabel()};
     returnIfNotZero.AddInstruction(Instruction::OpWithArgs(
         Instruction::Op::kBranchNEqz, /*dest=*/{}, Value::Parameter(0), else_target));
@@ -148,8 +148,8 @@ void GenerateSimpleTestCases(const string& outdir) {
   MethodBuilder backwardsBranch{
       cbuilder.CreateMethod("backwardsBranch", Prototype{TypeDescriptor::Int()})};
   [](MethodBuilder& method) {
-    Value zero = method.MakeRegister();
-    Value result = method.MakeRegister();
+    LiveRegister zero = method.AllocRegister();
+    LiveRegister result = method.AllocRegister();
     Value labelA = method.MakeLabel();
     Value labelB = method.MakeLabel();
     method.BuildConst4(zero, 0);
@@ -177,7 +177,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   // public static String returnNull() { return null; }
   MethodBuilder returnNull{cbuilder.CreateMethod("returnNull", Prototype{string_type})};
   [](MethodBuilder& method) {
-    Value zero = method.MakeRegister();
+    LiveRegister zero = method.AllocRegister();
     method.BuildConst4(zero, 0);
     method.BuildReturn(zero, /*is_object=*/true);
   }(returnNull);
@@ -188,7 +188,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   // public static String makeString() { return "Hello, World!"; }
   MethodBuilder makeString{cbuilder.CreateMethod("makeString", Prototype{string_type})};
   [](MethodBuilder& method) {
-    Value string = method.MakeRegister();
+    LiveRegister string = method.AllocRegister();
     method.BuildConstString(string, "Hello, World!");
     method.BuildReturn(string, /*is_object=*/true);
   }(makeString);
@@ -200,7 +200,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   MethodBuilder returnStringIfZeroAB{
       cbuilder.CreateMethod("returnStringIfZeroAB", Prototype{string_type, TypeDescriptor::Int()})};
   [&](MethodBuilder& method) {
-    Value resultIfZero{method.MakeRegister()};
+    LiveRegister resultIfZero{method.AllocRegister()};
     Value else_target{method.MakeLabel()};
     method.AddInstruction(Instruction::OpWithArgs(
         Instruction::Op::kBranchEqz, /*dest=*/{}, Value::Parameter(0), else_target));
@@ -220,7 +220,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   MethodBuilder returnStringIfZeroBA{
       cbuilder.CreateMethod("returnStringIfZeroBA", Prototype{string_type, TypeDescriptor::Int()})};
   [&](MethodBuilder& method) {
-    Value resultIfZero{method.MakeRegister()};
+    LiveRegister resultIfZero{method.AllocRegister()};
     Value else_target{method.MakeLabel()};
     method.AddInstruction(Instruction::OpWithArgs(
         Instruction::Op::kBranchEqz, /*dest=*/{}, Value::Parameter(0), else_target));
@@ -244,7 +244,7 @@ void GenerateSimpleTestCases(const string& outdir) {
       cbuilder.CreateMethod("invokeStaticReturnObject",
                             Prototype{string_type, TypeDescriptor::Int(), TypeDescriptor::Int()})};
   [&](MethodBuilder& method) {
-    Value result{method.MakeRegister()};
+    LiveRegister result{method.AllocRegister()};
     MethodDeclData to_string{dex_file.GetOrDeclareMethod(
         TypeDescriptor::FromClassname("java.lang.Integer"),
         "toString",
@@ -260,7 +260,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   MethodBuilder invokeVirtualReturnObject{cbuilder.CreateMethod(
       "invokeVirtualReturnObject", Prototype{string_type, string_type, TypeDescriptor::Int()})};
   [&](MethodBuilder& method) {
-    Value result{method.MakeRegister()};
+    LiveRegister result{method.AllocRegister()};
     MethodDeclData substring{dex_file.GetOrDeclareMethod(
         string_type, "substring", Prototype{string_type, TypeDescriptor::Int()})};
     method.AddInstruction(Instruction::InvokeVirtualObject(
@@ -291,7 +291,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   [&](MethodBuilder& method) {
     const ir::FieldDecl* field =
         dex_file.GetOrAddField(test_class, "staticInteger", TypeDescriptor::Int());
-    Value result{method.MakeRegister()};
+    LiveRegister result{method.AllocRegister()};
     method.AddInstruction(Instruction::GetStaticField(field->orig_index, result));
     method.BuildReturn(result, /*is_object=*/false);
     method.Encode();
@@ -304,7 +304,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   [&](MethodBuilder& method) {
     const ir::FieldDecl* field =
         dex_file.GetOrAddField(test_class, "staticInteger", TypeDescriptor::Int());
-    Value number{method.MakeRegister()};
+    LiveRegister number{method.AllocRegister()};
     method.BuildConst4(number, 7);
     method.AddInstruction(Instruction::SetStaticField(field->orig_index, number));
     method.BuildReturn();
@@ -318,7 +318,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   [&](MethodBuilder& method) {
     const ir::FieldDecl* field =
         dex_file.GetOrAddField(test_class, "instanceField", TypeDescriptor::Int());
-    Value result{method.MakeRegister()};
+    LiveRegister result{method.AllocRegister()};
     method.AddInstruction(Instruction::GetField(field->orig_index, result, Value::Parameter(0)));
     method.BuildReturn(result, /*is_object=*/false);
     method.Encode();
@@ -331,7 +331,7 @@ void GenerateSimpleTestCases(const string& outdir) {
   [&](MethodBuilder& method) {
     const ir::FieldDecl* field =
         dex_file.GetOrAddField(test_class, "instanceField", TypeDescriptor::Int());
-    Value number{method.MakeRegister()};
+    LiveRegister number{method.AllocRegister()};
     method.BuildConst4(number, 7);
     method.AddInstruction(Instruction::SetField(field->orig_index, Value::Parameter(0), number));
     method.BuildReturn();
