@@ -21,6 +21,10 @@ package android {
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
   }
 
+  public static final class Manifest.permission_group {
+    field public static final String UNDEFINED = "android.permission-group.UNDEFINED";
+  }
+
   public static final class R.bool {
     field public static final int config_perDisplayFocusEnabled = 17891332; // 0x1110004
   }
@@ -919,6 +923,10 @@ package android.hardware.camera2 {
     field public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED = 1; // 0x1
     field public static final int SESSION_OPERATION_MODE_NORMAL = 0; // 0x0
     field public static final int SESSION_OPERATION_MODE_VENDOR_START = 32768; // 0x8000
+  }
+
+  public final class CameraManager {
+    method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
   }
 
 }
@@ -2904,6 +2912,7 @@ package android.telephony {
     method public int checkCarrierPrivilegesForPackage(String);
     method public int getCarrierIdListVersion();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
+    method @NonNull public String getNetworkCountryIso(int);
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);

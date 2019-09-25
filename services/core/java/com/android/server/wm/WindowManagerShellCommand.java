@@ -28,6 +28,8 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.Surface;
 
+import com.android.server.protolog.ProtoLogImpl;
+
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,6 +77,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // the output trace file, so the shell gets the correct semantics for where
                     // trace files can be written.
                     return mInternal.mWindowTracing.onShellCommand(this);
+                case "logging":
+                    return ProtoLogImpl.getSingleInstance().onShellCommand(this);
                 case "set-user-rotation":
                     return runSetDisplayUserRotation(pw);
                 case "set-fix-to-user-rotation":
@@ -389,6 +393,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");
+            pw.println("  logging (start | stop | enable | disable | enable-text | disable-text)");
+            pw.println("    Logging settings.");
         }
     }
 }

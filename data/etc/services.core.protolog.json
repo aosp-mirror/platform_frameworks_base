@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "messages": {
+    "485522692": {
+      "message": "Test completed successfully: %b %d %o %x %e %g %f %% %s.",
+      "level": "ERROR",
+      "group": "TEST_GROUP"
+    }
+  },
+  "groups": {
+    "TEST_GROUP": {
+      "tag": "WindowManagetProtoLogTest"
+    }
+  }
+}

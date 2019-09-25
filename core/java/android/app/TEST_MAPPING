@@ -26,6 +26,15 @@
                     "include-filter": "com.android.server.appop"
                 }
             ]
+        },
+        {
+            "file_patterns": ["(/|^)AppOpsManager.java"],
+            "name": "CtsPermission2TestCases",
+            "options": [
+                {
+                    "include-filter": "android.permission2.cts.RuntimePermissionProperties"
+                }
+            ]
         }
     ],
     "postsubmit": [

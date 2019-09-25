@@ -40,14 +40,14 @@ import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks {
 
     private static final float SHUTDOWN_SCRIM_ALPHA = 0.95f;
 
     private final Context mContext;
-    private final KeyguardMonitor mKeyguardMonitor;
+    private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
     private GlobalActionsDialog mGlobalActions;
@@ -55,7 +55,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
 
     public GlobalActionsImpl(Context context) {
         mContext = context;
-        mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         SysUiServiceProvider.getComponent(context, CommandQueue.class).addCallback(this);
         mPanelExtension = Dependency.get(ExtensionController.class)
@@ -79,7 +79,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActionsDialog(mContext, manager);
         }
-        mGlobalActions.showDialog(mKeyguardMonitor.isShowing(),
+        mGlobalActions.showDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mPanelExtension.get());
         Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();

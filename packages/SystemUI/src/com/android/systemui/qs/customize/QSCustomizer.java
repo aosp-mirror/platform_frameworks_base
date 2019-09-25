@@ -46,8 +46,8 @@ import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.policy.KeyguardMonitor;
-import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.KeyguardStateController.Callback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +68,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private final QSDetailClipper mClipper;
     private final LightBarController mLightBarController;
-    private KeyguardMonitor mKeyguardMonitor;
+    private KeyguardStateController mKeyguardStateController;
     private final ScreenLifecycle mScreenLifecycle;
     private final TileQueryHelper mTileQueryHelper;
     private final View mTransparentView;
@@ -89,7 +89,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     @Inject
     public QSCustomizer(Context context, AttributeSet attrs,
             LightBarController lightBarController,
-            KeyguardMonitor keyguardMonitor,
+            KeyguardStateController keyguardStateController,
             ScreenLifecycle screenLifecycle) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
 
@@ -124,7 +124,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
         mLightBarController = lightBarController;
-        mKeyguardMonitor = keyguardMonitor;
+        mKeyguardStateController = keyguardStateController;
         mScreenLifecycle = screenLifecycle;
         updateNavBackDrop(getResources().getConfiguration());
     }
@@ -187,7 +187,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             queryTiles();
             mNotifQsContainer.setCustomizerAnimating(true);
             mNotifQsContainer.setCustomizerShowing(true);
-            mKeyguardMonitor.addCallback(mKeyguardCallback);
+            mKeyguardStateController.addCallback(mKeyguardCallback);
             updateNavColors();
         }
     }
@@ -203,7 +203,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             queryTiles();
             mNotifQsContainer.setCustomizerAnimating(false);
             mNotifQsContainer.setCustomizerShowing(true);
-            mKeyguardMonitor.addCallback(mKeyguardCallback);
+            mKeyguardStateController.addCallback(mKeyguardCallback);
             updateNavColors();
         }
     }
@@ -227,7 +227,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             }
             mNotifQsContainer.setCustomizerAnimating(animate);
             mNotifQsContainer.setCustomizerShowing(false);
-            mKeyguardMonitor.removeCallback(mKeyguardCallback);
+            mKeyguardStateController.removeCallback(mKeyguardCallback);
             updateNavColors();
         }
     }
@@ -283,7 +283,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void saveInstanceState(Bundle outState) {
         if (isShown) {
-            mKeyguardMonitor.removeCallback(mKeyguardCallback);
+            mKeyguardStateController.removeCallback(mKeyguardCallback);
         }
         outState.putBoolean(EXTRA_QS_CUSTOMIZING, mCustomizing);
     }
@@ -315,7 +315,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         @Override
         public void onKeyguardShowingChanged() {
             if (!isAttachedToWindow()) return;
-            if (mKeyguardMonitor.isShowing() && !mOpening) {
+            if (mKeyguardStateController.isShowing() && !mOpening) {
                 hide();
             }
         }

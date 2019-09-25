@@ -5,6 +5,9 @@
             "options": [
                 {
                     "include-filter": "android.permission2.cts.PermissionPolicyTest#platformPermissionPolicyIsUnaltered"
+                },
+                {
+                    "include-filter": "android.permission2.cts.RuntimePermissionProperties"
                 }
             ]
         }
