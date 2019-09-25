@@ -23,9 +23,8 @@
 #include <media/MediaAnalyticsItem.h>
 
 
-// This source file is compiled and linked into both:
+// This source file is compiled and linked into:
 // core/jni/ (libandroid_runtime.so)
-// media/jni (libmedia2_jni.so)
 
 namespace android {
 
