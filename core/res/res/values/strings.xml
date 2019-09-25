@@ -1745,6 +1745,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_startViewPermissionUsage">Allows the holder to start the permission usage for an app. Should never be needed for normal apps.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_accessibilityShortcutTarget">accessibility shortcut target</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_accessibilityShortcutTarget">Allows an app to define the accessibility shortcut target.</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->

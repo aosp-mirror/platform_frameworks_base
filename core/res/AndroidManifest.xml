@@ -2552,6 +2552,19 @@
         android:label="@string/permlab_readSyncStats"
         android:protectionLevel="normal" />
 
+    <!-- ==================================================== -->
+    <!-- Permissions related to accessibility                 -->
+    <!-- ==================================================== -->
+    <eat-comment />
+
+    <!-- Allows applications to define the accessibility shortcut target.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.ACCESSIBILITY_SHORTCUT_TARGET"
+                android:description="@string/permdesc_accessibilityShortcutTarget"
+                android:label="@string/permlab_accessibilityShortcutTarget"
+                android:protectionLevel="normal" />
+
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
