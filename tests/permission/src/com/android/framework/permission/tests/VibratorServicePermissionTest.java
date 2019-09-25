@@ -16,12 +16,12 @@
 
 package com.android.framework.permission.tests;
 
-import android.media.AudioAttributes;
 import android.os.Binder;
 import android.os.IVibratorService;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -52,8 +52,8 @@ public class VibratorServicePermissionTest extends TestCase {
         try {
             final VibrationEffect effect =
                     VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE);
-            final AudioAttributes attrs = new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
+            final VibrationAttributes attrs = new VibrationAttributes.Builder()
+                    .setUsage(VibrationAttributes.USAGE_ALARM)
                     .build();
             mVibratorService.vibrate(Process.myUid(), null, effect, attrs,
                     "testVibrate", new Binder());
