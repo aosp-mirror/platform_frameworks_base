@@ -33,29 +33,31 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.storage.VolumeInfo;
 import android.service.storage.ExternalStorageService;
 import android.service.storage.IExternalStorageService;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Controls the lifecycle of the {@link ActiveConnection} to an {@link ExternalStorageService}
- * for a user and manages storage sessions represented by a {@link Session}.
+ * for a user and manages storage sessions associated with mounted volumes.
  */
 public final class StorageUserConnection {
     private static final String TAG = "StorageUserConnection";
+    private static final int REMOTE_TIMEOUT_SECONDS = 15;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -70,68 +72,188 @@ public final class StorageUserConnection {
         mSessionController = controller;
     }
 
-    /** Starts a session for a user */
-    public void startSession(FileDescriptor deviceFd, VolumeInfo vol)
-            throws ExternalStorageServiceException {
-        String sessionId = vol.getId();
-        String upperPath = vol.getPath().getPath();
-        String lowerPath = vol.getInternalPath().getPath();
-        Slog.i(TAG, "Starting session with id: " + sessionId + " and upperPath: " + upperPath
-                + " and lowerPath: " + lowerPath);
-        Session session = new Session(sessionId, deviceFd, upperPath, lowerPath);
+    /**
+     * Creates and stores a storage {@link Session}.
+     *
+     * Created sessions must be initialised with {@link #initSession} before starting with
+     * {@link #startSession}.
+     *
+     * They must also be cleaned up with {@link #removeSession}.
+     *
+     * @throws IllegalArgumentException if a {@code Session} with {@code sessionId} already exists
+     */
+    public void createSession(String sessionId, ParcelFileDescriptor pfd) {
+        Preconditions.checkNotNull(sessionId);
+        Preconditions.checkNotNull(pfd);
+
         synchronized (mLock) {
-            // TODO(b/135341433): Ensure we don't replace a session without ending the previous
-            mSessions.put(sessionId, session);
-            // TODO(b/135341433): If this fails, maybe its at boot, how to handle if not boot?
+            Preconditions.checkArgument(!mSessions.containsKey(sessionId));
+            mSessions.put(sessionId, new Session(sessionId, pfd));
+        }
+    }
+
+    /**
+     * Initialise a storage {@link Session}.
+     *
+     * Initialised sessions can be started with {@link #startSession}.
+     *
+     * They must also be cleaned up with {@link #removeSession}.
+     *
+     * @throws IllegalArgumentException if {@code sessionId} does not exist or is initialised
+     */
+    public void initSession(String sessionId, String upperPath, String lowerPath) {
+        synchronized (mLock) {
+            Session session = mSessions.get(sessionId);
+            if (session == null) {
+                throw new IllegalStateException("Failed to initialise non existent session. Id: "
+                        + sessionId + ". Upper path: " + upperPath + ". Lower path: " + lowerPath);
+            } else if (session.isInitialisedLocked()) {
+                throw new IllegalStateException("Already initialised session. Id: "
+                        + sessionId + ". Upper path: " + upperPath + ". Lower path: " + lowerPath);
+            } else {
+                session.upperPath = upperPath;
+                session.lowerPath = lowerPath;
+                Slog.i(TAG, "Initialised session: " + session);
+            }
+        }
+    }
+
+    /**
+     * Starts an already created storage {@link Session} for {@code sessionId}.
+     *
+     * It is safe to call this multiple times, however if the session is already started,
+     * subsequent calls will be ignored.
+     *
+     * @throws ExternalStorageServiceException if the session failed to start
+     **/
+    public void startSession(String sessionId) throws ExternalStorageServiceException {
+        Session session;
+        synchronized (mLock) {
+            session = mSessions.get(sessionId);
+        }
+
+        prepareRemote();
+        synchronized (mLock) {
             mActiveConnection.startSessionLocked(session);
         }
     }
 
     /**
-     * Ends a session for a user.
+     * Removes a session without ending it or waiting for exit.
      *
-     * @return {@code true} if there are no more sessions for this user, {@code false} otherwise
+     * This should only be used if the session has certainly been ended because the volume was
+     * unmounted or the user running the session has been stopped. Otherwise, wait for session
+     * with {@link #waitForExit}.
      **/
-    public boolean endSession(VolumeInfo vol) throws ExternalStorageServiceException {
+    public Session removeSession(String sessionId) {
         synchronized (mLock) {
-            Session session = mSessions.remove(vol.getId());
+            Session session = mSessions.remove(sessionId);
             if (session != null) {
-                mActiveConnection.endSessionLocked(session);
-                mSessions.remove(session.sessionId);
+                session.close();
+                return session;
             }
-            boolean isAllSessionsEnded = mSessions.isEmpty();
-            if (isAllSessionsEnded) {
-                mActiveConnection.close();
-            }
-            return isAllSessionsEnded;
+            return null;
         }
     }
 
-    /** Starts all available sessions for a user */
-    public void startAllSessions() throws ExternalStorageServiceException {
+
+    /**
+     * Removes a session and waits for exit
+     *
+     * @throws ExternalStorageServiceException if the session may not have exited
+     **/
+    public void removeSessionAndWait(String sessionId) throws ExternalStorageServiceException {
+        Session session = removeSession(sessionId);
+        if (session == null) {
+            Slog.i(TAG, "No session found for id: " + sessionId);
+            return;
+        }
+
+        Slog.i(TAG, "Waiting for session end " + session + " ...");
+        prepareRemote();
         synchronized (mLock) {
+            mActiveConnection.endSessionLocked(session);
+        }
+    }
+
+    /** Starts all available sessions for a user without blocking. Any failures will be ignored. */
+    public void startAllSessions() {
+        try {
+            prepareRemote();
+        } catch (ExternalStorageServiceException e) {
+            Slog.e(TAG, "Failed to start all sessions for user: " + mUserId, e);
+            return;
+        }
+
+        synchronized (mLock) {
+            Slog.i(TAG, "Starting " + mSessions.size() + " sessions for user: " + mUserId + "...");
             for (Session session : mSessions.values()) {
-                mActiveConnection.startSessionLocked(session);
+                try {
+                    mActiveConnection.startSessionLocked(session);
+                } catch (IllegalStateException | ExternalStorageServiceException e) {
+                    // TODO: Don't crash process? We could get into process crash loop
+                    Slog.e(TAG, "Failed to start " + session, e);
+                }
             }
         }
     }
 
-    /** Ends all available sessions for a user */
-    public void endAllSessions() throws ExternalStorageServiceException {
+    /**
+     * Closes the connection to the {@link ExternalStorageService}. The connection will typically
+     * be restarted after close.
+     */
+    public void close() {
+        mActiveConnection.close();
+    }
+
+    /** Throws an {@link IllegalArgumentException} if {@code path} is not ready for access */
+    public void checkPathReady(String path) {
         synchronized (mLock) {
             for (Session session : mSessions.values()) {
-                mActiveConnection.endSessionLocked(session);
-                mSessions.remove(session.sessionId);
+                if (session.upperPath != null && path.startsWith(session.upperPath)) {
+                    if (mActiveConnection.isActiveLocked(session)) {
+                        return;
+                    }
+                }
             }
-            mActiveConnection.close();
+            throw new IllegalStateException("Path not ready " + path);
+        }
+    }
+
+    /** Returns all created sessions. */
+    public Set<String> getAllSessionIds() {
+        synchronized (mLock) {
+            return new HashSet<>(mSessions.keySet());
+        }
+    }
+
+    private void prepareRemote() throws ExternalStorageServiceException {
+        try {
+            waitForLatch(mActiveConnection.bind(), "remote_prepare_user " + mUserId);
+        } catch (IllegalStateException | TimeoutException e) {
+            throw new ExternalStorageServiceException("Failed to prepare remote", e);
+        }
+    }
+
+    private void waitForLatch(CountDownLatch latch, String reason) throws TimeoutException {
+        try {
+            if (!latch.await(REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                // TODO(b/140025078): Call ActivityManager ANR API?
+                throw new TimeoutException("Latch wait for " + reason + " elapsed");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Latch wait for " + reason + " interrupted");
         }
     }
 
     private final class ActiveConnection implements AutoCloseable {
         // Lifecycle connection to the external storage service, needed to unbind.
-        // We should only try to bind if mServiceConnection is null.
-        // Non-null indicates we are connected or connecting.
         @GuardedBy("mLock") @Nullable private ServiceConnection mServiceConnection;
+        // True if we are connecting, either bound or binding
+        // False && mRemote != null means we are connected
+        // False && mRemote == null means we are neither connecting nor connected
+        @GuardedBy("mLock") @Nullable private boolean mIsConnecting;
         // Binder object representing the external storage service.
         // Non-null indicates we are connected
         @GuardedBy("mLock") @Nullable private IExternalStorageService mRemote;
@@ -141,58 +263,72 @@ public final class StorageUserConnection {
         // (and clear the exception state) with the same lock which we hold during
         // the entire transaction, there is no risk of race.
         @GuardedBy("mLock") @Nullable private ParcelableException mLastException;
+        // Not guarded by any lock intentionally and non final because we cannot
+        // reset latches so need to create a new one after one use
+        private CountDownLatch mLatch;
 
         @Override
         public void close() {
+            ServiceConnection oldConnection = null;
             synchronized (mLock) {
-                if (mServiceConnection != null) {
-                    mContext.unbindService(mServiceConnection);
-                }
+                Slog.i(TAG, "Closing connection for user " + mUserId);
+                mIsConnecting = false;
+                oldConnection = mServiceConnection;
                 mServiceConnection = null;
                 mRemote = null;
             }
+
+            if (oldConnection != null) {
+                mContext.unbindService(oldConnection);
+            }
+        }
+
+        public boolean isActiveLocked(Session session) {
+            if (!session.isInitialisedLocked()) {
+                Slog.i(TAG, "Session not initialised " + session);
+                return false;
+            }
+
+            if (mRemote == null) {
+                throw new IllegalStateException("Valid session with inactive connection");
+            }
+            return true;
         }
 
         public void startSessionLocked(Session session) throws ExternalStorageServiceException {
-            if (mServiceConnection == null || mRemote == null) {
-                if (mServiceConnection == null) {
-                    // Not bound
-                    bindLocked();
-                } // else we are binding. In any case when we bind we'll re-start all sessions
+            if (!isActiveLocked(session)) {
                 return;
             }
 
             CountDownLatch latch = new CountDownLatch(1);
-            try {
+            try (ParcelFileDescriptor dupedPfd = session.pfd.dup()) {
                 mRemote.startSession(session.sessionId,
                         FLAG_SESSION_TYPE_FUSE | FLAG_SESSION_ATTRIBUTE_INDEXABLE,
-                        new ParcelFileDescriptor(session.deviceFd), session.upperPath,
-                        session.lowerPath, new RemoteCallback(result ->
+                        dupedPfd, session.upperPath, session.lowerPath, new RemoteCallback(result ->
                                 setResultLocked(latch, result)));
-
-            } catch (RemoteException e) {
-                throw new ExternalStorageServiceException(e);
+                waitForLatch(latch, "start_session " + session);
+                maybeThrowExceptionLocked();
+            } catch (Exception e) {
+                throw new ExternalStorageServiceException("Failed to start session: " + session, e);
             }
-            waitAndReturnResultLocked(latch);
         }
 
         public void endSessionLocked(Session session) throws ExternalStorageServiceException {
-            if (mRemote == null) {
-                // TODO(b/135341433): This assumes if there is no connection, there are no
-                // session resources held. Need to document in the ExternalStorageService
-                // API that implementors should end all sessions and clean up resources
-                // when the binding is lost, onDestroy?
+            session.close();
+            if (!isActiveLocked(session)) {
+                // Nothing to end, not started yet
                 return;
             }
 
             CountDownLatch latch = new CountDownLatch(1);
             try {
                 mRemote.endSession(session.sessionId, new RemoteCallback(result ->
-                                setResultLocked(latch, result)));
-            } catch (RemoteException e) {
-                throw new ExternalStorageServiceException(e);
+                        setResultLocked(latch, result)));
+                waitForLatch(latch, "end_session " + session);
+                maybeThrowExceptionLocked();
+            } catch (Exception e) {
+                throw new ExternalStorageServiceException("Failed to end session: " + session, e);
             }
-            waitAndReturnResultLocked(latch);
         }
 
         private void setResultLocked(CountDownLatch latch, Bundle result) {
@@ -200,36 +336,38 @@ public final class StorageUserConnection {
             latch.countDown();
         }
 
-        private void waitAndReturnResultLocked(CountDownLatch latch)
-                throws ExternalStorageServiceException {
-            try {
-                // TODO(b/140025078): Call ActivityManager ANR API?
-                latch.await(20, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException(
-                        "Interrupted while waiting for ExternalStorageService result");
-            }
+        private void maybeThrowExceptionLocked() throws IOException {
             if (mLastException != null) {
+                ParcelableException lastException = mLastException;
                 mLastException = null;
                 try {
-                    mLastException.maybeRethrow(IOException.class);
+                    lastException.maybeRethrow(IOException.class);
                 } catch (IOException e) {
-                    throw new ExternalStorageServiceException(e);
+                    throw e;
                 }
-                throw new RuntimeException(mLastException);
+                throw new RuntimeException(lastException);
             }
-            mLastException = null;
         }
 
-        private void bindLocked() {
+        public CountDownLatch bind() throws ExternalStorageServiceException {
             ComponentName name = mSessionController.getExternalStorageServiceComponentName();
             if (name == null) {
-                Slog.i(TAG, "Not ready to bind to the ExternalStorageService for user " + mUserId);
-                return;
+                // Not ready to bind
+                throw new ExternalStorageServiceException(
+                        "Not ready to bind to the ExternalStorageService for user " + mUserId);
             }
 
-            ServiceConnection connection = new ServiceConnection() {
+            synchronized (mLock) {
+                if (mRemote != null || mIsConnecting) {
+                    // Connected or connecting (bound or binding)
+                    // Will wait on a latch that will countdown when we connect, unless we are
+                    // connected and the latch has already countdown, yay!
+                    return mLatch;
+                } // else neither connected nor connecting
+
+                mLatch = new CountDownLatch(1);
+                mIsConnecting = true;
+                mServiceConnection = new ServiceConnection() {
                     @Override
                     public void onServiceConnected(ComponentName name, IBinder service) {
                         Slog.i(TAG, "Service: [" + name + "] connected. User [" + mUserId + "]");
@@ -255,65 +393,81 @@ public final class StorageUserConnection {
 
                     @Override
                     public void onNullBinding(ComponentName name) {
-                        // Should never happen. Service returned null from #onBind.
                         Slog.wtf(TAG, "Service: [" + name + "] is null. User [" + mUserId + "]");
                     }
 
                     private void handleConnection(IBinder service) {
                         synchronized (mLock) {
-                            if (mServiceConnection != null) {
+                            if (mIsConnecting) {
                                 mRemote = IExternalStorageService.Stub.asInterface(service);
-                            } else {
-                                Slog.wtf(TAG, "Service connected without a connection object??");
+                                mIsConnecting = false;
+                                mLatch.countDown();
+                                // Separate thread so we don't block the main thead
+                                return;
                             }
                         }
-
-                        try {
-                            startAllSessions();
-                        } catch (ExternalStorageServiceException e) {
-                            Slog.e(TAG, "Failed to start all sessions", e);
-                        }
+                        Slog.wtf(TAG, "Connection closed to the ExternalStorageService for user "
+                                + mUserId);
                     }
 
                     private void handleDisconnection() {
-                        close();
                         // Clear all sessions because we will need a new device fd since
                         // StorageManagerService will reset the device mount state and #startSession
                         // will be called for any required mounts.
-                        synchronized (mLock) {
-                            mSessions.clear();
-                        }
                         // Notify StorageManagerService so it can restart all necessary sessions
-                        mSessionController.getCallback().onUserDisconnected(mUserId);
+                        close();
+                        new Thread(StorageUserConnection.this::startAllSessions).start();
                     }
                 };
+            }
 
             Slog.i(TAG, "Binding to the ExternalStorageService for user " + mUserId);
-            // TODO(b/135341433): Verify required service flags BIND_IMPORTANT?
-            if (mContext.bindServiceAsUser(new Intent().setComponent(name), connection,
-                            Context.BIND_AUTO_CREATE, UserHandle.of(mUserId))) {
+            if (mContext.bindServiceAsUser(new Intent().setComponent(name), mServiceConnection,
+                            Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                            UserHandle.of(mUserId))) {
                 Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
-                mServiceConnection = connection;
-                // Reset the remote, we will set when we connect
-                mRemote = null;
+                return mLatch;
             } else {
-                Slog.w(TAG, "Failed to bind to the ExternalStorageService for user " + mUserId);
+                synchronized (mLock) {
+                    mIsConnecting = false;
+                }
+                throw new ExternalStorageServiceException(
+                        "Failed to bind to the ExternalStorageService for user " + mUserId);
             }
         }
     }
 
-    private static final class Session {
+    private static final class Session implements AutoCloseable {
         public final String sessionId;
-        public final FileDescriptor deviceFd;
-        public final String lowerPath;
-        public final String upperPath;
+        public final ParcelFileDescriptor pfd;
+        @GuardedBy("mLock")
+        public String lowerPath;
+        @GuardedBy("mLock")
+        public String upperPath;
 
-        Session(String sessionId, FileDescriptor deviceFd, String upperPath,
-                String lowerPath) {
+        Session(String sessionId, ParcelFileDescriptor pfd) {
             this.sessionId = sessionId;
-            this.upperPath = upperPath;
-            this.lowerPath = lowerPath;
-            this.deviceFd = deviceFd;
+            this.pfd = pfd;
+        }
+
+        @Override
+        public void close() {
+            try {
+                pfd.close();
+            } catch (IOException e) {
+                Slog.i(TAG, "Failed to close session: " + this);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "[SessionId: " + sessionId + ". UpperPath: " + upperPath + ". LowerPath: "
+                    + lowerPath + "]";
+        }
+
+        @GuardedBy("mLock")
+        public boolean isInitialisedLocked() {
+            return !TextUtils.isEmpty(upperPath) && !TextUtils.isEmpty(lowerPath);
         }
     }
 }

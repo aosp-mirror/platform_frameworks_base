@@ -779,7 +779,12 @@ public class StorageManager {
     /** {@hide} */
     public @Nullable VolumeInfo findPrivateForEmulated(VolumeInfo emulatedVol) {
         if (emulatedVol != null) {
-            return findVolumeById(emulatedVol.getId().replace("emulated", "private"));
+            String id = emulatedVol.getId();
+            int idx = id.indexOf(";");
+            if (idx != -1) {
+                id = id.substring(0, idx);
+            }
+            return findVolumeById(id.replace("emulated", "private"));
         } else {
             return null;
         }
@@ -789,7 +794,8 @@ public class StorageManager {
     @UnsupportedAppUsage
     public @Nullable VolumeInfo findEmulatedForPrivate(VolumeInfo privateVol) {
         if (privateVol != null) {
-            return findVolumeById(privateVol.getId().replace("private", "emulated"));
+            return findVolumeById(privateVol.getId().replace("private", "emulated") + ";"
+                    + mContext.getUserId());
         } else {
             return null;
         }
