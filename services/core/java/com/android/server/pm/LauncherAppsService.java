@@ -443,45 +443,39 @@ public class LauncherAppsService extends SystemService {
             if (isManagedProfileAdmin(user, appInfo.packageName)) {
                 return false;
             }
-            // If app does not have any components or any permissions, the app can legitimately
-            // have no icon so we do not show the synthetic activity.
-            return hasComponentsAndRequestsPermissions(appInfo.packageName);
-        }
-
-        private boolean hasComponentsAndRequestsPermissions(@NonNull String packageName) {
             final PackageManagerInternal pmInt =
                     LocalServices.getService(PackageManagerInternal.class);
-            final PackageParser.Package pkg = pmInt.getPackage(packageName);
+            final PackageParser.Package pkg = pmInt.getPackage(appInfo.packageName);
             if (pkg == null) {
                 // Should not happen, but we shouldn't be failing if it does
                 return false;
             }
-            if (ArrayUtils.isEmpty(pkg.requestedPermissions)) {
-                return false;
-            }
-            if (!hasApplicationDeclaredActivities(pkg)
-                    && ArrayUtils.isEmpty(pkg.receivers)
-                    && ArrayUtils.isEmpty(pkg.providers)
-                    && ArrayUtils.isEmpty(pkg.services)) {
-                return false;
-            }
-            return true;
+            // If app does not have any default enabled launcher activity or any permissions,
+            // the app can legitimately have no icon so we do not show the synthetic activity.
+            return requestsPermissions(pkg) && hasDefaultEnableLauncherActivity(
+                    appInfo.packageName);
         }
 
-        private boolean hasApplicationDeclaredActivities(@NonNull PackageParser.Package pkg) {
-            if (pkg.activities == null) {
-                return false;
+        private boolean requestsPermissions(@NonNull PackageParser.Package pkg) {
+            return !ArrayUtils.isEmpty(pkg.requestedPermissions);
+        }
+
+        private boolean hasDefaultEnableLauncherActivity(@NonNull String packageName) {
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final Intent matchIntent = new Intent(Intent.ACTION_MAIN);
+            matchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            matchIntent.setPackage(packageName);
+            final List<ResolveInfo> infoList = pmInt.queryIntentActivities(matchIntent,
+                    PackageManager.MATCH_DISABLED_COMPONENTS, Binder.getCallingUid(),
+                    getCallingUserId());
+            final int size = infoList.size();
+            for (int i = 0; i < size; i++) {
+                if (infoList.get(i).activityInfo.enabled) {
+                    return true;
+                }
             }
-            if (ArrayUtils.isEmpty(pkg.activities)) {
-                return false;
-            }
-            // If it only contains synthetic AppDetailsActivity only, it means application does
-            // not have actual activity declared in manifest.
-            if (pkg.activities.size() == 1 && PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
-                    pkg.activities.get(0).className)) {
-                return false;
-            }
-            return true;
+            return false;
         }
 
         private boolean isManagedProfileAdmin(UserHandle user, String packageName) {
