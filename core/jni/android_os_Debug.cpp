@@ -257,6 +257,8 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
             which_heap = HEAP_NATIVE;
         } else if (base::StartsWith(name, "[anon:libc_malloc]")) {
             which_heap = HEAP_NATIVE;
+        } else if (base::StartsWith(name, "[anon:scudo:")) {
+            which_heap = HEAP_NATIVE;
         } else if (base::StartsWith(name, "[stack")) {
             which_heap = HEAP_STACK;
         } else if (base::StartsWith(name, "[anon:stack_and_tls:")) {
