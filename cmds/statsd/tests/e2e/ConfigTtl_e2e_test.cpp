@@ -96,6 +96,11 @@ TEST(ConfigTtlE2eTest, TestCountMetric) {
 
     EXPECT_EQ((int64_t)(bucketStartTimeNs + 25 * bucketSizeNs + 2 + 2 * 3600 * NS_PER_SEC),
               processor->mMetricsManagers.begin()->second->getTtlEndNs());
+
+    // Clear the data stored on disk as a result of the ttl.
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 25 * bucketSizeNs + 3, false, true,
+                                ADB_DUMP, FAST, &buffer);
 }
 
 

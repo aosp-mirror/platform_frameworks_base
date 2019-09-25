@@ -1713,6 +1713,11 @@ TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart) {
     EXPECT_EQ(kActive, activation1004->state);
     EXPECT_EQ(ACTIVATE_IMMEDIATELY, activation1004->activationType);
     // }}}------------------------------------------------------------------------------
+
+    // Clear the data stored on disk as a result of the system server death.
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey1, configAddedTimeNs + NS_PER_SEC, false, true,
+                                ADB_DUMP, FAST, &buffer);
 }
 
 #else
