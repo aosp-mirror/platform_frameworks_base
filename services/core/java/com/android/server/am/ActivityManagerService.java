@@ -14999,7 +14999,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mBatteryStatsService.removeUid(uid);
                                 if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                                     mAppOpsService.resetAllModes(UserHandle.getUserId(uid),
-                                            intent.getData().getSchemeSpecificPart());
+                                            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME));
                                 } else {
                                     mAppOpsService.uidRemoved(uid);
                                 }
