@@ -181,7 +181,9 @@ public class BubbleStackView extends FrameLayout {
      */
     private float mVerticalPosPercentBeforeRotation = -1;
 
+    private int mMaxBubbles;
     private int mBubbleSize;
+    private int mBubbleElevation;
     private int mBubblePaddingTop;
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
@@ -326,7 +328,9 @@ public class BubbleStackView extends FrameLayout {
         mInflater = LayoutInflater.from(context);
 
         Resources res = getResources();
+        mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
         mBubbleSize = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
         mExpandedAnimateXDistance =
@@ -1597,8 +1601,7 @@ public class BubbleStackView extends FrameLayout {
         for (int i = 0; i < bubbleCount; i++) {
             BubbleView bv = (BubbleView) mBubbleContainer.getChildAt(i);
             bv.updateDotVisibility(true /* animate */);
-            bv.setZ((BubbleController.MAX_BUBBLES
-                    * getResources().getDimensionPixelSize(R.dimen.bubble_elevation)) - i);
+            bv.setZ((mMaxBubbles * mBubbleElevation) - i);
             // If the dot is on the left, and so is the stack, we need to change the dot position.
             if (bv.getDotPositionOnLeft() == mStackOnLeftOrWillBe) {
                 bv.setDotPosition(!mStackOnLeftOrWillBe, animate);
