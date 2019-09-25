@@ -29,20 +29,19 @@ import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.RootWindowContainerProto.DISPLAYS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOWS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
@@ -50,7 +49,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
-import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
@@ -80,6 +78,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.server.EventLogTags;
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -195,8 +194,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mTopFocusedDisplayId = topFocusedDisplayId;
             mWmService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
             mWmService.mPolicy.setTopFocusedDisplay(topFocusedDisplayId);
-            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "New topFocusedDisplayId="
-                    + topFocusedDisplayId);
+            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "New topFocusedDisplayId=%d",
+                    topFocusedDisplayId);
         }
         return changed;
     }
@@ -457,13 +456,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void removeReplacedWindows() {
-        if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION removeReplacedWindows");
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION removeReplacedWindows");
         mWmService.openSurfaceTransaction();
         try {
             forAllWindows(sRemoveReplacedWindowsConsumer, true /* traverseTopToBottom */);
         } finally {
             mWmService.closeSurfaceTransaction("removeReplacedWindows");
-            if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION removeReplacedWindows");
+            ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION removeReplacedWindows");
         }
     }
 
@@ -539,8 +538,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 Slog.w(TAG_WM,
                         "Looks like we have reclaimed some memory, clearing surface for retry.");
                 if (surfaceController != null) {
-                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) logSurface(winAnimator.mWin,
-                            "RECOVER DESTROY", false);
+                    ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
+                            "SURFACE RECOVER DESTROY: %s",  winAnimator.mWin);
                     winAnimator.destroySurface();
                     if (winAnimator.mWin.mAppToken != null) {
                         winAnimator.mWin.mAppToken.removeStartingWindow();
@@ -651,8 +650,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         handleResizingWindows();
 
-        if (DEBUG_ORIENTATION && mWmService.mDisplayFrozen) Slog.v(TAG,
-                "With display frozen, orientationChangeComplete=" + mOrientationChangeComplete);
+        if (mWmService.mDisplayFrozen) {
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "With display frozen, orientationChangeComplete=%b",
+                    mOrientationChangeComplete);
+        }
         if (mOrientationChangeComplete) {
             if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
                 mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
@@ -714,7 +716,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         if (mUpdateRotation) {
-            if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
+            ProtoLog.d(WM_DEBUG_ORIENTATION, "Performing post-rotate rotation");
             mUpdateRotation = updateRotationUnchecked();
         }
 
@@ -868,29 +870,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
-        if (DEBUG_KEEP_SCREEN_ON) {
-            Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked w: " + w
-                + ", w.mHasSurface: " + w.mHasSurface
-                + ", w.isOnScreen(): " + onScreen
-                + ", w.isDisplayedLw(): " + w.isDisplayedLw()
-                + ", w.mAttrs.userActivityTimeout: " + w.mAttrs.userActivityTimeout);
-        }
+        ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
+                    "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w"
+                            + ".isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",
+                    w, w.mHasSurface, onScreen, w.isDisplayedLw(), w.mAttrs.userActivityTimeout);
         if (w.mHasSurface && onScreen) {
             if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
                 mUserActivityTimeout = w.mAttrs.userActivityTimeout;
-                if (DEBUG_KEEP_SCREEN_ON) {
-                    Slog.d(TAG, "mUserActivityTimeout set to " + mUserActivityTimeout);
-                }
+                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON, "mUserActivityTimeout set to %d",
+                        mUserActivityTimeout);
             }
         }
         if (w.mHasSurface && canBeSeen) {
             if ((attrFlags & FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
                 mHoldScreenWindow = w;
-            } else if (DEBUG_KEEP_SCREEN_ON && w == mWmService.mLastWakeLockHoldingWindow) {
-                Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked: " + w + " was holding "
-                        + "screen wakelock but no longer has FLAG_KEEP_SCREEN_ON!!! called by"
-                        + Debug.getCallers(10));
+            } else if (w == mWmService.mLastWakeLockHoldingWindow) {
+                ProtoLog.d(WM_DEBUG_KEEP_SCREEN_ON,
+                        "handleNotObscuredLocked: %s was holding screen wakelock but no longer "
+                                + "has FLAG_KEEP_SCREEN_ON!!! called by%s",
+                        w, Debug.getCallers(10));
             }
             if (!syswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
                 mScreenBrightness = w.mAttrs.screenBrightness;

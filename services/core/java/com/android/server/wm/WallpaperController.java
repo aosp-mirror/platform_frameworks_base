@@ -24,7 +24,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -607,8 +606,9 @@ class WallpaperController {
     boolean processWallpaperDrawPendingTimeout() {
         if (mWallpaperDrawState == WALLPAPER_DRAW_PENDING) {
             mWallpaperDrawState = WALLPAPER_DRAW_TIMEOUT;
-            if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
-                    "*** WALLPAPER DRAW TIMEOUT");
+            if (DEBUG_WALLPAPER) {
+                Slog.v(TAG, "*** WALLPAPER DRAW TIMEOUT");
+            }
 
             // If there was a pending recents animation, start the animation anyways (it's better
             // to not see the wallpaper than for the animation to not start)
@@ -641,9 +641,11 @@ class WallpaperController {
                                 WALLPAPER_DRAW_PENDING_TIMEOUT_DURATION);
 
                 }
-                if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
-                        "Wallpaper should be visible but has not been drawn yet. " +
-                                "mWallpaperDrawState=" + mWallpaperDrawState);
+                if (DEBUG_WALLPAPER) {
+                    Slog.v(TAG,
+                            "Wallpaper should be visible but has not been drawn yet. "
+                                    + "mWallpaperDrawState=" + mWallpaperDrawState);
+                }
                 break;
             }
         }
