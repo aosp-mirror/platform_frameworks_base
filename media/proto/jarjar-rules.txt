@@ -1,2 +1,0 @@
-rule com.google.protobuf.** android.media.protobuf.@1
-
