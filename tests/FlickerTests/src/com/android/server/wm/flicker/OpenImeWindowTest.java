@@ -23,8 +23,10 @@ import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 /**
  * Test IME window opening transitions.
@@ -32,13 +34,14 @@ import org.junit.runner.RunWith;
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OpenImeWindowTest extends FlickerTestBase {
 
     private static final String IME_WINDOW_TITLE = "InputMethod";
 
     @Before
     public void runTransition() {
-        super.runTransition(editTextSetFocus(uiDevice)
+        super.runTransition(editTextSetFocus(mUiDevice)
                 .includeJankyRuns().build());
     }
 

@@ -24,8 +24,10 @@ import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 /**
  * Test open app to split screen.
@@ -33,16 +35,17 @@ import org.junit.runner.RunWith;
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class OpenAppToSplitScreenTest extends FlickerTestBase {
 
     public OpenAppToSplitScreenTest() {
-        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
     @Before
     public void runTransition() {
-        super.runTransition(appToSplitScreen(testApp, uiDevice).includeJankyRuns().build());
+        super.runTransition(appToSplitScreen(mTestApp, mUiDevice).includeJankyRuns().build());
     }
 
     @Test
