@@ -23,6 +23,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Capture screen contents -->
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+    <!-- Enable / Disable tracing !-->
+    <uses-permission android:name="android.permission.DUMP" />
     <!-- Run layers trace -->
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <application>
