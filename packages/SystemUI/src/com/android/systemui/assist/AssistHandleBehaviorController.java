@@ -192,7 +192,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         try {
             setBehavior(AssistHandleBehavior.valueOf(behavior));
         } catch (IllegalArgumentException | NullPointerException e) {
-            Log.e(TAG, "Invalid behavior: " + behavior, e);
+            Log.e(TAG, "Invalid behavior: " + behavior);
         }
     }
 
