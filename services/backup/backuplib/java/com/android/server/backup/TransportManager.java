@@ -93,7 +93,8 @@ public class TransportManager {
         mTransportWhitelist = Preconditions.checkNotNull(whitelist);
         mCurrentTransportName = selectedTransport;
         mTransportStats = new TransportStats();
-        mTransportClientManager = new TransportClientManager(mUserId, context, mTransportStats);
+        mTransportClientManager = TransportClientManager.createEncryptingClientManager(mUserId,
+                context, mTransportStats);
     }
 
     @VisibleForTesting
