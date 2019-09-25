@@ -274,7 +274,7 @@ class RollbackStore {
     /**
      * Removes all persistent storage associated with the given rollback.
      */
-    void deleteRollback(Rollback rollback) {
+    static void deleteRollback(Rollback rollback) {
         removeFile(rollback.getBackupDir());
     }
 
