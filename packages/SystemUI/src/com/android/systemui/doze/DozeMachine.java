@@ -27,6 +27,7 @@ import com.android.internal.util.Preconditions;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -122,6 +123,7 @@ public class DozeMachine {
     private final WakeLock mWakeLock;
     private final AmbientDisplayConfiguration mConfig;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final BatteryController mBatteryController;
     private Part[] mParts;
 
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
@@ -130,11 +132,13 @@ public class DozeMachine {
     private boolean mWakeLockHeldForCurrentState = false;
 
     public DozeMachine(Service service, AmbientDisplayConfiguration config,
-            WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle, DozeLog dozeLog) {
+            WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
+            BatteryController batteryController, DozeLog dozeLog) {
         mDozeService = service;
         mConfig = config;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakeLock = wakeLock;
+        mBatteryController = batteryController;
         mDozeLog = dozeLog;
     }
 
@@ -317,6 +321,9 @@ public class DozeMachine {
                 && requestedState == State.DOZE_PULSE_DONE) {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
+        }
+        if (requestedState == State.DOZE_AOD && mBatteryController.isAodPowerSave()) {
+            return State.DOZE;
         }
         if (requestedState == State.DOZE_REQUEST_PULSE && !mState.canPulse()) {
             Log.i(TAG, "Dropping pulse request because current state can't pulse: " + mState);

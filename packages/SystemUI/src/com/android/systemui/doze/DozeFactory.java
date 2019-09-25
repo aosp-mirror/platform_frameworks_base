@@ -33,6 +33,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -66,7 +67,7 @@ public class DozeFactory {
                 params);
 
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock,
-                wakefulnessLifecycle, dozeLog);
+                wakefulnessLifecycle, Dependency.get(BatteryController.class), dozeLog);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager, params.getPolicy()),
                 new DozeFalsingManagerAdapter(falsingManager),

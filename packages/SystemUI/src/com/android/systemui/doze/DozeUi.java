@@ -86,7 +86,8 @@ public class DozeUi implements DozeMachine.Part {
      */
     private void updateAnimateScreenOff() {
         if (mCanAnimateTransition) {
-            final boolean controlScreenOff = mDozeParameters.getAlwaysOn() && mKeyguardShowing;
+            final boolean controlScreenOff = mDozeParameters.getAlwaysOn() && mKeyguardShowing
+                    && !mHost.isPowerSaveActive();
             mDozeParameters.setControlScreenOffAnimation(controlScreenOff);
             mHost.setAnimateScreenOff(controlScreenOff);
         }
