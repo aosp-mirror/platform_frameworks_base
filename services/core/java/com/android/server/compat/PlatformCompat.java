@@ -18,6 +18,7 @@ package com.android.server.compat;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.util.Slog;
 import android.util.StatsLog;
 
@@ -49,6 +50,15 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public void reportChangeByPackageName(long changeId, String packageName) {
+        ApplicationInfo appInfo = getApplicationInfo(packageName);
+        if (appInfo == null) {
+            return;
+        }
+        reportChange(changeId, appInfo);
+    }
+
+    @Override
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
         if (CompatConfig.get().isChangeEnabled(changeId, appInfo)) {
             reportChange(changeId, appInfo,
@@ -61,9 +71,27 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public boolean isChangeEnabledByPackageName(long changeId, String packageName) {
+        ApplicationInfo appInfo = getApplicationInfo(packageName);
+        if (appInfo == null) {
+            return true;
+        }
+        return isChangeEnabled(changeId, appInfo);
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, "platform_compat", pw)) return;
         CompatConfig.get().dumpConfig(pw);
+    }
+
+    private ApplicationInfo getApplicationInfo(String packageName) {
+        try {
+            return mContext.getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "No installed package " + packageName);
+        }
+        return null;
     }
 
     private void reportChange(long changeId, ApplicationInfo appInfo, int state) {
