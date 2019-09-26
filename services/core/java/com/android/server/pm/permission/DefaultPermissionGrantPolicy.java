@@ -550,9 +550,11 @@ public final class DefaultPermissionGrantPolicy {
         grantSystemFixedPermissionsToSystemPackage(calendarProvider, userId, CALENDAR_PERMISSIONS);
 
         // Calendar provider sync adapters
-        grantPermissionToEachSystemPackage(
-                getHeadlessSyncAdapterPackages(calendarSyncAdapterPackages, userId),
-                userId, CALENDAR_PERMISSIONS);
+        if (calendarSyncAdapterPackages != null) {
+            grantPermissionToEachSystemPackage(
+                    getHeadlessSyncAdapterPackages(calendarSyncAdapterPackages, userId),
+                    userId, CALENDAR_PERMISSIONS);
+        }
 
         // Contacts
         grantPermissionsToSystemPackage(
@@ -561,9 +563,11 @@ public final class DefaultPermissionGrantPolicy {
                 userId, CONTACTS_PERMISSIONS, PHONE_PERMISSIONS);
 
         // Contacts provider sync adapters
-        grantPermissionToEachSystemPackage(
-                getHeadlessSyncAdapterPackages(contactsSyncAdapterPackages, userId),
-                userId, CONTACTS_PERMISSIONS);
+        if (contactsSyncAdapterPackages != null) {
+            grantPermissionToEachSystemPackage(
+                    getHeadlessSyncAdapterPackages(contactsSyncAdapterPackages, userId),
+                    userId, CONTACTS_PERMISSIONS);
+        }
 
         // Contacts provider
         String contactsProviderPackage =
