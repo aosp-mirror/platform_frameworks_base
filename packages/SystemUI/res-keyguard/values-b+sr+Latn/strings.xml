@@ -34,7 +34,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN kôd je netačan."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Nevažeća kartica."</string>
     <string name="keyguard_charged" msgid="3316115607283493413">"Napunjena je u potpunosti"</string>
-    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bežično punjenje"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Puni se"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Brzo se puni"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sporo se puni"</string>
@@ -159,85 +159,7 @@
       <item quantity="few">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
       <item quantity="other">SIM je sada onemogućen. Unesite PUK kôd da biste nastavili. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja pre nego što SIM postane trajno neupotrebljiv. Detaljne informacije potražite od mobilnog operatera.</item>
     </plurals>
-    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
-      <item quantity="one">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
-      <item quantity="few">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
-      <item quantity="other">"<annotation name="color">"Sada je"</annotation>\n"^1\n^2</item>
-    </plurals>
-  <string-array name="type_clock_hours">
-    <item msgid="3543074812389379830">"dvanaest"</item>
-    <item msgid="7389464214252023751">"jedan"</item>
-    <item msgid="8803180377002008046">"dva"</item>
-    <item msgid="8614897059944644719">"tri"</item>
-    <item msgid="2293058674782619556">"četiri"</item>
-    <item msgid="4815402358455041664">"pet"</item>
-    <item msgid="3325754778509665687">"šest"</item>
-    <item msgid="5805551341866280575">"sedam"</item>
-    <item msgid="203334816668238610">"osam"</item>
-    <item msgid="4828052671464488923">"devet"</item>
-    <item msgid="2233497913571137419">"deset"</item>
-    <item msgid="5621554266768657830">"jedanaest"</item>
-  </string-array>
-  <string-array name="type_clock_minutes">
-    <item msgid="8322049385467207985">"sata(i)"</item>
-    <item msgid="8837126587669001578">"jedan"</item>
-    <item msgid="4294343372940455660">"dva"</item>
-    <item msgid="7129166637707421536">"tri"</item>
-    <item msgid="7579404865008788673">"četiri"</item>
-    <item msgid="3873924689207380586">"pet"</item>
-    <item msgid="4849565597850069377">"šest"</item>
-    <item msgid="4404219424523572364">"sedam"</item>
-    <item msgid="8740481214764087329">"osam"</item>
-    <item msgid="1713216865806811237">"devet"</item>
-    <item msgid="3508406095411245038">"deset"</item>
-    <item msgid="7161996337755311711">"jedanaest"</item>
-    <item msgid="4044549963329624197">"dvanaest"</item>
-    <item msgid="333373157917379088">"trinaest"</item>
-    <item msgid="2631202907124819385">"četrnaest"</item>
-    <item msgid="6472396076858033453">"petnaest"</item>
-    <item msgid="8656981856181581643">"šesnaest"</item>
-    <item msgid="7289026608562030619">"sedamnaest"</item>
-    <item msgid="3881477602692646573">"osamnaest"</item>
-    <item msgid="3358129827772984226">"devetnaest"</item>
-    <item msgid="3308575407402865807">"dvadeset"</item>
-    <item msgid="5346560955382229629">"dvadeset\njedan"</item>
-    <item msgid="226750304761473436">"dvadeset\ndva"</item>
-    <item msgid="616811325336838734">"dvadeset\ntri"</item>
-    <item msgid="616346116869053440">"dvadeset\nčetiri"</item>
-    <item msgid="4642996410384042830">"dvadeset\npet"</item>
-    <item msgid="7506092849993571465">"dvadeset\nšest"</item>
-    <item msgid="1915078191101042031">"dvadeset\nsedam"</item>
-    <item msgid="4292378641900520252">"dvadeset\nosam"</item>
-    <item msgid="5339513901773103696">"dvadeset\ndevet"</item>
-    <item msgid="3574673250891657607">"trideset"</item>
-    <item msgid="5796923836589110940">"trideset\njedan"</item>
-    <item msgid="5859323597571702052">"trideset\ndva"</item>
-    <item msgid="5133326723148876507">"trideset\ntri"</item>
-    <item msgid="2693999494655663096">"trideset\nčetiri"</item>
-    <item msgid="3316754944962836197">"trideset\npet"</item>
-    <item msgid="816891008836796723">"trideset\nšest"</item>
-    <item msgid="9158890488666520078">"trideset\nsedam"</item>
-    <item msgid="1894769703213894011">"trideset\nosam"</item>
-    <item msgid="5638820345598572399">"trideset\ndevet"</item>
-    <item msgid="8838304023017895439">"četrdeset"</item>
-    <item msgid="1834742948932559597">"četrdeset\njedan"</item>
-    <item msgid="6573707308847773944">"četrdeset\ndva"</item>
-    <item msgid="2450149950652678001">"četrdeset\ntri"</item>
-    <item msgid="2874667401318178036">"četrdeset\nčetiri"</item>
-    <item msgid="3391101532763048862">"četrdeset\npet"</item>
-    <item msgid="1671489330863254362">"četrdeset\nšest"</item>
-    <item msgid="5916017359554531038">"četrdeset\nsedam"</item>
-    <item msgid="8205413177993059967">"četrdeset\nosam"</item>
-    <item msgid="6607867415142171302">"četrdeset\ndevet"</item>
-    <item msgid="8358850748472089162">"pedeset"</item>
-    <item msgid="3551313125255080234">"pedeset\njedan"</item>
-    <item msgid="1559678130725716542">"pedeset\ndva"</item>
-    <item msgid="431441994725492377">"pedeset\ntri"</item>
-    <item msgid="6345774640539623024">"pedeset\nčetiri"</item>
-    <item msgid="8018192990793931120">"pedeset\npet"</item>
-    <item msgid="6187650843754604534">"pedeset\nšest"</item>
-    <item msgid="8727240174015993259">"pedeset\nsedam"</item>
-    <item msgid="848339003778952950">"pedeset\nosam"</item>
-    <item msgid="5798985802835423618">"pedeset\ndevet"</item>
-  </string-array>
+    <string name="clock_title_default" msgid="6645600990069154049">"Podrazumevani"</string>
+    <string name="clock_title_bubble" msgid="1286365278681892114">"Mehurići"</string>
+    <string name="clock_title_analog" msgid="4047401488577315053">"Analogni"</string>
 </resources>
