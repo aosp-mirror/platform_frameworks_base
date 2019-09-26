@@ -22,6 +22,7 @@ import static android.opengl.EGL14.EGL_CONFIG_CAVEAT;
 import static android.opengl.EGL14.EGL_CONTEXT_CLIENT_VERSION;
 import static android.opengl.EGL14.EGL_DEFAULT_DISPLAY;
 import static android.opengl.EGL14.EGL_DEPTH_SIZE;
+import static android.opengl.EGL14.EGL_EXTENSIONS;
 import static android.opengl.EGL14.EGL_GREEN_SIZE;
 import static android.opengl.EGL14.EGL_NONE;
 import static android.opengl.EGL14.EGL_NO_CONTEXT;
@@ -41,6 +42,7 @@ import static android.opengl.EGL14.eglGetDisplay;
 import static android.opengl.EGL14.eglGetError;
 import static android.opengl.EGL14.eglInitialize;
 import static android.opengl.EGL14.eglMakeCurrent;
+import static android.opengl.EGL14.eglQueryString;
 import static android.opengl.EGL14.eglSwapBuffers;
 import static android.opengl.EGL14.eglTerminate;
 
@@ -64,6 +66,7 @@ public class EglHelper {
     private static final int EGL_CONTEXT_PRIORITY_LEVEL_IMG = 0x3100;
     private static final int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
     private static final boolean DEBUG = true;
+    private static final String EGL_IMG_CONTEXT_PRIORITY = "EGL_IMG_context_priority";
 
     private EGLDisplay mEglDisplay;
     private EGLConfig mEglConfig;
@@ -71,6 +74,7 @@ public class EglHelper {
     private EGLSurface mEglSurface;
     private final int[] mEglVersion = new int[2];
     private boolean mEglReady;
+    private boolean mContextPrioritySupported;
 
     /**
      * Initialize EGL and prepare EglSurface.
@@ -106,8 +110,20 @@ public class EglHelper {
             return false;
         }
 
+        mContextPrioritySupported = isContextPrioritySuppported();
+
         mEglReady = true;
         return true;
+    }
+
+    private boolean isContextPrioritySuppported() {
+        String[] extensions = eglQueryString(mEglDisplay, EGL_EXTENSIONS).split(" ");
+        for (String extension : extensions) {
+            if (extension.equals(EGL_IMG_CONTEXT_PRIORITY)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private EGLConfig chooseEglConfig() {
@@ -202,8 +218,15 @@ public class EglHelper {
             Log.d(TAG, "createEglContext start");
         }
 
-        int[] attrib_list = new int[] {EGL_CONTEXT_CLIENT_VERSION, 2,
-                EGL_CONTEXT_PRIORITY_LEVEL_IMG, EGL_CONTEXT_PRIORITY_LOW_IMG, EGL_NONE};
+        int[] attrib_list = new int[5];
+        int idx = 0;
+        attrib_list[idx++] = EGL_CONTEXT_CLIENT_VERSION;
+        attrib_list[idx++] = 2;
+        if (mContextPrioritySupported) {
+            attrib_list[idx++] = EGL_CONTEXT_PRIORITY_LEVEL_IMG;
+            attrib_list[idx++] = EGL_CONTEXT_PRIORITY_LOW_IMG;
+        }
+        attrib_list[idx++] = EGL_NONE;
         if (hasEglDisplay()) {
             mEglContext = eglCreateContext(mEglDisplay, mEglConfig, EGL_NO_CONTEXT, attrib_list, 0);
         } else {
