@@ -63,6 +63,12 @@ import android.telecom.InCallService;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
+import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.DataState;
+import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation.RadioPowerState;
+import android.telephony.Annotation.SimActivationState;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
@@ -253,17 +259,6 @@ public class TelephonyManager {
      * Note that once the UICC card is loaded, the card ID may become {@link #UNSUPPORTED_CARD_ID}.
      */
     public static final int UNINITIALIZED_CARD_ID = -2;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"SRVCC_STATE_"},
-            value = {
-                    SRVCC_STATE_HANDOVER_NONE,
-                    SRVCC_STATE_HANDOVER_STARTED,
-                    SRVCC_STATE_HANDOVER_COMPLETED,
-                    SRVCC_STATE_HANDOVER_FAILED,
-                    SRVCC_STATE_HANDOVER_CANCELED})
-    public @interface SrvccState {}
 
     private final Context mContext;
     private final int mSubId;
@@ -2538,33 +2533,6 @@ public class TelephonyManager {
     /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
     public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_NR;
 
-    /** @hide */
-    @IntDef({
-            NETWORK_TYPE_UNKNOWN,
-            NETWORK_TYPE_GPRS,
-            NETWORK_TYPE_EDGE,
-            NETWORK_TYPE_UMTS,
-            NETWORK_TYPE_CDMA,
-            NETWORK_TYPE_EVDO_0,
-            NETWORK_TYPE_EVDO_A,
-            NETWORK_TYPE_1xRTT,
-            NETWORK_TYPE_HSDPA,
-            NETWORK_TYPE_HSUPA,
-            NETWORK_TYPE_HSPA,
-            NETWORK_TYPE_IDEN,
-            NETWORK_TYPE_EVDO_B,
-            NETWORK_TYPE_LTE,
-            NETWORK_TYPE_EHRPD,
-            NETWORK_TYPE_HSPAP,
-            NETWORK_TYPE_GSM,
-            NETWORK_TYPE_TD_SCDMA,
-            NETWORK_TYPE_IWLAN,
-            NETWORK_TYPE_LTE_CA,
-            NETWORK_TYPE_NR,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface NetworkType{}
-
     /**
      * Return the current data network type.
      *
@@ -4611,17 +4579,6 @@ public class TelephonyManager {
     @SystemApi
     public static final int SIM_ACTIVATION_STATE_RESTRICTED = 4;
 
-    /** @hide */
-    @IntDef({
-            SIM_ACTIVATION_STATE_UNKNOWN,
-            SIM_ACTIVATION_STATE_ACTIVATING,
-            SIM_ACTIVATION_STATE_ACTIVATED,
-            SIM_ACTIVATION_STATE_DEACTIVATED,
-            SIM_ACTIVATION_STATE_RESTRICTED
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SimActivationState{}
-
      /**
       * Sets the voice activation state
       *
@@ -5006,15 +4963,6 @@ public class TelephonyManager {
      */
     public static final int CALL_STATE_OFFHOOK = 2;
 
-    /** @hide */
-    @IntDef(prefix = { "CALL_STATE_" }, value = {
-            CALL_STATE_IDLE,
-            CALL_STATE_RINGING,
-            CALL_STATE_OFFHOOK
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallState{}
-
     /**
      * Returns the state of all calls on the device.
      * <p>
@@ -5094,17 +5042,6 @@ public class TelephonyManager {
      * Data connection is active, but physical link is down
      */
     public static final int DATA_ACTIVITY_DORMANT = 0x00000004;
-
-    /** @hide */
-    @IntDef(prefix = {"DATA_"}, value = {
-        DATA_ACTIVITY_NONE,
-        DATA_ACTIVITY_IN,
-        DATA_ACTIVITY_OUT,
-        DATA_ACTIVITY_INOUT,
-        DATA_ACTIVITY_DORMANT,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface DataActivityType{}
 
     /**
      * Returns a constant indicating the type of activity on a data connection
@@ -8321,15 +8258,6 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"RADIO_POWER_"},
-            value = {RADIO_POWER_OFF,
-                    RADIO_POWER_ON,
-                    RADIO_POWER_UNAVAILABLE,
-            })
-    public @interface RadioPowerState {}
-
     /**
      * Radio explicitly powered off (e.g, airplane mode).
      * @hide
@@ -11443,7 +11371,7 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public boolean isDataEnabledForApn(@ApnSetting.ApnType int apnType) {
+    public boolean isDataEnabledForApn(@ApnType int apnType) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         try {
             ITelephony service = getITelephony();
@@ -11464,7 +11392,7 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public boolean isApnMetered(@ApnSetting.ApnType int apnType) {
+    public boolean isApnMetered(@ApnType int apnType) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {

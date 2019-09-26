@@ -28,6 +28,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.RadioPowerState;
+import android.telephony.Annotation.SimActivationState;
+import android.telephony.Annotation.SrvccState;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 
@@ -567,7 +571,7 @@ public class PhoneStateListener {
      * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), an empty string will be
      * passed as an argument.
      */
-    public void onCallStateChanged(@TelephonyManager.CallState int state, String phoneNumber) {
+    public void onCallStateChanged(@CallState int state, String phoneNumber) {
         // default implementation empty
     }
 
@@ -773,7 +777,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onSrvccStateChanged(@TelephonyManager.SrvccState int srvccState) {
+    public void onSrvccStateChanged(@SrvccState int srvccState) {
 
     }
 
@@ -791,7 +795,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onVoiceActivationStateChanged(@TelephonyManager.SimActivationState int state) {
+    public void onVoiceActivationStateChanged(@SimActivationState int state) {
     }
 
     /**
@@ -807,7 +811,7 @@ public class PhoneStateListener {
      * @param state is the current SIM data activation state
      * @hide
      */
-    public void onDataActivationStateChanged(@TelephonyManager.SimActivationState int state) {
+    public void onDataActivationStateChanged(@SimActivationState int state) {
     }
 
     /**
@@ -964,7 +968,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
-    public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
+    public void onRadioPowerStateChanged(@RadioPowerState int state) {
         // default implementation empty
     }
 
@@ -1231,7 +1235,7 @@ public class PhoneStateListener {
                     () -> mExecutor.execute(() -> psl.onPhoneCapabilityChanged(capability)));
         }
 
-        public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
+        public void onRadioPowerStateChanged(@RadioPowerState int state) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 

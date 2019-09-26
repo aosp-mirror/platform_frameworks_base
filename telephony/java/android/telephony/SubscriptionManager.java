@@ -53,7 +53,7 @@ import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.telephony.TelephonyManager.NetworkType;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
