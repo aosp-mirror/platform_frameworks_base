@@ -100,8 +100,8 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   static const char* kVendorOverlaySubdir = "/system/vendor/overlay-subdir/";
   static const char* kSystemProductOverlayDir = "/system/product/overlay/";
   static const char* kProductOverlayDir = "/product/overlay";
-  static const char* kSystemProductServicesOverlayDir = "/system/product_services/overlay/";
-  static const char* kProductServicesOverlayDir = "/product_services/overlay";
+  static const char* kSystemSystemExtOverlayDir = "/system/system_ext/overlay/";
+  static const char* kSystemExtOverlayDir = "/system_ext/overlay";
   static const char* kSystemOdmOverlayDir = "/system/odm/overlay";
   static const char* kOdmOverlayDir = "/odm/overlay";
   static const char* kSystemOemOverlayDir = "/system/oem/overlay";
@@ -113,8 +113,8 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
        || android::base::StartsWith(path, kVendorOverlayDir)
        || android::base::StartsWith(path, kSystemProductOverlayDir)
        || android::base::StartsWith(path, kProductOverlayDir)
-       || android::base::StartsWith(path, kSystemProductServicesOverlayDir)
-       || android::base::StartsWith(path, kProductServicesOverlayDir)
+       || android::base::StartsWith(path, kSystemSystemExtOverlayDir)
+       || android::base::StartsWith(path, kSystemExtOverlayDir)
        || android::base::StartsWith(path, kSystemOdmOverlayDir)
        || android::base::StartsWith(path, kOdmOverlayDir)
        || android::base::StartsWith(path, kSystemOemOverlayDir)

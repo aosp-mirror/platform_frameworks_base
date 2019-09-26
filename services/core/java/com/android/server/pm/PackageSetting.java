@@ -148,8 +148,8 @@ public final class PackageSetting extends PackageSettingBase {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
     }
 
-    public boolean isProductServices() {
-        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
+    public boolean isSystemExt() {
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT) != 0;
     }
 
     public boolean isOdm() {
