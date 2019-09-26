@@ -86,13 +86,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             mSecurityMessageDisplay.setMessage("");
         }
         final boolean wasDisabled = mPasswordEntry.isEnabled();
-        // Don't set enabled password entry & showSoftInput when PasswordEntry is invisible or in
-        // pausing stage.
+        setPasswordEntryEnabled(true);
+        setPasswordEntryInputEnabled(true);
+        // Don't call showSoftInput when PasswordEntry is invisible or in pausing stage.
         if (!mResumed || !mPasswordEntry.isVisibleToUser()) {
             return;
         }
-        setPasswordEntryEnabled(true);
-        setPasswordEntryInputEnabled(true);
         if (wasDisabled) {
             mImm.showSoftInput(mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
         }
