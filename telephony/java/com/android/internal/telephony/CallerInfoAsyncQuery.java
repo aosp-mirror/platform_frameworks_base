@@ -115,7 +115,7 @@ public class CallerInfoAsyncQuery {
             final Context otherContext;
             try {
                 otherContext = context.createPackageContextAsUser(context.getPackageName(),
-                        /* flags =*/ 0, new UserHandle(currentUser));
+                        /* flags =*/ 0, UserHandle.of(currentUser));
                 return otherContext.getContentResolver();
             } catch (NameNotFoundException e) {
                 Rlog.e(LOG_TAG, "Can't find self package", e);
