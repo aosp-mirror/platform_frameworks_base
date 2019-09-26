@@ -16,7 +16,15 @@
 
 package com.android.internal.compat;
 
+import android.util.Log;
+import android.util.Slog;
 import android.util.StatsLog;
+
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A helper class to report changes to stats log.
@@ -24,6 +32,73 @@ import android.util.StatsLog;
  * @hide
  */
 public final class ChangeReporter {
+    private static final String TAG = "CompatibilityChangeReporter";
+    private int mSource;
+
+    private final class ChangeReport {
+        int mUid;
+        long mChangeId;
+        int mState;
+
+        ChangeReport(int uid, long changeId, int state) {
+            mUid = uid;
+            mChangeId = changeId;
+            mState = state;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ChangeReport that = (ChangeReport) o;
+            return mUid == that.mUid
+                    && mChangeId == that.mChangeId
+                    && mState == that.mState;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mUid, mChangeId, mState);
+        }
+    }
+
+    @GuardedBy("mReportedChanges")
+    private Set<ChangeReport> mReportedChanges =  new HashSet<>();
+
+    public ChangeReporter(int source) {
+        mSource = source;
+    }
+
+    /**
+     * Report the change to stats log.
+     *
+     * @param uid      affected by the change
+     * @param changeId the reported change id
+     * @param state    of the reported change - enabled/disabled/only logged
+     */
+    public void reportChange(int uid, long changeId, int state) {
+        debugLog(uid, changeId, state);
+        ChangeReport report = new ChangeReport(uid, changeId, state);
+        synchronized (mReportedChanges) {
+            if (!mReportedChanges.contains(report)) {
+                StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
+                        state, mSource);
+                mReportedChanges.add(report);
+            }
+        }
+    }
+
+    private void debugLog(int uid, long changeId, int state) {
+        //TODO(b/138374585): Implement rate limiting for the logs.
+        String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
+                uid, stateToString(state));
+        if (mSource == StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER) {
+            Slog.d(TAG, message);
+        } else {
+            Log.d(TAG, message);
+        }
+
+    }
 
     /**
      * Transforms StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE enum to a string.
@@ -42,32 +117,5 @@ public final class ChangeReporter {
             default:
                 return "UNKNOWN";
         }
-    }
-
-    /**
-     * Constructs and returns a string to be logged to logcat when a change is reported.
-     *
-     * @param uid      affected by the change
-     * @param changeId the reported change id
-     * @param state    of the reported change - enabled/disabled/only logged
-     * @return string to log
-     */
-    public static String createLogString(int uid, long changeId, int state) {
-        return String.format("Compat change id reported: %d; UID %d; state: %s", changeId, uid,
-                stateToString(state));
-    }
-
-    /**
-     * Report the change to stats log.
-     *
-     * @param uid      affected by the change
-     * @param changeId the reported change id
-     * @param state    of the reported change - enabled/disabled/only logged
-     * @param source   of the logging - app process or system server
-     */
-    public void reportChange(int uid, long changeId, int state, int source) {
-        //TODO(b/138374585): Implement rate limiting for stats log.
-        StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
-                state, source);
     }
 }
