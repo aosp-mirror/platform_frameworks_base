@@ -230,6 +230,8 @@ public abstract class ViewStructure {
     /**
      * Sets the identifier used to set the hint associated with this view.
      *
+     * <p>Used as metadata for fingerprinting view nodes/structures.
+     *
      * <p>Should only be set when the node is used for autofill purposes - it will be ignored
      * when used for Assist.
      */
