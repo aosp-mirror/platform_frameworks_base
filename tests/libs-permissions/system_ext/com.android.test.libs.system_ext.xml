@@ -15,6 +15,6 @@
 -->
 
 <permissions>
-    <library name="com.android.test.libs.product_services"
-            file="/product_services/framework/com.android.test.libs.product_services.jar" />
+    <library name="com.android.test.libs.system_ext"
+            file="/system_ext/framework/com.android.test.libs.system_ext.jar" />
 </permissions>

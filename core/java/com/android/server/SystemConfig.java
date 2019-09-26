@@ -196,9 +196,8 @@ public class SystemConfig {
     final ArrayMap<String, ArraySet<String>> mProductPrivAppPermissions = new ArrayMap<>();
     final ArrayMap<String, ArraySet<String>> mProductPrivAppDenyPermissions = new ArrayMap<>();
 
-    final ArrayMap<String, ArraySet<String>> mProductServicesPrivAppPermissions = new ArrayMap<>();
-    final ArrayMap<String, ArraySet<String>> mProductServicesPrivAppDenyPermissions =
-            new ArrayMap<>();
+    final ArrayMap<String, ArraySet<String>> mSystemExtPrivAppPermissions = new ArrayMap<>();
+    final ArrayMap<String, ArraySet<String>> mSystemExtPrivAppDenyPermissions = new ArrayMap<>();
 
     final ArrayMap<String, ArrayMap<String, Boolean>> mOemPermissions = new ArrayMap<>();
 
@@ -328,12 +327,20 @@ public class SystemConfig {
         return mProductPrivAppDenyPermissions.get(packageName);
     }
 
-    public ArraySet<String> getProductServicesPrivAppPermissions(String packageName) {
-        return mProductServicesPrivAppPermissions.get(packageName);
+    /**
+     * Read from "permission" tags in /system_ext/etc/permissions/*.xml
+     * @return Set of privileged permissions that are explicitly granted.
+     */
+    public ArraySet<String> getSystemExtPrivAppPermissions(String packageName) {
+        return mSystemExtPrivAppPermissions.get(packageName);
     }
 
-    public ArraySet<String> getProductServicesPrivAppDenyPermissions(String packageName) {
-        return mProductServicesPrivAppDenyPermissions.get(packageName);
+    /**
+     * Read from "deny-permission" tags in /system_ext/etc/permissions/*.xml
+     * @return Set of privileged permissions that are explicitly denied.
+     */
+    public ArraySet<String> getSystemExtPrivAppDenyPermissions(String packageName) {
+        return mSystemExtPrivAppDenyPermissions.get(packageName);
     }
 
     public Map<String, Boolean> getOemPermissions(String packageName) {
@@ -405,11 +412,11 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "permissions"), ALLOW_ALL);
 
-        // Allow /product_services to customize all system configs
+        // Allow /system_ext to customize all system configs
         readPermissions(Environment.buildPath(
-                Environment.getProductServicesDirectory(), "etc", "sysconfig"), ALLOW_ALL);
+                Environment.getSystemExtDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         readPermissions(Environment.buildPath(
-                Environment.getProductServicesDirectory(), "etc", "permissions"), ALLOW_ALL);
+                Environment.getSystemExtDirectory(), "etc", "permissions"), ALLOW_ALL);
     }
 
     void readPermissions(File libraryDir, int permissionFlag) {
@@ -855,7 +862,7 @@ public class SystemConfig {
                     } break;
                     case "privapp-permissions": {
                         if (allowPrivappPermissions) {
-                            // privapp permissions from system, vendor, product and product_services
+                            // privapp permissions from system, vendor, product and system_ext
                             // partitions are stored separately. This is to prevent xml files in
                             // the vendor partition from granting permissions to priv apps in the
                             // system partition and vice versa.
@@ -865,17 +872,17 @@ public class SystemConfig {
                                     Environment.getOdmDirectory().toPath() + "/");
                             boolean product = permFile.toPath().startsWith(
                                     Environment.getProductDirectory().toPath() + "/");
-                            boolean productServices = permFile.toPath().startsWith(
-                                    Environment.getProductServicesDirectory().toPath() + "/");
+                            boolean systemExt = permFile.toPath().startsWith(
+                                    Environment.getSystemExtDirectory().toPath() + "/");
                             if (vendor) {
                                 readPrivAppPermissions(parser, mVendorPrivAppPermissions,
                                         mVendorPrivAppDenyPermissions);
                             } else if (product) {
                                 readPrivAppPermissions(parser, mProductPrivAppPermissions,
                                         mProductPrivAppDenyPermissions);
-                            } else if (productServices) {
-                                readPrivAppPermissions(parser, mProductServicesPrivAppPermissions,
-                                        mProductServicesPrivAppDenyPermissions);
+                            } else if (systemExt) {
+                                readPrivAppPermissions(parser, mSystemExtPrivAppPermissions,
+                                        mSystemExtPrivAppDenyPermissions);
                             } else {
                                 readPrivAppPermissions(parser, mPrivAppPermissions,
                                         mPrivAppDenyPermissions);

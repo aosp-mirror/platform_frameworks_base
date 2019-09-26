@@ -1403,8 +1403,7 @@ public final class DefaultPermissionGrantPolicy {
         if (dir.isDirectory() && dir.canRead()) {
             Collections.addAll(ret, dir.listFiles());
         }
-        dir = new File(Environment.getProductServicesDirectory(),
-                "etc/default-permissions");
+        dir = new File(Environment.getSystemExtDirectory(), "etc/default-permissions");
         if (dir.isDirectory() && dir.canRead()) {
             Collections.addAll(ret, dir.listFiles());
         }

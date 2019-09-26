@@ -6915,8 +6915,8 @@ public class PackageParser {
         }
 
         /** @hide */
-        public boolean isProductServices() {
-            return applicationInfo.isProductServices();
+        public boolean isSystemExt() {
+            return applicationInfo.isSystemExt();
         }
 
         /** @hide */

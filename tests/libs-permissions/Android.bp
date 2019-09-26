@@ -14,16 +14,16 @@ prebuilt_etc {
 }
 
 java_library {
-    name: "com.android.test.libs.product_services",
+    name: "com.android.test.libs.system_ext",
     installable: true,
-    product_services_specific: true,
-    srcs: ["product_services/java/**/*.java"],
-    required: ["com.android.test.libs.product_services.xml"],
+    system_ext_specific: true,
+    srcs: ["system_ext/java/**/*.java"],
+    required: ["com.android.test.libs.system_ext.xml"],
 }
 
 prebuilt_etc {
-    name: "com.android.test.libs.product_services.xml",
-    src: "product_services/com.android.test.libs.product_services.xml",
+    name: "com.android.test.libs.system_ext.xml",
+    src: "system_ext/com.android.test.libs.system_ext.xml",
     sub_dir: "permissions",
-    product_services_specific: true,
+    system_ext_specific: true,
 }

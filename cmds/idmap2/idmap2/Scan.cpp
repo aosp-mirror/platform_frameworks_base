@@ -103,6 +103,7 @@ std::vector<std::string> PoliciesForPath(const std::string& apk_path) {
       {"/oem/", kPolicyOem},
       {"/product/", kPolicyProduct},
       {"/system/", kPolicySystem},
+      {"/system_ext/", kPolicySystem},
       {"/vendor/", kPolicyVendor},
   };
 
