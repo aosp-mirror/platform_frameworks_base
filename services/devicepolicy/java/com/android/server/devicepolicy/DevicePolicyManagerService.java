@@ -8008,6 +8008,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         "clearDeviceOwner can only be called by the device owner");
             }
             enforceUserUnlocked(deviceOwnerUserId);
+            DevicePolicyData policy = getUserData(deviceOwnerUserId);
+            if (policy.mPasswordTokenHandle != 0) {
+                mLockPatternUtils.removeEscrowToken(policy.mPasswordTokenHandle, deviceOwnerUserId);
+            }
 
             final ActiveAdmin admin = getDeviceOwnerAdminLocked();
             long ident = mInjector.binderClearCallingIdentity();
