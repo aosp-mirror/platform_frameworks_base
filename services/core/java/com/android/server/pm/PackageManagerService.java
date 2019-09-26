@@ -475,7 +475,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_OEM = 1 << 19;
     static final int SCAN_AS_VENDOR = 1 << 20;
     static final int SCAN_AS_PRODUCT = 1 << 21;
-    static final int SCAN_AS_PRODUCT_SERVICES = 1 << 22;
+    static final int SCAN_AS_SYSTEM_EXT = 1 << 22;
     static final int SCAN_AS_ODM = 1 << 23;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
@@ -593,7 +593,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
 
-    private static final String PRODUCT_SERVICES_OVERLAY_DIR = "/product_services/overlay";
+    private static final String SYSTEM_EXT_OVERLAY_DIR = "/system_ext/overlay";
 
     private static final String ODM_OVERLAY_DIR = "/odm/overlay";
 
@@ -2604,7 +2604,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
             }
 
-            // Collect vendor/product/product_services overlay packages. (Do this before scanning
+            // Collect vendor/product/system_ext overlay packages. (Do this before scanning
             // any apps.)
             // For security and version matching reason, only consider overlay packages if they
             // reside in the right directory.
@@ -2622,12 +2622,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_PRODUCT,
                     0);
-            scanDirTracedLI(new File(PRODUCT_SERVICES_OVERLAY_DIR),
+            scanDirTracedLI(new File(SYSTEM_EXT_OVERLAY_DIR),
                     mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
                     | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRODUCT_SERVICES,
+                    | SCAN_AS_SYSTEM_EXT,
                     0);
             scanDirTracedLI(new File(ODM_OVERLAY_DIR),
                     mDefParseFlags
@@ -2785,37 +2785,37 @@ public class PackageManagerService extends IPackageManager.Stub
                     | SCAN_AS_PRODUCT,
                     0);
 
-            // Collected privileged /product_services packages.
-            File privilegedProductServicesAppDir =
-                    new File(Environment.getProductServicesDirectory(), "priv-app");
+            // Collected privileged /system_ext packages.
+            File privilegedSystemExtAppDir =
+                    new File(Environment.getSystemExtDirectory(), "priv-app");
             try {
-                privilegedProductServicesAppDir =
-                        privilegedProductServicesAppDir.getCanonicalFile();
+                privilegedSystemExtAppDir =
+                        privilegedSystemExtAppDir.getCanonicalFile();
             } catch (IOException e) {
                 // failed to look up canonical path, continue with original one
             }
-            scanDirTracedLI(privilegedProductServicesAppDir,
+            scanDirTracedLI(privilegedSystemExtAppDir,
                     mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
                     | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRODUCT_SERVICES
+                    | SCAN_AS_SYSTEM_EXT
                     | SCAN_AS_PRIVILEGED,
                     0);
 
-            // Collect ordinary /product_services packages.
-            File productServicesAppDir = new File(Environment.getProductServicesDirectory(), "app");
+            // Collect ordinary /system_ext packages.
+            File systemExtAppDir = new File(Environment.getSystemExtDirectory(), "app");
             try {
-                productServicesAppDir = productServicesAppDir.getCanonicalFile();
+                systemExtAppDir = systemExtAppDir.getCanonicalFile();
             } catch (IOException e) {
                 // failed to look up canonical path, continue with original one
             }
-            scanDirTracedLI(productServicesAppDir,
+            scanDirTracedLI(systemExtAppDir,
                     mDefParseFlags
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
                     | SCAN_AS_SYSTEM
-                    | SCAN_AS_PRODUCT_SERVICES,
+                    | SCAN_AS_SYSTEM_EXT,
                     0);
 
             // Prune any system packages that no longer exist.
@@ -3045,23 +3045,23 @@ public class PackageManagerService extends IPackageManager.Stub
                                     scanFlags
                                     | SCAN_AS_SYSTEM
                                     | SCAN_AS_PRODUCT;
-                        } else if (FileUtils.contains(privilegedProductServicesAppDir, scanFile)) {
+                        } else if (FileUtils.contains(privilegedSystemExtAppDir, scanFile)) {
                             reparseFlags =
                                     mDefParseFlags |
                                     PackageParser.PARSE_IS_SYSTEM_DIR;
                             rescanFlags =
                                     scanFlags
                                     | SCAN_AS_SYSTEM
-                                    | SCAN_AS_PRODUCT_SERVICES
+                                    | SCAN_AS_SYSTEM_EXT
                                     | SCAN_AS_PRIVILEGED;
-                        } else if (FileUtils.contains(productServicesAppDir, scanFile)) {
+                        } else if (FileUtils.contains(systemExtAppDir, scanFile)) {
                             reparseFlags =
                                     mDefParseFlags |
                                     PackageParser.PARSE_IS_SYSTEM_DIR;
                             rescanFlags =
                                     scanFlags
                                     | SCAN_AS_SYSTEM
-                                    | SCAN_AS_PRODUCT_SERVICES;
+                                    | SCAN_AS_SYSTEM_EXT;
                         } else {
                             Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
                             continue;
@@ -10849,7 +10849,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * <li>{@link #SCAN_AS_OEM}</li>
      * <li>{@link #SCAN_AS_VENDOR}</li>
      * <li>{@link #SCAN_AS_PRODUCT}</li>
-     * <li>{@link #SCAN_AS_PRODUCT_SERVICES}</li>
+     * <li>{@link #SCAN_AS_SYSTEM_EXT}</li>
      * <li>{@link #SCAN_AS_INSTANT_APP}</li>
      * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
      * <li>{@link #SCAN_AS_ODM}</li>
@@ -10886,8 +10886,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanFlags |= SCAN_AS_PRODUCT;
             }
             if ((systemPkgSetting.pkgPrivateFlags
-                    & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0) {
-                scanFlags |= SCAN_AS_PRODUCT_SERVICES;
+                    & ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT) != 0) {
+                scanFlags |= SCAN_AS_SYSTEM_EXT;
             }
             if ((systemPkgSetting.pkgPrivateFlags
                     & ApplicationInfo.PRIVATE_FLAG_ODM) != 0) {
@@ -11669,8 +11669,8 @@ public class PackageManagerService extends IPackageManager.Stub
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRODUCT;
         }
 
-        if ((scanFlags & SCAN_AS_PRODUCT_SERVICES) != 0) {
-            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES;
+        if ((scanFlags & SCAN_AS_SYSTEM_EXT) != 0) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT;
         }
 
         if ((scanFlags & SCAN_AS_ODM) != 0) {
@@ -12634,8 +12634,8 @@ public class PackageManagerService extends IPackageManager.Stub
             codeRoot = Environment.getOdmDirectory();
         } else if (FileUtils.contains(Environment.getProductDirectory(), codePath)) {
             codeRoot = Environment.getProductDirectory();
-        } else if (FileUtils.contains(Environment.getProductServicesDirectory(), codePath)) {
-            codeRoot = Environment.getProductServicesDirectory();
+        } else if (FileUtils.contains(Environment.getSystemExtDirectory(), codePath)) {
+            codeRoot = Environment.getSystemExtDirectory();
         } else if (FileUtils.contains(Environment.getOdmDirectory(), codePath)) {
             codeRoot = Environment.getOdmDirectory();
         } else {
@@ -18192,9 +18192,9 @@ public class PackageManagerService extends IPackageManager.Stub
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
     }
 
-    private static boolean isProductServicesApp(PackageParser.Package pkg) {
+    private static boolean isSystemExtApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags
-                & ApplicationInfo.PRIVATE_FLAG_PRODUCT_SERVICES) != 0;
+                & ApplicationInfo.PRIVATE_FLAG_SYSTEM_EXT) != 0;
     }
 
     private static boolean isOdmApp(PackageParser.Package pkg) {
@@ -18960,13 +18960,13 @@ public class PackageManagerService extends IPackageManager.Stub
             final File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
             final File privilegedOdmAppDir = new File(Environment.getOdmDirectory(), "priv-app");
             final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
-            final File privilegedProductServicesAppDir =
-                    new File(Environment.getProductServicesDirectory(), "priv-app");
+            final File privilegedSystemExtAppDir =
+                    new File(Environment.getSystemExtDirectory(), "priv-app");
             return path.startsWith(privilegedAppDir.getCanonicalPath() + "/")
                     || path.startsWith(privilegedVendorAppDir.getCanonicalPath() + "/")
                     || path.startsWith(privilegedOdmAppDir.getCanonicalPath() + "/")
                     || path.startsWith(privilegedProductAppDir.getCanonicalPath() + "/")
-                    || path.startsWith(privilegedProductServicesAppDir.getCanonicalPath() + "/");
+                    || path.startsWith(privilegedSystemExtAppDir.getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -19001,10 +19001,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
-    static boolean locationIsProductServices(String path) {
+    static boolean locationIsSystemExt(String path) {
         try {
             return path.startsWith(
-              Environment.getProductServicesDirectory().getCanonicalPath() + "/");
+              Environment.getSystemExtDirectory().getCanonicalPath() + "/");
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -19137,8 +19137,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (locationIsProduct(codePathString)) {
             scanFlags |= SCAN_AS_PRODUCT;
         }
-        if (locationIsProductServices(codePathString)) {
-            scanFlags |= SCAN_AS_PRODUCT_SERVICES;
+        if (locationIsSystemExt(codePathString)) {
+            scanFlags |= SCAN_AS_SYSTEM_EXT;
         }
         if (locationIsOdm(codePathString)) {
             scanFlags |= SCAN_AS_ODM;
