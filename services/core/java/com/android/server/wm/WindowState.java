@@ -197,6 +197,7 @@ import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInfo;
+import android.view.WindowInsets.Type.InsetType;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -3344,6 +3345,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     stateController.getControlsForDispatch(this));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change", e);
+        }
+    }
+
+    @Override
+    public void showInsets(@InsetType int types, boolean fromIme) {
+        try {
+            mClient.showInsets(types, fromIme);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to deliver showInsets", e);
         }
     }
 

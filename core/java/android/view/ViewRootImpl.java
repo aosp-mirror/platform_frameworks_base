@@ -91,6 +91,7 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
+import android.view.WindowInsets.Type.InsetType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -4528,6 +4529,8 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_INSETS_CONTROL_CHANGED = 31;
     private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 32;
     private static final int MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED = 33;
+    private static final int MSG_SHOW_INSETS = 34;
+
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -4591,6 +4594,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED";
                 case MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED:
                     return "MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED";
+                case MSG_SHOW_INSETS:
+                    return "MSG_SHOW_INSETS";
             }
             return super.getMessageName(message);
         }
@@ -4703,6 +4708,10 @@ public final class ViewRootImpl implements ViewParent,
                     SomeArgs args = (SomeArgs) msg.obj;
                     mInsetsController.onControlsChanged((InsetsSourceControl[]) args.arg2);
                     mInsetsController.onStateChanged((InsetsState) args.arg1);
+                    break;
+                }
+                case MSG_SHOW_INSETS: {
+                    mInsetsController.show(msg.arg1, msg.arg2 == 1);
                     break;
                 }
                 case MSG_WINDOW_MOVED:
@@ -7484,6 +7493,10 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_INSETS_CONTROL_CHANGED, args).sendToTarget();
     }
 
+    private void showInsets(@InsetType int types, boolean fromIme) {
+        mHandler.obtainMessage(MSG_SHOW_INSETS, types, fromIme ? 1 : 0).sendToTarget();
+    }
+
     public void dispatchMoved(int newX, int newY) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Window moved " + this + ": newX=" + newX + " newY=" + newY);
         if (mTranslator != null) {
@@ -8595,6 +8608,14 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchInsetsControlChanged(insetsState, activeControls);
+            }
+        }
+
+        @Override
+        public void showInsets(@InsetType int types, boolean fromIme) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.showInsets(types, fromIme);
             }
         }
 
