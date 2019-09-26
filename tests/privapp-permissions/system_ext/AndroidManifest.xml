@@ -16,7 +16,7 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.framework.permission.privapp.tests.product_services">
+          package="com.android.framework.permission.privapp.tests.system_ext">
 
     <!-- MANAGE_USB is signature|privileged -->
     <uses-permission android:name="android.permission.MANAGE_USB"/>
