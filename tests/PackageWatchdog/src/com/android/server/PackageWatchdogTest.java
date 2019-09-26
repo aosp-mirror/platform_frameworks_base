@@ -626,11 +626,40 @@ public class PackageWatchdogTest {
         // Verify that health check is failed
         assertThat(observer.mMitigatedPackages).containsExactly(APP_A);
 
-        // Then clear failed packages and start observing a random package so requests are synced
-        // and PackageWatchdog#onSupportedPackages is called and APP_A has a chance to fail again
-        // this time due to package expiry.
+        // Clear failed packages and forward time to expire the observation duration
         observer.mMitigatedPackages.clear();
-        watchdog.startObservingHealth(observer, Arrays.asList(APP_B), LONG_DURATION);
+        moveTimeForwardAndDispatch(LONG_DURATION);
+
+        // Verify that health check failure is not notified again
+        assertThat(observer.mMitigatedPackages).isEmpty();
+    }
+
+    /**
+     * Tests failure when health check duration is different from package observation duration
+     * Failure is also notified only once.
+     */
+    @Test
+    public void testExplicitHealthCheckFailureAfterExpiry() {
+        TestController controller = new TestController();
+        PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
+        TestObserver observer = new TestObserver(OBSERVER_NAME_1,
+                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+
+        // Start observing with explicit health checks for APP_A and
+        // package observation duration == SHORT_DURATION / 2
+        // health check duration == SHORT_DURATION (set by default in the TestController)
+        controller.setSupportedPackages(Arrays.asList(APP_A));
+        watchdog.startObservingHealth(observer, Arrays.asList(APP_A), SHORT_DURATION / 2);
+
+        // Forward time to expire the observation duration
+        moveTimeForwardAndDispatch(SHORT_DURATION / 2);
+
+        // Verify that health check is failed
+        assertThat(observer.mMitigatedPackages).containsExactly(APP_A);
+
+        // Clear failed packages and forward time to expire the health check duration
+        observer.mMitigatedPackages.clear();
+        moveTimeForwardAndDispatch(SHORT_DURATION);
 
         // Verify that health check failure is not notified again
         assertThat(observer.mMitigatedPackages).isEmpty();
