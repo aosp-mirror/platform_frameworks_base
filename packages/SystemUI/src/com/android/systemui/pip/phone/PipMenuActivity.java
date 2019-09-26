@@ -247,6 +247,9 @@ public class PipMenuActivity extends Activity {
     protected void onStop() {
         super.onStop();
 
+        // In cases such as device lock, hide and finish it so that it can be recreated on the top
+        // next time it starts, see also {@link #onUserLeaveHint}
+        hideMenu();
         cancelDelayedFinish();
     }
 
