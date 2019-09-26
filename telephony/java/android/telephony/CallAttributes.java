@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.TelephonyManager.NetworkType;
 
+import android.telephony.Annotation.NetworkType;
 import java.util.Objects;
 
 /**

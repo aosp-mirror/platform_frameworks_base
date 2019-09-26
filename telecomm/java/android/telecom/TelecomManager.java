@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.telephony.Annotation.CallState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -1412,7 +1413,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
-    public @TelephonyManager.CallState int getCallState() {
+    public @CallState int getCallState() {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCallState();
