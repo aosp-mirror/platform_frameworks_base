@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -47,7 +48,7 @@ public class ProtoLogIntegrationTest {
         ProtoLogGroup.testProtoLog();
         verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.ERROR), eq(
                 ProtoLogGroup.TEST_GROUP),
-                eq(485522692), eq(0b0010101001010111),
+                anyInt(), eq(0b0010101001010111),
                 eq(ProtoLogGroup.TEST_GROUP.isLogToLogcat()
                         ? "Test completed successfully: %b %d %o %x %e %g %f %% %s"
                         : null),
