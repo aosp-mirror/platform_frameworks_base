@@ -1,7 +1,9 @@
-java_library {
+android_library {
     name: "SettingsLib-search",
-    host_supported: true,
     srcs: ["src/**/*.java"],
+
+    sdk_version: "system_current",
+    min_sdk_version: "21",
 }
 
 java_plugin {
@@ -9,9 +11,11 @@ java_plugin {
     processor_class: "com.android.settingslib.search.IndexableProcessor",
     static_libs: [
         "javapoet-prebuilt-jar",
-        "SettingsLib-search",
     ],
-    srcs: ["processor-src/**/*.java"],
+    srcs: [
+        "processor-src/**/*.java",
+        "src/com/android/settingslib/search/SearchIndexable.java"
+    ],
     java_resource_dirs: ["resources"],
 }
 
