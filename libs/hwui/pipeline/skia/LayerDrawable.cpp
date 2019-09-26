@@ -43,41 +43,28 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
     if (!matrix.rectStaysRect()) return true;
     SkRect dstDevRect = matrix.mapRect(dstRect);
     float dstW, dstH;
-    bool requiresIntegerTranslate = false;
     if (MathUtils::isZero(matrix.getScaleX()) && MathUtils::isZero(matrix.getScaleY())) {
         // Has a 90 or 270 degree rotation, although total matrix may also have scale factors
         // in m10 and m01. Those scalings are automatically handled by mapRect so comparing
         // dimensions is sufficient, but swap width and height comparison.
         dstW = dstDevRect.height();
         dstH = dstDevRect.width();
-        requiresIntegerTranslate = true;
     } else {
         // Handle H/V flips or 180 rotation matrices. Axes may have been mirrored, but
         // dimensions are still safe to compare directly.
         dstW = dstDevRect.width();
         dstH = dstDevRect.height();
-        requiresIntegerTranslate =
-                matrix.getScaleX() < -NON_ZERO_EPSILON || matrix.getScaleY() < -NON_ZERO_EPSILON;
     }
     if (!(MathUtils::areEqual(dstW, srcRect.width()) &&
           MathUtils::areEqual(dstH, srcRect.height()))) {
         return true;
     }
-    if (requiresIntegerTranslate) {
-        // Device rect and source rect should be integer aligned to ensure there's no difference
-        // in how nearest-neighbor sampling is resolved.
-        return !(isIntegerAligned(srcRect.x()) &&
-                 isIntegerAligned(srcRect.y()) &&
-                 isIntegerAligned(dstDevRect.x()) &&
-                 isIntegerAligned(dstDevRect.y()));
-    } else {
-        // As long as src and device rects are translated by the same fractional amount,
-        // filtering won't be needed
-        return !(MathUtils::areEqual(SkScalarFraction(srcRect.x()),
-                                     SkScalarFraction(dstDevRect.x())) &&
-                 MathUtils::areEqual(SkScalarFraction(srcRect.y()),
-                                     SkScalarFraction(dstDevRect.y())));
-    }
+    // Device rect and source rect should be integer aligned to ensure there's no difference
+    // in how nearest-neighbor sampling is resolved.
+    return !(isIntegerAligned(srcRect.x()) &&
+             isIntegerAligned(srcRect.y()) &&
+             isIntegerAligned(dstDevRect.x()) &&
+             isIntegerAligned(dstDevRect.y()));
 }
 
 bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
