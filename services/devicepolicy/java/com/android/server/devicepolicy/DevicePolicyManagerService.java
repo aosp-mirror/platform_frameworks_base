@@ -4133,6 +4133,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 final PasswordMetrics metrics = ap.minimumPasswordMetrics;
                 if (metrics.quality != quality) {
                     metrics.quality = quality;
+                    resetInactivePasswordRequirementsIfRPlus(userId, ap);
                     updatePasswordValidityCheckpointLocked(userId, parent);
                     updatePasswordQualityCacheForUserGroup(userId);
                     saveSettingsLocked(userId);
@@ -4148,6 +4149,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setInt(quality)
                 .setBoolean(parent)
                 .write();
+    }
+
+    /**
+     * For admins targeting R+ reset various password constraints to default values when quality is
+     * set to a value that makes those constraints that have no effect.
+     */
+    private void resetInactivePasswordRequirementsIfRPlus(int userId, ActiveAdmin admin) {
+        if (getTargetSdk(admin.info.getPackageName(), userId) > Build.VERSION_CODES.Q) {
+            final PasswordMetrics metrics = admin.minimumPasswordMetrics;
+            if (metrics.quality < PASSWORD_QUALITY_NUMERIC) {
+                metrics.length = ActiveAdmin.DEF_MINIMUM_PASSWORD_LENGTH;
+            }
+            if (metrics.quality < PASSWORD_QUALITY_COMPLEX) {
+                metrics.letters = ActiveAdmin.DEF_MINIMUM_PASSWORD_LETTERS;
+                metrics.upperCase = ActiveAdmin.DEF_MINIMUM_PASSWORD_UPPER_CASE;
+                metrics.lowerCase = ActiveAdmin.DEF_MINIMUM_PASSWORD_LOWER_CASE;
+                metrics.numeric = ActiveAdmin.DEF_MINIMUM_PASSWORD_NUMERIC;
+                metrics.symbols = ActiveAdmin.DEF_MINIMUM_PASSWORD_SYMBOLS;
+                metrics.nonLetter = ActiveAdmin.DEF_MINIMUM_PASSWORD_NON_LETTER;
+            }
+        }
     }
 
     /**
@@ -4281,6 +4303,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
+            ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_NUMERIC, "setPasswordMinimumLength");
             if (metrics.length != length) {
                 metrics.length = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
@@ -4295,10 +4318,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
     }
 
+    private void ensureMinimumQuality(
+            int userId, ActiveAdmin admin, int minimumQuality, String operation) {
+        if (admin.minimumPasswordMetrics.quality < minimumQuality
+                && getTargetSdk(admin.info.getPackageName(), userId) > Build.VERSION_CODES.Q) {
+            throw new IllegalStateException(String.format(
+                    "password quality should be at least %d for %s", minimumQuality, operation));
+        }
+    }
+
     @Override
     public int getPasswordMinimumLength(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.length, PASSWORD_QUALITY_UNSPECIFIED);
+                admin -> admin.minimumPasswordMetrics.length, PASSWORD_QUALITY_NUMERIC);
     }
 
     @Override
@@ -4525,6 +4557,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+            ensureMinimumQuality(
+                    userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumUpperCase");
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.upperCase != length) {
                 metrics.upperCase = length;
@@ -4553,6 +4587,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+            ensureMinimumQuality(
+                    userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumLowerCase");
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.lowerCase != length) {
                 metrics.lowerCase = length;
@@ -4584,6 +4620,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+            ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumLetters");
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.letters != length) {
                 metrics.letters = length;
@@ -4615,6 +4652,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+            ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumNumeric");
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.numeric != length) {
                 metrics.numeric = length;
@@ -4646,6 +4684,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+            ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumSymbols");
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.symbols != length) {
                 ap.minimumPasswordMetrics.symbols = length;
@@ -4677,6 +4716,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
+            ensureMinimumQuality(
+                    userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumNonLetter");
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.nonLetter != length) {
                 ap.minimumPasswordMetrics.nonLetter = length;
