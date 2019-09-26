@@ -41,7 +41,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     public PlatformCompat(Context context) {
         mContext = context;
-        mChangeReporter = new ChangeReporter();
+        mChangeReporter = new ChangeReporter(
+                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER);
     }
 
     @Override
@@ -96,10 +97,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private void reportChange(long changeId, ApplicationInfo appInfo, int state) {
         int uid = appInfo.uid;
-        //TODO(b/138374585): Implement rate limiting for the logs.
-        Slog.d(TAG, ChangeReporter.createLogString(uid, changeId, state));
-        mChangeReporter.reportChange(uid, changeId,
-                state, /* source */
-                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER);
+        mChangeReporter.reportChange(uid, changeId, state);
     }
 }
