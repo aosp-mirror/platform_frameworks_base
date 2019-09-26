@@ -3569,9 +3569,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledWithValidTokenLocked(token)) {
                 return;
             }
-            if (mCurClient != null && mCurClient.client != null) {
-                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                        MSG_APPLY_IME_VISIBILITY, setVisible ? 1 : 0, mCurClient));
+            if (!setVisible) {
+                // Client hides the IME directly.
+                if (mCurClient != null && mCurClient.client != null) {
+                    executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                            MSG_APPLY_IME_VISIBILITY, setVisible ? 1 : 0, mCurClient));
+                }
+            } else {
+                // Send to window manager to show IME after IME layout finishes.
+                mWindowManagerInternal.showImePostLayout(mLastImeTargetWindow);
             }
         }
     }

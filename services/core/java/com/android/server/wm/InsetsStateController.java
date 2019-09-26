@@ -108,8 +108,18 @@ class InsetsStateController {
      * @return The provider of a specific type.
      */
     InsetsSourceProvider getSourceProvider(@InternalInsetType int type) {
-        return mProviders.computeIfAbsent(type,
-                key -> new InsetsSourceProvider(mState.getSource(key), this, mDisplayContent));
+        if (type == TYPE_IME) {
+            return mProviders.computeIfAbsent(type,
+                    key -> new ImeInsetsSourceProvider(
+                            mState.getSource(key), this, mDisplayContent));
+        } else {
+            return mProviders.computeIfAbsent(type,
+                    key -> new InsetsSourceProvider(mState.getSource(key), this, mDisplayContent));
+        }
+    }
+
+    ImeInsetsSourceProvider getImeSourceProvider() {
+        return (ImeInsetsSourceProvider) getSourceProvider(TYPE_IME);
     }
 
     /**
@@ -124,6 +134,7 @@ class InsetsStateController {
             mLastState.set(mState, true /* copySources */);
             notifyInsetsChanged();
         }
+        getImeSourceProvider().onPostInsetsDispatched();
     }
 
     void onInsetsModified(WindowState windowState, InsetsState state) {

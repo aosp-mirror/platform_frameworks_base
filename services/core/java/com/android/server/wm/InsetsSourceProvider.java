@@ -47,9 +47,11 @@ import java.io.PrintWriter;
  */
 class InsetsSourceProvider {
 
+    protected final DisplayContent mDisplayContent;
+    protected final @NonNull InsetsSource mSource;
+    protected WindowState mWin;
+
     private final Rect mTmpRect = new Rect();
-    private final @NonNull InsetsSource mSource;
-    private final DisplayContent mDisplayContent;
     private final InsetsStateController mStateController;
     private final InsetsSourceControl mFakeControl;
     private @Nullable InsetsSourceControl mControl;
@@ -57,7 +59,6 @@ class InsetsSourceProvider {
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
     private @Nullable ControlAdapter mAdapter;
-    private WindowState mWin;
     private TriConsumer<DisplayFrames, WindowState, Rect> mFrameProvider;
 
     /** The visibility override from the current controlling window. */
