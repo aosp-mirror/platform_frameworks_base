@@ -16,38 +16,61 @@
 
 package com.android.systemui.volume;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
+import android.os.Handler;
+import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+@RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class VolumeDialogControllerImplTest extends SysuiTestCase {
 
     TestableVolumeDialogControllerImpl mVolumeController;
     VolumeDialogControllerImpl.C mCallback;
     StatusBar mStatusBar;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     @Before
     public void setup() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mStatusBar = mock(StatusBar.class);
-        mVolumeController = new TestableVolumeDialogControllerImpl(mContext, mCallback, mStatusBar);
+        mVolumeController = new TestableVolumeDialogControllerImpl(mContext, mCallback, mStatusBar,
+                mBroadcastDispatcher);
         mVolumeController.setEnableDialogs(true, true);
+    }
+
+    @Test
+    public void testRegisteredWithDispatcher() {
+        verify(mBroadcastDispatcher).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class),
+                any(Handler.class)); // VolumeDialogControllerImpl does not call with user
     }
 
     @Test
@@ -81,7 +104,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     public void testVolumeChangeW_nullStatusBar() {
         VolumeDialogControllerImpl.C callback = mock(VolumeDialogControllerImpl.C.class);
         TestableVolumeDialogControllerImpl nullStatusBarTestableDialog =  new
-                TestableVolumeDialogControllerImpl(mContext, callback, null);
+                TestableVolumeDialogControllerImpl(mContext, callback, null, mBroadcastDispatcher);
         nullStatusBarTestableDialog.setEnableDialogs(true, true);
         nullStatusBarTestableDialog.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(callback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
@@ -100,8 +123,9 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     static class TestableVolumeDialogControllerImpl extends VolumeDialogControllerImpl {
-        public TestableVolumeDialogControllerImpl(Context context, C callback, StatusBar s) {
-            super(context);
+        TestableVolumeDialogControllerImpl(Context context, C callback, StatusBar s,
+                BroadcastDispatcher broadcastDispatcher) {
+            super(context, broadcastDispatcher);
             mCallbacks = callback;
             mStatusBar = s;
         }

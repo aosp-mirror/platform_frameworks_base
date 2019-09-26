@@ -19,6 +19,7 @@ import static android.provider.Settings.Global.SHOW_USB_TEMPERATURE_ALARM;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.mock;
@@ -27,8 +28,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Handler;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
 import android.os.PowerManager;
@@ -43,6 +47,7 @@ import android.testing.TestableResources;
 import com.android.settingslib.fuelgauge.Estimate;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -80,6 +85,7 @@ public class PowerUITest extends SysuiTestCase {
     @Mock private IThermalService mThermalServiceMock;
     private IThermalEventListener mUsbThermalEventListener;
     private IThermalEventListener mSkinThermalEventListener;
+    @Mock private BroadcastDispatcher mBroadcastDispatcher;
 
     @Before
     public void setup() {
@@ -93,6 +99,15 @@ public class PowerUITest extends SysuiTestCase {
         createPowerUi();
         mSkinThermalEventListener = mPowerUI.new SkinThermalEventListener();
         mUsbThermalEventListener = mPowerUI.new UsbThermalEventListener();
+    }
+
+    @Test
+    public void testReceiverIsRegisteredToDispatcherOnStart() {
+        mPowerUI.start();
+        verify(mBroadcastDispatcher).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class),
+                any(Handler.class)); //PowerUI does not call with User
     }
 
     @Test
@@ -667,7 +682,7 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     private void createPowerUi() {
-        mPowerUI = new PowerUI();
+        mPowerUI = new PowerUI(mBroadcastDispatcher);
         mPowerUI.mContext = mContext;
         mPowerUI.mComponents = mContext.getComponents();
         mPowerUI.mThermalService = mThermalServiceMock;

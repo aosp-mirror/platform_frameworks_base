@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 private const val MSG_REGISTER_RECEIVER = 0
 private const val MSG_UNREGISTER_RECEIVER = 1
-private const val TAG = "UniversalReceiver"
+private const val TAG = "UserBroadcastDispatcher"
 private const val DEBUG = false
 
 /**
@@ -97,7 +97,7 @@ class UserBroadcastDispatcher(
     private val receiverToReceiverData = ArrayMap<BroadcastReceiver, MutableSet<ReceiverData>>()
 
     override fun onReceive(context: Context, intent: Intent) {
-        bgHandler.post(HandleBroadcastRunnable(actionsToReceivers, context, intent))
+        bgHandler.post(HandleBroadcastRunnable(actionsToReceivers, context, intent, pendingResult))
     }
 
     /**
@@ -160,7 +160,8 @@ class UserBroadcastDispatcher(
     private class HandleBroadcastRunnable(
         val actionsToReceivers: Map<String, Set<ReceiverData>>,
         val context: Context,
-        val intent: Intent
+        val intent: Intent,
+        val pendingResult: PendingResult
     ) : Runnable {
         override fun run() {
             if (DEBUG) Log.w(TAG, "Dispatching $intent")
@@ -171,6 +172,7 @@ class UserBroadcastDispatcher(
                     ?.forEach {
                         it.handler.post {
                             if (DEBUG) Log.w(TAG, "Dispatching to ${it.receiver}")
+                            it.receiver.pendingResult = pendingResult
                             it.receiver.onReceive(context, intent)
                         }
                     }

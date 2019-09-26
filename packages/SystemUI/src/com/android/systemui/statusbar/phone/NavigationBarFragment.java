@@ -89,6 +89,7 @@ import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.model.SysUiState;
@@ -171,6 +172,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private OverviewProxyService mOverviewProxyService;
 
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
     @VisibleForTesting
     public int mDisplayId;
     private boolean mIsOnDefaultDisplay;
@@ -252,7 +255,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             AssistManager assistManager, OverviewProxyService overviewProxyService,
             NavigationModeController navigationModeController,
             StatusBarStateController statusBarStateController,
-            SysUiState sysUiFlagsContainer) {
+            SysUiState sysUiFlagsContainer,
+            BroadcastDispatcher broadcastDispatcher) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -263,6 +267,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mOverviewProxyService = overviewProxyService;
         mNavigationModeController = navigationModeController;
         mNavBarMode = navigationModeController.addListener(this);
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -340,7 +345,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
+        mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, Handler.getMain(),
+                UserHandle.ALL);
         notifyNavigationBarScreenOn();
 
         mOverviewProxyService.addCallback(mOverviewProxyListener);
@@ -383,7 +389,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             mNavigationBarView.getLightTransitionsController().destroy(getContext());
         }
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
-        getContext().unregisterReceiver(mBroadcastReceiver);
+        mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override

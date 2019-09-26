@@ -28,6 +28,7 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 
@@ -138,20 +139,21 @@ public class SystemUIDialog extends AlertDialog {
 
         private final Dialog mDialog;
         private boolean mRegistered;
+        private final BroadcastDispatcher mBroadcastDispatcher;
 
         DismissReceiver(Dialog dialog) {
             mDialog = dialog;
+            mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
         }
 
         void register() {
-            mDialog.getContext()
-                    .registerReceiverAsUser(this, UserHandle.CURRENT, INTENT_FILTER, null, null);
+            mBroadcastDispatcher.registerReceiver(this, INTENT_FILTER, null, UserHandle.CURRENT);
             mRegistered = true;
         }
 
         void unregister() {
             if (mRegistered) {
-                mDialog.getContext().unregisterReceiver(this);
+                mBroadcastDispatcher.unregisterReceiver(this);
                 mRegistered = false;
             }
         }

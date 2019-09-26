@@ -70,6 +70,8 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
     private lateinit var mockContext: Context
     @Mock
     private lateinit var mockHandler: Handler
+    @Mock
+    private lateinit var mPendingResult: BroadcastReceiver.PendingResult
 
     @Captor
     private lateinit var argumentCaptor: ArgumentCaptor<IntentFilter>
@@ -88,6 +90,7 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
 
         universalBroadcastReceiver = UserBroadcastDispatcher(
                 mockContext, USER_ID, handler, testableLooper.looper)
+        universalBroadcastReceiver.pendingResult = mPendingResult
     }
 
     @Test
@@ -226,5 +229,20 @@ class UserBroadcastDispatcherTest : SysuiTestCase() {
 
         verify(broadcastReceiver).onReceive(mockContext, intent)
         verify(broadcastReceiverOther).onReceive(mockContext, intent)
+    }
+
+    @Test
+    fun testPendingResult() {
+        intentFilter = IntentFilter(ACTION_1)
+        universalBroadcastReceiver.registerReceiver(
+                ReceiverData(broadcastReceiver, intentFilter, handler, USER_HANDLE))
+
+        val intent = Intent(ACTION_1)
+        universalBroadcastReceiver.onReceive(mockContext, intent)
+
+        testableLooper.processAllMessages()
+
+        verify(broadcastReceiver).onReceive(mockContext, intent)
+        verify(broadcastReceiver).pendingResult = mPendingResult
     }
 }

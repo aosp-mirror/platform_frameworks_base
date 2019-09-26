@@ -61,8 +61,10 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -245,10 +247,15 @@ public class RecentsOnboarding {
 
     private final View.OnAttachStateChangeListener mOnAttachStateChangeListener
             = new View.OnAttachStateChangeListener() {
+
+        private final BroadcastDispatcher mBroadcastDispatcher = Dependency.get(
+                BroadcastDispatcher.class);
+
         @Override
         public void onViewAttachedToWindow(View view) {
             if (view == mLayout) {
-                mContext.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+                mBroadcastDispatcher.registerReceiver(mReceiver,
+                        new IntentFilter(Intent.ACTION_SCREEN_OFF));
                 mLayoutAttachedToWindow = true;
                 if (view.getTag().equals(R.string.recents_swipe_up_onboarding)) {
                     mHasDismissedSwipeUpTip = false;
@@ -273,7 +280,7 @@ public class RecentsOnboarding {
                     }
                     mOverviewOpenedCountSinceQuickScrubTipDismiss = 0;
                 }
-                mContext.unregisterReceiver(mReceiver);
+                mBroadcastDispatcher.unregisterReceiver(mReceiver);
             }
         }
     };
@@ -335,10 +342,11 @@ public class RecentsOnboarding {
     private void notifyOnTip(int action, int target) {
         try {
             IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
-            if(overviewProxy != null) {
+            if (overviewProxy != null) {
                 overviewProxy.onTip(action, target);
             }
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+        }
     }
 
     public void onNavigationModeChanged(int mode) {
