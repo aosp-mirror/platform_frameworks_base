@@ -265,6 +265,20 @@ void imageInfo(JNIEnv* env, jobject bitmap, AndroidBitmapInfo* info) {
             info->format = ANDROID_BITMAP_FORMAT_NONE;
             break;
     }
+    switch (imageInfo.alphaType()) {
+        case kUnknown_SkAlphaType:
+            LOG_ALWAYS_FATAL("Bitmap has no alpha type");
+            break;
+        case kOpaque_SkAlphaType:
+            info->flags |= ANDROID_BITMAP_FLAGS_ALPHA_OPAQUE;
+            break;
+        case kPremul_SkAlphaType:
+            info->flags |= ANDROID_BITMAP_FLAGS_ALPHA_PREMUL;
+            break;
+        case kUnpremul_SkAlphaType:
+            info->flags |= ANDROID_BITMAP_FLAGS_ALPHA_UNPREMUL;
+            break;
+    }
 }
 
 void* lockPixels(JNIEnv* env, jobject bitmap) {
