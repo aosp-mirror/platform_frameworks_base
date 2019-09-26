@@ -1212,6 +1212,45 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isDeviceManaged());
     }
 
+    /**
+     * Test for: {@link DevicePolicyManager#clearDeviceOwnerApp(String)}
+     *
+     * Validates that when the device owner is removed, the reset password token is cleared
+     */
+    public void testClearDeviceOwner_clearResetPasswordToken() throws Exception {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+
+        // Install admin1 on system user
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+
+        // Set admin1 to active admin and device owner
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        dpm.setDeviceOwner(admin1, null, UserHandle.USER_SYSTEM);
+
+        // Add reset password token
+        final long handle = 12000;
+        final byte[] token = new byte[32];
+        when(getServices().lockPatternUtils.addEscrowToken(eq(token), eq(UserHandle.USER_SYSTEM),
+                nullable(EscrowTokenStateChangeCallback.class)))
+                .thenReturn(handle);
+        assertTrue(dpm.setResetPasswordToken(admin1, token));
+
+        // Assert reset password token is active
+        when(getServices().lockPatternUtils.isEscrowTokenActive(eq(handle),
+                eq(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+        assertTrue(dpm.isResetPasswordTokenActive(admin1));
+
+        // Remove the device owner
+        dpm.clearDeviceOwnerApp(admin1.getPackageName());
+
+        // Verify password reset password token was removed
+        verify(getServices().lockPatternUtils).removeEscrowToken(eq(handle),
+                eq(UserHandle.USER_SYSTEM));
+    }
+
     public void testSetProfileOwner() throws Exception {
         setAsProfileOwner(admin1);
 
