@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.util.DebugUtils;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.PrintWriter;
@@ -351,7 +352,7 @@ public interface ServiceConnector<I extends IInterface> {
         @Override
         public <R> CompletionAwareJob<I, R> postForResult(@NonNull Job<I, R> job) {
             CompletionAwareJob<I, R> task = new CompletionAwareJob<>();
-            task.mDelegate = job;
+            task.mDelegate = Preconditions.checkNotNull(job);
             enqueue(task);
             return task;
         }
@@ -359,7 +360,7 @@ public interface ServiceConnector<I extends IInterface> {
         @Override
         public <R> AndroidFuture<R> postAsync(@NonNull Job<I, CompletableFuture<R>> job) {
             CompletionAwareJob<I, R> task = new CompletionAwareJob<>();
-            task.mDelegate = (Job) job;
+            task.mDelegate = Preconditions.checkNotNull((Job) job);
             task.mAsync = true;
             enqueue(task);
             return task;
