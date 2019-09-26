@@ -1128,11 +1128,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 return;
             }
 
-            if (frameNumber > 0) {
-                final ViewRootImpl viewRoot = getViewRootImpl();
-
-                mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
-                        frameNumber);
+            final ViewRootImpl viewRoot = getViewRootImpl();
+            if (frameNumber > 0 && viewRoot !=  null) {
+                if (viewRoot.mSurface.isValid()) {
+                    mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
+                            frameNumber);
+                }
             }
             mRtTransaction.hide(mSurfaceControl);
 
