@@ -41,27 +41,27 @@ import java.util.Collections;
  */
 final class TvRemoteProviderWatcher {
 
-    private static final String TAG = "TvRemoteProvWatcher";  // max. 23 chars
+    private static final String TAG = "TvRemoteProviderWatcher";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
 
     private final Context mContext;
-    private final TvRemoteProviderProxy.ProviderMethods mProvider;
     private final Handler mHandler;
     private final PackageManager mPackageManager;
     private final ArrayList<TvRemoteProviderProxy> mProviderProxies = new ArrayList<>();
     private final int mUserId;
     private final String mUnbundledServicePackage;
+    private final Object mLock;
 
     private boolean mRunning;
 
-    TvRemoteProviderWatcher(Context context, TvRemoteProviderProxy.ProviderMethods provider) {
+    TvRemoteProviderWatcher(Context context, Object lock) {
         mContext = context;
-        mProvider = provider;
         mHandler = new Handler(true);
         mUserId = UserHandle.myUserId();
         mPackageManager = context.getPackageManager();
         mUnbundledServicePackage = context.getString(
                 com.android.internal.R.string.config_tvRemoteServicePackage);
+        mLock = lock;
     }
 
     public void start() {
@@ -116,7 +116,7 @@ final class TvRemoteProviderWatcher {
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
                     TvRemoteProviderProxy providerProxy =
-                            new TvRemoteProviderProxy(mContext, mProvider,
+                            new TvRemoteProviderProxy(mContext, mLock,
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     mUserId, serviceInfo.applicationInfo.uid);
                     providerProxy.start();
