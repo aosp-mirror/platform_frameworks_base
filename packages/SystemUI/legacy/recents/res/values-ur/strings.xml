@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"مجموعی جائزہ۔"</string>
+    <string name="accessibility_desc_recent_apps" msgid="2427210347871321373">"عمومی جائزہ۔"</string>
     <string name="accessibility_recents_item_will_be_dismissed" msgid="2355882496933479534">"<xliff:g id="APP">%s</xliff:g> کو مسترد کریں۔"</string>
     <string name="accessibility_recents_item_dismissed" msgid="4816790842084268400">"<xliff:g id="APP">%s</xliff:g> کو مسترد کر دیا گیا۔"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="5693205751863608046">"سبھی حالیہ ایپلیکیشنز کو مسترد کر دیا گیا۔"</string>
