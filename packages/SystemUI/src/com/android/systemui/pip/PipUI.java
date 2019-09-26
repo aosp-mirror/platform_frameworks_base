@@ -28,6 +28,7 @@ import android.os.UserManager;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.wm.DisplayWindowController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -44,15 +45,17 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
     private final CommandQueue mCommandQueue;
     private BasePipManager mPipManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
-
+    private final DisplayWindowController mDisplayWindowController;
     private boolean mSupportsPip;
 
     @Inject
     public PipUI(Context context, CommandQueue commandQueue,
-            BroadcastDispatcher broadcastDispatcher) {
+            BroadcastDispatcher broadcastDispatcher,
+            DisplayWindowController displayWindowController) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
         mCommandQueue = commandQueue;
+        mDisplayWindowController = displayWindowController;
     }
 
     @Override
@@ -72,7 +75,7 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
         mPipManager = pm.hasSystemFeature(FEATURE_LEANBACK_ONLY)
                 ? com.android.systemui.pip.tv.PipManager.getInstance()
                 : com.android.systemui.pip.phone.PipManager.getInstance();
-        mPipManager.initialize(mContext, mBroadcastDispatcher);
+        mPipManager.initialize(mContext, mBroadcastDispatcher, mDisplayWindowController);
 
         mCommandQueue.addCallback(this);
     }

@@ -20,11 +20,13 @@ import android.content.Context;
 import android.content.res.Configuration;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.wm.DisplayWindowController;
 
 import java.io.PrintWriter;
 
 public interface BasePipManager {
-    void initialize(Context context, BroadcastDispatcher broadcastDispatcher);
+    void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
+            DisplayWindowController displayWindowController);
     void showPictureInPictureMenu();
     default void expandPip() {}
     default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}

@@ -101,10 +101,11 @@ public class DisplayWindowController {
                             }
                             DisplayRecord record = new DisplayRecord();
                             record.mDisplayId = displayId;
-                            Display display = getDisplay(displayId);
-                            record.mContext = (displayId == Display.DEFAULT_DISPLAY) ? mContext
-                                    : mContext.createDisplayContext(display);
-                            record.mDisplayLayout = new DisplayLayout(record.mContext, display);
+                            // TODO(b/146566787): disabled for MultiDisplayActivityLaunchTests
+                            // Display display = getDisplay(displayId);
+                            // record.mContext = (displayId == Display.DEFAULT_DISPLAY) ? mContext
+                            //         : mContext.createDisplayContext(display);
+                            // record.mDisplayLayout = new DisplayLayout(record.mContext, display);
                             mDisplays.put(displayId, record);
                             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                                 mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
@@ -123,13 +124,14 @@ public class DisplayWindowController {
                                         + " display.");
                                 return;
                             }
-                            Display display = getDisplay(displayId);
-                            Context perDisplayContext = mContext;
-                            if (displayId != Display.DEFAULT_DISPLAY) {
-                                perDisplayContext = mContext.createDisplayContext(display);
-                            }
-                            dr.mContext = perDisplayContext.createConfigurationContext(newConfig);
-                            dr.mDisplayLayout = new DisplayLayout(dr.mContext, display);
+                            // TODO(b/146566787): disabled for MultiDisplaySystemDecorationTests
+                            // Display display = getDisplay(displayId);
+                            // Context perDisplayContext = mContext;
+                            // if (displayId != Display.DEFAULT_DISPLAY) {
+                            //     perDisplayContext = mContext.createDisplayContext(display);
+                            // }
+                            // dr.mContext = perDisplayContext.createConfigurationContext(newConfig);
+                            // dr.mDisplayLayout = new DisplayLayout(dr.mContext, display);
                             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                                 mDisplayChangedListeners.get(i).onDisplayConfigurationChanged(
                                         displayId, newConfig);

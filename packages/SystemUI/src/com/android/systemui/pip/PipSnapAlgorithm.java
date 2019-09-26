@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy;
+package com.android.systemui.pip;
 
 import android.content.Context;
 import android.content.res.Configuration;

@@ -46,7 +46,7 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.policy.PipSnapAlgorithm;
+import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 

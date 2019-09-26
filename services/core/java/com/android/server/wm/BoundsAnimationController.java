@@ -185,6 +185,10 @@ public class BoundsAnimationController {
             resume();
         };
 
+        // If this animator is explicitly cancelled when it's in paused state, we should not
+        // attempt to resume the animation. Use this flag to avoid such behavior.
+        private boolean mIsCancelled;
+
         BoundsAnimator(BoundsAnimationTarget target, @AnimationType int animationType, Rect from,
                 Rect to, @SchedulePipModeChangedState int schedulePipModeChangedState,
                 @SchedulePipModeChangedState int prevShedulePipModeChangedState,
@@ -221,6 +225,7 @@ public class BoundsAnimationController {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mPrevSchedulePipModeChangedState=" + mPrevSchedulePipModeChangedState
                     + " mSchedulePipModeChangedState=" + mSchedulePipModeChangedState);
+            mIsCancelled = false;
             mFinishAnimationAfterTransition = false;
             mTmpRect.set(mFrom.left, mFrom.top, mFrom.left + mFrozenTaskWidth,
                     mFrom.top + mFrozenTaskHeight);
@@ -293,7 +298,7 @@ public class BoundsAnimationController {
         public void resume() {
             if (DEBUG) Slog.d(TAG, "resume:");
             mHandler.removeCallbacks(mResumeRunnable);
-            super.resume();
+            if (!mIsCancelled) super.resume();
         }
 
         @Override
@@ -376,6 +381,7 @@ public class BoundsAnimationController {
 
         @Override
         public void onAnimationCancel(Animator animation) {
+            mIsCancelled = true;
             // Always skip the final resize when the animation is canceled
             mSkipFinalResize = true;
             mMoveToFullscreen = false;

@@ -34,6 +34,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
+import android.view.WindowContainerTransaction;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
@@ -45,6 +46,7 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.wm.DisplayWindowController;
 
 import java.io.PrintWriter;
 
@@ -75,9 +77,22 @@ public class PipManager implements BasePipManager {
     private PipAppOpsListener mAppOpsListener;
 
     /**
+     * Handler for display rotation changes.
+     */
+    private final DisplayWindowController.OnDisplayWindowRotationController mRotationController = (
+            int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
+                displayId, fromRotation, toRotation, t);
+        if (changed) {
+            updateMovementBounds(mTmpNormalBounds, false /* fromImeAdjustment */,
+                    false /* fromShelfAdjustment */);
+        }
+    };
+
+    /**
      * Handler for system task stack changes.
      */
-    TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+    private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
         public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             mTouchHandler.onActivityPinned();
@@ -214,7 +229,8 @@ public class PipManager implements BasePipManager {
     /**
      * Initializes {@link PipManager}.
      */
-    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public void initialize(Context context, BroadcastDispatcher broadcastDispatcher,
+            DisplayWindowController displayWindowController) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -235,6 +251,7 @@ public class PipManager implements BasePipManager {
                 mMenuController, mInputConsumerController, mPipBoundsHandler);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
+        displayWindowController.addRotationController(mRotationController);
 
         // If SystemUI restart, and it already existed a pinned stack,
         // register the pip input consumer to ensure touch can send to it.
