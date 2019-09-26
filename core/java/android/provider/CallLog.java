@@ -38,11 +38,11 @@ import android.provider.ContactsContract.DataUsageFeedback;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
+import android.telephony.CallerInfo;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
-import android.telephony.CallerInfo;
 import com.android.internal.telephony.PhoneConstants;
 
 import java.util.List;
@@ -233,6 +233,9 @@ public class CallLog {
 
         /** Call was on RTT at some point */
         public static final int FEATURES_RTT = 1 << 5;
+
+        /** Call was VoLTE */
+        public static final int FEATURES_VOLTE = 1 << 6;
 
         /**
          * The phone number as the user entered it.
