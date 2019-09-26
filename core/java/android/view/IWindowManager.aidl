@@ -44,6 +44,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.IRotationWatcher;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWallpaperVisibilityListener;
+import android.view.IWindow;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.KeyEvent;
@@ -118,6 +119,17 @@ interface IWindowManager
      * only continue once the controller has finished calculating associated configurations.
      */
     void setDisplayWindowRotationController(IDisplayWindowRotationController controller);
+
+    /**
+     * Adds a root container that a client shell can populate with its own windows (usually via
+     * WindowlessWindowManager).
+     *
+     * @param client an IWindow used for window-level communication (ime, finish draw, etc.).
+     * @param windowType used by WM to determine the z-order. This is the same as the window type
+     *                   used in {@link WindowManager.LayoutParams}.
+     * @return a SurfaceControl to add things to.
+     */
+    SurfaceControl addShellRoot(int displayId, IWindow client, int windowType);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is

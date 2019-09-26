@@ -3712,6 +3712,26 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public SurfaceControl addShellRoot(int displayId, IWindow client, int windowType) {
+        if (mContext.checkCallingOrSelfPermission(MANAGE_APP_TOKENS)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Must hold permission " + MANAGE_APP_TOKENS);
+        }
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                return dc.addShellRoot(client, windowType);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
     public int watchRotation(IRotationWatcher watcher, int displayId) {
         final DisplayContent displayContent;
         synchronized (mGlobalLock) {
