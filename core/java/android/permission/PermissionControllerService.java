@@ -221,7 +221,7 @@ public abstract class PermissionControllerService extends Service {
      * permission controller package.
      */
     @BinderThread
-    public void onUpdateUserSensitive() {
+    public void onUpdateUserSensitivePermissionFlags() {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -449,7 +449,7 @@ public abstract class PermissionControllerService extends Service {
             public void updateUserSensitive(AndroidFuture callback) {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
 
-                onUpdateUserSensitive();
+                onUpdateUserSensitivePermissionFlags();
                 callback.complete(null);
             }
         };
