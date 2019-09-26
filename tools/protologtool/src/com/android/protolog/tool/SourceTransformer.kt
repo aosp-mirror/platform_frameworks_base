@@ -73,7 +73,7 @@ class SourceTransformer(
         }
         val ifStmt: IfStmt
         if (group.enabled) {
-            val position = CodeUtils.getPositionString(call, fileName)
+            val position = CodeUtils.getPositionString(fileName)
             val hash = CodeUtils.hash(position, messageString, level, group)
             val newCall = call.clone()
             if (!group.textEnabled) {
