@@ -763,43 +763,43 @@ final class BackStackRecord extends FragmentTransaction implements
             final Fragment f = op.fragment;
             if (f != null) {
                 f.setNextTransition(mTransition, mTransitionStyle);
-            }
-            switch (op.cmd) {
-                case OP_ADD:
-                    f.setNextAnim(op.enterAnim);
-                    mManager.addFragment(f, false);
-                    break;
-                case OP_REMOVE:
-                    f.setNextAnim(op.exitAnim);
-                    mManager.removeFragment(f);
-                    break;
-                case OP_HIDE:
-                    f.setNextAnim(op.exitAnim);
-                    mManager.hideFragment(f);
-                    break;
-                case OP_SHOW:
-                    f.setNextAnim(op.enterAnim);
-                    mManager.showFragment(f);
-                    break;
-                case OP_DETACH:
-                    f.setNextAnim(op.exitAnim);
-                    mManager.detachFragment(f);
-                    break;
-                case OP_ATTACH:
-                    f.setNextAnim(op.enterAnim);
-                    mManager.attachFragment(f);
-                    break;
-                case OP_SET_PRIMARY_NAV:
-                    mManager.setPrimaryNavigationFragment(f);
-                    break;
-                case OP_UNSET_PRIMARY_NAV:
-                    mManager.setPrimaryNavigationFragment(null);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
-            }
-            if (!mReorderingAllowed && op.cmd != OP_ADD && f != null) {
-                mManager.moveFragmentToExpectedState(f);
+                switch (op.cmd) {
+                    case OP_ADD:
+                        f.setNextAnim(op.enterAnim);
+                        mManager.addFragment(f, false);
+                        break;
+                    case OP_REMOVE:
+                        f.setNextAnim(op.exitAnim);
+                        mManager.removeFragment(f);
+                        break;
+                    case OP_HIDE:
+                        f.setNextAnim(op.exitAnim);
+                        mManager.hideFragment(f);
+                        break;
+                    case OP_SHOW:
+                        f.setNextAnim(op.enterAnim);
+                        mManager.showFragment(f);
+                        break;
+                    case OP_DETACH:
+                        f.setNextAnim(op.exitAnim);
+                        mManager.detachFragment(f);
+                        break;
+                    case OP_ATTACH:
+                        f.setNextAnim(op.enterAnim);
+                        mManager.attachFragment(f);
+                        break;
+                    case OP_SET_PRIMARY_NAV:
+                        mManager.setPrimaryNavigationFragment(f);
+                        break;
+                    case OP_UNSET_PRIMARY_NAV:
+                        mManager.setPrimaryNavigationFragment(null);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
+                }
+                if (!mReorderingAllowed && op.cmd != OP_ADD) {
+                    mManager.moveFragmentToExpectedState(f);
+                }
             }
         }
         if (!mReorderingAllowed) {
