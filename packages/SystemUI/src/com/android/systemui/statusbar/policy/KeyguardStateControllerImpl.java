@@ -101,7 +101,9 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
     @Override
     public void addCallback(@NonNull Callback callback) {
         Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
-        mCallbacks.add(callback);
+        if (!mCallbacks.contains(callback)) {
+            mCallbacks.add(callback);
+        }
         if (mCallbacks.size() != 0 && !mListening) {
             mListening = true;
             mKeyguardUpdateMonitor.registerCallback(this);
