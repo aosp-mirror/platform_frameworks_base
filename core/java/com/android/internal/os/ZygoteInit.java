@@ -835,7 +835,7 @@ public class ZygoteInit {
             TimingsTraceLog bootTimingsTraceLog = new TimingsTraceLog(bootTimeTag,
                     Trace.TRACE_TAG_DALVIK);
             bootTimingsTraceLog.traceBegin("ZygoteInit");
-            RuntimeInit.enableDdms();
+            RuntimeInit.preForkInit();
 
             boolean startSystemServer = false;
             String zygoteSocketName = "zygote";
