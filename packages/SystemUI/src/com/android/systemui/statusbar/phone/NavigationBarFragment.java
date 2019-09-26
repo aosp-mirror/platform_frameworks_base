@@ -139,6 +139,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private final MetricsLogger mMetricsLogger;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final StatusBarStateController mStatusBarStateController;
+    private final NavigationModeController mNavigationModeController;
 
     protected NavigationBarView mNavigationBarView = null;
 
@@ -260,6 +261,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mSysUiFlagsContainer = sysUiFlagsContainer;
         mAssistantAvailable = mAssistManager.getAssistInfoForUser(UserHandle.USER_CURRENT) != null;
         mOverviewProxyService = overviewProxyService;
+        mNavigationModeController = navigationModeController;
         mNavBarMode = navigationModeController.addListener(this);
     }
 
@@ -299,6 +301,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mNavigationModeController.removeListener(this);
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mMagnificationObserver);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
