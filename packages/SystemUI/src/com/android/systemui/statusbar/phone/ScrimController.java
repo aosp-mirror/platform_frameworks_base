@@ -754,6 +754,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     private void onFinished(Callback callback) {
+        if (!hasReachedFinalState(mScrimBehind)
+            || !hasReachedFinalState(mScrimInFront)
+            || !hasReachedFinalState(mScrimForBubble)) {
+            if (callback != null && callback != mCallback) {
+                // Since we only notify the callback that we're finished once everything has
+                // finished, we need to make sure that any changing callbacks are also invoked
+                callback.onFinished();
+            }
+            return;
+        }
         if (mWakeLockHeld) {
             mWakeLock.release(TAG);
             mWakeLockHeld = false;
@@ -773,7 +783,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mInFrontTint = Color.TRANSPARENT;
             mBehindTint = Color.TRANSPARENT;
             mBubbleTint = Color.TRANSPARENT;
+            updateScrimColor(mScrimInFront, mInFrontAlpha, mInFrontTint);
+            updateScrimColor(mScrimBehind, mBehindAlpha, mBehindTint);
+            updateScrimColor(mScrimForBubble, mBubbleAlpha, mBubbleTint);
         }
+    }
+
+    private boolean hasReachedFinalState(ScrimView scrim) {
+        return scrim.getViewAlpha() == getCurrentScrimAlpha(scrim)
+                && scrim.getTint() == getCurrentScrimTint(scrim);
     }
 
     private boolean isAnimating(View scrim) {
