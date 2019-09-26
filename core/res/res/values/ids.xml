@@ -220,4 +220,7 @@
 
   <!-- Accessibility action identifier for {@link android.accessibilityservice.AccessibilityService#GLOBAL_ACTION_TAKE_SCREENSHOT}. -->
   <item type="id" name="accessibilitySystemActionTakeScreenshot" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_PRESS_AND_HOLD}. -->
+  <item type="id" name="accessibilityActionPressAndHold" />
 </resources>
