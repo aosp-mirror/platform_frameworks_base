@@ -1376,12 +1376,23 @@ public final class AssetManager implements AutoCloseable {
     /**
      * @hide
      */
-    @TestApi
     @GuardedBy("this")
     public @Nullable Map<String, String> getOverlayableMap(String packageName) {
         synchronized (this) {
             ensureValidLocked();
             return nativeGetOverlayableMap(mObject, packageName);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @GuardedBy("this")
+    public @Nullable String getOverlayablesToString(String packageName) {
+        synchronized (this) {
+            ensureValidLocked();
+            return nativeGetOverlayablesToString(mObject, packageName);
         }
     }
 
@@ -1503,6 +1514,8 @@ public final class AssetManager implements AutoCloseable {
     private static native void nativeVerifySystemIdmaps();
     private static native String[] nativeCreateIdmapsForStaticOverlaysTargetingAndroid();
     private static native @Nullable Map nativeGetOverlayableMap(long ptr,
+            @NonNull String packageName);
+    private static native @Nullable String nativeGetOverlayablesToString(long ptr,
             @NonNull String packageName);
 
     // Global debug native methods.

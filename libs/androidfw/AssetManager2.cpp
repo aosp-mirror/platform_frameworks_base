@@ -224,6 +224,62 @@ const std::unordered_map<std::string, std::string>*
   return &loaded_package->GetOverlayableMap();
 }
 
+bool AssetManager2::GetOverlayablesToString(const android::StringPiece& package_name,
+                                            std::string* out) const {
+  uint8_t package_id = 0U;
+  for (const auto& apk_assets : apk_assets_) {
+    const LoadedArsc* loaded_arsc = apk_assets->GetLoadedArsc();
+    if (loaded_arsc == nullptr) {
+      continue;
+    }
+
+    const auto& loaded_packages = loaded_arsc->GetPackages();
+    if (loaded_packages.empty()) {
+      continue;
+    }
+
+    const auto& loaded_package = loaded_packages[0];
+    if (loaded_package->GetPackageName() == package_name) {
+      package_id = GetAssignedPackageId(loaded_package.get());
+      break;
+    }
+  }
+
+  if (package_id == 0U) {
+    ANDROID_LOG(ERROR) << base::StringPrintf("No package with name '%s", package_name.data());
+    return false;
+  }
+
+  const size_t idx = package_ids_[package_id];
+  if (idx == 0xff) {
+    return false;
+  }
+
+  std::string output;
+  for (const ConfiguredPackage& package : package_groups_[idx].packages_) {
+    const LoadedPackage* loaded_package = package.loaded_package_;
+    for (auto it = loaded_package->begin(); it != loaded_package->end(); it++) {
+      const OverlayableInfo* info = loaded_package->GetOverlayableInfo(*it);
+      if (info != nullptr) {
+        ResourceName res_name;
+        if (!GetResourceName(*it, &res_name)) {
+          ANDROID_LOG(ERROR) << base::StringPrintf(
+              "Unable to retrieve name of overlayable resource 0x%08x", *it);
+          return false;
+        }
+
+        const std::string name = ToFormattedResourceString(&res_name);
+        output.append(base::StringPrintf(
+            "resource='%s' overlayable='%s' actor='%s' policy='0x%08x'\n",
+            name.c_str(), info->name.c_str(), info->actor.c_str(), info->policy_flags));
+      }
+    }
+  }
+
+  *out = std::move(output);
+  return true;
+}
+
 void AssetManager2::SetConfiguration(const ResTable_config& configuration) {
   const int diff = configuration_.diff(configuration);
   configuration_ = configuration;
@@ -1073,7 +1129,7 @@ void AssetManager2::InvalidateCaches(uint32_t diff) {
   }
 }
 
-uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) {
+uint8_t AssetManager2::GetAssignedPackageId(const LoadedPackage* package) const {
   for (auto& package_group : package_groups_) {
     for (auto& package2 : package_group.packages_) {
       if (package2.loaded_package_ == package) {

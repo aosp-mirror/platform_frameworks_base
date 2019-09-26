@@ -707,7 +707,7 @@ TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {
   EXPECT_EQ("", resultDisabled);
 }
 
-TEST_F(AssetManager2Test, GetOverlayableMap) {
+TEST_F(AssetManager2Test, GetOverlayablesToString) {
   ResTable_config desired_config;
   memset(&desired_config, 0, sizeof(desired_config));
 
@@ -721,6 +721,12 @@ TEST_F(AssetManager2Test, GetOverlayableMap) {
   ASSERT_EQ(2, map->size());
   ASSERT_EQ(map->at("OverlayableResources1"), "overlay://theme");
   ASSERT_EQ(map->at("OverlayableResources2"), "overlay://com.android.overlayable");
+
+  std::string api;
+  ASSERT_TRUE(assetmanager.GetOverlayablesToString("com.android.overlayable", &api));
+  ASSERT_EQ(api.find("not_overlayable"), std::string::npos);
+  ASSERT_NE(api.find("resource='com.android.overlayable:string/overlayable2' overlayable='OverlayableResources1' actor='overlay://theme' policy='0x0000000a'\n"),
+            std::string::npos);
 }
 
 }  // namespace android
