@@ -39,15 +39,17 @@ public class DozeService extends DreamService
     private static final String TAG = "DozeService";
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private final FalsingManager mFalsingManager;
+    private final DozeLog mDozeLog;
 
     private DozeMachine mDozeMachine;
     private DozeServicePlugin mDozePlugin;
     private PluginManager mPluginManager;
 
     @Inject
-    public DozeService(FalsingManager falsingManager) {
+    public DozeService(FalsingManager falsingManager, DozeLog dozeLog) {
         setDebug(DEBUG);
         mFalsingManager = falsingManager;
+        mDozeLog = dozeLog;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class DozeService extends DreamService
         }
         mPluginManager = Dependency.get(PluginManager.class);
         mPluginManager.addPluginListener(this, DozeServicePlugin.class, false /* allowMultiple */);
-        mDozeMachine = new DozeFactory().assembleMachine(this, mFalsingManager);
+        mDozeMachine = new DozeFactory().assembleMachine(this, mFalsingManager, mDozeLog);
     }
 
     @Override

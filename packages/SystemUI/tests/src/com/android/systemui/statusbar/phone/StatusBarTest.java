@@ -76,8 +76,8 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.doze.DozeEvent;
 import com.android.systemui.doze.DozeHost;
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
@@ -224,7 +224,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mExpansionStateLogger);
         mNotificationLogger.setVisibilityReporter(mock(Runnable.class));
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
-        DozeLog.traceDozing(mContext, false /* dozing */);
 
         mCommandQueue = mock(CommandQueue.class);
         when(mCommandQueue.asBinder()).thenReturn(new Binder());
@@ -644,7 +643,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         // Starting a pulse should change the scrim controller to the pulsing state
         mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class),
-                DozeLog.PULSE_REASON_NOTIFICATION);
+                DozeEvent.PULSE_REASON_NOTIFICATION);
         verify(mScrimController).transitionTo(eq(ScrimState.PULSING), any());
 
         // Ending a pulse should take it back to keyguard state
@@ -655,21 +654,21 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testPulseWhileDozing_notifyAuthInterrupt() {
         HashSet<Integer> reasonsWantingAuth = new HashSet<>(
-                Collections.singletonList(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
+                Collections.singletonList(DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN));
         HashSet<Integer> reasonsSkippingAuth = new HashSet<>(
-                Arrays.asList(DozeLog.PULSE_REASON_INTENT,
-                        DozeLog.PULSE_REASON_NOTIFICATION,
-                        DozeLog.PULSE_REASON_SENSOR_SIGMOTION,
-                        DozeLog.REASON_SENSOR_PICKUP,
-                        DozeLog.REASON_SENSOR_DOUBLE_TAP,
-                        DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
-                        DozeLog.PULSE_REASON_DOCKING,
-                        DozeLog.REASON_SENSOR_WAKE_UP,
-                        DozeLog.REASON_SENSOR_TAP));
+                Arrays.asList(DozeEvent.PULSE_REASON_INTENT,
+                        DozeEvent.PULSE_REASON_NOTIFICATION,
+                        DozeEvent.PULSE_REASON_SENSOR_SIGMOTION,
+                        DozeEvent.REASON_SENSOR_PICKUP,
+                        DozeEvent.REASON_SENSOR_DOUBLE_TAP,
+                        DozeEvent.PULSE_REASON_SENSOR_LONG_PRESS,
+                        DozeEvent.PULSE_REASON_DOCKING,
+                        DozeEvent.REASON_SENSOR_WAKE_UP,
+                        DozeEvent.REASON_SENSOR_TAP));
         HashSet<Integer> reasonsThatDontPulse = new HashSet<>(
-                Arrays.asList(DozeLog.REASON_SENSOR_PICKUP,
-                        DozeLog.REASON_SENSOR_DOUBLE_TAP,
-                        DozeLog.REASON_SENSOR_TAP));
+                Arrays.asList(DozeEvent.REASON_SENSOR_PICKUP,
+                        DozeEvent.REASON_SENSOR_DOUBLE_TAP,
+                        DozeEvent.REASON_SENSOR_TAP));
 
         doAnswer(invocation -> {
             DozeHost.PulseCallback callback = invocation.getArgument(0);
@@ -678,7 +677,7 @@ public class StatusBarTest extends SysuiTestCase {
         }).when(mDozeScrimController).pulse(any(), anyInt());
 
         mStatusBar.mDozeServiceHost.mWakeLockScreenPerformsAuth = true;
-        for (int i = 0; i < DozeLog.REASONS; i++) {
+        for (int i = 0; i < DozeEvent.TOTAL_REASONS; i++) {
             reset(mKeyguardUpdateMonitor);
             mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class), i);
             if (reasonsWantingAuth.contains(i)) {
@@ -703,7 +702,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         // Starting a pulse while docking should suppress wakeup gesture
         mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class),
-                DozeLog.PULSE_REASON_DOCKING);
+                DozeEvent.PULSE_REASON_DOCKING);
         verify(mStatusBarWindowView).suppressWakeUpGesture(eq(true));
 
         // Ending a pulse should restore wakeup gesture

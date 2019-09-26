@@ -111,6 +111,7 @@ public abstract class PanelView extends FrameLayout {
     private FlingAnimationUtils mFlingAnimationUtilsClosing;
     private FlingAnimationUtils mFlingAnimationUtilsDismissing;
     private final FalsingManager mFalsingManager;
+    private final DozeLog mDozeLog;
     private final VibratorHelper mVibratorHelper;
 
     /**
@@ -203,7 +204,8 @@ public abstract class PanelView extends FrameLayout {
         mJustPeeked = true;
     }
 
-    public PanelView(Context context, AttributeSet attrs) {
+    public PanelView(Context context, AttributeSet attrs, FalsingManager falsingManager,
+            DozeLog dozeLog) {
         super(context, attrs);
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f /* maxLengthSeconds */,
                 0.6f /* speedUpFactor */);
@@ -213,7 +215,8 @@ public abstract class PanelView extends FrameLayout {
                 0.5f /* maxLengthSeconds */, 0.2f /* speedUpFactor */, 0.6f /* x2 */,
                 0.84f /* y2 */);
         mBounceInterpolator = new BounceInterpolator();
-        mFalsingManager = Dependency.get(FalsingManager.class);  // TODO: inject into a controller.
+        mFalsingManager = falsingManager;
+        mDozeLog = dozeLog;
         mNotificationsDragEnabled =
                 getResources().getBoolean(R.bool.config_enableNotificationShadeDrag);
         mVibratorHelper = Dependency.get(VibratorHelper.class);
@@ -476,7 +479,7 @@ public abstract class PanelView extends FrameLayout {
             boolean expand = flingExpands(vel, vectorVel, x, y)
                     || event.getActionMasked() == MotionEvent.ACTION_CANCEL
                     || forceCancel;
-            DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
+            mDozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                     mStatusBar.isFalsingThresholdNeeded(),
                     mStatusBar.isWakeUpComingFromTouch());
                     // Log collapse gesture if on lock screen.

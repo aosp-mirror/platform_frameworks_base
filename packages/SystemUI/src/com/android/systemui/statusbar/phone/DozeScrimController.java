@@ -22,10 +22,13 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
+import com.android.systemui.doze.DozeEvent;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+
+import javax.inject.Inject;
 
 /**
  * Controller which handles all the doze animations of the scrims.
@@ -34,6 +37,7 @@ public class DozeScrimController implements StateListener {
     private static final String TAG = "DozeScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final DozeLog mDozeLog;
     private final DozeParameters mDozeParameters;
     private final Handler mHandler = new Handler();
 
@@ -47,7 +51,7 @@ public class DozeScrimController implements StateListener {
         public void onDisplayBlanked() {
             if (DEBUG) {
                 Log.d(TAG, "Pulse in, mDozing=" + mDozing + " mPulseReason="
-                        + DozeLog.reasonToString(mPulseReason));
+                        + DozeEvent.reasonToString(mPulseReason));
             }
             if (!mDozing) {
                 return;
@@ -68,8 +72,8 @@ public class DozeScrimController implements StateListener {
             // Notifications should time out on their own.  Pulses due to notifications should
             // instead be managed externally based off the notification's lifetime.
             // Dock also controls the time out by self.
-            if (mPulseReason != DozeLog.PULSE_REASON_NOTIFICATION
-                    && mPulseReason != DozeLog.PULSE_REASON_DOCKING) {
+            if (mPulseReason != DozeEvent.PULSE_REASON_NOTIFICATION
+                    && mPulseReason != DozeEvent.PULSE_REASON_DOCKING) {
                 mHandler.postDelayed(mPulseOut, mDozeParameters.getPulseVisibleDuration());
                 mHandler.postDelayed(mPulseOutExtended,
                         mDozeParameters.getPulseVisibleDurationExtended());
@@ -90,14 +94,16 @@ public class DozeScrimController implements StateListener {
          */
         @Override
         public boolean shouldTimeoutWallpaper() {
-            return mPulseReason == DozeLog.PULSE_REASON_DOCKING;
+            return mPulseReason == DozeEvent.PULSE_REASON_DOCKING;
         }
     };
 
-    public DozeScrimController(DozeParameters dozeParameters) {
+    @Inject
+    public DozeScrimController(DozeParameters dozeParameters, DozeLog dozeLog) {
         mDozeParameters = dozeParameters;
         //Never expected to be destroyed
         Dependency.get(StatusBarStateController.class).addCallback(this);
+        mDozeLog = dozeLog;
     }
 
     @VisibleForTesting
@@ -168,14 +174,14 @@ public class DozeScrimController implements StateListener {
     }
 
     private void pulseStarted() {
-        DozeLog.tracePulseStart(mPulseReason);
+        mDozeLog.tracePulseStart(mPulseReason);
         if (mPulseCallback != null) {
             mPulseCallback.onPulseStarted();
         }
     }
 
     private void pulseFinished() {
-        DozeLog.tracePulseFinish();
+        mDozeLog.tracePulseFinish();
         if (mPulseCallback != null) {
             mPulseCallback.onPulseFinished();
             mPulseCallback = null;

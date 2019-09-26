@@ -78,6 +78,8 @@ public class DozeSensorsTest extends SysuiTestCase {
     private AlwaysOnDisplayPolicy mAlwaysOnDisplayPolicy;
     @Mock
     private TriggerSensor mTriggerSensor;
+    @Mock
+    private DozeLog mDozeLog;
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
@@ -101,14 +103,14 @@ public class DozeSensorsTest extends SysuiTestCase {
 
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
-        verify(mCallback).onSensorPulse(eq(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
+        verify(mCallback).onSensorPulse(eq(DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
                 anyFloat(), anyFloat(), eq(null));
 
         mDozeSensors.requestTemporaryDisable();
         reset(mCallback);
         mWakeLockScreenListener.onSensorChanged(mock(SensorManagerPlugin.SensorEvent.class));
         mTestableLooper.processAllMessages();
-        verify(mCallback, never()).onSensorPulse(eq(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
+        verify(mCallback, never()).onSensorPulse(eq(DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN),
                 anyFloat(), anyFloat(), eq(null));
     }
 
@@ -146,7 +148,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         TestableDozeSensors() {
             super(getContext(), mAlarmManager, mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback,
-                    mAlwaysOnDisplayPolicy);
+                    mAlwaysOnDisplayPolicy, mDozeLog);
             for (TriggerSensor sensor : mSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()
