@@ -17,8 +17,7 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
-
-import static junit.framework.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
@@ -655,7 +654,6 @@ public class SettingsBackupTest {
                  Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                  Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
                  Settings.Secure.ODI_CAPTIONS_ENABLED,
-                 Settings.Secure.PACKAGE_VERIFIER_STATE,
                  Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
                  Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
                  Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
@@ -754,12 +752,11 @@ public class SettingsBackupTest {
             Set<String> settings, Set<String> settingsToBackup, Set<String> blacklist) {
         Set<String> settingsNotBackedUp = difference(settings, settingsToBackup);
         Set<String> settingsNotBackedUpOrBlacklisted = difference(settingsNotBackedUp, blacklist);
-        assertTrue(
-                "Settings not backed up or blacklisted",
-                settingsNotBackedUpOrBlacklisted.isEmpty());
+        assertWithMessage("Settings not backed up or blacklisted")
+                .that(settingsNotBackedUpOrBlacklisted).isEmpty();
 
-        assertTrue(
-                "blacklisted settings backed up", intersect(settingsToBackup, blacklist).isEmpty());
+        assertWithMessage("blacklisted settings backed up")
+                .that(intersect(settingsToBackup, blacklist)).isEmpty();
     }
 
     private static Set<String> getCandidateSettings(

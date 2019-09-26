@@ -2849,6 +2849,17 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports device-unique Keystore attestations.  Only available on devices that
+     * also support {@link #FEATURE_STRONGBOX_KEYSTORE}, and can only be used by device owner
+     * apps (see {@link android.app.admin.DevicePolicyManager#generateKeyPair}).
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_DEVICE_UNIQUE_ATTESTATION =
+            "android.hardware.device_unique_attestation";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device has a Keymaster implementation that supports Device ID attestation.
      *
      * @see DevicePolicyManager#isDeviceIdAttestationSupported

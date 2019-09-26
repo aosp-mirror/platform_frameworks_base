@@ -137,6 +137,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private boolean mCommittedReparentToAnimationLeash;
 
+    /**
+     * Callback which is triggered while changing the parent, after setting up the surface but
+     * before asking the parent to assign child layers.
+     */
+    interface PreAssignChildLayersCallback {
+        void onPreAssignChildLayers();
+    }
+
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mPendingTransaction = wms.mTransactionFactory.get();
@@ -176,6 +184,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @Override
     void onParentChanged() {
+        onParentChanged(null);
+    }
+
+    void onParentChanged(PreAssignChildLayersCallback callback) {
         super.onParentChanged();
         if (mParent == null) {
             return;
@@ -193,6 +205,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // mSurfaceControl stays attached to the leash and we just reparent the leash to the
             // new parent.
             reparentSurfaceControl(getPendingTransaction(), mParent.mSurfaceControl);
+        }
+
+        if (callback != null) {
+            callback.onPreAssignChildLayers();
         }
 
         // Either way we need to ask the parent to assign us a Z-order.

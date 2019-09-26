@@ -564,6 +564,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Last systemUiVisibility we dispatched to windows.
     private int mLastDispatchedSystemUiVisibility = 0;
 
+    private final ArrayList<TaskStack> mTmpAlwaysOnTopStacks = new ArrayList<>();
+    private final ArrayList<TaskStack> mTmpNormalStacks = new ArrayList<>();
+    private final ArrayList<TaskStack> mTmpHomeStacks = new ArrayList<>();
+
     /** Corner radius that windows should have in order to match the display. */
     private final float mWindowCornerRadius;
 
@@ -4266,54 +4270,56 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         void assignStackOrdering(SurfaceControl.Transaction t) {
-
-            final int HOME_STACK_STATE = 0;
-            final int NORMAL_STACK_STATE = 1;
-            final int ALWAYS_ON_TOP_STATE = 2;
+            if (getParent() == null) {
+                return;
+            }
+            mTmpAlwaysOnTopStacks.clear();
+            mTmpHomeStacks.clear();
+            mTmpNormalStacks.clear();
+            for (int i = 0; i < mChildren.size(); ++i) {
+                final TaskStack s = mChildren.get(i);
+                if (s.isAlwaysOnTop()) {
+                    mTmpAlwaysOnTopStacks.add(s);
+                } else if (s.isActivityTypeHome()) {
+                    mTmpHomeStacks.add(s);
+                } else {
+                    mTmpNormalStacks.add(s);
+                }
+            }
 
             int layer = 0;
-            int layerForAnimationLayer = 0;
-            int layerForBoostedAnimationLayer = 0;
-            int layerForHomeAnimationLayer = 0;
+            // Place home stacks to the bottom.
+            for (int i = 0; i < mTmpHomeStacks.size(); i++) {
+                mTmpHomeStacks.get(i).assignLayer(t, layer++);
+            }
+            // The home animation layer is between the home stacks and the normal stacks.
+            final int layerForHomeAnimationLayer = layer++;
+            int layerForSplitScreenDividerAnchor = layer++;
+            int layerForAnimationLayer = layer++;
+            for (int i = 0; i < mTmpNormalStacks.size(); i++) {
+                final TaskStack s = mTmpNormalStacks.get(i);
+                s.assignLayer(t, layer++);
+                if (s.inSplitScreenWindowingMode()) {
+                    // The split screen divider anchor is located above the split screen window.
+                    layerForSplitScreenDividerAnchor = layer++;
+                }
+                if (s.isTaskAnimating() || s.isAppAnimating()) {
+                    // The animation layer is located above the highest animating stack and no
+                    // higher.
+                    layerForAnimationLayer = layer++;
+                }
+            }
+            // The boosted animation layer is between the normal stacks and the always on top
+            // stacks.
+            final int layerForBoostedAnimationLayer = layer++;
+            for (int i = 0; i < mTmpAlwaysOnTopStacks.size(); i++) {
+                mTmpAlwaysOnTopStacks.get(i).assignLayer(t, layer++);
+            }
 
-            for (int state = 0; state <= ALWAYS_ON_TOP_STATE; state++) {
-                for (int i = 0; i < mChildren.size(); i++) {
-                    final TaskStack s = mChildren.get(i);
-                    if (state == HOME_STACK_STATE && !s.isActivityTypeHome()) {
-                        continue;
-                    } else if (state == NORMAL_STACK_STATE && (s.isActivityTypeHome()
-                            || s.isAlwaysOnTop())) {
-                        continue;
-                    } else if (state == ALWAYS_ON_TOP_STATE && !s.isAlwaysOnTop()) {
-                        continue;
-                    }
-                    s.assignLayer(t, layer++);
-                    if (s.inSplitScreenWindowingMode() && mSplitScreenDividerAnchor != null) {
-                        t.setLayer(mSplitScreenDividerAnchor, layer++);
-                    }
-                    if ((s.isTaskAnimating() || s.isAppAnimating())
-                            && state != ALWAYS_ON_TOP_STATE) {
-                        // Ensure the animation layer ends up above the
-                        // highest animating stack and no higher.
-                        layerForAnimationLayer = layer++;
-                    }
-                    if (state != ALWAYS_ON_TOP_STATE) {
-                        layerForBoostedAnimationLayer = layer++;
-                    }
-                }
-                if (state == HOME_STACK_STATE) {
-                    layerForHomeAnimationLayer = layer++;
-                }
-            }
-            if (mAppAnimationLayer != null) {
-                t.setLayer(mAppAnimationLayer, layerForAnimationLayer);
-            }
-            if (mBoostedAppAnimationLayer != null) {
-                t.setLayer(mBoostedAppAnimationLayer, layerForBoostedAnimationLayer);
-            }
-            if (mHomeAppAnimationLayer != null) {
-                t.setLayer(mHomeAppAnimationLayer, layerForHomeAnimationLayer);
-            }
+            t.setLayer(mHomeAppAnimationLayer, layerForHomeAnimationLayer);
+            t.setLayer(mAppAnimationLayer, layerForAnimationLayer);
+            t.setLayer(mSplitScreenDividerAnchor, layerForSplitScreenDividerAnchor);
+            t.setLayer(mBoostedAppAnimationLayer, layerForBoostedAnimationLayer);
         }
 
         @Override
@@ -4335,27 +4341,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void onParentChanged() {
-            super.onParentChanged();
             if (getParent() != null) {
-                mAppAnimationLayer = makeChildSurface(null)
-                        .setName("animationLayer")
-                        .build();
-                mBoostedAppAnimationLayer = makeChildSurface(null)
-                        .setName("boostedAnimationLayer")
-                        .build();
-                mHomeAppAnimationLayer = makeChildSurface(null)
-                        .setName("homeAnimationLayer")
-                        .build();
-                mSplitScreenDividerAnchor = makeChildSurface(null)
-                        .setName("splitScreenDividerAnchor")
-                        .build();
-                getPendingTransaction()
-                        .show(mAppAnimationLayer)
-                        .show(mBoostedAppAnimationLayer)
-                        .show(mHomeAppAnimationLayer)
-                        .show(mSplitScreenDividerAnchor);
-                scheduleAnimation();
+                super.onParentChanged(() -> {
+                    mAppAnimationLayer = makeChildSurface(null)
+                            .setName("animationLayer")
+                            .build();
+                    mBoostedAppAnimationLayer = makeChildSurface(null)
+                            .setName("boostedAnimationLayer")
+                            .build();
+                    mHomeAppAnimationLayer = makeChildSurface(null)
+                            .setName("homeAnimationLayer")
+                            .build();
+                    mSplitScreenDividerAnchor = makeChildSurface(null)
+                            .setName("splitScreenDividerAnchor")
+                            .build();
+                    getPendingTransaction()
+                            .show(mAppAnimationLayer)
+                            .show(mBoostedAppAnimationLayer)
+                            .show(mHomeAppAnimationLayer)
+                            .show(mSplitScreenDividerAnchor);
+                });
             } else {
+                super.onParentChanged();
                 mWmService.mTransactionFactory.get()
                         .remove(mAppAnimationLayer)
                         .remove(mBoostedAppAnimationLayer)

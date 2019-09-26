@@ -511,6 +511,7 @@
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
   <java-symbol type="integer" name="config_multiuserMaxRunningUsers" />
   <java-symbol type="bool" name="config_multiuserDelayUserDataLocking" />
+  <java-symbol type="integer" name="config_userTypePackageWhitelistMode"/>
   <java-symbol type="integer" name="config_safe_media_volume_index" />
   <java-symbol type="integer" name="config_safe_media_volume_usb_mB" />
   <java-symbol type="integer" name="config_mobile_mtu" />
@@ -2093,6 +2094,8 @@
   <java-symbol type="string" name="adb_active_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_title" />
   <java-symbol type="string" name="test_harness_mode_notification_message" />
+  <java-symbol type="string" name="console_running_notification_title" />
+  <java-symbol type="string" name="console_running_notification_message" />
   <java-symbol type="string" name="taking_remote_bugreport_notification_title" />
   <java-symbol type="string" name="share_remote_bugreport_notification_title" />
   <java-symbol type="string" name="sharing_remote_bugreport_notification_title" />

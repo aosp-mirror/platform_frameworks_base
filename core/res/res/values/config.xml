@@ -2527,6 +2527,16 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
+    <!-- Whether to only install system packages on a user if they're whitelisted for that user
+         type. These are flags and can be freely combined.
+         0 (0b000) - disable whitelist (install all system packages; no logging)
+         1 (0b001) - enforce (only install system packages if they are whitelisted)
+         2 (0b010) - log (log when a non-whitelisted package is run)
+         4 (0b100) - treat any package not mentioned in the whitelist file as implicitly whitelisted
+        Note: This list must be kept current with PACKAGE_WHITELIST_MODE_PROP in
+        frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller.java -->
+    <integer name="config_userTypePackageWhitelistMode">5</integer> <!-- 0b101 -->
+
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
 

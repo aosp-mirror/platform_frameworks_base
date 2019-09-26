@@ -85,6 +85,14 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
         mPipManager.onConfigurationChanged(newConfig);
     }
 
+    public void setShelfHeight(boolean visible, int height) {
+        if (mPipManager == null) {
+            return;
+        }
+
+        mPipManager.setShelfHeight(visible, height);
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (mPipManager == null) {

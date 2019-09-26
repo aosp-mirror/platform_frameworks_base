@@ -504,6 +504,8 @@ public class ConnectivityServiceTest {
             // Waits for the NetworkAgent to be registered, which includes the creation of the
             // NetworkMonitor.
             waitForIdle(TIMEOUT_MS);
+            HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
+            HandlerUtilsKt.waitForIdle(ConnectivityThread.get(), TIMEOUT_MS);
         }
 
         @Override
@@ -4315,16 +4317,16 @@ public class ConnectivityServiceTest {
         assertFalse(mCm.isNetworkSupported(TYPE_NONE));
 
         assertThrows(IllegalArgumentException.class,
-                () -> { mCm.networkCapabilitiesForType(TYPE_NONE); });
+                () -> mCm.networkCapabilitiesForType(TYPE_NONE));
 
         Class<UnsupportedOperationException> unsupported = UnsupportedOperationException.class;
-        assertThrows(unsupported, () -> { mCm.startUsingNetworkFeature(TYPE_WIFI, ""); });
-        assertThrows(unsupported, () -> { mCm.stopUsingNetworkFeature(TYPE_WIFI, ""); });
+        assertThrows(unsupported, () -> mCm.startUsingNetworkFeature(TYPE_WIFI, ""));
+        assertThrows(unsupported, () -> mCm.stopUsingNetworkFeature(TYPE_WIFI, ""));
         // TODO: let test context have configuration application target sdk version
         // and test that pre-M requesting for TYPE_NONE sends back APN_REQUEST_FAILED
-        assertThrows(unsupported, () -> { mCm.startUsingNetworkFeature(TYPE_NONE, ""); });
-        assertThrows(unsupported, () -> { mCm.stopUsingNetworkFeature(TYPE_NONE, ""); });
-        assertThrows(unsupported, () -> { mCm.requestRouteToHostAddress(TYPE_NONE, null); });
+        assertThrows(unsupported, () -> mCm.startUsingNetworkFeature(TYPE_NONE, ""));
+        assertThrows(unsupported, () -> mCm.stopUsingNetworkFeature(TYPE_NONE, ""));
+        assertThrows(unsupported, () -> mCm.requestRouteToHostAddress(TYPE_NONE, null));
     }
 
     @Test

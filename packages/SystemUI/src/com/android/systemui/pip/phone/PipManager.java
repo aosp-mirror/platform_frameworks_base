@@ -143,14 +143,6 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
-            mHandler.post(() -> {
-                mPipBoundsHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
-                mTouchHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
-            });
-        }
-
-        @Override
         public void onMinimizedStateChanged(boolean isMinimized) {
             mHandler.post(() -> {
                 mPipBoundsHandler.onMinimizedStateChanged(isMinimized);
@@ -161,14 +153,8 @@ public class PipManager implements BasePipManager {
         @Override
         public void onMovementBoundsChanged(Rect animatingBounds, boolean fromImeAdjustment,
                 boolean fromShelfAdjustment) {
-            mHandler.post(() -> {
-                // Populate the inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
-                mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        animatingBounds, mTmpDisplayInfo);
-                mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
-                        animatingBounds, fromImeAdjustment, fromShelfAdjustment,
-                        mTmpDisplayInfo.rotation);
-            });
+            mHandler.post(() -> updateMovementBounds(animatingBounds, fromImeAdjustment,
+                    fromShelfAdjustment));
         }
 
         @Override
@@ -277,6 +263,31 @@ public class PipManager implements BasePipManager {
      */
     public void showPictureInPictureMenu() {
         mTouchHandler.showPictureInPictureMenu();
+    }
+
+    /**
+     * Sets both shelf visibility and its height.
+     */
+    @Override
+    public void setShelfHeight(boolean visible, int height) {
+        mHandler.post(() -> {
+            final boolean changed = mPipBoundsHandler.setShelfHeight(visible, height);
+            if (changed) {
+                mTouchHandler.onShelfVisibilityChanged(visible, height);
+                updateMovementBounds(mPipBoundsHandler.getLastDestinationBounds(),
+                        false /* fromImeAdjustment */, true /* fromShelfAdjustment */);
+            }
+        });
+    }
+
+    private void updateMovementBounds(Rect animatingBounds, boolean fromImeAdjustment,
+            boolean fromShelfAdjustment) {
+        // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler first.
+        mPipBoundsHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
+                animatingBounds, mTmpDisplayInfo);
+        mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
+                animatingBounds, fromImeAdjustment, fromShelfAdjustment,
+                mTmpDisplayInfo.rotation);
     }
 
     /**

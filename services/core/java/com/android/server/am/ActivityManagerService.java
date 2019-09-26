@@ -5320,8 +5320,40 @@ public class ActivityManagerService extends IActivityManager.Stub
                     });
             mUserController.scheduleStartProfiles();
         }
+        // UART is on if init's console service is running, send a warning notification.
+        showConsoleNotificationIfActive();
 
         t.traceEnd();
+    }
+
+    private void showConsoleNotificationIfActive() {
+        if (!SystemProperties.get("init.svc.console").equals("running")) {
+            return;
+        }
+        String title = mContext
+                .getString(com.android.internal.R.string.console_running_notification_title);
+        String message = mContext
+                .getString(com.android.internal.R.string.console_running_notification_message);
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
+                        .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                        .setWhen(0)
+                        .setOngoing(true)
+                        .setTicker(title)
+                        .setDefaults(0)  // please be quiet
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color
+                                        .system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .build();
+
+        NotificationManager notificationManager =
+                mContext.getSystemService(NotificationManager.class);
+        notificationManager.notifyAsUser(
+                null, SystemMessage.NOTE_SERIAL_CONSOLE_ENABLED, notification, UserHandle.ALL);
+
     }
 
     @Override
@@ -15267,7 +15299,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 mBatteryStatsService.removeUid(uid);
                                 if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                                     mAppOpsService.resetAllModes(UserHandle.getUserId(uid),
-                                            intent.getData().getSchemeSpecificPart());
+                                            intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME));
                                 } else {
                                     mAppOpsService.uidRemoved(uid);
                                 }

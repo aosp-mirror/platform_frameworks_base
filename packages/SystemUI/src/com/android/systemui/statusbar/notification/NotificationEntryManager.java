@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -390,7 +391,7 @@ public class NotificationEntryManager implements
         }
 
         mNotificationData.updateRanking(rankingMap);
-        NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
+        Ranking ranking = new Ranking();
         rankingMap.getRanking(key, ranking);
 
         NotificationEntry entry = new NotificationEntry(notification, ranking);
@@ -513,10 +514,11 @@ public class NotificationEntryManager implements
         if (rankingMap == null) {
             return;
         }
-        NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         for (NotificationEntry pendingNotification : mPendingNotifications.values()) {
-            rankingMap.getRanking(pendingNotification.key, ranking);
-            pendingNotification.setRanking(ranking);
+            Ranking ranking = new Ranking();
+            if (rankingMap.getRanking(pendingNotification.key(), ranking)) {
+                pendingNotification.setRanking(ranking);
+            }
         }
     }
 

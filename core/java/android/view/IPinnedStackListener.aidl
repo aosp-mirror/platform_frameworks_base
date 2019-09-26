@@ -55,14 +55,6 @@ oneway interface IPinnedStackListener {
     void onImeVisibilityChanged(boolean imeVisible, int imeHeight);
 
     /**
-     * Called when window manager decides to adjust the pinned stack bounds because of the shelf, or
-     * when the listener is first registered to allow the listener to synchronized its state with
-     * the controller.  This call will always be followed by a onMovementBoundsChanged() call
-     * with fromShelfAdjustment set to {@code true}.
-     */
-    void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight);
-
-    /**
      * Called when window manager decides to adjust the minimized state, or when the listener
      * is first registered to allow the listener to synchronized its state with the controller.
      */

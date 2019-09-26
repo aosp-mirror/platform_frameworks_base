@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2019 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!--
+This XML file declares which system packages should be initially installed for new users based on
+the type of user. All system packages on the device should ideally have an entry in an xml file
+(keys by its manifest name).
+
+Main user-types (every user will be at least one of these types) are:
+  SYSTEM    (user 0)
+  FULL      (any non-profile human user)
+  PROFILE   (profile human user)
+
+Additional optional types are:   GUEST,    RESTRICTED,    MANAGED_PROFILE,    EPHEMERAL,    DEMO
+
+The meaning of each of these user types is delineated by flags in
+frameworks/base/core/java/android/content/pm/UserInfo.java.
+See frameworks/base/services/core/java/com/android/server/pm/UserSystemPackageInstaller#getFlagsFromUserTypes
+
+The following three examples should cover most normal cases:
+
+1. For a system package to be pre-installed only in user 0:
+
+   <install-in-user-type package="com.android.example">
+       <install-in user-type="SYSTEM">
+   </install-in-user-type>
+
+
+2. For a system package to be pre-installed on all human users (e.g. a web browser), i.e. to be
+installed on any user of type type FULL or PROFILE (since this covers all human users):
+
+   <install-in-user-type package="com.android.example">
+       <install-in user-type="FULL">
+       <install-in user-type="PROFILE">
+   </install-in-user-type>
+
+
+3. For a system package to be pre-installed on all human users except for profile users (e.g. a
+wallpaper app, since profiles cannot display wallpaper):
+
+   <install-in-user-type package="com.android.example">
+       <install-in user-type="FULL">
+   </install-in-user-type>
+
+
+Some system packages truly are required to be on all users, regardless of type, in which case use:
+   <install-in-user-type package="com.android.example">
+       <install-in user-type="SYSTEM">
+       <install-in user-type="FULL">
+       <install-in user-type="PROFILE">
+   </install-in-user-type>
+
+More fine-grained options are also available (see below). Additionally, packages can blacklist
+user types. Blacklists override any whitelisting (in any file).
+E.g.
+     <install-in-user-type package="com.android.example">
+        <install-in user-type="FULL" />
+        <do-not-install-in user-type="GUEST" />
+    </install-in-user-type>
+
+If a user is of type FULL and GUEST, this package will NOT be installed, because the
+'do-not-install-in' takes precedence over 'install-in'.
+
+The way that a device treats system packages that do not have any entry (for any user type) at all
+is determined by the config resource value config_userTypePackageWhitelistMode.
+See frameworks/base/core/res/res/values/config.xml#config_userTypePackageWhitelistMode.
+
+Changes to the whitelist during system updates can result in installing new system packages
+to pre-existing users, but cannot uninstall system packages from pre-existing users.
+-->
+<config>
+    <install-in-user-type package="com.android.providers.settings">
+        <install-in user-type="SYSTEM" />
+        <install-in user-type="FULL" />
+        <install-in user-type="PROFILE" />
+    </install-in-user-type>
+</config>

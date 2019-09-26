@@ -27,17 +27,32 @@ import org.junit.Test
 class CodeUtilsTest {
     @Test
     fun hash() {
-        assertEquals(-1704685243, CodeUtils.hash("test", LogLevel.DEBUG))
+        assertEquals(-1259556708, CodeUtils.hash("Test.java:50", "test",
+                LogLevel.DEBUG, LogGroup("test", true, true, "TAG")))
+    }
+
+    @Test
+    fun hash_changeLocation() {
+        assertEquals(15793504, CodeUtils.hash("Test.java:10", "test2",
+                LogLevel.DEBUG, LogGroup("test", true, true, "TAG")))
     }
 
     @Test
     fun hash_changeLevel() {
-        assertEquals(-1176900998, CodeUtils.hash("test", LogLevel.ERROR))
+        assertEquals(-731772463, CodeUtils.hash("Test.java:50", "test",
+                LogLevel.ERROR, LogGroup("test", true, true, "TAG")))
     }
 
     @Test
     fun hash_changeMessage() {
-        assertEquals(-1305634931, CodeUtils.hash("test2", LogLevel.DEBUG))
+        assertEquals(-2026343204, CodeUtils.hash("Test.java:50", "test2",
+                LogLevel.DEBUG, LogGroup("test", true, true, "TAG")))
+    }
+
+    @Test
+    fun hash_changeGroup() {
+        assertEquals(1607870166, CodeUtils.hash("Test.java:50", "test2",
+                LogLevel.DEBUG, LogGroup("test2", true, true, "TAG")))
     }
 
     @Test

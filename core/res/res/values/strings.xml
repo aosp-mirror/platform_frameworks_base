@@ -1745,6 +1745,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_startViewPermissionUsage">Allows the holder to start the permission usage for an app. Should never be needed for normal apps.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_accessibilityShortcutTarget">accessibility shortcut target</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_accessibilityShortcutTarget">Allows an app to define the accessibility shortcut target.</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
@@ -3628,6 +3633,11 @@
     <string name="test_harness_mode_notification_title">Test Harness Mode enabled</string>
     <!-- Message of notification shown when Test Harness Mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="test_harness_mode_notification_message">Perform a factory reset to disable Test Harness Mode.</string>
+
+    <!-- Title of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
+    <string name="console_running_notification_title">Serial console enabled</string>
+    <!-- Message of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
+    <string name="console_running_notification_message">Performance is impacted. To disable, check bootloader.</string>
 
     <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>

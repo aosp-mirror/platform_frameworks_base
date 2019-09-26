@@ -32,24 +32,28 @@ class ViewerConfigBuilder(
         group: LogGroup
     ) {
         if (group.enabled) {
-            val key = CodeUtils.hash(messageString, level)
+            val position = CodeUtils.getPositionString(call, fileName)
+            val key = CodeUtils.hash(position, messageString, level, group)
             if (statements.containsKey(key)) {
-                if (statements[key] != Triple(messageString, level, group)) {
+                if (statements[key] != LogCall(messageString, level, group, position)) {
                     throw HashCollisionException(
                             "Please modify the log message \"$messageString\" " +
                                     "or \"${statements[key]}\" - their hashes are equal.")
                 }
             } else {
                 groups.add(group)
-                statements[key] = Triple(messageString, level, group)
+                statements[key] = LogCall(messageString, level, group, position)
+                call.range.isPresent
             }
         }
     }
 
-    private val statements: MutableMap<Int, Triple<String, LogLevel, LogGroup>> = mutableMapOf()
+    private val statements: MutableMap<Int, LogCall> = mutableMapOf()
     private val groups: MutableSet<LogGroup> = mutableSetOf()
+    private var fileName: String = ""
 
-    fun processClass(unit: CompilationUnit) {
+    fun processClass(unit: CompilationUnit, fileName: String) {
+        this.fileName = fileName
         protoLogCallVisitor.process(unit, this)
     }
 
@@ -66,11 +70,13 @@ class ViewerConfigBuilder(
             writer.name(key.toString())
             writer.beginObject()
             writer.name("message")
-            writer.value(value.first)
+            writer.value(value.messageString)
             writer.name("level")
-            writer.value(value.second.name)
+            writer.value(value.logLevel.name)
             writer.name("group")
-            writer.value(value.third.name)
+            writer.value(value.logGroup.name)
+            writer.name("at")
+            writer.value(value.position)
             writer.endObject()
         }
         writer.endObject()
@@ -88,4 +94,11 @@ class ViewerConfigBuilder(
         stringWriter.buffer.append('\n')
         return stringWriter.toString()
     }
+
+    data class LogCall(
+        val messageString: String,
+        val logLevel: LogLevel,
+        val logGroup: LogGroup,
+        val position: String
+    )
 }

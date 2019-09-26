@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.testapp;
 
 import static android.os.SystemClock.sleep;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 
 import static com.android.server.wm.flicker.testapp.ActivityOptions.EXTRA_STARVE_UI_THREAD;
 
@@ -39,8 +38,8 @@ public class SeamlessRotationActivity extends Activity {
         super.onCreate(savedInstanceState);
         enableSeamlessRotation();
         setContentView(R.layout.activity_simple);
-        boolean starveUiThread = getIntent().getExtras() != null &&
-                getIntent().getExtras().getBoolean(EXTRA_STARVE_UI_THREAD);
+        boolean starveUiThread = getIntent().getExtras() != null
+                && getIntent().getExtras().getBoolean(EXTRA_STARVE_UI_THREAD);
         if (starveUiThread) {
             starveUiThread();
         }

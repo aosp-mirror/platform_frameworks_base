@@ -25,5 +25,6 @@
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="directory-keys" value="/sdcard/flicker" />
         <option name="collect-on-run-ended-only" value="true" />
+        <option name="clean-up" value="false" />
     </metrics_collector>
 </configuration>

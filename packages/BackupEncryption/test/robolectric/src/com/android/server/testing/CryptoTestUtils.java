@@ -16,7 +16,11 @@
 
 package com.android.server.backup.testing;
 
+import com.android.server.backup.encryption.chunk.ChunkHash;
+import com.android.server.backup.encryption.protos.nano.ChunksMetadataProto;
+
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.crypto.KeyGenerator;
@@ -41,5 +45,73 @@ public class CryptoTestUtils {
         Random random = new Random();
         random.nextBytes(bytes);
         return bytes;
+    }
+
+    public static ChunksMetadataProto.Chunk newChunk(ChunkHash hash, int length) {
+        return newChunk(hash.getHash(), length);
+    }
+
+    public static ChunksMetadataProto.Chunk newChunk(byte[] hash, int length) {
+        ChunksMetadataProto.Chunk newChunk = new ChunksMetadataProto.Chunk();
+        newChunk.hash = Arrays.copyOf(hash, hash.length);
+        newChunk.length = length;
+        return newChunk;
+    }
+
+    public static ChunksMetadataProto.ChunkListing newChunkListing(
+            String docId,
+            byte[] fingerprintSalt,
+            int cipherType,
+            int orderingType,
+            ChunksMetadataProto.Chunk... chunks) {
+        ChunksMetadataProto.ChunkListing chunkListing =
+                newChunkListingWithoutDocId(fingerprintSalt, cipherType, orderingType, chunks);
+        chunkListing.documentId = docId;
+        return chunkListing;
+    }
+
+    public static ChunksMetadataProto.ChunkListing newChunkListingWithoutDocId(
+            byte[] fingerprintSalt,
+            int cipherType,
+            int orderingType,
+            ChunksMetadataProto.Chunk... chunks) {
+        ChunksMetadataProto.ChunkListing chunkListing = new ChunksMetadataProto.ChunkListing();
+        chunkListing.fingerprintMixerSalt = Arrays.copyOf(fingerprintSalt, fingerprintSalt.length);
+        chunkListing.cipherType = cipherType;
+        chunkListing.chunkOrderingType = orderingType;
+        chunkListing.chunks = chunks;
+        return chunkListing;
+    }
+
+    public static ChunksMetadataProto.ChunkOrdering newChunkOrdering(
+            int[] starts, byte[] checksum) {
+        ChunksMetadataProto.ChunkOrdering chunkOrdering = new ChunksMetadataProto.ChunkOrdering();
+        chunkOrdering.starts = Arrays.copyOf(starts, starts.length);
+        chunkOrdering.checksum = Arrays.copyOf(checksum, checksum.length);
+        return chunkOrdering;
+    }
+
+    public static ChunksMetadataProto.ChunkListing clone(
+            ChunksMetadataProto.ChunkListing original) {
+        ChunksMetadataProto.Chunk[] clonedChunks;
+        if (original.chunks == null) {
+            clonedChunks = null;
+        } else {
+            clonedChunks = new ChunksMetadataProto.Chunk[original.chunks.length];
+            for (int i = 0; i < original.chunks.length; i++) {
+                clonedChunks[i] = clone(original.chunks[i]);
+            }
+        }
+
+        return newChunkListing(
+                original.documentId,
+                original.fingerprintMixerSalt,
+                original.cipherType,
+                original.chunkOrderingType,
+                clonedChunks);
+    }
+
+    public static ChunksMetadataProto.Chunk clone(ChunksMetadataProto.Chunk original) {
+        return newChunk(original.hash, original.length);
     }
 }

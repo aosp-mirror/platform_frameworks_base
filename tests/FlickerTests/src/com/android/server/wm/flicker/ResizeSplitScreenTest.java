@@ -28,12 +28,16 @@ import android.platform.helpers.IAppHelper;
 import android.util.Rational;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 /**
  * Test split screen resizing window transitions.
@@ -41,10 +45,13 @@ import org.junit.runner.RunWith;
  */
 @LargeTest
 @RunWith(AndroidJUnit4.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 140856143)
+@Ignore("Waiting bug feedback")
 public class ResizeSplitScreenTest extends FlickerTestBase {
 
     public ResizeSplitScreenTest() {
-        this.testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+        this.mTestApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
@@ -53,7 +60,7 @@ public class ResizeSplitScreenTest extends FlickerTestBase {
         IAppHelper bottomApp = new StandardAppHelper(InstrumentationRegistry
                 .getInstrumentation(),
                 "com.android.server.wm.flicker.testapp", "ImeApp");
-        super.runTransition(resizeSplitScreen(testApp, bottomApp, uiDevice, new Rational(1, 3),
+        super.runTransition(resizeSplitScreen(mTestApp, bottomApp, mUiDevice, new Rational(1, 3),
                 new Rational(2, 3)).includeJankyRuns().build());
     }
 

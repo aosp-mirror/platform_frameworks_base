@@ -38,7 +38,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.DumpController;
-import com.android.systemui.ScreenDecorations;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
@@ -64,7 +63,6 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
 
     private AssistHandleBehaviorController mAssistHandleBehaviorController;
 
-    @Mock private ScreenDecorations mMockScreenDecorations;
     @Mock private AssistUtils mMockAssistUtils;
     @Mock private Handler mMockHandler;
     @Mock private PhenotypeHelper mMockPhenotypeHelper;
@@ -74,6 +72,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
     @Mock private AssistHandleBehaviorController.BehaviorController mMockTestBehavior;
     @Mock private NavigationModeController mMockNavigationModeController;
     @Mock private DumpController mMockDumpController;
+    @Mock private AssistHandleViewController mMockAssistHandleViewController;
 
     @Before
     public void setup() {
@@ -97,7 +96,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
                         mContext,
                         mMockAssistUtils,
                         mMockHandler,
-                        () -> mMockScreenDecorations,
+                        () -> mMockAssistHandleViewController,
                         mMockPhenotypeHelper,
                         behaviorMap,
                         mMockNavigationModeController,
@@ -114,14 +113,14 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.showAndStay();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.hide();
 
         // Assert
-        verify(mMockScreenDecorations).setAssistHintVisible(false);
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verify(mMockAssistHandleViewController).setAssistHintVisible(false);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -129,13 +128,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.hide();
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -143,14 +142,14 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndStay();
 
         // Assert
-        verify(mMockScreenDecorations).setAssistHintVisible(true);
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verify(mMockAssistHandleViewController).setAssistHintVisible(true);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -158,13 +157,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.showAndStay();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndStay();
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -172,13 +171,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(null);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndStay();
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -186,15 +185,15 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGo();
 
         // Assert
-        InOrder inOrder = inOrder(mMockScreenDecorations);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(true);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(false);
+        InOrder inOrder = inOrder(mMockAssistHandleViewController);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(true);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(false);
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -203,14 +202,14 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.showAndStay();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGo();
 
         // Assert
-        verify(mMockScreenDecorations).setAssistHintVisible(false);
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verify(mMockAssistHandleViewController).setAssistHintVisible(false);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -221,13 +220,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
                 eq(SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS),
                 anyLong())).thenReturn(10000L);
         mAssistHandleBehaviorController.showAndGo();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGo();
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -235,13 +234,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(null);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGo();
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -249,15 +248,15 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGoDelayed(1000, false);
 
         // Assert
-        InOrder inOrder = inOrder(mMockScreenDecorations);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(true);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(false);
+        InOrder inOrder = inOrder(mMockAssistHandleViewController);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(true);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(false);
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -266,14 +265,14 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.showAndStay();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGoDelayed(1000, false);
 
         // Assert
-        verify(mMockScreenDecorations).setAssistHintVisible(false);
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verify(mMockAssistHandleViewController).setAssistHintVisible(false);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -281,16 +280,16 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
         mAssistHandleBehaviorController.showAndStay();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGoDelayed(1000, true);
 
         // Assert
-        InOrder inOrder = inOrder(mMockScreenDecorations);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(false);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(true);
-        inOrder.verify(mMockScreenDecorations).setAssistHintVisible(false);
+        InOrder inOrder = inOrder(mMockAssistHandleViewController);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(false);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(true);
+        inOrder.verify(mMockAssistHandleViewController).setAssistHintVisible(false);
         inOrder.verifyNoMoreInteractions();
     }
 
@@ -302,13 +301,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
                 eq(SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOWN_FREQUENCY_THRESHOLD_MS),
                 anyLong())).thenReturn(10000L);
         mAssistHandleBehaviorController.showAndGo();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGoDelayed(1000, false);
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test
@@ -316,13 +315,13 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
         // Arrange
         when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(null);
         mAssistHandleBehaviorController.hide();
-        reset(mMockScreenDecorations);
+        reset(mMockAssistHandleViewController);
 
         // Act
         mAssistHandleBehaviorController.showAndGoDelayed(1000, false);
 
         // Assert
-        verifyNoMoreInteractions(mMockScreenDecorations);
+        verifyNoMoreInteractions(mMockAssistHandleViewController);
     }
 
     @Test

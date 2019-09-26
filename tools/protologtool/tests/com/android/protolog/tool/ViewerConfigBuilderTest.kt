@@ -31,6 +31,10 @@ class ViewerConfigBuilderTest {
         private val TEST1 = ViewerConfigParser.ConfigEntry("test1", LogLevel.INFO.name, TAG1)
         private val TEST2 = ViewerConfigParser.ConfigEntry("test2", LogLevel.DEBUG.name, TAG2)
         private val TEST3 = ViewerConfigParser.ConfigEntry("test3", LogLevel.ERROR.name, TAG2)
+        private val GROUP1 = LogGroup("TEST_GROUP", true, true, TAG1)
+        private val GROUP2 = LogGroup("DEBUG_GROUP", true, true, TAG2)
+        private val GROUP3 = LogGroup("DEBUG_GROUP", true, true, TAG2)
+        private const val PATH = "/tmp/test.java"
     }
 
     private val processor: ProtoLogCallProcessor = Mockito.mock(ProtoLogCallProcessor::class.java)
@@ -50,25 +54,25 @@ class ViewerConfigBuilderTest {
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
-                    LogGroup("TEST_GROUP", true, true, TAG1))
+                    GROUP1)
             visitor.processCall(MethodCallExpr(), TEST2.messageString, LogLevel.DEBUG,
-                    LogGroup("DEBUG_GROUP", true, true, TAG2))
+                    GROUP2)
             visitor.processCall(MethodCallExpr(), TEST3.messageString, LogLevel.ERROR,
-                    LogGroup("DEBUG_GROUP", true, true, TAG2))
+                    GROUP3)
 
             invocation.arguments[0] as CompilationUnit
         }
 
-        configBuilder.processClass(dummyCompilationUnit)
+        configBuilder.processClass(dummyCompilationUnit, PATH)
 
         val parsedConfig = parseConfig(configBuilder.build())
         assertEquals(3, parsedConfig.size)
-        assertEquals(TEST1, parsedConfig[CodeUtils.hash(TEST1.messageString,
-                LogLevel.INFO)])
-        assertEquals(TEST2, parsedConfig[CodeUtils.hash(TEST2.messageString,
-                LogLevel.DEBUG)])
-        assertEquals(TEST3, parsedConfig[CodeUtils.hash(TEST3.messageString,
-                LogLevel.ERROR)])
+        assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH,
+	           TEST1.messageString, LogLevel.INFO, GROUP1)])
+        assertEquals(TEST2, parsedConfig[CodeUtils.hash(PATH, TEST2.messageString,
+	           LogLevel.DEBUG, GROUP2)])
+        assertEquals(TEST3, parsedConfig[CodeUtils.hash(PATH, TEST3.messageString,
+	           LogLevel.ERROR, GROUP3)])
     }
 
     @Test
@@ -78,20 +82,21 @@ class ViewerConfigBuilderTest {
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
-                    LogGroup("TEST_GROUP", true, true, TAG1))
+                    GROUP1)
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
-                    LogGroup("TEST_GROUP", true, true, TAG1))
+                    GROUP1)
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
-                    LogGroup("TEST_GROUP", true, true, TAG1))
+                    GROUP1)
 
             invocation.arguments[0] as CompilationUnit
         }
 
-        configBuilder.processClass(dummyCompilationUnit)
+        configBuilder.processClass(dummyCompilationUnit, PATH)
 
         val parsedConfig = parseConfig(configBuilder.build())
         assertEquals(1, parsedConfig.size)
-        assertEquals(TEST1, parsedConfig[CodeUtils.hash(TEST1.messageString, LogLevel.INFO)])
+        assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH, TEST1.messageString,
+            	   LogLevel.INFO, GROUP1)])
     }
 
     @Test
@@ -101,7 +106,7 @@ class ViewerConfigBuilderTest {
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
-                    LogGroup("TEST_GROUP", true, true, TAG1))
+                    GROUP1)
             visitor.processCall(MethodCallExpr(), TEST2.messageString, LogLevel.DEBUG,
                     LogGroup("DEBUG_GROUP", false, true, TAG2))
             visitor.processCall(MethodCallExpr(), TEST3.messageString, LogLevel.ERROR,
@@ -110,11 +115,13 @@ class ViewerConfigBuilderTest {
             invocation.arguments[0] as CompilationUnit
         }
 
-        configBuilder.processClass(dummyCompilationUnit)
+        configBuilder.processClass(dummyCompilationUnit, PATH)
 
         val parsedConfig = parseConfig(configBuilder.build())
         assertEquals(2, parsedConfig.size)
-        assertEquals(TEST1, parsedConfig[CodeUtils.hash(TEST1.messageString, LogLevel.INFO)])
-        assertEquals(TEST3, parsedConfig[CodeUtils.hash(TEST3.messageString, LogLevel.ERROR)])
+        assertEquals(TEST1, parsedConfig[CodeUtils.hash(PATH, TEST1.messageString,
+	           LogLevel.INFO, GROUP1)])
+        assertEquals(TEST3, parsedConfig[CodeUtils.hash(PATH, TEST3.messageString,
+	           LogLevel.ERROR, LogGroup("DEBUG_GROUP", true, false, TAG2))])
     }
 }

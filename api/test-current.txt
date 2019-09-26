@@ -1094,6 +1094,7 @@ package android.location {
     method @NonNull public String[] getIgnoreSettingsWhitelist();
     method @NonNull public java.util.List<android.location.LocationRequest> getTestProviderCurrentRequests(String);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@NonNull android.location.LocationRequest, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
   }
@@ -2435,6 +2436,7 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+    field public static final int USE_INDIVIDUAL_ATTESTATION = 4; // 0x4
   }
 
   public class DeviceIdAttestationException extends java.lang.Exception {

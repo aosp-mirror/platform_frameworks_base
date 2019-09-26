@@ -24,8 +24,7 @@ import android.os.SystemClock;
 import androidx.slice.Clock;
 
 import com.android.internal.app.AssistUtils;
-import com.android.systemui.ScreenDecorations;
-import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.statusbar.NavigationBarController;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -69,8 +68,9 @@ public abstract class AssistModule {
     }
 
     @Provides
-    static ScreenDecorations provideScreenDecorations(Context context) {
-        return SysUiServiceProvider.getComponent(context, ScreenDecorations.class);
+    static AssistHandleViewController provideAssistHandleViewController(
+            NavigationBarController navigationBarController) {
+        return navigationBarController.getAssistHandlerViewController();
     }
 
     @Provides
