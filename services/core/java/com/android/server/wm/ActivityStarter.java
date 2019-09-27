@@ -1806,7 +1806,9 @@ class ActivityStarter {
      */
     private void complyActivityFlags(TaskRecord targetTask, ActivityRecord reusedActivity) {
         ActivityRecord targetTaskTop = targetTask.getTopActivity();
-        if (reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
+        final boolean resetTask =
+                reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0;
+        if (resetTask) {
             targetTaskTop = mTargetStack.resetTaskIfNeededLocked(targetTaskTop, mStartActivity);
         }
 
@@ -1898,7 +1900,7 @@ class ActivityStarter {
             } else if (reusedActivity == null) {
                 mAddingToTask = true;
             }
-        } else if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) == 0) {
+        } else if (!resetTask) {
             // In this case an activity is being launched in to an existing task, without
             // resetting that task. This is typically the situation of launching an activity
             // from a notification or shortcut. We want to place the new activity on top of the
