@@ -39,8 +39,7 @@ import java.util.regex.Pattern;
  * Static utility methods related to {@link MemoryStat}.
  */
 public final class MemoryStatUtil {
-    static final int BYTES_IN_KILOBYTE = 1024;
-    static final long JIFFY_NANOS = 1_000_000_000 / Os.sysconf(OsConstants._SC_CLK_TCK);
+    static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
 
@@ -52,10 +51,6 @@ public final class MemoryStatUtil {
     private static final String MEMORY_STAT_FILE_FMT = "/dev/memcg/apps/uid_%d/pid_%d/memory.stat";
     /** Path to procfs stat file for logging app start memory state */
     private static final String PROC_STAT_FILE_FMT = "/proc/%d/stat";
-    /** Path to procfs status file for logging app memory state */
-    private static final String PROC_STATUS_FILE_FMT = "/proc/%d/status";
-    /** Path to procfs cmdline file. Used with pid: /proc/pid/cmdline. */
-    private static final String PROC_CMDLINE_FILE_FMT = "/proc/%d/cmdline";
 
     private static final Pattern PGFAULT = Pattern.compile("total_pgfault (\\d+)");
     private static final Pattern PGMAJFAULT = Pattern.compile("total_pgmajfault (\\d+)");
@@ -63,16 +58,9 @@ public final class MemoryStatUtil {
     private static final Pattern CACHE_IN_BYTES = Pattern.compile("total_cache (\\d+)");
     private static final Pattern SWAP_IN_BYTES = Pattern.compile("total_swap (\\d+)");
 
-    private static final Pattern PROCFS_RSS_IN_KILOBYTES =
-            Pattern.compile("VmRSS:\\s*(\\d+)\\s*kB");
-    private static final Pattern PROCFS_ANON_RSS_IN_KILOBYTES =
-            Pattern.compile("RssAnon:\\s*(\\d+)\\s*kB");
-    private static final Pattern PROCFS_SWAP_IN_KILOBYTES =
-            Pattern.compile("VmSwap:\\s*(\\d+)\\s*kB");
-
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
-    private static final int START_TIME_INDEX = 21;
+    private static final int RSS_IN_PAGES_INDEX = 23;
 
     private MemoryStatUtil() {}
 
@@ -106,19 +94,7 @@ public final class MemoryStatUtil {
     @Nullable
     public static MemoryStat readMemoryStatFromProcfs(int pid) {
         final String statPath = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
-        final String statusPath = String.format(Locale.US, PROC_STATUS_FILE_FMT, pid);
-        return parseMemoryStatFromProcfs(readFileContents(statPath), readFileContents(statusPath));
-    }
-
-    /**
-     * Reads cmdline of a process from procfs.
-     *
-     * Returns content of /proc/pid/cmdline (e.g. /system/bin/statsd) or an empty string
-     * if the file is not available.
-     */
-    public static String readCmdlineFromProcfs(int pid) {
-        final String path = String.format(Locale.US, PROC_CMDLINE_FILE_FMT, pid);
-        return parseCmdlineFromProcfs(readFileContents(path));
+        return parseMemoryStatFromProcfs(readFileContents(statPath));
     }
 
     private static String readFileContents(String path) {
@@ -160,53 +136,24 @@ public final class MemoryStatUtil {
      */
     @VisibleForTesting
     @Nullable
-    static MemoryStat parseMemoryStatFromProcfs(
-            String procStatContents, String procStatusContents) {
+    static MemoryStat parseMemoryStatFromProcfs(String procStatContents) {
         if (procStatContents == null || procStatContents.isEmpty()) {
             return null;
         }
-        if (procStatusContents == null || procStatusContents.isEmpty()) {
-            return null;
-        }
-
         final String[] splits = procStatContents.split(" ");
         if (splits.length < 24) {
             return null;
         }
-
         try {
             final MemoryStat memoryStat = new MemoryStat();
             memoryStat.pgfault = Long.parseLong(splits[PGFAULT_INDEX]);
             memoryStat.pgmajfault = Long.parseLong(splits[PGMAJFAULT_INDEX]);
-            memoryStat.rssInBytes =
-                tryParseLong(PROCFS_RSS_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
-            memoryStat.anonRssInBytes =
-                tryParseLong(PROCFS_ANON_RSS_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
-            memoryStat.swapInBytes =
-                tryParseLong(PROCFS_SWAP_IN_KILOBYTES, procStatusContents) * BYTES_IN_KILOBYTE;
-            memoryStat.startTimeNanos = Long.parseLong(splits[START_TIME_INDEX]) * JIFFY_NANOS;
+            memoryStat.rssInBytes = Long.parseLong(splits[RSS_IN_PAGES_INDEX]) * PAGE_SIZE;
             return memoryStat;
         } catch (NumberFormatException e) {
             Slog.e(TAG, "Failed to parse value", e);
             return null;
         }
-    }
-
-    /**
-     * Parses cmdline out of the contents of the /proc/pid/cmdline file in procfs.
-     *
-     * Parsing is required to strip anything after first null byte.
-     */
-    @VisibleForTesting
-    static String parseCmdlineFromProcfs(String cmdline) {
-        if (cmdline == null) {
-            return "";
-        }
-        int firstNullByte = cmdline.indexOf("\0");
-        if (firstNullByte == -1) {
-            return cmdline;
-        }
-        return cmdline.substring(0, firstNullByte);
     }
 
     /**
@@ -237,13 +184,9 @@ public final class MemoryStatUtil {
         public long pgmajfault;
         /** For memcg stats, the anon rss + swap cache size. Otherwise total RSS. */
         public long rssInBytes;
-        /** Number of bytes of the anonymous RSS. Only present for non-memcg stats. */
-        public long anonRssInBytes;
         /** Number of bytes of page cache memory. Only present for memcg stats. */
         public long cacheInBytes;
         /** Number of bytes of swap usage */
         public long swapInBytes;
-        /** Device time when the processes started. */
-        public long startTimeNanos;
     }
 }
