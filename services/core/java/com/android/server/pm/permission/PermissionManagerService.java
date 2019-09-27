@@ -1697,10 +1697,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (mPackageManagerInt.getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        DefaultBrowserProvider provider;
         synchronized (mLock) {
-            return mDefaultBrowserProvider == null
-                    ? null : mDefaultBrowserProvider.getDefaultBrowser(userId);
+            provider = mDefaultBrowserProvider;
         }
+        return provider != null ? provider.getDefaultBrowser(userId) : null;
     }
 
     @Override
@@ -1716,23 +1717,27 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private boolean setDefaultBrowserInternal(String packageName, boolean async,
             boolean doGrant, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            return false;
+        }
+        DefaultBrowserProvider provider;
         synchronized (mLock) {
-            if (userId == UserHandle.USER_ALL) {
+            provider = mDefaultBrowserProvider;
+        }
+        if (provider == null) {
+            return false;
+        }
+        if (async) {
+            provider.setDefaultBrowserAsync(packageName, userId);
+        } else {
+            if (!provider.setDefaultBrowser(packageName, userId)) {
                 return false;
             }
-            if (mDefaultBrowserProvider == null) {
-                return false;
-            }
-            if (async) {
-                mDefaultBrowserProvider.setDefaultBrowserAsync(packageName, userId);
-            } else {
-                if (!mDefaultBrowserProvider.setDefaultBrowser(packageName, userId)) {
-                    return false;
-                }
-            }
-            if (doGrant && packageName != null) {
-                mDefaultPermissionGrantPolicy
-                        .grantDefaultPermissionsToDefaultBrowser(packageName, userId);
+        }
+        if (doGrant && packageName != null) {
+            synchronized (mLock) {
+                mDefaultPermissionGrantPolicy.grantDefaultPermissionsToDefaultBrowser(packageName,
+                        userId);
             }
         }
         return true;
@@ -4334,15 +4339,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public void setDefaultHome(String packageName, int userId, Consumer<Boolean> callback) {
-            synchronized (mLock) {
-                if (userId == UserHandle.USER_ALL) {
-                    return;
-                }
-                if (mDefaultHomeProvider == null) {
-                    return;
-                }
-                mDefaultHomeProvider.setDefaultHomeAsync(packageName, userId, callback);
+            if (userId == UserHandle.USER_ALL) {
+                return;
             }
+            DefaultHomeProvider provider;
+            synchronized (mLock) {
+                provider = mDefaultHomeProvider;
+            }
+            if (provider == null) {
+                return;
+            }
+            provider.setDefaultHomeAsync(packageName, userId, callback);
         }
 
         @Override
@@ -4403,26 +4410,29 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         @Override
         public String getDefaultBrowser(int userId) {
+            DefaultBrowserProvider provider;
             synchronized (mLock) {
-                return mDefaultBrowserProvider == null
-                        ? null : mDefaultBrowserProvider.getDefaultBrowser(userId);
+                provider = mDefaultBrowserProvider;
             }
+            return provider != null ? provider.getDefaultBrowser(userId) : null;
         }
 
         @Override
         public String getDefaultDialer(int userId) {
+            DefaultDialerProvider provider;
             synchronized (mLock) {
-                return mDefaultDialerProvider == null
-                        ? null : mDefaultDialerProvider.getDefaultDialer(userId);
+                provider = mDefaultDialerProvider;
             }
+            return provider != null ? provider.getDefaultDialer(userId) : null;
         }
 
         @Override
         public String getDefaultHome(int userId) {
+            DefaultHomeProvider provider;
             synchronized (mLock) {
-                return mDefaultHomeProvider == null
-                        ? null : mDefaultHomeProvider.getDefaultHome(userId);
+                provider = mDefaultHomeProvider;
             }
+            return provider != null ? provider.getDefaultHome(userId) : null;
         }
 
         @Override
