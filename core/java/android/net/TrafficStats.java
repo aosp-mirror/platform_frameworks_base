@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -595,8 +596,15 @@ public class TrafficStats {
         return total;
     }
 
-    /** {@hide} */
-    public static long getTxPackets(String iface) {
+    /**
+     * Return the number of packets transmitted on the specified interface since
+     * device boot. Statistics are measured at the network layer, so both TCP and
+     * UDP usage are included.
+     *
+     * @param iface The name of the interface.
+     * @return The number of transmitted packets.
+     */
+    public static long getTxPackets(@NonNull String iface) {
         try {
             return getStatsService().getIfaceStats(iface, TYPE_TX_PACKETS);
         } catch (RemoteException e) {
@@ -604,8 +612,15 @@ public class TrafficStats {
         }
     }
 
-    /** {@hide} */
-    public static long getRxPackets(String iface) {
+    /**
+     * Return the number of packets received on the specified interface since
+     * device boot. Statistics are measured at the network layer, so both TCP
+     * and UDP usage are included.
+     *
+     * @param iface The name of the interface.
+     * @return The number of received packets.
+     */
+    public static long getRxPackets(@NonNull String iface) {
         try {
             return getStatsService().getIfaceStats(iface, TYPE_RX_PACKETS);
         } catch (RemoteException e) {
