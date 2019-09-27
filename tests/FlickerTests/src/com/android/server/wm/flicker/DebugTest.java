@@ -25,6 +25,9 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.wm.flicker.helpers.ImeAppHelper;
+import com.android.server.wm.flicker.helpers.PipAppHelper;
+
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -121,7 +124,9 @@ public class DebugTest {
      */
     @Test
     public void editTextSetFocus() {
-        CommonTransitions.editTextSetFocus(uiDevice).includeJankyRuns().recordEachRun()
+        ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.editTextSetFocus(testApp, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
@@ -130,10 +135,9 @@ public class DebugTest {
      */
     @Test
     public void editTextLoseFocusToHome() {
-        IAppHelper testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
-                "com.android.server.wm.flicker.testapp", "ImeApp");
-        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0,
-                /* clickOnEditField */true).includeJankyRuns().recordEachRun()
+        ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
@@ -142,8 +146,9 @@ public class DebugTest {
      */
     @Test
     public void editTextLoseFocusToApp() {
-        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0,
-                /* clickOnEditField */true).includeJankyRuns().recordEachRun()
+        ImeAppHelper testApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
@@ -154,7 +159,9 @@ public class DebugTest {
      */
     @Test
     public void enterPipMode() {
-        CommonTransitions.enterPipMode(uiDevice).includeJankyRuns().recordEachRun().build().run();
+        PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.enterPipMode(testApp, uiDevice).includeJankyRuns().recordEachRun()
+                .build().run();
     }
 
     /**
@@ -162,7 +169,8 @@ public class DebugTest {
      */
     @Test
     public void exitPipModeToHome() {
-        CommonTransitions.exitPipModeToHome(uiDevice).includeJankyRuns().recordEachRun()
+        PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.exitPipModeToHome(testApp, uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
@@ -171,7 +179,8 @@ public class DebugTest {
      */
     @Test
     public void exitPipModeToApp() {
-        CommonTransitions.exitPipModeToApp(uiDevice).includeJankyRuns().recordEachRun()
+        PipAppHelper testApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.exitPipModeToApp(testApp, uiDevice).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 }
