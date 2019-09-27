@@ -219,7 +219,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private final Context mContext;
     private final boolean mIsPrimaryUser;
-    HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
+    HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<Integer, ServiceState>();
 
     private int mRingMode;
@@ -2512,8 +2512,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     @MainThread
     public void reportSimUnlocked(int subId) {
         if (DEBUG_SIM_STATES) Log.v(TAG, "reportSimUnlocked(subId=" + subId + ")");
-        int slotId = SubscriptionManager.getSlotIndex(subId);
-        handleSimStateChange(subId, slotId, State.READY);
+        handleSimStateChange(subId, getSlotId(subId), State.READY);
     }
 
     /**
@@ -2584,6 +2583,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         } else {
             return State.UNKNOWN;
         }
+    }
+
+    private int getSlotId(int subId) {
+        if (!mSimDatas.containsKey(subId)) {
+            refreshSimState(subId, SubscriptionManager.getSlotIndex(subId));
+        }
+        return mSimDatas.get(subId).slotId;
     }
 
     private final TaskStackChangeListener
@@ -2710,7 +2716,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         for (int i = 0; i < list.size(); i++) {
             final SubscriptionInfo info = list.get(i);
             final int id = info.getSubscriptionId();
-            int slotId = SubscriptionManager.getSlotIndex(id);
+            int slotId = getSlotId(id);
             if (state == getSimState(id) && bestSlotId > slotId) {
                 resultId = id;
                 bestSlotId = slotId;
