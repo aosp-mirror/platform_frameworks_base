@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package com.android.server.wm.flicker;
 import static com.android.server.wm.flicker.CommonTransitions.editTextLoseFocusToApp;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
-import com.android.server.wm.flicker.helpers.ImeAppHelper;
+import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -37,42 +39,39 @@ import org.junit.runners.Parameterized;
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class CloseImeWindowToAppTest extends NonRotationTestBase {
+public class CloseImeAutoOpenWindowToAppTest extends CloseImeWindowToAppTest {
 
-    static final String IME_WINDOW_TITLE = "InputMethod";
-
-    public CloseImeWindowToAppTest(String beginRotationName, int beginRotation) {
+    public CloseImeAutoOpenWindowToAppTest(String beginRotationName, int beginRotation) {
         super(beginRotationName, beginRotation);
 
-        mTestApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
+        mTestApp = new ImeAppAutoFocusHelper(InstrumentationRegistry.getInstrumentation());
     }
 
     @Before
     public void runTransition() {
-        run(editTextLoseFocusToApp((ImeAppHelper) mTestApp, mUiDevice, mBeginRotation)
+        run(editTextLoseFocusToApp((ImeAppAutoFocusHelper) mTestApp, mUiDevice, mBeginRotation)
                 .includeJankyRuns().build());
     }
 
+    @FlakyTest(bugId = 141458352)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_imeLayerBecomesInvisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(IME_WINDOW_TITLE)
-                .then()
-                .hidesLayer(IME_WINDOW_TITLE)
-                .forAllEntries());
+        super.checkVisibility_imeLayerBecomesInvisible();
     }
 
+    @FlakyTest(bugId = 141458352)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_imeAppLayerIsAlwaysVisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(mTestApp.getPackage())
-                .forAllEntries());
+        super.checkVisibility_imeAppLayerIsAlwaysVisible();
     }
 
+    @FlakyTest(bugId = 141458352)
+    @Ignore("Waiting bug feedback")
     @Test
     public void checkVisibility_imeAppWindowIsAlwaysVisible() {
-        checkResults(result -> WmTraceSubject.assertThat(result)
-                .showsAppWindowOnTop(mTestApp.getPackage())
-                .forAllEntries());
+        super.checkVisibility_imeAppWindowIsAlwaysVisible();
     }
+
 }
