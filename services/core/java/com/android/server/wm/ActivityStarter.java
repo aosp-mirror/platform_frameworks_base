@@ -1743,7 +1743,12 @@ class ActivityStarter {
             return START_SUCCESS;
         }
 
-        if (!mMovedToFront && mDoResume) {
+        if (mMovedToFront) {
+            // We moved the task to front, use starting window to hide initial drawn delay.
+            targetTaskTop.showStartingWindow(null /* prev */, false /* newTask */,
+                    true /* taskSwitch */);
+        } else if (mDoResume) {
+            // Make sure the stack and its belonging display are moved to topmost.
             mTargetStack.moveToFront("intentActivityFound");
         }
         // We didn't do anything...  but it was needed (a.k.a., client don't use that intent!)
@@ -2349,11 +2354,6 @@ class ActivityStarter {
                 }
 
                 mOptions = null;
-
-                // We are moving a task to the front, use starting window to hide initial drawn
-                // delay.
-                intentActivity.showStartingWindow(null /* prev */, false /* newTask */,
-                        true /* taskSwitch */);
             }
         }
         // Need to update mTargetStack because if task was moved out of it, the original stack may
