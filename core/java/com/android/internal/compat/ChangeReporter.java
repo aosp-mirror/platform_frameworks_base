@@ -77,10 +77,10 @@ public final class ChangeReporter {
      * @param state    of the reported change - enabled/disabled/only logged
      */
     public void reportChange(int uid, long changeId, int state) {
-        debugLog(uid, changeId, state);
         ChangeReport report = new ChangeReport(uid, changeId, state);
         synchronized (mReportedChanges) {
             if (!mReportedChanges.contains(report)) {
+                debugLog(uid, changeId, state);
                 StatsLog.write(StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED, uid, changeId,
                         state, mSource);
                 mReportedChanges.add(report);
@@ -89,7 +89,6 @@ public final class ChangeReporter {
     }
 
     private void debugLog(int uid, long changeId, int state) {
-        //TODO(b/138374585): Implement rate limiting for the logs.
         String message = String.format("Compat change id reported: %d; UID %d; state: %s", changeId,
                 uid, stateToString(state));
         if (mSource == StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__SYSTEM_SERVER) {
