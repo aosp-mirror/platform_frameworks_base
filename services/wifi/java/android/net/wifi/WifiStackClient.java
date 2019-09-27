@@ -21,11 +21,12 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.net.ConnectivityModuleConnector;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+
+import java.util.List;
 
 /**
  * Service used to communicate with the wifi stack, which could be running in a separate
@@ -56,21 +57,23 @@ public class WifiStackClient {
         @Override
         public void onModuleServiceConnected(IBinder service) {
             Log.i(TAG, "Wifi stack connected");
+            registerWifiStackService(service);
 
-            // spin up a new thread to not block system_server main thread
-            HandlerThread thread = new HandlerThread("InitWifiServicesThread");
-            thread.start();
-            thread.getThreadHandler().post(() -> {
-                registerWifiStackService(service);
-                IWifiStackConnector connector = IWifiStackConnector.Stub.asInterface(service);
-                registerApiServiceAndStart(connector, Context.WIFI_SCANNING_SERVICE);
-                registerApiServiceAndStart(connector, Context.WIFI_SERVICE);
-                registerApiServiceAndStart(connector, Context.WIFI_P2P_SERVICE);
-                registerApiServiceAndStart(connector, Context.WIFI_AWARE_SERVICE);
-                registerApiServiceAndStart(connector, Context.WIFI_RTT_RANGING_SERVICE);
+            IWifiStackConnector connector = IWifiStackConnector.Stub.asInterface(service);
 
-                thread.quitSafely();
-            });
+            List<WifiApiServiceInfo> wifiApiServiceInfos;
+            try {
+                wifiApiServiceInfos = connector.getWifiApiServiceInfos();
+            } catch (RemoteException e) {
+                throw new RuntimeException("Failed to getWifiApiServiceInfos()", e);
+            }
+
+            for (WifiApiServiceInfo wifiApiServiceInfo : wifiApiServiceInfos) {
+                String serviceName = wifiApiServiceInfo.name;
+                IBinder binder = wifiApiServiceInfo.binder;
+                Log.i(TAG, "Registering " + serviceName);
+                ServiceManager.addService(serviceName, binder);
+            }
         }
     }
 
@@ -79,32 +82,6 @@ public class WifiStackClient {
                 false /* allowIsolated */,
                 DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
         Log.i(TAG, "Wifi stack service registered");
-    }
-
-    private void registerApiServiceAndStart(
-            IWifiStackConnector stackConnector, String serviceName) {
-        IBinder service = null;
-        try {
-            service = stackConnector.retrieveApiServiceImpl(serviceName);
-        } catch (RemoteException e) {
-            throw new RuntimeException("Failed to retrieve service impl " + serviceName, e);
-        }
-        if (service == null) {
-            Log.i(TAG, "Service " + serviceName + " not available");
-            return;
-        }
-        Log.i(TAG, "Registering " + serviceName);
-        ServiceManager.addService(serviceName, service);
-
-        boolean success = false;
-        try {
-            success = stackConnector.startApiService(serviceName);
-        } catch (RemoteException e) {
-            throw new RuntimeException("Failed to start service " + serviceName, e);
-        }
-        if (!success) {
-            throw new RuntimeException("Service " + serviceName + " start failed");
-        }
     }
 
     /**
