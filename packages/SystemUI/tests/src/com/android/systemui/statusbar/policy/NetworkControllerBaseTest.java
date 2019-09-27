@@ -350,7 +350,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                     iconArg.capture(),
                     anyInt(),
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
-                    anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
+                    anyString(), anyString(), anyString(), anyBoolean(), anyInt(), anyBoolean());
         IconState iconState = iconArg.getValue();
         int state = SignalDrawable.getState(icon, SignalStrength.NUM_SIGNAL_STRENGTH_BINS,
                 false);
@@ -382,8 +382,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 iconArg.capture(),
                 any(),
                 typeIconArg.capture(),
-                anyInt(), anyBoolean(), anyBoolean(), anyString(), anyString(), anyBoolean(),
-                anyInt(), eq(roaming));
+                anyInt(), anyBoolean(), anyBoolean(), anyString(), anyString(), anyString(),
+                anyBoolean(), anyInt(), eq(roaming));
         IconState iconState = iconArg.getValue();
 
         int state = icon == -1 ? 0
@@ -425,6 +425,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 qsTypeIconArg.capture(),
                 dataInArg.capture(),
                 dataOutArg.capture(),
+                typeContentDescriptionArg.capture(),
                 typeContentDescriptionArg.capture(),
                 anyString(), anyBoolean(), anyInt(), anyBoolean());
 
