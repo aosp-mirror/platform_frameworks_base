@@ -34,6 +34,7 @@ cc_library_shared {
         "libutils",
         "libbinder",
         "libmedia",
+        "libmedia_codeclist",
         "libmedia_jni_utils",
         "libmedia_omx",
         "libmediametrics",
