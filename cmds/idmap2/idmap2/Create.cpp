@@ -50,7 +50,7 @@ Result<Unit> Create(const std::vector<std::string>& args) {
   std::string overlay_apk_path;
   std::string idmap_path;
   std::vector<std::string> policies;
-  bool ignore_overlayable;
+  bool ignore_overlayable = false;
 
   const CommandLineOptions opts =
       CommandLineOptions("idmap2 create")
