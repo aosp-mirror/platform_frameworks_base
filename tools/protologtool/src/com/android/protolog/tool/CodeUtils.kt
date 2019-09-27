@@ -20,7 +20,6 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
 import com.github.javaparser.ast.expr.Expression
-import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.StringLiteralExpr
 
 object CodeUtils {
@@ -74,9 +73,8 @@ object CodeUtils {
         }
     }
 
-    fun getPositionString(call: MethodCallExpr, fileName: String): String {
+    fun getPositionString(fileName: String): String {
         return when {
-            call.range.isPresent -> "$fileName:${call.range.get().begin.line}"
             else -> fileName
         }
     }

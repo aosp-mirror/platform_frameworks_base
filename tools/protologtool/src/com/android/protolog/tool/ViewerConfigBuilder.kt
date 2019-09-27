@@ -32,7 +32,7 @@ class ViewerConfigBuilder(
         group: LogGroup
     ) {
         if (group.enabled) {
-            val position = CodeUtils.getPositionString(call, fileName)
+            val position = CodeUtils.getPositionString(fileName)
             val key = CodeUtils.hash(position, messageString, level, group)
             if (statements.containsKey(key)) {
                 if (statements[key] != LogCall(messageString, level, group, position)) {
