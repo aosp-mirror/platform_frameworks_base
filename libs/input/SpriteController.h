@@ -20,9 +20,8 @@
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
 
+#include <android/graphics/bitmap.h>
 #include <gui/SurfaceComposerClient.h>
-
-#include <SkBitmap.h>
 
 namespace android {
 
@@ -56,21 +55,16 @@ struct SpriteTransformationMatrix {
  */
 struct SpriteIcon {
     inline SpriteIcon() : style(0), hotSpotX(0), hotSpotY(0) { }
-    inline SpriteIcon(const SkBitmap& bitmap, int32_t style, float hotSpotX, float hotSpotY) :
+    inline SpriteIcon(const graphics::Bitmap& bitmap, int32_t style, float hotSpotX, float hotSpotY) :
             bitmap(bitmap), style(style), hotSpotX(hotSpotX), hotSpotY(hotSpotY) { }
 
-    SkBitmap bitmap;
+    graphics::Bitmap bitmap;
     int32_t style;
     float hotSpotX;
     float hotSpotY;
 
     inline SpriteIcon copy() const {
-        SkBitmap bitmapCopy;
-        if (bitmapCopy.tryAllocPixels(bitmap.info().makeColorType(kN32_SkColorType))) {
-            bitmap.readPixels(bitmapCopy.info(), bitmapCopy.getPixels(), bitmapCopy.rowBytes(),
-                    0, 0);
-        }
-        return SpriteIcon(bitmapCopy, style, hotSpotX, hotSpotY);
+        return SpriteIcon(bitmap.copy(ANDROID_BITMAP_FORMAT_RGBA_8888), style, hotSpotX, hotSpotY);
     }
 
     inline void reset() {
@@ -81,7 +75,7 @@ struct SpriteIcon {
     }
 
     inline bool isValid() const {
-        return !bitmap.isNull() && !bitmap.empty();
+        return bitmap.isValid() && !bitmap.isEmpty();
     }
 };
 
@@ -183,7 +177,7 @@ private:
      * This structure is designed so that it can be copied during updates so that
      * surfaces can be resized and redrawn without blocking the client by holding a lock
      * on the sprites for a long time.
-     * Note that the SkBitmap holds a reference to a shared (and immutable) pixel ref. */
+     * Note that the SpriteIcon holds a reference to a shared (and immutable) bitmap. */
     struct SpriteState {
         inline SpriteState() :
                 dirty(0), visible(false),

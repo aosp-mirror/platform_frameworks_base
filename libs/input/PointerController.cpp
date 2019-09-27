@@ -24,12 +24,6 @@
 
 #include <log/log.h>
 
-#include <SkBitmap.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
-#include <SkBlendMode.h>
-
 namespace android {
 
 // --- WeakLooperCallback ---

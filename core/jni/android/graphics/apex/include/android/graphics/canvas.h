@@ -16,6 +16,8 @@
 #ifndef ANDROID_GRAPHICS_CANVAS_H
 #define ANDROID_GRAPHICS_CANVAS_H
 
+#include <android/graphics/bitmap.h>
+#include <android/graphics/paint.h>
 #include <android/native_window.h>
 #include <android/rect.h>
 #include <jni.h>
@@ -23,8 +25,8 @@
 __BEGIN_DECLS
 
 /**
-* Opaque handle for a native graphics canvas.
-*/
+ * Opaque handle for a native graphics canvas.
+ */
 typedef struct ACanvas ACanvas;
 
 //  One of AHardwareBuffer_Format.
@@ -33,34 +35,104 @@ bool ACanvas_isSupportedPixelFormat(int32_t bufferFormat);
 /**
  * Returns a native handle to a Java android.graphics.Canvas
  *
- * @param env
- * @param canvas
  * @return ACanvas* that is only valid for the life of the jobject.
  */
 ACanvas* ACanvas_getNativeHandleFromJava(JNIEnv* env, jobject canvas);
 
 /**
+ * Creates a canvas that wraps the buffer
+ *
+ * @param buffer required
+ */
+ACanvas* ACanvas_createCanvas(const ANativeWindow_Buffer* buffer,
+                              int32_t /*android_dataspace_t*/ dataspace);
+
+void ACanvas_destroyCanvas(ACanvas* canvas);
+
+/**
  * Updates the canvas to render into the pixels in the provided buffer
  *
- * @param canvas
  * @param buffer The buffer that will provide the backing store for this canvas.  The buffer must
  *               remain valid until the this method is called again with either another active
  *               buffer or nullptr.  If nullptr is given the canvas will release the previous buffer
  *               and set an empty backing store.
- * @param dataspace
  */
 void ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
                        int32_t /*android_dataspace_t*/ dataspace);
 
 /**
  * Clips operations on the canvas to the intersection of the current clip and the provided clipRect.
+ *
+ * @param clipRect required
  */
-void ACanvas_clipRect(ACanvas* canvas, const ARect& clipRect, bool doAntiAlias = false);
+void ACanvas_clipRect(ACanvas* canvas, const ARect* clipRect, bool doAntiAlias = false);
 
 /**
  * Clips operations on the canvas to the difference of the current clip and the provided clipRect.
+ *
+ * @param clipRect required
  */
-void ACanvas_clipOutRect(ACanvas* canvas, const ARect& clipRect, bool doAntiAlias = false);
+void ACanvas_clipOutRect(ACanvas* canvas, const ARect* clipRect, bool doAntiAlias = false);
+
+/**
+ *
+ * @param rect required
+ * @param paint required
+ */
+void ACanvas_drawRect(ACanvas* canvas, const ARect* rect, const APaint* paint);
+
+/**
+ *
+ * @param bitmap required
+ * @param left
+ * @param top
+ * @param paint
+ */
+void ACanvas_drawBitmap(ACanvas* canvas, const ABitmap* bitmap, float left, float top,
+                        const APaint* paint);
 
 __END_DECLS
+
+#ifdef	__cplusplus
+namespace android {
+namespace graphics {
+    class Canvas {
+    public:
+        Canvas(JNIEnv* env, jobject canvasObj) :
+                mCanvas(ACanvas_getNativeHandleFromJava(env, canvasObj)),
+                mOwnedPtr(false) {}
+        Canvas(const ANativeWindow_Buffer& buffer, int32_t /*android_dataspace_t*/ dataspace) :
+                mCanvas(ACanvas_createCanvas(&buffer, dataspace)),
+                mOwnedPtr(true) {}
+        ~Canvas() {
+            if (mOwnedPtr) {
+                ACanvas_destroyCanvas(mCanvas);
+            }
+        }
+
+        void setBuffer(const ANativeWindow_Buffer* buffer,
+                       int32_t /*android_dataspace_t*/ dataspace) {
+            ACanvas_setBuffer(mCanvas, buffer, dataspace);
+        }
+
+        void clipRect(const ARect& clipRect, bool doAntiAlias = false) {
+            ACanvas_clipRect(mCanvas, &clipRect, doAntiAlias);
+        }
+
+        void drawRect(const ARect& rect, const Paint& paint) {
+            ACanvas_drawRect(mCanvas, &rect, &paint.get());
+        }
+        void drawBitmap(const Bitmap& bitmap, float left, float top, const Paint* paint) {
+            const APaint* aPaint = (paint) ? &paint->get() : nullptr;
+            ACanvas_drawBitmap(mCanvas, bitmap.get(), left, top, aPaint);
+        }
+
+    private:
+        ACanvas* mCanvas;
+        const bool mOwnedPtr;
+    };
+}; // namespace graphics
+}; // namespace android
+#endif // __cplusplus
+
 #endif // ANDROID_GRAPHICS_CANVAS_H

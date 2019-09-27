@@ -16,6 +16,7 @@
 
 #include "android/graphics/canvas.h"
 
+#include "TypeCast.h"
 #include "GraphicsJNI.h"
 
 #include <hwui/Canvas.h>
@@ -25,14 +26,6 @@
 
 using namespace android;
 
-static inline Canvas* toCanvas(ACanvas* aCanvas) {
-    return reinterpret_cast<Canvas*>(aCanvas);
-}
-
-static inline ACanvas* toACanvas(Canvas* canvas) {
-    return reinterpret_cast<ACanvas*>(canvas);
-}
-
 bool ACanvas_isSupportedPixelFormat(int32_t bufferFormat) {
     ANativeWindow_Buffer buffer { 0, 0, 0, bufferFormat, nullptr, {0} };
     const SkColorType colorType = uirenderer::ANativeWindowToImageInfo(buffer, nullptr).colorType();
@@ -40,11 +33,11 @@ bool ACanvas_isSupportedPixelFormat(int32_t bufferFormat) {
 }
 
 ACanvas* ACanvas_getNativeHandleFromJava(JNIEnv* env, jobject canvasObj) {
-    return toACanvas(GraphicsJNI::getNativeCanvas(env, canvasObj));
+    return TypeCast::toACanvas(GraphicsJNI::getNativeCanvas(env, canvasObj));
 }
 
-void ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
-                       int32_t /*android_dataspace_t*/ dataspace) {
+static SkBitmap convert(const ANativeWindow_Buffer* buffer,
+                        int32_t /*android_dataspace_t*/ dataspace) {
     SkBitmap bitmap;
     if (buffer != nullptr && buffer->width > 0 && buffer->height > 0) {
         sk_sp<SkColorSpace> cs(uirenderer::DataSpaceToColorSpace((android_dataspace)dataspace));
@@ -53,18 +46,44 @@ void ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
         bitmap.setInfo(imageInfo, rowBytes);
         bitmap.setPixels(buffer->bits);
     }
-
-    toCanvas(canvas)->setBitmap(bitmap);
+    return bitmap;
 }
 
-void ACanvas_clipRect(ACanvas* canvas, const ARect& clipRect, bool /*doAA*/) {
-    //TODO update Canvas to take antialias param
-    toCanvas(canvas)->clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
-                               SkClipOp::kIntersect);
+ACanvas* ACanvas_createCanvas(const ANativeWindow_Buffer* buffer,
+                              int32_t /*android_dataspace_t*/ dataspace) {
+    return TypeCast::toACanvas(Canvas::create_canvas(convert(buffer, dataspace)));
 }
 
-void ACanvas_clipOutRect(ACanvas* canvas, const ARect& clipRect, bool /*doAA*/) {
+void ACanvas_destroyCanvas(ACanvas* canvas) {
+    delete TypeCast::toCanvas(canvas);
+}
+
+void ACanvas_setBuffer(ACanvas* canvas, const ANativeWindow_Buffer* buffer,
+                       int32_t /*android_dataspace_t*/ dataspace) {
+
+
+    TypeCast::toCanvas(canvas)->setBitmap(convert(buffer, dataspace));
+}
+
+void ACanvas_clipRect(ACanvas* canvas, const ARect* clipRect, bool /*doAA*/) {
     //TODO update Canvas to take antialias param
-    toCanvas(canvas)->clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
-                               SkClipOp::kDifference);
+    TypeCast::toCanvas(canvas)->clipRect(clipRect->left, clipRect->top, clipRect->right,
+                                         clipRect->bottom, SkClipOp::kIntersect);
+}
+
+void ACanvas_clipOutRect(ACanvas* canvas, const ARect* clipRect, bool /*doAA*/) {
+    //TODO update Canvas to take antialias param
+    TypeCast::toCanvas(canvas)->clipRect(clipRect->left, clipRect->top, clipRect->right,
+                                         clipRect->bottom, SkClipOp::kDifference);
+}
+
+void ACanvas_drawRect(ACanvas* canvas, const ARect* rect, const APaint* paint) {
+    TypeCast::toCanvas(canvas)->drawRect(rect->left, rect->top, rect->right, rect->bottom,
+                                         TypeCast::toPaintRef(paint));
+}
+
+void ACanvas_drawBitmap(ACanvas* canvas, const ABitmap* bitmap, float left, float top,
+                        const APaint* paint) {
+    TypeCast::toCanvas(canvas)->drawBitmap(TypeCast::toBitmapRef(bitmap), left, top,
+                                           TypeCast::toPaint(paint));
 }

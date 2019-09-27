@@ -39,8 +39,6 @@ jobject createBitmap(JNIEnv* env, Bitmap* bitmap,
             jobject ninePatchInsets = nullptr, int density = -1);
 
 
-void toSkBitmap(jlong bitmapHandle, SkBitmap* outBitmap);
-
 Bitmap& toBitmap(JNIEnv* env, jobject bitmap);
 Bitmap& toBitmap(jlong bitmapHandle);
 
