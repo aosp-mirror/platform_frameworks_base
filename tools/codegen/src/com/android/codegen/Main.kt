@@ -132,11 +132,11 @@ fun main(args: Array<String>) {
         // $GENERATED_WARNING_PREFIX v$CODEGEN_VERSION.
         //
         // DO NOT MODIFY!
+        // CHECKSTYLE:OFF Generated code
         //
         // To regenerate run:
         // $ $cliExecutable ${cliArgs.dropLast(1).joinToString("") { "$it " }}$fileEscaped
-        //
-        // CHECKSTYLE:OFF Generated code
+        /
         """
 
         if (FeatureFlag.CONST_DEFS()) generateConstDefs()
