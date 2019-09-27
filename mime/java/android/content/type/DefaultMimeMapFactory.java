@@ -26,21 +26,24 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * Default implementation of {@link MimeMap}, a bidirectional mapping between
- * MIME types and file extensions.
+ * Creates the framework default {@link MimeMap}, a bidirectional mapping
+ * between MIME types and file extensions.
  *
  * This default mapping is loaded from data files that start with some mappings
  * recognized by IANA plus some custom extensions and overrides.
  *
  * @hide
  */
-public class MimeMapImpl {
+public class DefaultMimeMapFactory {
+
+    private DefaultMimeMapFactory() {
+    }
 
     /**
-     * Creates and returns a new {@link MimeMapImpl} instance that implements.
+     * Creates and returns a new {@link MimeMap} instance that implements.
      * Android's default mapping between MIME types and extensions.
      */
-    public static MimeMap createDefaultInstance() {
+    public static MimeMap create() {
         return parseFromResources("/mime.types", "/android.mime.types");
     }
 
@@ -56,7 +59,7 @@ public class MimeMapImpl {
 
     private static void parseTypes(MimeMap.Builder builder, String resource) {
         try (BufferedReader r = new BufferedReader(
-                new InputStreamReader(MimeMapImpl.class.getResourceAsStream(resource)))) {
+                new InputStreamReader(DefaultMimeMapFactory.class.getResourceAsStream(resource)))) {
             String line;
             while ((line = r.readLine()) != null) {
                 int commentPos = line.indexOf('#');
