@@ -20,10 +20,13 @@ import libcore.net.MimeMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -45,21 +48,33 @@ public class DefaultMimeMapFactory {
      * Android's default mapping between MIME types and extensions.
      */
     public static MimeMap create() {
-        MimeMap.Builder builder = MimeMap.builder();
-        parseTypes(builder, true, "/mime.types");
-        parseTypes(builder, true, "/android.mime.types");
-        parseTypes(builder, false, "/vendor.mime.types");
-        return builder.build();
+        Class c = DefaultMimeMapFactory.class;
+        // The resources are placed into the res/ path by the "mimemap-res.jar" genrule.
+        return create(resourceName -> c.getResourceAsStream("/res/" + resourceName));
     }
 
     private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
 
+    /**
+     * Creates a {@link MimeMap} instance whose resources are loaded from the
+     * InputStreams looked up in {@code resourceSupplier}.
+     *
+     * @hide
+     */
+    public static MimeMap create(Function<String, InputStream> resourceSupplier) {
+        MimeMap.Builder builder = MimeMap.builder();
+        parseTypes(builder, true, resourceSupplier, "mime.types");
+        parseTypes(builder, true, resourceSupplier, "android.mime.types");
+        parseTypes(builder, false, resourceSupplier, "vendor.mime.types");
+        return builder.build();
+    }
+
     private static void parseTypes(MimeMap.Builder builder, boolean allowOverwrite,
-            String resource) {
-        try (BufferedReader r = new BufferedReader(
-                new InputStreamReader(DefaultMimeMapFactory.class.getResourceAsStream(resource)))) {
+            Function<String, InputStream> resourceSupplier, String resourceName) {
+        try (InputStream inputStream = Objects.requireNonNull(resourceSupplier.apply(resourceName));
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
-            while ((line = r.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 int commentPos = line.indexOf('#');
                 if (commentPos >= 0) {
                     line = line.substring(0, commentPos);
@@ -78,7 +93,7 @@ public class DefaultMimeMapFactory {
                 builder.put(specs.get(0), specs.subList(1, specs.size()));
             }
         } catch (IOException | RuntimeException e) {
-            throw new RuntimeException("Failed to parse " + resource, e);
+            throw new RuntimeException("Failed to parse " + resourceName, e);
         }
     }
 
