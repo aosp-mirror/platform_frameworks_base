@@ -152,6 +152,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.doze.DozeEvent;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
@@ -369,6 +370,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Object mQueueLock = new Object();
 
     protected StatusBarIconController mIconController;
+    @Inject
+    DozeLog mDozeLog;
     @Inject
     InjectionInflationController mInjectionInflater;
     @Inject
@@ -968,7 +971,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mKeyguardStateController);
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
-        mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context));
+        mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context),
+                mDozeLog);
 
         BackDropView backdrop = mStatusBarWindow.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
@@ -2377,7 +2381,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean lightWpTheme = mContext.getThemeResId() == R.style.Theme_SystemUI_Light;
         pw.println("    light wallpaper theme: " + lightWpTheme);
 
-        DozeLog.dump(pw);
+        mDozeLog.dump(pw);
 
         if (mBiometricUnlockController != null) {
             mBiometricUnlockController.dump(pw);
@@ -4003,7 +4007,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void startDozing() {
             if (!mDozingRequested) {
                 mDozingRequested = true;
-                DozeLog.traceDozing(mContext, mDozing);
+                mDozeLog.traceDozing(mDozing);
                 updateDozing();
                 updateIsKeyguard();
             }
@@ -4011,22 +4015,22 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
-            if (reason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS) {
+            if (reason == DozeEvent.PULSE_REASON_SENSOR_LONG_PRESS) {
                 mPowerManager.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                         "com.android.systemui:LONG_PRESS");
                 startAssist(new Bundle());
                 return;
             }
 
-            if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+            if (reason == DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
                 mScrimController.setWakeLockScreenSensorActive(true);
             }
 
-            if (reason == DozeLog.PULSE_REASON_DOCKING && mStatusBarWindow != null) {
+            if (reason == DozeEvent.PULSE_REASON_DOCKING && mStatusBarWindow != null) {
                 mStatusBarWindow.suppressWakeUpGesture(true);
             }
 
-            boolean passiveAuthInterrupt = reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
+            boolean passiveAuthInterrupt = reason == DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
                             && mWakeLockScreenPerformsAuth;
             // Set the state to pulsing, so ScrimController will know what to do once we ask it to
             // execute the transition. The pulse callback will then be invoked when the scrims
@@ -4077,7 +4081,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         public void stopDozing() {
             if (mDozingRequested) {
                 mDozingRequested = false;
-                DozeLog.traceDozing(mContext, mDozing);
+                mDozeLog.traceDozing(mDozing);
                 updateDozing();
             }
         }
@@ -4085,7 +4089,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void onIgnoreTouchWhilePulsing(boolean ignore) {
             if (ignore != mIgnoreTouchWhilePulsing) {
-                DozeLog.tracePulseTouchDisabledByProx(mContext, ignore);
+                mDozeLog.tracePulseTouchDisabledByProx(ignore);
             }
             mIgnoreTouchWhilePulsing = ignore;
             if (isDozing() && ignore) {
@@ -4129,7 +4133,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void extendPulse(int reason) {
-            if (reason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
+            if (reason == DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN) {
                 mScrimController.setWakeLockScreenSensorActive(true);
             }
             if (mDozeScrimController.isPulsing() && mHeadsUpManager.hasNotifications()) {

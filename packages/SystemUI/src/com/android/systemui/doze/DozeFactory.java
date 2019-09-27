@@ -44,7 +44,8 @@ public class DozeFactory {
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
-    public DozeMachine assembleMachine(DozeService dozeService, FalsingManager falsingManager) {
+    public DozeMachine assembleMachine(DozeService dozeService, FalsingManager falsingManager,
+            DozeLog dozeLog) {
         Context context = dozeService;
         AsyncSensorManager sensorManager = Dependency.get(AsyncSensorManager.class);
         AlarmManager alarmManager = context.getSystemService(AlarmManager.class);
@@ -65,13 +66,14 @@ public class DozeFactory {
                 params);
 
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock,
-                wakefulnessLifecycle);
+                wakefulnessLifecycle, dozeLog);
         machine.setParts(new DozeMachine.Part[]{
                 new DozePauser(handler, machine, alarmManager, params.getPolicy()),
                 new DozeFalsingManagerAdapter(falsingManager),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
-                        handler, wakeLock, machine, dockManager),
-                createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),
+                        handler, wakeLock, machine, dockManager, dozeLog),
+                createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params,
+                        dozeLog),
                 new DozeScreenState(wrappedService, handler, params, wakeLock),
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, params,
                         handler),
@@ -95,18 +97,19 @@ public class DozeFactory {
     private DozeTriggers createDozeTriggers(Context context, AsyncSensorManager sensorManager,
             DozeHost host, AlarmManager alarmManager, AmbientDisplayConfiguration config,
             DozeParameters params, Handler handler, WakeLock wakeLock, DozeMachine machine,
-            DockManager dockManager) {
+            DockManager dockManager, DozeLog dozeLog) {
         boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, alarmManager, config, params,
                 sensorManager, handler, wakeLock, allowPulseTriggers, dockManager,
-                new ProximitySensor(context, sensorManager));
+                new ProximitySensor(context, sensorManager), dozeLog);
+
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
             DozeMachine machine, Handler handler, AlarmManager alarmManager,
-            DozeParameters params) {
+            DozeParameters params, DozeLog dozeLog) {
         return new DozeUi(context, alarmManager, machine, wakeLock, host, handler, params,
-                Dependency.get(KeyguardUpdateMonitor.class));
+                Dependency.get(KeyguardUpdateMonitor.class), dozeLog);
     }
 
     public static DozeHost getHost(DozeService service) {

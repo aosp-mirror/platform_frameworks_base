@@ -48,7 +48,6 @@ import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -63,12 +62,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     private Sensor mTapSensor;
     private DockManager mDockManagerFake;
     private FakeProximitySensor mProximitySensor;
-
-    @BeforeClass
-    public static void setupSuite() {
-        // We can't use KeyguardUpdateMonitor from tests.
-        DozeLog.setRegisterKeyguardCallback(false);
-    }
 
     @Before
     public void setUp() throws Exception {
@@ -87,7 +80,7 @@ public class DozeTriggersTest extends SysuiTestCase {
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, alarmManager, config, parameters,
                 asyncSensorManager, Handler.createAsync(Looper.myLooper()), wakeLock, true,
-                mDockManagerFake, mProximitySensor);
+                mDockManagerFake, mProximitySensor, mock(DozeLog.class));
         waitForSensorManager();
     }
 
@@ -148,9 +141,10 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Test
     public void testProximitySensorNotAvailablel() {
         mProximitySensor.setSensorAvailable(false);
-        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
-        mTriggers.onSensor(DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, 100, 100, new float[]{1});
-        mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 100, null);
+        mTriggers.onSensor(DozeEvent.PULSE_REASON_SENSOR_LONG_PRESS, 100, 100, null);
+        mTriggers.onSensor(DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN, 100, 100,
+                new float[]{1});
+        mTriggers.onSensor(DozeEvent.REASON_SENSOR_TAP, 100, 100, null);
     }
 
     private void waitForSensorManager() {
