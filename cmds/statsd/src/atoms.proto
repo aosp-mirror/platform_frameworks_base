@@ -371,6 +371,9 @@ message Atom {
             249 [(module) = "cellbroadcast"];
         CellBroadcastMessageError cb_message_error =
             250 [(module) = "cellbroadcast"];
+        WifiHealthStatReported wifi_health_stat_reported = 251 [(module) = "wifi"];
+        WifiFailureStatReported wifi_failure_stat_reported = 252 [(module) = "wifi"];
+        WifiConnectionResultReported wifi_connection_result_reported = 253 [(module) = "wifi"];
     }
 
     // Pulled events will start at field 10000.
@@ -636,6 +639,81 @@ message CachedKillReported {
     // TODO: remove this when validation is done
     optional int64 version = 5;
     optional int64 pss = 4;
+}
+
+/**
+ * Logs the change in wifi health.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiDataStall.java
+ */
+message WifiHealthStatReported {
+    // duration this stat is obtained over in milliseconds
+    optional int32 duration_millis = 1;
+    // whether wifi is classified as sufficient for the user's data traffic, determined
+    // by whether the calculated throughput exceeds the average demand within |duration_millis|
+    optional bool is_sufficient = 2;
+    // whether the calculated throughput is exceeds the minimum required for typical usage
+    optional bool is_throughput_good = 3;
+    // whether cellular data is available
+    optional bool is_cell_data_available = 4;
+    // the WLAN channel the connected network is on (ie. 2412)
+    optional int32 frequency = 5;
+}
+
+/**
+ * Logged when wifi detects a significant change in connection failure rate.
+ *
+ * Logged from: frameworks/opt/net/wifi/service/java/com/android/server/wifi/WifiHealthMonitor.java
+ *
+ */
+message WifiFailureStatReported {
+    enum AbnormalityType {
+        UNKNOWN = 0;
+        SIGNIFICANT_INCREASE = 1;
+        SIGNIFICANT_DECREASE = 2;
+        SIMPLY_HIGH = 3;
+    }
+    enum FailureType {
+        FAILURE_UNKNOWN = 0;
+        FAILURE_CONNECTION = 1;
+        FAILURE_ASSOCIATION_REJECTION = 2;
+        FAILURE_ASSOCIATION_TIMEOUT = 3;
+        FAILURE_AUTHENTICATION = 4;
+        FAILURE_NON_LOCAL_DISCONNECTION = 5;
+        FAILURE_SHORT_CONNECTION_DUE_TO_NON_LOCAL_DISCONNECTION = 6;
+    }
+    // Reason for uploading this stat
+    optional AbnormalityType abnormality_type = 1;
+    // The particular type of failure
+    optional FailureType failure_type = 2;
+    // How many times we have encountered this combination of AbnormalityType and FailureType
+    optional int32 failure_count = 3;
+}
+
+/**
+ * Logs whether a wifi connection is successful and reasons for failure if it isn't.
+ *
+ * Logged from:
+ *   frameworks/opt/net/wifi/service/java/com/android/server/wifi/ClientModeImpl.java
+ */
+message WifiConnectionResultReported {
+    enum FailureCode {
+        FAILURE_UNKNOWN = 0;
+        FAILURE_ASSOCIATION_TIMEOUT = 1;
+        FAILURE_ASSOCIATION_REJECTION = 2;
+        FAILURE_AUTHENTICATION_GENERAL = 3;
+        FAILURE_AUTHENTICATION_EAP = 4;
+        FAILURE_DHCP = 5;
+        FAILURE_NETWORK_DISCONNECTION = 6;
+        FAILURE_ROAM_TIMEOUT = 7;
+    }
+    // true represents a successful connection
+    optional bool connection_result = 1;
+    // reason for the connection failure
+    optional FailureCode failure_code = 2;
+    // scan rssi before the connection attempt
+    optional int32 rssi = 3;
 }
 
 /**
