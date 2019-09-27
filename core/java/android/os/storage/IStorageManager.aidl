@@ -193,5 +193,4 @@ interface IStorageManager {
     void startCheckpoint(int numTries) = 85;
     boolean needsCheckpoint() = 86;
     void abortChanges(in String message, boolean retry) = 87;
-    void clearUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 88;
 }
