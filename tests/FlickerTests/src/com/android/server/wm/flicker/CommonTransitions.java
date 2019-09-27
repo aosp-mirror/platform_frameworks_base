@@ -243,30 +243,40 @@ class CommonTransitions {
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder editTextLoseFocusToHome(UiDevice device) {
-        IAppHelper testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
-                "com.android.server.wm.flicker.testapp", "ImeApp");
+    static TransitionBuilder editTextLoseFocusToHome(IAppHelper testApp, UiDevice device,
+            int beginRotation, boolean clickOnEditText) {
         return TransitionRunner.newBuilder()
-                .withTag("editTextLoseFocusToHome_" + testApp.getLauncherName())
+                .withTag("editTextLoseFocusToHome_" + testApp.getLauncherName()
+                        + rotationToString(beginRotation))
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
+                .runBefore(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
-                .runBefore(() -> clickEditTextWidget(device, testApp))
+                .runBefore(() -> {
+                    if (clickOnEditText) {
+                        clickEditTextWidget(device, testApp);
+                    }
+                })
                 .run(device::pressHome)
                 .run(device::waitForIdle)
                 .runAfterAll(testApp::exit)
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder editTextLoseFocusToApp(UiDevice device) {
-        IAppHelper testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
-                "com.android.server.wm.flicker.testapp", "ImeApp");
+    static TransitionBuilder editTextLoseFocusToApp(IAppHelper testApp, UiDevice device,
+            int beginRotation, boolean clickOnEditText) {
         return TransitionRunner.newBuilder()
-                .withTag("editTextLoseFocusToApp_" + testApp.getLauncherName())
+                .withTag("editTextLoseFocusToApp_" + testApp.getLauncherName()
+                        + rotationToString(beginRotation))
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
+                .runBefore(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
-                .runBefore(() -> clickEditTextWidget(device, testApp))
+                .runBefore(() -> {
+                    if (clickOnEditText) {
+                        clickEditTextWidget(device, testApp);
+                    }
+                })
                 .run(device::pressBack)
                 .run(device::waitForIdle)
                 .runAfterAll(testApp::exit)
