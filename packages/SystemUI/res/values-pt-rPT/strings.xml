@@ -68,7 +68,7 @@
     <string name="learn_more" msgid="5000517160980853569">"Saiba mais"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para preencher o ecrã"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Esticar p. caber em ec. int."</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de ecrã"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. ecrã"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"A guardar captura de ecrã..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"A guardar captura de ecrã..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Captura de ecrã guardada"</string>
