@@ -130,7 +130,10 @@ public class DebugTest {
      */
     @Test
     public void editTextLoseFocusToHome() {
-        CommonTransitions.editTextLoseFocusToHome(uiDevice).includeJankyRuns().recordEachRun()
+        IAppHelper testApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
+                "com.android.server.wm.flicker.testapp", "ImeApp");
+        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0,
+                /* clickOnEditField */true).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
@@ -139,7 +142,8 @@ public class DebugTest {
      */
     @Test
     public void editTextLoseFocusToApp() {
-        CommonTransitions.editTextLoseFocusToHome(uiDevice).includeJankyRuns().recordEachRun()
+        CommonTransitions.editTextLoseFocusToHome(testApp, uiDevice, Surface.ROTATION_0,
+                /* clickOnEditField */true).includeJankyRuns().recordEachRun()
                 .build().run();
     }
 
