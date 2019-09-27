@@ -16,7 +16,6 @@
 
 package android.content;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
@@ -38,66 +37,96 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
-    public Cursor query(String callingPkg, Uri url, @Nullable String[] projection,
+    public Cursor query(String callingPkg, @Nullable String featureId, Uri url,
+            @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
             throws RemoteException;
     public String getType(Uri url) throws RemoteException;
-    @UnsupportedAppUsage
-    public Uri insert(String callingPkg, Uri url, ContentValues initialValues)
-            throws RemoteException;
-    @UnsupportedAppUsage
-    public int bulkInsert(String callingPkg, Uri url, ContentValues[] initialValues)
-            throws RemoteException;
-    @UnsupportedAppUsage
-    public int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
-            throws RemoteException;
-    @UnsupportedAppUsage
-    public int update(String callingPkg, Uri url, ContentValues values, String selection,
-            String[] selectionArgs) throws RemoteException;
-    public ParcelFileDescriptor openFile(
-            String callingPkg, Uri url, String mode, ICancellationSignal signal,
-            IBinder callerToken)
-            throws RemoteException, FileNotFoundException;
-    public AssetFileDescriptor openAssetFile(
-            String callingPkg, Uri url, String mode, ICancellationSignal signal)
-            throws RemoteException, FileNotFoundException;
-
     @Deprecated
-    public default ContentProviderResult[] applyBatch(String callingPkg,
-            ArrayList<ContentProviderOperation> operations)
-                    throws RemoteException, OperationApplicationException {
-        return applyBatch(callingPkg, "unknown", operations);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "ContentProviderClient#insert(android.net.Uri, android.content.ContentValues)} "
+            + "instead")
+    public default Uri insert(String callingPkg, Uri url, ContentValues initialValues)
+            throws RemoteException {
+        return insert(callingPkg, null, url, initialValues);
     }
+    public Uri insert(String callingPkg, String featureId, Uri url, ContentValues initialValues)
+            throws RemoteException;
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "ContentProviderClient#bulkInsert(android.net.Uri, android.content.ContentValues[])"
+            + "} instead")
+    public default int bulkInsert(String callingPkg, Uri url, ContentValues[] initialValues)
+            throws RemoteException {
+        return bulkInsert(callingPkg, null, url, initialValues);
+    }
+    public int bulkInsert(String callingPkg, String featureId, Uri url,
+            ContentValues[] initialValues) throws RemoteException;
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "ContentProviderClient#delete(android.net.Uri, java.lang.String, java.lang"
+            + ".String[])} instead")
+    public default int delete(String callingPkg, Uri url, String selection, String[] selectionArgs)
+            throws RemoteException {
+        return delete(callingPkg, null, url, selection, selectionArgs);
+    }
+    public int delete(String callingPkg, String featureId, Uri url, String selection,
+            String[] selectionArgs) throws RemoteException;
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "ContentProviderClient#update(android.net.Uri, android.content.ContentValues, java"
+            + ".lang.String, java.lang.String[])} instead")
+    public default int update(String callingPkg, Uri url, ContentValues values, String selection,
+            String[] selectionArgs) throws RemoteException {
+        return update(callingPkg, null, url, values, selection, selectionArgs);
+    }
+    public int update(String callingPkg, String featureId, Uri url, ContentValues values,
+            String selection, String[] selectionArgs) throws RemoteException;
 
-    public ContentProviderResult[] applyBatch(String callingPkg, String authority,
-            ArrayList<ContentProviderOperation> operations)
+    public ParcelFileDescriptor openFile(String callingPkg, @Nullable String featureId, Uri url,
+            String mode, ICancellationSignal signal, IBinder callerToken)
+            throws RemoteException, FileNotFoundException;
+
+    public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String featureId,
+            Uri url, String mode, ICancellationSignal signal)
+            throws RemoteException, FileNotFoundException;
+
+    public ContentProviderResult[] applyBatch(String callingPkg, @Nullable String featureId,
+            String authority, ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
 
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
+            + "ContentProviderClient#call(java.lang.String, java.lang.String, android.os.Bundle)} "
+            + "instead")
     public default Bundle call(String callingPkg, String method,
             @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
-        return call(callingPkg, "unknown", method, arg, extras);
+        return call(callingPkg, null, "unknown", method, arg, extras);
     }
 
-    public Bundle call(String callingPkg, String authority, String method,
-            @Nullable String arg, @Nullable Bundle extras) throws RemoteException;
+    public Bundle call(String callingPkg, @Nullable String featureId, String authority,
+            String method, @Nullable String arg, @Nullable Bundle extras) throws RemoteException;
 
-    public int checkUriPermission(String callingPkg, Uri uri, int uid, int modeFlags)
-            throws RemoteException;
+    public int checkUriPermission(String callingPkg, @Nullable String featureId, Uri uri, int uid,
+            int modeFlags) throws RemoteException;
 
     public ICancellationSignal createCancellationSignal() throws RemoteException;
 
-    public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException;
-    public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException;
+    public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+            throws RemoteException;
 
-    public boolean refresh(String callingPkg, Uri url, @Nullable Bundle args,
-            ICancellationSignal cancellationSignal) throws RemoteException;
+    public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+            throws RemoteException;
+
+    public boolean refresh(String callingPkg, @Nullable String featureId, Uri url,
+            @Nullable Bundle args, ICancellationSignal cancellationSignal) throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
-    public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
-            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException;
+
+    public AssetFileDescriptor openTypedAssetFile(String callingPkg, @Nullable String featureId,
+            Uri url, String mimeType, Bundle opts, ICancellationSignal signal)
+            throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)

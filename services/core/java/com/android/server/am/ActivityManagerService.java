@@ -7758,7 +7758,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             holder = getContentProviderExternalUnchecked(name, null, callingUid,
                     "*checkContentProviderUriPermission*", userId);
             if (holder != null) {
-                return holder.provider.checkUriPermission(null, uri, callingUid, modeFlags);
+                return holder.provider.checkUriPermission(null, null, uri, callingUid, modeFlags);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Content provider dead retrieving " + uri, e);
@@ -7923,7 +7923,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             sCallerIdentity.set(new Identity(
                     token, Binder.getCallingPid(), Binder.getCallingUid()));
             try {
-                pfd = cph.provider.openFile(null, uri, "r", null, token);
+                pfd = cph.provider.openFile(null, null, uri, "r", null, token);
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
             } finally {

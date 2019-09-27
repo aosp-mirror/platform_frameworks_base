@@ -406,8 +406,8 @@ public class TileUtils {
             return null;
         }
         try {
-            return provider.call(context.getPackageName(), uri.getAuthority(),
-                    method, uri.toString(), bundle);
+            return provider.call(context.getPackageName(), context.getFeatureId(),
+                    uri.getAuthority(), method, uri.toString(), bundle);
         } catch (RemoteException e) {
             return null;
         }
