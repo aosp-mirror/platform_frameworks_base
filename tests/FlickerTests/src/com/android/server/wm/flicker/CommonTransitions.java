@@ -74,13 +74,16 @@ class CommonTransitions {
     }
 
     static TransitionBuilder openAppWarm(IAppHelper testApp, UiDevice
-            device) {
+            device, int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("OpenAppWarm_" + testApp.getLauncherName())
+                .withTag("OpenAppWarm_" + testApp.getLauncherName()
+                        + rotationToString(beginRotation))
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
+                .runBeforeAll(() -> setRotation(device, beginRotation))
                 .runBeforeAll(testApp::open)
                 .runBefore(device::pressHome)
                 .runBefore(device::waitForIdle)
+                .runBefore(() -> setRotation(device, beginRotation))
                 .run(testApp::open)
                 .runAfterAll(testApp::exit)
                 .runAfterAll(AutomationUtils::setDefaultWait)
@@ -115,16 +118,19 @@ class CommonTransitions {
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder getOpenAppCold(IAppHelper testApp,
-            UiDevice device) {
+    static TransitionBuilder openAppCold(IAppHelper testApp,
+            UiDevice device, int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("OpenAppCold_" + testApp.getLauncherName())
+                .withTag("OpenAppCold_" + testApp.getLauncherName()
+                        + rotationToString(beginRotation))
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
+                .runBeforeAll(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::exit)
                 .runBefore(device::waitForIdle)
                 .run(testApp::open)
                 .runAfterAll(testApp::exit)
+                .runAfterAll(() -> setRotation(device, Surface.ROTATION_0))
                 .repeat(ITERATIONS);
     }
 
