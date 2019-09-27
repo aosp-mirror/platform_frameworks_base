@@ -197,7 +197,7 @@ class StorageManagerService extends IStorageManager.Stub
             "persist.sys.zram_enabled";
 
     private static final boolean IS_FUSE_ENABLED =
-            SystemProperties.getBoolean("persist.sys.fuse", false);
+            SystemProperties.getBoolean(StorageManager.PROP_FUSE, false);
 
     private static final boolean ENABLE_ISOLATED_STORAGE = StorageManager.hasIsolatedStorage();
 
@@ -1526,6 +1526,9 @@ class StorageManagerService extends IStorageManager.Stub
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE_SNAPSHOT, Boolean.toString(
                 SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, true)));
 
+        SystemProperties.set(StorageManager.PROP_FUSE_SNAPSHOT, Boolean.toString(
+                SystemProperties.getBoolean(StorageManager.PROP_FUSE, false)));
+
         mContext = context;
         mResolver = mContext.getContentResolver();
 
@@ -1858,7 +1861,7 @@ class StorageManagerService extends IStorageManager.Stub
             // This means the mountUserId on such volumes is USER_NULL. This breaks fuse which
             // requires a valid user to mount a volume. Create individual volumes per user in vold
             // and remove this property check
-            int userId = SystemProperties.getBoolean("persist.sys.fuse", false)
+            int userId = SystemProperties.getBoolean(StorageManager.PROP_FUSE_SNAPSHOT, false)
                     ? mCurrentUserId : vol.mountUserId;
             return mVold.mount(vol.id, vol.mountFlags, userId);
         } catch (Exception e) {
