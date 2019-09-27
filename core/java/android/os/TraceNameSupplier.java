@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.os;
 
-package com.android.internal.util.function.pooled;
-
-import android.os.TraceNameSupplier;
-
-import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import android.annotation.NonNull;
 
 /**
- * {@link Runnable} + {@link PooledLambda}
+ * Supplier for custom trace messages.
  *
- * @see PooledLambda
  * @hide
  */
-public interface PooledRunnable
-        extends PooledLambda, Runnable, ThrowingRunnable, TraceNameSupplier {
-    /** @inheritDoc */
-    PooledRunnable recycleOnUse();
+public interface TraceNameSupplier {
+
+    /**
+     * Gets the name used for trace messages.
+     */
+    @NonNull String getTraceName();
 }
