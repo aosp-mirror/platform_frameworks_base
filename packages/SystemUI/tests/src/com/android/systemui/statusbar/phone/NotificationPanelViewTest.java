@@ -40,8 +40,8 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.doze.DozeLog;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -52,7 +52,10 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -122,8 +125,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mStatusBarStateController);
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mUpdateMonitor);
-        mDependency.injectMockDependency(ShadeController.class);
-        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectMockDependency(ConfigurationController.class);
         mDependency.injectMockDependency(ZenModeController.class);
         NotificationWakeUpCoordinator coordinator =
@@ -217,12 +218,22 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         TestableNotificationPanelView(NotificationWakeUpCoordinator coordinator,
                 PulseExpansionHandler expansionHandler,
                 KeyguardBypassController bypassController) {
-            super(NotificationPanelViewTest.this.mContext, null,
+            super(
+                    NotificationPanelViewTest.this.mContext,
+                    null,
                     new InjectionInflationController(
                             SystemUIFactory.getInstance().getRootComponent()),
-                    coordinator, expansionHandler, mock(DynamicPrivacyController.class),
+                    coordinator,
+                    expansionHandler,
+                    mock(DynamicPrivacyController.class),
                     bypassController,
-                    mFalsingManager, mock(PluginManager.class), mock(DozeLog.class));
+                    mFalsingManager,
+                    mock(PluginManager.class),
+                    mock(ShadeController.class),
+                    mock(NotificationLockscreenUserManager.class),
+                    new NotificationEntryManager(new NotificationData(mock(
+                            NotificationSectionsFeatureManager.class))),
+                    mock(DozeLog.class));
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

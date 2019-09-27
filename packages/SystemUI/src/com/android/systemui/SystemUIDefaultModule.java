@@ -19,8 +19,6 @@ package com.android.systemui;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
-import android.content.Context;
-
 import androidx.annotation.Nullable;
 
 import com.android.systemui.dock.DockManager;
@@ -72,11 +70,8 @@ abstract class SystemUIDefaultModule {
     abstract NotificationData.KeyguardEnvironment bindKeyguardEnvironment(
             KeyguardEnvironmentImpl keyguardEnvironment);
 
-    @Singleton
-    @Provides
-    static ShadeController provideShadeController(Context context) {
-        return SysUiServiceProvider.getComponent(context, StatusBar.class);
-    }
+    @Binds
+    abstract ShadeController provideShadeController(StatusBar statusBar);
 
     @Binds
     @IntoMap

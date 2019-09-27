@@ -24,6 +24,7 @@ import android.testing.DexmakerShareClassLoaderRule;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;
 
@@ -64,6 +65,7 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
         when(inst.getTargetContext()).thenThrow(new RuntimeException(
                 "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext"));
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
+        mDependency.injectMockDependency(AssistManager.class);
     }
 
     @After
