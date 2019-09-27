@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="4638956954852782576">"&lt;Bez naslova&gt;"</string>
+    <string name="untitled" msgid="4638956954852782576">"&lt;Bez imena&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nema broja telefona)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Nepoznato"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Glasovna pošta"</string>
@@ -1922,8 +1922,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nekategorizovano"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vi podešavate važnost ovih obaveštenja."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ovo je važno zbog ljudi koji učestvuju."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Želite li da dozvolite aplikaciji <xliff:g id="APP">%1$s</xliff:g> da napravi novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Želite li da dozvolite aplikaciji <xliff:g id="APP">%1$s</xliff:g> da napravi novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (korisnik sa ovim nalogom već postoji)?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Želite li da dozvolite da <xliff:g id="APP">%1$s</xliff:g> napravi novog korisnika sa nalogom <xliff:g id="ACCOUNT">%2$s</xliff:g> (korisnik sa tim nalogom već postoji)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Želite li da dozvolite da <xliff:g id="APP">%1$s</xliff:g> napravi novog korisnika sa nalogom <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodajte jezik"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Podešavanje regiona"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Unesite naziv jezika"</string>
