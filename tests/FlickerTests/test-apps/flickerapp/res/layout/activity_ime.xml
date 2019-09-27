@@ -18,6 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     android:background="@android:color/holo_green_light">
     <EditText android:id="@+id/plain_text_input"
               android:layout_height="wrap_content"
