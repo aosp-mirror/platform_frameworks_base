@@ -18,8 +18,9 @@ package com.android.server.pm;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.UserInfo;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ParsedPackage;
 import android.service.pm.PackageProto;
 import android.util.proto.ProtoOutputStream;
 
@@ -31,9 +32,11 @@ import java.util.List;
 /**
  * Settings data for a particular package we know about.
  */
-public final class PackageSetting extends PackageSettingBase {
+public final class PackageSetting extends PackageSettingBase implements
+        ParsedPackage.PackageSettingCallback {
     int appId;
-    PackageParser.Package pkg;
+
+    public AndroidPackage pkg;
     /**
      * WARNING. The object reference is important. We perform integer equality and NOT
      * object equality to check whether shared user settings are the same.
@@ -50,12 +53,12 @@ public final class PackageSetting extends PackageSettingBase {
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            long pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
-            List<String> childPackageNames, int sharedUserId, String[] usesStaticLibraries,
+            long pVersionCode, int pkgFlags, int privateFlags,
+            int sharedUserId, String[] usesStaticLibraries,
             long[] usesStaticLibrariesVersions) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames,
+                pVersionCode, pkgFlags, privateFlags,
                 usesStaticLibraries, usesStaticLibrariesVersions);
         this.sharedUserId = sharedUserId;
     }
@@ -116,10 +119,6 @@ public final class PackageSetting extends PackageSettingBase {
                 : super.getPermissionsState();
     }
 
-    public PackageParser.Package getPackage() {
-        return pkg;
-    }
-
     public int getAppId() {
         return appId;
     }
@@ -132,6 +131,7 @@ public final class PackageSetting extends PackageSettingBase {
         return installPermissionsFixed;
     }
 
+    // TODO(b/135203078): Remove these in favor of reading from the package directly
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -176,10 +176,6 @@ public final class PackageSetting extends PackageSettingBase {
         return true;
     }
 
-    public boolean hasChildPackages() {
-        return childPackageNames != null && !childPackageNames.isEmpty();
-    }
-
     public void writeToProto(ProtoOutputStream proto, long fieldId, List<UserInfo> users) {
         final long packageToken = proto.start(fieldId);
         proto.write(PackageProto.NAME, (realName != null ? realName : name));
@@ -190,18 +186,19 @@ public final class PackageSetting extends PackageSettingBase {
         proto.write(PackageProto.INSTALLER_NAME, installerPackageName);
 
         if (pkg != null) {
-            proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
+            proto.write(PackageProto.VERSION_STRING, pkg.getVersionName());
 
             long splitToken = proto.start(PackageProto.SPLITS);
             proto.write(PackageProto.SplitProto.NAME, "base");
-            proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.baseRevisionCode);
+            proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.getBaseRevisionCode());
             proto.end(splitToken);
 
-            if (pkg.splitNames != null) {
-                for (int i = 0; i < pkg.splitNames.length; i++) {
+            if (pkg.getSplitNames() != null) {
+                for (int i = 0; i < pkg.getSplitNames().length; i++) {
                     splitToken = proto.start(PackageProto.SPLITS);
-                    proto.write(PackageProto.SplitProto.NAME, pkg.splitNames[i]);
-                    proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.splitRevisionCodes[i]);
+                    proto.write(PackageProto.SplitProto.NAME, pkg.getSplitNames()[i]);
+                    proto.write(PackageProto.SplitProto.REVISION_CODE,
+                            pkg.getSplitRevisionCodes()[i]);
                     proto.end(splitToken);
                 }
             }
@@ -217,5 +214,11 @@ public final class PackageSetting extends PackageSettingBase {
         pkg = other.pkg;
         sharedUserId = other.sharedUserId;
         sharedUser = other.sharedUser;
+    }
+
+    // TODO(b/135203078): Move to constructor
+    @Override
+    public void setAndroidPackage(AndroidPackage pkg) {
+        this.pkg = pkg;
     }
 }

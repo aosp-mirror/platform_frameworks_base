@@ -35,13 +35,17 @@ import static org.junit.Assert.assertNotSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageParser;
 import android.content.pm.SharedLibraryInfo;
+import android.content.pm.parsing.PackageImpl;
+import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.parsing.ParsingPackage;
+import android.content.res.TypedArray;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
@@ -58,6 +62,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 @Presubmit
@@ -65,6 +70,9 @@ import java.io.File;
 public class ScanTests {
 
     private static final String DUMMY_PACKAGE_NAME = "some.app.to.test";
+
+    private static final UUID UUID_ONE = UUID.randomUUID();
+    private static final UUID UUID_TWO = UUID.randomUUID();
 
     @Mock
     PackageAbiHelper mMockPackageAbiHelper;
@@ -87,25 +95,25 @@ public class ScanTests {
     @Before
     public void setupDefaultAbiBehavior() throws Exception {
         when(mMockPackageAbiHelper.derivePackageAbi(
-                any(PackageParser.Package.class), nullable(String.class), anyBoolean()))
+                any(ParsedPackage.class), nullable(String.class), anyBoolean()))
                 .thenReturn(new Pair<>(
                         new PackageAbiHelper.Abis("derivedPrimary", "derivedSecondary"),
                         new PackageAbiHelper.NativeLibraryPaths(
                                 "derivedRootDir", true, "derivedNativeDir", "derivedNativeDir2")));
         when(mMockPackageAbiHelper.getNativeLibraryPaths(
-                any(PackageParser.Package.class), any(File.class)))
+                any(ParsedPackage.class), any(File.class)))
                 .thenReturn(new PackageAbiHelper.NativeLibraryPaths(
                         "getRootDir", true, "getNativeDir", "getNativeDir2"
                 ));
         when(mMockPackageAbiHelper.getBundledAppAbis(
-                any(PackageParser.Package.class)))
+                any(ParsedPackage.class)))
                 .thenReturn(new PackageAbiHelper.Abis("bundledPrimary", "bundledSecondary"));
     }
 
     @Test
     public void newInstallSimpleAllNominal() throws Exception {
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .addScanFlag(PackageManagerService.SCAN_NEW_INSTALL)
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
                         .build();
@@ -123,7 +131,7 @@ public class ScanTests {
         when(mMockUserManager.getUserIds()).thenReturn(userIds);
 
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setRealPkgName(null)
                         .addScanFlag(PackageManagerService.SCAN_NEW_INSTALL)
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
@@ -138,7 +146,7 @@ public class ScanTests {
     @Test
     public void installRealPackageName() throws Exception {
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setRealPkgName("com.package.real")
                         .build();
 
@@ -149,7 +157,7 @@ public class ScanTests {
         final PackageManagerService.ScanRequest scanRequestNoRealPkg =
                 createBasicScanRequestBuilder(
                         createBasicPackage(DUMMY_PACKAGE_NAME)
-                                .setRealPackageName("com.package.real").build())
+                                .setRealPackage("com.package.real"))
                         .build();
 
         final PackageManagerService.ScanResult scanResultNoReal = executeScan(scanRequestNoRealPkg);
@@ -165,7 +173,7 @@ public class ScanTests {
                 .setSecondaryCpuAbiString("secondaryCpuAbi")
                 .build();
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .addScanFlag(PackageManagerService.SCAN_AS_FULL_APP)
                         .setPkgSetting(pkgSetting)
                         .build();
@@ -197,7 +205,7 @@ public class ScanTests {
                         .build();
 
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .build();
 
@@ -209,17 +217,18 @@ public class ScanTests {
 
     @Test
     public void installStaticSharedLibrary() throws Exception {
-        final PackageParser.Package pkg = createBasicPackage("static.lib.pkg.123")
-                .setStaticSharedLib("static.lib", 123L)
-                .setManifestPackageName("static.lib.pkg")
+        final ParsedPackage pkg = createBasicPackage("static.lib.pkg")
+                .setStaticSharedLibName("static.lib")
+                .setStaticSharedLibVersion(123L)
+                .hideAsParsed()
+                .setPackageName("static.lib.pkg.123")
                 .setVersionCodeMajor(1)
                 .setVersionCode(234)
                 .setBaseCodePath("/some/path.apk")
-                .addSplitCodePath("/some/other/path.apk")
-                .build();
+                .setSplitCodePaths(new String[] {"/some/other/path.apk"});
 
-        final PackageManagerService.ScanRequest scanRequest = new ScanRequestBuilder(
-                pkg).setUser(UserHandle.of(0)).build();
+        final PackageManagerService.ScanRequest scanRequest = new ScanRequestBuilder(pkg)
+                .setUser(UserHandle.of(0)).build();
 
 
         final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
@@ -240,15 +249,14 @@ public class ScanTests {
 
     @Test
     public void installDynamicLibraries() throws Exception {
-        final PackageParser.Package pkg = createBasicPackage("dynamic.lib.pkg")
-                .setManifestPackageName("dynamic.lib.pkg")
+        final ParsedPackage pkg = createBasicPackage("dynamic.lib.pkg")
                 .addLibraryName("liba")
                 .addLibraryName("libb")
+                .hideAsParsed()
                 .setVersionCodeMajor(1)
                 .setVersionCode(234)
                 .setBaseCodePath("/some/path.apk")
-                .addSplitCodePath("/some/other/path.apk")
-                .build();
+                .setSplitCodePaths(new String[] {"/some/other/path.apk"});
 
         final PackageManagerService.ScanRequest scanRequest =
                 new ScanRequestBuilder(pkg).setUser(UserHandle.of(0)).build();
@@ -290,15 +298,15 @@ public class ScanTests {
                         .setVolumeUuid("someUuid")
                         .build();
 
-        final PackageParser.Package basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
-                .setApplicationInfoVolumeUuid("someNewUuid")
-                .build();
+        final ParsedPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
+                .hideAsParsed()
+                .setApplicationVolumeUuid(UUID_TWO.toString());
 
 
         final PackageManagerService.ScanResult scanResult = executeScan(
                 new ScanRequestBuilder(basicPackage).setPkgSetting(pkgSetting).build());
 
-        assertThat(scanResult.pkgSetting.volumeUuid, is("someNewUuid"));
+        assertThat(scanResult.pkgSetting.volumeUuid, is(UUID_TWO.toString()));
     }
 
     @Test
@@ -306,10 +314,10 @@ public class ScanTests {
         final PackageSetting pkgSetting =
                 createBasicPackageSettingBuilder(DUMMY_PACKAGE_NAME).build();
 
-        final PackageParser.Package basicPackage =
+        final ParsedPackage basicPackage =
                 createBasicPackage(DUMMY_PACKAGE_NAME)
-                        .setCpuAbiOVerride("testOverride")
-                        .build();
+                        .hideAsParsed()
+                        .setCpuAbiOverride("testOverride");
 
 
         final PackageManagerService.ScanResult scanResult = executeScan(new ScanRequestBuilder(
@@ -326,9 +334,9 @@ public class ScanTests {
         final PackageSetting originalPkgSetting =
                 createBasicPackageSettingBuilder("original.package").build();
 
-        final PackageParser.Package basicPackage =
+        final ParsedPackage basicPackage =
                 createBasicPackage(DUMMY_PACKAGE_NAME)
-                        .build();
+                        .hideAsParsed();
 
 
         final PackageManagerService.ScanResult result =
@@ -336,7 +344,7 @@ public class ScanTests {
                         .setOriginalPkgSetting(originalPkgSetting)
                         .build());
 
-        assertThat(result.request.pkg.packageName, is("original.package"));
+        assertThat(result.request.parsedPackage.getPackageName(), is("original.package"));
     }
 
     @Test
@@ -349,7 +357,7 @@ public class ScanTests {
                         .build();
 
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .addScanFlag(SCAN_AS_FULL_APP)
                         .build();
@@ -370,7 +378,7 @@ public class ScanTests {
                         .build();
 
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .addScanFlag(SCAN_AS_INSTANT_APP)
                         .build();
@@ -389,7 +397,7 @@ public class ScanTests {
                         .build();
 
         final PackageManagerService.ScanRequest scanRequest =
-                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME).build())
+                createBasicScanRequestBuilder(createBasicPackage(DUMMY_PACKAGE_NAME))
                         .setPkgSetting(existingPkgSetting)
                         .setDisabledPkgSetting(existingPkgSetting)
                         .addScanFlag(SCAN_NEW_INSTALL)
@@ -397,15 +405,14 @@ public class ScanTests {
 
         final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.request.pkg.applicationInfo.flags,
+        assertThat(scanResult.request.parsedPackage.getFlags(),
                 hasFlag(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP));
     }
 
     @Test
     public void factoryTestFlagSet() throws Exception {
-        final PackageParser.Package basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
-                .addPermissionRequest(Manifest.permission.FACTORY_TEST)
-                .build();
+        final ParsingPackage basicPackage = createBasicPackage(DUMMY_PACKAGE_NAME)
+                .addRequestedPermission(Manifest.permission.FACTORY_TEST);
 
         final PackageManagerService.ScanResult scanResult = PackageManagerService.scanPackageOnlyLI(
                 createBasicScanRequestBuilder(basicPackage).build(),
@@ -413,15 +420,15 @@ public class ScanTests {
                 true /*isUnderFactoryTest*/,
                 System.currentTimeMillis());
 
-        assertThat(scanResult.request.pkg.applicationInfo.flags,
+        assertThat(scanResult.request.parsedPackage.getFlags(),
                 hasFlag(ApplicationInfo.FLAG_FACTORY_TEST));
     }
 
     @Test
     public void scanSystemApp_isOrphanedTrue() throws Exception {
-        final PackageParser.Package pkg = createBasicPackage(DUMMY_PACKAGE_NAME)
-                .addApplicationInfoFlag(ApplicationInfo.FLAG_SYSTEM)
-                .build();
+        final ParsedPackage pkg = createBasicPackage(DUMMY_PACKAGE_NAME)
+                .hideAsParsed()
+                .setSystem(true);
 
         final PackageManagerService.ScanRequest scanRequest =
                 createBasicScanRequestBuilder(pkg)
@@ -476,22 +483,29 @@ public class ScanTests {
                 .setResourcePath(createResourcePath(packageName));
     }
 
-    private static ScanRequestBuilder createBasicScanRequestBuilder(PackageParser.Package pkg) {
+    private static ScanRequestBuilder createBasicScanRequestBuilder(ParsingPackage pkg) {
+        return new ScanRequestBuilder(pkg.hideAsParsed())
+                .setUser(UserHandle.of(0));
+    }
+
+    private static ScanRequestBuilder createBasicScanRequestBuilder(ParsedPackage pkg) {
         return new ScanRequestBuilder(pkg)
                 .setUser(UserHandle.of(0));
     }
 
-
-    private static PackageBuilder createBasicPackage(String packageName) {
-        return new PackageBuilder(packageName)
+    private static ParsingPackage createBasicPackage(String packageName) {
+        // TODO(b/135203078): Make this use PackageImpl.forParsing and separate the steps
+        return new PackageImpl(packageName, null, mock(TypedArray.class), false)
                 .setCodePath("/data/tmp/randompath")
                 .setApplicationInfoCodePath(createCodePath(packageName))
                 .setApplicationInfoResourcePath(createResourcePath(packageName))
-                .setApplicationInfoVolumeUuid("volumeUuid")
+                .setApplicationVolumeUuid(UUID_ONE.toString())
                 .setBaseCodePath("/data/tmp/randompath/base.apk")
-                .addUsesStaticLibrary("some.static.library", 234L)
-                .addUsesStaticLibrary("some.other.static.library", 456L)
-                .setApplicationInfoNativeLibraryRootDir("/data/tmp/randompath/base.apk:/lib")
+                .addUsesStaticLibrary("some.static.library")
+                .addUsesStaticLibraryVersion(234L)
+                .addUsesStaticLibrary("some.other.static.library")
+                .addUsesStaticLibraryVersion(456L)
+                .setNativeLibraryRootDir("/data/tmp/randompath/base.apk:/lib")
                 .setVersionCodeMajor(1)
                 .setVersionCode(2345);
     }
@@ -503,20 +517,18 @@ public class ScanTests {
         final PackageSetting pkgSetting = scanResult.pkgSetting;
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
-        final ApplicationInfo applicationInfo = pkgSetting.pkg.applicationInfo;
+        final ApplicationInfo applicationInfo = pkgSetting.pkg.toAppInfo();
         assertBasicApplicationInfo(scanResult, applicationInfo);
-
     }
 
     private static void assertBasicPackageSetting(PackageManagerService.ScanResult scanResult,
             String packageName, boolean isInstant, PackageSetting pkgSetting) {
-        assertThat(pkgSetting.pkg.packageName, is(packageName));
+        assertThat(pkgSetting.pkg.getPackageName(), is(packageName));
         assertThat(pkgSetting.getInstantApp(0), is(isInstant));
         assertThat(pkgSetting.usesStaticLibraries,
                 arrayContaining("some.static.library", "some.other.static.library"));
         assertThat(pkgSetting.usesStaticLibrariesVersions, is(new long[]{234L, 456L}));
-        assertThat(pkgSetting.pkg, is(scanResult.request.pkg));
-        assertThat(pkgSetting.pkg.mExtras, is(pkgSetting));
+        assertThat(pkgSetting.pkg, is(scanResult.request.parsedPackage));
         assertThat(pkgSetting.codePath, is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.resourcePath, is(new File(createResourcePath(packageName))));
         assertThat(pkgSetting.versionCode, is(PackageInfo.composeLongVersionCode(1, 2345)));
@@ -524,20 +536,21 @@ public class ScanTests {
 
     private static void assertBasicApplicationInfo(PackageManagerService.ScanResult scanResult,
             ApplicationInfo applicationInfo) {
-        assertThat(applicationInfo.processName, is(scanResult.request.pkg.packageName));
+        assertThat(applicationInfo.processName,
+                is(scanResult.request.parsedPackage.getPackageName()));
 
         final int uid = applicationInfo.uid;
         assertThat(UserHandle.getUserId(uid), is(UserHandle.USER_SYSTEM));
 
         final String calculatedCredentialId = Environment.getDataUserCePackageDirectory(
                 applicationInfo.volumeUuid, UserHandle.USER_SYSTEM,
-                scanResult.request.pkg.packageName).getAbsolutePath();
+                scanResult.request.parsedPackage.getPackageName()).getAbsolutePath();
         assertThat(applicationInfo.credentialProtectedDataDir, is(calculatedCredentialId));
         assertThat(applicationInfo.dataDir, is(applicationInfo.credentialProtectedDataDir));
     }
 
     private static void assertAbiAndPathssDerived(PackageManagerService.ScanResult scanResult) {
-        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.applicationInfo;
+        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.toAppInfo();
         assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
         assertThat(applicationInfo.secondaryCpuAbi, is("derivedSecondary"));
 
@@ -549,7 +562,7 @@ public class ScanTests {
     }
 
     private static void assertPathsNotDerived(PackageManagerService.ScanResult scanResult) {
-        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.applicationInfo;
+        final ApplicationInfo applicationInfo = scanResult.pkgSetting.pkg.toAppInfo();
         assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));
         assertThat(scanResult.pkgSetting.legacyNativeLibraryPathString, is("getRootDir"));
         assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));

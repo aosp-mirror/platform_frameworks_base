@@ -38,8 +38,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
+import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -159,7 +159,8 @@ public final class PermissionPolicyService extends SystemService {
                     appOpsService.startWatchingMode(getSwitchOp(perm.name), null, appOpsListener);
 
                     SoftRestrictedPermissionPolicy policy =
-                            SoftRestrictedPermissionPolicy.forPermission(null, null, null,
+                            SoftRestrictedPermissionPolicy.forPermission(null,
+                                    (AndroidPackage) null, null,
                                     perm.name);
                     if (policy.resolveAppOp() != OP_NONE) {
                         appOpsService.startWatchingMode(policy.resolveAppOp(), null,
@@ -358,10 +359,10 @@ public final class PermissionPolicyService extends SystemService {
                 pkg.sharedUserId, userId);
         if (sharedPkgNames != null) {
             for (String sharedPkgName : sharedPkgNames) {
-                final PackageParser.Package sharedPkg = packageManagerInternal
+                final AndroidPackage sharedPkg = packageManagerInternal
                         .getPackage(sharedPkgName);
                 if (sharedPkg != null) {
-                    synchroniser.addPackage(sharedPkg.packageName);
+                    synchroniser.addPackage(sharedPkg.getPackageName());
                 }
             }
         }
@@ -378,7 +379,8 @@ public final class PermissionPolicyService extends SystemService {
                 PackageManagerInternal.class);
         final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
                 getUserContext(getContext(), UserHandle.of(userId)));
-        packageManagerInternal.forEachPackage((pkg) -> synchronizer.addPackage(pkg.packageName));
+        packageManagerInternal.forEachPackage(
+                (pkg) -> synchronizer.addPackage(pkg.getPackageName()));
         synchronizer.syncPackages();
     }
 

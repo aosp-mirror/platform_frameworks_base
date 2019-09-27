@@ -28,6 +28,8 @@ import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
@@ -315,7 +317,7 @@ public abstract class PackageManagerInternal {
      * @param installed the new installed state
      * @return true if the installed state changed as a result
      */
-    public abstract boolean setInstalled(PackageParser.Package pkg,
+    public abstract boolean setInstalled(AndroidPackage pkg,
             @UserIdInt int userId, boolean installed);
 
     /**
@@ -394,7 +396,7 @@ public abstract class PackageManagerInternal {
      * Returns whether or not the given package represents a legacy system application released
      * prior to runtime permissions.
      */
-    public abstract boolean isLegacySystemApp(PackageParser.Package pkg);
+    public abstract boolean isLegacySystemApp(AndroidPackage pkg);
 
     /**
      * Get all overlay packages for a user.
@@ -486,13 +488,17 @@ public abstract class PackageManagerInternal {
     /**
      * Returns a package object for the given package name.
      */
-    public abstract @Nullable PackageParser.Package getPackage(@NonNull String packageName);
+    public abstract @Nullable AndroidPackage getPackage(@NonNull String packageName);
+
+    // TODO(b/135203078): PackageSetting can't be referenced directly. Should move to a server side
+    //  internal PM which is aware of PS.
+    public abstract @Nullable Object getPackageSetting(String packageName);
 
     /**
      * Returns a package for the given UID. If the UID is part of a shared user ID, one
      * of the packages will be chosen to be returned.
      */
-    public abstract @Nullable PackageParser.Package getPackage(int uid);
+    public abstract @Nullable AndroidPackage getPackage(int uid);
 
     /**
      * Returns a list without a change observer.
@@ -523,17 +529,19 @@ public abstract class PackageManagerInternal {
      */
     public abstract void removePackageListObserver(@NonNull PackageListObserver observer);
 
+    // TODO(b/135203078): PackageSetting can't be referenced directly
     /**
      * Returns a package object for the disabled system package name.
      */
-    public abstract @Nullable PackageParser.Package getDisabledSystemPackage(
-            @NonNull String packageName);
+    public abstract @Nullable Object getDisabledSystemPackage(@NonNull String packageName);
 
     /**
      * Returns the package name for the disabled system package.
      *
      * This is equivalent to
-     * {@link #getDisabledSystemPackage(String)}.{@link PackageParser.Package#packageName}
+     * {@link #getDisabledSystemPackage(String)}
+     *     .{@link com.android.server.pm.PackageSetting#pkg}
+     *     .{@link AndroidPackage#getPackageName()}
      */
     public abstract @Nullable String getDisabledSystemPackageName(@NonNull String packageName);
 
@@ -567,7 +575,7 @@ public abstract class PackageManagerInternal {
      * @see #canAccessInstantApps
      */
     public abstract boolean filterAppAccess(
-            @NonNull PackageParser.Package pkg, int callingUid, int userId);
+            @NonNull AndroidPackage pkg, int callingUid, int userId);
 
     /**
      * Returns whether or not access to the application should be filtered.
@@ -641,7 +649,8 @@ public abstract class PackageManagerInternal {
             throws IOException;
 
     /** Returns {@code true} if the specified component is enabled and matches the given flags. */
-    public abstract boolean isEnabledAndMatches(@NonNull ComponentInfo info, int flags, int userId);
+    public abstract boolean isEnabledAndMatches(
+            @NonNull ComponentParseUtils.ParsedComponent component, int flags, int userId);
 
     /** Returns {@code true} if the given user requires extra badging for icons. */
     public abstract boolean userNeedsBadging(int userId);
@@ -652,14 +661,14 @@ public abstract class PackageManagerInternal {
      *
      * @param actionLocked action to be performed
      */
-    public abstract void forEachPackage(Consumer<PackageParser.Package> actionLocked);
+    public abstract void forEachPackage(Consumer<AndroidPackage> actionLocked);
 
     /**
      * Perform the given action for each installed package for a user.
      * Note that packages lock will be held while performin the actions.
      */
     public abstract void forEachInstalledPackage(
-            @NonNull Consumer<PackageParser.Package> actionLocked, @UserIdInt int userId);
+            @NonNull Consumer<AndroidPackage> actionLocked, @UserIdInt int userId);
 
     /** Returns the list of enabled components */
     public abstract ArraySet<String> getEnabledComponents(String packageName, int userId);
@@ -793,7 +802,7 @@ public abstract class PackageManagerInternal {
      * Otherwise, {@code false}.
      */
     public abstract boolean isCallerInstallerOfRecord(
-            @NonNull PackageParser.Package pkg, int callingUid);
+            @NonNull AndroidPackage pkg, int callingUid);
 
     /** Returns whether or not default runtime permissions are granted for the given user */
     public abstract boolean areDefaultRuntimePermissionsGranted(@UserIdInt int userId);

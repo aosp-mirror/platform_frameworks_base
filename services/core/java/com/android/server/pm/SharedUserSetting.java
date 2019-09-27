@@ -18,7 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.AndroidPackage;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
@@ -46,7 +46,7 @@ public final class SharedUserSetting extends SettingBase {
     // that all apps within the sharedUser run in the same selinux context.
     int seInfoTargetSdkVersion;
 
-    final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
+    final ArraySet<PackageSetting> packages = new ArraySet<>();
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
@@ -98,7 +98,7 @@ public final class SharedUserSetting extends SettingBase {
         // If this is the first package added to this shared user, temporarily (until next boot) use
         // its targetSdkVersion when assigning seInfo for the shared user.
         if ((packages.size() == 0) && (packageSetting.pkg != null)) {
-            seInfoTargetSdkVersion = packageSetting.pkg.applicationInfo.targetSdkVersion;
+            seInfoTargetSdkVersion = packageSetting.pkg.getTargetSdkVersion();
         }
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
@@ -106,11 +106,11 @@ public final class SharedUserSetting extends SettingBase {
         }
     }
 
-    public @Nullable List<PackageParser.Package> getPackages() {
+    public @Nullable List<AndroidPackage> getPackages() {
         if (packages == null || packages.size() == 0) {
             return null;
         }
-        final ArrayList<PackageParser.Package> pkgList = new ArrayList<>(packages.size());
+        final ArrayList<AndroidPackage> pkgList = new ArrayList<>(packages.size());
         for (PackageSetting ps : packages) {
             if ((ps == null) || (ps.pkg == null)) {
                 continue;
@@ -131,20 +131,20 @@ public final class SharedUserSetting extends SettingBase {
      * restrictive selinux domain.
      */
     public void fixSeInfoLocked() {
-        final List<PackageParser.Package> pkgList = getPackages();
+        final List<AndroidPackage> pkgList = getPackages();
         if (pkgList == null || pkgList.size() == 0) {
             return;
         }
 
-        for (PackageParser.Package pkg : pkgList) {
-            if (pkg.applicationInfo.targetSdkVersion < seInfoTargetSdkVersion) {
-                seInfoTargetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+        for (AndroidPackage pkg : pkgList) {
+            if (pkg.getTargetSdkVersion() < seInfoTargetSdkVersion) {
+                seInfoTargetSdkVersion = pkg.getTargetSdkVersion();
             }
         }
-        for (PackageParser.Package pkg : pkgList) {
+        for (AndroidPackage pkg : pkgList) {
             final boolean isPrivileged = isPrivileged() | pkg.isPrivileged();
-            pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
-                seInfoTargetSdkVersion);
+            pkg.mutate().setSeInfo(SELinuxMMAC.getSeInfo(pkg, isPrivileged,
+                    seInfoTargetSdkVersion));
         }
     }
 
