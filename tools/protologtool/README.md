@@ -8,8 +8,13 @@ ProtoLogTool incorporates three different modes of operation:
 
 ### Code transformation
 
-Command: `process <protolog class path> <protolog implementation class path>
- <protolog groups class path> <config.jar> [<input.java>] <output.srcjar>`
+Command: `protologtool transform-protolog-calls 
+    --protolog-class <protolog class name> 
+    --protolog-impl-class <protolog implementation class name>
+    --loggroups-class <protolog groups class name>
+    --loggroups-jar <config jar path>
+    --output-srcjar <output.srcjar>
+    [<input.java>]`
 
 In this mode ProtoLogTool transforms every ProtoLog logging call in form of:
 ```java
@@ -17,16 +22,20 @@ ProtoLog.x(ProtoLogGroup.GROUP_NAME, "Format string %d %s", value1, value2);
 ```
 into:
 ```java
-if (GROUP_NAME.isLogToAny()) {
-    ProtoLogImpl.x(ProtoLogGroup.GROUP_NAME, 123456, "Format string %d %s or null", value1, value2);
+if (ProtoLogImpl.isEnabled(GROUP_NAME)) {
+    int protoLogParam0 = value1;
+    String protoLogParam1 = String.valueOf(value2);
+    ProtoLogImpl.x(ProtoLogGroup.GROUP_NAME, 123456, 0b0100, "Format string %d %s or null", protoLogParam0, protoLogParam1);
 }
 ```
 where `ProtoLog`, `ProtoLogImpl` and `ProtoLogGroup` are the classes provided as arguments
  (can be imported, static imported or full path, wildcard imports are not allowed) and, `x` is the
  logging method. The transformation is done on the source level. A hash is generated from the format
- string and log level and inserted after the `ProtoLogGroup` argument. The format string is replaced
+ string, log level and log group name and inserted after the `ProtoLogGroup` argument. After the hash
+ we insert a bitmask specifying the types of logged parameters. The format string is replaced
  by `null` if `ProtoLogGroup.GROUP_NAME.isLogToLogcat()` returns false. If `ProtoLogGroup.GROUP_NAME.isEnabled()`
- returns false the log statement is removed entirely from the resultant code.
+ returns false the log statement is removed entirely from the resultant code. The real generated code is inlined
+ and a number of new line characters is added as to preserve line numbering in file.
 
 Input is provided as a list of java source file names. Transformed source is saved to a single
 source jar file. The ProtoLogGroup class with all dependencies should be provided as a compiled
@@ -34,8 +43,12 @@ jar file (config.jar).
 
 ### Viewer config generation
 
-Command: `viewerconf <protolog class path> <protolog implementation class path
-<protolog groups class path> <config.jar> [<input.java>] <output.json>`
+Command: `generate-viewer-config
+    --protolog-class <protolog class name> 
+    --loggroups-class <protolog groups class name>
+    --loggroups-jar <config jar path>
+    --viewer-conf <viewer.json>
+    [<input.java>]`
 
 This command is similar in it's syntax to the previous one, only instead of creating a processed source jar
 it writes a viewer configuration file with following schema:
@@ -46,8 +59,9 @@ it writes a viewer configuration file with following schema:
     "123456": {
       "message": "Format string %d %s",
       "level": "ERROR",
-      "group": "GROUP_NAME"
-    },
+      "group": "GROUP_NAME",
+      "at": "com\/android\/server\/example\/Class.java"
+    }
   },
   "groups": {
     "GROUP_NAME": {
@@ -60,13 +74,13 @@ it writes a viewer configuration file with following schema:
 
 ### Binary log viewing
 
-Command: `read <viewer.json> <wm_log.pb>`
+Command: `read-log --viewer-conf <viewer.json> <wm_log.pb>`
 
 Reads the binary ProtoLog log file and outputs a human-readable LogCat-like text log.
 
 ## What is ProtoLog?
 
-ProtoLog is a logging system created for the WindowManager project. It allows both binary and text logging
+ProtoLog is a generic logging system created for the WindowManager project. It allows both binary and text logging
 and is tunable in runtime. It consists of 3 different submodules:
 * logging system built-in the Android app,
 * log viewer for reading binary logs,
@@ -94,8 +108,7 @@ To add a new ProtoLogGroup simple create a new enum ProtoLogGroup member with de
 
 To add a new logging statement just add a new call to ProtoLog.x where x is a log level.
 
-After doing any changes to logging groups or statements you should run `make update-protolog` to update
-viewer configuration saved in the code repository.
+After doing any changes to logging groups or statements you should build the project and follow instructions printed by the tool.
 
 ## How to change settings on device in runtime?
 Use the `adb shell su root cmd window logging` command. To get help just type

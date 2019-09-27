@@ -32,9 +32,14 @@ object CodeUtils {
                 .map { c -> c.toInt() }.reduce { h, c -> h * 31 + c }
     }
 
-    fun isWildcardStaticImported(code: CompilationUnit, className: String): Boolean {
-        return code.findAll(ImportDeclaration::class.java)
-                .any { im -> im.isStatic && im.isAsterisk && im.name.toString() == className }
+    fun checkWildcardStaticImported(code: CompilationUnit, className: String, fileName: String) {
+        code.findAll(ImportDeclaration::class.java)
+                .forEach { im ->
+                    if (im.isStatic && im.isAsterisk && im.name.toString() == className) {
+                        throw IllegalImportException("Wildcard static imports of $className " +
+                                "methods are not supported.", ParsingContext(fileName, im))
+                    }
+                }
     }
 
     fun isClassImportedOrSamePackage(code: CompilationUnit, className: String): Boolean {
@@ -58,24 +63,19 @@ object CodeUtils {
                 .map { im -> im.name.toString().substringAfterLast('.') }.toSet()
     }
 
-    fun concatMultilineString(expr: Expression): String {
+    fun concatMultilineString(expr: Expression, context: ParsingContext): String {
         return when (expr) {
             is StringLiteralExpr -> expr.asString()
             is BinaryExpr -> when {
                 expr.operator == BinaryExpr.Operator.PLUS ->
-                    concatMultilineString(expr.left) + concatMultilineString(expr.right)
+                    concatMultilineString(expr.left, context) +
+                            concatMultilineString(expr.right, context)
                 else -> throw InvalidProtoLogCallException(
-                        "messageString must be a string literal " +
-                                "or concatenation of string literals.", expr)
+                        "expected a string literal " +
+                                "or concatenation of string literals, got: $expr", context)
             }
-            else -> throw InvalidProtoLogCallException("messageString must be a string literal " +
-                    "or concatenation of string literals.", expr)
-        }
-    }
-
-    fun getPositionString(fileName: String): String {
-        return when {
-            else -> fileName
+            else -> throw InvalidProtoLogCallException("expected a string literal " +
+                    "or concatenation of string literals, got: $expr", context)
         }
     }
 }

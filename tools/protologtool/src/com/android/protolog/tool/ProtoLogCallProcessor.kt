@@ -38,23 +38,27 @@ open class ProtoLogCallProcessor(
     private fun getLogGroupName(
         expr: Expression,
         isClassImported: Boolean,
-        staticImports: Set<String>
+        staticImports: Set<String>,
+        fileName: String
     ): String {
+        val context = ParsingContext(fileName, expr)
         return when (expr) {
             is NameExpr -> when {
                 expr.nameAsString in staticImports -> expr.nameAsString
                 else ->
-                    throw InvalidProtoLogCallException("Unknown/not imported ProtoLogGroup", expr)
+                    throw InvalidProtoLogCallException("Unknown/not imported ProtoLogGroup: $expr",
+                            context)
             }
             is FieldAccessExpr -> when {
                 expr.scope.toString() == protoLogGroupClassName
                         || isClassImported &&
                         expr.scope.toString() == protoLogGroupSimpleClassName -> expr.nameAsString
                 else ->
-                    throw InvalidProtoLogCallException("Unknown/not imported ProtoLogGroup", expr)
+                    throw InvalidProtoLogCallException("Unknown/not imported ProtoLogGroup: $expr",
+                            context)
             }
             else -> throw InvalidProtoLogCallException("Invalid group argument " +
-                    "- must be ProtoLogGroup enum member reference", expr)
+                    "- must be ProtoLogGroup enum member reference: $expr", context)
         }
     }
 
@@ -69,12 +73,10 @@ open class ProtoLogCallProcessor(
                 !call.scope.isPresent && staticLogImports.contains(call.name.toString())
     }
 
-    open fun process(code: CompilationUnit, callVisitor: ProtoLogCallVisitor?): CompilationUnit {
-        if (CodeUtils.isWildcardStaticImported(code, protoLogClassName) ||
-                CodeUtils.isWildcardStaticImported(code, protoLogGroupClassName)) {
-            throw IllegalImportException("Wildcard static imports of $protoLogClassName " +
-                    "and $protoLogGroupClassName methods are not supported.")
-        }
+    open fun process(code: CompilationUnit, callVisitor: ProtoLogCallVisitor?, fileName: String):
+            CompilationUnit {
+        CodeUtils.checkWildcardStaticImported(code, protoLogClassName, fileName)
+        CodeUtils.checkWildcardStaticImported(code, protoLogGroupClassName, fileName)
 
         val isLogClassImported = CodeUtils.isClassImportedOrSamePackage(code, protoLogClassName)
         val staticLogImports = CodeUtils.staticallyImportedMethods(code, protoLogClassName)
@@ -86,22 +88,25 @@ open class ProtoLogCallProcessor(
                 .filter { call ->
                     isProtoCall(call, isLogClassImported, staticLogImports)
                 }.forEach { call ->
+                    val context = ParsingContext(fileName, call)
                     if (call.arguments.size < 2) {
                         throw InvalidProtoLogCallException("Method signature does not match " +
-                                "any ProtoLog method.", call)
+                                "any ProtoLog method: $call", context)
                     }
 
-                    val messageString = CodeUtils.concatMultilineString(call.getArgument(1))
+                    val messageString = CodeUtils.concatMultilineString(call.getArgument(1),
+                            context)
                     val groupNameArg = call.getArgument(0)
                     val groupName =
-                            getLogGroupName(groupNameArg, isGroupClassImported, staticGroupImports)
+                            getLogGroupName(groupNameArg, isGroupClassImported,
+                                    staticGroupImports, fileName)
                     if (groupName !in groupMap) {
                         throw InvalidProtoLogCallException("Unknown group argument " +
-                                "- not a ProtoLogGroup enum member", call)
+                                "- not a ProtoLogGroup enum member: $call", context)
                     }
 
                     callVisitor?.processCall(call, messageString, LogLevel.getLevelForMethodName(
-                            call.name.toString(), call), groupMap.getValue(groupName))
+                            call.name.toString(), call, context), groupMap.getValue(groupName))
                 }
         return code
     }
