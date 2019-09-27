@@ -98,7 +98,7 @@ public class FlickerTestBase {
     /**
      * Runs a transition, returns a cached result if the transition has run before.
      */
-    void runTransition(TransitionRunner transition) {
+    void run(TransitionRunner transition) {
         if (transitionResults.containsKey(transition.getTestTag())) {
             mResults = transitionResults.get(transition.getTestTag());
             return;
@@ -108,6 +108,13 @@ public class FlickerTestBase {
         assertWithMessage("No results to test because all transition runs were invalid because "
                 + "of Jank").that(mResults).isNotEmpty();
         transitionResults.put(transition.getTestTag(), mResults);
+    }
+
+    /**
+     * Runs a transition, returns a cached result if the transition has run before.
+     */
+    void runTransition(TransitionRunner transition) {
+        run(transition);
     }
 
     /**
