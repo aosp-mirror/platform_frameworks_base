@@ -67,6 +67,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -104,6 +105,9 @@ public class AccessibilityWindowManagerTest {
     // List of callback, mapping from displayId -> callback.
     private final SparseArray<WindowsForAccessibilityCallback> mCallbackOfWindows =
             new SparseArray<>();
+    // List of display ID.
+    private final ArrayList<Integer> mExpectedDisplayList = new ArrayList<>(Arrays.asList(
+            Display.DEFAULT_DISPLAY, SECONDARY_DISPLAY_ID));
 
     private final MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
@@ -690,6 +694,15 @@ public class AccessibilityWindowManagerTest {
         final int windowId = mA11yWindowManager.findWindowIdLocked(
                 USER_PROFILE_PARENT, token.asBinder());
         assertTrue(windowId >= 0);
+    }
+
+    @Test
+    public void getDisplayList() throws RemoteException {
+        // Starts tracking window of second display.
+        startTrackingPerDisplay(SECONDARY_DISPLAY_ID);
+
+        final ArrayList<Integer> displayList = mA11yWindowManager.getDisplayListLocked();
+        assertTrue(displayList.equals(mExpectedDisplayList));
     }
 
     private void startTrackingPerDisplay(int displayId) throws RemoteException {

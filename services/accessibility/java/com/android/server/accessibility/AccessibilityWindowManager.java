@@ -1472,8 +1472,24 @@ public class AccessibilityWindowManager {
     public int getDisplayIdByUserIdAndWindowIdLocked(int userId, int windowId) {
         final IBinder windowToken = getWindowTokenForUserAndWindowIdLocked(userId, windowId);
         final int displayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
-
         return displayId;
+    }
+
+    /**
+     * Returns the display list including all displays which are tracking windows.
+     *
+     * @return The display list.
+     */
+    public ArrayList<Integer> getDisplayListLocked() {
+        final ArrayList<Integer> displayList = new ArrayList<>();
+        final int count = mDisplayWindowsObservers.size();
+        for (int i = 0; i < count; i++) {
+            final DisplayWindowsObserver observer = mDisplayWindowsObservers.valueAt(i);
+            if (observer != null) {
+                displayList.add(observer.mDisplayId);
+            }
+        }
+        return displayList;
     }
 
     /**

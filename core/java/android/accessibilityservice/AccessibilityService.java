@@ -605,7 +605,7 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Gets the windows on the screen. This method returns only the windows
+     * Gets the windows on the screen of the default display. This method returns only the windows
      * that a sighted user can interact with, as opposed to all windows.
      * For example, if there is a modal dialog shown and the user cannot touch
      * anything behind it, then only the modal window will be reported
@@ -629,6 +629,34 @@ public abstract class AccessibilityService extends Service {
      */
     public List<AccessibilityWindowInfo> getWindows() {
         return AccessibilityInteractionClient.getInstance().getWindows(mConnectionId);
+    }
+
+    /**
+     * Gets the windows on the screen of all displays. This method returns only the windows
+     * that a sighted user can interact with, as opposed to all windows.
+     * For example, if there is a modal dialog shown and the user cannot touch
+     * anything behind it, then only the modal window will be reported
+     * (assuming it is the top one). For convenience the returned windows
+     * are ordered in a descending layer order, which is the windows that
+     * are on top are reported first. Since the user can always
+     * interact with the window that has input focus by typing, the focused
+     * window is always returned (even if covered by a modal window).
+     * <p>
+     * <strong>Note:</strong> In order to access the windows your service has
+     * to declare the capability to retrieve window content by setting the
+     * {@link android.R.styleable#AccessibilityService_canRetrieveWindowContent}
+     * property in its meta-data. For details refer to {@link #SERVICE_META_DATA}.
+     * Also the service has to opt-in to retrieve the interactive windows by
+     * setting the {@link AccessibilityServiceInfo#FLAG_RETRIEVE_INTERACTIVE_WINDOWS}
+     * flag.
+     * </p>
+     *
+     * @return The windows of all displays if there are windows and the service is can retrieve
+     *         them, otherwise an empty list. The key of SparseArray is display ID.
+     */
+    @NonNull
+    public final SparseArray<List<AccessibilityWindowInfo>> getWindowsOnAllDisplays() {
+        return AccessibilityInteractionClient.getInstance().getWindowsOnAllDisplays(mConnectionId);
     }
 
     /**
