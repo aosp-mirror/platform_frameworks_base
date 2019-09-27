@@ -209,15 +209,17 @@ class CommonTransitions {
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder resizeSplitScreen(IAppHelper testAppTop, IAppHelper testAppBottom,
-            UiDevice device, Rational startRatio, Rational stopRatio) {
+    static TransitionBuilder resizeSplitScreen(IAppHelper testAppTop, ImeAppHelper testAppBottom,
+            UiDevice device, int beginRotation, Rational startRatio, Rational stopRatio) {
         String testTag = "resizeSplitScreen_" + testAppTop.getLauncherName() + "_"
                 + testAppBottom.getLauncherName() + "_"
                 + startRatio.toString().replace("/", ":") + "_to_"
-                + stopRatio.toString().replace("/", ":");
+                + stopRatio.toString().replace("/", ":") + "_"
+                + rotationToString(beginRotation);
         return TransitionRunner.newBuilder()
                 .withTag(testTag)
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
+                .runBeforeAll(() -> setRotation(device, beginRotation))
                 .runBeforeAll(() -> clearRecents(device))
                 .runBefore(testAppBottom::open)
                 .runBefore(device::pressHome)
@@ -229,6 +231,7 @@ class CommonTransitions {
                             By.res(device.getLauncherPackageName(), "snapshot"));
                     snapshot.click();
                 })
+                .runBefore(() -> testAppBottom.clickEditTextWidget(device))
                 .runBefore(() -> AutomationUtils.resizeSplitScreen(device, startRatio))
                 .run(() -> AutomationUtils.resizeSplitScreen(device, stopRatio))
                 .runAfter(() -> exitSplitScreen(device))
