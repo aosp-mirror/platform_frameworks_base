@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.app.Service;
@@ -32,9 +31,6 @@ import android.os.RemoteException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.ICallScreeningAdapter;
 import com.android.internal.telecom.ICallScreeningService;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * This service can be implemented by the default dialer (see
@@ -75,7 +71,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * public void requestRole() {
  *     RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
- *     Intent intent = roleManager.createRequestRoleIntent("android.app.role.CALL_SCREENING");
+ *     Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
  *     startActivityForResult(intent, REQUEST_ID);
  * }
  *
