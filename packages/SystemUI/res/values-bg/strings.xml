@@ -401,7 +401,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Докоснете отново, за да отворите"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Прекарайте пръст нагоре, за да отключите"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"Прекарайте пръст нагоре, за да опитате отново"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Плъзнете бързо нагоре, за да опитате отново"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Това устройство се управлява от организацията ви"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Това устройство се управлява от <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Плъзнете с пръст от иконата, за да използвате телефона"</string>

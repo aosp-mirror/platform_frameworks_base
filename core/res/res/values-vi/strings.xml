@@ -1888,10 +1888,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Chưa được phân loại"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Thông báo này quan trọng vì những người có liên quan."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (đã tồn tại người dùng có tài khoản này)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Thêm ngôn ngữ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Tùy chọn khu vực"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Nhập tên ngôn ngữ"</string>

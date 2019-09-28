@@ -1328,7 +1328,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"పూర్తయింది"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"మొబైల్ నెట్‌వర్క్‌ను యాక్సెస్ చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"రీస్టార్ట్ చేయి"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"మొబైల్ సేవను సక్రియం చేయండి"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"మీ కొత్త SIMని సక్రియం చేయడానికి క్యారియర్ యాప్‌ను డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"మీ కొత్త SIMని సక్రియం చేయడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> యాప్‌ని డౌన్‌లోడ్ చేయండి"</string>
@@ -1889,10 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"వర్గీకరించబడలేదు"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>

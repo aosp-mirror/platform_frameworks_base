@@ -1889,10 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"वर्गीकरण न केलेले"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"तुम्ही या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून अस्तित्वात आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची आहे का?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची आहे का?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"एक भाषा जोडा"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>

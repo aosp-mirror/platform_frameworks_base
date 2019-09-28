@@ -10508,12 +10508,7 @@ public class Notification implements Parcelable
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
             this.title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
-
-            CharSequence text = extras.getCharSequence(EXTRA_BIG_TEXT);
-            if (TextUtils.isEmpty(text)) {
-                text = extras.getCharSequence(EXTRA_TEXT);
-            }
-            this.text = b.processLegacyText(text);
+            this.text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
             this.summaryText = extras.getCharSequence(EXTRA_SUB_TEXT);
             return this;
         }

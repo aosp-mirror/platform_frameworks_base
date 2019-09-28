@@ -544,7 +544,7 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage, og hold fingeren nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Dette fastholder skærmen i visningen, indtil du frigør den. Hold Startskærm nede for at frigøre skærmen."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Hold knapperne Tilbage og Oversigt nede for at frigøre skærmen"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Hold knapperne Tilbage og Startskærm nede for at frigøre skærmen"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Hold knapperne Tilbage og Hjem nede for at frigøre skærmen"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Stryg opad, og hold fingeren nede for at frigøre denne skærm"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK, det er forstået"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nej tak"</string>

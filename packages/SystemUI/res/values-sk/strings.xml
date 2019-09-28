@@ -405,7 +405,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Menej naliehavé upozornenia sa nachádzajú nižšie"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Upozornenie otvoríte opätovným klepnutím"</string>
     <string name="keyguard_unlock" msgid="6035822649218712063">"Otvorte potiahnutím prstom nahor"</string>
-    <string name="keyguard_retry" msgid="5221600879614948709">"Potiahnutím nahor to skúsite znova"</string>
+    <string name="keyguard_retry" msgid="5221600879614948709">"Potiahnutím nahor to skúste znova"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Toto zariadenie spravuje vaša organizácia"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Toto zariadenie spravuje organizácia <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telefón otvoríte prejdením prstom od ikony"</string>
