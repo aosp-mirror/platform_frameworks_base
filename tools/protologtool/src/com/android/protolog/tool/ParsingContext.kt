@@ -18,21 +18,9 @@ package com.android.protolog.tool
 
 import com.github.javaparser.ast.Node
 
-enum class LogLevel {
-    DEBUG, VERBOSE, INFO, WARN, ERROR, WTF;
+data class ParsingContext(val filePath: String, val lineNumber: Int) {
+    constructor(filePath: String, node: Node)
+            : this(filePath, if (node.range.isPresent) node.range.get().begin.line else -1)
 
-    companion object {
-        fun getLevelForMethodName(name: String, node: Node, context: ParsingContext): LogLevel {
-            return when (name) {
-                "d" -> DEBUG
-                "v" -> VERBOSE
-                "i" -> INFO
-                "w" -> WARN
-                "e" -> ERROR
-                "wtf" -> WTF
-                else ->
-                    throw InvalidProtoLogCallException("Unknown log level $name in $node", context)
-            }
-        }
-    }
+    constructor() : this("", -1)
 }

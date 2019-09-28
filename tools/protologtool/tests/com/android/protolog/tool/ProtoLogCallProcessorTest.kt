@@ -66,7 +66,7 @@ class ProtoLogCallProcessorTest {
         """
         groupMap["TEST"] = LogGroup("TEST", true, false, "WindowManager")
         groupMap["ERROR"] = LogGroup("ERROR", true, true, "WindowManagerERROR")
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
         assertEquals(2, calls.size)
         var c = calls[0]
         assertEquals("test %b", c.messageString)
@@ -93,7 +93,7 @@ class ProtoLogCallProcessorTest {
             }
         """
         groupMap["TEST"] = LogGroup("TEST", true, true, "WindowManager")
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
         checkCalls()
     }
 
@@ -112,7 +112,7 @@ class ProtoLogCallProcessorTest {
             }
         """
         groupMap["TEST"] = LogGroup("TEST", true, true, "WindowManager")
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
         checkCalls()
     }
 
@@ -130,7 +130,7 @@ class ProtoLogCallProcessorTest {
             }
         """
         groupMap["TEST"] = LogGroup("TEST", true, true, "WindowManager")
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
     }
 
     @Test
@@ -147,7 +147,7 @@ class ProtoLogCallProcessorTest {
             }
         """
         groupMap["TEST"] = LogGroup("TEST", true, true, "WindowManager")
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
         assertEquals(0, calls.size)
     }
 
@@ -162,7 +162,7 @@ class ProtoLogCallProcessorTest {
                 }
             }
         """
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
     }
 
     @Test(expected = InvalidProtoLogCallException::class)
@@ -176,7 +176,7 @@ class ProtoLogCallProcessorTest {
                 }
             }
         """
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
     }
 
     @Test(expected = InvalidProtoLogCallException::class)
@@ -190,7 +190,7 @@ class ProtoLogCallProcessorTest {
                 }
             }
         """
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
     }
 
     @Test(expected = InvalidProtoLogCallException::class)
@@ -204,7 +204,7 @@ class ProtoLogCallProcessorTest {
                 }
             }
         """
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
     }
 
     @Test
@@ -220,7 +220,7 @@ class ProtoLogCallProcessorTest {
             }
         """
         groupMap["TEST"] = LogGroup("TEST", false, true, "WindowManager")
-        visitor.process(StaticJavaParser.parse(code), processor)
+        visitor.process(StaticJavaParser.parse(code), processor, "")
         checkCalls()
     }
 }

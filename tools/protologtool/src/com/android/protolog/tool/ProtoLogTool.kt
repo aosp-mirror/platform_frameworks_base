@@ -17,7 +17,9 @@
 package com.android.protolog.tool
 
 import com.android.protolog.tool.CommandOptions.Companion.USAGE
+import com.github.javaparser.ParseProblemException
 import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.ast.CompilationUnit
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -48,7 +50,7 @@ object ProtoLogTool {
         command.javaSourceArgs.forEach { path ->
             val file = File(path)
             val text = file.readText()
-            val code = StaticJavaParser.parse(text)
+            val code = tryParse(text, path)
             val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
                     .get().nameAsString else ""
             val newPath = pack.replace('.', '/') + '/' + file.name
@@ -66,6 +68,19 @@ object ProtoLogTool {
         out.close()
     }
 
+    private fun tryParse(code: String, fileName: String): CompilationUnit {
+        try {
+            return StaticJavaParser.parse(code)
+        } catch (ex: ParseProblemException) {
+            val problem = ex.problems.first()
+            throw ParsingException("Java parsing erro" +
+                    "r: ${problem.verboseMessage}",
+                    ParsingContext(fileName, problem.location.orElse(null)
+                            ?.begin?.range?.orElse(null)?.begin?.line
+                            ?: 0))
+        }
+    }
+
     private fun viewerConf(command: CommandOptions) {
         val groups = ProtoLogGroupReader()
                 .loadFromJar(command.protoLogGroupsJarArg, command.protoLogGroupsClassNameArg)
@@ -76,7 +91,7 @@ object ProtoLogTool {
             val file = File(path)
             val text = file.readText()
             if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                val code = StaticJavaParser.parse(text)
+                val code = tryParse(text, path)
                 val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
                         .get().nameAsString else ""
                 val newPath = pack.replace('.', '/') + '/' + file.name
@@ -104,8 +119,11 @@ object ProtoLogTool {
                 CommandOptions.READ_LOG_CMD -> read(command)
             }
         } catch (ex: InvalidCommandException) {
-            println(ex.message)
+            println("\n${ex.message}\n")
             showHelpAndExit()
+        } catch (ex: CodeProcessingException) {
+            println("\n${ex.message}\n")
+            exitProcess(1)
         }
     }
 }

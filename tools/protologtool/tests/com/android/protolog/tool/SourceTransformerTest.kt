@@ -175,7 +175,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test %d %f",
@@ -212,7 +213,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTICALLS)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             val calls = code.findAll(MethodCallExpr::class.java)
@@ -254,7 +256,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTILINE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0],
@@ -292,7 +295,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_NO_PARAMS)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test",
@@ -326,7 +330,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test %d %f",
@@ -363,7 +368,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTILINE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0],
@@ -402,7 +408,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test %d %f",
@@ -426,7 +433,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTILINE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0],

@@ -16,16 +16,23 @@
 
 package com.android.protolog.tool
 
-import com.github.javaparser.ast.Node
 import java.lang.Exception
-import java.lang.RuntimeException
 
-class HashCollisionException(message: String) : RuntimeException(message)
+open class CodeProcessingException(message: String, context: ParsingContext)
+    : Exception("Code processing error in ${context.filePath}:${context.lineNumber}:\n" +
+        "  $message")
 
-class IllegalImportException(message: String) : Exception(message)
+class HashCollisionException(message: String, context: ParsingContext) :
+        CodeProcessingException(message, context)
 
-class InvalidProtoLogCallException(message: String, node: Node)
-    : RuntimeException("$message\nAt: $node")
+class IllegalImportException(message: String, context: ParsingContext) :
+        CodeProcessingException("Illegal import: $message", context)
+
+class InvalidProtoLogCallException(message: String, context: ParsingContext)
+    : CodeProcessingException("InvalidProtoLogCall: $message", context)
+
+class ParsingException(message: String, context: ParsingContext)
+    : CodeProcessingException(message, context)
 
 class InvalidViewerConfigException(message: String) : Exception(message)
 
