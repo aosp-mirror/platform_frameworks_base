@@ -44,6 +44,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DeviceStateCache;
 import android.app.admin.PasswordMetrics;
 import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
@@ -76,6 +77,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -429,6 +431,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         }
 
+        public UserManagerInternal getUserManagerInternal() {
+            return LocalServices.getService(UserManagerInternal.class);
+        }
+
         /**
          * Return the {@link DevicePolicyManager} object.
          *
@@ -438,6 +444,10 @@ public class LockSettingsService extends ILockSettings.Stub {
          */
         public DevicePolicyManager getDevicePolicyManager() {
             return (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+        }
+
+        public DeviceStateCache getDeviceStateCache() {
+            return DeviceStateCache.getInstance();
         }
 
         public KeyStore getKeyStore() {
@@ -1023,11 +1033,16 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void notifySeparateProfileChallengeChanged(int userId) {
-        final DevicePolicyManagerInternal dpmi = LocalServices.getService(
-                DevicePolicyManagerInternal.class);
-        if (dpmi != null) {
-            dpmi.reportSeparateProfileChallengeChanged(userId);
-        }
+        // LSS cannot call into DPM directly, otherwise it will cause deadlock.
+        // In this case, calling DPM on a handler thread is OK since DPM doesn't
+        // expect reportSeparateProfileChallengeChanged() to happen synchronously.
+        mHandler.post(() -> {
+            final DevicePolicyManagerInternal dpmi = LocalServices.getService(
+                    DevicePolicyManagerInternal.class);
+            if (dpmi != null) {
+                dpmi.reportSeparateProfileChallengeChanged(userId);
+            }
+        });
     }
 
     @Override
@@ -2038,7 +2053,6 @@ public class LockSettingsService extends ILockSettings.Stub {
      * reporting the password changed.
      */
     private void notifyPasswordChanged(@UserIdInt int userId) {
-        // Same handler as notifyActivePasswordMetricsAvailable to ensure correct ordering
         mHandler.post(() -> {
             mInjector.getDevicePolicyManager().reportPasswordChanged(userId);
             LocalServices.getService(WindowManagerInternal.class).reportPasswordChanged(userId);
@@ -3026,45 +3040,43 @@ public class LockSettingsService extends ILockSettings.Stub {
         pw.decreaseIndent();
     }
 
+    /**
+     * Cryptographically disable escrow token support for the current user, if the user is not
+     * managed (either user has a profile owner, or if device is managed). Do not disable
+     * if we are running an automotive build.
+     */
     private void disableEscrowTokenOnNonManagedDevicesIfNeeded(int userId) {
-        long ident = Binder.clearCallingIdentity();
-        try {
-            // Managed profile should have escrow enabled
-            if (mUserManager.getUserInfo(userId).isManagedProfile()) {
-                Slog.i(TAG, "Managed profile can have escrow token");
-                return;
-            }
-            DevicePolicyManager dpm = mInjector.getDevicePolicyManager();
-            // Devices with Device Owner should have escrow enabled on all users.
-            if (dpm.getDeviceOwnerComponentOnAnyUser() != null) {
-                Slog.i(TAG, "Corp-owned device can have escrow token");
-                return;
-            }
-            // We could also have a profile owner on the given (non-managed) user for unicorn cases
-            if (dpm.getProfileOwnerAsUser(userId) != null) {
-                Slog.i(TAG, "User with profile owner can have escrow token");
-                return;
-            }
-            // If the device is yet to be provisioned (still in SUW), there is still
-            // a chance that Device Owner will be set on the device later, so postpone
-            // disabling escrow token for now.
-            if (!dpm.isDeviceProvisioned()) {
-                Slog.i(TAG, "Postpone disabling escrow tokens until device is provisioned");
-                return;
-            }
+        final UserManagerInternal userManagerInternal = mInjector.getUserManagerInternal();
 
-            // Escrow tokens are enabled on automotive builds.
-            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
-                return;
-            }
+        // Managed profile should have escrow enabled
+        if (userManagerInternal.isUserManaged(userId)) {
+            Slog.i(TAG, "Managed profile can have escrow token");
+            return;
+        }
 
-            // Disable escrow token permanently on all other device/user types.
-            Slog.i(TAG, "Disabling escrow token on user " + userId);
-            if (isSyntheticPasswordBasedCredentialLocked(userId)) {
-                mSpManager.destroyEscrowData(userId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+        // Devices with Device Owner should have escrow enabled on all users.
+        if (userManagerInternal.isDeviceManaged()) {
+            Slog.i(TAG, "Corp-owned device can have escrow token");
+            return;
+        }
+
+        // If the device is yet to be provisioned (still in SUW), there is still
+        // a chance that Device Owner will be set on the device later, so postpone
+        // disabling escrow token for now.
+        if (!mInjector.getDeviceStateCache().isDeviceProvisioned()) {
+            Slog.i(TAG, "Postpone disabling escrow tokens until device is provisioned");
+            return;
+        }
+
+        // Escrow tokens are enabled on automotive builds.
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            return;
+        }
+
+        // Disable escrow token permanently on all other device/user types.
+        Slog.i(TAG, "Disabling escrow token on user " + userId);
+        if (isSyntheticPasswordBasedCredentialLocked(userId)) {
+            mSpManager.destroyEscrowData(userId);
         }
     }
 

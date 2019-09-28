@@ -126,6 +126,7 @@ import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.admin.DeviceStateCache;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.SecurityLog;
@@ -507,6 +508,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final OverlayPackagesProvider mOverlayPackagesProvider;
 
     private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
+    private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -2295,6 +2297,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 policy = new DevicePolicyData(userHandle);
                 mUserData.append(userHandle, policy);
                 loadSettingsLocked(policy, userHandle);
+                if (userHandle == UserHandle.USER_SYSTEM) {
+                    mStateCache.setDeviceProvisioned(policy.mUserSetupComplete);
+                }
             }
             return policy;
         }
@@ -8958,6 +8963,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pw.println("Encryption Status: " + getEncryptionStatusName(getEncryptionStatus()));
             pw.println();
             mPolicyCache.dump(pw);
+            pw.println();
+            mStateCache.dump(pw);
         }
     }
 
@@ -11169,6 +11176,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 DevicePolicyData policy = getUserData(userHandle);
                 if (!policy.mUserSetupComplete) {
                     policy.mUserSetupComplete = true;
+                    if (userHandle == UserHandle.USER_SYSTEM) {
+                        mStateCache.setDeviceProvisioned(true);
+                    }
                     synchronized (getLockObject()) {
                         saveSettingsLocked(userHandle);
                     }
@@ -11481,6 +11491,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         protected DevicePolicyCache getDevicePolicyCache() {
             return mPolicyCache;
         }
+
+        @Override
+        protected DeviceStateCache getDeviceStateCache() {
+            return mStateCache;
+        }
+
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
@@ -13021,6 +13037,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, userId) != 0;
         DevicePolicyData policy = getUserData(userId);
         policy.mUserSetupComplete = isUserCompleted;
+        mStateCache.setDeviceProvisioned(isUserCompleted);
         synchronized (getLockObject()) {
             saveSettingsLocked(userId);
         }
