@@ -291,7 +291,7 @@ public class DynamicSystemInstallationService extends Service
         if (mInstallTask != null && mInstallTask.getResult() == RESULT_OK) {
             enabled = mInstallTask.commit();
         } else if (isDynamicSystemInstalled()) {
-            enabled = mDynSystem.setEnable(true);
+            enabled = mDynSystem.setEnable(true, true);
         } else {
             Log.e(TAG, "Trying to reboot to AOT while there is no complete installation");
             return;
