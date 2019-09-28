@@ -18,9 +18,11 @@ package com.android.server.appop;
 
 import static android.app.AppOpsManager.MAX_PRIORITY_UID_STATE;
 import static android.app.AppOpsManager.MIN_PRIORITY_UID_STATE;
+import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.AppOpsManager.OP_PLAY_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -171,6 +173,12 @@ public class AppOpsService extends IAppOpsService.Stub {
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_RECENT
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_CACHED_EMPTY
         UID_STATE_CACHED,               // ActivityManager.PROCESS_STATE_NONEXISTENT
+    };
+
+    private static final int[] OPS_RESTRICTED_ON_SUSPEND = {
+            OP_PLAY_AUDIO,
+            OP_RECORD_AUDIO,
+            OP_CAMERA,
     };
 
     Context mContext;
@@ -784,20 +792,22 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 final String[] changedPkgs = intent.getStringArrayExtra(
                         Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                ArraySet<ModeCallback> callbacks;
-                synchronized (AppOpsService.this) {
-                    callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
-                    if (callbacks == null) {
-                        return;
+                for (int code : OPS_RESTRICTED_ON_SUSPEND) {
+                    ArraySet<ModeCallback> callbacks;
+                    synchronized (AppOpsService.this) {
+                        callbacks = mOpModeWatchers.get(code);
+                        if (callbacks == null) {
+                            continue;
+                        }
+                        callbacks = new ArraySet<>(callbacks);
                     }
-                    callbacks = new ArraySet<>(callbacks);
-                }
-                for (int i = 0; i < changedUids.length; i++) {
-                    final int changedUid = changedUids[i];
-                    final String changedPkg = changedPkgs[i];
-                    // We trust packagemanager to insert matching uid and packageNames in the
-                    // extras
-                    notifyOpChanged(callbacks, OP_PLAY_AUDIO, changedUid, changedPkg);
+                    for (int i = 0; i < changedUids.length; i++) {
+                        final int changedUid = changedUids[i];
+                        final String changedPkg = changedPkgs[i];
+                        // We trust packagemanager to insert matching uid and packageNames in the
+                        // extras
+                        notifyOpChanged(callbacks, code, changedUid, changedPkg);
+                    }
                 }
             }
         }, packageSuspendFilter);
@@ -1800,6 +1810,9 @@ public class AppOpsService extends IAppOpsService.Stub {
      */
     private @Mode int checkOperationUnchecked(int code, int uid, @NonNull String packageName,
                 boolean raw, boolean verify) {
+        if (isOpRestrictedDueToSuspend(code, packageName, uid)) {
+            return AppOpsManager.MODE_IGNORED;
+        }
         synchronized (this) {
             if (verify) {
                 checkPackage(uid, packageName);
@@ -2652,6 +2665,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             scheduleWriteLocked();
         }
         return op;
+    }
+
+    private boolean isOpRestrictedDueToSuspend(int code, String packageName, int uid) {
+        if (!ArrayUtils.contains(OPS_RESTRICTED_ON_SUSPEND, code)) {
+            return false;
+        }
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        return pmi.isPackageSuspended(packageName, UserHandle.getUserId(uid));
     }
 
     private boolean isOpRestrictedLocked(int uid, int code, String packageName) {
