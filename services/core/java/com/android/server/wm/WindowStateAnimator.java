@@ -27,17 +27,18 @@ import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_DRAW;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_CROP;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
@@ -67,6 +68,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 
@@ -312,19 +314,19 @@ class WindowStateAnimator {
     boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
         final boolean startingWindow =
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-        if (DEBUG_STARTING_WINDOW && startingWindow) {
-            Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
-                    + drawStateToString());
+        if (startingWindow) {
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finishing drawing window %s: mDrawState=%s",
+                    mWin, drawStateToString());
         }
 
         boolean layoutNeeded = false;
 
         if (mDrawState == DRAW_PENDING) {
-            if (DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
-                Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + mWin + " in "
-                        + mSurfaceController);
-            if (DEBUG_STARTING_WINDOW && startingWindow) {
-                Slog.v(TAG, "Draw state now committed in " + mWin);
+            ProtoLog.v(WM_DEBUG_DRAW,
+                    "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING %s in %s", mWin,
+                    mSurfaceController);
+            if (startingWindow) {
+                ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Draw state now committed in %s", mWin);
             }
             mDrawState = COMMIT_DRAW_PENDING;
             layoutNeeded = true;
@@ -385,7 +387,7 @@ class WindowStateAnimator {
             mSurfaceDestroyDeferred = true;
             return;
         }
-        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", false);
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SET FREEZE LAYER: %s", mWin);
         if (mSurfaceController != null) {
             // Our SurfaceControl is always at layer 0 within the parent Surface managed by
             // window-state. We want this old Surface to stay on top of the new one
@@ -456,8 +458,9 @@ class WindowStateAnimator {
 
         w.setHasSurface(false);
 
-        if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
-                "createSurface " + this + ": mDrawState=DRAW_PENDING");
+        if (DEBUG_ANIM) {
+            Slog.i(TAG, "createSurface " + this + ": mDrawState=DRAW_PENDING");
+        }
 
         resetDrawState();
 
@@ -514,15 +517,10 @@ class WindowStateAnimator {
 
             w.setHasSurface(true);
 
-            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                Slog.i(TAG, "  CREATE SURFACE "
-                        + mSurfaceController + " IN SESSION "
-                        + mSession.mSurfaceSession
-                        + ": pid=" + mSession.mPid + " format="
-                        + attrs.format + " flags=0x"
-                        + Integer.toHexString(flags)
-                        + " / " + this);
-            }
+            ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
+                        "  CREATE SURFACE %s IN SESSION %s: pid=%d format=%d flags=0x%x / %s",
+                        mSurfaceController, mSession.mSurfaceSession, mSession.mPid, attrs.format,
+                        flags, this);
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "OutOfResourcesException creating surface");
             mService.mRoot.reclaimSomeSurfaceMemory(this, "create", true);
@@ -616,17 +614,15 @@ class WindowStateAnimator {
             if (mSurfaceDestroyDeferred) {
                 if (mSurfaceController != null && mPendingDestroySurface != mSurfaceController) {
                     if (mPendingDestroySurface != null) {
-                        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                            WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
-                        }
+                        ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
+                                mWin, new RuntimeException().fillInStackTrace());
                         mPendingDestroySurface.destroyNotInTransaction();
                     }
                     mPendingDestroySurface = mSurfaceController;
                 }
             } else {
-                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                    WindowManagerService.logSurface(mWin, "DESTROY", true);
-                }
+                ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
+                        mWin, new RuntimeException().fillInStackTrace());
                 destroySurface();
             }
             // Don't hide wallpaper if we're deferring the surface destroy
@@ -653,9 +649,8 @@ class WindowStateAnimator {
     void destroyDeferredSurfaceLocked() {
         try {
             if (mPendingDestroySurface != null) {
-                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                    WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
-                }
+                ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
+                        mWin, new RuntimeException().fillInStackTrace());
                 mPendingDestroySurface.destroyNotInTransaction();
                 // Don't hide wallpaper if we're destroying a deferred surface
                 // after a surface mode change.
@@ -1089,9 +1084,7 @@ class WindowStateAnimator {
             // There is no need to wait for an animation change if our window is gone for layout
             // already as we'll never be visible.
             if (w.getOrientationChanging() && w.isGoneForLayoutLw()) {
-                if (DEBUG_ORIENTATION) {
-                    Slog.v(TAG, "Orientation change skips hidden " + w);
-                }
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change skips hidden %s", w);
                 w.setOrientationChanging(false);
             }
             return;
@@ -1116,8 +1109,8 @@ class WindowStateAnimator {
             // before it has drawn for the new orientation.
             if (w.getOrientationChanging() && w.isGoneForLayoutLw()) {
                 w.setOrientationChanging(false);
-                if (DEBUG_ORIENTATION) Slog.v(TAG,
-                        "Orientation change skips hidden " + w);
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Orientation change skips hidden %s", w);
             }
         } else if (mLastAlpha != mShownAlpha
                 || mLastDsDx != mDsDx
@@ -1135,13 +1128,10 @@ class WindowStateAnimator {
             mLastDtDy = mDtDy;
             w.mLastHScale = w.mHScale;
             w.mLastVScale = w.mVScale;
-            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                    "controller=" + mSurfaceController +
-                    "alpha=" + mShownAlpha
-                    + " matrix=[" + mDsDx + "*" + w.mHScale
-                    + "," + mDtDx + "*" + w.mVScale
-                    + "][" + mDtDy + "*" + w.mHScale
-                    + "," + mDsDy + "*" + w.mVScale + "]", false);
+            ProtoLog.i(WM_SHOW_TRANSACTIONS,
+                    "SURFACE controller=%s alpha=%f matrix=[%f*%f,%f*%f][%f*%f,%f*%f]: %s",
+                            mSurfaceController, mShownAlpha, mDsDx, w.mHScale, mDtDx, w.mVScale,
+                            mDtDy, w.mHScale, mDsDy, w.mVScale, w);
 
             boolean prepared =
                 mSurfaceController.prepareToShowInTransaction(mShownAlpha,
@@ -1191,11 +1181,11 @@ class WindowStateAnimator {
             if (!w.isDrawnLw()) {
                 mAnimator.mBulkUpdateParams &= ~SET_ORIENTATION_CHANGE_COMPLETE;
                 mAnimator.mLastWindowFreezeSource = w;
-                if (DEBUG_ORIENTATION) Slog.v(TAG,
-                        "Orientation continue waiting for draw in " + w);
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Orientation continue waiting for draw in %s", w);
             } else {
                 w.setOrientationChanging(false);
-                if (DEBUG_ORIENTATION) Slog.v(TAG, "Orientation change complete in " + w);
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change complete in %s", w);
             }
         }
 
