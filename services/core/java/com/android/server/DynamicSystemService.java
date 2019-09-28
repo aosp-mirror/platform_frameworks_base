@@ -25,6 +25,7 @@ import android.gsi.IGsid;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -181,28 +182,34 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
 
     @Override
     public boolean remove() throws RemoteException {
-        return getGsiService().removeGsiInstall();
+        return getGsiService().removeGsi();
     }
 
     @Override
-    public boolean setEnable(boolean enable) throws RemoteException {
+    public boolean setEnable(boolean enable, boolean oneShot) throws RemoteException {
         IGsiService gsiService = getGsiService();
         if (enable) {
-            final int status = gsiService.getGsiBootStatus();
-            final boolean singleBoot = (status == IGsiService.BOOT_STATUS_SINGLE_BOOT);
-            return gsiService.setGsiBootable(singleBoot) == 0;
+            return gsiService.enableGsi(oneShot) == 0;
         } else {
-            return gsiService.disableGsiInstall();
+            return gsiService.disableGsi();
         }
     }
 
     @Override
-    public boolean write(byte[] buf) throws RemoteException {
-        return getGsiService().commitGsiChunkFromMemory(buf);
+    public boolean setAshmem(ParcelFileDescriptor ashmem, long size) {
+        try {
+            return getGsiService().setGsiAshmem(ashmem, size);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
     }
 
     @Override
-    public boolean commit() throws RemoteException {
-        return getGsiService().setGsiBootable(true) == 0;
+    public boolean submitFromAshmem(long size) {
+        try {
+            return getGsiService().commitGsiChunkFromAshmem(size);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
     }
 }
