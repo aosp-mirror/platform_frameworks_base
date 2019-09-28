@@ -417,7 +417,7 @@
     <string name="keyguard_indication_charging_time_wireless" msgid="6959284458466962592">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • En recharge sans fil (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à la recharge complète)"</string>
     <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"En recharge : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à charge complète)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"En recharge rapide : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à ch. comp.)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"En recharge lente : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (<xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> jusqu\'à ch. comp.)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"Recharge lente : <xliff:g id="PERCENTAGE">%2$s</xliff:g> (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Changer d\'utilisateur (utilisateur actuel <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
