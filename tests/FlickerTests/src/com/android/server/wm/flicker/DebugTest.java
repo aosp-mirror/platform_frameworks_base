@@ -113,10 +113,10 @@ public class DebugTest {
      */
     @Test
     public void resizeSplitScreen() {
-        IAppHelper bottomApp = new StandardAppHelper(InstrumentationRegistry.getInstrumentation(),
-                "com.android.server.wm.flicker.testapp", "ImeApp");
-        CommonTransitions.resizeSplitScreen(testApp, bottomApp, uiDevice, new Rational(1, 3),
-                new Rational(2, 3)).includeJankyRuns().recordEachRun().build().run();
+        ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
+        CommonTransitions.resizeSplitScreen(testApp, bottomApp, uiDevice, Surface.ROTATION_0,
+                new Rational(1, 3), new Rational(2, 3))
+                .includeJankyRuns().recordEachRun().build().run();
     }
 
     // IME tests
