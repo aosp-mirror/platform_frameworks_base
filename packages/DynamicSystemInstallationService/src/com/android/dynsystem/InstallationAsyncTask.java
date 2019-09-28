@@ -20,6 +20,8 @@ import android.content.Context;
 import android.gsi.GsiProgress;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.MemoryFile;
+import android.os.ParcelFileDescriptor;
 import android.os.image.DynamicSystemManager;
 import android.util.Log;
 import android.webkit.URLUtil;
@@ -28,10 +30,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.zip.GZIPInputStream;
-
 
 class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
 
@@ -125,28 +125,26 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
                 Thread.sleep(10);
             }
 
-
             if (mInstallationSession == null) {
-                throw new IOException("Failed to start installation with requested size: "
-                        + (mSystemSize + mUserdataSize));
+                throw new IOException(
+                        "Failed to start installation with requested size: "
+                                + (mSystemSize + mUserdataSize));
             }
 
             installedSize = mUserdataSize;
 
+            MemoryFile memoryFile = new MemoryFile("dsu", READ_BUFFER_SIZE);
             byte[] bytes = new byte[READ_BUFFER_SIZE];
-
+            mInstallationSession.setAshmem(
+                    new ParcelFileDescriptor(memoryFile.getFileDescriptor()), READ_BUFFER_SIZE);
             int numBytesRead;
-
             Log.d(TAG, "Start installation loop");
             while ((numBytesRead = mStream.read(bytes, 0, READ_BUFFER_SIZE)) != -1) {
+                memoryFile.writeBytes(bytes, 0, 0, numBytesRead);
                 if (isCancelled()) {
                     break;
                 }
-
-                byte[] writeBuffer = numBytesRead == READ_BUFFER_SIZE
-                        ? bytes : Arrays.copyOf(bytes, numBytesRead);
-
-                if (!mInstallationSession.write(writeBuffer)) {
+                if (!mInstallationSession.submitFromAshmem(numBytesRead)) {
                     throw new IOException("Failed write() to DynamicSystem");
                 }
 
@@ -157,7 +155,6 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
                     reportedInstalledSize = installedSize;
                 }
             }
-
             return null;
 
         } catch (Exception e) {
