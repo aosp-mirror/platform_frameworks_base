@@ -16,6 +16,13 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_PLAY_AUDIO;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO;
+import static android.app.AppOpsManager.opToName;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -40,6 +47,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
@@ -52,6 +60,8 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
 import com.android.servicestests.apps.suspendtestapp.SuspendTestActivity;
 import com.android.servicestests.apps.suspendtestapp.SuspendTestReceiver;
 
@@ -544,6 +554,46 @@ public class SuspendPackagesTest {
         assertTrue("Profile-owner could not be set", setProfileOwner());
         intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
         assertEquals(ACTION_REPORT_MY_PACKAGE_UNSUSPENDED, intentFromApp.getAction());
+    }
+
+    @Test
+    public void testCameraBlockedOnSuspend() throws Exception {
+        assertOpBlockedOnSuspend(OP_CAMERA);
+    }
+
+    @Test
+    public void testPlayAudioBlockedOnSuspend() throws Exception {
+        assertOpBlockedOnSuspend(OP_PLAY_AUDIO);
+    }
+
+    @Test
+    public void testRecordAudioBlockedOnSuspend() throws Exception {
+        assertOpBlockedOnSuspend(OP_RECORD_AUDIO);
+    }
+
+    private void assertOpBlockedOnSuspend(int code) throws Exception {
+        final IAppOpsService iAppOps = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
+        final CountDownLatch latch = new CountDownLatch(1);
+        final IAppOpsCallback watcher = new IAppOpsCallback.Stub() {
+            @Override
+            public void opChanged(int op, int uid, String packageName) {
+                if (op == code && packageName.equals(TEST_APP_PACKAGE_NAME)) {
+                    latch.countDown();
+                }
+            }
+        };
+        iAppOps.startWatchingMode(code, TEST_APP_PACKAGE_NAME, watcher);
+        final int testPackageUid = mPackageManager.getPackageUid(TEST_APP_PACKAGE_NAME, 0);
+        int opMode = iAppOps.checkOperation(code, testPackageUid, TEST_APP_PACKAGE_NAME);
+        assertEquals("Op " + opToName(code) + " disallowed for unsuspended package", MODE_ALLOWED,
+                opMode);
+        suspendTestPackage(null, null, null);
+        assertTrue("AppOpsWatcher did not callback", latch.await(5, TimeUnit.SECONDS));
+        opMode = iAppOps.checkOperation(code, testPackageUid, TEST_APP_PACKAGE_NAME);
+        assertEquals("Op " + opToName(code) + " allowed for suspended package", MODE_IGNORED,
+                opMode);
+        iAppOps.stopWatchingMode(watcher);
     }
 
     @After
