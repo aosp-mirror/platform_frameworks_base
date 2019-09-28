@@ -152,7 +152,8 @@ public class DefaultUiController implements AssistManager.UiController {
                     .setSubtype(Dependency.get(AssistManager.class).toLoggingSubType(type)));
         }
         // Logs assistant invocation cancelled.
-        if (!mInvocationAnimator.isRunning() && invocationWasInProgress && progress == 0f) {
+        if ((mInvocationAnimator == null || !mInvocationAnimator.isRunning())
+                && invocationWasInProgress && progress == 0f) {
             if (VERBOSE) {
                 Log.v(TAG, "Invocation cancelled: type=" + type);
             }
