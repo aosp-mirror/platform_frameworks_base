@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -298,7 +299,8 @@ public class GnssManagerService {
      * @param packageName name of requesting package
      * @return true if callback is successfully added, false otherwise
      */
-    public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName) {
+    public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
+            @NonNull String listenerIdentity) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.LOCATION_HARDWARE,
                 "Location Hardware permission not granted to access hardware batching");
@@ -316,7 +318,8 @@ public class GnssManagerService {
         }
 
         CallerIdentity callerIdentity =
-                new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(), packageName);
+                new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(), packageName,
+                        listenerIdentity);
         synchronized (mGnssBatchingLock) {
             mGnssBatchingCallback = callback;
             mGnssBatchingDeathCallback =
@@ -494,7 +497,7 @@ public class GnssManagerService {
     private <TListener extends IInterface> boolean addGnssDataListenerLocked(
             TListener listener,
             String packageName,
-            String listenerName,
+            @NonNull String listenerIdentifier,
             RemoteListenerHelper<TListener> gnssDataProvider,
             ArrayMap<IBinder,
                     LinkedListener<TListener>> gnssDataListeners,
@@ -513,10 +516,11 @@ public class GnssManagerService {
         }
 
         CallerIdentity callerIdentity =
-                new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(), packageName);
+                new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(), packageName,
+                        listenerIdentifier);
         LinkedListener<TListener> linkedListener =
                 new LocationManagerServiceUtils.LinkedListener<>(
-                        listener, listenerName, callerIdentity, binderDeathCallback);
+                        listener, listenerIdentifier, callerIdentity, binderDeathCallback);
         IBinder binder = listener.asBinder();
         if (!linkedListener.linkToListenerDeathNotificationLocked(binder)) {
             return false;
@@ -606,7 +610,7 @@ public class GnssManagerService {
             return addGnssDataListenerLocked(
                     listener,
                     packageName,
-                    "GnssStatusListener",
+                    "Gnss status",
                     mGnssStatusProvider,
                     mGnssStatusListeners,
                     this::unregisterGnssStatusCallback);
@@ -632,12 +636,13 @@ public class GnssManagerService {
      * @return true if listener is successfully added, false otherwise
      */
     public boolean addGnssMeasurementsListener(
-            IGnssMeasurementsListener listener, String packageName) {
+            IGnssMeasurementsListener listener, String packageName,
+            @NonNull String listenerIdentifier) {
         synchronized (mGnssMeasurementsListeners) {
             return addGnssDataListenerLocked(
                     listener,
                     packageName,
-                    "GnssMeasurementsListener",
+                    listenerIdentifier,
                     mGnssMeasurementsProvider,
                     mGnssMeasurementsListeners,
                     this::removeGnssMeasurementsListener);
@@ -689,12 +694,13 @@ public class GnssManagerService {
      * @return true if listener is successfully added, false otherwise
      */
     public boolean addGnssNavigationMessageListener(
-            IGnssNavigationMessageListener listener, String packageName) {
+            IGnssNavigationMessageListener listener, String packageName,
+            @NonNull String listenerIdentifier) {
         synchronized (mGnssNavigationMessageListeners) {
             return addGnssDataListenerLocked(
                     listener,
                     packageName,
-                    "GnssNavigationMessageListener",
+                    listenerIdentifier,
                     mGnssNavigationMessageProvider,
                     mGnssNavigationMessageListeners,
                     this::removeGnssNavigationMessageListener);

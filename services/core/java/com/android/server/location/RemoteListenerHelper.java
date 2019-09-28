@@ -182,7 +182,9 @@ public abstract class RemoteListenerHelper<TListener extends IInterface> {
         }
 
         return mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, callerIdentity.mUid,
-                callerIdentity.mPackageName) == AppOpsManager.MODE_ALLOWED;
+                callerIdentity.mPackageName,
+                "Location sent to " + callerIdentity.mListenerIdentifier)
+                == AppOpsManager.MODE_ALLOWED;
     }
 
     protected void logPermissionDisabledEventNotReported(String tag, String packageName,

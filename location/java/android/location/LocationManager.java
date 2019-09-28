@@ -542,6 +542,23 @@ public class LocationManager {
     }
 
     /**
+     * Create a string that allows an app to identify a listener
+     *
+     * @param listener The listener
+     *
+     * @return A identifying string
+     */
+    private static String getListenerIdentifier(@NonNull Object listener) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(listener.getClass().getName());
+        sb.append('@');
+        sb.append(Integer.toHexString(System.identityHashCode(listener)));
+
+        return sb.toString();
+    }
+
+    /**
      * Register for a single location update using the named provider and
      * a callback.
      *
@@ -981,7 +998,7 @@ public class LocationManager {
             boolean registered = false;
             try {
                 mService.requestLocationUpdates(locationRequest, transport, null,
-                        mContext.getPackageName());
+                        mContext.getPackageName(), getListenerIdentifier(listener));
                 registered = true;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1026,7 +1043,7 @@ public class LocationManager {
 
         try {
             mService.requestLocationUpdates(locationRequest, null, pendingIntent,
-                    mContext.getPackageName());
+                    mContext.getPackageName(), getListenerIdentifier(pendingIntent));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1471,7 +1488,8 @@ public class LocationManager {
         Geofence fence = Geofence.createCircle(latitude, longitude, radius);
         LocationRequest request = new LocationRequest().setExpireIn(expiration);
         try {
-            mService.requestGeofence(request, fence, intent, mContext.getPackageName());
+            mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
+                    getListenerIdentifier(intent));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1548,7 +1566,8 @@ public class LocationManager {
         Preconditions.checkArgument(fence != null, "invalid null geofence");
 
         try {
-            mService.requestGeofence(request, fence, intent, mContext.getPackageName());
+            mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
+                    getListenerIdentifier(intent));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2538,7 +2557,7 @@ public class LocationManager {
 
             mListenerTransport = new GnssMeasurementsListener();
             return mService.addGnssMeasurementsListener(mListenerTransport,
-                    mContext.getPackageName());
+                    mContext.getPackageName(), "gnss measurement callback");
         }
 
         @Override
@@ -2574,7 +2593,7 @@ public class LocationManager {
 
             mListenerTransport = new GnssNavigationMessageListener();
             return mService.addGnssNavigationMessageListener(mListenerTransport,
-                    mContext.getPackageName());
+                    mContext.getPackageName(), "gnss navigation callback");
         }
 
         @Override
@@ -2609,7 +2628,8 @@ public class LocationManager {
             Preconditions.checkState(mListenerTransport == null);
 
             mListenerTransport = new BatchedLocationCallback();
-            return mService.addGnssBatchingCallback(mListenerTransport, mContext.getPackageName());
+            return mService.addGnssBatchingCallback(mListenerTransport, mContext.getPackageName(),
+                     "batched location callback");
         }
 
         @Override
