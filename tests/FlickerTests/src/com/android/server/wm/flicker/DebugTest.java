@@ -47,23 +47,25 @@ public class DebugTest {
     private UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
     /**
-     * atest FlickerTest:DebugTests#openAppCold
+     * atest FlickerTests:DebugTest#openAppCold
      */
     @Test
     public void openAppCold() {
-        CommonTransitions.getOpenAppCold(testApp, uiDevice).recordAllRuns().build().run();
+        CommonTransitions.openAppCold(testApp, uiDevice, Surface.ROTATION_0)
+                .recordAllRuns().build().run();
     }
 
     /**
-     * atest FlickerTest:DebugTests#openAppWarm
+     * atest FlickerTests:DebugTest#openAppWarm
      */
     @Test
     public void openAppWarm() {
-        CommonTransitions.openAppWarm(testApp, uiDevice).recordAllRuns().build().run();
+        CommonTransitions.openAppWarm(testApp, uiDevice, Surface.ROTATION_0)
+                .recordAllRuns().build().run();
     }
 
     /**
-     * atest FlickerTest:DebugTests#changeOrientationFromNaturalToLeft
+     * atest FlickerTests:DebugTest#changeOrientationFromNaturalToLeft
      */
     @Test
     public void changeOrientationFromNaturalToLeft() {
@@ -72,7 +74,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#closeAppWithBackKey
+     * atest FlickerTests:DebugTest#closeAppWithBackKey
      */
     @Test
     public void closeAppWithBackKey() {
@@ -80,7 +82,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#closeAppWithHomeKey
+     * atest FlickerTests:DebugTest#closeAppWithHomeKey
      */
     @Test
     public void closeAppWithHomeKey() {
@@ -88,7 +90,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#openAppToSplitScreen
+     * atest FlickerTests:DebugTest#openAppToSplitScreen
      */
     @Test
     public void openAppToSplitScreen() {
@@ -97,7 +99,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#splitScreenToLauncher
+     * atest FlickerTests:DebugTest#splitScreenToLauncher
      */
     @Test
     public void splitScreenToLauncher() {
@@ -107,7 +109,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#resizeSplitScreen
+     * atest FlickerTests:DebugTest#resizeSplitScreen
      */
     @Test
     public void resizeSplitScreen() {
@@ -120,7 +122,7 @@ public class DebugTest {
     // IME tests
 
     /**
-     * atest FlickerTest:DebugTests#editTextSetFocus
+     * atest FlickerTests:DebugTest#editTextSetFocus
      */
     @Test
     public void editTextSetFocus() {
@@ -131,7 +133,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#editTextLoseFocusToHome
+     * atest FlickerTests:DebugTest#editTextLoseFocusToHome
      */
     @Test
     public void editTextLoseFocusToHome() {
@@ -142,7 +144,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#editTextLoseFocusToApp
+     * atest FlickerTests:DebugTest#editTextLoseFocusToApp
      */
     @Test
     public void editTextLoseFocusToApp() {
@@ -155,7 +157,7 @@ public class DebugTest {
     // PIP tests
 
     /**
-     * atest FlickerTest:DebugTests#enterPipMode
+     * atest FlickerTests:DebugTest#enterPipMode
      */
     @Test
     public void enterPipMode() {
@@ -165,7 +167,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#exitPipModeToHome
+     * atest FlickerTests:DebugTest#exitPipModeToHome
      */
     @Test
     public void exitPipModeToHome() {
@@ -175,7 +177,7 @@ public class DebugTest {
     }
 
     /**
-     * atest FlickerTest:DebugTests#exitPipModeToApp
+     * atest FlickerTests:DebugTest#exitPipModeToApp
      */
     @Test
     public void exitPipModeToApp() {
