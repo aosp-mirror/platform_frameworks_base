@@ -1302,7 +1302,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         if (bp.isSoftRestricted() && !SoftRestrictedPermissionPolicy.forPermission(mContext,
-                pkg, UserHandle.of(userId), permName).canBeGranted()) {
+                pkg.toAppInfo(), UserHandle.of(userId), permName).mayGrantPermission()) {
             Log.e(TAG, "Cannot grant soft restricted permission " + permName + " for package "
                     + packageName);
             return;
@@ -3361,6 +3361,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int immutableFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                 | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 
+        final int compatFlags = PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
+
         final boolean supportsRuntimePermissions = pkg.getTargetSdkVersion()
                 >= Build.VERSION_CODES.M;
 
@@ -3384,12 +3387,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                                 callingUid, userId, callback);
                     }
                 } else {
-                    // In permission review mode we clear the review flag when we
-                    // are asked to install the app with all permissions granted.
-                    if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                        updatePermissionFlagsInternal(permission, pkg.getPackageName(),
-                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED, 0, callingUid,
-                                userId, false, callback);
+                    // In permission review mode we clear the review flag and the revoked compat
+                    // flag when we are asked to install the app with all permissions granted.
+                    if ((flags & compatFlags) != 0) {
+                        updatePermissionFlagsInternal(permission, pkg.getPackageName(), compatFlags,
+                                0, callingUid, userId, false, callback);
                     }
                 }
             }
