@@ -561,11 +561,17 @@ public class PermissionMonitorTest {
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_NONE, new int[]{SYSTEM_UID1});
     }
 
-    private PackageInfo addPackage(String packageName, int uid, String[] permissions)
+    private PackageInfo setPackagePermissions(String packageName, int uid, String[] permissions)
             throws Exception {
         PackageInfo packageInfo = packageInfoWithPermissions(permissions, PARTITION_SYSTEM);
         when(mPackageManager.getPackageInfo(eq(packageName), anyInt())).thenReturn(packageInfo);
         when(mPackageManager.getPackagesForUid(eq(uid))).thenReturn(new String[]{packageName});
+        return packageInfo;
+    }
+
+    private PackageInfo addPackage(String packageName, int uid, String[] permissions)
+            throws Exception {
+        PackageInfo packageInfo = setPackagePermissions(packageName, uid, permissions);
         mObserver.onPackageAdded(packageName, uid);
         return packageInfo;
     }
@@ -616,19 +622,32 @@ public class PermissionMonitorTest {
     }
 
     @Test
-    public void testPackageUpdate() throws Exception {
+    public void testPackageRemoveThenAdd() throws Exception {
         final NetdServiceMonitor mNetdServiceMonitor = new NetdServiceMonitor(mNetdService);
 
         addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET, UPDATE_DEVICE_STATS});
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET
                 | INetd.PERMISSION_UPDATE_DEVICE_STATS, new int[]{MOCK_UID1});
 
-        // Remove and install the same package to simulate the update action
         when(mPackageManager.getPackagesForUid(MOCK_UID1)).thenReturn(new String[]{});
         mObserver.onPackageRemoved(MOCK_PACKAGE1, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_UNINSTALLED, new int[]{MOCK_UID1});
 
         addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET});
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{MOCK_UID1});
+    }
+
+    @Test
+    public void testPackageUpdate() throws Exception {
+        final NetdServiceMonitor mNetdServiceMonitor = new NetdServiceMonitor(mNetdService);
+
+        addPackage(MOCK_PACKAGE1, MOCK_UID1, new String[] {});
+        mNetdServiceMonitor.expectPermission(INetd.PERMISSION_NONE, new int[]{MOCK_UID1});
+
+        // When updating a package, the broadcast receiver gets two broadcasts (a remove and then an
+        // add), but the observer sees only one callback (an update).
+        setPackagePermissions(MOCK_PACKAGE1, MOCK_UID1, new String[] {INTERNET});
+        mObserver.onPackageChanged(MOCK_PACKAGE1, MOCK_UID1);
         mNetdServiceMonitor.expectPermission(INetd.PERMISSION_INTERNET, new int[]{MOCK_UID1});
     }
 
