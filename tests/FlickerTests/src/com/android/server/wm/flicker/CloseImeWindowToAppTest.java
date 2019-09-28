@@ -17,37 +17,39 @@
 package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.editTextLoseFocusToApp;
-import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
-
-import android.platform.helpers.IAppHelper;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.junit.runners.Parameterized;
 
 /**
  * Test IME window closing back to app window transitions.
  * To run this test: {@code atest FlickerTests:CloseImeWindowToAppTest}
  */
 @LargeTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class CloseImeWindowToAppTest extends FlickerTestBase {
+public class CloseImeWindowToAppTest extends NonRotationTestBase {
 
-    private static final String IME_WINDOW_TITLE = "InputMethod";
-    private IAppHelper mImeTestApp = new StandardAppHelper(
-            InstrumentationRegistry.getInstrumentation(),
-            "com.android.server.wm.flicker.testapp", "ImeApp");
+    static final String IME_WINDOW_TITLE = "InputMethod";
+
+    public CloseImeWindowToAppTest(String beginRotationName, int beginRotation) {
+        super(beginRotationName, beginRotation);
+
+        mTestApp = new StandardAppHelper(
+                InstrumentationRegistry.getInstrumentation(),
+                "com.android.server.wm.flicker.testapp", "ImeApp");
+    }
 
     @Before
     public void runTransition() {
-        super.runTransition(editTextLoseFocusToApp(mUiDevice)
+        run(editTextLoseFocusToApp(mTestApp, mUiDevice, mBeginRotation, /* clickOnEditField */true)
                 .includeJankyRuns().build());
     }
 
@@ -63,20 +65,14 @@ public class CloseImeWindowToAppTest extends FlickerTestBase {
     @Test
     public void checkVisibility_imeAppLayerIsAlwaysVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
-                .showsLayer(mImeTestApp.getPackage())
+                .showsLayer(mTestApp.getPackage())
                 .forAllEntries());
     }
 
     @Test
     public void checkVisibility_imeAppWindowIsAlwaysVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
-                .showsAppWindowOnTop(mImeTestApp.getPackage())
+                .showsAppWindowOnTop(mTestApp.getPackage())
                 .forAllEntries());
-    }
-
-    @Test
-    public void checkCoveredRegion_noUncoveredRegions() {
-        checkResults(result -> LayersTraceSubject.assertThat(result).coversRegion(
-                getDisplayBounds()).forAllEntries());
     }
 }
