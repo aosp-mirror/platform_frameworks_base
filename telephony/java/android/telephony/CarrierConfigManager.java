@@ -1739,9 +1739,8 @@ public class CarrierConfigManager {
             "allow_emergency_video_calls_bool";
 
     /**
-     * Flag indicating whether the carrier supports RCS presence indication for video calls.  When
-     * {@code true}, the carrier supports RCS presence indication for video calls.  When presence
-     * is supported, the device should use the
+     * Flag indicating whether the carrier supports RCS presence indication for
+     * User Capability Exchange (UCE).  When presence is supported, the device should use the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE} bit mask and set the
      * {@link android.provider.ContactsContract.Data#CARRIER_PRESENCE_VT_CAPABLE} bit to indicate
      * whether each contact supports video calling.  The UI is made aware that presence is enabled
@@ -1750,6 +1749,12 @@ public class CarrierConfigManager {
      * video.
      */
     public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
+
+    /**
+     * Flag indicating whether the carrier supports RCS SIP OPTIONS indication for
+     * User Capability Exchange (UCE).
+     */
+    public static final String KEY_USE_RCS_SIP_OPTIONS_BOOL = "use_rcs_sip_options_bool";
 
     /**
      * The duration in seconds that platform call and message blocking is disabled after the user
@@ -3435,6 +3440,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putInt(KEY_EMERGENCY_SMS_MODE_TIMER_MS_INT, 0);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
+        sDefaults.putBoolean(KEY_USE_RCS_SIP_OPTIONS_BOOL, false);
         sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
         sDefaults.putInt(
                 KEY_CDMA_ROAMING_MODE_INT, TelephonyManager.CDMA_ROAMING_MODE_RADIO_DEFAULT);
