@@ -45,6 +45,7 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
@@ -52,6 +53,8 @@ import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.Future;
+
+import javax.inject.Inject;
 
 public class PowerUI extends SystemUI {
 
@@ -97,6 +100,12 @@ public class PowerUI extends SystemUI {
 
     private IThermalEventListener mSkinThermalEventListener;
     private IThermalEventListener mUsbThermalEventListener;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
+    @Inject
+    public PowerUI(BroadcastDispatcher broadcastDispatcher) {
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
 
     public void start() {
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -211,7 +220,7 @@ public class PowerUI extends SystemUI {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            mContext.registerReceiver(this, filter, null, mHandler);
+            mBroadcastDispatcher.registerReceiver(this, filter, mHandler);
         }
 
         @Override

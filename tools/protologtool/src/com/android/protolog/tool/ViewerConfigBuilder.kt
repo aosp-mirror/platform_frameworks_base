@@ -32,13 +32,14 @@ class ViewerConfigBuilder(
         group: LogGroup
     ) {
         if (group.enabled) {
-            val position = CodeUtils.getPositionString(call, fileName)
+            val position = fileName
             val key = CodeUtils.hash(position, messageString, level, group)
             if (statements.containsKey(key)) {
                 if (statements[key] != LogCall(messageString, level, group, position)) {
                     throw HashCollisionException(
                             "Please modify the log message \"$messageString\" " +
-                                    "or \"${statements[key]}\" - their hashes are equal.")
+                                    "or \"${statements[key]}\" - their hashes are equal.",
+                            ParsingContext(fileName, call))
                 }
             } else {
                 groups.add(group)
@@ -54,7 +55,7 @@ class ViewerConfigBuilder(
 
     fun processClass(unit: CompilationUnit, fileName: String) {
         this.fileName = fileName
-        protoLogCallVisitor.process(unit, this)
+        protoLogCallVisitor.process(unit, this, fileName)
     }
 
     fun build(): String {

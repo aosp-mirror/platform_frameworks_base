@@ -22,7 +22,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -444,5 +443,38 @@ public class WifiScannerTest {
         assertNotNull(message);
 
         assertEquals(WifiScanner.CMD_STOP_PNO_SCAN, message.what);
+    }
+
+    @Test
+    public void testScanDataAddResults() throws Exception {
+        ScanResult scanResult1 = new ScanResult();
+        scanResult1.SSID = TEST_SSID_1;
+        ScanData scanData = new ScanData(0, 0, new ScanResult[]{scanResult1});
+
+        ScanResult scanResult2 = new ScanResult();
+        scanResult2.SSID = TEST_SSID_2;
+        scanData.addResults(new ScanResult[]{scanResult2});
+
+        ScanResult[] consolidatedScanResults = scanData.getResults();
+        assertEquals(2, consolidatedScanResults.length);
+        assertEquals(TEST_SSID_1, consolidatedScanResults[0].SSID);
+        assertEquals(TEST_SSID_2, consolidatedScanResults[1].SSID);
+    }
+
+    @Test
+    public void testScanDataParcel() throws Exception {
+        ScanResult scanResult1 = new ScanResult();
+        scanResult1.SSID = TEST_SSID_1;
+        ScanData scanData = new ScanData(5, 4, new ScanResult[]{scanResult1});
+
+        Parcel parcel = Parcel.obtain();
+        scanData.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);    // Rewind data position back to the beginning for read.
+        ScanData readScanData = ScanData.CREATOR.createFromParcel(parcel);
+
+        assertEquals(scanData.getId(), readScanData.getId());
+        assertEquals(scanData.getFlags(), readScanData.getFlags());
+        assertEquals(scanData.getResults().length, readScanData.getResults().length);
+        assertEquals(scanData.getResults()[0].SSID, readScanData.getResults()[0].SSID);
     }
 }

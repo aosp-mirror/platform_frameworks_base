@@ -73,8 +73,7 @@ class SourceTransformer(
         }
         val ifStmt: IfStmt
         if (group.enabled) {
-            val position = CodeUtils.getPositionString(call, fileName)
-            val hash = CodeUtils.hash(position, messageString, level, group)
+            val hash = CodeUtils.hash(fileName, messageString, level, group)
             val newCall = call.clone()
             if (!group.textEnabled) {
                 // Remove message string if text logging is not enabled by default.
@@ -99,7 +98,8 @@ class SourceTransformer(
                 NodeList<Expression>(newCall.arguments[0].clone()))
             if (argTypes.size != call.arguments.size - 2) {
                 throw InvalidProtoLogCallException(
-                        "Number of arguments does not mach format string", call)
+                        "Number of arguments (${argTypes.size} does not mach format" +
+                                " string in: $call", ParsingContext(fileName, call))
             }
             val blockStmt = BlockStmt()
             if (argTypes.isNotEmpty()) {
@@ -225,7 +225,7 @@ class SourceTransformer(
         processedCode = code.split('\n').toMutableList()
         offsets = IntArray(processedCode.size)
         LexicalPreservingPrinter.setup(compilationUnit)
-        protoLogCallProcessor.process(compilationUnit, this)
+        protoLogCallProcessor.process(compilationUnit, this, fileName)
         // return LexicalPreservingPrinter.print(compilationUnit)
         return processedCode.joinToString("\n")
     }

@@ -38,6 +38,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ImeActivityAutoFocus"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.ImeActivityAutoFocus"
+                  android:windowSoftInputMode="stateVisible"
+                  android:label="ImeAppAutoFocus">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
         <activity android:name=".PipActivity"
                   android:resizeableActivity="true"
                   android:supportsPictureInPicture="true"

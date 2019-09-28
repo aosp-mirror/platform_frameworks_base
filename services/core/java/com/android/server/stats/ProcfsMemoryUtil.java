@@ -72,6 +72,30 @@ final class ProcfsMemoryUtil {
         return null;
     }
 
+    /**
+     * Reads cmdline of a process from procfs.
+     *
+     * Returns content of /proc/pid/cmdline (e.g. /system/bin/statsd) or an empty string
+     * if the file is not available.
+     */
+    public static String readCmdlineFromProcfs(int pid) {
+        return parseCmdline(readFile("/proc/" + pid + "/cmdline"));
+    }
+
+    /**
+     * Parses cmdline out of the contents of the /proc/pid/cmdline file in procfs.
+     *
+     * Parsing is required to strip anything after the first null byte.
+     */
+    @VisibleForTesting
+    static String parseCmdline(String contents) {
+        int firstNullByte = contents.indexOf("\0");
+        if (firstNullByte == -1) {
+            return contents;
+        }
+        return contents.substring(0, firstNullByte);
+    }
+
     private static String readFile(String path) {
         try {
             final File file = new File(path);

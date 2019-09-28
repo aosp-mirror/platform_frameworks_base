@@ -47,6 +47,7 @@ import android.widget.TextView;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.NavigationBarView;
@@ -159,6 +160,8 @@ public class ScreenPinningRequest implements View.OnClickListener,
         private ValueAnimator mColorAnim;
         private ViewGroup mLayout;
         private boolean mShowCancel;
+        private final BroadcastDispatcher mBroadcastDispatcher =
+                Dependency.get(BroadcastDispatcher.class);
 
         public RequestWindowView(Context context, boolean showCancel) {
             super(context);
@@ -212,7 +215,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
             IntentFilter filter = new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             filter.addAction(Intent.ACTION_SCREEN_OFF);
-            mContext.registerReceiver(mReceiver, filter);
+            mBroadcastDispatcher.registerReceiver(mReceiver, filter);
         }
 
         private void inflateView(int rotation) {
@@ -313,7 +316,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
 
         @Override
         public void onDetachedFromWindow() {
-            mContext.unregisterReceiver(mReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mReceiver);
         }
 
         protected void onConfigurationChanged() {

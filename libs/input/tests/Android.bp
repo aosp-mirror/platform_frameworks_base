@@ -18,9 +18,9 @@ cc_test {
         "PointerController_test.cpp",
     ],
     shared_libs: [
+        "libandroid_runtime",
         "libinputservice",
         "libgui",
-        "libhwui",
         "libutils",
     ],
     static_libs: [

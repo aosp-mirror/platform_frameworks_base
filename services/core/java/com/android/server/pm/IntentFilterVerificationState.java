@@ -17,7 +17,7 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -35,7 +35,7 @@ public class IntentFilterVerificationState {
 
     private int mState;
 
-    private ArrayList<PackageParser.ActivityIntentInfo> mFilters = new ArrayList<>();
+    private ArrayList<ComponentParseUtils.ParsedActivityIntentInfo> mFilters = new ArrayList<>();
     private ArraySet<String> mHosts = new ArraySet<>();
     private int mUserId;
 
@@ -66,7 +66,7 @@ public class IntentFilterVerificationState {
         setState(STATE_VERIFICATION_PENDING);
     }
 
-    public ArrayList<PackageParser.ActivityIntentInfo> getFilters() {
+    public ArrayList<ComponentParseUtils.ParsedActivityIntentInfo> getFilters() {
         return mFilters;
     }
 
@@ -123,7 +123,7 @@ public class IntentFilterVerificationState {
         return false;
     }
 
-    public void addFilter(PackageParser.ActivityIntentInfo filter) {
+    public void addFilter(ComponentParseUtils.ParsedActivityIntentInfo filter) {
         mFilters.add(filter);
         mHosts.addAll(filter.getHostsList());
     }

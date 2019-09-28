@@ -24,9 +24,11 @@ import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.LayoutRes;
@@ -34,11 +36,14 @@ import android.annotation.Nullable;
 import android.app.Fragment;
 import android.app.FragmentController;
 import android.app.FragmentHostCallback;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.LeakCheck.Tracker;
 import android.testing.TestableLooper;
@@ -58,6 +63,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
@@ -70,6 +76,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper()
@@ -85,6 +93,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private OverviewProxyService mOverviewProxyService;
     private CommandQueue mCommandQueue;
     private SysUiState mMockSysUiState;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     private AccessibilityManagerWrapper mAccessibilityWrapper =
             new AccessibilityManagerWrapper(mContext) {
@@ -112,6 +122,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
 
     @Before
     public void setupFragment() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
         setupSysuiDependency();
         createRootView();
         mOverviewProxyService =
@@ -177,6 +189,18 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    public void testRegisteredWithDispatcher() {
+        mFragments.dispatchResume();
+        processAllMessages();
+
+        verify(mBroadcastDispatcher).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class),
+                any(Handler.class),
+                any(UserHandle.class));
+    }
+
+    @Test
     public void testSetImeWindowStatusWhenImeSwitchOnDisplay() {
         // Create default & external NavBar fragment.
         NavigationBarFragment defaultNavBar = (NavigationBarFragment) mFragment;
@@ -227,7 +251,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mOverviewProxyService,
                 mock(NavigationModeController.class),
                 mock(StatusBarStateController.class),
-                mMockSysUiState);
+                mMockSysUiState,
+                mBroadcastDispatcher);
     }
 
     private class HostCallbacksForExternalDisplay extends

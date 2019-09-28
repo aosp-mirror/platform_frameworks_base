@@ -18,9 +18,6 @@ package com.android.server.policy;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.app.AppOpsManager.MODE_ALLOWED;
-import static android.app.AppOpsManager.MODE_DEFAULT;
-import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_LEGACY_STORAGE;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
@@ -55,22 +52,7 @@ public abstract class SoftRestrictedPermissionPolicy {
     private static final SoftRestrictedPermissionPolicy DUMMY_POLICY =
             new SoftRestrictedPermissionPolicy() {
                 @Override
-                public int resolveAppOp() {
-                    return OP_NONE;
-                }
-
-                @Override
-                public int getDesiredOpMode() {
-                    return MODE_DEFAULT;
-                }
-
-                @Override
-                public boolean shouldSetAppOpIfNotDefault() {
-                    return false;
-                }
-
-                @Override
-                public boolean canBeGranted() {
+                public boolean mayGrantPermission() {
                     return true;
                 }
             };
@@ -114,10 +96,8 @@ public abstract class SoftRestrictedPermissionPolicy {
      * Get the policy for a soft restricted permission.
      *
      * @param context A context to use
-     * @param appInfo The application the permission belongs to. Can be {@code null}, but then
-     *                only {@link #resolveAppOp} will work.
-     * @param user The user the app belongs to. Can be {@code null}, but then only
-     *             {@link #resolveAppOp} will work.
+     * @param appInfo The application the permission belongs to.
+     * @param user The user the app belongs to.
      * @param permission The name of the permission
      *
      * @return The policy for this permission
@@ -130,82 +110,46 @@ public abstract class SoftRestrictedPermissionPolicy {
             // where the restricted state allows the permission but only for accessing the medial
             // collections.
             case READ_EXTERNAL_STORAGE: {
-                final int flags;
-                final boolean applyRestriction;
                 final boolean isWhiteListed;
-                final boolean hasRequestedLegacyExternalStorage;
+                boolean shouldApplyRestriction;
                 final int targetSDK;
+                final boolean hasRequestedLegacyExternalStorage;
 
                 if (appInfo != null) {
                     PackageManager pm = context.getPackageManager();
-                    flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
-                    applyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
+                    int flags = pm.getPermissionFlags(permission, appInfo.packageName, user);
                     isWhiteListed = (flags & FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT) != 0;
+                    shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0;
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
-
-                    boolean hasAnyRequestedLegacyExternalStorage =
-                            appInfo.hasRequestedLegacyExternalStorage();
-
-                    // hasRequestedLegacyExternalStorage is per package. To make sure two apps in
-                    // the same shared UID do not fight over what to set, always compute the
-                    // combined hasRequestedLegacyExternalStorage
-                    String[] uidPkgs = pm.getPackagesForUid(appInfo.uid);
-                    if (uidPkgs != null) {
-                        for (String uidPkg : uidPkgs) {
-                            if (!uidPkg.equals(appInfo.packageName)) {
-                                ApplicationInfo uidPkgInfo;
-                                try {
-                                    uidPkgInfo = pm.getApplicationInfoAsUser(uidPkg, 0, user);
-                                } catch (PackageManager.NameNotFoundException e) {
-                                    continue;
-                                }
-
-                                hasAnyRequestedLegacyExternalStorage |=
-                                        uidPkgInfo.hasRequestedLegacyExternalStorage();
-                            }
-                        }
-                    }
-
-                    hasRequestedLegacyExternalStorage = hasAnyRequestedLegacyExternalStorage;
+                    hasRequestedLegacyExternalStorage = hasUidRequestedLegacyExternalStorage(
+                            appInfo.uid, context);
                 } else {
-                    flags = 0;
-                    applyRestriction = false;
                     isWhiteListed = false;
-                    hasRequestedLegacyExternalStorage = false;
+                    shouldApplyRestriction = false;
                     targetSDK = 0;
+                    hasRequestedLegacyExternalStorage = false;
                 }
 
+                // We have a check in PermissionPolicyService.PermissionToOpSynchroniser.setUidMode
+                // to prevent apps losing files in legacy storage, because we are holding the
+                // package manager lock here. If we ever remove this policy that check should be
+                // removed as well.
                 return new SoftRestrictedPermissionPolicy() {
                     @Override
-                    public int resolveAppOp() {
+                    public boolean mayGrantPermission() {
+                        return isWhiteListed || targetSDK >= Build.VERSION_CODES.Q;
+                    }
+                    @Override
+                    public int getExtraAppOpCode() {
                         return OP_LEGACY_STORAGE;
                     }
-
                     @Override
-                    public int getDesiredOpMode() {
-                        if (applyRestriction) {
-                            return MODE_DEFAULT;
-                        } else if (hasRequestedLegacyExternalStorage) {
-                            return MODE_ALLOWED;
-                        } else {
-                            return MODE_IGNORED;
-                        }
+                    public boolean mayAllowExtraAppOp() {
+                        return !shouldApplyRestriction && hasRequestedLegacyExternalStorage;
                     }
-
                     @Override
-                    public boolean shouldSetAppOpIfNotDefault() {
-                        // Do not switch from allowed -> ignored as this would mean to retroactively
-                        // turn on isolated storage. This will make the app loose all its files.
-                        return getDesiredOpMode() != MODE_IGNORED;
-                    }
-
-                    @Override
-                    public boolean canBeGranted() {
-                        if (isWhiteListed || targetSDK >= Build.VERSION_CODES.Q) {
-                            return true;
-                        } else {
-                            return false;
-                        }
+                    public boolean mayDenyExtraAppOpIfGranted() {
+                        return shouldApplyRestriction;
                     }
                 };
             }
@@ -225,22 +169,7 @@ public abstract class SoftRestrictedPermissionPolicy {
 
                 return new SoftRestrictedPermissionPolicy() {
                     @Override
-                    public int resolveAppOp() {
-                        return OP_NONE;
-                    }
-
-                    @Override
-                    public int getDesiredOpMode() {
-                        return MODE_DEFAULT;
-                    }
-
-                    @Override
-                    public boolean shouldSetAppOpIfNotDefault() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean canBeGranted() {
+                    public boolean mayGrantPermission() {
                         return isWhiteListed || targetSDK >= Build.VERSION_CODES.Q;
                     }
                 };
@@ -250,25 +179,51 @@ public abstract class SoftRestrictedPermissionPolicy {
         }
     }
 
-    /**
-     * @return An app op to be changed based on the state of the permission or
-     * {@link AppOpsManager#OP_NONE} if not app-op should be set.
-     */
-    public abstract int resolveAppOp();
-
-    /**
-     * @return The mode the {@link #resolveAppOp() app op} should be in.
-     */
-    public abstract @AppOpsManager.Mode int getDesiredOpMode();
-
-    /**
-     * @return If the {@link #resolveAppOp() app op} should be set even if the app-op is currently
-     * not {@link AppOpsManager#MODE_DEFAULT}.
-     */
-    public abstract boolean shouldSetAppOpIfNotDefault();
+    private static boolean hasUidRequestedLegacyExternalStorage(int uid, @NonNull Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        String[] packageNames = packageManager.getPackagesForUid(uid);
+        if (packageNames == null) {
+            return false;
+        }
+        UserHandle user = UserHandle.getUserHandleForUid(uid);
+        for (String packageName : packageNames) {
+            ApplicationInfo applicationInfo;
+            try {
+                applicationInfo = packageManager.getApplicationInfoAsUser(packageName, 0, user);
+            } catch (PackageManager.NameNotFoundException e) {
+                continue;
+            }
+            if (applicationInfo.hasRequestedLegacyExternalStorage()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * @return If the permission can be granted
      */
-    public abstract boolean canBeGranted();
+    public abstract boolean mayGrantPermission();
+
+    /**
+     * @return An app op to be changed based on the state of the permission or
+     * {@link AppOpsManager#OP_NONE} if not app-op should be set.
+     */
+    public int getExtraAppOpCode() {
+        return OP_NONE;
+    }
+
+    /**
+     * @return Whether the {@link #getExtraAppOpCode() app op} may be granted.
+     */
+    public boolean mayAllowExtraAppOp() {
+        return false;
+    }
+
+    /**
+     * @return Whether the {@link #getExtraAppOpCode() app op} may be denied if was granted.
+     */
+    public boolean mayDenyExtraAppOpIfGranted() {
+        return false;
+    }
 }

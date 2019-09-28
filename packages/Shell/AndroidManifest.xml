@@ -29,6 +29,7 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_ACTIVE_EMERGENCY_SESSION" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
@@ -240,7 +241,7 @@
 
         <activity
             android:name=".BugreportWarningActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog.Alert"
+            android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true"
             android:exported="false" />

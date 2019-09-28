@@ -257,10 +257,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mNextAlarmTextView.setSelected(true);
 
         mPermissionsHubEnabled = PrivacyItemControllerKt.isPermissionsHubEnabled();
-        // Change the ignored slots when DeviceConfig flag changes
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
-                mContext.getMainExecutor(), mPropertiesListener);
-
     }
 
     private List<String> getIgnoredIconSlots() {
@@ -489,6 +485,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         super.onAttachedToWindow();
         mStatusBarIconController.addIconGroup(mIconManager);
         requestApplyInsets();
+        // Change the ignored slots when DeviceConfig flag changes
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
+                mContext.getMainExecutor(), mPropertiesListener);
     }
 
     @Override
@@ -527,6 +526,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     public void onDetachedFromWindow() {
         setListening(false);
         mStatusBarIconController.removeIconGroup(mIconManager);
+        DeviceConfig.removeOnPropertiesChangedListener(mPropertiesListener);
         super.onDetachedFromWindow();
     }
 

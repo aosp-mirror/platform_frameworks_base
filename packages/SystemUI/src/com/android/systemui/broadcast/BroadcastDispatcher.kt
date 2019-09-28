@@ -75,7 +75,7 @@ open class BroadcastDispatcher @Inject constructor (
      * @param filter A filter to determine what broadcasts should be dispatched to this receiver.
      *               It will only take into account actions and categories for filtering.
      * @param handler A handler to dispatch [BroadcastReceiver.onReceive]. By default, it is the
-     *                main handler.
+     *                main handler. Pass `null` to use the default.
      * @param user A user handle to determine which broadcast should be dispatched to this receiver.
      *             By default, it is the current user.
      */
@@ -83,10 +83,12 @@ open class BroadcastDispatcher @Inject constructor (
     fun registerReceiver(
         receiver: BroadcastReceiver,
         filter: IntentFilter,
-        handler: Handler = mainHandler,
+        handler: Handler? = mainHandler,
         user: UserHandle = context.user
     ) {
-        this.handler.obtainMessage(MSG_ADD_RECEIVER, ReceiverData(receiver, filter, handler, user))
+        this.handler
+                .obtainMessage(MSG_ADD_RECEIVER,
+                ReceiverData(receiver, filter, handler ?: mainHandler, user))
                 .sendToTarget()
     }
 

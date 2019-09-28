@@ -28,6 +28,7 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPON
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
 import android.annotation.UnsupportedAppUsage;
+import android.content.pm.parsing.ComponentParseUtils;
 import android.os.BaseBundle;
 import android.os.Debug;
 import android.os.PersistableBundle;
@@ -127,6 +128,18 @@ public class PackageUserState {
                         && (!this.hidden || matchUninstalled));
     }
 
+    public boolean isMatch(ComponentInfo componentInfo, int flags) {
+        return isMatch(componentInfo.applicationInfo.isSystemApp(),
+                componentInfo.applicationInfo.enabled, componentInfo.enabled,
+                componentInfo.directBootAware, componentInfo.name, flags);
+    }
+
+    public boolean isMatch(boolean isSystem, boolean isPackageEnabled,
+            ComponentParseUtils.ParsedComponent component, int flags) {
+        return isMatch(isSystem, isPackageEnabled, component.isEnabled(),
+                component.isDirectBootAware(), component.getName(), flags);
+    }
+
     /**
      * Test if the given component is considered installed, enabled and a match
      * for the given flags.
@@ -135,28 +148,33 @@ public class PackageUserState {
      * Expects at least one of {@link PackageManager#MATCH_DIRECT_BOOT_AWARE} and
      * {@link PackageManager#MATCH_DIRECT_BOOT_UNAWARE} are specified in {@code flags}.
      * </p>
+     *
      */
-    public boolean isMatch(ComponentInfo componentInfo, int flags) {
-        final boolean isSystemApp = componentInfo.applicationInfo.isSystemApp();
+    public boolean isMatch(boolean isSystem, boolean isPackageEnabled, boolean isComponentEnabled,
+               boolean isComponentDirectBootAware, String componentName, int flags) {
         final boolean matchUninstalled = (flags & PackageManager.MATCH_KNOWN_PACKAGES) != 0;
-        if (!isAvailable(flags)
-                && !(isSystemApp && matchUninstalled)) return reportIfDebug(false, flags);
-        if (!isEnabled(componentInfo, flags)) return reportIfDebug(false, flags);
+        if (!isAvailable(flags) && !(isSystem && matchUninstalled)) {
+            return reportIfDebug(false, flags);
+        }
+
+        if (!isEnabled(isPackageEnabled, isComponentEnabled, componentName, flags)) {
+            return reportIfDebug(false, flags);
+        }
 
         if ((flags & MATCH_SYSTEM_ONLY) != 0) {
-            if (!isSystemApp) {
+            if (!isSystem) {
                 return reportIfDebug(false, flags);
             }
         }
 
         final boolean matchesUnaware = ((flags & MATCH_DIRECT_BOOT_UNAWARE) != 0)
-                && !componentInfo.directBootAware;
+                && !isComponentDirectBootAware;
         final boolean matchesAware = ((flags & MATCH_DIRECT_BOOT_AWARE) != 0)
-                && componentInfo.directBootAware;
+                && isComponentDirectBootAware;
         return reportIfDebug(matchesUnaware || matchesAware, flags);
     }
 
-    private boolean reportIfDebug(boolean result, int flags) {
+    public boolean reportIfDebug(boolean result, int flags) {
         if (DEBUG && !result) {
             Slog.i(LOG_TAG, "No match!; flags: "
                     + DebugUtils.flagsToString(PackageManager.class, "MATCH_", flags) + " "
@@ -165,10 +183,22 @@ public class PackageUserState {
         return result;
     }
 
+    public boolean isEnabled(ComponentInfo componentInfo, int flags) {
+        return isEnabled(componentInfo.applicationInfo.enabled, componentInfo.enabled,
+                componentInfo.name, flags);
+    }
+
+    public boolean isEnabled(boolean isPackageEnabled,
+            ComponentParseUtils.ParsedComponent parsedComponent, int flags) {
+        return isEnabled(isPackageEnabled, parsedComponent.isEnabled(), parsedComponent.getName(),
+                flags);
+    }
+
     /**
      * Test if the given component is considered enabled.
      */
-    public boolean isEnabled(ComponentInfo componentInfo, int flags) {
+    public boolean isEnabled(boolean isPackageEnabled, boolean isComponentEnabled,
+            String componentName, int flags) {
         if ((flags & MATCH_DISABLED_COMPONENTS) != 0) {
             return true;
         }
@@ -183,24 +213,26 @@ public class PackageUserState {
                 if ((flags & MATCH_DISABLED_UNTIL_USED_COMPONENTS) == 0) {
                     return false;
                 }
+                // fallthrough
             case COMPONENT_ENABLED_STATE_DEFAULT:
-                if (!componentInfo.applicationInfo.enabled) {
+                if (!isPackageEnabled) {
                     return false;
                 }
+                // fallthrough
             case COMPONENT_ENABLED_STATE_ENABLED:
                 break;
         }
 
         // Check if component has explicit state before falling through to
         // the manifest default
-        if (ArrayUtils.contains(this.enabledComponents, componentInfo.name)) {
+        if (ArrayUtils.contains(this.enabledComponents, componentName)) {
             return true;
         }
-        if (ArrayUtils.contains(this.disabledComponents, componentInfo.name)) {
+        if (ArrayUtils.contains(this.disabledComponents, componentName)) {
             return false;
         }
 
-        return componentInfo.enabled;
+        return isComponentEnabled;
     }
 
     @Override

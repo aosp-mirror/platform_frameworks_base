@@ -15,6 +15,7 @@
  */
 package com.android.server.stats;
 
+import static com.android.server.stats.ProcfsMemoryUtil.parseCmdline;
 import static com.android.server.stats.ProcfsMemoryUtil.parseMemorySnapshotFromStatus;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,6 +25,8 @@ import androidx.test.filters.SmallTest;
 import com.android.server.stats.ProcfsMemoryUtil.MemorySnapshot;
 
 import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Build/Install/Run:
@@ -99,5 +102,40 @@ public class ProcfsMemoryUtilTest {
     public void testParseMemorySnapshotFromStatus_emptyContents() {
         MemorySnapshot snapshot = parseMemorySnapshotFromStatus("");
         assertThat(snapshot).isNull();
+    }
+
+    @Test
+    public void testParseCmdline_invalidValue() {
+        byte[] nothing = new byte[] {0x00, 0x74, 0x65, 0x73, 0x74}; // \0test
+
+        assertThat(parseCmdline(bytesToString(nothing))).isEmpty();
+    }
+
+    @Test
+    public void testParseCmdline_correctValue_noNullBytes() {
+        assertThat(parseCmdline("com.google.app")).isEqualTo("com.google.app");
+    }
+
+    @Test
+    public void testParseCmdline_correctValue_withNullBytes() {
+        byte[] trailing = new byte[] {0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x00}; // test\0\0\0
+
+        assertThat(parseCmdline(bytesToString(trailing))).isEqualTo("test");
+
+        // test\0\0test
+        byte[] inside = new byte[] {0x74, 0x65, 0x73, 0x74, 0x00, 0x00, 0x74, 0x65, 0x73, 0x74};
+
+        assertThat(parseCmdline(bytesToString(trailing))).isEqualTo("test");
+    }
+
+    @Test
+    public void testParseCmdline_emptyContents() {
+        assertThat(parseCmdline("")).isEmpty();
+    }
+
+    private static String bytesToString(byte[] bytes) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        output.write(bytes, 0, bytes.length);
+        return output.toString();
     }
 }

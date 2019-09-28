@@ -1157,22 +1157,14 @@ public final class JobStore {
         private void removeAll(Predicate<JobStatus> predicate) {
             for (int jobSetIndex = mJobs.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
                 final ArraySet<JobStatus> jobs = mJobs.valueAt(jobSetIndex);
-                for (int jobIndex = jobs.size() - 1; jobIndex >= 0; jobIndex--) {
-                    if (predicate.test(jobs.valueAt(jobIndex))) {
-                        jobs.removeAt(jobIndex);
-                    }
-                }
+                jobs.removeIf(predicate);
                 if (jobs.size() == 0) {
                     mJobs.removeAt(jobSetIndex);
                 }
             }
             for (int jobSetIndex = mJobsPerSourceUid.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
                 final ArraySet<JobStatus> jobs = mJobsPerSourceUid.valueAt(jobSetIndex);
-                for (int jobIndex = jobs.size() - 1; jobIndex >= 0; jobIndex--) {
-                    if (predicate.test(jobs.valueAt(jobIndex))) {
-                        jobs.removeAt(jobIndex);
-                    }
-                }
+                jobs.removeIf(predicate);
                 if (jobs.size() == 0) {
                     mJobsPerSourceUid.removeAt(jobSetIndex);
                 }

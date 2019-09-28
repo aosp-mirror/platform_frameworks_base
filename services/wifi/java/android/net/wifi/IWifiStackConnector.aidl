@@ -15,8 +15,9 @@
  */
 package android.net.wifi;
 
+import android.net.wifi.WifiApiServiceInfo;
+
 /** @hide */
 interface IWifiStackConnector {
-     IBinder retrieveApiServiceImpl(String serviceName);
-     boolean startApiService(String serviceName);
+     List<WifiApiServiceInfo> getWifiApiServiceInfos();
 }

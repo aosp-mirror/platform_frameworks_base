@@ -50,7 +50,8 @@ class ViewerConfigBuilderTest {
     @Test
     fun processClass() {
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
@@ -78,7 +79,8 @@ class ViewerConfigBuilderTest {
     @Test
     fun processClass_nonUnique() {
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,
@@ -102,7 +104,8 @@ class ViewerConfigBuilderTest {
     @Test
     fun processClass_disabled() {
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(MethodCallExpr(), TEST1.messageString, LogLevel.INFO,

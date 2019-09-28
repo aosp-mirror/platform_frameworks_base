@@ -22,7 +22,7 @@ enum class LogLevel {
     DEBUG, VERBOSE, INFO, WARN, ERROR, WTF;
 
     companion object {
-        fun getLevelForMethodName(name: String, node: Node): LogLevel {
+        fun getLevelForMethodName(name: String, node: Node, context: ParsingContext): LogLevel {
             return when (name) {
                 "d" -> DEBUG
                 "v" -> VERBOSE
@@ -30,7 +30,8 @@ enum class LogLevel {
                 "w" -> WARN
                 "e" -> ERROR
                 "wtf" -> WTF
-                else -> throw InvalidProtoLogCallException("Unknown log level $name", node)
+                else ->
+                    throw InvalidProtoLogCallException("Unknown log level $name in $node", context)
             }
         }
     }

@@ -237,12 +237,11 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
-    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
-    ACanvas_setBuffer(canvas, &buffer, static_cast<int32_t>(surface->getBuffersDataSpace()));
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(&buffer, static_cast<int32_t>(surface->getBuffersDataSpace()));
 
     if (dirtyRectPtr) {
-        ACanvas_clipRect(canvas, {dirtyRect.left, dirtyRect.top,
-                                  dirtyRect.right, dirtyRect.bottom});
+        canvas.clipRect({dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom});
     }
 
     if (dirtyRectObj) {
@@ -268,8 +267,8 @@ static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
     }
 
     // detach the canvas from the surface
-    ACanvas* canvas = ACanvas_getNativeHandleFromJava(env, canvasObj);
-    ACanvas_setBuffer(canvas, nullptr, ADATASPACE_UNKNOWN);
+    graphics::Canvas canvas(env, canvasObj);
+    canvas.setBuffer(nullptr, ADATASPACE_UNKNOWN);
 
     // unlock surface
     status_t err = surface->unlockAndPost();

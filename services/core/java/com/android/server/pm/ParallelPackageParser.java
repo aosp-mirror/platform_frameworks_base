@@ -16,7 +16,10 @@
 
 package com.android.server.pm;
 
+import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+
 import android.content.pm.PackageParser;
+import android.content.pm.parsing.ParsedPackage;
 import android.os.Process;
 import android.os.Trace;
 import android.util.DisplayMetrics;
@@ -29,8 +32,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-
-import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 /**
  * Helper class for parallel parsing of packages using {@link PackageParser}.
@@ -65,14 +66,14 @@ class ParallelPackageParser implements AutoCloseable {
 
     static class ParseResult {
 
-        PackageParser.Package pkg; // Parsed package
+        ParsedPackage parsedPackage; // Parsed package
         File scanFile; // File that was parsed
         Throwable throwable; // Set if an error occurs during parsing
 
         @Override
         public String toString() {
             return "ParseResult{" +
-                    "pkg=" + pkg +
+                    "parsedPackage=" + parsedPackage +
                     ", scanFile=" + scanFile +
                     ", throwable=" + throwable +
                     '}';
@@ -100,7 +101,7 @@ class ParallelPackageParser implements AutoCloseable {
     /**
      * Submits the file for parsing
      * @param scanFile file to scan
-     * @param parseFlags parse falgs
+     * @param parseFlags parse flags
      */
     public void submit(File scanFile, int parseFlags) {
         mService.submit(() -> {
@@ -114,7 +115,7 @@ class ParallelPackageParser implements AutoCloseable {
                 pp.setCacheDir(mCacheDir);
                 pp.setCallback(mPackageParserCallback);
                 pr.scanFile = scanFile;
-                pr.pkg = parsePackage(pp, scanFile, parseFlags);
+                pr.parsedPackage = parsePackage(pp, scanFile, parseFlags);
             } catch (Throwable e) {
                 pr.throwable = e;
             } finally {
@@ -133,9 +134,9 @@ class ParallelPackageParser implements AutoCloseable {
     }
 
     @VisibleForTesting
-    protected PackageParser.Package parsePackage(PackageParser packageParser, File scanFile,
+    protected ParsedPackage parsePackage(PackageParser packageParser, File scanFile,
             int parseFlags) throws PackageParser.PackageParserException {
-        return packageParser.parsePackage(scanFile, parseFlags, true /* useCaches */);
+        return packageParser.parseParsedPackage(scanFile, parseFlags, true);
     }
 
     @Override

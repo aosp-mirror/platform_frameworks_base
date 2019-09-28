@@ -192,6 +192,15 @@ public class RuntimeInit {
         }
     }
 
+    /**
+     * Common initialization that (unlike {@link #commonInit()} should happen prior to
+     * the Zygote fork.
+     */
+    public static void preForkInit() {
+        if (DEBUG) Slog.d(TAG, "Entered preForkInit.");
+        RuntimeInit.enableDdms();
+    }
+
     @UnsupportedAppUsage
     protected static final void commonInit() {
         if (DEBUG) Slog.d(TAG, "Entered RuntimeInit!");
@@ -324,7 +333,7 @@ public class RuntimeInit {
 
     @UnsupportedAppUsage
     public static final void main(String[] argv) {
-        enableDdms();
+        preForkInit();
         if (argv.length == 2 && argv[1].equals("application")) {
             if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application");
             redirectLogStreams();
@@ -418,7 +427,7 @@ public class RuntimeInit {
     /**
      * Enable DDMS.
      */
-    static final void enableDdms() {
+    private static void enableDdms() {
         // Register handlers for DDM messages.
         android.ddm.DdmRegister.registerHandlers();
     }

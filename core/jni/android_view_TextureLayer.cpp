@@ -26,10 +26,7 @@
 #include <gui/GLConsumer.h>
 #include <hwui/Paint.h>
 
-#include <SkBitmap.h>
-#include <SkCanvas.h>
 #include <SkMatrix.h>
-#include <SkBlendMode.h>
 
 #include <DeferredLayerUpdater.h>
 #include <Rect.h>

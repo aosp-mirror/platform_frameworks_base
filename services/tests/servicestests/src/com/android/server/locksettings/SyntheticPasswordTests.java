@@ -29,6 +29,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.admin.PasswordMetrics;
 import android.os.RemoteException;
@@ -466,6 +467,18 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
                     .getResponseCode());
         // Verify token is activated
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
+    }
+
+    public void testEscrowTokenCannotBeActivatedOnUnmanagedUser() {
+        final byte[] token = "some-high-entropy-secure-token".getBytes();
+        when(mUserManagerInternal.isDeviceManaged()).thenReturn(false);
+        when(mUserManagerInternal.isUserManaged(PRIMARY_USER_ID)).thenReturn(false);
+        when(mDeviceStateCache.isDeviceProvisioned()).thenReturn(true);
+
+        try {
+            mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
+            fail("Escrow token should not be possible on unmanaged device");
+        } catch (SecurityException expected) { }
     }
 
     public void testSetLockCredentialWithTokenFailsWithoutLockScreen() throws Exception {

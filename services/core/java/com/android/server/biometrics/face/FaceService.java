@@ -930,7 +930,8 @@ public class FaceService extends BiometricServiceBase {
                     final Face face = new Face("", 0 /* identifier */, deviceId);
                     FaceService.super.handleRemoved(face, 0 /* remaining */);
                 }
-
+                Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                        Settings.Secure.FACE_UNLOCK_RE_ENROLL, 0, UserHandle.USER_CURRENT);
             });
         }
 

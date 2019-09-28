@@ -27,6 +27,7 @@ import com.android.internal.util.Preconditions;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle.Wakefulness;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -45,6 +46,7 @@ public class DozeMachine {
 
     static final String TAG = "DozeMachine";
     static final boolean DEBUG = DozeService.DEBUG;
+    private final DozeLog mDozeLog;
     private static final String REASON_CHANGE_STATE = "DozeMachine#requestState";
     private static final String REASON_HELD_FOR_STATE = "DozeMachine#heldForState";
 
@@ -121,6 +123,7 @@ public class DozeMachine {
     private final WakeLock mWakeLock;
     private final AmbientDisplayConfiguration mConfig;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final BatteryController mBatteryController;
     private Part[] mParts;
 
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
@@ -129,11 +132,14 @@ public class DozeMachine {
     private boolean mWakeLockHeldForCurrentState = false;
 
     public DozeMachine(Service service, AmbientDisplayConfiguration config,
-            WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle) {
+            WakeLock wakeLock, WakefulnessLifecycle wakefulnessLifecycle,
+            BatteryController batteryController, DozeLog dozeLog) {
         mDozeService = service;
         mConfig = config;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mWakeLock = wakeLock;
+        mBatteryController = batteryController;
+        mDozeLog = dozeLog;
     }
 
     /** Initializes the set of {@link Part}s. Must be called exactly once after construction. */
@@ -155,7 +161,7 @@ public class DozeMachine {
     @MainThread
     public void requestState(State requestedState) {
         Preconditions.checkArgument(requestedState != State.DOZE_REQUEST_PULSE);
-        requestState(requestedState, DozeLog.PULSE_REASON_NONE);
+        requestState(requestedState, DozeEvent.PULSE_REASON_NONE);
     }
 
     @MainThread
@@ -243,7 +249,7 @@ public class DozeMachine {
         State oldState = mState;
         mState = newState;
 
-        DozeLog.traceState(newState);
+        mDozeLog.traceState(newState);
         Trace.traceCounter(Trace.TRACE_TAG_APP, "doze_machine_state", newState.ordinal());
 
         updatePulseReason(newState, oldState, pulseReason);
@@ -257,7 +263,7 @@ public class DozeMachine {
         if (newState == State.DOZE_REQUEST_PULSE) {
             mPulseReason = pulseReason;
         } else if (oldState == State.DOZE_PULSE_DONE) {
-            mPulseReason = DozeLog.PULSE_REASON_NONE;
+            mPulseReason = DozeEvent.PULSE_REASON_NONE;
         }
     }
 
@@ -316,6 +322,9 @@ public class DozeMachine {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
         }
+        if (requestedState == State.DOZE_AOD && mBatteryController.isAodPowerSave()) {
+            return State.DOZE;
+        }
         if (requestedState == State.DOZE_REQUEST_PULSE && !mState.canPulse()) {
             Log.i(TAG, "Dropping pulse request because current state can't pulse: " + mState);
             return mState;
@@ -349,7 +358,7 @@ public class DozeMachine {
                     nextState = State.DOZE;
                 }
 
-                transitionTo(nextState, DozeLog.PULSE_REASON_NONE);
+                transitionTo(nextState, DozeEvent.PULSE_REASON_NONE);
                 break;
             default:
                 break;

@@ -1103,6 +1103,7 @@ class SimpleMonthView extends View {
             }
 
             node.setEnabled(isDayEnabled);
+            node.setClickable(true);
 
             if (virtualViewId == mActivatedDay) {
                 // TODO: This should use activated once that's supported.

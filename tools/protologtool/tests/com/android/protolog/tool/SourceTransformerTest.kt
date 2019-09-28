@@ -78,7 +78,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -88,7 +88,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 805272208, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 1780316587, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -100,8 +100,8 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, "test %d %f", protoLogParam0, protoLogParam1); }
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, -154595499, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -111,7 +111,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { org.example.ProtoLogImpl.w(TEST_GROUP, 1913810354, 0, "test", (Object[]) null); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { org.example.ProtoLogImpl.w(TEST_GROUP, -1741986185, 0, "test", (Object[]) null); }
                 }
             }
             """.trimIndent()
@@ -121,7 +121,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1922613844, 9, null, protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, null, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -131,7 +131,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 805272208, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 1780316587, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -175,7 +175,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test %d %f",
@@ -199,7 +200,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("1922613844", methodCall.arguments[1].toString())
+        assertEquals("1698911065", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
         assertEquals("\"test %d %f\"", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -212,7 +213,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTICALLS)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             val calls = code.findAll(MethodCallExpr::class.java)
@@ -241,7 +243,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("1922613844", methodCall.arguments[1].toString())
+        assertEquals("1698911065", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
         assertEquals("\"test %d %f\"", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -254,7 +256,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTILINE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0],
@@ -279,7 +282,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(7, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("805272208", methodCall.arguments[1].toString())
+        assertEquals("1780316587", methodCall.arguments[1].toString())
         assertEquals(0b001001.toString(), methodCall.arguments[2].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
         assertEquals("protoLogParam1", methodCall.arguments[5].toString())
@@ -292,7 +295,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_NO_PARAMS)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test",
@@ -316,7 +320,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(5, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("1913810354", methodCall.arguments[1].toString())
+        assertEquals("-1741986185", methodCall.arguments[1].toString())
         assertEquals(0.toString(), methodCall.arguments[2].toString())
         assertEquals(TRANSFORMED_CODE_NO_PARAMS, out)
     }
@@ -326,7 +330,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test %d %f",
@@ -350,7 +355,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(6, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("1922613844", methodCall.arguments[1].toString())
+        assertEquals("1698911065", methodCall.arguments[1].toString())
         assertEquals(0b1001.toString(), methodCall.arguments[2].toString())
         assertEquals("null", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -363,7 +368,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTILINE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0],
@@ -388,7 +394,7 @@ class SourceTransformerTest {
         assertEquals("w", methodCall.name.asString())
         assertEquals(7, methodCall.arguments.size)
         assertEquals("TEST_GROUP", methodCall.arguments[0].toString())
-        assertEquals("805272208", methodCall.arguments[1].toString())
+        assertEquals("1780316587", methodCall.arguments[1].toString())
         assertEquals(0b001001.toString(), methodCall.arguments[2].toString())
         assertEquals("null", methodCall.arguments[3].toString())
         assertEquals("protoLogParam0", methodCall.arguments[4].toString())
@@ -402,7 +408,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0], "test %d %f",
@@ -426,7 +433,8 @@ class SourceTransformerTest {
         var code = StaticJavaParser.parse(TEST_CODE_MULTILINE)
 
         Mockito.`when`(processor.process(any(CompilationUnit::class.java),
-                any(ProtoLogCallVisitor::class.java))).thenAnswer { invocation ->
+                any(ProtoLogCallVisitor::class.java), any(String::class.java)))
+                .thenAnswer { invocation ->
             val visitor = invocation.arguments[1] as ProtoLogCallVisitor
 
             visitor.processCall(code.findAll(MethodCallExpr::class.java)[0],

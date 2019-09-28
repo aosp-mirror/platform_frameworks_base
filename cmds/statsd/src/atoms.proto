@@ -378,7 +378,6 @@ message Atom {
         PowerProfile power_profile = 10033;
         ProcStatsPkgProc proc_stats_pkg_proc = 10034;
         ProcessCpuTime process_cpu_time = 10035;
-        NativeProcessMemoryState native_process_memory_state = 10036;
         CpuTimePerThreadFreq cpu_time_per_thread_freq = 10037;
         OnDevicePowerMeasurement on_device_power_measurement = 10038;
         DeviceCalculatedPowerUse device_calculated_power_use = 10039;
@@ -412,6 +411,8 @@ message Atom {
     // DO NOT USE field numbers above 100,000 in AOSP.
     // Field numbers 100,000 - 199,999 are reserved for non-AOSP (e.g. OEMs) to use.
     // Field numbers 200,000 and above are reserved for future use; do not use them at all.
+
+    reserved 10036;
 }
 
 /**
@@ -4019,8 +4020,8 @@ message ProcessMemoryState {
     optional int64 page_major_fault = 5;
 
     // RSS
-    // Value is read from /proc/PID/status. Or from memory.stat, field
-    // total_rss if per-app memory cgroups are enabled.
+    // Value is read from memory.stat, field total_rss if per-app memory
+    // cgroups are enabled. Otherwise, value from /proc/pid/stat.
     optional int64 rss_in_bytes = 6;
 
     // CACHE
@@ -4030,56 +4031,17 @@ message ProcessMemoryState {
 
     // SWAP
     // Value is read from memory.stat, field total_swap if per-app memory
-    // cgroups are enabled. Otherwise, VmSwap from /proc/PID/status.
+    // cgroups are enabled. Otherwise, 0.
     optional int64 swap_in_bytes = 8;
 
-    // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
+    // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always -1.
     optional int64 rss_high_watermark_in_bytes = 9 [deprecated = true];
 
-    // Elapsed real time when the process started.
-    // Value is read from /proc/PID/stat, field 22. 0 if read from per-app memory cgroups.
-    optional int64 start_time_nanos = 10;
+    // Deprecated: use ProcessMemorySnapshot atom instead. Always -1.
+    optional int64 start_time_nanos = 10 [deprecated = true];
 
-    // Anonymous page size plus swap size. Values are read from /proc/PID/status.
-    optional int32 anon_rss_and_swap_in_kilobytes = 11;
-}
-
-/*
- * Logs the memory stats for a native process (from procfs).
- *
- * Pulled from StatsCompanionService for selected native processes.
- */
-message NativeProcessMemoryState {
-    // The uid if available. -1 means not available.
-    optional int32 uid = 1 [(is_uid) = true];
-
-    // The process name.
-    // Value read from /proc/PID/cmdline.
-    optional string process_name = 2;
-
-    // # of page-faults
-    optional int64 page_fault = 3;
-
-    // # of major page-faults
-    optional int64 page_major_fault = 4;
-
-    // RSS
-    // Value read from /proc/PID/status.
-    optional int64 rss_in_bytes = 5;
-
-    // Deprecated: use ProcessMemoryHighWaterMark atom instead. Always 0.
-    optional int64 rss_high_watermark_in_bytes = 6 [deprecated = true];
-
-    // Elapsed real time when the process started.
-    // Value is read from /proc/PID/stat, field 22.
-    optional int64 start_time_nanos = 7;
-
-    // SWAP
-    // Value read from /proc/PID/status, field VmSwap.
-    optional int64 swap_in_bytes = 8;
-
-    // Anonymous page size plus swap size. Values are read from /proc/PID/status.
-    optional int32 anon_rss_and_swap_in_kilobytes = 9;
+    // Deprecated: use ProcessMemorySnapshot atom instead. Always -1.
+    optional int32 anon_rss_and_swap_in_kilobytes = 11 [deprecated = true];
 }
 
 /*

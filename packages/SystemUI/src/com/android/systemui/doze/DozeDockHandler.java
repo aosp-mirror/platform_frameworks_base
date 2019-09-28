@@ -82,7 +82,7 @@ public class DozeDockHandler implements DozeMachine.Part {
 
     private void requestPulse(State dozeState) {
         if (!mDozeHost.isPulsingBlocked() && dozeState.canPulse()) {
-            mMachine.requestPulse(DozeLog.PULSE_REASON_DOCKING);
+            mMachine.requestPulse(DozeEvent.PULSE_REASON_DOCKING);
         }
         mPulsePending = false;
     }
@@ -91,7 +91,7 @@ public class DozeDockHandler implements DozeMachine.Part {
         if (dozeState == State.DOZE_REQUEST_PULSE || dozeState == State.DOZE_PULSING
                 || dozeState == State.DOZE_PULSING_BRIGHT) {
             final int pulseReason = mMachine.getPulseReason();
-            if (pulseReason == DozeLog.PULSE_REASON_DOCKING) {
+            if (pulseReason == DozeEvent.PULSE_REASON_DOCKING) {
                 mDozeHost.stopPulsing();
             }
         }

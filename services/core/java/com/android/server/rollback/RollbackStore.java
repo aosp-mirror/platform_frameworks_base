@@ -253,7 +253,7 @@ class RollbackStore {
      * Saves the given rollback to persistent storage.
      */
     @GuardedBy("rollback.getLock")
-    void saveRollback(Rollback rollback) throws IOException {
+    static void saveRollback(Rollback rollback) {
         try {
             JSONObject dataJson = new JSONObject();
             dataJson.put("info", rollbackInfoToJson(rollback.info));
@@ -266,15 +266,15 @@ class RollbackStore {
             PrintWriter pw = new PrintWriter(new File(rollback.getBackupDir(), "rollback.json"));
             pw.println(dataJson.toString());
             pw.close();
-        } catch (JSONException e) {
-            throw new IOException(e);
+        } catch (JSONException | IOException e) {
+            Slog.e(TAG, "Unable to save rollback for: " + rollback.info.getRollbackId(), e);
         }
     }
 
     /**
      * Removes all persistent storage associated with the given rollback.
      */
-    void deleteRollback(Rollback rollback) {
+    static void deleteRollback(Rollback rollback) {
         removeFile(rollback.getBackupDir());
     }
 

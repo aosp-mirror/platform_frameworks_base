@@ -55,40 +55,40 @@ class CodeUtilsTest {
                 LogLevel.DEBUG, LogGroup("test2", true, true, "TAG")))
     }
 
-    @Test
-    fun isWildcardStaticImported_true() {
+    @Test(expected = IllegalImportException::class)
+    fun checkWildcardStaticImported_true() {
         val code = """package org.example.test;
             import static org.example.Test.*;
         """
-        assertTrue(CodeUtils.isWildcardStaticImported(
-                StaticJavaParser.parse(code), "org.example.Test"))
+        CodeUtils.checkWildcardStaticImported(
+                StaticJavaParser.parse(code), "org.example.Test", "")
     }
 
     @Test
-    fun isWildcardStaticImported_notStatic() {
+    fun checkWildcardStaticImported_notStatic() {
         val code = """package org.example.test;
             import org.example.Test.*;
         """
-        assertFalse(CodeUtils.isWildcardStaticImported(
-                StaticJavaParser.parse(code), "org.example.Test"))
+        CodeUtils.checkWildcardStaticImported(
+                StaticJavaParser.parse(code), "org.example.Test", "")
     }
 
     @Test
-    fun isWildcardStaticImported_differentClass() {
+    fun checkWildcardStaticImported_differentClass() {
         val code = """package org.example.test;
             import static org.example.Test2.*;
         """
-        assertFalse(CodeUtils.isWildcardStaticImported(
-                StaticJavaParser.parse(code), "org.example.Test"))
+        CodeUtils.checkWildcardStaticImported(
+                StaticJavaParser.parse(code), "org.example.Test", "")
     }
 
     @Test
-    fun isWildcardStaticImported_notWildcard() {
+    fun checkWildcardStaticImported_notWildcard() {
         val code = """package org.example.test;
             import org.example.Test.test;
         """
-        assertFalse(CodeUtils.isWildcardStaticImported(
-                StaticJavaParser.parse(code), "org.example.Test"))
+        CodeUtils.checkWildcardStaticImported(
+                StaticJavaParser.parse(code), "org.example.Test", "")
     }
 
     @Test
@@ -156,7 +156,7 @@ class CodeUtilsTest {
     @Test
     fun concatMultilineString_single() {
         val str = StringLiteralExpr("test")
-        val out = CodeUtils.concatMultilineString(str)
+        val out = CodeUtils.concatMultilineString(str, ParsingContext())
         assertEquals("test", out)
     }
 
@@ -166,7 +166,7 @@ class CodeUtilsTest {
             "test" + "abc"
         """
         val code = StaticJavaParser.parseExpression<BinaryExpr>(str)
-        val out = CodeUtils.concatMultilineString(code)
+        val out = CodeUtils.concatMultilineString(code, ParsingContext())
         assertEquals("testabc", out)
     }
 
@@ -176,7 +176,7 @@ class CodeUtilsTest {
             "test" + "abc" + "1234" + "test"
         """
         val code = StaticJavaParser.parseExpression<BinaryExpr>(str)
-        val out = CodeUtils.concatMultilineString(code)
+        val out = CodeUtils.concatMultilineString(code, ParsingContext())
         assertEquals("testabc1234test", out)
     }
 }

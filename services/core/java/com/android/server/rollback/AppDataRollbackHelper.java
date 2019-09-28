@@ -78,7 +78,6 @@ public class AppDataRollbackHelper {
                         + packageRollbackInfo.getPackageName() + ", userId: " + user, ie);
             }
         }
-        packageRollbackInfo.getSnapshottedUsers().addAll(IntArray.wrap(userIds));
     }
 
     /**

@@ -86,10 +86,20 @@ public abstract class UserManagerInternal {
     public abstract void setDeviceManaged(boolean isManaged);
 
     /**
+     * Returns whether the device is managed by device owner.
+     */
+    public abstract boolean isDeviceManaged();
+
+    /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to update
      * whether the user is managed by profile owner.
      */
     public abstract void setUserManaged(int userId, boolean isManaged);
+
+    /**
+     * whether a profile owner manages this user.
+     */
+    public abstract boolean isUserManaged(int userId);
 
     /**
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to omit

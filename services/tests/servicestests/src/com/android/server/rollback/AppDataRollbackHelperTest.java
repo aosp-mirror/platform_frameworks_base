@@ -16,7 +16,6 @@
 
 package com.android.server.rollback;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -270,16 +269,5 @@ public class AppDataRollbackHelperTest {
         assertNull(pendingRestore.getRestoreInfo(37));
 
         inOrder.verifyNoMoreInteractions();
-    }
-
-    @Test
-    public void snapshotAddDataSavesSnapshottedUsersToInfo() {
-        Installer installer = mock(Installer.class);
-        AppDataRollbackHelper helper = new AppDataRollbackHelper(installer);
-
-        PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
-        helper.snapshotAppData(5, info, new int[]{10, 11});
-
-        assertArrayEquals(info.getSnapshottedUsers().toArray(), new int[]{10, 11});
     }
 }

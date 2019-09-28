@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone
 
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.FrameLayout
 import com.android.systemui.plugins.NPVPlugin
 import com.android.systemui.plugins.PluginListener
@@ -36,6 +37,7 @@ class NPVPluginManager(
 
     private var plugin: NPVPlugin? = null
     private var animator = createAnimator()
+    private var yOffset = 0f
 
     private fun createAnimator() = TouchAnimator.Builder()
             .addFloat(parent, "alpha", 1f, 0f)
@@ -76,7 +78,7 @@ class NPVPluginManager(
     }
 
     fun setExpansion(expansion: Float, headerTranslation: Float, heightDiff: Float) {
-        parent.setTranslationY(expansion * heightDiff + headerTranslation)
+        parent.setTranslationY(expansion * heightDiff + headerTranslation + yOffset)
         if (!expansion.isNaN()) animator.setPosition(expansion)
     }
 
@@ -88,5 +90,13 @@ class NPVPluginManager(
         animator = createAnimator()
     }
 
-    fun getHeight() = if (plugin != null) parent.height else 0
+    fun getHeight() =
+        if (plugin != null) {
+            parent.height + (parent.getLayoutParams() as MarginLayoutParams).topMargin
+        } else 0
+
+    fun setYOffset(y: Float) {
+        yOffset = y
+        parent.setTranslationY(yOffset)
+    }
 }

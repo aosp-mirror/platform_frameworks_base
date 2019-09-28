@@ -143,7 +143,7 @@ public class IndexableProcessor extends AbstractProcessor {
 
         final TypeSpec baseClass = TypeSpec.classBuilder(CLASS_BASE)
                 .addModifiers(Modifier.PUBLIC)
-                .addSuperinterface(ClassName.get(SearchIndexableResources.class))
+                .addSuperinterface(ClassName.get(PACKAGE, "SearchIndexableResources"))
                 .addField(providers)
                 .addMethod(baseConstructorBuilder.build())
                 .addMethod(addIndex)

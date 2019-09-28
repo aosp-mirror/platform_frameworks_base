@@ -21,6 +21,8 @@
     <!-- Read and write traces from external storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Write secure settings -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <!-- Capture screen contents -->
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
     <!-- Enable / Disable tracing !-->

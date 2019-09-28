@@ -18,7 +18,6 @@ package android.app;
 
 import android.compat.Compatibility;
 import android.os.Process;
-import android.util.Log;
 import android.util.StatsLog;
 
 import com.android.internal.compat.ChangeReporter;
@@ -31,8 +30,6 @@ import java.util.Arrays;
  * @hide
  */
 public final class AppCompatCallbacks extends Compatibility.Callbacks {
-    private static final String TAG = "Compatibility";
-
     private final long[] mDisabledChanges;
     private final ChangeReporter mChangeReporter;
 
@@ -48,7 +45,8 @@ public final class AppCompatCallbacks extends Compatibility.Callbacks {
     private AppCompatCallbacks(long[] disabledChanges) {
         mDisabledChanges = Arrays.copyOf(disabledChanges, disabledChanges.length);
         Arrays.sort(mDisabledChanges);
-        mChangeReporter = new ChangeReporter();
+        mChangeReporter = new ChangeReporter(
+                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS);
     }
 
     protected void reportChange(long changeId) {
@@ -67,10 +65,7 @@ public final class AppCompatCallbacks extends Compatibility.Callbacks {
 
     private void reportChange(long changeId, int state) {
         int uid = Process.myUid();
-        //TODO(b/138374585): Implement rate limiting for the logs.
-        Log.d(TAG, ChangeReporter.createLogString(uid, changeId, state));
-        mChangeReporter.reportChange(uid, changeId,
-                state, /* source */StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS);
+        mChangeReporter.reportChange(uid, changeId, state);
     }
 
 }

@@ -64,7 +64,13 @@ public class DisplayWhiteBalanceController implements
     AmbientFilter mColorTemperatureFilter;
     private DisplayWhiteBalanceThrottler mThrottler;
 
+    // In low brightness conditions the ALS readings are more noisy and produce
+    // high errors. This default is introduced to provide a fixed display color
+    // temperature when sensor readings become unreliable.
     private final float mLowLightAmbientColorTemperature;
+    // In high brightness conditions certain color temperatures can cause peak display
+    // brightness to drop. This fixed color temperature can be used to compensate for
+    // this effect.
     private final float mHighLightAmbientColorTemperature;
 
     private float mAmbientColorTemperature;
@@ -85,12 +91,14 @@ public class DisplayWhiteBalanceController implements
     // A piecewise linear relationship between ambient and display color temperatures.
     private Spline.LinearSpline mAmbientToDisplayColorTemperatureSpline;
 
-    // In very low or very high brightness conditions ambient EQ should to set to a default
-    // instead of using mAmbientToDisplayColorTemperatureSpline. However, setting ambient EQ
-    // based on thresholds can cause the display to rapidly change color temperature. To solve
-    // this, mLowLightAmbientBrightnessToBiasSpline and mHighLightAmbientBrightnessToBiasSpline
-    // are used to smoothly interpolate from ambient color temperature to the defaults.
-    // A piecewise linear relationship between low light brightness and low light bias.
+    // In very low or very high brightness conditions Display White Balance should
+    // be to set to a default instead of using mAmbientToDisplayColorTemperatureSpline.
+    // However, setting Display White Balance based on thresholds can cause the
+    // display to rapidly change color temperature. To solve this,
+    // mLowLightAmbientBrightnessToBiasSpline and
+    // mHighLightAmbientBrightnessToBiasSpline are used to smoothly interpolate from
+    // ambient color temperature to the defaults. A piecewise linear relationship
+    // between low light brightness and low light bias.
     private Spline.LinearSpline mLowLightAmbientBrightnessToBiasSpline;
 
     // A piecewise linear relationship between high light brightness and high light bias.

@@ -141,7 +141,6 @@ import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.signedconfig.SignedConfigService;
 import com.android.server.soundtrigger.SoundTriggerService;
-import com.android.server.stats.StatsCompanionService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
@@ -202,6 +201,8 @@ public final class SystemServer {
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
             "com.android.server.companion.CompanionDeviceManagerService";
+    private static final String STATS_COMPANION_SERVICE_LIFECYCLE_CLASS =
+            "com.android.server.stats.StatsCompanionService$Lifecycle";
     private static final String USB_SERVICE_CLASS =
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
@@ -1875,7 +1876,7 @@ public final class SystemServer {
 
         // Statsd helper
         t.traceBegin("StartStatsCompanionService");
-        mSystemServiceManager.startService(StatsCompanionService.Lifecycle.class);
+        mSystemServiceManager.startService(STATS_COMPANION_SERVICE_LIFECYCLE_CLASS);
         t.traceEnd();
 
         // Incidentd and dumpstated helper

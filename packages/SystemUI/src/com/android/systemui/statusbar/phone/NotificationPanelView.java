@@ -68,6 +68,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.FalsingManager;
@@ -459,8 +460,9 @@ public class NotificationPanelView extends PanelView implements
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController,
             FalsingManager falsingManager,
-            PluginManager pluginManager) {
-        super(context, attrs);
+            PluginManager pluginManager,
+            DozeLog dozeLog) {
+        super(context, attrs, falsingManager, dozeLog);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;
@@ -652,8 +654,7 @@ public class NotificationPanelView extends PanelView implements
             mNotificationStackScroller.setLayoutParams(lp);
         }
         int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
-        int topMargin =
-                res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
+        int topMargin = sideMargin;
         lp = (FrameLayout.LayoutParams) mPluginFrame.getLayoutParams();
         if (lp.width != qsWidth || lp.gravity != panelGravity || lp.leftMargin != sideMargin
                 || lp.rightMargin != sideMargin || lp.topMargin != topMargin) {
@@ -796,6 +797,7 @@ public class NotificationPanelView extends PanelView implements
         int oldMaxHeight = mQsMaxExpansionHeight;
         if (mQs != null) {
             mQsMinExpansionHeight = mKeyguardShowing ? 0 : mQs.getQsMinExpansionHeight();
+            mNPVPluginManager.setYOffset(mQsMinExpansionHeight);
             mQsMinExpansionHeight += mNPVPluginManager.getHeight();
             mQsMaxExpansionHeight = mQs.getDesiredHeight();
             mNotificationStackScroller.setMaxTopPadding(

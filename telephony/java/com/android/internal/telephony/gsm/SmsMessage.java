@@ -1496,7 +1496,7 @@ public class SmsMessage extends SmsMessageBase {
      *
      * @return true if this is a USIM data download message; false otherwise
      */
-    public boolean isUsimDataDownload() {
+    boolean isUsimDataDownload() {
         return messageClass == MessageClass.CLASS_2 &&
                 (mProtocolIdentifier == 0x7f || mProtocolIdentifier == 0x7c);
     }

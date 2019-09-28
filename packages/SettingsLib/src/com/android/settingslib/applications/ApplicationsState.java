@@ -865,6 +865,10 @@ public class ApplicationsState {
         void handleRebuildList() {
             AppFilter filter;
             Comparator<AppEntry> comparator;
+
+            if (!mResumed) {
+                return;
+            }
             synchronized (mRebuildSync) {
                 if (!mRebuildRequested) {
                     return;
@@ -1069,8 +1073,8 @@ public class ApplicationsState {
                 }
             }
             if (rebuildingSessions != null) {
-                for (int i = 0; i < rebuildingSessions.size(); i++) {
-                    rebuildingSessions.get(i).handleRebuildList();
+                for (Session session : rebuildingSessions) {
+                    session.handleRebuildList();
                 }
             }
 

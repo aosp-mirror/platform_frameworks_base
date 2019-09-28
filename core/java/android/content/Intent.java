@@ -10004,11 +10004,23 @@ public class Intent implements Parcelable, Cloneable {
         if (!Objects.equals(this.mData, other.mData)) return false;
         if (!Objects.equals(this.mType, other.mType)) return false;
         if (!Objects.equals(this.mIdentifier, other.mIdentifier)) return false;
-        if (!Objects.equals(this.mPackage, other.mPackage)) return false;
+        if (!(this.hasPackageEquivalentComponent() && other.hasPackageEquivalentComponent())
+                && !Objects.equals(this.mPackage, other.mPackage)) {
+            return false;
+        }
         if (!Objects.equals(this.mComponent, other.mComponent)) return false;
         if (!Objects.equals(this.mCategories, other.mCategories)) return false;
 
         return true;
+    }
+
+    /**
+     * Return {@code true} if the component name is not null and is in the same package that this
+     * intent limited to. otherwise return {@code false}.
+     */
+    private boolean hasPackageEquivalentComponent() {
+        return mComponent != null
+            && (mPackage == null || mPackage.equals(mComponent.getPackageName()));
     }
 
     /**

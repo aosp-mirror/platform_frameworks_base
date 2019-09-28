@@ -26,7 +26,7 @@ public class ThreadUtils {
 
     private static volatile Thread sMainThread;
     private static volatile Handler sMainThreadHandler;
-    private static volatile ExecutorService sSingleThreadExecutor;
+    private static volatile ExecutorService sThreadExecutor;
 
     /**
      * Returns true if the current thread is the UI thread.
@@ -64,10 +64,11 @@ public class ThreadUtils {
      * @Return A future of the task that can be monitored for updates or cancelled.
      */
     public static Future postOnBackgroundThread(Runnable runnable) {
-        if (sSingleThreadExecutor == null) {
-            sSingleThreadExecutor = Executors.newSingleThreadExecutor();
+        if (sThreadExecutor == null) {
+            sThreadExecutor = Executors.newFixedThreadPool(
+                    Runtime.getRuntime().availableProcessors());
         }
-        return sSingleThreadExecutor.submit(runnable);
+        return sThreadExecutor.submit(runnable);
     }
 
     /**
