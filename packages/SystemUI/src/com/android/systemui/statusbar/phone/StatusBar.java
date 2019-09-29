@@ -396,6 +396,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     boolean mAllowNotificationLongPress;
     @Inject
     protected NotifPipelineInitializer mNotifPipelineInitializer;
+    @Inject
+    protected FalsingManager mFalsingManager;
 
     @VisibleForTesting
     BroadcastDispatcher mBroadcastDispatcher;
@@ -587,7 +589,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
     private boolean mNoAnimationOnNextBarModeChange;
-    protected FalsingManager mFalsingManager;
     private final SysuiStatusBarStateController mStatusBarStateController =
             (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
 
@@ -719,7 +720,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mRecents = getComponent(Recents.class);
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mFalsingManager = Dependency.get(FalsingManager.class);
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -2448,7 +2448,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mKeyguardUpdateMonitor.dump(fd, pw, args);
         }
 
-        Dependency.get(FalsingManager.class).dump(pw);
+        mFalsingManager.dump(pw);
         FalsingLog.dump(pw);
 
         pw.println("SharedPreferences:");

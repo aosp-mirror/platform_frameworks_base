@@ -41,6 +41,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -130,9 +131,13 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(),
                         mKeyguardBypassController);
-        PulseExpansionHandler expansionHandler = new PulseExpansionHandler(mContext, coordinator,
+        PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
+                mContext,
+                coordinator,
                 mKeyguardBypassController, mHeadsUpManager,
-                mock(NotificationRoundnessManager.class), mStatusBarStateController);
+                mock(NotificationRoundnessManager.class),
+                mStatusBarStateController,
+                new FalsingManagerFake());
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
                 mKeyguardBypassController);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);

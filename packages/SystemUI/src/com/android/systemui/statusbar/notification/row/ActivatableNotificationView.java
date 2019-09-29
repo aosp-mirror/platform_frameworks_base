@@ -180,6 +180,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         initDimens();
     }
 
+    public FalsingManager getFalsingManager() {
+        return mFalsingManager;
+    }
+
     private void updateColors() {
         mNormalColor = mContext.getColor(R.color.notification_material_background_color);
         mTintedRippleColor = mContext.getColor(
