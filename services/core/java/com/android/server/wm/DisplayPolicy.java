@@ -98,9 +98,9 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_SHOW;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -168,7 +168,6 @@ import com.android.server.policy.WindowManagerPolicy.NavigationBarPosition;
 import com.android.server.policy.WindowManagerPolicy.ScreenOnListener;
 import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 import com.android.server.policy.WindowOrientationListener;
-import com.android.server.protolog.common.ProtoLog;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wallpaper.WallpaperManagerInternal;
 import com.android.server.wm.utils.InsetUtils;
@@ -766,19 +765,19 @@ public class DisplayPolicy {
     /** Return false if it is not ready to turn on. */
     public boolean finishScreenTurningOn() {
         synchronized (mLock) {
-            ProtoLog.d(WM_DEBUG_SCREEN_ON,
-                            "finishScreenTurningOn: mAwake=%b, mScreenOnEarly=%b, "
-                                    + "mScreenOnFully=%b, mKeyguardDrawComplete=%b, "
-                                    + "mWindowManagerDrawComplete=%b",
-                            mAwake, mScreenOnEarly, mScreenOnFully, mKeyguardDrawComplete,
-                            mWindowManagerDrawComplete);
+            if (DEBUG_SCREEN_ON) Slog.d(TAG,
+                    "finishScreenTurningOn: mAwake=" + mAwake
+                            + ", mScreenOnEarly=" + mScreenOnEarly
+                            + ", mScreenOnFully=" + mScreenOnFully
+                            + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
+                            + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
 
             if (mScreenOnFully || !mScreenOnEarly || !mWindowManagerDrawComplete
                     || (mAwake && !mKeyguardDrawComplete)) {
                 return false;
             }
 
-            ProtoLog.i(WM_DEBUG_SCREEN_ON, "Finished screen turning on...");
+            if (DEBUG_SCREEN_ON) Slog.i(TAG, "Finished screen turning on...");
             mScreenOnListener = null;
             mScreenOnFully = true;
         }

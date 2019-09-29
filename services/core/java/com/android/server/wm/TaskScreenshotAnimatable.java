@@ -15,14 +15,13 @@
  */
 package com.android.server.wm;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
 
 import android.graphics.GraphicBuffer;
+import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-
-import com.android.server.protolog.common.ProtoLog;
 
 import java.util.function.Function;
 
@@ -46,9 +45,10 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
         mTask = task;
         mWidth = (buffer != null) ? buffer.getWidth() : 1;
         mHeight = (buffer != null) ? buffer.getHeight() : 1;
-        ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                "Creating TaskScreenshotAnimatable: task: %s width: %d height: %d",
-                        task, mWidth, mHeight);
+        if (DEBUG_RECENTS_ANIMATIONS) {
+            Slog.d(TAG, "Creating TaskScreenshotAnimatable: task: " + task
+                    + "width: " + mWidth + "height: " + mHeight);
+        }
         mSurfaceControl = surfaceControlFactory.apply(new SurfaceSession())
                 .setName("RecentTaskScreenshotSurface")
                 .setBufferSize(mWidth, mHeight)

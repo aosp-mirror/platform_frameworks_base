@@ -19,10 +19,10 @@ package com.android.server.wm;
 import static com.android.server.wm.DragDropController.MSG_ANIMATION_END;
 import static com.android.server.wm.DragDropController.MSG_DRAG_END_TIMEOUT;
 import static com.android.server.wm.DragDropController.MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.animation.Animator;
@@ -58,7 +58,6 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.util.ArrayList;
 
@@ -301,7 +300,9 @@ class DragState {
             mDragWindowHandle.frameBottom = mDisplaySize.y;
 
             // Pause rotations before a drag.
-            ProtoLog.d(WM_DEBUG_ORIENTATION, "Pausing rotation during drag");
+            if (DEBUG_ORIENTATION) {
+                Slog.d(TAG_WM, "Pausing rotation during drag");
+            }
             mDisplayContent.getDisplayRotation().pause();
         }
 
@@ -318,7 +319,9 @@ class DragState {
             mDragApplicationHandle = null;
 
             // Resume rotations after a drag.
-            ProtoLog.d(WM_DEBUG_ORIENTATION, "Resuming rotation after drag");
+            if (DEBUG_ORIENTATION) {
+                Slog.d(TAG_WM, "Resuming rotation after drag");
+            }
             mDisplayContent.getDisplayRotation().resume();
         }
     }
@@ -496,9 +499,10 @@ class DragState {
             Slog.i(TAG_WM, ">>> OPEN TRANSACTION notifyMoveLocked");
         }
         mTransaction.setPosition(mSurfaceControl, x - mThumbOffsetX, y - mThumbOffsetY).apply();
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "DRAG %s: pos=(%d,%d)", mSurfaceControl,
-                (int) (x - mThumbOffsetX), (int) (y - mThumbOffsetY));
-
+        if (SHOW_TRANSACTIONS) {
+            Slog.i(TAG_WM, "  DRAG " + mSurfaceControl + ": pos=(" + (int) (x - mThumbOffsetX) + ","
+                    + (int) (y - mThumbOffsetY) + ")");
+        }
         notifyLocationLocked(x, y);
     }
 

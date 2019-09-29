@@ -22,7 +22,7 @@ import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
 import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
@@ -31,6 +31,7 @@ import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Binder;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -38,7 +39,6 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 
-import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 
 import java.util.function.Supplier;
@@ -104,7 +104,9 @@ class AppWindowThumbnail implements Animatable {
                         window != null ? window.mOwnerUid : Binder.getCallingUid())
                 .build();
 
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "  THUMBNAIL %s: CREATE", mSurfaceControl);
+        if (SHOW_TRANSACTIONS) {
+            Slog.i(TAG, "  THUMBNAIL " + mSurfaceControl + ": CREATE");
+        }
 
         // Transfer the thumbnail to the surface
         drawSurface.copyFrom(mSurfaceControl);
