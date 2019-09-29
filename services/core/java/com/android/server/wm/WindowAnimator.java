@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
@@ -33,7 +33,6 @@ import android.view.SurfaceControl;
 
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -148,7 +147,7 @@ public class WindowAnimator {
                 Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
             }
 
-            ProtoLog.i(WM_SHOW_TRANSACTIONS, ">>> OPEN TRANSACTION animate");
+            if (SHOW_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION animate");
             mService.openSurfaceTransaction();
             try {
                 final AccessibilityController accessibilityController =
@@ -214,7 +213,7 @@ public class WindowAnimator {
                 Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
             } finally {
                 mService.closeSurfaceTransaction("WindowAnimator");
-                ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
+                if (SHOW_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION animate");
             }
 
             boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);

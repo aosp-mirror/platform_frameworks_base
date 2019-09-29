@@ -100,21 +100,24 @@ import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.STACKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
@@ -130,6 +133,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIG
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
+import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.EXCLUSION_LEFT;
 import static com.android.server.wm.WindowState.EXCLUSION_RIGHT;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
@@ -198,7 +202,6 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -597,8 +600,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final ToBooleanFunction<WindowState> mFindFocusedWindow = w -> {
         final AppWindowToken focusedApp = mFocusedApp;
-        ProtoLog.v(WM_DEBUG_FOCUS, "Looking for focus: %s, flags=%d, canReceive=%b",
-                w, w.mAttrs.flags, w.canReceiveKeys());
+        if (DEBUG_FOCUS) Slog.v(TAG_WM, "Looking for focus: " + w
+                + ", flags=" + w.mAttrs.flags + ", canReceive=" + w.canReceiveKeys());
 
         if (!w.canReceiveKeys()) {
             return false;
@@ -608,22 +611,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // If this window's application has been removed, just skip it.
         if (wtoken != null && (wtoken.removed || wtoken.sendingToBottom)) {
-            ProtoLog.v(WM_DEBUG_FOCUS, "Skipping %s because %s", wtoken,
-                    (wtoken.removed ? "removed" : "sendingToBottom"));
+            if (DEBUG_FOCUS) Slog.v(TAG_WM, "Skipping " + wtoken + " because "
+                    + (wtoken.removed ? "removed" : "sendingToBottom"));
             return false;
         }
 
         if (focusedApp == null) {
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT,
-                    "findFocusedWindow: focusedApp=null using new focus @ %s", w);
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: focusedApp=null"
+                    + " using new focus @ " + w);
             mTmpWindow = w;
             return true;
         }
 
         if (!focusedApp.windowsAreFocusable()) {
             // Current focused app windows aren't focusable...
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: focusedApp windows not"
-                    + " focusable using new focus @ %s", w);
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: focusedApp windows not"
+                    + " focusable using new focus @ " + w);
             mTmpWindow = w;
             return true;
         }
@@ -633,14 +636,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (wtoken != null && w.mAttrs.type != TYPE_APPLICATION_STARTING) {
             if (focusedApp.compareTo(wtoken) > 0) {
                 // App stack below focused app stack. No focus for you!!!
-                ProtoLog.v(WM_DEBUG_FOCUS_LIGHT,
-                        "findFocusedWindow: Reached focused app=%s", focusedApp);
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM,
+                        "findFocusedWindow: Reached focused app=" + focusedApp);
                 mTmpWindow = null;
                 return true;
             }
         }
 
-        ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: Found new focus @ %s", w);
+        if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: Found new focus @ " + w);
         mTmpWindow = w;
         return true;
     };
@@ -1331,7 +1334,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         forAllWindows(w -> {
             if (w.mHasSurface && !rotateSeamlessly) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Set mOrientationChanging of " + w);
                 w.setOrientationChanging(true);
                 mWmService.mRoot.mOrientationChangeComplete = false;
                 w.mLastFreezeDuration = 0;
@@ -1995,9 +1998,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (mWmService.mDisplayFrozen) {
             if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Display id=%d is frozen, return %d", mDisplayId,
-                                mLastWindowForcedOrientation);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
+                        + " is frozen, return " + mLastWindowForcedOrientation);
                 // If the display is frozen, some activities may be in the middle of restarting, and
                 // thus have removed their old window. If the window has the flag to hide the lock
                 // screen, then the lock screen can re-appear and inflict its own orientation on us.
@@ -2009,9 +2011,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // window. We don't want to check the show when locked window directly though as
                 // things aren't stable while the display is frozen, for example the window could be
                 // momentarily unavailable due to activity relaunch.
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Display id=%d is frozen while keyguard locked, return %d",
-                                mDisplayId, getLastOrientation());
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
+                        + " is frozen while keyguard locked, return " + getLastOrientation());
                 return getLastOrientation();
             }
         } else {
@@ -2850,7 +2851,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(mFindFocusedWindow, true /* traverseTopToBottom */);
 
         if (mTmpWindow == null) {
-            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "findFocusedWindow: No focusable windows.");
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "findFocusedWindow: No focusable windows.");
             return null;
         }
         return mTmpWindow;
@@ -2896,8 +2897,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWmService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
         }
 
-        ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Changing focus from %s to %s displayId=%d Callers=%s",
-                    mCurrentFocus, newFocus, getDisplayId(), Debug.getCallers(4));
+        if (DEBUG_FOCUS_LIGHT || DEBUG) {
+            Slog.v(TAG_WM, "Changing focus from "
+                    + mCurrentFocus + " to " + newFocus + " displayId=" + getDisplayId()
+                    + " Callers=" + Debug.getCallers(4));
+        }
         final WindowState oldFocus = mCurrentFocus;
         mCurrentFocus = newFocus;
         mLosingFocus.remove(newFocus);
@@ -3034,7 +3038,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
                         + w + " surface=" + wsa.mSurfaceController
                         + " token=" + w.mAppToken);
-                ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE LEAK DESTROY: %s", w);
+                if (SHOW_TRANSACTIONS) logSurface(w, "LEAK DESTROY", false);
                 wsa.destroySurface();
                 mTmpWindow = w;
             }
@@ -3368,11 +3372,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         com.android.internal.R.bool.config_checkWallpaperAtBoot)
                 && !mWmService.mOnlyCore;
 
-        ProtoLog.i(WM_DEBUG_SCREEN_ON,
-                        "******** booted=%b msg=%b haveBoot=%b haveApp=%b haveWall=%b "
-                                + "wallEnabled=%b haveKeyguard=%b",
-                        mWmService.mSystemBooted, mWmService.mShowingBootMessages, mHaveBootMsg,
-                        mHaveApp, mHaveWallpaper, wallpaperEnabled, mHaveKeyguard);
+        if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG_WM,
+                "******** booted=" + mWmService.mSystemBooted
+                + " msg=" + mWmService.mShowingBootMessages
+                + " haveBoot=" + mHaveBootMsg + " haveApp=" + mHaveApp
+                + " haveWall=" + mHaveWallpaper + " wallEnabled=" + wallpaperEnabled
+                + " haveKeyguard=" + mHaveKeyguard);
 
         // If we are turning on the screen to show the boot message, don't do it until the boot
         // message is actually displayed.
@@ -4209,8 +4214,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         // associated with it will be removed as soon as their animations are
                         // complete.
                         cancelAnimation();
-                        ProtoLog.v(WM_DEBUG_ADD_REMOVE,
-                                "performLayout: App token exiting now removed %s", token);
+                        if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
+                                "performLayout: App token exiting now removed" + token);
                         token.removeIfPossible();
                     }
                 }
@@ -4240,15 +4245,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             final int orientation = super.getOrientation();
             if (orientation != SCREEN_ORIENTATION_UNSET
                     && orientation != SCREEN_ORIENTATION_BEHIND) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                                "App is requesting an orientation, return %d for display id=%d",
-                                orientation, mDisplayId);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                        "App is requesting an orientation, return " + orientation
+                                + " for display id=" + mDisplayId);
                 return orientation;
             }
 
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                            "No app is requesting an orientation, return %d for display id=%d",
-                            getLastOrientation(), mDisplayId);
+            if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                    "No app is requesting an orientation, return " + getLastOrientation()
+                            + " for display id=" + mDisplayId);
             // The next app has not been requested to be visible, so we keep the current orientation
             // to prevent freezing/unfreezing the display too early.
             return getLastOrientation();
@@ -4485,9 +4490,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         return SCREEN_ORIENTATION_UNSET;
                     }
                 }
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "%s forcing orientation to %d for display id=%d", win, req,
-                                mDisplayId);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req
+                        + " for display id=" + mDisplayId);
                 return (mLastWindowForcedOrientation = req);
             }
 
@@ -4755,9 +4759,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void executeAppTransition() {
         if (mAppTransition.isTransitionSet()) {
-            ProtoLog.w(WM_DEBUG_APP_TRANSITIONS,
-                    "Execute app transition: %s, displayId: %d Callers=%s",
-                        mAppTransition, mDisplayId, Debug.getCallers(5));
+            if (DEBUG_APP_TRANSITIONS) {
+                Slog.w(TAG_WM, "Execute app transition: " + mAppTransition + ", displayId: "
+                        + mDisplayId + " Callers=" + Debug.getCallers(5));
+            }
             mAppTransition.setReady();
             mWmService.mWindowPlacerLocked.requestTraversal();
         }

@@ -27,38 +27,8 @@ import com.android.server.protolog.common.ProtoLog;
  * must be included in services.core.wm.protologgroups build target.
  */
 public enum ProtoLogGroup implements IProtoLogGroup {
-    WM_ERROR(true, true, true, Consts.TAG_WM),
-    WM_DEBUG_ORIENTATION(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
-            Consts.TAG_WM),
-    WM_DEBUG_FOCUS_LIGHT(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_BOOT(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_RESIZE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_ADD_REMOVE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_FOCUS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
-    WM_DEBUG_STARTING_WINDOW(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_SHOW_TRANSACTIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_SHOW_SURFACE_ALLOC(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_APP_TRANSITIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_APP_TRANSITIONS_ANIM(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_RECENTS_ANIMATIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_DRAW(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
-    WM_DEBUG_REMOTE_ANIMATIONS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_SCREEN_ON(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false, Consts.TAG_WM),
-    WM_DEBUG_KEEP_SCREEN_ON(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
-    WM_DEBUG_WINDOW_MOVEMENT(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
-            Consts.TAG_WM),
+    GENERIC_WM(true, true, false, "WindowManager"),
+
     TEST_GROUP(true, true, false, "WindowManagetProtoLogTest");
 
     private final boolean mEnabled;
@@ -124,12 +94,5 @@ public enum ProtoLogGroup implements IProtoLogGroup {
         ProtoLog.e(ProtoLogGroup.TEST_GROUP,
                 "Test completed successfully: %b %d %o %x %e %g %f %% %s.",
                 true, 1, 2, 3, 0.4, 0.5, 0.6, "ok");
-    }
-
-    private static class Consts {
-        private static final String TAG_WM = "WindowManager";
-
-        private static final boolean ENABLE_DEBUG = true;
-        private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;
     }
 }

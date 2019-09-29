@@ -21,7 +21,7 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_FREEFORM;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -54,7 +54,6 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -298,7 +297,9 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDragWindowHandle.frameBottom = p.y;
 
         // Pause rotations before a drag.
-        ProtoLog.d(WM_DEBUG_ORIENTATION, "Pausing rotation during re-position");
+        if (DEBUG_ORIENTATION) {
+            Slog.d(TAG, "Pausing rotation during re-position");
+        }
         mDisplayContent.getDisplayRotation().pause();
 
         // Notify InputMonitor to take mDragWindowHandle.
@@ -339,7 +340,9 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
 
         // Resume rotations after a drag.
-        ProtoLog.d(WM_DEBUG_ORIENTATION, "Resuming rotation after re-position");
+        if (DEBUG_ORIENTATION) {
+            Slog.d(TAG, "Resuming rotation after re-position");
+        }
         mDisplayContent.getDisplayRotation().resume();
         mDisplayContent = null;
         mClientCallback.unlinkToDeath(this, 0 /* flags */);

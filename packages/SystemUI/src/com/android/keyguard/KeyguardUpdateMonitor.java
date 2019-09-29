@@ -2752,7 +2752,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private void checkIsHandlerThread() {
         if (!mHandler.getLooper().isCurrentThread()) {
-            Log.wtf(TAG, "must call on mHandler's thread "
+            Log.wtfStack(TAG, "must call on mHandler's thread "
                     + mHandler.getLooper().getThread() + ", not " + Thread.currentThread());
         }
     }
