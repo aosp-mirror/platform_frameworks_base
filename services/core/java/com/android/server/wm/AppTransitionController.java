@@ -48,7 +48,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_S
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -66,7 +66,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.util.function.Predicate;
 
@@ -105,7 +104,7 @@ public class AppTransitionController {
         }
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "**** GOOD TO GO");
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
         final AppTransition appTransition = mDisplayContent.mAppTransition;
         int transit = appTransition.getAppTransition();
         if (mDisplayContent.mSkipAppTransitionAnimation && !isKeyguardGoingAwayTransit(transit)) {
@@ -349,7 +348,7 @@ public class AppTransitionController {
         final int appsCount = openingApps.size();
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = openingApps.valueAt(i);
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now opening app %s", wtoken);
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
 
             if (!wtoken.commitVisibility(animLp, true, transit, false, voiceInteraction)) {
                 // This token isn't going to be animating. Add it to the list of tokens to
@@ -384,7 +383,7 @@ public class AppTransitionController {
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = closingApps.valueAt(i);
 
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now closing app %s", wtoken);
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now closing app " + wtoken);
             // TODO: Do we need to add to mNoAnimationNotifyOnTransitionFinished like above if not
             //       animating?
             wtoken.commitVisibility(animLp, false, transit, false, voiceInteraction);
@@ -411,7 +410,7 @@ public class AppTransitionController {
         final int appsCount = apps.size();
         for (int i = 0; i < appsCount; i++) {
             AppWindowToken wtoken = apps.valueAt(i);
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now changing app %s", wtoken);
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now changing app" + wtoken);
             wtoken.cancelAnimationOnly();
             wtoken.applyAnimationLocked(null, transit, true, false);
             wtoken.updateReportedVisibilityLocked();
@@ -446,9 +445,10 @@ public class AppTransitionController {
     }
 
     private boolean transitionGoodToGo(ArraySet<AppWindowToken> apps, SparseIntArray outReasons) {
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                "Checking %d opening apps (frozen=%b timeout=%b)...", apps.size(),
-                        mService.mDisplayFrozen, mDisplayContent.mAppTransition.isTimeout());
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                "Checking " + apps.size() + " opening apps (frozen="
+                        + mService.mDisplayFrozen + " timeout="
+                        + mDisplayContent.mAppTransition.isTimeout() + ")...");
         final ScreenRotationAnimation screenRotationAnimation =
                 mService.mAnimator.getScreenRotationAnimationLocked(
                         Display.DEFAULT_DISPLAY);
@@ -463,18 +463,20 @@ public class AppTransitionController {
             // app transition.
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
                     mDisplayContent.getDisplayRotation().needsUpdate()) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "Delaying app transition for screen rotation animation to finish");
+                if (DEBUG_APP_TRANSITIONS) {
+                    Slog.v(TAG, "Delaying app transition for screen rotation animation to finish");
+                }
                 return false;
             }
             for (int i = 0; i < apps.size(); i++) {
                 AppWindowToken wtoken = apps.valueAt(i);
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                                "Check opening app=%s: allDrawn=%b startingDisplayed=%b "
-                                        + "startingMoved=%b isRelaunching()=%b startingWindow=%s",
-                                wtoken, wtoken.allDrawn, wtoken.startingDisplayed,
-                                wtoken.startingMoved, wtoken.isRelaunching(),
-                                wtoken.startingWindow);
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                        "Check opening app=" + wtoken + ": allDrawn="
+                                + wtoken.allDrawn + " startingDisplayed="
+                                + wtoken.startingDisplayed + " startingMoved="
+                                + wtoken.startingMoved + " isRelaunching()="
+                                + wtoken.isRelaunching() + " startingWindow="
+                                + wtoken.startingWindow);
 
 
                 final boolean allDrawn = wtoken.allDrawn && !wtoken.isRelaunching();
@@ -494,13 +496,15 @@ public class AppTransitionController {
 
             // We also need to wait for the specs to be fetched, if needed.
             if (mDisplayContent.mAppTransition.isFetchingAppTransitionsSpecs()) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "isFetchingAppTransitionSpecs=true");
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "isFetchingAppTransitionSpecs=true");
                 return false;
             }
 
             if (!mDisplayContent.mUnknownAppVisibilityController.allResolved()) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "unknownApps is not empty: %s",
-                            mDisplayContent.mUnknownAppVisibilityController.getDebugMessage());
+                if (DEBUG_APP_TRANSITIONS) {
+                    Slog.v(TAG, "unknownApps is not empty: "
+                            + mDisplayContent.mUnknownAppVisibilityController.getDebugMessage());
+                }
                 return false;
             }
 
@@ -545,20 +549,22 @@ public class AppTransitionController {
                 true /* ignoreHidden */);
 
         boolean openingCanBeWallpaperTarget = canBeWallpaperTarget(openingApps);
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "New wallpaper target=%s, oldWallpaper=%s, openingApps=%s, closingApps=%s",
-                        wallpaperTarget, oldWallpaper, openingApps, closingApps);
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                "New wallpaper target=" + wallpaperTarget
+                        + ", oldWallpaper=" + oldWallpaper
+                        + ", openingApps=" + openingApps
+                        + ", closingApps=" + closingApps);
 
         if (openingCanBeWallpaperTarget && transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             transit = TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                    "New transit: %s", AppTransition.appTransitionToString(transit));
+            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                    "New transit: " + AppTransition.appTransitionToString(transit));
         }
         // We never want to change from a Keyguard transit to a non-Keyguard transit, as our logic
         // relies on the fact that we always execute a Keyguard transition after preparing one.
         else if (!isKeyguardGoingAwayTransit(transit)) {
             if (closingAppHasWallpaper && openingAppHasWallpaper) {
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Wallpaper animation!");
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Wallpaper animation!");
                 switch (transit) {
                     case TRANSIT_ACTIVITY_OPEN:
                     case TRANSIT_TASK_OPEN:
@@ -571,17 +577,16 @@ public class AppTransitionController {
                         transit = TRANSIT_WALLPAPER_INTRA_CLOSE;
                         break;
                 }
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "New transit: %s", AppTransition.appTransitionToString(transit));
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
+                        "New transit: " + AppTransition.appTransitionToString(transit));
             } else if (oldWallpaper != null && !mDisplayContent.mOpeningApps.isEmpty()
                     && !openingApps.contains(oldWallpaper.mAppToken)
                     && closingApps.contains(oldWallpaper.mAppToken)
                     && topClosingApp == oldWallpaper.mAppToken) {
                 // We are transitioning from an activity with a wallpaper to one without.
                 transit = TRANSIT_WALLPAPER_CLOSE;
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
-                        "New transit away from wallpaper: %s",
-                                AppTransition.appTransitionToString(transit));
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit away from wallpaper: "
+                        + AppTransition.appTransitionToString(transit));
             } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()
                     && openingApps.contains(wallpaperTarget.mAppToken)
                     && topOpeningApp == wallpaperTarget.mAppToken
@@ -589,8 +594,8 @@ public class AppTransitionController {
                 // We are transitioning from an activity without
                 // a wallpaper to now showing the wallpaper
                 transit = TRANSIT_WALLPAPER_OPEN;
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "New transit into wallpaper: %s",
-                        AppTransition.appTransitionToString(transit));
+                if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit into wallpaper: "
+                        + AppTransition.appTransitionToString(transit));
             }
         }
         return transit;
@@ -717,7 +722,8 @@ public class AppTransitionController {
             final WindowState win = mDisplayContent.findFocusedWindow();
             if (win != null) {
                 final AppWindowToken wtoken = win.mAppToken;
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now animating app in place %s", wtoken);
+                if (DEBUG_APP_TRANSITIONS)
+                    Slog.v(TAG, "Now animating app in place " + wtoken);
                 wtoken.cancelAnimation();
                 wtoken.applyAnimationLocked(null, transit, false, false);
                 wtoken.updateReportedVisibilityLocked();

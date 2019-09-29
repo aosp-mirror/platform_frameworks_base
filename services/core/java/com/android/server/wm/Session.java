@@ -24,9 +24,9 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
@@ -56,7 +56,6 @@ import android.view.SurfaceSession;
 import android.view.WindowManager;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
-import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -479,7 +478,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 Slog.v(TAG_WM, "First window added to " + this + ", creating SurfaceSession");
             }
             mSurfaceSession = new SurfaceSession();
-            ProtoLog.i(WM_SHOW_TRANSACTIONS, "  NEW SURFACE SESSION %s", mSurfaceSession);
+            if (SHOW_TRANSACTIONS) Slog.i(
+                    TAG_WM, "  NEW SURFACE SESSION " + mSurfaceSession);
             mService.mSessions.add(this);
             if (mLastReportedAnimatorScale != mService.getCurrentAnimatorScale()) {
                 mService.dispatchNewAnimatorScaleLocked(this);
@@ -570,7 +570,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             Slog.v(TAG_WM, "Last window removed from " + this
                     + ", destroying " + mSurfaceSession);
         }
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "  KILL SURFACE SESSION %s", mSurfaceSession);
+        if (SHOW_TRANSACTIONS) Slog.i(TAG_WM, "  KILL SURFACE SESSION " + mSurfaceSession);
         try {
             mSurfaceSession.kill();
         } catch (Exception e) {

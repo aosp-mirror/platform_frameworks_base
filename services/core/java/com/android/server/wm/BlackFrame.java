@@ -16,7 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.graphics.Matrix;
@@ -24,8 +25,6 @@ import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
-
-import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.function.Supplier;
@@ -59,8 +58,8 @@ public class BlackFrame {
             transaction.setLayer(surface, layer);
             transaction.setPosition(surface, left, top);
             transaction.show(surface);
-            ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                    "  BLACK %s: CREATE layer=%d", surface, layer);
+            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
+                            "  BLACK " + surface + ": CREATE layer=" + layer);
         }
 
         void setAlpha(SurfaceControl.Transaction t, float alpha) {
@@ -156,8 +155,8 @@ public class BlackFrame {
             SurfaceControl.Transaction t = mTransactionFactory.get();
             for (int i=0; i<mBlackSurfaces.length; i++) {
                 if (mBlackSurfaces[i] != null) {
-                    ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
-                            "  BLACK %s: DESTROY", mBlackSurfaces[i].surface);
+                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
+                            "  BLACK " + mBlackSurfaces[i].surface + ": DESTROY");
                     t.remove(mBlackSurfaces[i].surface);
                     mBlackSurfaces[i] = null;
                 }

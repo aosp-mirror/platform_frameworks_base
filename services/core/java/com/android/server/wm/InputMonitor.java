@@ -26,7 +26,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLP
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
-import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -49,7 +49,6 @@ import android.view.SurfaceControl;
 
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.Set;
@@ -332,7 +331,9 @@ final class InputMonitor {
      * Layer assignment is assumed to be complete by the time this is called.
      */
     public void setInputFocusLw(WindowState newWindow, boolean updateInputWindows) {
-        ProtoLog.d(WM_DEBUG_FOCUS_LIGHT, "Input focus has changed to %s", newWindow);
+        if (DEBUG_FOCUS_LIGHT || DEBUG_INPUT) {
+            Slog.d(TAG_WM, "Input focus has changed to " + newWindow);
+        }
 
         if (newWindow != mInputFocus) {
             if (newWindow != null && newWindow.canReceiveKeys()) {
