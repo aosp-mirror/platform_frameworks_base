@@ -7610,12 +7610,15 @@ public class WindowManagerService extends IWindowManager.Stub
             // it as if the host window was tapped.
             touchedWindow = mEmbeddedWindowController.getHostWindow(touchedToken);
         }
-        if (touchedWindow == null || !touchedWindow.canReceiveKeys()) {
+
+        if (touchedWindow == null || !touchedWindow.canReceiveKeys(true /* fromUserTouch */)) {
+            // If the window that received the input event cannot receive keys, don't move the
+            // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
 
-        handleTaskFocusChange(touchedWindow.getTask());
         handleDisplayFocusChange(touchedWindow);
+        handleTaskFocusChange(touchedWindow.getTask());
     }
 
     private void handleTaskFocusChange(Task task) {
@@ -7640,12 +7643,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void handleDisplayFocusChange(WindowState window) {
         final DisplayContent displayContent = window.getDisplayContent();
         if (displayContent == null) {
-            return;
-        }
-
-        if (!window.canReceiveKeys()) {
-            // If the window that received the input event cannot receive keys, don't move the
-            // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
 

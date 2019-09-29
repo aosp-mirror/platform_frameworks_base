@@ -4097,7 +4097,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 super.positionChildAt(currentPosition, child, false /* includingParents */);
                 return;
             }
-
+            // We don't allow untrusted display to top when task stack moves to top,
+            // until user tapping this display to change display position as top intentionally.
+            if (isUntrustedVirtualDisplay() && !getParent().isOnTop()) {
+                includingParents = false;
+            }
             final int targetPosition = findPositionForStack(position, child, false /* adding */);
             super.positionChildAt(targetPosition, child, includingParents);
 
