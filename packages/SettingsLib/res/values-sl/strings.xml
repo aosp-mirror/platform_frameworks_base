@@ -388,7 +388,7 @@
     <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Naprava bi morala glede na način uporabe (<xliff:g id="LEVEL">%2$s</xliff:g>) delovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Naprava bi morala glede na način uporabe delovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by" msgid="6453537733650125582">"Naprava bi morala delovati do približno <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Naprava bi morala delovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Moralo bi zadostovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_extend_battery" msgid="4401408879069551485">"Podaljšanje časa delovanja akumulatorja za dlje kot <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Preostalo manj kot <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
