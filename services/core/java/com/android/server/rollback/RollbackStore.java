@@ -28,6 +28,7 @@ import android.util.Slog;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import libcore.io.IoUtils;
 
@@ -288,17 +289,23 @@ class RollbackStore {
             JSONObject dataJson = new JSONObject(
                     IoUtils.readFileAsString(rollbackJsonFile.getAbsolutePath()));
 
-            return new Rollback(
-                    rollbackInfoFromJson(dataJson.getJSONObject("info")),
-                    backupDir,
-                    Instant.parse(dataJson.getString("timestamp")),
-                    dataJson.getInt("stagedSessionId"),
-                    rollbackStateFromString(dataJson.getString("state")),
-                    dataJson.getInt("apkSessionId"),
-                    dataJson.getBoolean("restoreUserDataInProgress"));
+            return rollbackFromJson(dataJson, backupDir);
         } catch (JSONException | DateTimeParseException | ParseException e) {
             throw new IOException(e);
         }
+    }
+
+    @VisibleForTesting
+    static Rollback rollbackFromJson(JSONObject dataJson, File backupDir)
+            throws JSONException, ParseException {
+        return new Rollback(
+                rollbackInfoFromJson(dataJson.getJSONObject("info")),
+                backupDir,
+                Instant.parse(dataJson.getString("timestamp")),
+                dataJson.getInt("stagedSessionId"),
+                rollbackStateFromString(dataJson.getString("state")),
+                dataJson.getInt("apkSessionId"),
+                dataJson.getBoolean("restoreUserDataInProgress"));
     }
 
     private static JSONObject toJson(VersionedPackage pkg) throws JSONException {
