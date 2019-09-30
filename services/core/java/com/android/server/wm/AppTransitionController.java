@@ -449,9 +449,9 @@ public class AppTransitionController {
                 "Checking " + apps.size() + " opening apps (frozen="
                         + mService.mDisplayFrozen + " timeout="
                         + mDisplayContent.mAppTransition.isTimeout() + ")...");
-        final ScreenRotationAnimation screenRotationAnimation =
-                mService.mAnimator.getScreenRotationAnimationLocked(
-                        Display.DEFAULT_DISPLAY);
+
+        final ScreenRotationAnimation screenRotationAnimation = mService.mRoot.getDisplayContent(
+                Display.DEFAULT_DISPLAY).getRotationAnimation();
 
         if (!mDisplayContent.mAppTransition.isTimeout()) {
             // Imagine the case where we are changing orientation due to an app transition, but a

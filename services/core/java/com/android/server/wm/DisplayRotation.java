@@ -404,7 +404,7 @@ public class DisplayRotation {
             }
 
             final ScreenRotationAnimation screenRotationAnimation =
-                    mService.mAnimator.getScreenRotationAnimationLocked(displayId);
+                    mDisplayContent.getRotationAnimation();
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
