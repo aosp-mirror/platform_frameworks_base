@@ -17,13 +17,19 @@
 package com.android.server.connectivity.tethering;
 
 import android.content.Context;
+import android.net.INetd;
+import android.net.INetworkPolicyManager;
+import android.net.INetworkStatsService;
 import android.net.NetworkRequest;
 import android.net.ip.IpServer;
 import android.net.util.SharedLog;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.INetworkManagementService;
+import android.os.Looper;
+import android.os.ServiceManager;
 
 import com.android.internal.util.StateMachine;
-import com.android.server.connectivity.MockableSystemProperties;
 
 import java.util.ArrayList;
 
@@ -82,8 +88,8 @@ public class TetheringDependencies {
      * Get a reference to the EntitlementManager to be used by tethering.
      */
     public EntitlementManager getEntitlementManager(Context ctx, StateMachine target,
-            SharedLog log, int what, MockableSystemProperties systemProperties) {
-        return new EntitlementManager(ctx, target, log, what, systemProperties);
+            SharedLog log, int what) {
+        return new EntitlementManager(ctx, target, log, what);
     }
 
     /**
@@ -92,5 +98,54 @@ public class TetheringDependencies {
     public TetheringConfiguration generateTetheringConfiguration(Context ctx, SharedLog log,
             int subId) {
         return new TetheringConfiguration(ctx, log, subId);
+    }
+
+    /**
+     * Get a reference to INetworkManagementService to registerTetheringStatsProvider from
+     * OffloadController. Note: This should be removed soon by Usage refactor work in R
+     * development cycle.
+     */
+    public INetworkManagementService getINetworkManagementService() {
+        return INetworkManagementService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
+    }
+
+    /**
+     *  Get a reference to INetworkStatsService to force update tethering usage.
+     *  Note: This should be removed in R development cycle.
+     */
+    public INetworkStatsService getINetworkStatsService() {
+        return INetworkStatsService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+    }
+
+    /**
+     * Get a reference to INetworkPolicyManager to be used by tethering.
+     */
+    public INetworkPolicyManager getINetworkPolicyManager() {
+        return INetworkPolicyManager.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+    }
+
+    /**
+     * Get a reference to INetd to be used by tethering.
+     */
+    public INetd getINetd(Context context) {
+        return INetd.Stub.asInterface(
+                (IBinder) context.getSystemService(Context.NETD_SERVICE));
+    }
+
+    /**
+     * Get tethering thread looper.
+     */
+    public Looper getTetheringLooper() {
+        return null;
+    }
+
+    /**
+     *  Get Context of TetheringSerice.
+     */
+    public Context getContext() {
+        return null;
     }
 }

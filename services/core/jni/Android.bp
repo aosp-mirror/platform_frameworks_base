@@ -53,7 +53,6 @@ cc_library_static {
         "com_android_server_am_LowMemDetector.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
-        ":tethering-jni-srcs",
     ],
 
     include_dirs: [
@@ -122,7 +121,6 @@ cc_defaults {
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
         "android.hardware.power.stats@1.0",
-        "android.hardware.tetheroffload.config@1.0",
         "android.hardware.thermal@1.0",
         "android.hardware.tv.cec@1.0",
         "android.hardware.tv.input@1.0",

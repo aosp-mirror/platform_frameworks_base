@@ -82,6 +82,7 @@ public class IPv6TetheringCoordinator {
         mNextSubnetId = 0;
     }
 
+    /** Add active downstream to ipv6 tethering candidate list. */
     public void addActiveDownstream(IpServer downstream, int mode) {
         if (findDownstream(downstream) == null) {
             // Adding a new downstream appends it to the list. Adding a
@@ -97,6 +98,7 @@ public class IPv6TetheringCoordinator {
         }
     }
 
+    /** Remove downstream from ipv6 tethering candidate list. */
     public void removeActiveDownstream(IpServer downstream) {
         stopIPv6TetheringOn(downstream);
         if (mActiveDownstreams.remove(findDownstream(downstream))) {
@@ -112,6 +114,11 @@ public class IPv6TetheringCoordinator {
         }
     }
 
+    /**
+     * Call when upstream NetworkState may be changed.
+     * If upstream has ipv6 for tethering, update this new NetworkState
+     * to IpServer. Otherwise stop ipv6 tethering on downstream interfaces.
+     */
     public void updateUpstreamNetworkState(NetworkState ns) {
         if (VDBG) {
             Log.d(TAG, "updateUpstreamNetworkState: " + toDebugString(ns));
@@ -122,8 +129,8 @@ public class IPv6TetheringCoordinator {
             return;
         }
 
-        if (mUpstreamNetworkState != null &&
-            !ns.network.equals(mUpstreamNetworkState.network)) {
+        if (mUpstreamNetworkState != null
+                && !ns.network.equals(mUpstreamNetworkState.network)) {
             stopIPv6TetheringOnAllInterfaces();
         }
 
@@ -221,8 +228,8 @@ public class IPv6TetheringCoordinator {
 
         for (RouteInfo routeInfo : lp.getRoutes()) {
             final IpPrefix destination = routeInfo.getDestination();
-            if ((destination.getAddress() instanceof Inet6Address) &&
-                (destination.getPrefixLength() <= 64)) {
+            if ((destination.getAddress() instanceof Inet6Address)
+                    && (destination.getPrefixLength() <= 64)) {
                 v6only.addRoute(routeInfo);
             }
         }
@@ -242,12 +249,12 @@ public class IPv6TetheringCoordinator {
     // TODO: Delete this and switch to LinkAddress#isGlobalPreferred once we
     // announce our own IPv6 address as DNS server.
     private static boolean isIPv6GlobalAddress(InetAddress ip) {
-        return (ip instanceof Inet6Address) &&
-               !ip.isAnyLocalAddress() &&
-               !ip.isLoopbackAddress() &&
-               !ip.isLinkLocalAddress() &&
-               !ip.isSiteLocalAddress() &&
-               !ip.isMulticastAddress();
+        return (ip instanceof Inet6Address)
+               && !ip.isAnyLocalAddress()
+               && !ip.isLoopbackAddress()
+               && !ip.isLinkLocalAddress()
+               && !ip.isSiteLocalAddress()
+               && !ip.isMulticastAddress();
     }
 
     private static LinkProperties getUniqueLocalConfig(byte[] ulp, short subnetId) {
