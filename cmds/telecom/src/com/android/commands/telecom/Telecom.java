@@ -65,6 +65,14 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_UNREGISTER_PHONE_ACCOUNT = "unregister-phone-account";
     private static final String COMMAND_SET_DEFAULT_DIALER = "set-default-dialer";
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
+    /**
+     * Change the system dialer package name if a package name was specified,
+     * Example: adb shell telecom set-system-dialer <PACKAGE>
+     *
+     * Restore it to the default if if argument is "default" or no argument is passed.
+     * Example: adb shell telecom set-system-dialer default
+     */
+    private static final String COMMAND_SET_SYSTEM_DIALER = "set-system-dialer";
     private static final String COMMAND_GET_SYSTEM_DIALER = "get-system-dialer";
     private static final String COMMAND_WAIT_ON_HANDLERS = "wait-on-handlers";
     private static final String COMMAND_SET_SIM_COUNT = "set-sim-count";
@@ -193,6 +201,9 @@ public final class Telecom extends BaseCommand {
             case COMMAND_GET_DEFAULT_DIALER:
                 runGetDefaultDialer();
                 break;
+            case COMMAND_SET_SYSTEM_DIALER:
+                runSetSystemDialer();
+                break;
             case COMMAND_GET_SYSTEM_DIALER:
                 runGetSystemDialer();
                 break;
@@ -295,6 +306,12 @@ public final class Telecom extends BaseCommand {
         final String packageName = nextArgRequired();
         mTelecomService.setTestDefaultDialer(packageName);
         System.out.println("Success - " + packageName + " set as override default dialer.");
+    }
+
+    private void runSetSystemDialer() throws RemoteException {
+        final String packageName = nextArg();
+        mTelecomService.setSystemDialerPackage(packageName.equals("default") ? null : packageName);
+        System.out.println("Success - " + packageName + " set as override system dialer.");
     }
 
     private void runGetDefaultDialer() throws RemoteException {

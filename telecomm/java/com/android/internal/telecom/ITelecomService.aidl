@@ -302,6 +302,11 @@ interface ITelecomService {
     void setTestAutoModeApp(String packageName);
 
     /**
+     * @see TelecomServiceImpl#setSystemDialerPackage
+     */
+    void setSystemDialerPackage(in String packageName);
+
+    /**
      * @see TelecomServiceImpl#setTestDefaultDialer
      */
     void setTestDefaultDialer(in String packageName);
