@@ -28,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMor
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -183,6 +184,16 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mActivityRecord));
        verifyNoMoreInteractions(mLaunchObserver);
+    }
+
+    @Test
+    public void testOnReportFullyDrawn() throws Exception {
+        testOnActivityLaunched();
+
+        mActivityMetricsLogger.logAppTransitionReportedDrawn(mActivityRecord, false);
+
+        verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mActivityRecord), anyLong());
+        verifyNoMoreInteractions(mLaunchObserver);
     }
 
     @Test

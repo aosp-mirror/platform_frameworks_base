@@ -92,6 +92,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.server.LocalServices;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Listens to activity launches, transitions, visibility changes and window drawn callbacks to
@@ -811,7 +812,9 @@ class ActivityMetricsLogger {
         final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
         builder.setPackageName(r.packageName);
         builder.addTaggedData(FIELD_CLASS_NAME, r.info.name);
-        long startupTimeMs = SystemClock.uptimeMillis() - mLastTransitionStartTime;
+        long currentTimestampNs = SystemClock.elapsedRealtimeNanos();
+        long startupTimeMs =
+            TimeUnit.NANOSECONDS.toMillis(currentTimestampNs) - mLastTransitionStartTime;
         builder.addTaggedData(APP_TRANSITION_REPORTED_DRAWN_MS, startupTimeMs);
         builder.setType(restoredFromBundle
                 ? TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE
@@ -837,6 +840,10 @@ class ActivityMetricsLogger {
         final WindowingModeTransitionInfoSnapshot infoSnapshot =
                 new WindowingModeTransitionInfoSnapshot(info, r, (int) startupTimeMs);
         BackgroundThread.getHandler().post(() -> logAppFullyDrawn(infoSnapshot));
+
+        // Notify reportFullyDrawn event.
+        launchObserverNotifyReportFullyDrawn(r, currentTimestampNs);
+
         return infoSnapshot;
     }
 
@@ -1045,6 +1052,16 @@ class ActivityMetricsLogger {
         mLaunchObserver.onActivityLaunched(convertActivityRecordToProto(info.launchedActivity),
                                            temperature);
 
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /**
+     * Notifies the {@link ActivityMetricsLaunchObserver} the reportFullDrawn event.
+     */
+    private void launchObserverNotifyReportFullyDrawn(ActivityRecord r, long timestampNanos) {
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+            "MetricsLogger:launchObserverNotifyReportFullyDrawn");
+        mLaunchObserver.onReportFullyDrawn(convertActivityRecordToProto(r), timestampNanos);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 

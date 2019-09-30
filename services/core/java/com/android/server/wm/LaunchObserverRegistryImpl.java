@@ -104,6 +104,15 @@ class LaunchObserverRegistryImpl implements
                 LaunchObserverRegistryImpl::handleOnActivityLaunchFinished, this, activity));
     }
 
+    @Override
+    public void onReportFullyDrawn(@ActivityRecordProto byte[] activity, long timestampNanos) {
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+            LaunchObserverRegistryImpl::handleOnReportFullyDrawn,
+            this,
+            activity,
+            timestampNanos));
+    }
+
     // Use PooledLambda.obtainMessage to invoke below methods. Every method reference must be
     // unbound (i.e. not capture any variables explicitly or implicitly) to fulfill the
     // singleton-lambda requirement.
@@ -157,6 +166,15 @@ class LaunchObserverRegistryImpl implements
         for (int i = 0; i < mList.size(); i++) {
             ActivityMetricsLaunchObserver o = mList.get(i);
             o.onActivityLaunchFinished(activity);
+        }
+    }
+
+    private void handleOnReportFullyDrawn(
+            @ActivityRecordProto byte[] activity, long timestampNanos) {
+        // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
+        for (int i = 0; i < mList.size(); i++) {
+            ActivityMetricsLaunchObserver o = mList.get(i);
+            o.onReportFullyDrawn(activity, timestampNanos);
         }
     }
 }

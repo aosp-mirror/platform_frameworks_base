@@ -914,6 +914,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void onActivityLaunchFinished(byte[] finalActivity) {
         }
+
+        @Override
+        public void onReportFullyDrawn(byte[] finalActivity, long timestampNanos) {
+        }
     };
 
     /**
