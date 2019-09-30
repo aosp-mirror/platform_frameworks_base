@@ -56,9 +56,7 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
-import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.concurrent.Executor;
@@ -71,15 +69,6 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
-
-    private final PinnedStackListener mImeChangedListener = new PinnedStackListener() {
-        @Override
-        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            // No need to thread jump, assignments are atomic
-            mImeHeight = imeVisible ? imeHeight : 0;
-            // TODO: Probably cancel any existing gesture
-        }
-    };
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -127,8 +116,6 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private boolean mAllowGesture = false;
     private boolean mInRejectedExclusion = false;
     private boolean mIsOnLeftEdge;
-
-    private int mImeHeight = 0;
 
     private boolean mIsAttached;
     private boolean mIsGesturalModeEnabled;
@@ -231,7 +218,6 @@ public class EdgeBackGestureHandler implements DisplayListener {
         }
 
         if (!mIsEnabled) {
-            WindowManagerWrapper.getInstance().removePinnedStackListener(mImeChangedListener);
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
 
             try {
@@ -248,7 +234,6 @@ public class EdgeBackGestureHandler implements DisplayListener {
                     mContext.getMainThreadHandler());
 
             try {
-                WindowManagerWrapper.getInstance().addPinnedStackListener(mImeChangedListener);
                 WindowManagerGlobal.getWindowManagerService()
                         .registerSystemGestureExclusionListener(
                                 mGestureExclusionListener, mDisplayId);
@@ -305,11 +290,6 @@ public class EdgeBackGestureHandler implements DisplayListener {
     }
 
     private boolean isWithinTouchRegion(int x, int y) {
-        // Disallow if over the IME
-        if (y > (mDisplaySize.y - Math.max(mImeHeight, mNavBarHeight))) {
-            return false;
-        }
-
         // Disallow if too far from the edge
         if (x > mEdgeWidth + mLeftInset && x < (mDisplaySize.x - mEdgeWidth - mRightInset)) {
             return false;
@@ -487,7 +467,6 @@ public class EdgeBackGestureHandler implements DisplayListener {
         pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
-        pw.println("  mImeHeight=" + mImeHeight);
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mEdgeWidth=" + mEdgeWidth);
     }
