@@ -525,16 +525,16 @@ public final class InputMethodManager {
         final InputMethodManager fallbackImm =
                 viewRootImpl.mContext.getSystemService(InputMethodManager.class);
         if (fallbackImm == null) {
-            Log.e(TAG, "b/117267690: Failed to get non-null fallback IMM. view=" + view);
+            Log.v(TAG, "b/117267690: Failed to get non-null fallback IMM. view=" + view);
             return null;
         }
         if (fallbackImm.mDisplayId != viewRootDisplayId) {
-            Log.e(TAG, "b/117267690: Failed to get fallback IMM with expected displayId="
+            Log.v(TAG, "b/117267690: Failed to get fallback IMM with expected displayId="
                     + viewRootDisplayId + " actual IMM#displayId=" + fallbackImm.mDisplayId
                     + " view=" + view);
             return null;
         }
-        Log.w(TAG, "b/117267690: Display ID mismatch found."
+        Log.v(TAG, "b/117267690: Display ID mismatch found."
                 + " ViewRootImpl displayId=" + viewRootDisplayId
                 + " InputMethodManager displayId=" + mDisplayId
                 + ". Use the right InputMethodManager instance to avoid performance overhead.",
