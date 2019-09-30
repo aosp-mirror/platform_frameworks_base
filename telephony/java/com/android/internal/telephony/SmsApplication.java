@@ -40,7 +40,6 @@ import android.os.UserHandle;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.Rlog;
-import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -1045,9 +1044,6 @@ public final class SmsApplication {
      */
     @UnsupportedAppUsage
     public static boolean shouldWriteMessageForPackage(String packageName, Context context) {
-        if (SmsManager.getDefault().getAutoPersisting()) {
-            return true;
-        }
         return !isDefaultSmsApplication(context, packageName);
     }
 
