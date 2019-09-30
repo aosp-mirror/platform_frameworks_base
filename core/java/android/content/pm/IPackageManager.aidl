@@ -50,6 +50,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.IArtManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.content.IntentSender;
@@ -280,7 +281,7 @@ interface IPackageManager {
 
     boolean isPackageSuspendedForUser(String packageName, int userId);
 
-    PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId);
+    Bundle getSuspendedPackageAppExtras(String packageName, int userId);
 
     /**
      * Backup/restore support - only the system uid may use these.

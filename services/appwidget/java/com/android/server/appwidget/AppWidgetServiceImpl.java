@@ -631,8 +631,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
                             providerUserId, true);
                 } else {
-                    final SuspendDialogInfo dialogInfo = mPackageManagerInternal
-                            .getSuspendedDialogInfo(providerPackage, providerUserId);
+                    final SuspendDialogInfo dialogInfo =
+                            mPackageManagerInternal.getSuspendedDialogInfo(providerPackage,
+                                    suspendingPackage, providerUserId);
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
                             providerPackage, suspendingPackage, dialogInfo, providerUserId);
                 }

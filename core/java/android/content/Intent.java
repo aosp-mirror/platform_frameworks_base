@@ -2025,17 +2025,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
 
     /**
-     * Intent extra: A {@link Bundle} of extras supplied for the launcher when any packages on
-     * device are suspended. Will be sent with {@link #ACTION_PACKAGES_SUSPENDED}.
-     *
-     * @see PackageManager#isPackageSuspended()
-     * @see #ACTION_PACKAGES_SUSPENDED
-     *
-     * @hide
-     */
-    public static final String EXTRA_LAUNCHER_EXTRAS = "android.intent.extra.LAUNCHER_EXTRAS";
-
-    /**
      * Intent extra: ID of the shortcut used to send the share intent. Will be sent with
      * {@link #ACTION_SEND}.
      *

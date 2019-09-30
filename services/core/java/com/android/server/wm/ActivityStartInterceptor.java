@@ -249,7 +249,8 @@ class ActivityStartInterceptor {
         if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
             return interceptSuspendedByAdminPackage();
         }
-        final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage, mUserId);
+        final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage,
+                suspendingPackage, mUserId);
         mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
                 suspendingPackage, dialogInfo, mUserId);
         mCallingPid = mRealCallingPid;

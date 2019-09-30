@@ -32,6 +32,7 @@ import android.content.pm.parsing.ComponentParseUtils;
 import android.os.BaseBundle;
 import android.os.Debug;
 import android.os.PersistableBundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Slog;
@@ -39,6 +40,11 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -57,10 +63,7 @@ public class PackageUserState {
     public boolean hidden; // Is the app restricted by owner / admin
     public int distractionFlags;
     public boolean suspended;
-    public String suspendingPackage;
-    public SuspendDialogInfo dialogInfo;
-    public PersistableBundle suspendedAppExtras;
-    public PersistableBundle suspendedLauncherExtras;
+    public ArrayMap<String, SuspendParams> suspendParams; // Suspending package to suspend params
     public boolean instantApp;
     public boolean virtualPreload;
     public int enabled;
@@ -96,10 +99,7 @@ public class PackageUserState {
         hidden = o.hidden;
         distractionFlags = o.distractionFlags;
         suspended = o.suspended;
-        suspendingPackage = o.suspendingPackage;
-        dialogInfo = o.dialogInfo;
-        suspendedAppExtras = o.suspendedAppExtras;
-        suspendedLauncherExtras = o.suspendedLauncherExtras;
+        suspendParams = new ArrayMap<>(o.suspendParams);
         instantApp = o.instantApp;
         virtualPreload = o.virtualPreload;
         enabled = o.enabled;
@@ -263,19 +263,7 @@ public class PackageUserState {
             return false;
         }
         if (suspended) {
-            if (suspendingPackage == null
-                    || !suspendingPackage.equals(oldState.suspendingPackage)) {
-                return false;
-            }
-            if (!Objects.equals(dialogInfo, oldState.dialogInfo)) {
-                return false;
-            }
-            if (!BaseBundle.kindofEquals(suspendedAppExtras,
-                    oldState.suspendedAppExtras)) {
-                return false;
-            }
-            if (!BaseBundle.kindofEquals(suspendedLauncherExtras,
-                    oldState.suspendedLauncherExtras)) {
+            if (!Objects.equals(suspendParams, oldState.suspendParams)) {
                 return false;
             }
         }
@@ -339,5 +327,172 @@ public class PackageUserState {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = Long.hashCode(ceDataInode);
+        hashCode = 31 * hashCode + Boolean.hashCode(installed);
+        hashCode = 31 * hashCode + Boolean.hashCode(stopped);
+        hashCode = 31 * hashCode + Boolean.hashCode(notLaunched);
+        hashCode = 31 * hashCode + Boolean.hashCode(hidden);
+        hashCode = 31 * hashCode + distractionFlags;
+        hashCode = 31 * hashCode + Boolean.hashCode(suspended);
+        hashCode = 31 * hashCode + Objects.hashCode(suspendParams);
+        hashCode = 31 * hashCode + Boolean.hashCode(instantApp);
+        hashCode = 31 * hashCode + Boolean.hashCode(virtualPreload);
+        hashCode = 31 * hashCode + enabled;
+        hashCode = 31 * hashCode + Objects.hashCode(lastDisableAppCaller);
+        hashCode = 31 * hashCode + domainVerificationStatus;
+        hashCode = 31 * hashCode + appLinkGeneration;
+        hashCode = 31 * hashCode + categoryHint;
+        hashCode = 31 * hashCode + installReason;
+        hashCode = 31 * hashCode + Objects.hashCode(disabledComponents);
+        hashCode = 31 * hashCode + Objects.hashCode(enabledComponents);
+        hashCode = 31 * hashCode + Objects.hashCode(harmfulAppWarning);
+        return hashCode;
+    }
+
+    /**
+     * Container to describe suspension parameters.
+     */
+    public static final class SuspendParams {
+        private static final String TAG_DIALOG_INFO = "dialog-info";
+        private static final String TAG_APP_EXTRAS = "app-extras";
+        private static final String TAG_LAUNCHER_EXTRAS = "launcher-extras";
+
+        public SuspendDialogInfo dialogInfo;
+        public PersistableBundle appExtras;
+        public PersistableBundle launcherExtras;
+
+        private SuspendParams() {
+        }
+
+        /**
+         * Returns a {@link SuspendParams} object with the given fields. Returns {@code null} if all
+         * the fields are {@code null}.
+         *
+         * @param dialogInfo
+         * @param appExtras
+         * @param launcherExtras
+         * @return A {@link SuspendParams} object or {@code null}.
+         */
+        public static SuspendParams getInstanceOrNull(SuspendDialogInfo dialogInfo,
+                PersistableBundle appExtras, PersistableBundle launcherExtras) {
+            if (dialogInfo == null && appExtras == null && launcherExtras == null) {
+                return null;
+            }
+            final SuspendParams instance = new SuspendParams();
+            instance.dialogInfo = dialogInfo;
+            instance.appExtras = appExtras;
+            instance.launcherExtras = launcherExtras;
+            return instance;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof SuspendParams)) {
+                return false;
+            }
+            final SuspendParams other = (SuspendParams) obj;
+            if (!Objects.equals(dialogInfo, other.dialogInfo)) {
+                return false;
+            }
+            if (!BaseBundle.kindofEquals(appExtras, other.appExtras)) {
+                return false;
+            }
+            if (!BaseBundle.kindofEquals(launcherExtras, other.launcherExtras)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int hashCode = Objects.hashCode(dialogInfo);
+            hashCode = 31 * hashCode + ((appExtras != null) ? appExtras.size() : 0);
+            hashCode = 31 * hashCode + ((launcherExtras != null) ? launcherExtras.size() : 0);
+            return hashCode;
+        }
+
+        /**
+         * Serializes this object into an xml format
+         * @param out the {@link XmlSerializer} object
+         * @throws IOException
+         */
+        public void saveToXml(XmlSerializer out) throws IOException {
+            if (dialogInfo != null) {
+                out.startTag(null, TAG_DIALOG_INFO);
+                dialogInfo.saveToXml(out);
+                out.endTag(null, TAG_DIALOG_INFO);
+            }
+            if (appExtras != null) {
+                out.startTag(null, TAG_APP_EXTRAS);
+                try {
+                    appExtras.saveToXml(out);
+                } catch (XmlPullParserException e) {
+                    Slog.e(LOG_TAG, "Exception while trying to write appExtras."
+                            + " Will be lost on reboot", e);
+                }
+                out.endTag(null, TAG_APP_EXTRAS);
+            }
+            if (launcherExtras != null) {
+                out.startTag(null, TAG_LAUNCHER_EXTRAS);
+                try {
+                    launcherExtras.saveToXml(out);
+                } catch (XmlPullParserException e) {
+                    Slog.e(LOG_TAG, "Exception while trying to write launcherExtras."
+                            + " Will be lost on reboot", e);
+                }
+                out.endTag(null, TAG_LAUNCHER_EXTRAS);
+            }
+        }
+
+        /**
+         * Parses this object from the xml format. Returns {@code null} if no object related
+         * information could be read.
+         * @param in the reader
+         * @return
+         */
+        public static SuspendParams restoreFromXml(XmlPullParser in) throws IOException {
+            SuspendDialogInfo readDialogInfo = null;
+            PersistableBundle readAppExtras = null;
+            PersistableBundle readLauncherExtras = null;
+
+            final int currentDepth = in.getDepth();
+            int type;
+            try {
+                while ((type = in.next()) != XmlPullParser.END_DOCUMENT
+                        && (type != XmlPullParser.END_TAG
+                        || in.getDepth() > currentDepth)) {
+                    if (type == XmlPullParser.END_TAG
+                            || type == XmlPullParser.TEXT) {
+                        continue;
+                    }
+                    switch (in.getName()) {
+                        case TAG_DIALOG_INFO:
+                            readDialogInfo = SuspendDialogInfo.restoreFromXml(in);
+                            break;
+                        case TAG_APP_EXTRAS:
+                            readAppExtras = PersistableBundle.restoreFromXml(in);
+                            break;
+                        case TAG_LAUNCHER_EXTRAS:
+                            readLauncherExtras = PersistableBundle.restoreFromXml(in);
+                            break;
+                        default:
+                            Slog.w(LOG_TAG, "Unknown tag " + in.getName()
+                                    + " in SuspendParams. Ignoring");
+                            break;
+                    }
+                }
+            } catch (XmlPullParserException e) {
+                Slog.e(LOG_TAG, "Exception while trying to parse SuspendParams,"
+                        + " some fields may default", e);
+            }
+            return getInstanceOrNull(readDialogInfo, readAppExtras, readLauncherExtras);
+        }
     }
 }

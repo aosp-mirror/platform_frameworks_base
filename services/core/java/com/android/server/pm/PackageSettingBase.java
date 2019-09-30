@@ -29,6 +29,7 @@ import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
 import android.os.PersistableBundle;
 import android.service.pm.PackageProto;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -394,14 +395,28 @@ public abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).suspended;
     }
 
-    void setSuspended(boolean suspended, String suspendingPackage, SuspendDialogInfo dialogInfo,
+    void addOrUpdateSuspension(String suspendingPackage, SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras, int userId) {
         final PackageUserState existingUserState = modifyUserState(userId);
-        existingUserState.suspended = suspended;
-        existingUserState.suspendingPackage = suspended ? suspendingPackage : null;
-        existingUserState.dialogInfo = suspended ? dialogInfo : null;
-        existingUserState.suspendedAppExtras = suspended ? appExtras : null;
-        existingUserState.suspendedLauncherExtras = suspended ? launcherExtras : null;
+        final PackageUserState.SuspendParams newSuspendParams =
+                PackageUserState.SuspendParams.getInstanceOrNull(dialogInfo, appExtras,
+                        launcherExtras);
+        if (existingUserState.suspendParams == null) {
+            existingUserState.suspendParams = new ArrayMap<>();
+        }
+        existingUserState.suspendParams.put(suspendingPackage, newSuspendParams);
+        existingUserState.suspended = true;
+    }
+
+    void removeSuspension(String suspendingPackage, int userId) {
+        final PackageUserState existingUserState = modifyUserState(userId);
+        if (existingUserState.suspendParams != null) {
+            existingUserState.suspendParams.remove(suspendingPackage);
+            if (existingUserState.suspendParams.size() == 0) {
+                existingUserState.suspendParams = null;
+            }
+        }
+        existingUserState.suspended = (existingUserState.suspendParams != null);
     }
 
     public boolean getInstantApp(int userId) {
@@ -422,9 +437,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean hidden, int distractionFlags, boolean suspended,
-            String suspendingPackage,
-            SuspendDialogInfo dialogInfo, PersistableBundle suspendedAppExtras,
-            PersistableBundle suspendedLauncherExtras, boolean instantApp,
+            ArrayMap<String, PackageUserState.SuspendParams> suspendParams, boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
             int domainVerifState, int linkGeneration, int installReason,
@@ -438,10 +451,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.hidden = hidden;
         state.distractionFlags = distractionFlags;
         state.suspended = suspended;
-        state.suspendingPackage = suspendingPackage;
-        state.dialogInfo = dialogInfo;
-        state.suspendedAppExtras = suspendedAppExtras;
-        state.suspendedLauncherExtras = suspendedLauncherExtras;
+        state.suspendParams = suspendParams;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;
@@ -456,9 +466,8 @@ public abstract class PackageSettingBase extends SettingBase {
     void setUserState(int userId, PackageUserState otherState) {
         setUserState(userId, otherState.ceDataInode, otherState.enabled, otherState.installed,
                 otherState.stopped, otherState.notLaunched, otherState.hidden,
-                otherState.distractionFlags, otherState.suspended, otherState.suspendingPackage,
-                otherState.dialogInfo, otherState.suspendedAppExtras,
-                otherState.suspendedLauncherExtras, otherState.instantApp,
+                otherState.distractionFlags, otherState.suspended, otherState.suspendParams,
+                otherState.instantApp,
                 otherState.virtualPreload, otherState.lastDisableAppCaller,
                 otherState.enabledComponents, otherState.disabledComponents,
                 otherState.domainVerificationStatus, otherState.appLinkGeneration,
@@ -622,7 +631,10 @@ public abstract class PackageSettingBase extends SettingBase {
             proto.write(PackageProto.UserInfoProto.DISTRACTION_FLAGS, state.distractionFlags);
             proto.write(PackageProto.UserInfoProto.IS_SUSPENDED, state.suspended);
             if (state.suspended) {
-                proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE, state.suspendingPackage);
+                for (int j = 0; j < state.suspendParams.size(); j++) {
+                    proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE,
+                            state.suspendParams.keyAt(j));
+                }
             }
             proto.write(PackageProto.UserInfoProto.IS_STOPPED, state.stopped);
             proto.write(PackageProto.UserInfoProto.IS_LAUNCHED, !state.notLaunched);
