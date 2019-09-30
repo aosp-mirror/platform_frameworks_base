@@ -16,6 +16,8 @@
 
 package com.android.server.backup.testing;
 
+import android.util.Pair;
+
 import com.android.server.backup.encryption.chunk.ChunkHash;
 import com.android.server.backup.encryption.protos.nano.ChunksMetadataProto;
 import com.android.server.backup.encryption.protos.nano.KeyValuePairProto;
@@ -23,6 +25,8 @@ import com.android.server.backup.encryption.protos.nano.KeyValuePairProto;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import javax.crypto.KeyGenerator;
@@ -161,5 +165,13 @@ public class CryptoTestUtils {
         clone.starts = Arrays.copyOf(original.starts, original.starts.length);
         clone.checksum = Arrays.copyOf(original.checksum, original.checksum.length);
         return clone;
+    }
+
+    public static <K, V> Map<K, V> mapOf(Pair<K, V>... pairs) {
+        Map<K, V> map = new HashMap<>();
+        for (Pair<K, V> pair : pairs) {
+            map.put(pair.first, pair.second);
+        }
+        return map;
     }
 }
