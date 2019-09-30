@@ -86,6 +86,7 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_NETD_NATIVE,
         DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
         DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
     };
 
     private final String[] mGlobalSettings;

@@ -257,10 +257,20 @@ public final class DeviceConfig {
     /**
      * Namespace for storage-related features.
      *
+     * @deprecated Replace storage namespace with storage_native_boot.
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static final String NAMESPACE_STORAGE = "storage";
+
+    /**
+     * Namespace for storage-related features, including native and boot.
+     *
      * @hide
      */
     @SystemApi
-    public static final String NAMESPACE_STORAGE = "storage";
+    public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
 
     /**
      * Namespace for System UI related features.
