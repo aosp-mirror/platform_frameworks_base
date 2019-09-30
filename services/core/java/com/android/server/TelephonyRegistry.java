@@ -209,6 +209,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private Map<Integer, List<EmergencyNumber>> mEmergencyNumberList;
 
+    private EmergencyNumber[] mOutgoingSmsEmergencyNumber;
+
+    private EmergencyNumber[] mOutgoingCallEmergencyNumber;
+
     private CallQuality[] mCallQuality;
 
     private CallAttributes[] mCallAttributes;
@@ -266,6 +270,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
                 PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE;
+
+    static final int READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
+            PhoneStateListener.LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER
+                    | PhoneStateListener.LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER;
 
     private static final int MSG_USER_SWITCHED = 1;
     private static final int MSG_UPDATE_DEFAULT_SUB = 2;
@@ -407,6 +415,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mImsReasonInfo = new ArrayList<>();
         mPhysicalChannelConfigs = new ArrayList<>();
         mEmergencyNumberList = new HashMap<>();
+        mOutgoingCallEmergencyNumber = new EmergencyNumber[numPhones];
+        mOutgoingSmsEmergencyNumber = new EmergencyNumber[numPhones];
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -1928,6 +1938,56 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
+    public void notifyOutgoingEmergencyCall(int phoneId, int subId,
+            EmergencyNumber emergencyNumber) {
+        if (!checkNotifyPermission("notifyOutgoingEmergencyCall()")) {
+            return;
+        }
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                mOutgoingCallEmergencyNumber[phoneId] = emergencyNumber;
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER)
+                                    && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onOutgoingEmergencyCall(emergencyNumber);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
+    public void notifyOutgoingEmergencySms(int phoneId, int subId,
+            EmergencyNumber emergencyNumber) {
+        if (!checkNotifyPermission("notifyOutgoingEmergencySms()")) {
+            return;
+        }
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                mOutgoingSmsEmergencyNumber[phoneId] = emergencyNumber;
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER)
+                                    && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            r.callback.onOutgoingEmergencySms(emergencyNumber);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    @Override
     public void notifyCallQualityChanged(CallQuality callQuality, int phoneId, int subId,
             int callNetworkType) {
         if (!checkNotifyPermission("notifyCallQualityChanged()")) {
@@ -1999,6 +2059,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mCallAttributes=" + mCallAttributes[i]);
                 pw.println("mCallNetworkType=" + mCallNetworkType[i]);
                 pw.println("mPreciseDataConnectionState=" + mPreciseDataConnectionState[i]);
+                pw.println("mOutgoingCallEmergencyNumber=" + mOutgoingCallEmergencyNumber[i]);
+                pw.println("mOutgoingSmsEmergencyNumber=" + mOutgoingSmsEmergencyNumber[i]);
                 pw.decreaseIndent();
             }
             pw.println("mCarrierNetworkChangeState=" + mCarrierNetworkChangeState);
@@ -2266,6 +2328,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if ((events & PRECISE_PHONE_STATE_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRECISE_PHONE_STATE, null);
+        }
+
+        if ((events & READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION, null);
         }
 
         if ((events & PhoneStateListener.LISTEN_OEM_HOOK_RAW_EVENT) != 0) {
