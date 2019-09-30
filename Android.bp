@@ -112,6 +112,14 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-mime-sources",
+    srcs: [
+        "mime/java/**/*.java",
+    ],
+    path: "mime/java",
+}
+
+filegroup {
     name: "framework-opengl-sources",
     srcs: [
         "opengl/java/**/*.java",
@@ -176,6 +184,7 @@ filegroup {
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
+        ":framework-mime-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
         ":framework-sax-sources",
@@ -310,7 +319,10 @@ java_defaults {
 
     jarjar_rules: ":framework-jarjar-rules",
 
-    static_libs: ["framework-internal-utils"],
+    static_libs: [
+        "framework-internal-utils",
+        "mimemap",
+    ],
 
     required: [
         // TODO: remove gps_debug when the build system propagates "required" properly.
