@@ -1173,17 +1173,8 @@ public class ImsCallSession {
         public void callSessionMergeComplete(IImsCallSession newSession) {
             if (mListener != null) {
                 if (newSession != null) {
-                    // Check if the active session is the same session that was
-                    // active before the merge request was sent.
-                    ImsCallSession validActiveSession = ImsCallSession.this;
-                    try {
-                        if (!Objects.equals(miSession.getCallId(), newSession.getCallId())) {
-                            // New session created after conference
-                            validActiveSession = new ImsCallSession(newSession);
-                        }
-                    } catch (RemoteException rex) {
-                        Log.e(TAG, "callSessionMergeComplete: exception for getCallId!");
-                    }
+                    // New session created after conference
+                    ImsCallSession validActiveSession = new ImsCallSession(newSession);
                     mListener.callSessionMergeComplete(validActiveSession);
                } else {
                    // Session already exists. Hence no need to pass
