@@ -277,20 +277,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     selectPosition(holder.getAdapterPosition(), v);
                 }
             });
-            if (mNeedsFocus) {
-                // Wait for this to get laid out then set its focus.
-                // Ensure that tile gets laid out so we get the callback.
-                holder.mTileView.requestLayout();
-                holder.mTileView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-                    @Override
-                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                        holder.mTileView.removeOnLayoutChangeListener(this);
-                        holder.mTileView.requestFocus();
-                    }
-                });
-                mNeedsFocus = false;
-            }
+            focusOnHolder(holder);
             return;
         }
 
@@ -330,13 +317,35 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                         } else {
                             if (position < mEditIndex && canRemoveTiles()) {
                                 showAccessibilityDialog(position, v);
+                            } else if (position < mEditIndex && !canRemoveTiles()) {
+                                startAccessibleMove(position);
                             } else {
                                 startAccessibleAdd(position);
                             }
                         }
                     }
                 });
+                if (position == mAccessibilityFromIndex) {
+                    focusOnHolder(holder);
+                }
             }
+        }
+    }
+
+    private void focusOnHolder(Holder holder) {
+        if (mNeedsFocus) {
+            // Wait for this to get laid out then set its focus.
+            // Ensure that tile gets laid out so we get the callback.
+            holder.mTileView.requestLayout();
+            holder.mTileView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    holder.mTileView.removeOnLayoutChangeListener(this);
+                    holder.mTileView.requestFocus();
+                }
+            });
+            mNeedsFocus = false;
         }
     }
 
@@ -396,6 +405,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mAccessibilityFromIndex = position;
         mAccessibilityFromLabel = mTiles.get(position).state.label;
         mAccessibilityAction = ACTION_MOVE;
+        mNeedsFocus = true;
         notifyDataSetChanged();
     }
 
