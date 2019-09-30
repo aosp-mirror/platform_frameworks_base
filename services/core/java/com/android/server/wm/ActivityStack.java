@@ -2106,7 +2106,11 @@ class ActivityStack extends ConfigurationContainer {
             boolean aboveTop = top != null;
             final boolean stackShouldBeVisible = shouldBeVisible(starting);
             boolean behindFullscreenActivity = !stackShouldBeVisible;
-            final boolean resumeTopActivity = isFocusable() && isInStackLocked(starting) == null;
+            // We should not resume activities that being launched behind because these
+            // activities are actually behind other fullscreen activities, but still required
+            // to be visible (such as performing Recents animation).
+            final boolean resumeTopActivity = isFocusable() && isInStackLocked(starting) == null
+                    && top != null && !top.mLaunchTaskBehind;
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -2332,11 +2336,7 @@ class ActivityStack extends ConfigurationContainer {
                 r.setVisible(true);
             }
             if (r != starting) {
-                // We should not resume activities that being launched behind because these
-                // activities are actually behind other fullscreen activities, but still required
-                // to be visible (such as performing Recents animation).
-                mStackSupervisor.startSpecificActivityLocked(r, andResume && !r.mLaunchTaskBehind,
-                        true /* checkConfig */);
+                mStackSupervisor.startSpecificActivityLocked(r, andResume, true /* checkConfig */);
                 return true;
             }
         }
