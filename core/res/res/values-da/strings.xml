@@ -226,7 +226,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Indstillinger for telefon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skærmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Sluk"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Nødopkald"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Nødsituation"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Fejlrapport"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Afslut sessionen"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>

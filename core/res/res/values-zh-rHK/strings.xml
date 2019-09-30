@@ -201,7 +201,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"開啟無線網絡"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線網絡"</string>
     <string name="screen_lock" msgid="799094655496098153">"螢幕鎖定"</string>
-    <string name="power_off" msgid="4266614107412865048">"關閉"</string>
+    <string name="power_off" msgid="4266614107412865048">"關機"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"鈴聲震動"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"鈴聲開啟"</string>
@@ -225,7 +225,7 @@
     <string name="global_actions" product="tv" msgid="7240386462508182976">"電視選項"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"手機選項"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"螢幕鎖定"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"關閉"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"關機"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"緊急"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"錯誤報告"</string>
     <string name="global_action_logout" msgid="935179188218826050">"結束工作階段"</string>
