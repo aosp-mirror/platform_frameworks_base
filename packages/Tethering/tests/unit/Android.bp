@@ -18,7 +18,6 @@ android_test {
     name: "TetheringTests",
     certificate: "platform",
     srcs: [
-        ":servicescore-tethering-src",
         "src/**/*.java",
     ],
     test_suites: ["device-tests"],
@@ -39,19 +38,5 @@ android_test {
         // For mockito extended
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
-    ],
-}
-
-// This group would be removed when tethering migration is done.
-filegroup {
-    name: "tethering-tests-src",
-    srcs: [
-        "src/com/android/server/connectivity/tethering/EntitlementManagerTest.java",
-        "src/com/android/server/connectivity/tethering/OffloadControllerTest.java",
-        "src/com/android/server/connectivity/tethering/TetheringConfigurationTest.java",
-        "src/com/android/server/connectivity/tethering/UpstreamNetworkMonitorTest.java",
-        "src/android/net/dhcp/DhcpServingParamsParcelExtTest.java",
-        "src/android/net/ip/IpServerTest.java",
-        "src/android/net/util/InterfaceSetTest.java",
     ],
 }

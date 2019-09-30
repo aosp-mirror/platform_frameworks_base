@@ -22,13 +22,12 @@ java_defaults {
         ":framework-tethering-shared-srcs",
         ":net-module-utils-srcs",
         ":services-tethering-shared-srcs",
-        ":servicescore-tethering-src",
     ],
     static_libs: [
         "androidx.annotation_annotation",
-        "netd_aidl_interface-java",
+        "netd_aidl_interface-unstable-java",
         "netlink-client",
-        "networkstack-aidl-interfaces-java",
+        "networkstack-aidl-interfaces-unstable-java",
         "android.hardware.tetheroffload.control-V1.0-java",
         "tethering-client",
     ],
@@ -96,7 +95,16 @@ java_defaults {
 }
 
 // Non-updatable tethering running in the system server process for devices not using the module
-// TODO: build in-process tethering APK here.
+android_app {
+    name: "InProcessTethering",
+    defaults: ["TetheringAppDefaults"],
+    static_libs: ["TetheringApiCurrentLib"],
+    certificate: "platform",
+    manifest: "AndroidManifest_InProcess.xml",
+    // InProcessTethering is a replacement for Tethering
+    overrides: ["Tethering"],
+    // TODO: use PlatformNetworkPermissionConfig.
+}
 
 // Updatable tethering packaged as an application
 android_app {
@@ -108,37 +116,4 @@ android_app {
     use_embedded_native_libs: true,
     // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkPermissionConfig"],
-}
-
-// This group will be removed when tethering migration is done.
-filegroup {
-    name: "tethering-servicescore-srcs",
-    srcs: [
-        "src/com/android/server/connectivity/tethering/EntitlementManager.java",
-        "src/com/android/server/connectivity/tethering/OffloadController.java",
-        "src/com/android/server/connectivity/tethering/OffloadHardwareInterface.java",
-        "src/com/android/server/connectivity/tethering/TetheringConfiguration.java",
-        "src/com/android/server/connectivity/tethering/UpstreamNetworkMonitor.java",
-    ],
-}
-
-// This group will be removed when tethering migration is done.
-filegroup {
-    name: "tethering-servicesnet-srcs",
-    srcs: [
-        "src/android/net/dhcp/DhcpServerCallbacks.java",
-        "src/android/net/dhcp/DhcpServingParamsParcelExt.java",
-        "src/android/net/ip/IpServer.java",
-        "src/android/net/ip/RouterAdvertisementDaemon.java",
-        "src/android/net/util/InterfaceSet.java",
-        "src/android/net/util/PrefixUtils.java",
-    ],
-}
-
-// This group would be removed when tethering migration is done.
-filegroup {
-    name: "tethering-jni-srcs",
-    srcs: [
-        "jni/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
-    ],
 }
