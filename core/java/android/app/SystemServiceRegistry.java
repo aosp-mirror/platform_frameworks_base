@@ -671,7 +671,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<UiModeManager>() {
             @Override
             public UiModeManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new UiModeManager();
+                return new UiModeManager(ctx.getOuterContext());
             }});
 
         registerService(Context.USB_SERVICE, UsbManager.class,

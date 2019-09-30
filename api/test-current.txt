@@ -376,6 +376,7 @@ package android.app {
   }
 
   public class UiModeManager {
+    method @RequiresPermission("android.permission.ENTER_CAR_MODE_PRIORITIZED") public void enableCarMode(@IntRange(from=0) int, int);
     method public boolean isNightModeLocked();
     method public boolean isUiModeLocked();
   }
