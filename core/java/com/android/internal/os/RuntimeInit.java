@@ -20,7 +20,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
-import android.content.type.MimeMapImpl;
+import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Debug;
@@ -209,7 +209,7 @@ public class RuntimeInit {
          * contains many more entries that are derived from IANA registrations but
          * with several customizations (extensions, overrides).
          */
-        MimeMap.setDefault(MimeMapImpl.createDefaultInstance());
+        MimeMap.setDefault(DefaultMimeMapFactory.create());
     }
 
     @UnsupportedAppUsage
