@@ -56,8 +56,8 @@ import android.media.AudioManager;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -68,6 +68,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.sysprop.HdmiProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -95,6 +96,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Provides a service for sending and processing HDMI control messages,
@@ -452,7 +455,14 @@ public class HdmiControlService extends SystemService {
 
     public HdmiControlService(Context context) {
         super(context);
-        mLocalDevices = getIntList(SystemProperties.get(Constants.PROPERTY_DEVICE_TYPE));
+        List<Integer> deviceTypes = HdmiProperties.device_type();
+        if (deviceTypes.contains(null)) {
+            Slog.w(TAG, "Error parsing ro.hdmi.device.type: " + SystemProperties.get(
+                    "ro.hdmi.device_type"));
+            deviceTypes = deviceTypes.stream().filter(Objects::nonNull).collect(
+                    Collectors.toList());
+        }
+        mLocalDevices = deviceTypes;
         mSettingsObserver = new SettingsObserver(mHandler);
     }
 
