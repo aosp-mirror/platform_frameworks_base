@@ -70,7 +70,6 @@ import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
-import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.ImsMmTelManager;
@@ -5478,18 +5477,20 @@ public class TelephonyManager {
             telephony.requestCellInfoUpdate(
                     getSubId(),
                     new ICellInfoCallback.Stub() {
+                        @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onCellInfo(cellInfo)));
                         }
 
-                        public void onError(int errorCode, android.os.ParcelableException detail) {
+                        @Override
+                        public void onError(int errorCode, String exceptionName, String message) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
-                                            errorCode, detail.getCause())));
+                                            errorCode,
+                                            createThrowableByClassName(exceptionName, message))));
                         }
                     }, getOpPackageName());
-
         } catch (RemoteException ex) {
         }
     }
@@ -5518,19 +5519,34 @@ public class TelephonyManager {
             telephony.requestCellInfoUpdateWithWorkSource(
                     getSubId(),
                     new ICellInfoCallback.Stub() {
+                        @Override
                         public void onCellInfo(List<CellInfo> cellInfo) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onCellInfo(cellInfo)));
                         }
 
-                        public void onError(int errorCode, android.os.ParcelableException detail) {
+                        @Override
+                        public void onError(int errorCode, String exceptionName, String message) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
-                                            errorCode, detail.getCause())));
+                                            errorCode,
+                                            createThrowableByClassName(exceptionName, message))));
                         }
                     }, getOpPackageName(), workSource);
         } catch (RemoteException ex) {
         }
+    }
+
+    private static Throwable createThrowableByClassName(String className, String message) {
+        if (className == null) {
+            return null;
+        }
+        try {
+            Class<?> c = Class.forName(className);
+            return (Throwable) c.getConstructor(String.class).newInstance(message);
+        } catch (ReflectiveOperationException | ClassCastException e) {
+        }
+        return new RuntimeException(className + ": " + message);
     }
 
     /**
