@@ -1447,6 +1447,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         setDismissed(fromAccessibility);
         if (mEntry.isClearable()) {
+            // TODO: beverlyt, log dismissal
             // TODO: track dismiss sentiment
             if (mOnDismissRunnable != null) {
                 mOnDismissRunnable.run();

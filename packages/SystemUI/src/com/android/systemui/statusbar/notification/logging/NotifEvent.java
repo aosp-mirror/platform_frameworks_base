@@ -30,9 +30,9 @@ import java.lang.annotation.RetentionPolicy;
  * and triaging purposes.
  */
 public class NotifEvent extends RichEvent {
-    public static final int TOTAL_EVENT_TYPES = 8;
-    private StatusBarNotification mSbn;
-    private Ranking mRanking;
+    public static final int TOTAL_EVENT_TYPES = 11;
+    private final StatusBarNotification mSbn;
+    private final Ranking mRanking;
 
     /**
      * Creates a NotifEvent with an event type that matches with an index in the array
@@ -44,9 +44,20 @@ public class NotifEvent extends RichEvent {
     public NotifEvent(int logLevel, int type, String reason, StatusBarNotification sbn,
             Ranking ranking) {
         super(logLevel, type, reason);
-        mSbn = sbn.clone();
-        mRanking = new Ranking();
-        mRanking.populate(ranking);
+
+        if (sbn != null) {
+            mSbn = sbn.cloneLight();
+        } else {
+            mSbn = null;
+        }
+
+        if (ranking != null) {
+            mRanking = new Ranking();
+            mRanking.populate(ranking);
+        } else {
+            mRanking = null;
+        }
+
         mMessage += getExtraInfo();
     }
 
@@ -76,11 +87,14 @@ public class NotifEvent extends RichEvent {
                 "NotifAdded",
                 "NotifRemoved",
                 "NotifUpdated",
-                "HeadsUpStarted",
-                "HeadsUpEnded",
                 "Filter",
                 "Sort",
+                "FilterAndSort",
                 "NotifVisibilityChanged",
+                "LifetimeExtended",
+                "RemoveIntercepted",
+                "InflationAborted",
+                "Inflated"
         };
 
         if (events.length != TOTAL_EVENT_TYPES) {
@@ -135,8 +149,19 @@ public class NotifEvent extends RichEvent {
         }
     }
 
-    @IntDef({NOTIF_ADDED, NOTIF_REMOVED, NOTIF_UPDATED, HEADS_UP_STARTED, HEADS_UP_ENDED, FILTER,
-            SORT, NOTIF_VISIBILITY_CHANGED})
+    @IntDef({NOTIF_ADDED,
+            NOTIF_REMOVED,
+            NOTIF_UPDATED,
+            FILTER,
+            SORT,
+            FILTER_AND_SORT,
+            NOTIF_VISIBILITY_CHANGED,
+            LIFETIME_EXTENDED,
+            REMOVE_INTERCEPTED,
+            INFLATION_ABORTED,
+            INFLATED
+    })
+
     /**
      * Types of NotifEvents
      */
@@ -145,9 +170,13 @@ public class NotifEvent extends RichEvent {
     public static final int NOTIF_ADDED = 0;
     public static final int NOTIF_REMOVED = 1;
     public static final int NOTIF_UPDATED = 2;
-    public static final int HEADS_UP_STARTED = 3;
-    public static final int HEADS_UP_ENDED = 4;
-    public static final int FILTER = 5;
-    public static final int SORT = 6;
-    public static final int NOTIF_VISIBILITY_CHANGED = 7;
+    public static final int FILTER = 3;
+    public static final int SORT = 4;
+    public static final int FILTER_AND_SORT = 5;
+    public static final int NOTIF_VISIBILITY_CHANGED = 6;
+    public static final int LIFETIME_EXTENDED = 7;
+    // unable to remove notif - removal intercepted by {@link NotificationRemoveInterceptor}
+    public static final int REMOVE_INTERCEPTED = 8;
+    public static final int INFLATION_ABORTED = 9;
+    public static final int INFLATED = 10;
 }

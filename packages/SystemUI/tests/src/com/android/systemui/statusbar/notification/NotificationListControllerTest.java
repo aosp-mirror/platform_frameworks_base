@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,6 +44,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -76,7 +78,7 @@ public class NotificationListControllerTest extends SysuiTestCase {
     // TODO: Remove this once EntryManager no longer needs to be mocked
     private NotificationData mNotificationData =
             new NotificationData(new NotificationSectionsFeatureManager(
-                    new DeviceConfigProxyFake(), mContext));
+                    new DeviceConfigProxyFake(), mContext), mock(NotifLog.class));
 
     private int mNextNotifId = 0;
 
@@ -113,7 +115,7 @@ public class NotificationListControllerTest extends SysuiTestCase {
     @Test
     public void testCallUpdateNotificationsOnDeviceProvisionedChange() {
         mProvisionedListener.onDeviceProvisionedChanged();
-        verify(mEntryManager).updateNotifications();
+        verify(mEntryManager).updateNotifications(anyString());
     }
 
     @Test
@@ -133,8 +135,8 @@ public class NotificationListControllerTest extends SysuiTestCase {
 
         // THEN the app op is added to the entry
         assertTrue(entry.mActiveAppOps.contains(AppOpsManager.OP_CAMERA));
-        // THEN updateNotifications() is called
-        verify(mEntryManager, times(1)).updateNotifications();
+        // THEN updateNotifications(TEST) is called
+        verify(mEntryManager, times(1)).updateNotifications(anyString());
     }
 
     @Test
@@ -146,8 +148,8 @@ public class NotificationListControllerTest extends SysuiTestCase {
         // WHEN An unrelated notification gets a new app op
         mController.updateNotificationsForAppOp(AppOpsManager.OP_CAMERA, 1000, "pkg", true);
 
-        // THEN We never call updateNotifications()
-        verify(mEntryManager, never()).updateNotifications();
+        // THEN We never call updateNotifications(TEST)
+        verify(mEntryManager, never()).updateNotifications(anyString());
     }
 
     @Test

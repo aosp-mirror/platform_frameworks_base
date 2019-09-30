@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -62,7 +63,6 @@ import org.mockito.MockitoAnnotations;
 @org.junit.runner.RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
-
     private NotificationBlockingHelperManager mBlockingHelperManager;
 
     private NotificationTestHelper mHelper;
@@ -112,7 +112,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         assertTrue(mBlockingHelperManager.dismissCurrentBlockingHelper());
         assertTrue(mBlockingHelperManager.isBlockingHelperRowNull());
 
-        verify(mEntryManager, times(0)).updateNotifications();
+        verify(mEntryManager, times(0)).updateNotifications(anyString());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         assertTrue(mBlockingHelperManager.dismissCurrentBlockingHelper());
         assertTrue(mBlockingHelperManager.isBlockingHelperRowNull());
 
-        verify(mEntryManager).updateNotifications();
+        verify(mEntryManager).updateNotifications(anyString());
     }
 
     @Test
@@ -267,7 +267,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         assertTrue(mBlockingHelperManager.dismissCurrentBlockingHelper());
         assertTrue(mBlockingHelperManager.isBlockingHelperRowNull());
 
-        verify(mEntryManager).updateNotifications();
+        verify(mEntryManager).updateNotifications(anyString());
     }
 
     @Test

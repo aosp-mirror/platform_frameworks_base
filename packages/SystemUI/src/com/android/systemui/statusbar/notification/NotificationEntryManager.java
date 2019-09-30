@@ -40,6 +40,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
+import com.android.systemui.statusbar.notification.logging.NotifEvent;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
@@ -92,6 +94,7 @@ public class NotificationEntryManager implements
     private NotificationListenerService.RankingMap mLatestRankingMap;
     @VisibleForTesting
     protected NotificationData mNotificationData;
+    private NotifLog mNotifLog;
 
     @VisibleForTesting
     final ArrayList<NotificationLifetimeExtender> mNotificationLifetimeExtenders
@@ -123,8 +126,9 @@ public class NotificationEntryManager implements
     }
 
     @Inject
-    public NotificationEntryManager(NotificationData notificationData) {
+    public NotificationEntryManager(NotificationData notificationData, NotifLog notifLog) {
         mNotificationData = notificationData;
+        mNotifLog = notifLog;
     }
 
     /** Adds a {@link NotificationEntryListener}. */
@@ -178,7 +182,7 @@ public class NotificationEntryManager implements
 
     @Override
     public void onReorderingAllowed() {
-        updateNotifications();
+        updateNotifications("reordering is now allowed");
     }
 
     /**
@@ -203,15 +207,19 @@ public class NotificationEntryManager implements
         return NotificationVisibility.obtain(key, rank, count, true, location);
     }
 
-    private void abortExistingInflation(String key) {
+    private void abortExistingInflation(String key, String reason) {
         if (mPendingNotifications.containsKey(key)) {
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
+            mNotifLog.log(NotifEvent.INFLATION_ABORTED, entry.sbn(), null,
+                    "PendingNotification aborted. " + reason);
         }
         NotificationEntry addedEntry = mNotificationData.get(key);
         if (addedEntry != null) {
             addedEntry.abortTask();
+            mNotifLog.log(NotifEvent.INFLATION_ABORTED, addedEntry.sbn(),
+                    null, reason);
         }
     }
 
@@ -247,7 +255,7 @@ public class NotificationEntryManager implements
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onBeforeNotificationAdded(entry);
                 }
-                updateNotifications();
+                updateNotifications("onAsyncInflationFinished");
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onNotificationAdded(entry);
                 }
@@ -276,7 +284,8 @@ public class NotificationEntryManager implements
 
         if (mRemoveInterceptor != null
                 && mRemoveInterceptor.onNotificationRemoveRequested(key, reason)) {
-            // Remove intercepted; skip
+            // Remove intercepted; log and skip
+            mNotifLog.log(NotifEvent.REMOVE_INTERCEPTED);
             return;
         }
 
@@ -291,13 +300,17 @@ public class NotificationEntryManager implements
                     if (extender.shouldExtendLifetimeForPendingNotification(pendingEntry)) {
                         extendLifetime(pendingEntry, extender);
                         lifetimeExtended = true;
+                        mNotifLog.log(
+                                NotifEvent.LIFETIME_EXTENDED,
+                                pendingEntry.sbn(),
+                                "pendingEntry extendedBy=" + extender.toString());
                     }
                 }
             }
         }
 
         if (!lifetimeExtended) {
-            abortExistingInflation(key);
+            abortExistingInflation(key, "removeNotification");
         }
 
         if (entry != null) {
@@ -310,6 +323,10 @@ public class NotificationEntryManager implements
                         mLatestRankingMap = ranking;
                         extendLifetime(entry, extender);
                         lifetimeExtended = true;
+                        mNotifLog.log(
+                                NotifEvent.LIFETIME_EXTENDED,
+                                entry.sbn(),
+                                "entry extendedBy=" + extender.toString());
                         break;
                     }
                 }
@@ -329,10 +346,12 @@ public class NotificationEntryManager implements
                 handleGroupSummaryRemoved(key);
 
                 mNotificationData.remove(key, ranking);
-                updateNotifications();
+                updateNotifications("removeNotificationInternal");
                 Dependency.get(LeakDetector.class).trackGarbage(entry);
                 removedByUser |= entryDismissed;
 
+                mNotifLog.log(NotifEvent.NOTIF_REMOVED, entry.sbn(),
+                        "removedByUser=" + removedByUser);
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryRemoved(entry, visibility, removedByUser);
                 }
@@ -389,7 +408,7 @@ public class NotificationEntryManager implements
             Log.d(TAG, "addNotification key=" + key);
         }
 
-        mNotificationData.updateRanking(rankingMap);
+        mNotificationData.updateRanking(rankingMap, "addNotificationInternal");
         Ranking ranking = new Ranking();
         rankingMap.getRanking(key, ranking);
 
@@ -400,9 +419,9 @@ public class NotificationEntryManager implements
         requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
                 REASON_CANCEL));
 
-        abortExistingInflation(key);
-
+        abortExistingInflation(key, "addNotification");
         mPendingNotifications.put(key, entry);
+        mNotifLog.log(NotifEvent.NOTIF_ADDED, entry.sbn());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPendingEntryAdded(entry);
         }
@@ -423,7 +442,7 @@ public class NotificationEntryManager implements
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final String key = notification.getKey();
-        abortExistingInflation(key);
+        abortExistingInflation(key, "updateNotification");
         NotificationEntry entry = mNotificationData.get(key);
         if (entry == null) {
             return;
@@ -433,15 +452,15 @@ public class NotificationEntryManager implements
         // to keep its lifetime extended.
         cancelLifetimeExtension(entry);
 
-        mNotificationData.update(entry, ranking, notification);
-
+        mNotificationData.update(entry, ranking, notification, "updateNotificationInternal");
+        mNotifLog.log(NotifEvent.NOTIF_UPDATED, entry.sbn(), entry.ranking());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }
 
         requireBinder().inflateViews(entry, () -> performRemoveNotification(notification,
                 REASON_CANCEL));
-        updateNotifications();
+        updateNotifications("updateNotificationInternal");
 
         if (DEBUG) {
             // Is this for you?
@@ -465,8 +484,12 @@ public class NotificationEntryManager implements
         }
     }
 
-    public void updateNotifications() {
-        mNotificationData.filterAndSort();
+    /**
+     * Update the notifications
+     * @param reason why the notifications are updating
+     */
+    public void updateNotifications(String reason) {
+        mNotificationData.filterAndSort(reason);
         if (mPresenter != null) {
             mPresenter.updateNotificationViews();
         }
@@ -489,7 +512,7 @@ public class NotificationEntryManager implements
         }
 
         // Populate notification entries from the new rankings.
-        mNotificationData.updateRanking(rankingMap);
+        mNotificationData.updateRanking(rankingMap, "updateNotificationRanking");
         updateRankingOfPendingNotifications(rankingMap);
 
         // By comparing the old and new UI adjustments, reinflate the view accordingly.
@@ -501,7 +524,7 @@ public class NotificationEntryManager implements
                     NotificationUiAdjustment.extractFromNotificationEntry(entry));
         }
 
-        updateNotifications();
+        updateNotifications("updateNotificationRanking");
 
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onNotificationRankingUpdated(rankingMap);

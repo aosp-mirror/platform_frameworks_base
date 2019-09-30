@@ -5333,7 +5333,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         requestChildrenUpdate();
         onUpdateRowStates();
 
-        mEntryManager.updateNotifications();
+        mEntryManager.updateNotifications("StatusBar state changed");
         updateVisibility();
     }
 
@@ -6492,12 +6492,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         @Override
         public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
-            mStatusBar.requestNotificationUpdate();
+            mStatusBar.requestNotificationUpdate("onGroupCreatedFromChildren");
         }
 
         @Override
         public void onGroupsChanged() {
-            mStatusBar.requestNotificationUpdate();
+            mStatusBar.requestNotificationUpdate("onGroupsChanged");
         }
     };
 

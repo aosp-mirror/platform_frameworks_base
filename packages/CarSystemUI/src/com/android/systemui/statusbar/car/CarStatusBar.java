@@ -108,6 +108,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -296,7 +297,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild) {
+            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
+            NotifLog notifLog) {
         super(
                 lightBarController,
                 autoHideController,
@@ -350,7 +352,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notificationListener,
                 configurationController,
                 statusBarWindowController,
-                statusBarWindowViewControllerBuild);
+                statusBarWindowViewControllerBuild,
+                notifLog);
         mNavigationBarController = navigationBarController;
     }
 

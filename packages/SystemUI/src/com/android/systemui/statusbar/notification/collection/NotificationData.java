@@ -35,6 +35,8 @@ import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
+import com.android.systemui.statusbar.notification.logging.NotifEvent;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -73,10 +75,13 @@ public class NotificationData {
     private RankingMap mRankingMap;
     private final Ranking mTmpRanking = new Ranking();
     private final boolean mUsePeopleFiltering;
+    private final NotifLog mNotifLog;
 
     @Inject
-    public NotificationData(NotificationSectionsFeatureManager sectionsFeatureManager) {
+    public NotificationData(NotificationSectionsFeatureManager sectionsFeatureManager,
+            NotifLog notifLog) {
         mUsePeopleFiltering = sectionsFeatureManager.isFilteringEnabled();
+        mNotifLog = notifLog;
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
@@ -179,7 +184,7 @@ public class NotificationData {
         }
         mGroupManager.onEntryAdded(entry);
 
-        updateRankingAndSort(mRankingMap);
+        updateRankingAndSort(mRankingMap, "addEntry=" + entry.sbn());
     }
 
     public NotificationEntry remove(String key, RankingMap ranking) {
@@ -189,7 +194,7 @@ public class NotificationData {
         }
         if (removed == null) return null;
         mGroupManager.onEntryRemoved(removed);
-        updateRankingAndSort(ranking);
+        updateRankingAndSort(ranking, "removeEntry=" + removed.sbn());
         return removed;
     }
 
@@ -197,15 +202,19 @@ public class NotificationData {
     public void update(
             NotificationEntry entry,
             RankingMap ranking,
-            StatusBarNotification notification) {
-        updateRanking(ranking);
+            StatusBarNotification notification,
+            String reason) {
+        updateRanking(ranking, reason);
         final StatusBarNotification oldNotification = entry.notification;
         entry.setNotification(notification);
         mGroupManager.onEntryUpdated(entry, oldNotification);
     }
 
-    public void updateRanking(RankingMap ranking) {
-        updateRankingAndSort(ranking);
+    /**
+     * Update ranking and trigger a re-sort
+     */
+    public void updateRanking(RankingMap ranking, String reason) {
+        updateRankingAndSort(ranking, reason);
     }
 
     public void updateAppOp(int appOp, int uid, String pkg, String key, boolean showIcon) {
@@ -352,7 +361,7 @@ public class NotificationData {
         return false;
     }
 
-    private void updateRankingAndSort(RankingMap rankingMap) {
+    private void updateRankingAndSort(RankingMap rankingMap, String reason) {
         if (rankingMap != null) {
             mRankingMap = rankingMap;
             synchronized (mEntries) {
@@ -375,7 +384,7 @@ public class NotificationData {
                 }
             }
         }
-        filterAndSort();
+        filterAndSort(reason);
     }
 
     /**
@@ -393,7 +402,11 @@ public class NotificationData {
 
     // TODO: This should not be public. Instead the Environment should notify this class when
     // anything changed, and this class should call back the UI so it updates itself.
-    public void filterAndSort() {
+    /**
+     * Filters and sorts the list of notification entries
+     */
+    public void filterAndSort(String reason) {
+        mNotifLog.log(NotifEvent.FILTER_AND_SORT, reason);
         mSortedAndFiltered.clear();
 
         synchronized (mEntries) {
