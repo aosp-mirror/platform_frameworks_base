@@ -341,7 +341,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
             }
         }
 
-        if (Type.contains("Map<")) {
+        if (FieldClass.endsWith("Map") && FieldInnerType != null) {
             generateBuilderMethod(
                     name = adderName,
                     defVisibility = visibility,
@@ -533,7 +533,7 @@ fun ClassPrinter.generateParcelable() {
                             } else if (Type !in PRIMITIVE_TYPES + "String" + "Bundle" &&
                                     (!isArray || FieldInnerType !in PRIMITIVE_TYPES + "String") &&
                                     ParcelMethodsSuffix != "Parcelable") {
-                                !"($Type) "
+                                !"($FieldClass) "
                             }
                         }
 
@@ -541,12 +541,15 @@ fun ClassPrinter.generateParcelable() {
                         when {
                             ParcelMethodsSuffix == "Parcelable" ->
                                 methodArgs += "$FieldClass.class.getClassLoader()"
+                            ParcelMethodsSuffix == "SparseArray" ->
+                                methodArgs += "$FieldInnerClass.class.getClassLoader()"
                             ParcelMethodsSuffix == "TypedObject" ->
                                 methodArgs += "$FieldClass.CREATOR"
                             ParcelMethodsSuffix == "TypedArray" ->
                                 methodArgs += "$FieldInnerClass.CREATOR"
+                            ParcelMethodsSuffix == "Map" ->
+                                methodArgs += "${fieldTypeGenegicArgs[1].substringBefore("<")}.class.getClassLoader()"
                             ParcelMethodsSuffix.startsWith("Parcelable")
-                                    || FieldClass == "Map"
                                     || (isList || isArray)
                                     && FieldInnerType !in PRIMITIVE_TYPES + "String" ->
                                 methodArgs += "$FieldInnerClass.class.getClassLoader()"

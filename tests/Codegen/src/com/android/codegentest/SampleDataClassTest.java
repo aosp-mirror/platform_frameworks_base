@@ -25,9 +25,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import android.net.LinkAddress;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -36,6 +41,9 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -207,6 +215,32 @@ public class SampleDataClassTest {
     @Test(expected = IllegalStateException.class)
     public void testCustomAnnotationValidation_isRun() {
         newBuilder().setDayOfWeek(42).build();
+    }
+
+    @Test
+    public void testDataStructures_parcelCorrectly() {
+        SampleWithCustomBuilder otherParcelable = new SampleWithCustomBuilder.Builder().setDelay(3, SECONDS).build();
+
+        ParcelAllTheThingsDataClass instance = new ParcelAllTheThingsDataClass.Builder()
+                .setIntArray(40, 41)
+                .addMap("foo", otherParcelable)
+                .setSparseArray(new SparseArray<SampleWithCustomBuilder>() {{
+                    put(45, otherParcelable);
+                }})
+                .setSparseIntArray(new SparseIntArray() {{
+                    put(48, 49);
+                }})
+                .addStringMap("foo2", "fooValue")
+                .setStringArray("foo", "bar")
+                .addStringList("foo")
+                .build();
+
+        ParcelAllTheThingsDataClass unparceledInstance =
+                parcelAndUnparcel(instance, ParcelAllTheThingsDataClass.CREATOR);
+
+        // SparseArray and friends don't implement equals
+        // so just compare string representations instead
+        assertEquals(instance.toString(), unparceledInstance.toString());
     }
 
     private static <T extends Parcelable> T parcelAndUnparcel(
