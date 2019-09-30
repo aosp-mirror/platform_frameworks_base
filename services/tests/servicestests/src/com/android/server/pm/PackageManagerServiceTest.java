@@ -87,7 +87,7 @@ public class PackageManagerServiceTest {
         setting = new PackageSetting("name", "realName", new File("codePath"),
                 new File("resourcePath"), "legacyNativeLibraryPathString",
                 "primaryCpuAbiString", "secondaryCpuAbiString",
-                "cpuAbiOverrideString", 0, 0, 0, 0,
+                "cpuAbiOverrideString", 0, 0, 0, "parentPackageName", null, 0,
                 null, null);
         pri.populateUsers(new int[] {
                 1, 2, 3, 4, 5

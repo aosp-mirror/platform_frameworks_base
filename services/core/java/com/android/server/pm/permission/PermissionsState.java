@@ -23,7 +23,6 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import com.android.internal.annotations.GuardedBy;
 
 /**
  * This class encapsulates the permissions for a package or a shared user.

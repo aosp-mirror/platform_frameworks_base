@@ -20,11 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.AndroidPackage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -139,7 +137,7 @@ class InstantAppRegistry {
     public byte[] getInstantAppCookieLPw(@NonNull String packageName,
             @UserIdInt int userId) {
         // Only installed packages can get their own cookie
-        AndroidPackage pkg = mService.mPackages.get(packageName);
+        PackageParser.Package pkg = mService.mPackages.get(packageName);
         if (pkg == null) {
             return null;
         }
@@ -173,7 +171,7 @@ class InstantAppRegistry {
         }
 
         // Only an installed package can set its own cookie
-        AndroidPackage pkg = mService.mPackages.get(packageName);
+        PackageParser.Package pkg = mService.mPackages.get(packageName);
         if (pkg == null) {
             return false;
         }
@@ -266,15 +264,15 @@ class InstantAppRegistry {
     }
 
     @GuardedBy("mService.mLock")
-    public void onPackageInstalledLPw(@NonNull AndroidPackage pkg, @NonNull int[] userIds) {
-        PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
+    public void onPackageInstalledLPw(@NonNull PackageParser.Package pkg, @NonNull int[] userIds) {
+        PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
             return;
         }
 
         for (int userId : userIds) {
             // Ignore not installed apps
-            if (mService.mPackages.get(pkg.getPackageName()) == null || !ps.getInstalled(userId)) {
+            if (mService.mPackages.get(pkg.packageName) == null || !ps.getInstalled(userId)) {
                 continue;
             }
 
@@ -288,16 +286,16 @@ class InstantAppRegistry {
 
             // Remove the in-memory state
             removeUninstalledInstantAppStateLPw((UninstalledInstantAppState state) ->
-                            state.mInstantAppInfo.getPackageName().equals(pkg.getPackageName()),
+                            state.mInstantAppInfo.getPackageName().equals(pkg.packageName),
                     userId);
 
             // Remove the on-disk state except the cookie
-            File instantAppDir = getInstantApplicationDir(pkg.getPackageName(), userId);
+            File instantAppDir = getInstantApplicationDir(pkg.packageName, userId);
             new File(instantAppDir, INSTANT_APP_METADATA_FILE).delete();
             new File(instantAppDir, INSTANT_APP_ICON_FILE).delete();
 
             // If app signature changed - wipe the cookie
-            File currentCookieFile = peekInstantCookieFile(pkg.getPackageName(), userId);
+            File currentCookieFile = peekInstantCookieFile(pkg.packageName, userId);
             if (currentCookieFile == null) {
                 continue;
             }
@@ -312,7 +310,7 @@ class InstantAppRegistry {
             // We prefer the modern computation procedure where all certs are taken
             // into account but also allow the value from the old computation to avoid
             // data loss.
-            if (pkg.getSigningDetails().checkCapability(currentCookieSha256,
+            if (pkg.mSigningDetails.checkCapability(currentCookieSha256,
                     PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
                 return;
             }
@@ -320,7 +318,7 @@ class InstantAppRegistry {
             // For backwards compatibility we accept match based on any signature, since we may have
             // recorded only the first for multiply-signed packages
             final String[] signaturesSha256Digests =
-                    PackageUtils.computeSignaturesSha256Digests(pkg.getSigningDetails().signatures);
+                    PackageUtils.computeSignaturesSha256Digests(pkg.mSigningDetails.signatures);
             for (String s : signaturesSha256Digests) {
                 if (s.equals(currentCookieSha256)) {
                     return;
@@ -328,7 +326,7 @@ class InstantAppRegistry {
             }
 
             // Sorry, you are out of luck - different signatures - nuke data
-            Slog.i(LOG_TAG, "Signature for package " + pkg.getPackageName()
+            Slog.i(LOG_TAG, "Signature for package " + pkg.packageName
                     + " changed - dropping cookie");
                 // Make sure a pending write for the old signed app is cancelled
             mCookiePersistence.cancelPendingPersistLPw(pkg, userId);
@@ -337,15 +335,15 @@ class InstantAppRegistry {
     }
 
     @GuardedBy("mService.mLock")
-    public void onPackageUninstalledLPw(@NonNull AndroidPackage pkg,
+    public void onPackageUninstalledLPw(@NonNull PackageParser.Package pkg,
             @NonNull int[] userIds) {
-        PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
+        PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
             return;
         }
 
         for (int userId : userIds) {
-            if (mService.mPackages.get(pkg.getPackageName()) != null && ps.getInstalled(userId)) {
+            if (mService.mPackages.get(pkg.packageName) != null && ps.getInstalled(userId)) {
                 continue;
             }
 
@@ -355,7 +353,7 @@ class InstantAppRegistry {
                 removeInstantAppLPw(userId, ps.appId);
             } else {
                 // Deleting an app prunes all instant state such as cookie
-                deleteDir(getInstantApplicationDir(pkg.getPackageName(), userId));
+                deleteDir(getInstantApplicationDir(pkg.packageName, userId));
                 mCookiePersistence.cancelPendingPersistLPw(pkg, userId);
                 removeAppLPw(userId, ps.appId);
             }
@@ -489,7 +487,7 @@ class InstantAppRegistry {
     }
 
     @GuardedBy("mService.mLock")
-    private void addUninstalledInstantAppLPw(@NonNull AndroidPackage pkg,
+    private void addUninstalledInstantAppLPw(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
         InstantAppInfo uninstalledApp = createInstantAppInfoForPackage(
                 pkg, userId, false);
@@ -513,15 +511,14 @@ class InstantAppRegistry {
         writeInstantApplicationIconLPw(pkg, userId);
     }
 
-    private void writeInstantApplicationIconLPw(@NonNull AndroidPackage pkg,
+    private void writeInstantApplicationIconLPw(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
-        File appDir = getInstantApplicationDir(pkg.getPackageName(), userId);
+        File appDir = getInstantApplicationDir(pkg.packageName, userId);
         if (!appDir.exists()) {
             return;
         }
 
-        // TODO(b/135203078): Remove toAppInfo call? Requires significant additions/changes to PM
-        Drawable icon = pkg.toAppInfo().loadIcon(mService.mContext.getPackageManager());
+        Drawable icon = pkg.applicationInfo.loadIcon(mService.mContext.getPackageManager());
 
         final Bitmap bitmap;
         if (icon instanceof BitmapDrawable) {
@@ -534,7 +531,7 @@ class InstantAppRegistry {
             icon.draw(canvas);
         }
 
-        File iconFile = new File(getInstantApplicationDir(pkg.getPackageName(), userId),
+        File iconFile = new File(getInstantApplicationDir(pkg.packageName, userId),
                 INSTANT_APP_ICON_FILE);
 
         try (FileOutputStream out = new FileOutputStream(iconFile)) {
@@ -693,16 +690,14 @@ class InstantAppRegistry {
 
             final int packageCount = mService.mPackages.size();
             for (int i = 0; i < packageCount; i++) {
-                final AndroidPackage pkg = mService.mPackages.valueAt(i);
+                final PackageParser.Package pkg = mService.mPackages.valueAt(i);
                 if (now - pkg.getLatestPackageUseTimeInMills() < maxInstalledCacheDuration) {
                     continue;
                 }
-
-                final PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
-                if (ps == null) {
+                if (!(pkg.mExtras instanceof PackageSetting)) {
                     continue;
                 }
-
+                final PackageSetting  ps = (PackageSetting) pkg.mExtras;
                 boolean installedOnlyAsInstantApp = false;
                 for (int userId : allUsers) {
                     if (ps.getInstalled(userId)) {
@@ -718,14 +713,14 @@ class InstantAppRegistry {
                     if (packagesToDelete == null) {
                         packagesToDelete = new ArrayList<>();
                     }
-                    packagesToDelete.add(pkg.getPackageName());
+                    packagesToDelete.add(pkg.packageName);
                 }
             }
 
             if (packagesToDelete != null) {
                 packagesToDelete.sort((String lhs, String rhs) -> {
-                    final AndroidPackage lhsPkg = mService.mPackages.get(lhs);
-                    final AndroidPackage rhsPkg = mService.mPackages.get(rhs);
+                    final PackageParser.Package lhsPkg = mService.mPackages.get(lhs);
+                    final PackageParser.Package rhsPkg = mService.mPackages.get(rhs);
                     if (lhsPkg == null && rhsPkg == null) {
                         return 0;
                     } else if (lhsPkg == null) {
@@ -740,22 +735,17 @@ class InstantAppRegistry {
                                 rhsPkg.getLatestPackageUseTimeInMills()) {
                             return -1;
                         } else {
-                            final PackageSetting lhsPs = mService.getPackageSetting(
-                                    lhsPkg.getPackageName());
-                            if (lhsPs == null) {
-                                return 0;
-                            }
-
-                            final PackageSetting rhsPs = mService.getPackageSetting(
-                                    rhsPkg.getPackageName());
-                            if (rhsPs == null) {
-                                return 0;
-                            }
-
-                            if (lhsPs.firstInstallTime > rhsPs.firstInstallTime) {
-                                return 1;
+                            if (lhsPkg.mExtras instanceof PackageSetting
+                                    && rhsPkg.mExtras instanceof PackageSetting) {
+                                final PackageSetting lhsPs = (PackageSetting) lhsPkg.mExtras;
+                                final PackageSetting rhsPs = (PackageSetting) rhsPkg.mExtras;
+                                if (lhsPs.firstInstallTime > rhsPs.firstInstallTime) {
+                                    return 1;
+                                } else {
+                                    return -1;
+                                }
                             } else {
-                                return -1;
+                                return 0;
                             }
                         }
                     }
@@ -828,8 +818,8 @@ class InstantAppRegistry {
 
         final int packageCount = mService.mPackages.size();
         for (int i = 0; i < packageCount; i++) {
-            final AndroidPackage pkg = mService.mPackages.valueAt(i);
-            final PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
+            final PackageParser.Package pkg = mService.mPackages.valueAt(i);
+            final PackageSetting ps = (PackageSetting) pkg.mExtras;
             if (ps == null || !ps.getInstantApp(userId)) {
                 continue;
             }
@@ -849,9 +839,9 @@ class InstantAppRegistry {
 
     private @NonNull
     InstantAppInfo createInstantAppInfoForPackage(
-            @NonNull AndroidPackage pkg, @UserIdInt int userId,
+            @NonNull PackageParser.Package pkg, @UserIdInt int userId,
             boolean addApplicationInfo) {
-        PackageSetting ps = mService.getPackageSetting(pkg.getPackageName());
+        PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
             return null;
         }
@@ -859,20 +849,19 @@ class InstantAppRegistry {
             return null;
         }
 
-        String[] requestedPermissions = new String[pkg.getRequestedPermissions().size()];
-        pkg.getRequestedPermissions().toArray(requestedPermissions);
+        String[] requestedPermissions = new String[pkg.requestedPermissions.size()];
+        pkg.requestedPermissions.toArray(requestedPermissions);
 
         Set<String> permissions = ps.getPermissionsState().getPermissions(userId);
         String[] grantedPermissions = new String[permissions.size()];
         permissions.toArray(grantedPermissions);
 
-        ApplicationInfo appInfo = pkg.toAppInfo();
         if (addApplicationInfo) {
-            return new InstantAppInfo(appInfo,
+            return new InstantAppInfo(pkg.applicationInfo,
                     requestedPermissions, grantedPermissions);
         } else {
-            return new InstantAppInfo(appInfo.packageName,
-                    appInfo.loadLabel(mService.mContext.getPackageManager()),
+            return new InstantAppInfo(pkg.applicationInfo.packageName,
+                    pkg.applicationInfo.loadLabel(mService.mContext.getPackageManager()),
                     requestedPermissions, grantedPermissions);
         }
     }
@@ -898,10 +887,10 @@ class InstantAppRegistry {
         return uninstalledApps;
     }
 
-    private void propagateInstantAppPermissionsIfNeeded(@NonNull AndroidPackage pkg,
+    private void propagateInstantAppPermissionsIfNeeded(@NonNull PackageParser.Package pkg,
             @UserIdInt int userId) {
         InstantAppInfo appInfo = peekOrParseUninstalledInstantAppInfo(
-                pkg.getPackageName(), userId);
+                pkg.packageName, userId);
         if (appInfo == null) {
             return;
         }
@@ -913,10 +902,8 @@ class InstantAppRegistry {
             for (String grantedPermission : appInfo.getGrantedPermissions()) {
                 final boolean propagatePermission =
                         mService.mSettings.canPropagatePermissionToInstantApp(grantedPermission);
-                if (propagatePermission && pkg.getRequestedPermissions().contains(
-                        grantedPermission)) {
-                    mService.grantRuntimePermission(pkg.getPackageName(), grantedPermission,
-                            userId);
+                if (propagatePermission && pkg.requestedPermissions.contains(grantedPermission)) {
+                    mService.grantRuntimePermission(pkg.packageName, grantedPermission, userId);
                 }
             }
         } finally {
@@ -1201,19 +1188,18 @@ class InstantAppRegistry {
             super(looper);
         }
 
-        public void schedulePersistLPw(@UserIdInt int userId, @NonNull AndroidPackage pkg,
+        public void schedulePersistLPw(@UserIdInt int userId, @NonNull PackageParser.Package pkg,
                 @NonNull byte[] cookie) {
             // Before we used only the first signature to compute the SHA 256 but some
             // apps could be singed by multiple certs and the cert order is undefined.
             // We prefer the modern computation procedure where all certs are taken
             // into account and delete the file derived via the legacy hash computation.
-            File newCookieFile = computeInstantCookieFile(pkg.getPackageName(),
-                    PackageUtils.computeSignaturesSha256Digest(pkg.getSigningDetails().signatures),
-                    userId);
-            if (!pkg.getSigningDetails().hasSignatures()) {
+            File newCookieFile = computeInstantCookieFile(pkg.packageName,
+                    PackageUtils.computeSignaturesSha256Digest(pkg.mSigningDetails.signatures), userId);
+            if (!pkg.mSigningDetails.hasSignatures()) {
                 Slog.wtf(LOG_TAG, "Parsed Instant App contains no valid signatures!");
             }
-            File oldCookieFile = peekInstantCookieFile(pkg.getPackageName(), userId);
+            File oldCookieFile = peekInstantCookieFile(pkg.packageName, userId);
             if (oldCookieFile != null && !newCookieFile.equals(oldCookieFile)) {
                 oldCookieFile.delete();
             }
@@ -1223,12 +1209,12 @@ class InstantAppRegistry {
                     PERSIST_COOKIE_DELAY_MILLIS);
         }
 
-        public @Nullable byte[] getPendingPersistCookieLPr(@NonNull AndroidPackage pkg,
+        public @Nullable byte[] getPendingPersistCookieLPr(@NonNull PackageParser.Package pkg,
                 @UserIdInt int userId) {
             ArrayMap<String, SomeArgs> pendingWorkForUser =
                     mPendingPersistCookies.get(userId);
             if (pendingWorkForUser != null) {
-                SomeArgs state = pendingWorkForUser.get(pkg.getPackageName());
+                SomeArgs state = pendingWorkForUser.get(pkg.packageName);
                 if (state != null) {
                     return (byte[]) state.arg1;
                 }
@@ -1236,7 +1222,7 @@ class InstantAppRegistry {
             return null;
         }
 
-        public void cancelPendingPersistLPw(@NonNull AndroidPackage pkg,
+        public void cancelPendingPersistLPw(@NonNull PackageParser.Package pkg,
                 @UserIdInt int userId) {
             removeMessages(userId, pkg);
             SomeArgs state = removePendingPersistCookieLPr(pkg, userId);
@@ -1246,7 +1232,7 @@ class InstantAppRegistry {
         }
 
         private void addPendingPersistCookieLPw(@UserIdInt int userId,
-                @NonNull AndroidPackage pkg, @NonNull byte[] cookie,
+                @NonNull PackageParser.Package pkg, @NonNull byte[] cookie,
                 @NonNull File cookieFile) {
             ArrayMap<String, SomeArgs> pendingWorkForUser =
                     mPendingPersistCookies.get(userId);
@@ -1257,16 +1243,16 @@ class InstantAppRegistry {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = cookie;
             args.arg2 = cookieFile;
-            pendingWorkForUser.put(pkg.getPackageName(), args);
+            pendingWorkForUser.put(pkg.packageName, args);
         }
 
-        private SomeArgs removePendingPersistCookieLPr(@NonNull AndroidPackage pkg,
+        private SomeArgs removePendingPersistCookieLPr(@NonNull PackageParser.Package pkg,
                 @UserIdInt int userId) {
             ArrayMap<String, SomeArgs> pendingWorkForUser =
                     mPendingPersistCookies.get(userId);
             SomeArgs state = null;
             if (pendingWorkForUser != null) {
-                state = pendingWorkForUser.remove(pkg.getPackageName());
+                state = pendingWorkForUser.remove(pkg.packageName);
                 if (pendingWorkForUser.isEmpty()) {
                     mPendingPersistCookies.remove(userId);
                 }
@@ -1277,7 +1263,7 @@ class InstantAppRegistry {
         @Override
         public void handleMessage(Message message) {
             int userId = message.what;
-            AndroidPackage pkg = (AndroidPackage) message.obj;
+            PackageParser.Package pkg = (PackageParser.Package) message.obj;
             SomeArgs state = removePendingPersistCookieLPr(pkg, userId);
             if (state == null) {
                 return;
@@ -1285,7 +1271,7 @@ class InstantAppRegistry {
             byte[] cookie = (byte[]) state.arg1;
             File cookieFile = (File) state.arg2;
             state.recycle();
-            persistInstantApplicationCookie(cookie, pkg.getPackageName(), cookieFile, userId);
+            persistInstantApplicationCookie(cookie, pkg.packageName, cookieFile, userId);
         }
     }
 }

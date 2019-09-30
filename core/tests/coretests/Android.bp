@@ -74,6 +74,7 @@ java_genrule {
         ":FrameworksCoreTests_install_loc_internal",
         ":FrameworksCoreTests_install_loc_sdcard",
         ":FrameworksCoreTests_install_loc_unspecified",
+        ":FrameworksCoreTests_install_multi_package",
         ":FrameworksCoreTests_install_split_base",
         ":FrameworksCoreTests_install_split_feature_a",
         ":FrameworksCoreTests_install_use_perm_good",

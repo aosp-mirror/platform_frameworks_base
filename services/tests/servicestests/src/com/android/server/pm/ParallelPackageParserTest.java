@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.content.pm.parsing.ParsedPackage;
 import android.util.Log;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -75,7 +74,7 @@ public class ParallelPackageParserTest {
         }
 
         @Override
-        protected ParsedPackage parsePackage(PackageParser packageParser, File scanFile,
+        protected PackageParser.Package parsePackage(PackageParser packageParser, File scanFile,
                 int parseFlags) throws PackageParser.PackageParserException {
             // Do not actually parse the package for testing
             return null;

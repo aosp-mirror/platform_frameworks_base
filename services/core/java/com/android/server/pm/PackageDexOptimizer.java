@@ -41,10 +41,10 @@ import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageParser;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -53,7 +53,6 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -110,9 +109,9 @@ public class PackageDexOptimizer {
         this.mSystemReady = from.mSystemReady;
     }
 
-    static boolean canOptimizePackage(AndroidPackage pkg) {
+    static boolean canOptimizePackage(PackageParser.Package pkg) {
         // We do not dexopt a package with no code.
-        if ((pkg.getFlags() & ApplicationInfo.FLAG_HAS_CODE) == 0) {
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
             return false;
         }
 
@@ -126,18 +125,18 @@ public class PackageDexOptimizer {
      * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
      * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(AndroidPackage pkg,
+    int performDexOpt(PackageParser.Package pkg,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
-        if (pkg.getUid() == -1) {
-            throw new IllegalArgumentException("Dexopt for " + pkg.getPackageName()
+        if (pkg.applicationInfo.uid == -1) {
+            throw new IllegalArgumentException("Dexopt for " + pkg.packageName
                     + " has invalid uid.");
         }
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
         synchronized (mInstallLock) {
-            final long acquireTime = acquireWakeLockLI(pkg.getUid());
+            final long acquireTime = acquireWakeLockLI(pkg.applicationInfo.uid);
             try {
                 return performDexOptLI(pkg, instructionSets,
                         packageStats, packageUseInfo, options);
@@ -152,20 +151,19 @@ public class PackageDexOptimizer {
      * It assumes the install lock is held.
      */
     @GuardedBy("mInstallLock")
-    private int performDexOptLI(AndroidPackage pkg,
+    private int performDexOptLI(PackageParser.Package pkg,
             String[] targetInstructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
-        final List<SharedLibraryInfo> sharedLibraries = pkg.getUsesLibraryInfos();
+        final List<SharedLibraryInfo> sharedLibraries = pkg.usesLibraryInfos;
         final String[] instructionSets = targetInstructionSets != null ?
-                targetInstructionSets : getAppDexInstructionSets(pkg.getPrimaryCpuAbi(),
-                pkg.getSecondaryCpuAbi());
+                targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         final List<String> paths = pkg.getAllCodePaths();
 
-        int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
+        int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
         if (sharedGid == -1) {
-            Slog.wtf(TAG, "Well this is awkward; package " + pkg.getAppInfoName() + " had UID "
-                    + pkg.getUid(), new Throwable());
+            Slog.wtf(TAG, "Well this is awkward; package " + pkg.applicationInfo.name + " had UID "
+                    + pkg.applicationInfo.uid, new Throwable());
             sharedGid = android.os.Process.NOBODY_UID;
         }
 
@@ -173,21 +171,21 @@ public class PackageDexOptimizer {
         // For each code path in the package, this array contains the class loader context that
         // needs to be passed to dexopt in order to ensure correct optimizations.
         boolean[] pathsWithCode = new boolean[paths.size()];
-        pathsWithCode[0] = (pkg.getFlags() & ApplicationInfo.FLAG_HAS_CODE) != 0;
+        pathsWithCode[0] = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0;
         for (int i = 1; i < paths.size(); i++) {
-            pathsWithCode[i] = (pkg.getSplitFlags()[i - 1] & ApplicationInfo.FLAG_HAS_CODE) != 0;
+            pathsWithCode[i] = (pkg.splitFlags[i - 1] & ApplicationInfo.FLAG_HAS_CODE) != 0;
         }
         String[] classLoaderContexts = DexoptUtils.getClassLoaderContexts(
-                pkg, sharedLibraries, pathsWithCode);
+                pkg.applicationInfo, sharedLibraries, pathsWithCode);
 
         // Sanity check that we do not call dexopt with inconsistent data.
         if (paths.size() != classLoaderContexts.length) {
-            String[] splitCodePaths = pkg.getSplitCodePaths();
+            String[] splitCodePaths = pkg.applicationInfo.getSplitCodePaths();
             throw new IllegalStateException("Inconsistent information "
                 + "between PackageParser.Package and its ApplicationInfo. "
                 + "pkg.getAllCodePaths=" + paths
-                + " pkg.getBaseCodePath=" + pkg.getBaseCodePath()
-                + " pkg.getSplitCodePaths="
+                + " pkg.applicationInfo.getBaseCodePath=" + pkg.applicationInfo.getBaseCodePath()
+                + " pkg.applicationInfo.getSplitCodePaths="
                 + (splitCodePaths == null ? "null" : Arrays.toString(splitCodePaths)));
         }
 
@@ -213,8 +211,7 @@ public class PackageDexOptimizer {
                 }
             }
 
-            String profileName = ArtManager.getProfileName(
-                    i == 0 ? null : pkg.getSplitNames()[i - 1]);
+            String profileName = ArtManager.getProfileName(i == 0 ? null : pkg.splitNames[i - 1]);
 
             String dexMetadataPath = null;
             if (options.isDexoptInstallWithDexMetadata()) {
@@ -225,7 +222,7 @@ public class PackageDexOptimizer {
 
             final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
                     || packageUseInfo.isUsedByOtherApps(path);
-            final String compilerFilter = getRealCompilerFilter(pkg,
+            final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
                 options.getCompilerFilter(), isUsedByOtherApps);
             final boolean profileUpdated = options.isCheckForProfileUpdates() &&
                 isProfileUpdated(pkg, sharedGid, profileName, compilerFilter);
@@ -260,7 +257,7 @@ public class PackageDexOptimizer {
      *      DEX_OPT_SKIPPED if the path does not need to be deopt-ed.
      */
     @GuardedBy("mInstallLock")
-    private int dexOptPath(AndroidPackage pkg, String path, String isa,
+    private int dexOptPath(PackageParser.Package pkg, String path, String isa,
             String compilerFilter, boolean profileUpdated, String classLoaderContext,
             int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
             String profileName, String dexMetadataPath, int compilationReason) {
@@ -273,7 +270,7 @@ public class PackageDexOptimizer {
         String oatDir = getPackageOatDirIfSupported(pkg);
 
         Log.i(TAG, "Running dexopt (dexoptNeeded=" + dexoptNeeded + ") on: " + path
-                + " pkg=" + pkg.getAppInfoPackageName() + " isa=" + isa
+                + " pkg=" + pkg.applicationInfo.packageName + " isa=" + isa
                 + " dexoptFlags=" + printDexoptFlags(dexoptFlags)
                 + " targetFilter=" + compilerFilter + " oatDir=" + oatDir
                 + " classLoaderContext=" + classLoaderContext);
@@ -284,9 +281,9 @@ public class PackageDexOptimizer {
             // TODO: Consider adding 2 different APIs for primary and secondary dexopt.
             // installd only uses downgrade flag for secondary dex files and ignores it for
             // primary dex files.
-            mInstaller.dexopt(path, uid, pkg.getPackageName(), isa, dexoptNeeded, oatDir,
-                    dexoptFlags, compilerFilter, pkg.getVolumeUuid(), classLoaderContext,
-                    pkg.getSeInfo(), false /* downgrade*/, pkg.getTargetSdkVersion(),
+            mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
+                    compilerFilter, pkg.volumeUuid, classLoaderContext, pkg.applicationInfo.seInfo,
+                    false /* downgrade*/, pkg.applicationInfo.targetSdkVersion,
                     profileName, dexMetadataPath,
                     getAugmentedReasonName(compilationReason, dexMetadataPath != null));
 
@@ -449,10 +446,9 @@ public class PackageDexOptimizer {
     /**
      * Dumps the dexopt state of the given package {@code pkg} to the given {@code PrintWriter}.
      */
-    void dumpDexoptState(IndentingPrintWriter pw, AndroidPackage pkg,
+    void dumpDexoptState(IndentingPrintWriter pw, PackageParser.Package pkg,
             PackageDexUsage.PackageUseInfo useInfo) {
-        final String[] instructionSets = getAppDexInstructionSets(pkg.getPrimaryCpuAbi(),
-                pkg.getSecondaryCpuAbi());
+        final String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
 
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
@@ -508,7 +504,7 @@ public class PackageDexOptimizer {
         // When an app or priv app is configured to run out of box, only verify it.
         if (info.isEmbeddedDexUsed()
                 || (info.isPrivilegedApp()
-                && DexManager.isPackageSelectedToRunOob(info.packageName))) {
+                    && DexManager.isPackageSelectedToRunOob(info.packageName))) {
             return "verify";
         }
 
@@ -539,43 +535,12 @@ public class PackageDexOptimizer {
     }
 
     /**
-     * Returns the compiler filter that should be used to optimize the package code.
-     * The target filter will be updated if the package code is used by other apps
-     * or if it has the safe mode flag set.
+     * Computes the dex flags that needs to be pass to installd for the given package and compiler
+     * filter.
      */
-    private String getRealCompilerFilter(AndroidPackage pkg, String targetCompilerFilter,
-            boolean isUsedByOtherApps) {
-        // When an app or priv app is configured to run out of box, only verify it.
-        if (pkg.isEmbeddedDexUsed()
-                || (pkg.isPrivileged()
-                    && DexManager.isPackageSelectedToRunOob(pkg.getPackageName()))) {
-            return "verify";
-        }
-
-        // We force vmSafeMode on debuggable apps as well:
-        //  - the runtime ignores their compiled code
-        //  - they generally have lots of methods that could make the compiler used run
-        //    out of memory (b/130828957)
-        // Note that forcing the compiler filter here applies to all compilations (even if they
-        // are done via adb shell commands). That's ok because right now the runtime will ignore
-        // the compiled code anyway. The alternative would have been to update either
-        // PackageDexOptimizer#canOptimizePackage or PackageManagerService#getOptimizablePackages
-        // but that would have the downside of possibly producing a big odex files which would
-        // be ignored anyway.
-        boolean vmSafeModeOrDebuggable = ((pkg.getFlags() & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0)
-                || ((pkg.getFlags() & ApplicationInfo.FLAG_DEBUGGABLE) != 0);
-
-        if (vmSafeModeOrDebuggable) {
-            return getSafeModeCompilerFilter(targetCompilerFilter);
-        }
-
-        if (isProfileGuidedCompilerFilter(targetCompilerFilter) && isUsedByOtherApps) {
-            // If the dex files is used by other apps, apply the shared filter.
-            return PackageManagerServiceCompilerMapping.getCompilerFilterForReason(
-                    PackageManagerService.REASON_SHARED);
-        }
-
-        return targetCompilerFilter;
+    private int getDexFlags(PackageParser.Package pkg, String compilerFilter,
+            DexoptOptions options) {
+        return getDexFlags(pkg.applicationInfo, compilerFilter, options);
     }
 
     private boolean isAppImageEnabled() {
@@ -583,24 +548,7 @@ public class PackageDexOptimizer {
     }
 
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
-        return getDexFlags(info.flags, info.getHiddenApiEnforcementPolicy(),
-                info.splitDependencies, info.requestsIsolatedSplitLoading(), compilerFilter,
-                options);
-    }
-    private int getDexFlags(AndroidPackage pkg, String compilerFilter,
-            DexoptOptions options) {
-        return getDexFlags(pkg.getFlags(), pkg.getHiddenApiEnforcementPolicy(),
-                pkg.getSplitDependencies(), pkg.requestsIsolatedSplitLoading(), compilerFilter,
-                options);
-    }
-
-    /**
-     * Computes the dex flags that needs to be pass to installd for the given package and compiler
-     * filter.
-     */
-    private int getDexFlags(int flags, int hiddenApiEnforcementPolicy,
-            SparseArray<int[]> splitDependencies, boolean requestsIsolatedSplitLoading,
-            String compilerFilter, DexoptOptions options) {
+        int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         // Profile guide compiled oat files should not be public unles they are based
         // on profiles from dex metadata archives.
@@ -612,9 +560,7 @@ public class PackageDexOptimizer {
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.
         // TODO we should pass the actual flag value to dexopt, rather than assuming blacklist
-        // TODO(b/135203078): This flag is no longer set as part of AndroidPackage
-        //  and may not be preserved
-        int hiddenApiFlag = hiddenApiEnforcementPolicy == HIDDEN_API_ENFORCEMENT_DISABLED
+        int hiddenApiFlag = info.getHiddenApiEnforcementPolicy() == HIDDEN_API_ENFORCEMENT_DISABLED
                 ? 0
                 : DEXOPT_ENABLE_HIDDEN_API_CHECKS;
         // Avoid generating CompactDex for modes that are latency critical.
@@ -632,8 +578,8 @@ public class PackageDexOptimizer {
         // declare inter-split dependencies, then all the splits will be loaded in the base
         // apk class loader (in the order of their definition, otherwise disable app images
         // because they are unsupported for multiple class loaders. b/7269679
-        boolean generateAppImage = isProfileGuidedFilter && (splitDependencies == null ||
-                !requestsIsolatedSplitLoading) && isAppImageEnabled();
+        boolean generateAppImage = isProfileGuidedFilter && (info.splitDependencies == null ||
+                !info.requestsIsolatedSplitLoading()) && isAppImageEnabled();
         int dexFlags =
                 (isPublic ? DEXOPT_PUBLIC : 0)
                 | (debuggable ? DEXOPT_DEBUGGABLE : 0)
@@ -671,7 +617,7 @@ public class PackageDexOptimizer {
      * current profile and the reference profile will be merged and subsequent calls
      * may return a different result.
      */
-    private boolean isProfileUpdated(AndroidPackage pkg, int uid, String profileName,
+    private boolean isProfileUpdated(PackageParser.Package pkg, int uid, String profileName,
             String compilerFilter) {
         // Check if we are allowed to merge and if the compiler filter is profile guided.
         if (!isProfileGuidedCompilerFilter(compilerFilter)) {
@@ -679,7 +625,7 @@ public class PackageDexOptimizer {
         }
         // Merge profiles. It returns whether or not there was an updated in the profile info.
         try {
-            return mInstaller.mergeProfiles(uid, pkg.getPackageName(), profileName);
+            return mInstaller.mergeProfiles(uid, pkg.packageName, profileName);
         } catch (InstallerException e) {
             Slog.w(TAG, "Failed to merge profiles", e);
         }
@@ -699,11 +645,11 @@ public class PackageDexOptimizer {
      * not needed or unsupported for the package.
      */
     @Nullable
-    private String getPackageOatDirIfSupported(AndroidPackage pkg) {
+    private String getPackageOatDirIfSupported(PackageParser.Package pkg) {
         if (!pkg.canHaveOatDir()) {
             return null;
         }
-        File codePath = new File(pkg.getCodePath());
+        File codePath = new File(pkg.codePath);
         if (!codePath.isDirectory()) {
             return null;
         }

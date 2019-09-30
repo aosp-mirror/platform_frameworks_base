@@ -1379,8 +1379,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             this.minHeight = minHeight;
         }
 
-        /** @hide */
-        public WindowLayout(Parcel source) {
+        WindowLayout(Parcel source) {
             width = source.readInt();
             widthFraction = source.readFloat();
             height = source.readInt();
