@@ -5036,6 +5036,14 @@ public abstract class Context {
     public static final String INCREMENTAL_SERVICE = "incremental_service";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.security.FileIntegrityManager}.
+     * @see #getSystemService(String)
+     * @see android.security.FileIntegrityManager
+     */
+    public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
