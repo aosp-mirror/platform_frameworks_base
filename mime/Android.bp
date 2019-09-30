@@ -20,7 +20,7 @@ java_library {
     ],
 
     srcs: [
-        "java/android/content/type/MimeMapImpl.java",
+        "java/android/content/type/DefaultMimeMapFactory.java",
     ],
 
     java_resources: [
