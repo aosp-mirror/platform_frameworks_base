@@ -89,6 +89,10 @@ interface ITelephonyRegistry {
     void notifyActiveDataSubIdChanged(int activeDataSubId);
     void notifyRadioPowerStateChanged(in int phoneId, in int subId, in int state);
     void notifyEmergencyNumberList(in int phoneId, in int subId);
+    void notifyOutgoingEmergencyCall(in int phoneId, in int subId,
+            in EmergencyNumber emergencyNumber);
+    void notifyOutgoingEmergencySms(in int phoneId, in int subId,
+            in EmergencyNumber emergencyNumber);
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
