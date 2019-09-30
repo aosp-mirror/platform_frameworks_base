@@ -23,7 +23,6 @@ import android.content.ContentProvider;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.InjectionInflationController;
-import com.android.systemui.util.leak.GarbageMonitor;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -43,7 +42,7 @@ import dagger.Component;
 public interface SystemUIRootComponent {
 
     /**
-     * Creates a GarbageMonitor.
+     * Creates a ContextComponentHelper.
      */
     @Singleton
     ContextComponentHelper getContextComponentHelper();
@@ -70,12 +69,6 @@ public interface SystemUIRootComponent {
      * ViewCreator generates all Views that need injection.
      */
     InjectionInflationController.ViewCreator createViewCreator();
-
-    /**
-     * Creates a GarbageMonitor.
-     */
-    @Singleton
-    GarbageMonitor createGarbageMonitor();
 
     /**
      * Whether notification long press is allowed.
