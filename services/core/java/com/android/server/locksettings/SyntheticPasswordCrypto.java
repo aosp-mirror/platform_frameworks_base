@@ -129,6 +129,9 @@ public class SyntheticPasswordCrypto {
             keyStore.load(null);
 
             SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            if (decryptionKey == null) {
+                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            }
             byte[] intermediate = decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, blob);
             return decrypt(decryptionKey, intermediate);
         } catch (Exception e) {
@@ -143,6 +146,9 @@ public class SyntheticPasswordCrypto {
             keyStore.load(null);
 
             SecretKey decryptionKey = (SecretKey) keyStore.getKey(keyAlias, null);
+            if (decryptionKey == null) {
+                throw new IllegalStateException("SP key is missing: " + keyAlias);
+            }
             byte[] intermediate = decrypt(decryptionKey, blob);
             return decrypt(applicationId, APPLICATION_ID_PERSONALIZATION, intermediate);
         } catch (CertificateException | IOException | BadPaddingException
@@ -193,6 +199,7 @@ public class SyntheticPasswordCrypto {
             keyStore = KeyStore.getInstance("AndroidKeyStore");
             keyStore.load(null);
             keyStore.deleteEntry(keyAlias);
+            Slog.i(TAG, "SP key deleted: " + keyAlias);
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException
                 | IOException e) {
             Slog.e(TAG, "Failed to destroy blob", e);
