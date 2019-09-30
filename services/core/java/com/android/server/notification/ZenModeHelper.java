@@ -1179,7 +1179,7 @@ public class ZenModeHelper {
 
             if (mZenMode == Global.ZEN_MODE_OFF
                     || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                    && !ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig))) {
+                    && !ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(mConfig))) {
                 // in priority only with ringer not muted, save ringer mode changes
                 // in dnd off, save ringer mode changes
                 setPreviousRingerModeSetting(ringerModeNew);
@@ -1200,7 +1200,7 @@ public class ZenModeHelper {
                             && (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
                             || mZenMode == Global.ZEN_MODE_ALARMS
                             || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                            && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(
+                            && ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(
                             mConfig)))) {
                         newZen = Global.ZEN_MODE_OFF;
                     } else if (mZenMode != Global.ZEN_MODE_OFF) {
@@ -1264,28 +1264,20 @@ public class ZenModeHelper {
 
         @Override
         public int getRingerModeAffectedStreams(int streams) {
-            // ringtone and notification streams are always affected by ringer mode
-            // system stream is affected by ringer mode when not in priority-only
+            // ringtone, notification and system streams are always affected by ringer mode
+            // zen muting is handled in AudioService.java's mZenModeAffectedStreams
             streams |= (1 << AudioSystem.STREAM_RING) |
                     (1 << AudioSystem.STREAM_NOTIFICATION) |
                     (1 << AudioSystem.STREAM_SYSTEM);
 
             if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                // alarm and music streams affected by ringer mode when in total silence
+                // alarm and music streams affected by ringer mode (cannot be adjusted) when in
+                // total silence
                 streams |= (1 << AudioSystem.STREAM_ALARM) |
                         (1 << AudioSystem.STREAM_MUSIC);
             } else {
                 streams &= ~((1 << AudioSystem.STREAM_ALARM) |
                         (1 << AudioSystem.STREAM_MUSIC));
-            }
-
-            if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                    && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)) {
-                // system stream is not affected by ringer mode in priority only when the ringer
-                // is zen muted (all other notification categories are muted)
-                streams &= ~(1 << AudioSystem.STREAM_SYSTEM);
-            } else {
-                streams |= (1 << AudioSystem.STREAM_SYSTEM);
             }
             return streams;
         }
