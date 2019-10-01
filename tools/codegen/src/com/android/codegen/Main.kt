@@ -136,7 +136,7 @@ fun main(args: Array<String>) {
         //
         // To regenerate run:
         // $ $cliExecutable ${cliArgs.dropLast(1).joinToString("") { "$it " }}$fileEscaped
-        /
+
         """
 
         if (FeatureFlag.CONST_DEFS()) generateConstDefs()
