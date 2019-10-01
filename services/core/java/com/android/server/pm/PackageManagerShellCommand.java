@@ -756,7 +756,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     (!listThirdParty || !isSystem) &&
                     (!listApexOnly || isApex)) {
                 pw.print("package:");
-                if (showSourceDir && !isApex) {
+                if (showSourceDir) {
                     pw.print(info.applicationInfo.sourceDir);
                     pw.print("=");
                 }
