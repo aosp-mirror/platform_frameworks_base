@@ -148,7 +148,7 @@ void NativeInputEventReceiver::setFdEvents(int events) {
         mFdEvents = events;
         int fd = mInputConsumer.getChannel()->getFd();
         if (events) {
-            mMessageQueue->getLooper()->addFd(fd, 0, events, this, NULL);
+            mMessageQueue->getLooper()->addFd(fd, 0, events, this, nullptr);
         } else {
             mMessageQueue->getLooper()->removeFd(fd);
         }
@@ -169,7 +169,7 @@ int NativeInputEventReceiver::handleEvent(int receiveFd, int events, void* data)
 
     if (events & ALOOPER_EVENT_INPUT) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        status_t status = consumeEvents(env, false /*consumeBatches*/, -1, NULL);
+        status_t status = consumeEvents(env, false /*consumeBatches*/, -1, nullptr);
         mMessageQueue->raiseAndClearException(env, "handleReceiveCallback");
         return status == OK || status == NO_MEMORY ? 1 : 0;
     }
@@ -230,7 +230,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
         *outConsumedBatch = false;
     }
 
-    ScopedLocalRef<jobject> receiverObj(env, NULL);
+    ScopedLocalRef<jobject> receiverObj(env, nullptr);
     bool skipCallbacks = false;
     for (;;) {
         uint32_t seq;
@@ -305,7 +305,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
 
             default:
                 assert(false); // InputConsumer should prevent this from ever happening
-                inputEventObj = NULL;
+                inputEventObj = nullptr;
             }
 
             if (inputEventObj) {
@@ -337,13 +337,13 @@ static jlong nativeInit(JNIEnv* env, jclass clazz, jobject receiverWeak,
         jobject inputChannelObj, jobject messageQueueObj) {
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
-    if (inputChannel == NULL) {
+    if (inputChannel == nullptr) {
         jniThrowRuntimeException(env, "InputChannel is not initialized.");
         return 0;
     }
 
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
-    if (messageQueue == NULL) {
+    if (messageQueue == nullptr) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
         return 0;
     }
