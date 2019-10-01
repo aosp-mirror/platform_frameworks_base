@@ -3430,6 +3430,7 @@ package android.location {
 
   public class LocationManager {
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void flushGnssBatch();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @Nullable public String getExtraLocationControllerPackage();
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public int getGnssBatchSize();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public android.location.GnssCapabilities getGnssCapabilities();

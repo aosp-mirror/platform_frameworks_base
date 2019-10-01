@@ -1100,6 +1100,7 @@ package android.location {
 
   public class LocationManager {
     method @NonNull public String[] getBackgroundThrottlingWhitelist();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void getCurrentLocation(@NonNull android.location.LocationRequest, @Nullable android.os.CancellationSignal, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.location.Location>);
     method @NonNull public String[] getIgnoreSettingsWhitelist();
     method @Nullable @RequiresPermission("android.permission.READ_DEVICE_CONFIG") public java.util.List<java.lang.String> getProviderPackages(@NonNull String);
     method @NonNull public java.util.List<android.location.LocationRequest> getTestProviderCurrentRequests(String);

@@ -62,8 +62,10 @@ import android.location.LocationRequest;
 import android.location.LocationTime;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
@@ -119,6 +121,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The service class that manages LocationProviders and issues location
@@ -145,10 +148,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final String FUSED_LOCATION_SERVICE_ACTION =
             "com.android.location.service.FusedLocationProvider";
 
-    private static final long NANOS_PER_MILLI = 1000000L;
-
     // The maximum interval a location request can have and still be considered "high power".
     private static final long HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
+
+    // maximum age of a location before it is no longer considered "current"
+    private static final long MAX_CURRENT_LOCATION_AGE_MS = 10 * 1000;
 
     private static final int FOREGROUND_IMPORTANCE_CUTOFF
             = ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
@@ -2450,8 +2454,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                 // Don't return stale location to apps with foreground-only location permission.
                 String op = resolutionLevelToOpStr(allowedResolutionLevel);
-                long locationAgeMs = SystemClock.elapsedRealtime()
-                        - location.getElapsedRealtimeNanos() / NANOS_PER_MILLI;
+                long locationAgeMs = TimeUnit.NANOSECONDS.toMillis(
+                        SystemClock.elapsedRealtime() - location.getElapsedRealtimeNanos());
                 if ((locationAgeMs > Settings.Global.getLong(
                         mContext.getContentResolver(),
                         Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
@@ -2486,6 +2490,56 @@ public class LocationManagerService extends ILocationManager.Stub {
                 Binder.restoreCallingIdentity(identity);
             }
         }
+    }
+
+    @Override
+    public boolean getCurrentLocation(LocationRequest locationRequest,
+            ICancellationSignal remoteCancellationSignal, ILocationListener listener,
+            String packageName, String listenerIdentifier) {
+        // side effect of validating locationRequest and packageName
+        Location lastLocation = getLastLocation(locationRequest, packageName);
+        if (lastLocation != null) {
+            long locationAgeMs = TimeUnit.NANOSECONDS.toMillis(
+                    SystemClock.elapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos());
+
+            long identity = Binder.clearCallingIdentity();
+            try {
+                if (locationAgeMs < MAX_CURRENT_LOCATION_AGE_MS) {
+                    try {
+                        listener.onLocationChanged(lastLocation);
+                        return true;
+                    } catch (RemoteException e) {
+                        Log.w(TAG, e);
+                        return false;
+                    }
+                }
+
+                // packageName already validated by getLastLocation() call above
+                boolean foreground = LocationManagerServiceUtils.isImportanceForeground(
+                        mActivityManager.getPackageImportance(packageName));
+                if (!foreground) {
+                    long backgroundThrottleIntervalMs = Settings.Global.getLong(
+                            mContext.getContentResolver(),
+                            Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
+                            DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS);
+                    if (locationAgeMs < backgroundThrottleIntervalMs) {
+                        // not allowed to request new locations, so we can't return anything
+                        return false;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        requestLocationUpdates(locationRequest, listener, null, packageName, listenerIdentifier);
+        CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
+                remoteCancellationSignal);
+        if (cancellationSignal != null) {
+            cancellationSignal.setOnCancelListener(
+                    () -> removeUpdates(listener, null, packageName));
+        }
+        return true;
     }
 
     @Override
@@ -2836,9 +2890,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // Check whether sufficient time has passed
         long minTime = record.mRealRequest.getFastestInterval();
-        long delta = (loc.getElapsedRealtimeNanos() - lastLoc.getElapsedRealtimeNanos())
-                / NANOS_PER_MILLI;
-        if (delta < minTime - MAX_PROVIDER_SCHEDULING_JITTER_MS) {
+        long deltaMs = TimeUnit.NANOSECONDS.toMillis(
+                loc.getElapsedRealtimeNanos() - lastLoc.getElapsedRealtimeNanos());
+        if (deltaMs < minTime - MAX_PROVIDER_SCHEDULING_JITTER_MS) {
             return false;
         }
 
@@ -2893,9 +2947,9 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLastLocationCoarseInterval.put(provider.getName(), lastLocationCoarseInterval);
             }
         }
-        long timeDiffNanos = location.getElapsedRealtimeNanos()
-                - lastLocationCoarseInterval.getElapsedRealtimeNanos();
-        if (timeDiffNanos > LocationFudger.FASTEST_INTERVAL_MS * NANOS_PER_MILLI) {
+        long timeDeltaMs = TimeUnit.NANOSECONDS.toMillis(location.getElapsedRealtimeNanos()
+                - lastLocationCoarseInterval.getElapsedRealtimeNanos());
+        if (timeDeltaMs > LocationFudger.FASTEST_INTERVAL_MS) {
             lastLocationCoarseInterval.set(location);
         }
         // Don't ever return a coarse location that is more recent than the allowed update
