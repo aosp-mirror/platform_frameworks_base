@@ -133,7 +133,7 @@ import java.util.HashSet;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper
+@RunWithLooper(setAsMainLooper = true)
 public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private KeyguardStateController mKeyguardStateController;
