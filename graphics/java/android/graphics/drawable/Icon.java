@@ -92,11 +92,17 @@ public final class Icon implements Parcelable {
      * @see #getType
      */
     public static final int TYPE_ADAPTIVE_BITMAP = 5;
+    /**
+     * An icon that was created using {@link Icon#createWithAdaptiveBitmapContentUri}.
+     * @see #getType
+     */
+    public static final int TYPE_URI_ADAPTIVE_BITMAP = 6;
 
     /**
      * @hide
      */
-    @IntDef({TYPE_BITMAP, TYPE_RESOURCE, TYPE_DATA, TYPE_URI, TYPE_ADAPTIVE_BITMAP})
+    @IntDef({TYPE_BITMAP, TYPE_RESOURCE, TYPE_DATA, TYPE_URI, TYPE_ADAPTIVE_BITMAP,
+            TYPE_URI_ADAPTIVE_BITMAP})
     public @interface IconType {
     }
 
@@ -113,12 +119,14 @@ public final class Icon implements Parcelable {
     // based on the value of mType.
 
     // TYPE_BITMAP: Bitmap
+    // TYPE_ADAPTIVE_BITMAP: Bitmap
     // TYPE_RESOURCE: Resources
     // TYPE_DATA: DataBytes
     private Object          mObj1;
 
     // TYPE_RESOURCE: package name
     // TYPE_URI: uri string
+    // TYPE_URI_ADAPTIVE_BITMAP: uri string
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private String          mString1;
 
@@ -141,7 +149,8 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * @return The {@link android.graphics.Bitmap} held by this {@link #TYPE_BITMAP} Icon.
+     * @return The {@link android.graphics.Bitmap} held by this {@link #TYPE_BITMAP} or
+     * {@link #TYPE_ADAPTIVE_BITMAP} Icon.
      * @hide
      */
     @UnsupportedAppUsage
@@ -243,11 +252,12 @@ public final class Icon implements Parcelable {
     }
 
     /**
-     * @return The URI (as a String) for this {@link #TYPE_URI} Icon.
+     * @return The URI (as a String) for this {@link #TYPE_URI} or {@link #TYPE_URI_ADAPTIVE_BITMAP}
+     * Icon.
      * @hide
      */
     public String getUriString() {
-        if (mType != TYPE_URI) {
+        if (mType != TYPE_URI && mType != TYPE_URI_ADAPTIVE_BITMAP) {
             throw new IllegalStateException("called getUriString() on " + this);
         }
         return mString1;
@@ -256,7 +266,7 @@ public final class Icon implements Parcelable {
     /**
      * Gets the uri used to create this icon.
      * <p>
-     * Only valid for icons of type {@link #TYPE_URI}.
+     * Only valid for icons of type {@link #TYPE_URI} and {@link #TYPE_URI_ADAPTIVE_BITMAP}.
      * Note: This uri may not be available in the future, and it is
      * up to the caller to ensure safety if this uri is re-used and/or persisted.
      */
@@ -272,6 +282,7 @@ public final class Icon implements Parcelable {
             case TYPE_DATA: return "DATA";
             case TYPE_RESOURCE: return "RESOURCE";
             case TYPE_URI: return "URI";
+            case TYPE_URI_ADAPTIVE_BITMAP: return "URI_MASKABLE";
             default: return "UNKNOWN";
         }
     }
@@ -380,28 +391,39 @@ public final class Icon implements Parcelable {
                     BitmapFactory.decodeByteArray(getDataBytes(), getDataOffset(), getDataLength())
                 );
             case TYPE_URI:
-                final Uri uri = getUri();
-                final String scheme = uri.getScheme();
-                InputStream is = null;
-                if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                        || ContentResolver.SCHEME_FILE.equals(scheme)) {
-                    try {
-                        is = context.getContentResolver().openInputStream(uri);
-                    } catch (Exception e) {
-                        Log.w(TAG, "Unable to load image from URI: " + uri, e);
-                    }
-                } else {
-                    try {
-                        is = new FileInputStream(new File(mString1));
-                    } catch (FileNotFoundException e) {
-                        Log.w(TAG, "Unable to load image from path: " + uri, e);
-                    }
-                }
+                InputStream is = getUriInputStream(context);
                 if (is != null) {
                     return new BitmapDrawable(context.getResources(),
                             BitmapFactory.decodeStream(is));
                 }
                 break;
+            case TYPE_URI_ADAPTIVE_BITMAP:
+                is = getUriInputStream(context);
+                if (is != null) {
+                    return new AdaptiveIconDrawable(null, new BitmapDrawable(context.getResources(),
+                            BitmapFactory.decodeStream(is)));
+                }
+                break;
+        }
+        return null;
+    }
+
+    private InputStream getUriInputStream(Context context) {
+        final Uri uri = getUri();
+        final String scheme = uri.getScheme();
+        if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+                || ContentResolver.SCHEME_FILE.equals(scheme)) {
+            try {
+                return context.getContentResolver().openInputStream(uri);
+            } catch (Exception e) {
+                Log.w(TAG, "Unable to load image from URI: " + uri, e);
+            }
+        } else {
+            try {
+                return new FileInputStream(new File(mString1));
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Unable to load image from path: " + uri, e);
+            }
         }
         return null;
     }
@@ -475,6 +497,7 @@ public final class Icon implements Parcelable {
                 dataStream.writeInt(getResId());
                 break;
             case TYPE_URI:
+            case TYPE_URI_ADAPTIVE_BITMAP:
                 dataStream.writeUTF(getUriString());
                 break;
         }
@@ -513,6 +536,9 @@ public final class Icon implements Parcelable {
                 case TYPE_URI:
                     final String uriOrPath = inputStream.readUTF();
                     return createWithContentUri(uriOrPath);
+                case TYPE_URI_ADAPTIVE_BITMAP:
+                    final String uri = inputStream.readUTF();
+                    return createWithAdaptiveBitmapContentUri(uri);
             }
         }
         return null;
@@ -545,6 +571,7 @@ public final class Icon implements Parcelable {
                 return getResId() == otherIcon.getResId()
                         && Objects.equals(getResPackage(), otherIcon.getResPackage());
             case TYPE_URI:
+            case TYPE_URI_ADAPTIVE_BITMAP:
                 return Objects.equals(getUriString(), otherIcon.getUriString());
         }
         return false;
@@ -665,9 +692,37 @@ public final class Icon implements Parcelable {
         if (uri == null) {
             throw new IllegalArgumentException("Uri must not be null.");
         }
-        final Icon rep = new Icon(TYPE_URI);
-        rep.mString1 = uri.toString();
+        return createWithContentUri(uri.toString());
+    }
+
+    /**
+     * Create an Icon pointing to an image file specified by URI. Image file should follow the icon
+     * design guideline defined by {@link AdaptiveIconDrawable}.
+     *
+     * @param uri A uri referring to local content:// or file:// image data.
+     */
+    @NonNull
+    public static Icon createWithAdaptiveBitmapContentUri(@NonNull String uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("Uri must not be null.");
+        }
+        final Icon rep = new Icon(TYPE_URI_ADAPTIVE_BITMAP);
+        rep.mString1 = uri;
         return rep;
+    }
+
+    /**
+     * Create an Icon pointing to an image file specified by URI. Image file should follow the icon
+     * design guideline defined by {@link AdaptiveIconDrawable}.
+     *
+     * @param uri A uri referring to local content:// or file:// image data.
+     */
+    @NonNull
+    public static Icon createWithAdaptiveBitmapContentUri(@NonNull Uri uri) {
+        if (uri == null) {
+            throw new IllegalArgumentException("Uri must not be null.");
+        }
+        return createWithAdaptiveBitmapContentUri(uri.toString());
     }
 
     /**
@@ -758,6 +813,7 @@ public final class Icon implements Parcelable {
                 }
                 break;
             case TYPE_URI:
+            case TYPE_URI_ADAPTIVE_BITMAP:
                 sb.append(" uri=").append(getUriString());
                 break;
         }
@@ -809,6 +865,7 @@ public final class Icon implements Parcelable {
                 mObj1 = a;
                 break;
             case TYPE_URI:
+            case TYPE_URI_ADAPTIVE_BITMAP:
                 final String uri = in.readString();
                 mString1 = uri;
                 break;
@@ -840,6 +897,7 @@ public final class Icon implements Parcelable {
                 dest.writeBlob(getDataBytes(), getDataOffset(), getDataLength());
                 break;
             case TYPE_URI:
+            case TYPE_URI_ADAPTIVE_BITMAP:
                 dest.writeString(getUriString());
                 break;
         }
