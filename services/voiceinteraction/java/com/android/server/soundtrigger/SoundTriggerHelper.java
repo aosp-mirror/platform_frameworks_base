@@ -16,11 +16,14 @@
 
 package com.android.server.soundtrigger;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
@@ -28,6 +31,7 @@ import android.hardware.soundtrigger.SoundTrigger.Keyphrase;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionEvent;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionEvent;
@@ -605,6 +609,67 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         return STATUS_ERROR;
     }
 
+    int setParameter(UUID modelId, @ModelParams int modelParam, int value) {
+        synchronized (mLock) {
+            MetricsLogger.count(mContext, "sth_set_parameter", 1);
+            if (modelId == null || mModule == null) {
+                return SoundTrigger.STATUS_ERROR;
+            }
+            ModelData modelData = mModelDataMap.get(modelId);
+            if (modelData == null) {
+                Slog.w(TAG, "SetParameter: Invalid model id:" + modelId);
+                return SoundTrigger.STATUS_BAD_VALUE;
+            }
+            if (!modelData.isModelLoaded()) {
+                Slog.i(TAG, "SetParameter: Given model is not loaded:" + modelId);
+                return SoundTrigger.STATUS_BAD_VALUE;
+            }
+
+            return mModule.setParameter(modelData.getHandle(), modelParam, value);
+        }
+    }
+
+    int getParameter(@NonNull UUID modelId, @ModelParams int modelParam)
+            throws UnsupportedOperationException, IllegalArgumentException {
+        synchronized (mLock) {
+            MetricsLogger.count(mContext, "sth_get_parameter", 1);
+            if (mModule == null) {
+                throw new UnsupportedOperationException("SoundTriggerModule not initialized");
+            }
+
+            ModelData modelData = mModelDataMap.get(modelId);
+            if (modelData == null) {
+                throw new IllegalArgumentException("Invalid model id:" + modelId);
+            }
+            if (!modelData.isModelLoaded()) {
+                throw new UnsupportedOperationException("Given model is not loaded:" + modelId);
+            }
+
+            return mModule.getParameter(modelData.getHandle(), modelParam);
+        }
+    }
+
+    @Nullable
+    ModelParamRange queryParameter(@NonNull UUID modelId, @ModelParams int modelParam) {
+        synchronized (mLock) {
+            MetricsLogger.count(mContext, "sth_query_parameter", 1);
+            if (mModule == null) {
+                return null;
+            }
+            ModelData modelData = mModelDataMap.get(modelId);
+            if (modelData == null) {
+                Slog.w(TAG, "queryParameter: Invalid model id:" + modelId);
+                return null;
+            }
+            if (!modelData.isModelLoaded()) {
+                Slog.i(TAG, "queryParameter: Given model is not loaded:" + modelId);
+                return null;
+            }
+
+            return mModule.queryParameter(modelData.getHandle(), modelParam);
+        }
+    }
+
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {
@@ -653,15 +718,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
         ModelData model = getModelDataForLocked(event.soundModelHandle);
         if (model == null || !model.isGenericModel()) {
-            Slog.w(TAG, "Generic recognition event: Model does not exist for handle: " +
-                    event.soundModelHandle);
+            Slog.w(TAG, "Generic recognition event: Model does not exist for handle: "
+                    + event.soundModelHandle);
             return;
         }
 
         IRecognitionStatusCallback callback = model.getCallback();
         if (callback == null) {
-            Slog.w(TAG, "Generic recognition event: Null callback for model handle: " +
-                    event.soundModelHandle);
+            Slog.w(TAG, "Generic recognition event: Null callback for model handle: "
+                    + event.soundModelHandle);
             return;
         }
 
@@ -678,8 +743,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         RecognitionConfig config = model.getRecognitionConfig();
         if (config == null) {
-            Slog.w(TAG, "Generic recognition event: Null RecognitionConfig for model handle: " +
-                    event.soundModelHandle);
+            Slog.w(TAG, "Generic recognition event: Null RecognitionConfig for model handle: "
+                    + event.soundModelHandle);
             return;
         }
 

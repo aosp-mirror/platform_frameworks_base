@@ -16,7 +16,9 @@
 
 package android.hardware.soundtrigger;
 
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -149,6 +151,57 @@ public class SoundTriggerModule {
      *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence
      */
     public native int getModelState(int soundModelHandle);
+
+    /**
+     * Set a model specific {@link ModelParams} with the given value. This
+     * parameter will keep its value for the duration the model is loaded regardless of starting and
+     * stopping recognition. Once the model is unloaded, the value will be lost.
+     * {@link SoundTriggerModule#isParameterSupported} should be checked first before calling this
+     * method.
+     *
+     * @param soundModelHandle handle of model to apply parameter
+     * @param modelParam   {@link ModelParams}
+     * @param value        Value to set
+     * @return - {@link SoundTrigger#STATUS_OK} in case of success
+     *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
+     *         - {@link SoundTrigger#STATUS_BAD_VALUE} invalid input parameter
+     *         - {@link SoundTrigger#STATUS_INVALID_OPERATION} if the call is out of sequence or
+     *           if API is not supported by HAL
+     */
+    public native int setParameter(int soundModelHandle,
+            @ModelParams int modelParam, int value);
+
+    /**
+     * Get a model specific {@link ModelParams}. This parameter will keep its value
+     * for the duration the model is loaded regardless of starting and stopping recognition.
+     * Once the model is unloaded, the value will be lost. If the value is not set, a default
+     * value is returned. See {@link ModelParams} for parameter default values.
+     * {@link SoundTriggerModule#isParameterSupported} should be checked first before
+     * calling this method. Otherwise, an exception can be thrown.
+     *
+     * @param soundModelHandle handle of model to get parameter
+     * @param modelParam   {@link ModelParams}
+     * @return value of parameter
+     * @throws UnsupportedOperationException if hal or model do not support this API.
+     *         {@link SoundTriggerModule#isParameterSupported} should be checked first.
+     * @throws IllegalArgumentException if invalid model handle or parameter is passed.
+     *         {@link SoundTriggerModule#isParameterSupported} should be checked first.
+     */
+    public native int getParameter(int soundModelHandle,
+            @ModelParams int modelParam)
+            throws UnsupportedOperationException, IllegalArgumentException;
+
+    /**
+     * Determine if parameter control is supported for the given model handle.
+     * This method should be checked prior to calling {@link SoundTriggerModule#setParameter} or
+     * {@link SoundTriggerModule#getParameter}.
+     *
+     * @param soundModelHandle handle of model to get parameter
+     * @param modelParam {@link ModelParams}
+     * @return supported range of parameter, null if not supported
+     */
+    @Nullable
+    public native ModelParamRange queryParameter(int soundModelHandle, @ModelParams int modelParam);
 
     private class NativeEventHandlerDelegate {
         private final Handler mHandler;

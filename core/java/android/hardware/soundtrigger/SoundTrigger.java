@@ -567,6 +567,65 @@ public class SoundTrigger {
         }
     }
 
+    /*****************************************************************************
+     * A ModelParamRange is a representation of supported parameter range for a
+     * given loaded model.
+     ****************************************************************************/
+    public static final class ModelParamRange implements Parcelable {
+
+        /**
+         * start of supported range inclusive
+         */
+        public final int start;
+
+        /**
+         * end of supported range inclusive
+         */
+        public final int end;
+
+        ModelParamRange(int start, int end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        private ModelParamRange(@NonNull Parcel in) {
+            this.start = in.readInt();
+            this.end = in.readInt();
+        }
+
+        @NonNull
+        public static final Creator<ModelParamRange> CREATOR = new Creator<ModelParamRange>() {
+            @Override
+            @NonNull
+            public ModelParamRange createFromParcel(@NonNull Parcel in) {
+                return new ModelParamRange(in);
+            }
+
+            @Override
+            @NonNull
+            public ModelParamRange[] newArray(int size) {
+                return new ModelParamRange[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(start);
+            dest.writeInt(end);
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            return "ModelParamRange [start=" + start + ", end=" + end + "]";
+        }
+    }
+
     /**
      *  Modes for key phrase recognition
      */
