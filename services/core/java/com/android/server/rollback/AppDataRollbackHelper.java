@@ -51,7 +51,7 @@ public class AppDataRollbackHelper {
      * {@code userIds}. Updates said {@code packageRollbackInfo} with the inodes of the CE user data
      * snapshot folders.
      */
-    @GuardedBy("rollback.getLock")
+    @GuardedBy("rollback.mLock")
     // TODO(b/136241838): Move into Rollback and synchronize there.
     public void snapshotAppData(
             int snapshotId, PackageRollbackInfo packageRollbackInfo, int[] userIds) {
@@ -88,7 +88,7 @@ public class AppDataRollbackHelper {
      *         to {@code packageRollbackInfo} are restricted to the removal or addition of {@code
      *         userId} to the list of pending backups or restores.
      */
-    @GuardedBy("rollback.getLock")
+    @GuardedBy("rollback.mLock")
     // TODO(b/136241838): Move into Rollback and synchronize there.
     public boolean restoreAppData(int rollbackId, PackageRollbackInfo packageRollbackInfo,
             int userId, int appId, String seInfo) {
@@ -133,7 +133,7 @@ public class AppDataRollbackHelper {
      * Deletes an app data snapshot with a given {@code rollbackId} for a specified package
      * {@code packageName} for a given {@code user}.
      */
-    @GuardedBy("rollback.getLock")
+    @GuardedBy("rollback.mLock")
     // TODO(b/136241838): Move into Rollback and synchronize there.
     public void destroyAppDataSnapshot(int rollbackId, PackageRollbackInfo packageRollbackInfo,
             int user) {
@@ -162,7 +162,7 @@ public class AppDataRollbackHelper {
      *
      * @return true if any backups or restores were found for the userId
      */
-    @GuardedBy("rollback.getLock")
+    @GuardedBy("rollback.mLock")
     boolean commitPendingBackupAndRestoreForUser(int userId, Rollback rollback) {
         boolean foundBackupOrRestore = false;
         for (PackageRollbackInfo info : rollback.info.getPackages()) {

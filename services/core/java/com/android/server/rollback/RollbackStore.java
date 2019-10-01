@@ -252,7 +252,7 @@ class RollbackStore {
     /**
      * Saves the given rollback to persistent storage.
      */
-    @GuardedBy("rollback.getLock")
+    @GuardedBy("rollback.mLock")
     static void saveRollback(Rollback rollback) {
         try {
             JSONObject dataJson = new JSONObject();

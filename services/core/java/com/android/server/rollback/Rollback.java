@@ -40,6 +40,7 @@ import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,11 +54,6 @@ import java.util.List;
 
 /**
  * Information about a rollback available for a set of atomically installed packages.
- *
- * <p>When accessing the state of a Rollback object, the caller is responsible for synchronization.
- * The lock object provided by {@link #getLock} should be acquired when accessing any of the mutable
- * state of a Rollback, including from the {@link RollbackInfo} and any of the
- * {@link PackageRollbackInfo} objects held within.
  */
 class Rollback {
 
@@ -101,11 +97,7 @@ class Rollback {
 
     /**
      * The rollback info for this rollback.
-     *
-     * <p>Any access to this field that touches any mutable state should be synchronized on
-     * {@link #getLock}.
      */
-    @GuardedBy("getLock")
     public final RollbackInfo info;
 
     /**
@@ -146,8 +138,6 @@ class Rollback {
 
     /**
      * Lock object to guard all access to Rollback state.
-     *
-     * @see #getLock
      */
     private final Object mLock = new Object();
 
@@ -185,23 +175,8 @@ class Rollback {
     }
 
     /**
-     * Returns a lock object that should be acquired before accessing any Rollback state from
-     * {@link RollbackManagerServiceImpl}.
-     *
-     * <p>Note that while holding this lock, the lock for {@link RollbackManagerServiceImpl} should
-     * not be acquired (but it is ok to acquire this lock while already holding the lock for that
-     * class).
-     */
-    // TODO(b/136241838): Move rollback functionality into this class and synchronize on the lock
-    // internally. Remove this method once this has been done for all cases.
-    Object getLock() {
-        return mLock;
-    }
-
-    /**
      * Whether the rollback is for rollback of a staged install.
      */
-    @GuardedBy("getLock")
     boolean isStaged() {
         return info.isStaged();
     }
@@ -216,17 +191,20 @@ class Rollback {
     /**
      * Returns the time when the upgrade occurred, for purposes of expiring rollback data.
      */
-    @GuardedBy("getLock")
     Instant getTimestamp() {
-        return mTimestamp;
+        synchronized (mLock) {
+            return mTimestamp;
+        }
     }
 
     /**
      * Sets the time at which upgrade occurred.
      */
-    @GuardedBy("getLock")
     void setTimestamp(Instant timestamp) {
-        mTimestamp = timestamp;
+        synchronized (mLock) {
+            mTimestamp = timestamp;
+            RollbackStore.saveRollback(this);
+        }
     }
 
     /**
@@ -240,33 +218,46 @@ class Rollback {
     /**
      * Returns true if the rollback is in the ENABLING state.
      */
-    @GuardedBy("getLock")
     boolean isEnabling() {
-        return mState == ROLLBACK_STATE_ENABLING;
+        synchronized (mLock) {
+            return mState == ROLLBACK_STATE_ENABLING;
+        }
     }
 
     /**
      * Returns true if the rollback is in the AVAILABLE state.
      */
-    @GuardedBy("getLock")
     boolean isAvailable() {
-        return mState == ROLLBACK_STATE_AVAILABLE;
+        synchronized (mLock) {
+            return mState == ROLLBACK_STATE_AVAILABLE;
+        }
     }
 
     /**
      * Returns true if the rollback is in the COMMITTED state.
      */
-    @GuardedBy("getLock")
     boolean isCommitted() {
-        return mState == ROLLBACK_STATE_COMMITTED;
+        synchronized (mLock) {
+            return mState == ROLLBACK_STATE_COMMITTED;
+        }
     }
 
     /**
      * Returns true if the rollback is in the DELETED state.
      */
-    @GuardedBy("getLock")
     boolean isDeleted() {
-        return mState == ROLLBACK_STATE_DELETED;
+        synchronized (mLock) {
+            return mState == ROLLBACK_STATE_DELETED;
+        }
+    }
+
+    /**
+     * Saves this rollback to persistent storage.
+     */
+    void saveRollback() {
+        synchronized (mLock) {
+            RollbackStore.saveRollback(this);
+        }
     }
 
     /**
@@ -274,7 +265,6 @@ class Rollback {
      *
      * @return boolean True if the rollback was enabled successfully for the specified package.
      */
-    @GuardedBy("getLock")
     boolean enableForPackage(String packageName, long newVersion, long installedVersion,
             boolean isApex, String sourceDir, String[] splitSourceDirs) {
         try {
@@ -295,7 +285,9 @@ class Rollback {
                 new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
                 isApex, new IntArray(), new SparseLongArray() /* ceSnapshotInodes */);
 
-        info.getPackages().add(packageRollbackInfo);
+        synchronized (mLock) {
+            info.getPackages().add(packageRollbackInfo);
+        }
 
         return true;
     }
@@ -304,19 +296,33 @@ class Rollback {
      * Snapshots user data for the provided package and user ids. Does nothing if this rollback is
      * not in the ENABLING state.
      */
-    @GuardedBy("getLock")
     void snapshotUserData(String packageName, int[] userIds, AppDataRollbackHelper dataHelper) {
-        if (!isEnabling()) {
-            return;
+        synchronized (mLock) {
+            if (!isEnabling()) {
+                return;
+            }
+
+            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                if (pkgRollbackInfo.getPackageName().equals(packageName)) {
+                    dataHelper.snapshotAppData(info.getRollbackId(), pkgRollbackInfo, userIds);
+
+                    RollbackStore.saveRollback(this);
+                    pkgRollbackInfo.getSnapshottedUsers().addAll(IntArray.wrap(userIds));
+                    break;
+                }
+            }
         }
+    }
 
-        for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
-            if (pkgRollbackInfo.getPackageName().equals(packageName)) {
-                dataHelper.snapshotAppData(info.getRollbackId(), pkgRollbackInfo, userIds);
-
+    /**
+     * Commits the pending backups and restores for a given {@code userId}. If this rollback has a
+     * pending backup, it is updated with a mapping from {@code userId} to inode of the CE user data
+     * snapshot.
+     */
+    void commitPendingBackupAndRestoreForUser(int userId, AppDataRollbackHelper dataHelper) {
+        synchronized (mLock) {
+            if (dataHelper.commitPendingBackupAndRestoreForUser(userId, this)) {
                 RollbackStore.saveRollback(this);
-                pkgRollbackInfo.getSnapshottedUsers().addAll(IntArray.wrap(userIds));
-                break;
             }
         }
     }
@@ -326,168 +332,170 @@ class Rollback {
      * current time and saves the rollback. Does nothing if this rollback is already in the
      * DELETED state.
      */
-    @GuardedBy("getLock")
     void makeAvailable() {
-        if (isDeleted()) {
-            Slog.w(TAG, "Cannot make deleted rollback available.");
-            return;
+        synchronized (mLock) {
+            if (isDeleted()) {
+                Slog.w(TAG, "Cannot make deleted rollback available.");
+                return;
+            }
+            mState = ROLLBACK_STATE_AVAILABLE;
+            mTimestamp = Instant.now();
+            RollbackStore.saveRollback(this);
         }
-        mState = ROLLBACK_STATE_AVAILABLE;
-        mTimestamp = Instant.now();
-        RollbackStore.saveRollback(this);
     }
 
     /**
      * Commits the rollback.
      */
-    @GuardedBy("getLock")
     void commit(final Context context, List<VersionedPackage> causePackages,
             String callerPackageName, IntentSender statusReceiver) {
-
-        if (!isAvailable()) {
-            sendFailure(context, statusReceiver,
-                    RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
-                    "Rollback unavailable");
-            return;
-        }
-
-        // Get a context to use to install the downgraded version of the package.
-        Context pkgContext;
-        try {
-            pkgContext = context.createPackageContext(callerPackageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
-                    "Invalid callerPackageName");
-            return;
-        }
-
-        PackageManager pm = pkgContext.getPackageManager();
-        try {
-            PackageInstaller packageInstaller = pm.getPackageInstaller();
-            PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
-                    PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-            parentParams.setRequestDowngrade(true);
-            parentParams.setMultiPackage();
-            if (isStaged()) {
-                parentParams.setStaged();
+        synchronized (mLock) {
+            if (!isAvailable()) {
+                sendFailure(context, statusReceiver,
+                        RollbackManager.STATUS_FAILURE_ROLLBACK_UNAVAILABLE,
+                        "Rollback unavailable");
+                return;
             }
 
-            int parentSessionId = packageInstaller.createSession(parentParams);
-            PackageInstaller.Session parentSession = packageInstaller.openSession(
-                    parentSessionId);
+            // Get a context to use to install the downgraded version of the package.
+            Context pkgContext;
+            try {
+                pkgContext = context.createPackageContext(callerPackageName, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                        "Invalid callerPackageName");
+                return;
+            }
 
-            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
-                PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+            PackageManager pm = pkgContext.getPackageManager();
+            try {
+                PackageInstaller packageInstaller = pm.getPackageInstaller();
+                PackageInstaller.SessionParams parentParams = new PackageInstaller.SessionParams(
                         PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-                // TODO: We can't get the installerPackageName for apex
-                // (b/123920130). Is it okay to ignore the installer package
-                // for apex?
-                if (!pkgRollbackInfo.isApex()) {
-                    String installerPackageName =
-                            pm.getInstallerPackageName(pkgRollbackInfo.getPackageName());
-                    if (installerPackageName != null) {
-                        params.setInstallerPackageName(installerPackageName);
-                    }
-                }
-                params.setRequestDowngrade(true);
-                params.setRequiredInstalledVersionCode(
-                        pkgRollbackInfo.getVersionRolledBackFrom().getLongVersionCode());
+                parentParams.setRequestDowngrade(true);
+                parentParams.setMultiPackage();
                 if (isStaged()) {
-                    params.setStaged();
-                }
-                if (pkgRollbackInfo.isApex()) {
-                    params.setInstallAsApex();
-                }
-                int sessionId = packageInstaller.createSession(params);
-                PackageInstaller.Session session = packageInstaller.openSession(sessionId);
-                File[] packageCodePaths = RollbackStore.getPackageCodePaths(
-                        this, pkgRollbackInfo.getPackageName());
-                if (packageCodePaths == null) {
-                    sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
-                            "Backup copy of package inaccessible");
-                    return;
+                    parentParams.setStaged();
                 }
 
-                for (File packageCodePath : packageCodePaths) {
-                    try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCodePath,
-                            ParcelFileDescriptor.MODE_READ_ONLY)) {
-                        final long token = Binder.clearCallingIdentity();
-                        try {
-                            session.write(packageCodePath.getName(), 0,
-                                    packageCodePath.length(),
-                                    fd);
-                        } finally {
-                            Binder.restoreCallingIdentity(token);
+                int parentSessionId = packageInstaller.createSession(parentParams);
+                PackageInstaller.Session parentSession = packageInstaller.openSession(
+                        parentSessionId);
+
+                for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                    PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
+                            PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+                    // TODO: We can't get the installerPackageName for apex
+                    // (b/123920130). Is it okay to ignore the installer package
+                    // for apex?
+                    if (!pkgRollbackInfo.isApex()) {
+                        String installerPackageName =
+                                pm.getInstallerPackageName(pkgRollbackInfo.getPackageName());
+                        if (installerPackageName != null) {
+                            params.setInstallerPackageName(installerPackageName);
                         }
                     }
-                }
-                parentSession.addChildSessionId(sessionId);
-            }
+                    params.setRequestDowngrade(true);
+                    params.setRequiredInstalledVersionCode(
+                            pkgRollbackInfo.getVersionRolledBackFrom().getLongVersionCode());
+                    if (isStaged()) {
+                        params.setStaged();
+                    }
+                    if (pkgRollbackInfo.isApex()) {
+                        params.setInstallAsApex();
+                    }
+                    int sessionId = packageInstaller.createSession(params);
+                    PackageInstaller.Session session = packageInstaller.openSession(sessionId);
+                    File[] packageCodePaths = RollbackStore.getPackageCodePaths(
+                            this, pkgRollbackInfo.getPackageName());
+                    if (packageCodePaths == null) {
+                        sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                                "Backup copy of package inaccessible");
+                        return;
+                    }
 
-            final LocalIntentReceiver receiver = new LocalIntentReceiver(
-                    (Intent result) -> {
-                        int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                                PackageInstaller.STATUS_FAILURE);
-                        if (status != PackageInstaller.STATUS_SUCCESS) {
-                            // Committing the rollback failed, but we still have all the info we
-                            // need to try rolling back again, so restore the rollback state to how
-                            // it was before we tried committing.
-                            // TODO: Should we just kill this rollback if commit failed?
-                            // Why would we expect commit not to fail again?
-                            // TODO: Could this cause a rollback to be resurrected
-                            // if it should otherwise have expired by now?
+                    for (File packageCodePath : packageCodePaths) {
+                        try (ParcelFileDescriptor fd = ParcelFileDescriptor.open(packageCodePath,
+                                ParcelFileDescriptor.MODE_READ_ONLY)) {
+                            final long token = Binder.clearCallingIdentity();
+                            try {
+                                session.write(packageCodePath.getName(), 0,
+                                        packageCodePath.length(),
+                                        fd);
+                            } finally {
+                                Binder.restoreCallingIdentity(token);
+                            }
+                        }
+                    }
+                    parentSession.addChildSessionId(sessionId);
+                }
+
+                final LocalIntentReceiver receiver = new LocalIntentReceiver(
+                        (Intent result) -> {
+                            int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                                    PackageInstaller.STATUS_FAILURE);
+                            if (status != PackageInstaller.STATUS_SUCCESS) {
+                                // Committing the rollback failed, but we still have all the info we
+                                // need to try rolling back again, so restore the rollback state to
+                                // how it was before we tried committing.
+                                // TODO: Should we just kill this rollback if commit failed?
+                                // Why would we expect commit not to fail again?
+                                // TODO: Could this cause a rollback to be resurrected
+                                // if it should otherwise have expired by now?
+                                synchronized (mLock) {
+                                    mState = ROLLBACK_STATE_AVAILABLE;
+                                    mRestoreUserDataInProgress = false;
+                                }
+                                sendFailure(context, statusReceiver,
+                                        RollbackManager.STATUS_FAILURE_INSTALL,
+                                        "Rollback downgrade install failed: "
+                                                + result.getStringExtra(
+                                                PackageInstaller.EXTRA_STATUS_MESSAGE));
+                                return;
+                            }
+
                             synchronized (mLock) {
-                                mState = ROLLBACK_STATE_AVAILABLE;
-                                mRestoreUserDataInProgress = false;
-                            }
-                            sendFailure(context, statusReceiver,
-                                    RollbackManager.STATUS_FAILURE_INSTALL,
-                                    "Rollback downgrade install failed: "
-                                            + result.getStringExtra(
-                                            PackageInstaller.EXTRA_STATUS_MESSAGE));
-                            return;
-                        }
+                                if (!isStaged()) {
+                                    // All calls to restoreUserData should have
+                                    // completed by now for a non-staged install.
+                                    mRestoreUserDataInProgress = false;
+                                }
 
-                        synchronized (mLock) {
-                            if (!isStaged()) {
-                                // All calls to restoreUserData should have
-                                // completed by now for a non-staged install.
-                                mRestoreUserDataInProgress = false;
+                                info.setCommittedSessionId(parentSessionId);
+                                info.getCausePackages().addAll(causePackages);
+                                RollbackStore.deletePackageCodePaths(this);
+                                RollbackStore.saveRollback(this);
                             }
 
-                            info.setCommittedSessionId(parentSessionId);
-                            info.getCausePackages().addAll(causePackages);
-                            RollbackStore.deletePackageCodePaths(this);
-                            RollbackStore.saveRollback(this);
+                            // Send success.
+                            try {
+                                final Intent fillIn = new Intent();
+                                fillIn.putExtra(
+                                        RollbackManager.EXTRA_STATUS,
+                                        RollbackManager.STATUS_SUCCESS);
+                                statusReceiver.sendIntent(context, 0, fillIn, null, null);
+                            } catch (IntentSender.SendIntentException e) {
+                                // Nowhere to send the result back to, so don't bother.
+                            }
+
+                            Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
+
+                            for (UserInfo userInfo : UserManager.get(context).getUsers(true)) {
+                                context.sendBroadcastAsUser(broadcast,
+                                        userInfo.getUserHandle(),
+                                        Manifest.permission.MANAGE_ROLLBACKS);
+                            }
                         }
+                );
 
-                        // Send success.
-                        try {
-                            final Intent fillIn = new Intent();
-                            fillIn.putExtra(
-                                    RollbackManager.EXTRA_STATUS, RollbackManager.STATUS_SUCCESS);
-                            statusReceiver.sendIntent(context, 0, fillIn, null, null);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Nowhere to send the result back to, so don't bother.
-                        }
-
-                        Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
-
-                        for (UserInfo userInfo : UserManager.get(context).getUsers(true)) {
-                            context.sendBroadcastAsUser(broadcast,
-                                    userInfo.getUserHandle(),
-                                    Manifest.permission.MANAGE_ROLLBACKS);
-                        }
-                    }
-            );
-
-            mState = ROLLBACK_STATE_COMMITTED;
-            mRestoreUserDataInProgress = true;
-            parentSession.commit(receiver.getIntentSender());
-        } catch (IOException e) {
-            Slog.e(TAG, "Rollback failed", e);
-            sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
-                    "IOException: " + e.toString());
+                mState = ROLLBACK_STATE_COMMITTED;
+                mRestoreUserDataInProgress = true;
+                parentSession.commit(receiver.getIntentSender());
+            } catch (IOException e) {
+                Slog.e(TAG, "Rollback failed", e);
+                sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
+                        "IOException: " + e.toString());
+            }
         }
     }
 
@@ -498,138 +506,156 @@ class Rollback {
      * @return boolean True if this rollback has a restore in progress and contains the specified
      * package.
      */
-    @GuardedBy("getLock")
     boolean restoreUserDataForPackageIfInProgress(String packageName, int[] userIds, int appId,
             String seInfo, AppDataRollbackHelper dataHelper) {
-        if (!isRestoreUserDataInProgress()) {
-            return false;
-        }
-
-        boolean foundPackage = false;
-        for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
-            if (pkgRollbackInfo.getPackageName().equals(packageName)) {
-                foundPackage = true;
-                boolean changedRollback = false;
-                for (int userId : userIds) {
-                    changedRollback |= dataHelper.restoreAppData(
-                            info.getRollbackId(), pkgRollbackInfo, userId, appId, seInfo);
-                }
-                // We've updated metadata about this rollback, so save it to flash.
-                if (changedRollback) {
-                    RollbackStore.saveRollback(this);
-                }
-                break;
+        synchronized (mLock) {
+            if (!isRestoreUserDataInProgress()) {
+                return false;
             }
+
+            boolean foundPackage = false;
+            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                if (pkgRollbackInfo.getPackageName().equals(packageName)) {
+                    foundPackage = true;
+                    boolean changedRollback = false;
+                    for (int userId : userIds) {
+                        changedRollback |= dataHelper.restoreAppData(
+                                info.getRollbackId(), pkgRollbackInfo, userId, appId, seInfo);
+                    }
+                    // We've updated metadata about this rollback, so save it to flash.
+                    if (changedRollback) {
+                        RollbackStore.saveRollback(this);
+                    }
+                    break;
+                }
+            }
+            return foundPackage;
         }
-        return foundPackage;
     }
 
     /**
      * Deletes app data snapshots associated with this rollback, and moves to the DELETED state.
      */
-    @GuardedBy("getLock")
     void delete(AppDataRollbackHelper dataHelper) {
-        for (PackageRollbackInfo pkgInfo : info.getPackages()) {
-            IntArray snapshottedUsers = pkgInfo.getSnapshottedUsers();
-            for (int i = 0; i < snapshottedUsers.size(); i++) {
-                // Destroy app data snapshot.
-                int userId = snapshottedUsers.get(i);
+        synchronized (mLock) {
+            for (PackageRollbackInfo pkgInfo : info.getPackages()) {
+                IntArray snapshottedUsers = pkgInfo.getSnapshottedUsers();
+                for (int i = 0; i < snapshottedUsers.size(); i++) {
+                    // Destroy app data snapshot.
+                    int userId = snapshottedUsers.get(i);
 
-                dataHelper.destroyAppDataSnapshot(info.getRollbackId(), pkgInfo, userId);
+                    dataHelper.destroyAppDataSnapshot(info.getRollbackId(), pkgInfo, userId);
+                }
             }
-        }
 
-        RollbackStore.deleteRollback(this);
-        mState = ROLLBACK_STATE_DELETED;
+            RollbackStore.deleteRollback(this);
+            mState = ROLLBACK_STATE_DELETED;
+        }
     }
 
     /**
      * Returns the id of the post-reboot apk session for a staged install, if any.
      */
-    @GuardedBy("getLock")
     int getApkSessionId() {
-        return mApkSessionId;
+        synchronized (mLock) {
+            return mApkSessionId;
+        }
     }
 
     /**
      * Sets the id of the post-reboot apk session for a staged install.
      */
-    @GuardedBy("getLock")
     void setApkSessionId(int apkSessionId) {
-        mApkSessionId = apkSessionId;
+        synchronized (mLock) {
+            mApkSessionId = apkSessionId;
+            RollbackStore.saveRollback(this);
+        }
     }
 
     /**
      * Returns true if we are expecting the package manager to call restoreUserData for this
      * rollback because it has just been committed but the rollback has not yet been fully applied.
      */
-    @GuardedBy("getLock")
     boolean isRestoreUserDataInProgress() {
-        return mRestoreUserDataInProgress;
+        synchronized (mLock) {
+            return mRestoreUserDataInProgress;
+        }
     }
 
     /**
      * Sets whether we are expecting the package manager to call restoreUserData for this
      * rollback because it has just been committed but the rollback has not yet been fully applied.
      */
-    @GuardedBy("getLock")
     void setRestoreUserDataInProgress(boolean restoreUserDataInProgress) {
-        mRestoreUserDataInProgress = restoreUserDataInProgress;
+        synchronized (mLock) {
+            mRestoreUserDataInProgress = restoreUserDataInProgress;
+            RollbackStore.saveRollback(this);
+        }
     }
 
     /**
      * Returns true if this rollback includes the package with the provided {@code packageName}.
      */
-    @GuardedBy("getLock")
     boolean includesPackage(String packageName) {
-        for (PackageRollbackInfo packageRollbackInfo : info.getPackages()) {
-            if (packageRollbackInfo.getPackageName().equals(packageName)) {
-                return true;
+        synchronized (mLock) {
+            for (PackageRollbackInfo packageRollbackInfo : info.getPackages()) {
+                if (packageRollbackInfo.getPackageName().equals(packageName)) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     /**
      * Returns true if this rollback includes the package with the provided {@code packageName}
      * with a <i>version rolled back from</i> that is not {@code versionCode}.
      */
-    @GuardedBy("getLock")
     boolean includesPackageWithDifferentVersion(String packageName, long versionCode) {
-        for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
-            if (pkgRollbackInfo.getPackageName().equals(packageName)
-                    && pkgRollbackInfo.getVersionRolledBackFrom().getLongVersionCode()
-                    != versionCode) {
-                return true;
+        synchronized (mLock) {
+            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                if (pkgRollbackInfo.getPackageName().equals(packageName)
+                        && pkgRollbackInfo.getVersionRolledBackFrom().getLongVersionCode()
+                        != versionCode) {
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
     }
 
     /**
      * Returns a list containing the names of all the packages included in this rollback.
      */
-    @GuardedBy("getLock")
     List<String> getPackageNames() {
-        List<String> result = new ArrayList<>();
-        for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
-            result.add(pkgRollbackInfo.getPackageName());
+        synchronized (mLock) {
+            List<String> result = new ArrayList<>();
+            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                result.add(pkgRollbackInfo.getPackageName());
+            }
+            return result;
         }
-        return result;
     }
 
     /**
      * Returns a list containing the names of all the apex packages included in this rollback.
      */
-    @GuardedBy("getLock")
     List<String> getApexPackageNames() {
-        List<String> result = new ArrayList<>();
-        for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
-            if (pkgRollbackInfo.isApex()) {
-                result.add(pkgRollbackInfo.getPackageName());
+        synchronized (mLock) {
+            List<String> result = new ArrayList<>();
+            for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
+                if (pkgRollbackInfo.isApex()) {
+                    result.add(pkgRollbackInfo.getPackageName());
+                }
             }
+            return result;
         }
-        return result;
+    }
+
+    int getPackageCount() {
+        synchronized (mLock) {
+            return info.getPackages().size();
+        }
     }
 
     static String rollbackStateToString(@RollbackState int state) {
@@ -651,8 +677,39 @@ class Rollback {
         throw new ParseException("Invalid rollback state: " + state, 0);
     }
 
-    @GuardedBy("getLock")
     String getStateAsString() {
-        return rollbackStateToString(mState);
+        synchronized (mLock) {
+            return rollbackStateToString(mState);
+        }
+    }
+
+    void dump(IndentingPrintWriter ipw) {
+        synchronized (mLock) {
+            ipw.println(info.getRollbackId() + ":");
+            ipw.increaseIndent();
+            ipw.println("-state: " + getStateAsString());
+            ipw.println("-timestamp: " + getTimestamp());
+            if (getStagedSessionId() != -1) {
+                ipw.println("-stagedSessionId: " + getStagedSessionId());
+            }
+            ipw.println("-packages:");
+            ipw.increaseIndent();
+            for (PackageRollbackInfo pkg : info.getPackages()) {
+                ipw.println(pkg.getPackageName()
+                        + " " + pkg.getVersionRolledBackFrom().getLongVersionCode()
+                        + " -> " + pkg.getVersionRolledBackTo().getLongVersionCode());
+            }
+            ipw.decreaseIndent();
+            if (isCommitted()) {
+                ipw.println("-causePackages:");
+                ipw.increaseIndent();
+                for (VersionedPackage cPkg : info.getCausePackages()) {
+                    ipw.println(cPkg.getPackageName() + " " + cPkg.getLongVersionCode());
+                }
+                ipw.decreaseIndent();
+                ipw.println("-committedSessionId: " + info.getCommittedSessionId());
+            }
+            ipw.decreaseIndent();
+        }
     }
 }
