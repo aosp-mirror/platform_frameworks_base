@@ -483,4 +483,7 @@
     <!-- Whether or not to add a "people" notifications section -->
     <bool name="config_usePeopleFiltering">false</bool>
 
+    <!-- Package name for controls plugin -->
+    <string name="config_controlsPluginPackageName" translatable="false">com.android.systemui.controls.panel</string>
+
 </resources>
