@@ -269,6 +269,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         maybeMigrateRole(RoleManager.ROLE_DIALER, userId);
         maybeMigrateRole(RoleManager.ROLE_SMS, userId);
         maybeMigrateRole(RoleManager.ROLE_EMERGENCY, userId);
+        maybeMigrateRole(RoleManager.ROLE_HOME, userId);
 
         // Some package state has changed, so grant default roles again.
         Slog.i(LOG_TAG, "Granting default roles...");
