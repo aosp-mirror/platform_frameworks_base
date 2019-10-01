@@ -20255,7 +20255,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     mInjector.getPermissionPolicyInternal();
             permissionPolicyInternal.setOnInitializedCallback(userId -> {
                 // The SDK updated case is already handled when we run during the ctor.
-                synchronized (mPackages) {
+                synchronized (mLock) {
                     mPermissionManager.updateAllPermissions(
                             StorageManager.UUID_PRIVATE_INTERNAL, false);
                 }
