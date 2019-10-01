@@ -3355,6 +3355,7 @@ package android.view {
   public class WindowlessViewRoot {
     ctor public WindowlessViewRoot(android.content.Context, android.view.Display, android.view.SurfaceControl);
     method public void addView(android.view.View, android.view.WindowManager.LayoutParams);
+    method public void relayout(android.view.WindowManager.LayoutParams);
   }
 
 }
