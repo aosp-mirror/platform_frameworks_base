@@ -30,20 +30,17 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.om.OverlayManagerServiceImpl.PackageManagerHelper;
-import com.android.server.pm.Installer;
 
 import java.io.File;
 
 /**
  * Handle the creation and deletion of idmap files.
  *
- * The actual work is performed by the idmap binary, launched through Installer
- * and installd (or idmap2).
+ * The actual work is performed by the idmap binary, launched through idmap2d.
  *
  * Note: this class is subclassed in the OMS unit tests, and hence not marked as final.
  */
 class IdmapManager {
-    private static final boolean FEATURE_FLAG_IDMAP2 = true;
     private static final boolean VENDOR_IS_Q_OR_LATER;
     static {
         final String value = SystemProperties.get("ro.vndk.version", "29");
@@ -58,12 +55,10 @@ class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
-    private final Installer mInstaller;
     private final PackageManagerHelper mPackageManager;
     private final IdmapDaemon mIdmapDaemon;
 
-    IdmapManager(final Installer installer, final PackageManagerHelper packageManager) {
-        mInstaller = installer;
+    IdmapManager(final PackageManagerHelper packageManager) {
         mPackageManager = packageManager;
         mIdmapDaemon = IdmapDaemon.getInstance();
     }
@@ -78,18 +73,13 @@ class IdmapManager {
         final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
-            if (FEATURE_FLAG_IDMAP2) {
-                int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
-                boolean enforce = enforceOverlayable(overlayPackage);
-                if (mIdmapDaemon.verifyIdmap(overlayPath, policies, enforce, userId)) {
-                    return true;
-                }
-                return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
-                        enforce, userId) != null;
-            } else {
-                mInstaller.idmap(targetPath, overlayPath, sharedGid);
+            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
+            boolean enforce = enforceOverlayable(overlayPackage);
+            if (mIdmapDaemon.verifyIdmap(overlayPath, policies, enforce, userId)) {
                 return true;
             }
+            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
+                    enforce, userId) != null;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayPath + ": " + e.getMessage());
@@ -102,12 +92,7 @@ class IdmapManager {
             Slog.d(TAG, "remove idmap for " + oi.baseCodePath);
         }
         try {
-            if (FEATURE_FLAG_IDMAP2) {
-                return mIdmapDaemon.removeIdmap(oi.baseCodePath, userId);
-            } else {
-                mInstaller.removeIdmap(oi.baseCodePath);
-                return true;
-            }
+            return mIdmapDaemon.removeIdmap(oi.baseCodePath, userId);
         } catch (Exception e) {
             Slog.w(TAG, "failed to remove idmap for " + oi.baseCodePath + ": " + e.getMessage());
             return false;
@@ -125,19 +110,12 @@ class IdmapManager {
 
     private @NonNull String getIdmapPath(@NonNull final String overlayPackagePath,
             final int userId) {
-        if (FEATURE_FLAG_IDMAP2) {
-            try {
-                return mIdmapDaemon.getIdmapPath(overlayPackagePath, userId);
-            } catch (Exception e) {
-                Slog.w(TAG, "failed to get idmap path for " + overlayPackagePath + ": "
-                        + e.getMessage());
-                return "";
-            }
-        } else {
-            final StringBuilder sb = new StringBuilder("/data/resource-cache/");
-            sb.append(overlayPackagePath.substring(1).replace('/', '@'));
-            sb.append("@idmap");
-            return sb.toString();
+        try {
+            return mIdmapDaemon.getIdmapPath(overlayPackagePath, userId);
+        } catch (Exception e) {
+            Slog.w(TAG, "failed to get idmap path for " + overlayPackagePath + ": "
+                    + e.getMessage());
+            return "";
         }
     }
 
