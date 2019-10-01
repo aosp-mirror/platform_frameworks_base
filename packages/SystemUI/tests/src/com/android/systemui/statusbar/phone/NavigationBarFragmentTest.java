@@ -80,7 +80,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper()
+@RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private static final int EXTERNAL_DISPLAY_ID = 2;
@@ -217,7 +217,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
         // Set IME window status for default NavBar.
         mCommandQueue.setImeWindowStatus(DEFAULT_DISPLAY, null, IME_VISIBLE,
                 BACK_DISPOSITION_DEFAULT, true, false);
-        Handler.getMain().runWithScissors(() -> { }, 500);
+        processAllMessages();
 
         // Verify IME window state will be updated in default NavBar & external NavBar state reset.
         assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN,
@@ -228,7 +228,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
         // Set IME window status for external NavBar.
         mCommandQueue.setImeWindowStatus(EXTERNAL_DISPLAY_ID, null,
                 IME_VISIBLE, BACK_DISPOSITION_DEFAULT, true, false);
-        Handler.getMain().runWithScissors(() -> { }, 500);
+        processAllMessages();
 
         // Verify IME window state will be updated in external NavBar & default NavBar state reset.
         assertEquals(NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_SHOWN,
