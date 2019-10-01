@@ -45,6 +45,7 @@ import androidx.test.runner.AndroidJUnit4;
 import libcore.util.HexEncoding;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -200,6 +201,7 @@ public class InetDiagSocketTest {
         checkGetConnectionOwnerUid("::1", "::1");
     }
 
+    @Ignore("Times out on Marlin/Sailfish")
     /* Verify fix for b/141603906 */
     @Test
     public void testB141603906() throws Exception {
