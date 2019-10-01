@@ -684,8 +684,9 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_EXTRAS = 0x00400000;
         static final int FLAGS_HAS_ID = 0x00200000;
         static final int FLAGS_HAS_CHILDREN = 0x00100000;
-        static final int FLAGS_HAS_URL = 0x00080000;
+        static final int FLAGS_HAS_URL_DOMAIN = 0x00080000;
         static final int FLAGS_HAS_INPUT_TYPE = 0x00040000;
+        static final int FLAGS_HAS_URL_SCHEME = 0x00020000;
         static final int FLAGS_HAS_LOCALE_LIST = 0x00010000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
@@ -829,8 +830,10 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_INPUT_TYPE) != 0) {
                 mInputType = in.readInt();
             }
-            if ((flags&FLAGS_HAS_URL) != 0) {
+            if ((flags&FLAGS_HAS_URL_SCHEME) != 0) {
                 mWebScheme = in.readString();
+            }
+            if ((flags&FLAGS_HAS_URL_DOMAIN) != 0) {
                 mWebDomain = in.readString();
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
@@ -891,8 +894,11 @@ public class AssistStructure implements Parcelable {
             if (mInputType != 0) {
                 flags |= FLAGS_HAS_INPUT_TYPE;
             }
-            if (mWebScheme != null || mWebDomain != null) {
-                flags |= FLAGS_HAS_URL;
+            if (mWebScheme != null) {
+                flags |= FLAGS_HAS_URL_SCHEME;
+            }
+            if (mWebDomain != null) {
+                flags |= FLAGS_HAS_URL_DOMAIN;
             }
             if (mLocaleList != null) {
                 flags |= FLAGS_HAS_LOCALE_LIST;
@@ -1055,8 +1061,10 @@ public class AssistStructure implements Parcelable {
             if ((flags&FLAGS_HAS_INPUT_TYPE) != 0) {
                 out.writeInt(mInputType);
             }
-            if ((flags&FLAGS_HAS_URL) != 0) {
+            if ((flags & FLAGS_HAS_URL_SCHEME) != 0) {
                 out.writeString(mWebScheme);
+            }
+            if ((flags&FLAGS_HAS_URL_DOMAIN) != 0) {
                 out.writeString(mWebDomain);
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
@@ -1431,13 +1439,18 @@ public class AssistStructure implements Parcelable {
         public void setWebDomain(@Nullable String domain) {
             if (domain == null) return;
 
-            final Uri uri = Uri.parse(domain);
+            Uri uri = Uri.parse(domain);
             if (uri == null) {
                 // Cannot log domain because it could contain PII;
                 Log.w(TAG, "Failed to parse web domain");
                 return;
             }
+
             mWebScheme = uri.getScheme();
+            if (mWebScheme == null) {
+                uri = Uri.parse("http://" + domain);
+            }
+
             mWebDomain = uri.getHost();
         }
 
