@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"ਐਪ ਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਕੌਂਫਿਗਰੇਸ਼ਨ ਨੂੰ ਪੜ੍ਹਨ ਅਤੇ ਲਿਖਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"ਇਜਾਜ਼ਤ ਵਰਤੋਂ ਦੇਖਣਾ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ਧਾਰਕ ਨੂੰ ਕਿਸੇ ਹੋਰ ਐਪ ਲਈ ਇਜਾਜ਼ਤ ਵਰਤੋਂ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਦਿੰਦਾ ਹੈ। ਸਧਾਰਨ ਐਪਾਂ ਲਈ ਕਦੇ ਵੀ ਲੋੜੀਂਦਾ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਟੀਚਾ"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"ਕਿਸੇ ਐਪ ਨੂੰ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਟੀਚੇ ਨੂੰ ਪਰਿਭਾਸ਼ਿਤ ਕਰਨ ਦਿਓ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ਪਾਸਵਰਡ ਨਿਯਮ ਸੈੱਟ ਕਰੋ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ਸਕ੍ਰੀਨ ਲਾਕ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਿੰਨ ਵਿੱਚ ਆਗਿਆ ਦਿੱਤੀ ਲੰਮਾਈ ਅਤੇ ਅੱਖਰਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ਸਕ੍ਰੀਨ ਅਣਲਾਕ ਕਰਨ ਦੀਆਂ ਕੋਸ਼ਿਸ਼ਾਂ \'ਤੇ ਨਿਗਰਾਨੀ ਰੱਖੋ"</string>
@@ -1362,6 +1364,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ਡੀਬੱਗਿੰਗ ਅਯੋਗ ਬਣਾਉਣ ਲਈ ਚੁਣੋ।"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"ਟੈਸਟ ਹਾਰਨੈੱਸ ਮੋਡ ਬੰਦ ਕਰਨ ਲਈ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਕਰੋ।"</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"ਸੀਰੀਅਲ ਕੰਸੋਲ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"ਕਾਰਗੁਜ਼ਾਰੀ ਪ੍ਰਭਾਵਿਤ ਹੋਈ ਹੈ। ਬੰਦ ਕਰਨ ਲਈ, ਬੂਟਲੋਡਰ ਦੇਖੋ।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ਪੋਰਟ ਵਿੱਚ ਪਾਣੀ ਜਾਂ ਧੂੜ-ਮਿੱਟੀ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ਪੋਰਟ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਬੰਦ ਕੀਤਾ ਗਿਆ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ਪੋਰਟ ਵਰਤਣ ਲਈ ਠੀਕ ਹੈ"</string>
@@ -1891,10 +1895,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ਗੈਰ-ਸ਼੍ਰੇਣੀਕਿਰਤ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਦੀ ਮਹੱਤਤਾ ਸੈੱਟ ਕੀਤੀ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ਇਹ ਸ਼ਾਮਲ ਲੋਕਾਂ ਦੇ ਕਾਰਨ ਮਹੱਤਵਪੂਰਨ ਹੈ।"</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ (ਇਸ ਖਾਤੇ ਨਾਲ ਇੱਕ ਵਰਤੋਂਕਾਰ ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਮੌਜੂਦ ਹੈ)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ਇੱਕ ਭਾਸ਼ਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ਖੇਤਰ ਤਰਜੀਹ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ਭਾਸ਼ਾ ਨਾਮ ਟਾਈਪ ਕਰੋ"</string>

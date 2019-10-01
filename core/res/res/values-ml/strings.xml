@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"അനുമതി ഉപയോഗം കാണാൻ ആരംഭിക്കുക"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ഒരു ആപ്പിനുള്ള അനുമതി ഉപയോഗം ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ഉപയോഗസഹായി കുറുക്കുവഴിയുടെ ടാർഗറ്റ്"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"ഉപയോഗസഹായി കുറുക്കുവഴിയുടെ ടാർഗറ്റ് നിർവ്വചിക്കാൻ ആപ്പിനെ അനുവദിക്കുക."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
@@ -1362,6 +1364,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ഡീബഗ്ഗുചെയ്യൽ പ്രവർത്തനരഹിതമാക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"പരിശോധനാ സംവിധാനങ്ങൾ മോഡ് പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"പരിശോധനാ സംവിധാന മോഡ് പ്രവർത്തനരഹിതമാക്കാൻ ഫാക്‌ടറി പുനഃക്രമീകരണം നിർവഹിക്കുക."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"സീരിയൽ കൺസോൾ പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"പ്രകടനത്തെ ബാധിച്ചു. പ്രവർത്തനരഹിതമാക്കാൻ, ബൂട്ട് ലോഡർ പരിശോധിക്കുക."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB പോർട്ടിൽ ദ്രാവകമോ പൊടിയോ കണ്ടെത്തി"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB പോർട്ടർ സ്വയമേവ പ്രവർത്തനരഹിതമായി. കൂടുതലറിയാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"ഇനി USB പോർട്ട് ഉപയോഗിക്കാം"</string>
@@ -1891,10 +1895,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് (ഈ അക്കൗണ്ട് ഉപയോഗിക്കുന്ന ഒരു ഉപയോക്താവ് നിലവിലുണ്ട്) ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ഒരു ഭാഷ ചേർക്കുക"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"മേഖലാ മുൻഗണന"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ഭാഷയുടെ പേര് ടൈപ്പുചെയ്യുക"</string>

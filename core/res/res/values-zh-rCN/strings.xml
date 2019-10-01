@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"无障碍功能快捷方式目标"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"允许应用定义无障碍功能快捷方式目标。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"监控屏幕解锁尝试次数"</string>
@@ -1361,6 +1363,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"选择即可停用 USB 调试功能。"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"自动化测试框架模式已启用"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"恢复出厂设置以停用自动化测试框架模式。"</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"已启用序列控制台"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"性能受到影响。要停用，请查看引导加载程序。"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 端口中有液体或碎屑"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB 端口已自动停用。点按即可了解详情。"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"允许使用 USB 端口"</string>
@@ -1890,10 +1894,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"未分类"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"这些通知的重要程度由您来设置。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定的人，因此被归为重要通知。"</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g>（目前已有用户使用此帐号）创建新用户吗？"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"添加语言"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"输入语言名称"</string>

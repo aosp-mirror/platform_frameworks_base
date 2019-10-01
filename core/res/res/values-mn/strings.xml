@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Апп-д Бүү саад бол тохируулгыг уншиж, бичихийг зөвшөөрөх"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"зөвшөөрлийн ашиглалтыг харж эхлэх"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Эзэмшигчид аппын зөвшөөрлөө ашиглаж эхлэхийг зөвшөөрдөг. Энгийн аппуудад шаардлагагүй."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"хандалтын товчлолын зорилт"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Аппад хандалтын товчлолын зорилтыг тодорхойлохыг зөвшөөрдөг."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Нууц үгний дүрмийг тохируулах"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Дэлгэц түгжих нууц үг болон ПИН кодны урт болон нийт тэмдэгтийн уртыг хянах."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Дэлгэцийн түгжээг тайлах оролдлогыг хянах"</string>
@@ -1361,6 +1363,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB дебаг хийхийг идэвхгүй болгох бол сонгоно уу."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Туршилтын цогц горимыг идэвхжүүлсэн"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Туршилтын цогц горимыг идэвхгүй болгохын тулд үйлдвэрийн төлөвт шинэчилнэ үү."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"Цуваа консолыг идэвхжүүлсэн"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"Гүйцэтгэлд нөлөөлнө. Идэвхгүй болгохын тулд эхэлж ачаалагчийг шалгана уу."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB порт дээрх шингэн зүйл эсвэл бохирдол"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB портыг автоматаар идэвхгүй болгосон байна. Дэлгэрэнгүй мэдээлэл авахын тулд товшино уу."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB портыг ашиглахад зүгээр"</string>
@@ -1890,10 +1894,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Ангилаагүй"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Та эдгээр мэдэгдлийн ач холбогдлыг тогтоосон."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Оролцсон хүмүүсээс шалтгаалан энэ нь өндөр ач холбогдолтой."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g>-д <xliff:g id="ACCOUNT">%2$s</xliff:g>-тай (ийм бүртгэлтэй хэрэглэгч аль хэдийн байна) шинэ хэрэглэгч үүсгэхийг зөвшөөрөх үү ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g>-д <xliff:g id="ACCOUNT">%2$s</xliff:g>-тай шинэ хэрэглэгч үүсгэхийг зөвшөөрөх үү?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Хэл нэмэх"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Бүс нутгийн тохиргоо"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Улсын хэлийг бичнэ үү"</string>

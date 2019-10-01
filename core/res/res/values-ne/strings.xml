@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"वाहकलाई कुनै अनुप्रयोगसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"पहुँचसम्बन्धी सर्टकटको लक्ष्य"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"कुनै अनुप्रयोगलाई पहुँचसम्बन्धी सर्टकटको लक्ष्य परिभाषित गर्न दिन्छ।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"मनिटरको स्क्रिन अनलक गर्ने प्रयासहरू"</string>
@@ -1367,6 +1369,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"परीक्षण प्याकेज मोड सक्षम पारियो"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"परीक्षण प्याकेज मोड असक्षम पार्न फ्याक्ट्री रिसेट गर्नुहोस्।"</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"क्रमसम्बन्धी कन्सोल सक्षम पारियो"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"कार्यसम्पादनमा प्रभाव परेको छ। यसलाई असक्षम पार्न बुटलोडरको जाँच गर्नुहोस्।"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB पोर्टमा तरल पदार्थ वा धुलो भएको कुरा पत्ता लाग्यो"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB पोर्ट स्वतः असक्षम पारियो। थप जान्न ट्याप गर्नुहोस्।"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB पोर्ट प्रयोग गर्दा हुन्छ"</string>
@@ -1896,10 +1900,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"वर्गीकरण नगरिएको"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहोस् ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"भाषा थप्नुहोस्"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"क्षेत्रको प्राथमिकता"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषाको नाम टाइप गर्नुहोस्"</string>
