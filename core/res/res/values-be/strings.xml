@@ -1956,10 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Некатэгарызаванае"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Вы задалі важнасць гэтых апавяшчэнняў."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Гэта важна, бо з гэтым звязаны пэўныя людзі."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g> (Карыстальнік з гэтым уліковым запісам ужо існуе)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Дадаць мову"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Параметры рэгіёна"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Увядзіце назву мовы"</string>

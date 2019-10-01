@@ -96,7 +96,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsionet e transferimit të dosjeve të USB-së"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lidh si një lexues \"media\" (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montoje si kamerë (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instalo apl. \"Transferimi i skedarëve\" për \"Mac\""</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Instalo \"Transferimi i skedarëve të Android\" për Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Prapa"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Faqja bazë"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyja"</string>

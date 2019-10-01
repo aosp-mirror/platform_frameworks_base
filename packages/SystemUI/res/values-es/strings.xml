@@ -544,7 +544,7 @@
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Aplicaciones recientes."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Inicio."</string>
     <string name="screen_pinning_toast" msgid="2266705122951934150">"Mantén pulsado el botón Atrás y el de aplicaciones recientes para dejar de fijar esta pantalla"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Mantén pulsado el botón Atrás y el de Inicio para dejar de fijar esta pantalla"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Mantén pulsados los botones Atrás e Inicio para dejar de fijar esta pantalla"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="5070548776081664958">"Para dejar de fijar esta pantalla, desliza el dedo hacia arriba y mantenla pulsada"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendido"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, gracias"</string>

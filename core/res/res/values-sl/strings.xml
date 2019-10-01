@@ -1956,10 +1956,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nekategorizirano"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vi določite raven pomembnosti teh obvestil."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Pomembno zaradi udeleženih ljudi."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Ali aplikaciji <xliff:g id="APP">%1$s</xliff:g> dovolite, da ustvari novega uporabnika za račun <xliff:g id="ACCOUNT">%2$s</xliff:g> (uporabnik s tem računom že obstaja)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Ali aplikaciji <xliff:g id="APP">%1$s</xliff:g> dovolite, da ustvari novega uporabnika za račun <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodajanje jezika"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Nastavitev območja"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Vnesite ime jezika"</string>
