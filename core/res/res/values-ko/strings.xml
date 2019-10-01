@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"권한 사용 보기 시작"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"앱의 권한 사용을 시작하려면 보유자를 허용하세요. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"접근성 단축키 대상"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"앱이 접근성 단축키 대상을 정의할 수 있도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"화면 잠금 해제 시도 모니터링"</string>
@@ -1361,6 +1363,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB 디버깅을 사용하지 않으려면 선택합니다."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"테스트 하네스 모드 사용 설정됨"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"테스트 하네스 모드를 사용 중지하려면 초기화하세요."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"시리얼 콘솔 사용 설정됨"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"성능에 영향을 미쳤습니다. 사용 중지하려면 부트로더를 확인하세요."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB 포트에서 액체 또는 이물질 감지됨"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB 포트가 자동으로 사용 중지되었습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB 포트를 사용해도 좋음"</string>
@@ -1890,10 +1894,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정으로 신규 사용자를 만들도록 허용하시겠습니까? 이 계정으로 등록된 사용자가 이미 존재합니다."</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정으로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"언어 추가"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"지역 환경설정"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"언어 이름 입력"</string>

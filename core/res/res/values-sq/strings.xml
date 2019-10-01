@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"nis përdorimin e lejes për shikimin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"objektivi i shkurtores së qasshmërisë"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Lejon që një aplikacion të përcaktojë objektivin e shkurtores së qasshmërisë."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoro tentativat e shkyçjes së ekranit"</string>
@@ -1362,6 +1364,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Përzgjidhe për të çaktivizuar korrigjimin e gabimeve të USB-së"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Modaliteti i lidhjes së testimit është aktivizuar"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Kryej një rivendosje në cilësimet e fabrikës për të çaktivizuar \"Modalitetin e lidhjes së testimit\"."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"Paneli komandues i serisë është aktivizuar"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"Ndikohet cilësia e funksionimit. Për ta çaktivizuar, kontrollo ngarkuesin e sistemit."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Lëngje ose papastërti në portën e USB-së"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Porta e USB-së është çaktivizuar automatikisht. Trokit për të mësuar më shumë."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Në rregulloj për përdorimin e portës USB"</string>
@@ -1891,10 +1895,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"E pakategorizuara"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Ke caktuar rëndësinë e këtyre njoftimeve."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Është i rëndësishëm për shkak të personave të përfshirë."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Të lejohet <xliff:g id="APP">%1$s</xliff:g> që të krijojë një përdorues të ri me <xliff:g id="ACCOUNT">%2$s</xliff:g> (një përdorues me këtë llogari ekziston tashmë) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Të lejohet <xliff:g id="APP">%1$s</xliff:g> që të krijojë një përdorues të ri me <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Shto një gjuhë"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferenca e rajonit"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Shkruaj emrin e gjuhës"</string>

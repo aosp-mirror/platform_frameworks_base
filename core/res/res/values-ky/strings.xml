@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Колдонмого \"Тынчымды алба\" режиминин конфигурациясын окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"уруксаттын колдонулушун көрүп баштоо"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Колдонмонун пайдаланылышына уруксат берүүгө мүмкүнчүлүк берет. Кадимки колдонмолорго эч качан талап кылынбашы керек."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"максаттуу атайын мүмкүнчүлүк аракетине кыска жол"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Колдонмого максаттуу атайын мүмкүнчүлүк аракетине кыска жолду аныктоого уруксат берет."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Сырсөз эрежелерин коюу"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
@@ -1363,6 +1365,8 @@
     <skip />
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Сыноо программасынын режими иштетилди"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Сыноо программасынын режимин өчүрүү үчүн, баштапкы жөндөөлөргө кайтарыңыз."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"Сериялык консоль иштетилди"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"Майнаптуулугуна таасири тиет. Аны өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB портунда суюктук же урандылар бар"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB порт автоматтык түрдө өчүрүлдү. Кененирээк маалымат алуу үчүн таптап коюңуз."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB портун колдонууга болот"</string>
@@ -1892,10 +1896,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Категорияларга бөлүнгөн эмес"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Бул эскертмелердин маанилүүлүгүн белгиледиңиз."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Булар сиз үчүн маанилүү адамдар."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> колдонмосуна <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту менен жаңы колдонуучу түзүүгө уруксат бересизби (мындай аккаунту бар колдонуучу мурунтан эле бар)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> колдонмосуна <xliff:g id="ACCOUNT">%2$s</xliff:g> аккаунту менен жаңы колдонуучу түзүүгө уруксат бересизби?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Тил кошуу"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Чөлкөмдүк жөндөөлөр"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Тилди киргизиңиз"</string>

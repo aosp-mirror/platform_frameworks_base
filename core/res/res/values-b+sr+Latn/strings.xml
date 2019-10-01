@@ -27,7 +27,7 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="untitled" msgid="4638956954852782576">"&lt;Bez naslova&gt;"</string>
+    <string name="untitled" msgid="4638956954852782576">"&lt;Bez imena&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nema broja telefona)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Nepoznato"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Glasovna pošta"</string>
@@ -658,6 +658,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Dozvoljava aplikaciji da čita i upisuje konfiguraciju podešavanja Ne uznemiravaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"početak korišćenja dozvole za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Dozvoljava vlasniku da započne korišćenje dozvole za aplikaciju. Nikada ne bi trebalo da bude potrebna za uobičajene aplikacije."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cilj prečice za pristupačnost"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Dozvoljava aplikaciji da definiše cilj prečice za pristupačnost."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Podešavanje pravila za lozinku"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontroliše dužinu i znakove dozvoljene u lozinkama i PIN-ovima za zaključavanje ekrana."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Nadgledajte pokušaje otključavanja ekrana"</string>
@@ -1383,6 +1385,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izaberite da biste onemogućili otklanjanja grešaka sa USB-a."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Omogućen je režim probnog korišćenja"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Obavite resetovanje na fabrička podešavanja da biste onemogućili režim probnog korišćenja."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"Serijska konzola je omogućena"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"Učinak je smanjen. Da biste onemogući konzolu, proverite pokretački program."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Tečnost ili nečistoća u USB portu"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB port je automatski isključen. Dodirnite da biste saznali više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Korišćenje USB porta je dozvoljeno"</string>
@@ -1924,10 +1928,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Nekategorizovano"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Vi podešavate važnost ovih obaveštenja."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ovo je važno zbog ljudi koji učestvuju."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Želite li da dozvolite da <xliff:g id="APP">%1$s</xliff:g> napravi novog korisnika sa nalogom <xliff:g id="ACCOUNT">%2$s</xliff:g> (korisnik sa tim nalogom već postoji)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Želite li da dozvolite da <xliff:g id="APP">%1$s</xliff:g> napravi novog korisnika sa nalogom <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Dodajte jezik"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Podešavanje regiona"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Unesite naziv jezika"</string>

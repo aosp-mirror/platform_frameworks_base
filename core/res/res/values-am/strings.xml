@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"መተግበሪያው የአትረብሽ ውቅረትን እንዲያነብብ እና እንዲጸፍ ይፈቅዳል።"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"የእይታ ፈቃድ መጠቀምን መጀመር"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"ያዢው ለአንድ መተግበሪያ የፈቃድ አጠቃቀሙን እንዲያስጀምር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"የተደራሽነት አቋራጭ ዒላማ"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"መተግበሪያ የተደራሽነት አቋራጭ ዒላማን ለመግለጽ እንዲችል ይፈቅድለታል።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"በማያ ገጽ መቆለፊያ የይለፍ ቃሎች እና ፒኖች ውስጥ የሚፈቀዱ ቁምፊዎችን እና ርዝመታቸውን ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"የማሳያ-ክፈት ሙከራዎችን ክትትል ያድርጉባቸው"</string>
@@ -1361,6 +1363,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ማረሚያ ላለማንቃት ምረጥ።"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"የሙከራ ጥቅል ሁነታ ነቅቷል"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"የመሞከሪያ ጥቅል ሁነታን ለማሰናከል የፋብሪካ ዳግም ቅንብርን ይሞክሩ።"</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"ተከታታይ ኮንሶል ነቅቷል"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"አፈጻጸም ተጽዕኖ አርፎበታል። ለማሰናከል፣ bootloader ን ይፈትሹ።"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"በዩኤስቢ ወደብ ውስጥ ፈሳሽ ወይም ፍርስራሽ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"የዩኤስቢ ወደብ በራስ-ሰር ተሰናክሏል። የበለጠ ለመረዳት መታ ያድርጉ።"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"የዩኤስቢ ወደቡን መጠቀም ችግር የለውም"</string>
@@ -1890,10 +1894,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"ያልተመደቡ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"የእነዚህን ማሳወቂያዎች አስፈላጊነት አዘጋጅተዋል።"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ይሄ በሚሳተፉ ሰዎች ምክንያት አስፈላጊ ነው።"</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> በ<xliff:g id="ACCOUNT">%2$s</xliff:g> አዲስ ተጠቃሚ እንዲፈጥር ይፈቀድለት (ይህ መለያ ያለው ተጠቃሚ አስቀድሞ አለ)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> አዲስ ተጠቃሚ ከ <xliff:g id="ACCOUNT">%2$s</xliff:g> ጋር መፍጠር እንዲችል ይፍቀዱ?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ቋንቋ ያክሉ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"የክልል ምርጫ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"የቋንቋ ስም ይተይቡ"</string>

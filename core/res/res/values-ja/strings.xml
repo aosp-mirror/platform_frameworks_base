@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ユーザー補助ショートカットのターゲット"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"ユーザー補助ショートカットのターゲットの定義付けをアプリに許可します。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"画面ロック解除試行の監視"</string>
@@ -1361,6 +1363,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USBデバッグを無効にする場合に選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"シリアル コンソールは有効です"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"シリアル コンソールを有効にすると、パフォーマンスに影響します。無効にするには、ブートローダーをチェックしてください。"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ポート内の液体やゴミ"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ポートが自動的に無効になりました。タップして詳細をご確認ください。"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ポートを安全に使用できます"</string>
@@ -1890,10 +1894,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"カテゴリなし"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"このような通知の重要度を設定します。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"関係するユーザーのため、この設定は重要です。"</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？（このアカウントのユーザーはすでに存在します）"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"言語を追加"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"地域設定"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"言語名を入力"</string>
