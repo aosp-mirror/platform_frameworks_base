@@ -431,6 +431,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 TRANSPARENT /* behind */,
                 TRANSPARENT /* bubble */);
 
+        // Make sure at the very end of the animation, we're reset to transparent
         assertScrimTint(false /* front */,
                 false /* behind */,
                 false  /* bubble */);
