@@ -30,8 +30,8 @@ import static android.system.OsConstants.IP_TTL;
 import static android.system.OsConstants.TIOCOUTQ;
 
 import android.annotation.NonNull;
+import android.net.InvalidPacketException;
 import android.net.NetworkUtils;
-import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
 import android.net.TcpKeepalivePacketDataParcelable;

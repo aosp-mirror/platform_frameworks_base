@@ -4085,6 +4085,14 @@ package android.net {
     method public void onUpstreamChanged(@Nullable android.net.Network);
   }
 
+  public class InvalidPacketException extends java.lang.Exception {
+    ctor public InvalidPacketException(int);
+    field public static final int ERROR_INVALID_IP_ADDRESS = -21; // 0xffffffeb
+    field public static final int ERROR_INVALID_LENGTH = -23; // 0xffffffe9
+    field public static final int ERROR_INVALID_PORT = -22; // 0xffffffea
+    field public final int error;
+  }
+
   public final class IpConfiguration implements android.os.Parcelable {
     ctor public IpConfiguration();
     ctor public IpConfiguration(@NonNull android.net.IpConfiguration);
@@ -4133,6 +4141,15 @@ package android.net {
 
   public static class IpSecTransform.Builder {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecTransform buildTunnelModeTransform(@NonNull java.net.InetAddress, @NonNull android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
+  }
+
+  public class KeepalivePacketData {
+    ctor protected KeepalivePacketData(@NonNull java.net.InetAddress, int, @NonNull java.net.InetAddress, int, @NonNull byte[]) throws android.net.InvalidPacketException;
+    method @NonNull public byte[] getPacket();
+    field @NonNull public final java.net.InetAddress dstAddress;
+    field public final int dstPort;
+    field @NonNull public final java.net.InetAddress srcAddress;
+    field public final int srcPort;
   }
 
   public class LinkAddress implements android.os.Parcelable {
