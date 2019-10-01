@@ -720,7 +720,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mUpdateRotation = updateRotationUnchecked();
         }
 
-        if (mWmService.mWaitingForDrawnCallback != null
+        if (!mWmService.mWaitingForDrawnCallbacks.isEmpty()
                 || (mOrientationChangeComplete && !isLayoutNeeded()
                 && !mUpdateRotation)) {
             mWmService.checkDrawnWindowsLocked();

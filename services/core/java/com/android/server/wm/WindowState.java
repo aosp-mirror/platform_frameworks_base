@@ -3497,7 +3497,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void setWaitingForDrawnIfResizingChanged() {
         if (isDragResizeChanged()) {
-            mWmService.mWaitingForDrawn.add(this);
+            mWmService.mRoot.mWaitingForDrawn.add(this);
         }
         super.setWaitingForDrawnIfResizingChanged();
     }

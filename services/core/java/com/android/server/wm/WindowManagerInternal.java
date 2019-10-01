@@ -313,10 +313,15 @@ public abstract class WindowManagerInternal {
     public abstract void showGlobalActions();
 
     /**
-     * Invalidate all visible windows. Then report back on the callback once all windows have
-     * redrawn.
+     * Invalidate all visible windows on a given display, and report back on the callback when all
+     * windows have redrawn.
+     *
+     * @param callback reporting callback to be called when all windows have redrawn.
+     * @param timeout calls the callback anyway after the timeout.
+     * @param displayId waits for the windows on the given display, INVALID_DISPLAY to wait for all
+     *                  windows on all displays.
      */
-    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout);
+    public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout, int displayId);
 
     /**
      * Overrides the display size.
