@@ -102,7 +102,7 @@
     <string name="peerTtyModeHco" msgid="5728602160669216784">"‏העמית ביקש TTY במצב HCO"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"‏העמית ביקש TTY במצב VCO"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"‏העמית ביקש TTY במצב OFF"</string>
-    <string name="serviceClassVoice" msgid="1258393812335258019">"Google Voice"</string>
+    <string name="serviceClassVoice" msgid="1258393812335258019">"קול"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Google Data"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"פקס"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
