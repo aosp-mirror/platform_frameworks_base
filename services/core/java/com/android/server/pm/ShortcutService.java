@@ -1414,7 +1414,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     void saveIconAndFixUpShortcutLocked(ShortcutInfo shortcut) {
-        if (shortcut.hasIconFile() || shortcut.hasIconResource()) {
+        if (shortcut.hasIconFile() || shortcut.hasIconResource() || shortcut.hasIconUri()) {
             return;
         }
 
@@ -1438,6 +1438,15 @@ public class ShortcutService extends IShortcutService.Stub {
                         shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_RES);
                         return;
                     }
+                    case Icon.TYPE_URI:
+                        shortcut.setIconUri(icon.getUriString());
+                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_URI);
+                        return;
+                    case Icon.TYPE_URI_ADAPTIVE_BITMAP:
+                        shortcut.setIconUri(icon.getUriString());
+                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_URI
+                                | ShortcutInfo.FLAG_ADAPTIVE_BITMAP);
+                        return;
                     case Icon.TYPE_BITMAP:
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;

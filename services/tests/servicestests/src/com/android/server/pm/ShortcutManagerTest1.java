@@ -1274,6 +1274,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     makeShortcut("s1")
             )));
 
+            // Set uri icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                            .setIcon(Icon.createWithContentUri("test_uri"))
+                            .build()
+            )));
+            mService.waitForBitmapSavesForTest();
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconUri());
+                        assertEquals("test_uri", si.getIconUri());
+                    });
             // Set resource icon
             assertTrue(mManager.updateShortcuts(list(
                     new ShortcutInfo.Builder(mClientContext, "s1")
@@ -1287,6 +1299,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertEquals(R.drawable.black_32x32, si.getIconResourceId());
                     });
             mService.waitForBitmapSavesForTest();
+
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
             // Set bitmap icon
             assertTrue(mManager.updateShortcuts(list(
                     new ShortcutInfo.Builder(mClientContext, "s1")
@@ -1300,9 +1315,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertTrue(si.hasIconFile());
                     });
 
-            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
-
-            // Do it again, with the reverse order (bitmap -> icon)
+            // Do it again, with the reverse order (bitmap -> resource -> uri)
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1")
             )));
@@ -1320,6 +1333,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertTrue(si.hasIconFile());
                     });
 
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
             // Set resource icon
             assertTrue(mManager.updateShortcuts(list(
                     new ShortcutInfo.Builder(mClientContext, "s1")
@@ -1331,6 +1346,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconResource());
                         assertEquals(R.drawable.black_32x32, si.getIconResourceId());
+                    });
+            // Set uri icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                            .setIcon(Icon.createWithContentUri("test_uri"))
+                            .build()
+            )));
+            mService.waitForBitmapSavesForTest();
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconUri());
+                        assertEquals("test_uri", si.getIconUri());
                     });
         });
     }

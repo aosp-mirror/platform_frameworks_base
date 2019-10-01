@@ -102,6 +102,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private static final String ATTR_ICON_RES_ID = "icon-res";
     private static final String ATTR_ICON_RES_NAME = "icon-resname";
     private static final String ATTR_BITMAP_PATH = "bitmap-path";
+    private static final String ATTR_ICON_URI = "icon-uri";
     private static final String ATTR_LOCUS_ID = "locus-id";
 
     private static final String ATTR_PERSON_NAME = "name";
@@ -1628,7 +1629,8 @@ class ShortcutPackage extends ShortcutPackageItem {
             int flags = si.getFlags() &
                     ~(ShortcutInfo.FLAG_HAS_ICON_FILE | ShortcutInfo.FLAG_HAS_ICON_RES
                             | ShortcutInfo.FLAG_ICON_FILE_PENDING_SAVE
-                            | ShortcutInfo.FLAG_DYNAMIC);
+                            | ShortcutInfo.FLAG_DYNAMIC
+                            | ShortcutInfo.FLAG_HAS_ICON_URI | ShortcutInfo.FLAG_ADAPTIVE_BITMAP);
             ShortcutService.writeAttr(out, ATTR_FLAGS, flags);
 
             // Set the publisher version code at every backup.
@@ -1646,6 +1648,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeAttr(out, ATTR_ICON_RES_ID, si.getIconResourceId());
             ShortcutService.writeAttr(out, ATTR_ICON_RES_NAME, si.getIconResName());
             ShortcutService.writeAttr(out, ATTR_BITMAP_PATH, si.getBitmapPath());
+            ShortcutService.writeAttr(out, ATTR_ICON_URI, si.getIconUri());
         }
 
         if (shouldBackupDetails) {
@@ -1764,6 +1767,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         int iconResId;
         String iconResName;
         String bitmapPath;
+        String iconUri;
         final String locusIdString;
         int backupVersionCode;
         ArraySet<String> categories = null;
@@ -1791,6 +1795,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         iconResId = (int) ShortcutService.parseLongAttribute(parser, ATTR_ICON_RES_ID);
         iconResName = ShortcutService.parseStringAttribute(parser, ATTR_ICON_RES_NAME);
         bitmapPath = ShortcutService.parseStringAttribute(parser, ATTR_BITMAP_PATH);
+        iconUri = ShortcutService.parseStringAttribute(parser, ATTR_ICON_URI);
         locusIdString = ShortcutService.parseStringAttribute(parser, ATTR_LOCUS_ID);
 
         final int outerDepth = parser.getDepth();
@@ -1866,8 +1871,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 categories,
                 intents.toArray(new Intent[intents.size()]),
                 rank, extras, lastChangedTimestamp, flags,
-                iconResId, iconResName, bitmapPath, disabledReason,
-                persons.toArray(new Person[persons.size()]), locusId);
+                iconResId, iconResName, bitmapPath, iconUri,
+                disabledReason, persons.toArray(new Person[persons.size()]), locusId);
     }
 
     private static Intent parseIntent(XmlPullParser parser)
@@ -1991,15 +1996,25 @@ class ShortcutPackage extends ShortcutPackageItem {
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " still has an icon");
             }
-            if (si.hasAdaptiveBitmap() && !si.hasIconFile()) {
+            if (si.hasAdaptiveBitmap() && !(si.hasIconFile() || si.hasIconUri())) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
-                    + " has adaptive bitmap but was not saved to a file.");
+                        + " has adaptive bitmap but was not saved to a file nor has icon uri.");
             }
             if (si.hasIconFile() && si.hasIconResource()) {
                 failed = true;
                 Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
                         + " has both resource and bitmap icons");
+            }
+            if (si.hasIconFile() && si.hasIconUri()) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " has both url and bitmap icons");
+            }
+            if (si.hasIconUri() && si.hasIconResource()) {
+                failed = true;
+                Log.e(TAG_VERIFY, "Package " + getPackageName() + ": shortcut " + si.getId()
+                        + " has both url and resource icons");
             }
             if (si.isEnabled()
                     != (si.getDisabledReason() == ShortcutInfo.DISABLED_REASON_NOT_DISABLED)) {
