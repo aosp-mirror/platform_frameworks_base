@@ -95,6 +95,9 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     @Override
     public Intent getLongClickIntent() {
+        if (getState().state == Tile.STATE_UNAVAILABLE) {
+            return new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+        }
         return getCellularSettingIntent();
     }
 

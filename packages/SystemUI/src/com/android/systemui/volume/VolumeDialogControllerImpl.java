@@ -621,7 +621,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 .PRIORITY_CATEGORY_MEDIA) == 0;
         boolean disallowSystem = (policy.priorityCategories & NotificationManager.Policy
                 .PRIORITY_CATEGORY_SYSTEM) == 0;
-        boolean disallowRinger = ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(policy);
+        // ringer controls notifications, ringer and system sounds, so only disallow ringer changes
+        // if all relevant (notifications + ringer + system) sounds are not allowed to bypass DND
+        boolean disallowRinger = ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(policy);
         if (mState.disallowAlarms == disallowAlarms
                 && mState.disallowMedia == disallowMedia
                 && mState.disallowRinger == disallowRinger

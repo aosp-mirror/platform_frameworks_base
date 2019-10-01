@@ -175,8 +175,8 @@ public class ActivityStartInterceptorTest {
                 .build();
         when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn(suspendingPackage);
-        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(dialogInfo);
+        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, suspendingPackage,
+                TEST_USER_ID)).thenReturn(dialogInfo);
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
 

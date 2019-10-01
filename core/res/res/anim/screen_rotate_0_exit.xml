@@ -19,7 +19,4 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:shareInterpolator="false">
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:duration="@android:integer/config_shortAnimTime" />
 </set>

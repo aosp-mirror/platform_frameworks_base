@@ -16,9 +16,10 @@
 
 package com.android.server.notification;
 
-import static junit.framework.Assert.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.assertTrue;
 
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
@@ -52,18 +53,18 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
     @Test
     public void testPriorityOnlyMutingAllNotifications() {
-        ZenModeConfig config = getMutedNotificationsConfig();
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        ZenModeConfig config = getMutedRingerConfig();
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
 
         config.allowReminders = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
         config.allowReminders = false;
 
         config.areChannelsBypassingDnd = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
         config.areChannelsBypassingDnd = false;
 
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
     }
 
     @Test
@@ -106,26 +107,26 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     @Test
     public void testPriorityOnlyMutingAll() {
         ZenModeConfig config = getMutedAllConfig();
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(true, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
 
         config.allowReminders = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(false, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
         config.allowReminders = false;
 
         config.areChannelsBypassingDnd = true;
-        assertEquals(false, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(false, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
         config.areChannelsBypassingDnd = false;
 
         config.allowAlarms = true;
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(false, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertFalse(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
         config.allowAlarms = false;
 
-        assertEquals(true, ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(config));
-        assertEquals(true, ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllPriorityOnlyRingerSoundsMuted(config));
+        assertTrue(ZenModeConfig.areAllZenBehaviorSoundsMuted(config));
     }
 
     @Test
@@ -200,14 +201,14 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.zenMode, fromXml.zenMode);
     }
 
-    private ZenModeConfig getMutedNotificationsConfig() {
+    private ZenModeConfig getMutedRingerConfig() {
         ZenModeConfig config = new ZenModeConfig();
-        // Allow alarms, media, and system
+        // Allow alarms, media
         config.allowAlarms = true;
         config.allowMedia = true;
-        config.allowSystem = true;
 
-        // All notification sounds are not allowed
+        // All sounds that respect the ringer are not allowed
+        config.allowSystem = false;
         config.allowCalls = false;
         config.allowRepeatCallers = false;
         config.allowMessages = false;

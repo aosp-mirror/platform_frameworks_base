@@ -21,7 +21,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
-import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 
 import android.content.Context;
 import android.os.Trace;
@@ -108,14 +107,6 @@ public class WindowAnimator {
     }
 
     void removeDisplayLocked(final int displayId) {
-        final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.get(displayId);
-        if (displayAnimator != null) {
-            if (displayAnimator.mScreenRotationAnimation != null) {
-                displayAnimator.mScreenRotationAnimation.kill();
-                displayAnimator.mScreenRotationAnimation = null;
-            }
-        }
-
         mDisplayContentsAnimators.delete(displayId);
     }
 
@@ -156,27 +147,6 @@ public class WindowAnimator {
                 for (int i = 0; i < numDisplays; i++) {
                     final int displayId = mDisplayContentsAnimators.keyAt(i);
                     final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
-                    DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
-
-                    final ScreenRotationAnimation screenRotationAnimation =
-                            displayAnimator.mScreenRotationAnimation;
-                    if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
-                        if (screenRotationAnimation.stepAnimationLocked(mCurrentTime)) {
-                            setAnimating(true);
-                        } else {
-                            mBulkUpdateParams |= SET_UPDATE_ROTATION;
-                            screenRotationAnimation.kill();
-                            displayAnimator.mScreenRotationAnimation = null;
-
-                            // display.
-                            if (accessibilityController != null) {
-                                // We just finished rotation animation which means we did not
-                                // announce the rotation and waited for it to end, announce now.
-                                accessibilityController.onRotationChangedLocked(dc);
-                            }
-                        }
-                    }
-
                     // Update animations of all applications, including those
                     // associated with exiting/removed apps
                     dc.updateWindowsForAnimator();
@@ -188,12 +158,6 @@ public class WindowAnimator {
                     final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
 
                     dc.checkAppWindowsReadyToShow();
-
-                    final ScreenRotationAnimation screenRotationAnimation =
-                            mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
-                    if (screenRotationAnimation != null) {
-                        screenRotationAnimation.updateSurfaces(mTransaction);
-                    }
                     orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
                     if (accessibilityController != null) {
                         accessibilityController.drawMagnifiedRegionBorderIfNeededLocked(displayId);
@@ -273,22 +237,14 @@ public class WindowAnimator {
 
     public void dumpLocked(PrintWriter pw, String prefix, boolean dumpAll) {
         final String subPrefix = "  " + prefix;
-        final String subSubPrefix = "  " + subPrefix;
 
         for (int i = 0; i < mDisplayContentsAnimators.size(); i++) {
             pw.print(prefix); pw.print("DisplayContentsAnimator #");
                     pw.print(mDisplayContentsAnimators.keyAt(i));
                     pw.println(":");
-            final DisplayContentsAnimator displayAnimator = mDisplayContentsAnimators.valueAt(i);
             final DisplayContent dc =
                     mService.mRoot.getDisplayContent(mDisplayContentsAnimators.keyAt(i));
             dc.dumpWindowAnimators(pw, subPrefix);
-            if (displayAnimator.mScreenRotationAnimation != null) {
-                pw.print(subPrefix); pw.println("mScreenRotationAnimation:");
-                displayAnimator.mScreenRotationAnimation.printTo(subSubPrefix, pw);
-            } else if (dumpAll) {
-                pw.print(subPrefix); pw.println("no ScreenRotationAnimation ");
-            }
             pw.println();
         }
 
@@ -322,23 +278,6 @@ public class WindowAnimator {
         return displayAnimator;
     }
 
-    void setScreenRotationAnimationLocked(int displayId, ScreenRotationAnimation animation) {
-        final DisplayContentsAnimator animator = getDisplayContentsAnimatorLocked(displayId);
-
-        if (animator != null) {
-            animator.mScreenRotationAnimation = animation;
-        }
-    }
-
-    ScreenRotationAnimation getScreenRotationAnimationLocked(int displayId) {
-        if (displayId < 0) {
-            return null;
-        }
-
-        DisplayContentsAnimator animator = getDisplayContentsAnimatorLocked(displayId);
-        return animator != null? animator.mScreenRotationAnimation : null;
-    }
-
     void requestRemovalOfReplacedWindows(WindowState win) {
         mRemoveReplacedWindows = true;
     }
@@ -358,7 +297,6 @@ public class WindowAnimator {
     }
 
     private class DisplayContentsAnimator {
-        ScreenRotationAnimation mScreenRotationAnimation = null;
     }
 
     boolean isAnimating() {

@@ -16,11 +16,12 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
-import android.content.pm.parsing.AndroidPackage;
 import android.util.SparseArray;
 
 import java.io.File;
+import java.util.List;
 
 class PackageSettingBuilder {
     private String mName;
@@ -34,14 +35,16 @@ class PackageSettingBuilder {
     private long mPVersionCode;
     private int mPkgFlags;
     private int mPrivateFlags;
+    private String mParentPackageName;
+    private List<String> mChildPackageNames;
     private int mSharedUserId;
     private String[] mUsesStaticLibraries;
     private long[] mUsesStaticLibrariesVersions;
     private String mVolumeUuid;
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
-    private AndroidPackage mPkg;
+    private PackageParser.Package mPkg;
 
-    public PackageSettingBuilder setPackage(AndroidPackage pkg) {
+    public PackageSettingBuilder setPackage(PackageParser.Package pkg) {
         this.mPkg = pkg;
         return this;
     }
@@ -102,6 +105,16 @@ class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setParentPackageName(String parentPackageName) {
+        this.mParentPackageName = parentPackageName;
+        return this;
+    }
+
+    public PackageSettingBuilder setChildPackageNames(List<String> childPackageNames) {
+        this.mChildPackageNames = childPackageNames;
+        return this;
+    }
+
     public PackageSettingBuilder setSharedUserId(int sharedUserId) {
         this.mSharedUserId = sharedUserId;
         return this;
@@ -135,8 +148,9 @@ class PackageSettingBuilder {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
                 new File(mCodePath), new File(mResourcePath),
                 mLegacyNativeLibraryPathString, mPrimaryCpuAbiString, mSecondaryCpuAbiString,
-                mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mSharedUserId,
-                mUsesStaticLibraries, mUsesStaticLibrariesVersions);
+                mCpuAbiOverrideString, mPVersionCode, mPkgFlags, mPrivateFlags, mParentPackageName,
+                mChildPackageNames, mSharedUserId, mUsesStaticLibraries,
+                mUsesStaticLibrariesVersions);
         packageSetting.pkg = mPkg;
         packageSetting.volumeUuid = this.mVolumeUuid;
         for (int i = 0; i < mUserStates.size(); i++) {

@@ -40,13 +40,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -62,6 +62,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -445,7 +446,7 @@ public class LauncherAppsService extends SystemService {
             }
             final PackageManagerInternal pmInt =
                     LocalServices.getService(PackageManagerInternal.class);
-            final AndroidPackage pkg = pmInt.getPackage(appInfo.packageName);
+            final PackageParser.Package pkg = pmInt.getPackage(appInfo.packageName);
             if (pkg == null) {
                 // Should not happen, but we shouldn't be failing if it does
                 return false;
@@ -456,8 +457,8 @@ public class LauncherAppsService extends SystemService {
                     appInfo.packageName);
         }
 
-        private boolean requestsPermissions(@NonNull AndroidPackage pkg) {
-            return !ArrayUtils.isEmpty(pkg.getRequestedPermissions());
+        private boolean requestsPermissions(@NonNull PackageParser.Package pkg) {
+            return !ArrayUtils.isEmpty(pkg.requestedPermissions);
         }
 
         private boolean hasDefaultEnableLauncherActivity(@NonNull String packageName) {
@@ -1024,8 +1025,22 @@ public class LauncherAppsService extends SystemService {
             }
 
             @Override
-            public void onPackagesSuspended(String[] packages, Bundle launcherExtras) {
+            public void onPackagesSuspended(String[] packages) {
                 UserHandle user = new UserHandle(getChangingUserId());
+                PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+                final ArrayList<Pair<String, Bundle>> packagesWithExtras = new ArrayList<>();
+                final ArrayList<String> packagesWithoutExtras = new ArrayList<>();
+                for (String pkg : packages) {
+                    final Bundle launcherExtras = pmi.getSuspendedPackageLauncherExtras(pkg,
+                            user.getIdentifier());
+                    if (launcherExtras != null) {
+                        packagesWithExtras.add(new Pair<>(pkg, launcherExtras));
+                    } else {
+                        packagesWithoutExtras.add(pkg);
+                    }
+                }
+                final String[] packagesNullExtras = packagesWithoutExtras.toArray(
+                        new String[packagesWithoutExtras.size()]);
                 final int n = mListeners.beginBroadcast();
                 try {
                     for (int i = 0; i < n; i++) {
@@ -1033,7 +1048,13 @@ public class LauncherAppsService extends SystemService {
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesSuspended")) continue;
                         try {
-                            listener.onPackagesSuspended(user, packages, launcherExtras);
+                            listener.onPackagesSuspended(user, packagesNullExtras, null);
+                            for (int idx = 0; idx < packagesWithExtras.size(); idx++) {
+                                Pair<String, Bundle> packageExtraPair = packagesWithExtras.get(idx);
+                                listener.onPackagesSuspended(user,
+                                        new String[]{packageExtraPair.first},
+                                        packageExtraPair.second);
+                            }
                         } catch (RemoteException re) {
                             Slog.d(TAG, "Callback failed ", re);
                         }
@@ -1041,8 +1062,6 @@ public class LauncherAppsService extends SystemService {
                 } finally {
                     mListeners.finishBroadcast();
                 }
-
-                super.onPackagesSuspended(packages, launcherExtras);
             }
 
             @Override

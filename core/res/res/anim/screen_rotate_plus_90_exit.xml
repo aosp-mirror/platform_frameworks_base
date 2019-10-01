@@ -40,9 +40,4 @@
             android:fillEnabled="true"
             android:fillBefore="true" android:fillAfter="true"
             android:duration="@android:integer/config_mediumAnimTime" />
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:interpolator="@interpolator/decelerate_quint"
-            android:fillEnabled="true"
-            android:fillBefore="true" android:fillAfter="true"
-            android:duration="@android:integer/config_mediumAnimTime" />
 </set>

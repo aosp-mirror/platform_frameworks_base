@@ -16,10 +16,10 @@
 
 package com.android.server.pm.dex;
 
-import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageParser;
 import android.os.Binder;
 import android.util.Log;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.pm.Installer;
 
@@ -33,18 +33,19 @@ public class ViewCompiler {
         mInstaller = installer;
     }
 
-    public boolean compileLayouts(AndroidPackage pkg) {
+    public boolean compileLayouts(PackageParser.Package pkg) {
         try {
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getBaseCodePath();
-            final String outDexFile = pkg.getDataDir() + "/code_cache/compiled_view.dex";
+            final String packageName = pkg.packageName;
+            final String apkPath = pkg.baseCodePath;
+            final ApplicationInfo appInfo = pkg.applicationInfo;
+            final String outDexFile = appInfo.dataDir + "/code_cache/compiled_view.dex";
             Log.i("PackageManager", "Compiling layouts in " + packageName + " (" + apkPath +
                 ") to " + outDexFile);
             long callingId = Binder.clearCallingIdentity();
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                        pkg.getUid());
+                        appInfo.uid);
                 }
             } finally {
                 Binder.restoreCallingIdentity(callingId);

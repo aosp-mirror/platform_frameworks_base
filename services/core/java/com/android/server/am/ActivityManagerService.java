@@ -233,6 +233,7 @@ import android.os.AppZygote;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.BinderProxy;
+import android.os.BugreportParams;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -8255,22 +8256,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Nullable String shareDescription, int bugreportType) {
         String type = null;
         switch (bugreportType) {
-            case ActivityManager.BUGREPORT_OPTION_FULL:
+            case BugreportParams.BUGREPORT_MODE_FULL:
                 type = "bugreportfull";
                 break;
-            case ActivityManager.BUGREPORT_OPTION_INTERACTIVE:
+            case BugreportParams.BUGREPORT_MODE_INTERACTIVE:
                 type = "bugreportplus";
                 break;
-            case ActivityManager.BUGREPORT_OPTION_REMOTE:
+            case BugreportParams.BUGREPORT_MODE_REMOTE:
                 type = "bugreportremote";
                 break;
-            case ActivityManager.BUGREPORT_OPTION_WEAR:
+            case BugreportParams.BUGREPORT_MODE_WEAR:
                 type = "bugreportwear";
                 break;
-            case ActivityManager.BUGREPORT_OPTION_TELEPHONY:
+            case BugreportParams.BUGREPORT_MODE_TELEPHONY:
                 type = "bugreporttelephony";
                 break;
-            case ActivityManager.BUGREPORT_OPTION_WIFI:
+            case BugreportParams.BUGREPORT_MODE_WIFI:
                 type = "bugreportwifi";
                 break;
             default:
@@ -8305,7 +8306,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean useApi = FeatureFlagUtils.isEnabled(mContext,
                 FeatureFlagUtils.USE_BUGREPORT_API);
 
-        if (useApi && bugreportType == ActivityManager.BUGREPORT_OPTION_INTERACTIVE) {
+        if (useApi && bugreportType == BugreportParams.BUGREPORT_MODE_INTERACTIVE) {
             // Create intent to trigger Bugreport API via Shell
             Intent triggerShellBugreport = new Intent();
             triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
@@ -8341,7 +8342,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void requestTelephonyBugReport(String shareTitle, String shareDescription) {
         requestBugReportWithDescription(shareTitle, shareDescription,
-                ActivityManager.BUGREPORT_OPTION_TELEPHONY);
+                BugreportParams.BUGREPORT_MODE_TELEPHONY);
     }
 
     /**
@@ -8353,7 +8354,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void requestWifiBugReport(String shareTitle, String shareDescription) {
         requestBugReportWithDescription(shareTitle, shareDescription,
-                ActivityManager.BUGREPORT_OPTION_WIFI);
+                BugreportParams.BUGREPORT_MODE_WIFI);
     }
 
     /**
@@ -8361,7 +8362,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void requestInteractiveBugReport() {
-        requestBugReportWithDescription(null, null, ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
+        requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_INTERACTIVE);
     }
 
     /**
@@ -8372,7 +8373,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void requestInteractiveBugReportWithDescription(String shareTitle,
             String shareDescription) {
         requestBugReportWithDescription(shareTitle, shareDescription,
-                ActivityManager.BUGREPORT_OPTION_INTERACTIVE);
+                BugreportParams.BUGREPORT_MODE_INTERACTIVE);
     }
 
     /**
@@ -8380,7 +8381,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void requestFullBugReport() {
-        requestBugReportWithDescription(null, null, ActivityManager.BUGREPORT_OPTION_FULL);
+        requestBugReportWithDescription(null, null,  BugreportParams.BUGREPORT_MODE_FULL);
     }
 
     /**
@@ -8388,7 +8389,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public void requestRemoteBugReport() {
-        requestBugReportWithDescription(null, null, ActivityManager.BUGREPORT_OPTION_REMOTE);
+        requestBugReportWithDescription(null, null, BugreportParams.BUGREPORT_MODE_REMOTE);
     }
 
     public void registerProcessObserver(IProcessObserver observer) {

@@ -112,6 +112,14 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-mime-sources",
+    srcs: [
+        "mime/java/**/*.java",
+    ],
+    path: "mime/java",
+}
+
+filegroup {
     name: "framework-opengl-sources",
     srcs: [
         "opengl/java/**/*.java",
@@ -176,6 +184,7 @@ filegroup {
         ":framework-mca-effect-sources",
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
+        ":framework-mime-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
         ":framework-sax-sources",
@@ -305,7 +314,7 @@ java_defaults {
 
     exclude_srcs: [
         // See comment on framework-atb-backward-compatibility module below
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 
     sdk_version: "core_platform",
@@ -316,7 +325,10 @@ java_defaults {
 
     jarjar_rules: ":framework-jarjar-rules",
 
-    static_libs: ["framework-internal-utils"],
+    static_libs: [
+        "framework-internal-utils",
+        "mimemap",
+    ],
 
     dxflags: [
         "--core-library",
@@ -435,7 +447,7 @@ java_library {
     name: "framework-atb-backward-compatibility",
     installable: true,
     srcs: [
-        "core/java/android/content/pm/parsing/library/AndroidTestBaseUpdater.java",
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 }
 

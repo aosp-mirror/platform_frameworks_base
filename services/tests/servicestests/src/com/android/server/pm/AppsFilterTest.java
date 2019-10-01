@@ -27,13 +27,10 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
-import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
-import android.content.pm.parsing.PackageImpl;
-import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.PackageParser;
 import android.os.Build;
 import android.os.Process;
 import android.permission.IPermissionManager;
@@ -59,55 +56,45 @@ public class AppsFilterTest {
     @Mock
     AppsFilter.FeatureConfig mFeatureConfigMock;
 
-    private Map<String, AndroidPackage> mExisting = new ArrayMap<>();
+    private Map<String, PackageParser.Package> mExisting = new ArrayMap<>();
 
-    private static ParsingPackage pkg(String packageName) {
-        return PackageImpl.forParsing(packageName)
-                .setTargetSdkVersion(Build.VERSION_CODES.R);
+    private static PackageBuilder pkg(String packageName) {
+        return new PackageBuilder(packageName)
+                .setApplicationInfoTargetSdkVersion(Build.VERSION_CODES.R);
     }
 
-    private static ParsingPackage pkg(String packageName, Intent... queries) {
-        ParsingPackage pkg = pkg(packageName);
-        if (queries != null) {
-            for (Intent intent : queries) {
-                pkg.addQueriesIntent(intent);
-            }
-        }
-        return pkg;
+    private static PackageBuilder pkg(String packageName, Intent... queries) {
+        return pkg(packageName).setQueriesIntents(queries);
     }
 
-    private static ParsingPackage pkg(String packageName, String... queriesPackages) {
-        ParsingPackage pkg = pkg(packageName);
-        if (queriesPackages != null) {
-            for (String queryPackageName : queriesPackages) {
-                pkg.addQueriesPackage(queryPackageName);
-            }
-        }
-        return pkg;
+    private static PackageBuilder pkg(String packageName, String... queriesPackages) {
+        return pkg(packageName).setQueriesPackages(queriesPackages);
     }
 
-    private static ParsingPackage pkg(String packageName, IntentFilter... filters) {
-        ParsedActivity activity = new ParsedActivity();
-        activity.setPackageName(packageName);
+    private static PackageBuilder pkg(String packageName, IntentFilter... filters) {
+        final PackageBuilder packageBuilder = pkg(packageName).addActivity(
+                pkg -> new PackageParser.ParseComponentArgs(pkg, new String[1], 0, 0, 0, 0, 0, 0,
+                        new String[]{packageName}, 0, 0, 0), new ActivityInfo());
         for (IntentFilter filter : filters) {
-            final ParsedActivityIntentInfo info = new ParsedActivityIntentInfo(packageName, null);
-            if (filter.countActions() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
-            }
-            if (filter.countCategories() > 0) {
-                filter.actionsIterator().forEachRemaining(info::addAction);
-            }
-            if (filter.countDataAuthorities() > 0) {
-                filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
-            }
-            if (filter.countDataSchemes() > 0) {
-                filter.schemesIterator().forEachRemaining(info::addDataScheme);
-            }
-            activity.addIntent(info);
+            packageBuilder.addActivityIntentInfo(0 /* index */, activity -> {
+                final PackageParser.ActivityIntentInfo info =
+                        new PackageParser.ActivityIntentInfo(activity);
+                if (filter.countActions() > 0) {
+                    filter.actionsIterator().forEachRemaining(info::addAction);
+                }
+                if (filter.countCategories() > 0) {
+                    filter.actionsIterator().forEachRemaining(info::addAction);
+                }
+                if (filter.countDataAuthorities() > 0) {
+                    filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
+                }
+                if (filter.countDataSchemes() > 0) {
+                    filter.schemesIterator().forEachRemaining(info::addDataScheme);
+                }
+                return info;
+            });
         }
-
-        return pkg(packageName)
-                .addActivity(activity);
+        return packageBuilder;
     }
 
     @Before
@@ -119,7 +106,7 @@ public class AppsFilterTest {
                 .checkPermission(anyString(), anyString(), anyInt()))
                 .thenReturn(PackageManager.PERMISSION_DENIED);
         when(mFeatureConfigMock.isGloballyEnabled()).thenReturn(true);
-        when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
+        when(mFeatureConfigMock.packageIsEnabled(any(PackageParser.Package.class)))
                 .thenReturn(true);
     }
 
@@ -165,7 +152,7 @@ public class AppsFilterTest {
 
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package")).build();
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package",
-                new Intent("TEST_ACTION")).setTargetSdkVersion(
+                new Intent("TEST_ACTION")).setApplicationInfoTargetSdkVersion(
                 Build.VERSION_CODES.P)).build();
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
@@ -258,7 +245,7 @@ public class AppsFilterTest {
 
     @Test
     public void testNoQueries_FeatureOff_DoesntFilter() {
-        when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
+        when(mFeatureConfigMock.packageIsEnabled(any(PackageParser.Package.class)))
                 .thenReturn(false);
         final AppsFilter appsFilter =
                 new AppsFilter(mFeatureConfigMock, mPermissionManagerMock,
@@ -314,15 +301,13 @@ public class AppsFilterTest {
     }
 
     private PackageSettingBuilder simulateAddPackage(AppsFilter filter,
-            ParsingPackage newPkgBuilder) {
-        AndroidPackage newPkg = newPkgBuilder
-                .hideAsParsed()
-                .hideAsFinal();
+            PackageBuilder newPkgBuilder) {
+        PackageParser.Package newPkg = newPkgBuilder.build();
         filter.addPackage(newPkg, mExisting);
-        mExisting.put(newPkg.getPackageName(), newPkg);
+        mExisting.put(newPkg.packageName, newPkg);
         return new PackageSettingBuilder()
                 .setPackage(newPkg)
-                .setName(newPkg.getPackageName())
+                .setName(newPkg.packageName)
                 .setCodePath("/")
                 .setResourcePath("/")
                 .setPVersionCode(1L);

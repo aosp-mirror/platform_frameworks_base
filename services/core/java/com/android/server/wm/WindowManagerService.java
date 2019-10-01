@@ -5392,7 +5392,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mExitAnimId = exitAnim;
         mEnterAnimId = enterAnim;
         ScreenRotationAnimation screenRotationAnimation =
-                mAnimator.getScreenRotationAnimationLocked(mFrozenDisplayId);
+                displayContent.getRotationAnimation();
         if (screenRotationAnimation != null) {
             screenRotationAnimation.kill();
         }
@@ -5404,8 +5404,7 @@ public class WindowManagerService extends IWindowManager.Stub
         screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
                 displayContent.getDisplayRotation().isFixedToUserRotation(), isSecure,
                 this);
-        mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
-                screenRotationAnimation);
+        displayContent.setRotationAnimation(screenRotationAnimation);
     }
 
     void stopFreezingDisplayLocked() {
@@ -5456,8 +5455,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         boolean updateRotation = false;
 
-        ScreenRotationAnimation screenRotationAnimation =
-                mAnimator.getScreenRotationAnimationLocked(displayId);
+        ScreenRotationAnimation screenRotationAnimation = displayContent == null ? null
+                : displayContent.getRotationAnimation();
         if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
             if (DEBUG_ORIENTATION) Slog.i(TAG_WM, "**** Dismissing screen rotation animation");
             DisplayInfo displayInfo = displayContent.getDisplayInfo();
@@ -5470,16 +5469,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     getTransitionAnimationScaleLocked(), displayInfo.logicalWidth,
                         displayInfo.logicalHeight, mExitAnimId, mEnterAnimId)) {
                 mTransaction.apply();
-                scheduleAnimationLocked();
             } else {
                 screenRotationAnimation.kill();
-                mAnimator.setScreenRotationAnimationLocked(displayId, null);
+                displayContent.setRotationAnimation(null);
                 updateRotation = true;
             }
         } else {
             if (screenRotationAnimation != null) {
                 screenRotationAnimation.kill();
-                mAnimator.setScreenRotationAnimationLocked(displayId, null);
+                displayContent.setRotationAnimation(null);
             }
             updateRotation = true;
         }

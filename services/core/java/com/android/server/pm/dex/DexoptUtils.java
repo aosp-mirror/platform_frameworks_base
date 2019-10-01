@@ -18,12 +18,10 @@ package com.android.server.pm.dex;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.SharedLibraryInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.ClassLoaderFactory;
-import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
 import java.util.List;
@@ -68,7 +66,7 @@ public final class DexoptUtils {
      * {@link android.app.LoadedApk#makePaths(
      * android.app.ActivityThread, boolean, ApplicationInfo, List, List)}.
      */
-    public static String[] getClassLoaderContexts(AndroidPackage pkg,
+    public static String[] getClassLoaderContexts(ApplicationInfo info,
             List<SharedLibraryInfo> sharedLibraries, boolean[] pathsWithCode) {
         // The base class loader context contains only the shared library.
         String sharedLibrariesContext = "";
@@ -77,8 +75,8 @@ public final class DexoptUtils {
         }
 
         String baseApkContextClassLoader = encodeClassLoader(
-                "", pkg.getAppInfoClassLoaderName(), sharedLibrariesContext);
-        if (pkg.getSplitCodePaths() == null) {
+                "", info.classLoaderName, sharedLibrariesContext);
+        if (info.getSplitCodePaths() == null) {
             // The application has no splits.
             return new String[] {baseApkContextClassLoader};
         }
@@ -86,11 +84,11 @@ public final class DexoptUtils {
         // The application has splits. Compute their class loader contexts.
 
         // First, cache the relative paths of the splits and do some sanity checks
-        String[] splitRelativeCodePaths = getSplitRelativeCodePaths(pkg);
+        String[] splitRelativeCodePaths = getSplitRelativeCodePaths(info);
 
         // The splits have an implicit dependency on the base apk.
         // This means that we have to add the base apk file in addition to the shared libraries.
-        String baseApkName = new File(pkg.getBaseCodePath()).getName();
+        String baseApkName = new File(info.getBaseCodePath()).getName();
         String baseClassPath = baseApkName;
 
         // The result is stored in classLoaderContexts.
@@ -99,11 +97,7 @@ public final class DexoptUtils {
         String[] classLoaderContexts = new String[/*base apk*/ 1 + splitRelativeCodePaths.length];
         classLoaderContexts[0] = pathsWithCode[0] ? baseApkContextClassLoader : null;
 
-        SparseArray<int[]> splitDependencies = pkg.getSplitDependencies();
-
-        if (!pkg.requestsIsolatedSplitLoading()
-                || splitDependencies == null
-                || splitDependencies.size() == 0) {
+        if (!info.requestsIsolatedSplitLoading() || info.splitDependencies == null) {
             // If the app didn't request for the splits to be loaded in isolation or if it does not
             // declare inter-split dependencies, then all the splits will be loaded in the base
             // apk class loader (in the order of their definition).
@@ -111,7 +105,7 @@ public final class DexoptUtils {
             for (int i = 1; i < classLoaderContexts.length; i++) {
                 if (pathsWithCode[i]) {
                     classLoaderContexts[i] = encodeClassLoader(
-                            classpath, pkg.getAppInfoClassLoaderName(), sharedLibrariesContext);
+                            classpath, info.classLoaderName, sharedLibrariesContext);
                 } else {
                     classLoaderContexts[i] = null;
                 }
@@ -138,10 +132,11 @@ public final class DexoptUtils {
             String[] splitClassLoaderEncodingCache = new String[splitRelativeCodePaths.length];
             for (int i = 0; i < splitRelativeCodePaths.length; i++) {
                 splitClassLoaderEncodingCache[i] = encodeClassLoader(splitRelativeCodePaths[i],
-                        pkg.getSplitClassLoaderNames()[i]);
+                        info.splitClassLoaderNames[i]);
             }
             String splitDependencyOnBase = encodeClassLoader(
-                    baseClassPath, pkg.getClassLoaderName());
+                    baseClassPath, info.classLoaderName);
+            SparseArray<int[]> splitDependencies = info.splitDependencies;
 
             // Note that not all splits have dependencies (e.g. configuration splits)
             // The splits without dependencies will have classLoaderContexts[config_split_index]
@@ -159,8 +154,7 @@ public final class DexoptUtils {
             // We also need to add the class loader of the current split which should
             // come first in the context.
             for (int i = 1; i < classLoaderContexts.length; i++) {
-                String splitClassLoader = encodeClassLoader("",
-                        pkg.getSplitClassLoaderNames()[i - 1]);
+                String splitClassLoader = encodeClassLoader("", info.splitClassLoaderNames[i - 1]);
                 if (pathsWithCode[i]) {
                     // If classLoaderContexts[i] is null it means that the split does not have
                     // any dependency. In this case its context equals its declared class loader.
@@ -400,11 +394,11 @@ public final class DexoptUtils {
      * Returns the relative paths of the splits declared by the application {@code info}.
      * Assumes that the application declares a non-null array of splits.
      */
-    private static String[] getSplitRelativeCodePaths(AndroidPackage pkg) {
-        String baseCodePath = new File(pkg.getBaseCodePath()).getParent();
-        String[] splitCodePaths = pkg.getSplitCodePaths();
-        String[] splitRelativeCodePaths = new String[ArrayUtils.size(splitCodePaths)];
-        for (int i = 0; i < splitRelativeCodePaths.length; i++) {
+    private static String[] getSplitRelativeCodePaths(ApplicationInfo info) {
+        String baseCodePath = new File(info.getBaseCodePath()).getParent();
+        String[] splitCodePaths = info.getSplitCodePaths();
+        String[] splitRelativeCodePaths = new String[splitCodePaths.length];
+        for (int i = 0; i < splitCodePaths.length; i++) {
             File pathFile = new File(splitCodePaths[i]);
             splitRelativeCodePaths[i] = pathFile.getName();
             // Sanity check that the base paths of the splits are all the same.

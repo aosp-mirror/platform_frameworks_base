@@ -37,7 +37,7 @@ import com.android.internal.view.IDragAndDropPermissions;
  * View.startDragAndDrop} by the app that started the drag operation.
  * </p>
  * <p>
- * The life cycle of the permissions is bound to the activity used to call {@link
+ * The lifecycle of the permissions is bound to the activity used to call {@link
  * android.app.Activity#requestDragAndDropPermissions(DragEvent) requestDragAndDropPermissions}. The
  * permissions are revoked when this activity is destroyed, or when {@link #release()} is called,
  * whichever occurs first.
@@ -48,6 +48,10 @@ import com.android.internal.view.IDragAndDropPermissions;
  * are no longer required. Permissions can be added to your activity's
  * {@link Activity#onSaveInstanceState} bundle and later retrieved in order to manually release
  * the permissions once they are no longer needed.
+ * </p>
+ * <p>
+ * Learn more about <a href="/guide/topics/ui/drag-drop#DragPermissionsMultiWindow">drag permissions
+ * in multi-window mode</a>.
  * </p>
  */
 public final class DragAndDropPermissions implements Parcelable {

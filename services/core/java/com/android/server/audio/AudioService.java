@@ -3854,7 +3854,7 @@ public class AudioService extends IAudioService.Stub
         final boolean muteSystem = (zenPolicy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0;
         final boolean muteNotificationAndRing = ZenModeConfig
-                .areAllPriorityOnlyNotificationZenSoundsMuted(
+                .areAllPriorityOnlyRingerSoundsMuted(
                         mNm.getConsolidatedNotificationPolicy());
         return muteAlarms && isAlarm(streamType)
                 || muteMedia && isMedia(streamType)
@@ -3867,16 +3867,26 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
-     * DND total silence: media and alarms streams are tied to the muted ringer
+     * Notifications, ringer and system sounds are controlled by the ringer:
      * {@link ZenModeHelper.RingerModeDelegate#getRingerModeAffectedStreams(int)}
-     * DND alarms only: notification, ringer + system muted (by default tied to muted ringer mode)
-     * DND priority only: alarms, media, system streams can be muted separate from ringer based on
+     * DND total silence: media and alarms streams can be muted by DND
+     * DND alarms only: no streams additionally controlled by DND
+     * DND priority only: alarms, media, system streams can be muted by DND based on
      * zenPolicy (this method determines which streams)
      * @return true if changed, else false
      */
     private boolean updateZenModeAffectedStreams() {
+        if (!mSystemReady) {
+            return false;
+        }
+
         int zenModeAffectedStreams = 0;
-        if (mSystemReady && mNm.getZenMode() == Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+        final int zenMode = mNm.getZenMode();
+
+        if (zenMode == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS) {
+            zenModeAffectedStreams |= 1 << AudioManager.STREAM_ALARM;
+            zenModeAffectedStreams |= 1 << AudioManager.STREAM_MUSIC;
+        } else if (zenMode == Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             NotificationManager.Policy zenPolicy = mNm.getConsolidatedNotificationPolicy();
             if ((zenPolicy.priorityCategories
                     & NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) == 0) {
@@ -3888,6 +3898,8 @@ public class AudioService extends IAudioService.Stub
                 zenModeAffectedStreams |= 1 << AudioManager.STREAM_MUSIC;
             }
 
+            // even if zen isn't muting the system stream, the ringer mode can still mute
+            // the system stream
             if ((zenPolicy.priorityCategories
                     & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0) {
                 zenModeAffectedStreams |= 1 << AudioManager.STREAM_SYSTEM;
