@@ -2978,6 +2978,7 @@
   <java-symbol type="string" name="status_bar_microphone" />
   <java-symbol type="string" name="status_bar_camera" />
   <java-symbol type="string" name="status_bar_sensors_off" />
+  <java-symbol type="string" name="status_bar_roaming" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />
