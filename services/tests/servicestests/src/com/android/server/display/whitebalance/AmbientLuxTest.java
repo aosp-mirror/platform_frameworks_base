@@ -78,6 +78,8 @@ public final class AmbientLuxTest {
     @Mock private TypedArray mBiases;
     @Mock private TypedArray mHighLightBrightnesses;
     @Mock private TypedArray mHighLightBiases;
+    @Mock private TypedArray mAmbientColorTemperatures;
+    @Mock private TypedArray mDisplayColorTemperatures;
 
     @Before
     public void setUp() throws Exception {
@@ -105,10 +107,10 @@ public final class AmbientLuxTest {
                 HIGH_LIGHT_AMBIENT_COLOR_TEMPERATURE);
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceAmbientColorTemperatures))
-                .thenReturn(createTypedArray());
+                .thenReturn(mAmbientColorTemperatures);
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceDisplayColorTemperatures))
-                .thenReturn(createTypedArray());
+                .thenReturn(mDisplayColorTemperatures);
 
         when(mResourcesSpy.obtainTypedArray(
                 R.array.config_displayWhiteBalanceLowLightAmbientBrightnesses))
@@ -388,6 +390,16 @@ public final class AmbientLuxTest {
         assertEquals(controller.mPendingAmbientColorTemperature, ambientColorTemperature, 0.001);
     }
 
+    @Test
+    public void testWhiteBalance_updateWithEmptyFilter() throws Exception {
+        setAmbientColorTemperatures(5300.0f, 6000.0f, 7000.0f, 8000.0f);
+        setDisplayColorTemperatures(6300.0f, 6400.0f, 6850.0f, 7450.0f);
+        DisplayWhiteBalanceController controller =
+                DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
+        controller.updateAmbientColorTemperature();
+        assertEquals(-1.0f, controller.mPendingAmbientColorTemperature, 0);
+    }
+
     void mockThrottler() {
         when(mResourcesSpy.getInteger(
                 R.integer.config_displayWhiteBalanceDecreaseDebounce)).thenReturn(0);
@@ -453,6 +465,14 @@ public final class AmbientLuxTest {
 
     private void setHighLightBiases(float... vals) {
         setFloatArrayResource(mHighLightBiases, vals);
+    }
+
+    private void setAmbientColorTemperatures(float... vals) {
+        setFloatArrayResource(mAmbientColorTemperatures, vals);
+    }
+
+    private void setDisplayColorTemperatures(float... vals) {
+        setFloatArrayResource(mDisplayColorTemperatures, vals);
     }
 
     private void setFloatArrayResource(TypedArray array, float[] vals) {
