@@ -19,8 +19,8 @@ package android.telephony;
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.TelephonyManager.NetworkType;
 
+import android.telephony.Annotation.NetworkType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;

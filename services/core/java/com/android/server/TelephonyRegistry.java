@@ -33,6 +33,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.telephony.Annotation.DataFailureCause;
+import android.telephony.Annotation.RadioPowerState;
+import android.telephony.Annotation.SrvccState;
 import android.telephony.CallAttributes;
 import android.telephony.CallQuality;
 import android.telephony.CellInfo;
@@ -245,7 +248,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mActiveDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-    @TelephonyManager.RadioPowerState
+    @RadioPowerState
     private int mRadioPowerState = TelephonyManager.RADIO_POWER_UNAVAILABLE;
 
     private final LocalLog mLocalLog = new LocalLog(100);
@@ -1718,7 +1721,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifyPreciseDataConnectionFailed(int phoneId, int subId, String apnType,
-            String apn, @DataFailCause.FailCause int failCause) {
+            String apn, @DataFailureCause int failCause) {
         if (!checkNotifyPermission("notifyPreciseDataConnectionFailed()")) {
             return;
         }
@@ -1748,7 +1751,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifySrvccStateChanged(int subId, @TelephonyManager.SrvccState int state) {
+    public void notifySrvccStateChanged(int subId, @SrvccState int state) {
         if (!checkNotifyPermission("notifySrvccStateChanged()")) {
             return;
         }
@@ -1855,8 +1858,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyRadioPowerStateChanged(int phoneId, int subId,
-                                             @TelephonyManager.RadioPowerState int state) {
+    public void notifyRadioPowerStateChanged(int phoneId, int subId, @RadioPowerState int state) {
         if (!checkNotifyPermission("notifyRadioPowerStateChanged()")) {
             return;
         }
@@ -2227,7 +2229,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private void broadcastPreciseDataConnectionStateChanged(int state, int networkType,
             String apnType, String apn, LinkProperties linkProperties,
-            @DataFailCause.FailCause int failCause) {
+            @DataFailureCause int failCause) {
         Intent intent = new Intent(TelephonyManager.ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED);
         intent.putExtra(PhoneConstants.STATE_KEY, state);
         intent.putExtra(PhoneConstants.DATA_NETWORK_TYPE_KEY, networkType);

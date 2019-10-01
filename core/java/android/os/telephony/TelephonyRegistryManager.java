@@ -21,23 +21,25 @@ import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.Annotation;
+import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.CallState;
+import android.telephony.Annotation.DataActivityType;
+import android.telephony.Annotation.DataFailureCause;
+import android.telephony.Annotation.DataState;
+import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation.RadioPowerState;
+import android.telephony.Annotation.SimActivationState;
+import android.telephony.Annotation.SrvccState;
 import android.telephony.CallQuality;
 import android.telephony.CellInfo;
-import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
 import android.telephony.PhoneCapability;
 import android.telephony.PreciseCallState.State;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.telephony.TelephonyManager.CallState;
-import android.telephony.TelephonyManager.DataActivityType;
-import android.telephony.TelephonyManager.DataState;
-import android.telephony.TelephonyManager.NetworkType;
-import android.telephony.TelephonyManager.RadioPowerState;
-import android.telephony.TelephonyManager.SimActivationState;
 import android.telephony.data.ApnSetting;
-import android.telephony.data.ApnSetting.ApnType;
 import android.telephony.ims.ImsReasonInfo;
 import com.android.internal.telephony.ITelephonyRegistry;
 import java.util.List;
@@ -410,7 +412,7 @@ public class TelephonyRegistryManager {
      * @hide
      */
     public void notifyPreciseDataConnectionFailed(int subId, int slotIndex, String apnType,
-        String apn, @DataFailCause.FailCause int failCause) {
+        String apn, @DataFailureCause int failCause) {
         try {
             sRegistry.notifyPreciseDataConnectionFailed(slotIndex, subId, apnType, apn, failCause);
         } catch (RemoteException ex) {
@@ -427,7 +429,7 @@ public class TelephonyRegistryManager {
      *
      * @hide
      */
-    public void notifySrvccStateChanged(int subId, @TelephonyManager.SrvccState int state) {
+    public void notifySrvccStateChanged(int subId, @SrvccState int state) {
         try {
             sRegistry.notifySrvccStateChanged(subId, state);
         } catch (RemoteException ex) {
