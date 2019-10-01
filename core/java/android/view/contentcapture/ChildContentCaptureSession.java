@@ -89,8 +89,13 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    public void internalNotifySessionLifecycle(boolean started) {
-        getMainCaptureSession().notifySessionLifecycle(mId, started);
+    void internalNotifySessionResumed() {
+        getMainCaptureSession().notifySessionResumed();
+    }
+
+    @Override
+    void internalNotifySessionPaused() {
+        getMainCaptureSession().notifySessionPaused();
     }
 
     @Override
