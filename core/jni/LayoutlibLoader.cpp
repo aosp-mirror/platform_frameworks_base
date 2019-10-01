@@ -75,10 +75,12 @@ extern int register_android_os_MessageQueue(JNIEnv* env);
 extern int register_android_os_SystemClock(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
+extern int register_android_text_AndroidCharacter(JNIEnv* env);
 extern int register_android_util_EventLog(JNIEnv* env);
 extern int register_android_util_Log(JNIEnv* env);
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_RenderNode(JNIEnv* env);
+extern int register_android_view_RenderNodeAnimator(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
 extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 extern int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv *env);
@@ -141,9 +143,11 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.os.SystemClock", REG_JNI(register_android_os_SystemClock)},
         {"android.os.SystemProperties", REG_JNI(register_android_os_SystemProperties)},
         {"android.os.Trace", REG_JNI(register_android_os_Trace)},
+        {"android.text.AndroidCharacter", REG_JNI(register_android_text_AndroidCharacter)},
         {"android.util.EventLog", REG_JNI(register_android_util_EventLog)},
         {"android.util.Log", REG_JNI(register_android_util_Log)},
         {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
+        {"android.view.RenderNodeAnimator", REG_JNI(register_android_view_RenderNodeAnimator)},
         {"com.android.internal.util.VirtualRefBasePtr",
          REG_JNI(register_com_android_internal_util_VirtualRefBasePtr)},
         {"com.android.internal.view.animation.NativeInterpolatorFactoryHelper",
