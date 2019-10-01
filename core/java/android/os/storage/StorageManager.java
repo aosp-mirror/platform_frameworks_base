@@ -1580,7 +1580,14 @@ public class StorageManager {
 
     /** {@hide} */
     public static boolean hasAdoptable() {
-        return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
+        switch (SystemProperties.get(PROP_ADOPTABLE)) {
+            case "force_on":
+                return true;
+            case "force_off":
+                return false;
+            default:
+                return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
+        }
     }
 
     /**
