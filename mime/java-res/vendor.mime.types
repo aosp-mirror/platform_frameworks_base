@@ -1,0 +1,41 @@
+###############################################################################
+#
+# Vendor-specific MIME type <-> extension mappings
+#
+# Each line below defines a mapping from one MIME type to the first of the
+# listed extensions, and from listed extension back to the MIME type.
+#
+# This file can _add_ additional mappings that are not in the default set,
+# but it it cannot _modify_ (replace or remove) any platform default mapping
+# (defined in files mime.types and android.mime.types).
+#
+###############################################################################
+#
+# EXAMPLES
+#
+# A line of the form (without the leading '#''):
+#
+#    mime ext1 ext2 ext3
+#
+# affects the current mappings along the lines of the following pseudo code:
+#
+#    mimeToExt.putIfAbsent("mime", "ext1");
+#    extToMime.putIfAbsent("ext1", "mime");
+#    extToMime.putIfAbsent("ext2", "mime");
+#    extToMime.putIfAbsent("ext3", "mime");
+#
+# Optionally, MIME types or extensions may be prefixed by a single '?', which
+# will be ignored. I.e., the following example lines all have the same semantics:
+#
+#    mime ext1 ext2 ext3
+#    ?mime ext1 ext2 ext3
+#    mime ?ext1 ext2 ?ext3
+#    ?mime ?ext1 ?ext2 ?ext3
+#
+# By default, this file contains no mappings (which means that the platform
+# default mapping is used unmodified).
+#
+###############################################################################
+#
+# Add your custom mappings below this line (with no "#" at the start of the line):
+
