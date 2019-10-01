@@ -46,6 +46,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -95,6 +96,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
+        DejankUtils.setImmediate(true);
         mScrimController = new SynchronousScrimController(mScrimBehind, mScrimInFront,
                 mScrimForBubble,
                 (scrimState, scrimBehindAlpha, scrimInFrontColor) -> {
@@ -113,6 +115,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mScrimController.finishAnimationsImmediately();
+        DejankUtils.setImmediate(false);
     }
 
     @Test

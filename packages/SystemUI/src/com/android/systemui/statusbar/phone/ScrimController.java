@@ -41,6 +41,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -311,10 +312,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // Docking pulses may take a long time, wallpapers should also fade away after a while.
         mWallpaperVisibilityTimedOut = false;
         if (shouldFadeAwayWallpaper()) {
-            mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
-                    AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+            DejankUtils.postAfterTraversal(() -> {
+                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
+                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+            });
         } else {
-            mTimeTicker.cancel();
+            DejankUtils.postAfterTraversal(mTimeTicker::cancel);
         }
 
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
@@ -430,8 +433,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // and docking.
             if (mWallpaperVisibilityTimedOut) {
                 mWallpaperVisibilityTimedOut = false;
-                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
-                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+                DejankUtils.postAfterTraversal(() -> {
+                    mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
+                            AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+                });
             }
         }
     }
