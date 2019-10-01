@@ -444,7 +444,7 @@ public class OverlayManagerServiceImplTests {
         private Set<String> mIdmapFiles = new ArraySet<>();
 
         DummyIdmapManager(DummyDeviceState state, DummyPackageManagerHelper packageManagerHelper) {
-            super(null, packageManagerHelper);
+            super(packageManagerHelper);
             mState = state;
         }
 
