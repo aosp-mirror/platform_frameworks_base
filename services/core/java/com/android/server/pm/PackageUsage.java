@@ -20,7 +20,7 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.PackageParser;
 import android.os.FileUtils;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -36,7 +36,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
+class PackageUsage extends AbstractStatsBase<Map<String, PackageParser.Package>> {
 
     private static final String USAGE_FILE_MAGIC = "PACKAGE_USAGE__VERSION_";
     private static final String USAGE_FILE_MAGIC_VERSION_1 = USAGE_FILE_MAGIC + "1";
@@ -52,7 +52,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
     }
 
     @Override
-    protected void writeInternal(Map<String, AndroidPackage> packages) {
+    protected void writeInternal(Map<String, PackageParser.Package> packages) {
         AtomicFile file = getFile();
         FileOutputStream f = null;
         try {
@@ -66,13 +66,13 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             sb.append('\n');
             out.write(sb.toString().getBytes(StandardCharsets.US_ASCII));
 
-            for (AndroidPackage pkg : packages.values()) {
+            for (PackageParser.Package pkg : packages.values()) {
                 if (pkg.getLatestPackageUseTimeInMills() == 0L) {
                     continue;
                 }
                 sb.setLength(0);
-                sb.append(pkg.getPackageName());
-                for (long usageTimeInMillis : pkg.getLastPackageUsageTimeInMills()) {
+                sb.append(pkg.packageName);
+                for (long usageTimeInMillis : pkg.mLastPackageUsageTimeInMills) {
                     sb.append(' ');
                     sb.append(usageTimeInMillis);
                 }
@@ -90,7 +90,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
     }
 
     @Override
-    protected void readInternal(Map<String, AndroidPackage> packages) {
+    protected void readInternal(Map<String, PackageParser.Package> packages) {
         AtomicFile file = getFile();
         BufferedInputStream in = null;
         try {
@@ -114,7 +114,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
         }
     }
 
-    private void readVersion0LP(Map<String, AndroidPackage> packages, InputStream in,
+    private void readVersion0LP(Map<String, PackageParser.Package> packages, InputStream in,
             StringBuffer sb, String firstLine)
             throws IOException {
         // Initial version of the file had no version number and stored one
@@ -128,7 +128,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             }
 
             String packageName = tokens[0];
-            AndroidPackage pkg = packages.get(packageName);
+            PackageParser.Package pkg = packages.get(packageName);
             if (pkg == null) {
                 continue;
             }
@@ -137,12 +137,12 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             for (int reason = 0;
                     reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
                     reason++) {
-                pkg.mutate().setLastPackageUsageTimeInMills(reason, timestamp);
+                pkg.mLastPackageUsageTimeInMills[reason] = timestamp;
             }
         }
     }
 
-    private void readVersion1LP(Map<String, AndroidPackage> packages, InputStream in,
+    private void readVersion1LP(Map<String, PackageParser.Package> packages, InputStream in,
             StringBuffer sb) throws IOException {
         // Version 1 of the file started with the corresponding version
         // number and then stored a package name and eight timestamps per line.
@@ -154,7 +154,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             }
 
             String packageName = tokens[0];
-            AndroidPackage pkg = packages.get(packageName);
+            PackageParser.Package pkg = packages.get(packageName);
             if (pkg == null) {
                 continue;
             }
@@ -162,8 +162,7 @@ class PackageUsage extends AbstractStatsBase<Map<String, AndroidPackage>> {
             for (int reason = 0;
                     reason < PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT;
                     reason++) {
-                pkg.mutate().setLastPackageUsageTimeInMills(reason,
-                        parseAsLong(tokens[reason + 1]));
+                pkg.mLastPackageUsageTimeInMills[reason] = parseAsLong(tokens[reason + 1]);
             }
         }
     }

@@ -16,13 +16,12 @@
 
 package com.android.server.pm;
 
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.PackageParser;
 import android.os.UserHandle;
 
 class ScanRequestBuilder {
-    private final ParsedPackage mPkg;
-    private AndroidPackage mOldPkg;
+    private final PackageParser.Package mPkg;
+    private PackageParser.Package mOldPkg;
     private SharedUserSetting mSharedUserSetting;
     private PackageSetting mPkgSetting;
     private PackageSetting mDisabledPkgSetting;
@@ -33,11 +32,11 @@ class ScanRequestBuilder {
     private UserHandle mUser;
     private boolean mIsPlatformPackage;
 
-    ScanRequestBuilder(ParsedPackage pkg) {
+    ScanRequestBuilder(PackageParser.Package pkg) {
         this.mPkg = pkg;
     }
 
-    public ScanRequestBuilder setOldPkg(AndroidPackage oldPkg) {
+    public ScanRequestBuilder setOldPkg(PackageParser.Package oldPkg) {
         this.mOldPkg = oldPkg;
         return this;
     }

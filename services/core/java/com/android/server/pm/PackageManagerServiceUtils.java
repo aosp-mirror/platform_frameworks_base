@@ -35,13 +35,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ApkParseUtils;
 import android.os.Build;
 import android.os.Debug;
 import android.os.Environment;
@@ -123,7 +120,7 @@ public class PackageManagerServiceUtils {
     // Sort a list of apps by their last usage, most recently used apps first. The order of
     // packages without usage data is undefined (but they will be sorted after the packages
     // that do have usage data).
-    public static void sortPackagesByUsageDate(List<AndroidPackage> pkgs,
+    public static void sortPackagesByUsageDate(List<PackageParser.Package> pkgs,
             PackageManagerService packageManagerService) {
         if (!packageManagerService.isHistoricalPackageUsageAvailable()) {
             return;
@@ -138,12 +135,12 @@ public class PackageManagerServiceUtils {
     // package will be removed from {@code packages} and added to {@code result} with its
     // dependencies. If usage data is available, the positive packages will be sorted by usage
     // data (with {@code sortTemp} as temporary storage).
-    private static void applyPackageFilter(Predicate<AndroidPackage> filter,
-            Collection<AndroidPackage> result,
-            Collection<AndroidPackage> packages,
-            @NonNull List<AndroidPackage> sortTemp,
+    private static void applyPackageFilter(Predicate<PackageParser.Package> filter,
+            Collection<PackageParser.Package> result,
+            Collection<PackageParser.Package> packages,
+            @NonNull List<PackageParser.Package> sortTemp,
             PackageManagerService packageManagerService) {
-        for (AndroidPackage pkg : packages) {
+        for (PackageParser.Package pkg : packages) {
             if (filter.test(pkg)) {
                 sortTemp.add(pkg);
             }
@@ -152,10 +149,10 @@ public class PackageManagerServiceUtils {
         sortPackagesByUsageDate(sortTemp, packageManagerService);
         packages.removeAll(sortTemp);
 
-        for (AndroidPackage pkg : sortTemp) {
+        for (PackageParser.Package pkg : sortTemp) {
             result.add(pkg);
 
-            Collection<AndroidPackage> deps =
+            Collection<PackageParser.Package> deps =
                     packageManagerService.findSharedNonSystemLibraries(pkg);
             if (!deps.isEmpty()) {
                 deps.removeAll(result);
@@ -169,51 +166,50 @@ public class PackageManagerServiceUtils {
 
     // Sort apps by importance for dexopt ordering. Important apps are given
     // more priority in case the device runs out of space.
-    public static List<AndroidPackage> getPackagesForDexopt(
-            Collection<AndroidPackage> packages,
+    public static List<PackageParser.Package> getPackagesForDexopt(
+            Collection<PackageParser.Package> packages,
             PackageManagerService packageManagerService) {
         return getPackagesForDexopt(packages, packageManagerService, DEBUG_DEXOPT);
     }
 
-    public static List<AndroidPackage> getPackagesForDexopt(
-            Collection<AndroidPackage> packages,
+    public static List<PackageParser.Package> getPackagesForDexopt(
+            Collection<PackageParser.Package> packages,
             PackageManagerService packageManagerService,
             boolean debug) {
-        ArrayList<AndroidPackage> remainingPkgs = new ArrayList<>(packages);
-        LinkedList<AndroidPackage> result = new LinkedList<>();
-        ArrayList<AndroidPackage> sortTemp = new ArrayList<>(remainingPkgs.size());
+        ArrayList<PackageParser.Package> remainingPkgs = new ArrayList<>(packages);
+        LinkedList<PackageParser.Package> result = new LinkedList<>();
+        ArrayList<PackageParser.Package> sortTemp = new ArrayList<>(remainingPkgs.size());
 
         // Give priority to core apps.
-        applyPackageFilter((pkg) -> pkg.isCoreApp(), result, remainingPkgs, sortTemp,
+        applyPackageFilter((pkg) -> pkg.coreApp, result, remainingPkgs, sortTemp,
                 packageManagerService);
 
         // Give priority to system apps that listen for pre boot complete.
         Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
         final ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        applyPackageFilter((pkg) -> pkgNames.contains(pkg.getPackageName()), result, remainingPkgs,
+        applyPackageFilter((pkg) -> pkgNames.contains(pkg.packageName), result, remainingPkgs,
                 sortTemp, packageManagerService);
 
         // Give priority to apps used by other apps.
         DexManager dexManager = packageManagerService.getDexManager();
         applyPackageFilter((pkg) ->
-                dexManager.getPackageUseInfoOrDefault(pkg.getPackageName())
+                dexManager.getPackageUseInfoOrDefault(pkg.packageName)
                         .isAnyCodePathUsedByOtherApps(),
                 result, remainingPkgs, sortTemp, packageManagerService);
 
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
-        Predicate<AndroidPackage> remainingPredicate;
+        Predicate<PackageParser.Package> remainingPredicate;
         if (!remainingPkgs.isEmpty() && packageManagerService.isHistoricalPackageUsageAvailable()) {
             if (debug) {
                 Log.i(TAG, "Looking at historical package use");
             }
             // Get the package that was used last.
-            AndroidPackage lastUsed = Collections.max(remainingPkgs, (pkg1, pkg2) ->
+            PackageParser.Package lastUsed = Collections.max(remainingPkgs, (pkg1, pkg2) ->
                     Long.compare(pkg1.getLatestForegroundPackageUseTimeInMills(),
                             pkg2.getLatestForegroundPackageUseTimeInMills()));
             if (debug) {
-                Log.i(TAG, "Taking package " + lastUsed.getPackageName()
-                        + " as reference in time use");
+                Log.i(TAG, "Taking package " + lastUsed.packageName + " as reference in time use");
             }
             long estimatedPreviousSystemUseTime =
                     lastUsed.getLatestForegroundPackageUseTimeInMills();
@@ -289,13 +285,13 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    public static String packagesToString(Collection<AndroidPackage> c) {
+    public static String packagesToString(Collection<PackageParser.Package> c) {
         StringBuilder sb = new StringBuilder();
-        for (AndroidPackage pkg : c) {
+        for (PackageParser.Package pkg : c) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(pkg.getPackageName());
+            sb.append(pkg.packageName);
         }
         return sb.toString();
     }
@@ -313,16 +309,16 @@ public class PackageManagerServiceUtils {
         return false;
     }
 
-    public static long getLastModifiedTime(AndroidPackage pkg) {
-        final File srcFile = new File(pkg.getCodePath());
+    public static long getLastModifiedTime(PackageParser.Package pkg) {
+        final File srcFile = new File(pkg.codePath);
         if (!srcFile.isDirectory()) {
             return srcFile.lastModified();
         }
-        final File baseFile = new File(pkg.getBaseCodePath());
+        final File baseFile = new File(pkg.baseCodePath);
         long maxModifiedTime = baseFile.lastModified();
-        if (pkg.getSplitCodePaths() != null) {
-            for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
-                final File splitFile = new File(pkg.getSplitCodePaths()[i]);
+        if (pkg.splitCodePaths != null) {
+            for (int i = pkg.splitCodePaths.length - 1; i >=0; --i) {
+                final File splitFile = new File(pkg.splitCodePaths[i]);
                 maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
             }
         }
@@ -543,7 +539,7 @@ public class PackageManagerServiceUtils {
     private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting) {
         try {
-            ApkParseUtils.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */);
+            PackageParser.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */);
             if (pkgSetting.signatures.mSigningDetails.checkCapability(
                     disabledPkgSetting.signatures.mSigningDetails,
                     PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
@@ -909,10 +905,8 @@ public class PackageManagerServiceUtils {
      * Returns the {@link PermissionsState} for the given package. If the {@link PermissionsState}
      * could not be found, {@code null} will be returned.
      */
-    public static PermissionsState getPermissionsState(
-            PackageManagerInternal packageManagerInternal, AndroidPackage pkg) {
-        final PackageSetting packageSetting =
-                (PackageSetting) packageManagerInternal.getPackageSetting(pkg.getPackageName());
+    public static PermissionsState getPermissionsState(PackageParser.Package pkg) {
+        final PackageSetting packageSetting = (PackageSetting) pkg.mExtras;
         if (packageSetting == null) {
             return null;
         }

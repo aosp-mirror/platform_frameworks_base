@@ -373,9 +373,8 @@ public class PackageInfo implements Parcelable {
 
     /**
      * Whether the overlay is static, meaning it cannot be enabled/disabled at runtime.
-     * @hide
      */
-    public boolean mOverlayIsStatic;
+    boolean mOverlayIsStatic;
 
     /**
      * The user-visible SDK version (ex. 26) of the framework against which the application claims

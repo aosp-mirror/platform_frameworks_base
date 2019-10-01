@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,24 +38,20 @@ import java.util.List;
 public final class SharedLibraryInfo implements Parcelable {
 
     /** @hide */
-    public static SharedLibraryInfo createForStatic(AndroidPackage pkg) {
-        return new SharedLibraryInfo(null, pkg.getPackageName(),
-                pkg.makeListAllCodePaths(),
-                pkg.getStaticSharedLibName(),
-                pkg.getStaticSharedLibVersion(),
+    public static SharedLibraryInfo createForStatic(PackageParser.Package pkg) {
+        return new SharedLibraryInfo(null, pkg.packageName, pkg.getAllCodePaths(),
+                pkg.staticSharedLibName,
+                pkg.staticSharedLibVersion,
                 TYPE_STATIC,
-                new VersionedPackage(pkg.getManifestPackageName(),
-                        pkg.getLongVersionCode()),
+                new VersionedPackage(pkg.manifestPackageName, pkg.getLongVersionCode()),
                 null, null);
     }
 
     /** @hide */
-    public static SharedLibraryInfo createForDynamic(AndroidPackage pkg, String name) {
-        return new SharedLibraryInfo(null, pkg.getPackageName(),
-                pkg.makeListAllCodePaths(), name,
+    public static SharedLibraryInfo createForDynamic(PackageParser.Package pkg, String name) {
+        return new SharedLibraryInfo(null, pkg.packageName, pkg.getAllCodePaths(), name,
                 (long) VERSION_UNDEFINED,
-                TYPE_DYNAMIC, new VersionedPackage(pkg.getPackageName(),
-                pkg.getLongVersionCode()),
+                TYPE_DYNAMIC, new VersionedPackage(pkg.packageName, pkg.getLongVersionCode()),
                 null, null);
     }
 

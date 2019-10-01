@@ -23,7 +23,6 @@ import android.annotation.UserIdInt;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.UserInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -152,15 +151,15 @@ class UserSystemPackageInstaller {
                     return;
                 }
                 final boolean install =
-                        (userWhitelist == null || userWhitelist.contains(pkg.getPackageName()))
-                        && !pkg.isHiddenUntilInstalled();
+                        (userWhitelist == null || userWhitelist.contains(pkg.packageName))
+                        && !pkg.applicationInfo.hiddenUntilInstalled;
                 if (isUpgrade && !isFirstBoot && !install) {
                     return; // To be careful, we don’t uninstall apps during OTAs
                 }
                 final boolean changed = pmInt.setInstalled(pkg, userId, install);
                 if (changed) {
                     Slog.i(TAG, (install ? "Installed " : "Uninstalled ")
-                            + pkg.getPackageName() + " for user " + userId);
+                            + pkg.packageName + " for user " + userId);
                 }
             });
         }
@@ -181,7 +180,7 @@ class UserSystemPackageInstaller {
 
         // Check whether all whitelisted packages are indeed on the system.
         for (String pkgName : allWhitelistedPackages) {
-            AndroidPackage pkg = pmInt.getPackage(pkgName);
+            PackageParser.Package pkg = pmInt.getPackage(pkgName);
             if (pkg == null) {
                 Slog.w(TAG, pkgName + " is whitelisted but not present.");
             } else if (!pkg.isSystem()) {
@@ -195,8 +194,8 @@ class UserSystemPackageInstaller {
         }
         final boolean doWtf = isEnforceMode(mode);
         pmInt.forEachPackage(pkg -> {
-            if (pkg.isSystem() && !allWhitelistedPackages.contains(pkg.getManifestPackageName())) {
-                final String msg = "System package " + pkg.getManifestPackageName()
+            if (pkg.isSystem() && !allWhitelistedPackages.contains(pkg.manifestPackageName)) {
+                final String msg = "System package " + pkg.manifestPackageName
                         + " is not whitelisted using 'install-in-user-type' in SystemConfig "
                         + "for any user types!";
                 if (doWtf) {
@@ -287,7 +286,7 @@ class UserSystemPackageInstaller {
             if (shouldInstallPackage(pkg, mWhitelitsedPackagesForUserTypes,
                     whitelistedPackages, isImplicitWhitelistMode, isSystemUser)) {
                 // Although the whitelist uses manifest names, this function returns packageNames.
-                installPackages.add(pkg.getPackageName());
+                installPackages.add(pkg.packageName);
             }
         });
         return installPackages;
@@ -308,12 +307,12 @@ class UserSystemPackageInstaller {
      * @param isSystemUser whether the user is USER_SYSTEM (which gets special treatment).
      */
     @VisibleForTesting
-    static boolean shouldInstallPackage(AndroidPackage sysPkg,
+    static boolean shouldInstallPackage(PackageParser.Package sysPkg,
             @NonNull ArrayMap<String, Integer> userTypeWhitelist,
             @NonNull Set<String> userWhitelist, boolean isImplicitWhitelistMode,
             boolean isSystemUser) {
 
-        final String pkgName = sysPkg.getManifestPackageName();
+        final String pkgName = sysPkg.manifestPackageName;
         boolean install = (isImplicitWhitelistMode && !userTypeWhitelist.containsKey(pkgName))
                 || userWhitelist.contains(pkgName);
 

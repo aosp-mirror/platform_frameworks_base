@@ -25,13 +25,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.ArtManager.ProfileType;
 import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -386,10 +386,9 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      *   - create the current primary profile to save time at app startup time.
      *   - copy the profiles from the associated dex metadata file to the reference profile.
      */
-    public void prepareAppProfiles(
-            AndroidPackage pkg, @UserIdInt int user,
+    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user,
             boolean updateReferenceProfileContent) {
-        final int appId = UserHandle.getAppId(pkg.getUid());
+        final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
         if (user < 0) {
             Slog.wtf(TAG, "Invalid user id: " + user);
             return;
@@ -412,24 +411,23 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                     dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
                 }
                 synchronized (mInstaller) {
-                    boolean result = mInstaller.prepareAppProfile(pkg.getPackageName(), user, appId,
+                    boolean result = mInstaller.prepareAppProfile(pkg.packageName, user, appId,
                             profileName, codePath, dexMetadataPath);
                     if (!result) {
                         Slog.e(TAG, "Failed to prepare profile for " +
-                                pkg.getPackageName() + ":" + codePath);
+                                pkg.packageName + ":" + codePath);
                     }
                 }
             }
         } catch (InstallerException e) {
-            Slog.e(TAG, "Failed to prepare profile for " + pkg.getPackageName(), e);
+            Slog.e(TAG, "Failed to prepare profile for " + pkg.packageName, e);
         }
     }
 
     /**
      * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
      */
-    public void prepareAppProfiles(
-            AndroidPackage pkg, int[] user,
+    public void prepareAppProfiles(PackageParser.Package pkg, int[] user,
             boolean updateReferenceProfileContent) {
         for (int i = 0; i < user.length; i++) {
             prepareAppProfiles(pkg, user[i], updateReferenceProfileContent);
@@ -439,12 +437,12 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Clear the profiles for the given package.
      */
-    public void clearAppProfiles(AndroidPackage pkg) {
+    public void clearAppProfiles(PackageParser.Package pkg) {
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
                 String profileName = packageProfileNames.valueAt(i);
-                mInstaller.clearAppProfiles(pkg.getPackageName(), profileName);
+                mInstaller.clearAppProfiles(pkg.packageName, profileName);
             }
         } catch (InstallerException e) {
             Slog.w(TAG, String.valueOf(e));
@@ -454,15 +452,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Dumps the profiles for the given package.
      */
-    public void dumpProfiles(AndroidPackage pkg) {
-        final int sharedGid = UserHandle.getSharedAppGid(pkg.getUid());
+    public void dumpProfiles(PackageParser.Package pkg) {
+        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
         try {
             ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
             for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
                 String codePath = packageProfileNames.keyAt(i);
                 String profileName = packageProfileNames.valueAt(i);
                 synchronized (mInstallLock) {
-                    mInstaller.dumpProfiles(sharedGid, pkg.getPackageName(), profileName, codePath);
+                    mInstaller.dumpProfiles(sharedGid, pkg.packageName, profileName, codePath);
                 }
             }
         } catch (InstallerException e) {
@@ -473,13 +471,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     /**
      * Compile layout resources in a given package.
      */
-    public boolean compileLayouts(AndroidPackage pkg) {
+    public boolean compileLayouts(PackageParser.Package pkg) {
         try {
-            final String packageName = pkg.getPackageName();
-            final String apkPath = pkg.getBaseCodePath();
-            final String outDexFile = pkg.getDataDir() + "/code_cache/compiled_view.dex";
-            if (pkg.isPrivileged() || pkg.isEmbeddedDexUsed()
-                    || pkg.isDefaultToDeviceProtectedStorage()) {
+            final String packageName = pkg.packageName;
+            final String apkPath = pkg.baseCodePath;
+            final ApplicationInfo appInfo = pkg.applicationInfo;
+            final String outDexFile = appInfo.dataDir + "/code_cache/compiled_view.dex";
+            if (appInfo.isPrivilegedApp() || appInfo.isEmbeddedDexUsed()
+                    || appInfo.isDefaultToDeviceProtectedStorage()) {
                 // Privileged apps prefer to load trusted code so they don't use compiled views.
                 // If the app is not privileged but prefers code integrity, also avoid compiling
                 // views.
@@ -493,7 +492,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             try {
                 synchronized (mInstallLock) {
                     return mInstaller.compileLayouts(apkPath, packageName, outDexFile,
-                            pkg.getUid());
+                            appInfo.uid);
                 }
             } finally {
                 Binder.restoreCallingIdentity(callingId);
@@ -509,19 +508,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      * Build the profiles names for all the package code paths (excluding resource only paths).
      * Return the map [code path -> profile name].
      */
-    private ArrayMap<String, String> getPackageProfileNames(AndroidPackage pkg) {
+    private ArrayMap<String, String> getPackageProfileNames(PackageParser.Package pkg) {
         ArrayMap<String, String> result = new ArrayMap<>();
-        if ((pkg.getFlags() & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-            result.put(pkg.getBaseCodePath(), ArtManager.getProfileName(null));
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            result.put(pkg.baseCodePath, ArtManager.getProfileName(null));
         }
-
-        String[] splitCodePaths = pkg.getSplitCodePaths();
-        int[] splitFlags = pkg.getSplitFlags();
-        String[] splitNames = pkg.getSplitNames();
-        if (!ArrayUtils.isEmpty(splitCodePaths)) {
-            for (int i = 0; i < splitCodePaths.length; i++) {
-                if ((splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
-                    result.put(splitCodePaths[i], ArtManager.getProfileName(splitNames[i]));
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                if ((pkg.splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+                    result.put(pkg.splitCodePaths[i], ArtManager.getProfileName(pkg.splitNames[i]));
                 }
             }
         }

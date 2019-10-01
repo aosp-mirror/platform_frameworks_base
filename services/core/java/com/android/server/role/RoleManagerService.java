@@ -308,12 +308,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         pm.forEachInstalledPackage(FunctionalUtils.uncheckExceptions(pkg -> {
-            out.write(pkg.getPackageName().getBytes());
+            out.write(pkg.packageName.getBytes());
             out.write(BitUtils.toBytes(pkg.getLongVersionCode()));
-            out.write(pm.getApplicationEnabledState(pkg.getPackageName(), userId));
+            out.write(pm.getApplicationEnabledState(pkg.packageName, userId));
 
             ArraySet<String> enabledComponents =
-                    pm.getEnabledComponents(pkg.getPackageName(), userId);
+                    pm.getEnabledComponents(pkg.packageName, userId);
             int numComponents = CollectionUtils.size(enabledComponents);
             out.write(numComponents);
             for (int i = 0; i < numComponents; i++) {
@@ -321,12 +321,12 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
             }
 
             ArraySet<String> disabledComponents =
-                    pm.getDisabledComponents(pkg.getPackageName(), userId);
+                    pm.getDisabledComponents(pkg.packageName, userId);
             numComponents = CollectionUtils.size(disabledComponents);
             for (int i = 0; i < numComponents; i++) {
                 out.write(disabledComponents.valueAt(i).getBytes());
             }
-            for (Signature signature : pkg.getSigningDetails().signatures) {
+            for (Signature signature : pkg.mSigningDetails.signatures) {
                 out.write(signature.toByteArray());
             }
         }), userId);

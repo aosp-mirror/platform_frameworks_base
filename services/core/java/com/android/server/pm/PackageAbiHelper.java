@@ -17,8 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.PackageParser;
 import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -26,21 +25,21 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.File;
 import java.util.Set;
 
-// TODO: Move to .parsing sub-package
 @VisibleForTesting
 public interface PackageAbiHelper {
     /**
      * Derive and get the location of native libraries for the given package,
      * which varies depending on where and how the package was installed.
      */
-    NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, File appLib32InstallDir);
+    NativeLibraryPaths getNativeLibraryPaths(
+            PackageParser.Package pkg, File appLib32InstallDir);
 
     /**
      * Calculate the abis for a bundled app. These can uniquely be determined from the contents of
      * the system partition, i.e whether it contains 64 or 32 bit shared libraries etc. We do not
      * validate any of this information, and instead assume that the system was built sensibly.
      */
-    Abis getBundledAppAbis(AndroidPackage pkg);
+    Abis getBundledAppAbis(PackageParser.Package pkg);
 
     /**
      * Derive the ABI of a non-system package located at {@code pkg}. This information
@@ -49,7 +48,7 @@ public interface PackageAbiHelper {
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
     Pair<Abis, NativeLibraryPaths> derivePackageAbi(
-            AndroidPackage pkg, String cpuAbiOverride, boolean extractLibs)
+            PackageParser.Package pkg, String cpuAbiOverride, boolean extractLibs)
             throws PackageManagerException;
 
     /**
@@ -70,11 +69,11 @@ public interface PackageAbiHelper {
      */
     @Nullable
     String getAdjustedAbiForSharedUser(
-            Set<PackageSetting> packagesForUser, AndroidPackage scannedPackage);
+            Set<PackageSetting> packagesForUser, PackageParser.Package scannedPackage);
 
     /**
      * The native library paths and related properties that should be set on a
-     * {@link ParsedPackage}.
+     * {@link android.content.pm.PackageParser.Package}.
      */
     final class NativeLibraryPaths {
         public final String nativeLibraryRootDir;
@@ -92,11 +91,11 @@ public interface PackageAbiHelper {
             this.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
         }
 
-        public void applyTo(ParsedPackage pkg) {
-            pkg.setNativeLibraryRootDir(nativeLibraryRootDir)
-                    .setNativeLibraryRootRequiresIsa(nativeLibraryRootRequiresIsa)
-                    .setNativeLibraryDir(nativeLibraryDir)
-                    .setSecondaryNativeLibraryDir(secondaryNativeLibraryDir);
+        public void applyTo(PackageParser.Package pkg) {
+            pkg.applicationInfo.nativeLibraryRootDir = nativeLibraryRootDir;
+            pkg.applicationInfo.nativeLibraryRootRequiresIsa = nativeLibraryRootRequiresIsa;
+            pkg.applicationInfo.nativeLibraryDir = nativeLibraryDir;
+            pkg.applicationInfo.secondaryNativeLibraryDir = secondaryNativeLibraryDir;
         }
     }
 
@@ -113,13 +112,13 @@ public interface PackageAbiHelper {
             this.secondary = secondary;
         }
 
-        Abis(AndroidPackage pkg) {
-            this(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi());
+        Abis(PackageParser.Package pkg) {
+            this(pkg.applicationInfo.primaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi);
         }
 
-        public void applyTo(ParsedPackage pkg) {
-            pkg.setPrimaryCpuAbi(primary)
-                    .setSecondaryCpuAbi(secondary);
+        public void applyTo(PackageParser.Package pkg) {
+            pkg.applicationInfo.primaryCpuAbi = primary;
+            pkg.applicationInfo.secondaryCpuAbi = secondary;
         }
         public void applyTo(PackageSetting pkgSetting) {
             // pkgSetting might be null during rescan following uninstall of updates

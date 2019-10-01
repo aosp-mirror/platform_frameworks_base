@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageParser.Component;
+import static android.content.pm.PackageParser.IntentInfo;
 import static android.provider.DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE;
 
 import android.Manifest;
@@ -23,11 +25,8 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
-import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
+import android.content.pm.PackageParser;
+import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Process;
@@ -41,15 +40,14 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.FgThread;
 import com.android.server.compat.PlatformCompat;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -127,7 +125,8 @@ public class AppsFilter {
         boolean isGloballyEnabled();
 
         /** @return true if the feature is enabled for the given package. */
-        boolean packageIsEnabled(AndroidPackage pkg);
+        boolean packageIsEnabled(PackageParser.Package pkg);
+
     }
 
     private static class FeatureConfigImpl implements FeatureConfig {
@@ -160,14 +159,14 @@ public class AppsFilter {
         }
 
         @Override
-        public boolean packageIsEnabled(AndroidPackage pkg) {
+        public boolean packageIsEnabled(PackageParser.Package pkg) {
             final PlatformCompat compatibility = mInjector.getCompatibility();
             if (compatibility == null) {
                 Slog.wtf(TAG, "PlatformCompat is null");
                 return mFeatureEnabled;
             }
-            return compatibility.isChangeEnabled(PackageManager.FILTER_APPLICATION_QUERY,
-                    pkg.toAppInfo());
+            return compatibility.isChangeEnabled(
+                    PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
         }
     }
 
@@ -197,13 +196,14 @@ public class AppsFilter {
     }
 
     /** Returns true if the querying package may query for the potential target package */
-    private static boolean canQuery(AndroidPackage querying, AndroidPackage potentialTarget) {
-        if (querying.getQueriesIntents() == null || potentialTarget.getActivities() == null) {
+    private static boolean canQuery(PackageParser.Package querying,
+            PackageParser.Package potentialTarget) {
+        if (querying.mQueriesIntents == null) {
             return false;
         }
-        for (Intent intent : querying.getQueriesIntents()) {
-            if (matches(intent, potentialTarget.getProviders(), potentialTarget.getActivities(),
-                    potentialTarget.getServices(), potentialTarget.getReceivers())) {
+        for (Intent intent : querying.mQueriesIntents) {
+            if (matches(intent, potentialTarget.providers, potentialTarget.activities,
+                    potentialTarget.services, potentialTarget.receivers)) {
                 return true;
             }
         }
@@ -211,24 +211,24 @@ public class AppsFilter {
     }
 
     private static boolean matches(Intent intent,
-            @Nullable List<ParsedProvider> providerList,
-            List<? extends ParsedComponent<? extends ParsedIntentInfo>>... componentLists) {
-        for (int p = ArrayUtils.size(providerList) - 1; p >= 0; p--) {
-            ParsedProvider provider = providerList.get(p);
+            ArrayList<PackageParser.Provider> providerList,
+            ArrayList<? extends Component<? extends IntentInfo>>... componentLists) {
+        for (int p = providerList.size() - 1; p >= 0; p--) {
+            PackageParser.Provider provider = providerList.get(p);
+            final ProviderInfo providerInfo = provider.info;
             final Uri data = intent.getData();
             if ("content".equalsIgnoreCase(intent.getScheme())
                     && data != null
-                    && provider.getAuthority().equalsIgnoreCase(data.getAuthority())) {
+                    && providerInfo.authority.equalsIgnoreCase(data.getAuthority())) {
                 return true;
             }
         }
 
         for (int l = componentLists.length - 1; l >= 0; l--) {
-            List<? extends ParsedComponent<? extends ParsedIntentInfo>> components =
-                    componentLists[l];
+            ArrayList<? extends Component<? extends IntentInfo>> components = componentLists[l];
             for (int c = components.size() - 1; c >= 0; c--) {
-                ParsedComponent<? extends ParsedIntentInfo> component = components.get(c);
-                List<? extends ParsedIntentInfo> intents = component.intents;
+                Component<? extends IntentInfo> component = components.get(c);
+                ArrayList<? extends IntentInfo> intents = component.intents;
                 for (int i = intents.size() - 1; i >= 0; i--) {
                     IntentFilter intentFilter = intents.get(i);
                     if (intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
@@ -273,44 +273,44 @@ public class AppsFilter {
      * @param newPkg   the new package being added
      * @param existing all other packages currently on the device.
      */
-    public void addPackage(AndroidPackage newPkg, Map<String, AndroidPackage> existing) {
+    public void addPackage(PackageParser.Package newPkg,
+            Map<String, PackageParser.Package> existing) {
         // let's re-evaluate the ability of already added packages to see this new package
-        if (newPkg.isForceQueryable()
+        if (newPkg.mForceQueryable
                 || (mSystemAppsQueryable && (newPkg.isSystem() || newPkg.isUpdatedSystemApp()))) {
-            mForceQueryable.add(newPkg.getPackageName());
+            mForceQueryable.add(newPkg.packageName);
         } else {
             for (String packageName : mQueriesViaIntent.keySet()) {
-                if (Objects.equals(packageName, newPkg.getPackageName())) {
+                if (packageName == newPkg.packageName) {
                     continue;
                 }
-                final AndroidPackage existingPackage = existing.get(packageName);
+                final PackageParser.Package existingPackage = existing.get(packageName);
                 if (canQuery(existingPackage, newPkg)) {
-                    mQueriesViaIntent.get(packageName).add(newPkg.getPackageName());
+                    mQueriesViaIntent.get(packageName).add(newPkg.packageName);
                 }
             }
         }
         // if the new package declares them, let's evaluate its ability to see existing packages
-        mQueriesViaIntent.put(newPkg.getPackageName(), new HashSet<>());
-        for (AndroidPackage existingPackage : existing.values()) {
-            if (Objects.equals(existingPackage.getPackageName(), newPkg.getPackageName())) {
+        mQueriesViaIntent.put(newPkg.packageName, new HashSet<>());
+        for (PackageParser.Package existingPackage : existing.values()) {
+            if (existingPackage.packageName == newPkg.packageName) {
                 continue;
             }
-            if (existingPackage.isForceQueryable()
+            if (existingPackage.mForceQueryable
                     || (mSystemAppsQueryable
                     && (newPkg.isSystem() || newPkg.isUpdatedSystemApp()))) {
                 continue;
             }
             if (canQuery(newPkg, existingPackage)) {
-                mQueriesViaIntent.get(newPkg.getPackageName())
-                        .add(existingPackage.getPackageName());
+                mQueriesViaIntent.get(newPkg.packageName).add(existingPackage.packageName);
             }
         }
         final HashSet<String> queriesPackages = new HashSet<>(
-                newPkg.getQueriesPackages() == null ? 0 : newPkg.getQueriesPackages().size());
-        if (newPkg.getQueriesPackages() != null) {
-            queriesPackages.addAll(newPkg.getQueriesPackages());
+                newPkg.mQueriesPackages == null ? 0 : newPkg.mQueriesPackages.size());
+        if (newPkg.mQueriesPackages != null) {
+            queriesPackages.addAll(newPkg.mQueriesPackages);
         }
-        mQueriesViaPackage.put(newPkg.getPackageName(), queriesPackages);
+        mQueriesViaPackage.put(newPkg.packageName, queriesPackages);
     }
 
     /**
@@ -405,8 +405,8 @@ public class AppsFilter {
 
     private boolean shouldFilterApplicationInternal(
             PackageSetting callingPkgSetting, PackageSetting targetPkgSetting, int userId) {
-        final String callingName = callingPkgSetting.pkg.getPackageName();
-        final AndroidPackage targetPkg = targetPkgSetting.pkg;
+        final String callingName = callingPkgSetting.pkg.packageName;
+        final PackageParser.Package targetPkg = targetPkgSetting.pkg;
 
         if (!mFeatureConfig.packageIsEnabled(callingPkgSetting.pkg)) {
             if (DEBUG_LOGGING) {
@@ -422,8 +422,8 @@ public class AppsFilter {
             }
             return true;
         }
-        final String targetName = targetPkg.getPackageName();
-        if (callingPkgSetting.pkg.getTargetSdkVersion() < Build.VERSION_CODES.R) {
+        final String targetName = targetPkg.packageName;
+        if (callingPkgSetting.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.R) {
             if (DEBUG_LOGGING) {
                 log(callingPkgSetting, targetPkgSetting, "caller pre-R");
             }
@@ -435,7 +435,7 @@ public class AppsFilter {
             }
             return false;
         }
-        if (targetPkg.isForceQueryable()) {
+        if (targetPkg.mForceQueryable) {
             if (DEBUG_LOGGING) {
                 log(callingPkgSetting, targetPkgSetting, "manifest forceQueryable");
             }
@@ -470,11 +470,9 @@ public class AppsFilter {
             }
             return false;
         }
-        List<ComponentParseUtils.ParsedInstrumentation> instrumentations =
-                callingPkgSetting.pkg.getInstrumentations();
-        if (ArrayUtils.size(instrumentations) > 0) {
-            for (int i = 0, max = instrumentations.size(); i < max; i++) {
-                if (Objects.equals(instrumentations.get(i).getTargetPackage(), targetName)) {
+        if (callingPkgSetting.pkg.instrumentation.size() > 0) {
+            for (int i = 0, max = callingPkgSetting.pkg.instrumentation.size(); i < max; i++) {
+                if (callingPkgSetting.pkg.instrumentation.get(i).info.targetPackage == targetName) {
                     if (DEBUG_LOGGING) {
                         log(callingPkgSetting, targetPkgSetting, "instrumentation");
                     }
@@ -506,7 +504,7 @@ public class AppsFilter {
 
     private boolean isImplicitlyQueryableSystemApp(PackageSetting targetPkgSetting) {
         return targetPkgSetting.isSystem() && (mSystemAppsQueryable
-                || mForceQueryableByDevice.contains(targetPkgSetting.pkg.getPackageName()));
+                || mForceQueryableByDevice.contains(targetPkgSetting.pkg.packageName));
     }
 
     public void dumpQueries(

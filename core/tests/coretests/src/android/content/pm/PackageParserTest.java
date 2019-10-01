@@ -23,26 +23,26 @@ import static org.junit.Assert.assertTrue;
 
 import android.apex.ApexInfo;
 import android.content.Context;
-import android.content.pm.parsing.AndroidPackage;
-import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
-import android.content.pm.parsing.ComponentParseUtils.ParsedPermission;
-import android.content.pm.parsing.ParsedPackage;
+import android.content.pm.PackageParser.Component;
+import android.content.pm.PackageParser.Package;
+import android.content.pm.PackageParser.Permission;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.SystemProperties;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
-import com.android.internal.util.ArrayUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.function.Function;
 
 @SmallTest
@@ -59,8 +59,8 @@ public class PackageParserTest {
     private static final String PRE_RELEASE_WITH_FINGERPRINT = "B.fingerprint";
     private static final String NEWER_PRE_RELEASE_WITH_FINGERPRINT = "C.fingerprint";
 
-    private static final String[] CODENAMES_RELEASED = { /* empty */};
-    private static final String[] CODENAMES_PRE_RELEASE = {PRE_RELEASE};
+    private static final String[] CODENAMES_RELEASED = { /* empty */ };
+    private static final String[] CODENAMES_PRE_RELEASE = { PRE_RELEASE };
 
     private static final int OLDER_VERSION = 10;
     private static final int PLATFORM_VERSION = 20;
@@ -300,6 +300,10 @@ public class PackageParserTest {
         assertEquals(0x0083, finalConfigChanges); // Should be 10000011.
     }
 
+    Package parsePackage(String apkFileName, int apkResourceId) throws Exception {
+        return parsePackage(apkFileName, apkResourceId, p -> p);
+    }
+
     /**
      * Copies a specified {@code resourceId} to a file. Returns a non-null file if the copy
      * succeeded, or {@code null} otherwise.
@@ -327,17 +331,16 @@ public class PackageParserTest {
      *
      * APKs are put into coretests/apks/packageparser_*.
      *
-     * @param apkFileName   temporary file name to store apk extracted from resources
+     * @param apkFileName temporary file name to store apk extracted from resources
      * @param apkResourceId identifier of the apk as a resource
      */
-    ParsedPackage parsePackage(String apkFileName, int apkResourceId,
-            Function<ParsedPackage, ParsedPackage> converter) throws Exception {
+    Package parsePackage(String apkFileName, int apkResourceId,
+            Function<Package, Package> converter) throws Exception {
         // Copy the resource to a file.
         File outFile = null;
         try {
             outFile = copyRawResourceToFile(apkFileName, apkResourceId);
-            return converter.apply(
-                    new PackageParser().parseParsedPackage(outFile, 0 /* flags */, false));
+            return converter.apply(new PackageParser().parsePackage(outFile, 0 /* flags */));
         } finally {
             if (outFile != null) {
                 outFile.delete();
@@ -348,40 +351,40 @@ public class PackageParserTest {
     /**
      * Asserts basic properties about a component.
      */
-    private void assertComponent(String className, int numIntents, ParsedComponent<?> component) {
+    private void assertComponent(String className, String packageName, int numIntents,
+            Component<?> component) {
         assertEquals(className, component.className);
+        assertEquals(packageName, component.owner.packageName);
         assertEquals(numIntents, component.intents.size());
     }
 
     /**
      * Asserts four regularly-named components of each type: one Activity, one Service, one
      * Provider, and one Receiver.
-     *
      * @param template templated string with %s subbed with Activity, Service, Provider, Receiver
      */
-    private void assertOneComponentOfEachType(String template, AndroidPackage p) {
-        assertEquals(2, p.getActivities().size());
+    private void assertOneComponentOfEachType(String template, Package p) {
+        String packageName = p.packageName;
 
-        // For normal apps, a Activity that forwards to the App Details page is added.
-        assertEquals("android.app.AppDetailsActivity", p.getActivities().get(1)
-                .className);
-
+        assertEquals(1, p.activities.size());
         assertComponent(String.format(template, "Activity"),
-                0 /* intents */, p.getActivities().get(0));
-        assertEquals(1, p.getServices().size());
+                packageName, 0 /* intents */, p.activities.get(0));
+        assertEquals(1, p.services.size());
         assertComponent(String.format(template, "Service"),
-                0 /* intents */, p.getServices().get(0));
-        assertEquals(1, p.getProviders().size());
+                packageName, 0 /* intents */, p.services.get(0));
+        assertEquals(1, p.providers.size());
         assertComponent(String.format(template, "Provider"),
-                0 /* intents */, p.getProviders().get(0));
-        assertEquals(1, p.getReceivers().size());
+                packageName, 0 /* intents */, p.providers.get(0));
+        assertEquals(1, p.receivers.size());
         assertComponent(String.format(template, "Receiver"),
-                0 /* intents */, p.getReceivers().get(0));
+                packageName, 0 /* intents */, p.receivers.get(0));
     }
 
-    private void assertPermission(String name, int protectionLevel, ParsedPermission permission) {
-        assertEquals(name, permission.getName());
-        assertEquals(protectionLevel, permission.getProtection());
+    private void assertPermission(String name, String packageName, int protectionLevel,
+            Permission permission) {
+        assertEquals(packageName, permission.owner.packageName);
+        assertEquals(name, permission.info.name);
+        assertEquals(protectionLevel, permission.info.protectionLevel);
     }
 
     private void assertMetadata(Bundle b, String... keysAndValues) {
@@ -413,25 +416,25 @@ public class PackageParserTest {
     }
 
     private void checkPackageWithComponents(
-            Function<ParsedPackage, ParsedPackage> converter) throws Exception {
-        ParsedPackage p = parsePackage(
+            Function<Package, Package> converter) throws Exception {
+        Package p = parsePackage(
                 "install_complete_package_info.apk", R.raw.install_complete_package_info,
                 converter);
         String packageName = "com.android.frameworks.coretests.install_complete_package_info";
 
-        assertEquals(packageName, p.getPackageName());
-        assertEquals(1, p.getPermissions().size());
+        assertEquals(packageName, p.packageName);
+        assertEquals(1, p.permissions.size());
         assertPermission(
                 "com.android.frameworks.coretests.install_complete_package_info.test_permission",
-                PermissionInfo.PROTECTION_NORMAL, p.getPermissions().get(0));
+                packageName, PermissionInfo.PROTECTION_NORMAL, p.permissions.get(0));
 
         // Hidden "app details" activity is added to every package.
         boolean foundAppDetailsActivity = false;
-        for (int i = 0; i < ArrayUtils.size(p.getActivities()); i++) {
-            if (p.getActivities().get(i).className.equals(
+        for (int i = 0; i < p.activities.size(); i++) {
+            if (p.activities.get(i).className.equals(
                     PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME)) {
                 foundAppDetailsActivity = true;
-                p.getActivities().remove(i);
+                p.activities.remove(i);
                 break;
             }
         }
@@ -439,21 +442,70 @@ public class PackageParserTest {
 
         assertOneComponentOfEachType("com.android.frameworks.coretests.Test%s", p);
 
-        assertMetadata(p.getAppMetaData(),
+        assertMetadata(p.mAppMetaData,
                 "key1", "value1",
                 "key2", "this_is_app");
-        assertMetadata(p.getActivities().get(0).getMetaData(),
+        assertMetadata(p.activities.get(0).metaData,
                 "key1", "value1",
                 "key2", "this_is_activity");
-        assertMetadata(p.getServices().get(0).getMetaData(),
+        assertMetadata(p.services.get(0).metaData,
                 "key1", "value1",
                 "key2", "this_is_service");
-        assertMetadata(p.getReceivers().get(0).getMetaData(),
+        assertMetadata(p.receivers.get(0).metaData,
                 "key1", "value1",
                 "key2", "this_is_receiver");
-        assertMetadata(p.getProviders().get(0).getMetaData(),
+        assertMetadata(p.providers.get(0).metaData,
                 "key1", "value1",
                 "key2", "this_is_provider");
+    }
+
+    /**
+     * Determines if the current device supports multi-package APKs.
+     */
+    private boolean supportsMultiPackageApk() {
+        return SystemProperties.getBoolean("persist.sys.child_packages_enabled", false);
+    }
+
+    @Test
+    public void testMultiPackageComponents() throws Exception {
+        // TODO(gboyer): Remove once we decide to launch multi-package APKs.
+        if (!supportsMultiPackageApk()) {
+            return;
+        }
+        String parentName = "com.android.frameworks.coretests.install_multi_package";
+        String firstChildName =
+                "com.android.frameworks.coretests.install_multi_package.first_child";
+        String secondChildName =  // NOTE: intentionally inconsistent!
+                "com.android.frameworks.coretests.blah.second_child";
+
+        Package parent = parsePackage("install_multi_package.apk", R.raw.install_multi_package);
+        assertEquals(parentName, parent.packageName);
+        assertEquals(2, parent.childPackages.size());
+        assertOneComponentOfEachType("com.android.frameworks.coretests.Test%s", parent);
+        assertEquals(1, parent.permissions.size());
+        assertPermission(parentName + ".test_permission", parentName,
+                PermissionInfo.PROTECTION_NORMAL, parent.permissions.get(0));
+        assertEquals(Arrays.asList("android.permission.INTERNET"),
+                parent.requestedPermissions);
+
+        Package firstChild = parent.childPackages.get(0);
+        assertEquals(firstChildName, firstChild.packageName);
+        assertOneComponentOfEachType(
+                "com.android.frameworks.coretests.FirstChildTest%s", firstChild);
+        assertEquals(0, firstChild.permissions.size());  // Child APKs cannot declare permissions.
+        assertEquals(Arrays.asList("android.permission.NFC"),
+                firstChild.requestedPermissions);
+
+        Package secondChild = parent.childPackages.get(1);
+        assertEquals(secondChildName, secondChild.packageName);
+        assertOneComponentOfEachType(
+                "com.android.frameworks.coretests.SecondChildTest%s", secondChild);
+        assertEquals(0, secondChild.permissions.size());  // Child APKs cannot declare permissions.
+        assertEquals(
+                Arrays.asList(
+                        "android.permission.ACCESS_NETWORK_STATE",
+                        "android.permission.READ_CONTACTS"),
+                secondChild.requestedPermissions);
     }
 
     @Test
@@ -470,7 +522,7 @@ public class PackageParserTest {
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
 
         PackageParser pp = new PackageParser();
-        PackageParser.Package p = pp.parsePackage(apexFile, flags, false);
+        Package p = pp.parsePackage(apexFile, flags, false);
         PackageParser.collectCertificates(p, false);
         PackageInfo pi = PackageParser.generatePackageInfo(p, apexInfo, flags);
 

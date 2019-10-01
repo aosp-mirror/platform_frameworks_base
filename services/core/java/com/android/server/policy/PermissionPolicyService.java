@@ -37,8 +37,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
+import android.content.pm.PackageParser;
 import android.content.pm.PermissionInfo;
-import android.content.pm.parsing.AndroidPackage;
 import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
@@ -356,10 +356,10 @@ public final class PermissionPolicyService extends SystemService {
                 pkg.sharedUserId, userId);
         if (sharedPkgNames != null) {
             for (String sharedPkgName : sharedPkgNames) {
-                final AndroidPackage sharedPkg = packageManagerInternal
+                final PackageParser.Package sharedPkg = packageManagerInternal
                         .getPackage(sharedPkgName);
                 if (sharedPkg != null) {
-                    synchroniser.addPackage(sharedPkg.getPackageName());
+                    synchroniser.addPackage(sharedPkg.packageName);
                 }
             }
         }
@@ -376,8 +376,7 @@ public final class PermissionPolicyService extends SystemService {
                 PackageManagerInternal.class);
         final PermissionToOpSynchroniser synchronizer = new PermissionToOpSynchroniser(
                 getUserContext(getContext(), UserHandle.of(userId)));
-        packageManagerInternal.forEachPackage(
-                (pkg) -> synchronizer.addPackage(pkg.getPackageName()));
+        packageManagerInternal.forEachPackage((pkg) -> synchronizer.addPackage(pkg.packageName));
         synchronizer.syncPackages();
     }
 

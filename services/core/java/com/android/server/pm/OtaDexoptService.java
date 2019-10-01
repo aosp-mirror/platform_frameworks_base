@@ -22,7 +22,7 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.IOtaDexopt;
-import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.PackageParser;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -118,8 +118,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (mDexoptCommands != null) {
             throw new IllegalStateException("already called prepare()");
         }
-        final List<AndroidPackage> important;
-        final List<AndroidPackage> others;
+        final List<PackageParser.Package> important;
+        final List<PackageParser.Package> others;
         synchronized (mPackageManagerService.mLock) {
             // Important: the packages we need to run with ab-ota compiler-reason.
             important = PackageManagerServiceUtils.getPackagesForDexopt(
@@ -133,12 +133,12 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             mDexoptCommands = new ArrayList<>(3 * mPackageManagerService.mPackages.size() / 2);
         }
 
-        for (AndroidPackage p : important) {
+        for (PackageParser.Package p : important) {
             mDexoptCommands.addAll(generatePackageDexopts(p, PackageManagerService.REASON_AB_OTA));
         }
-        for (AndroidPackage p : others) {
+        for (PackageParser.Package p : others) {
             // We assume here that there are no core apps left.
-            if (p.isCoreApp()) {
+            if (p.coreApp) {
                 throw new IllegalStateException("Found a core app that's not important");
             }
             mDexoptCommands.addAll(
@@ -150,8 +150,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (spaceAvailable < BULK_DELETE_THRESHOLD) {
             Log.i(TAG, "Low on space, deleting oat files in an attempt to free up space: "
                     + PackageManagerServiceUtils.packagesToString(others));
-            for (AndroidPackage pkg : others) {
-                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.getPackageName());
+            for (PackageParser.Package pkg : others) {
+                mPackageManagerService.deleteOatArtifactsOfPackage(pkg.packageName);
             }
         }
         long spaceAvailableNow = getAvailableSpace();
@@ -161,15 +161,15 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (DEBUG_DEXOPT) {
             try {
                 // Output some data about the packages.
-                AndroidPackage lastUsed = Collections.max(important,
+                PackageParser.Package lastUsed = Collections.max(important,
                         (pkg1, pkg2) -> Long.compare(
                                 pkg1.getLatestForegroundPackageUseTimeInMills(),
                                 pkg2.getLatestForegroundPackageUseTimeInMills()));
                 Log.d(TAG, "A/B OTA: lastUsed time = "
                         + lastUsed.getLatestForegroundPackageUseTimeInMills());
                 Log.d(TAG, "A/B OTA: deprioritized packages:");
-                for (AndroidPackage pkg : others) {
-                    Log.d(TAG, "  " + pkg.getPackageName() + " - "
+                for (PackageParser.Package pkg : others) {
+                    Log.d(TAG, "  " + pkg.packageName + " - "
                             + pkg.getLatestForegroundPackageUseTimeInMills());
                 }
             } catch (Exception ignored) {
@@ -262,7 +262,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
     /**
      * Generate all dexopt commands for the given package.
      */
-    private synchronized List<String> generatePackageDexopts(AndroidPackage pkg,
+    private synchronized List<String> generatePackageDexopts(PackageParser.Package pkg,
             int compilationReason) {
         // Intercept and collect dexopt requests
         final List<String> commands = new ArrayList<String>();
@@ -336,9 +336,8 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         optimizer.performDexOpt(pkg,
                 null /* ISAs */,
                 null /* CompilerStats.PackageStats */,
-                mPackageManagerService.getDexManager().getPackageUseInfoOrDefault(
-                        pkg.getPackageName()),
-                new DexoptOptions(pkg.getPackageName(), compilationReason,
+                mPackageManagerService.getDexManager().getPackageUseInfoOrDefault(pkg.packageName),
+                new DexoptOptions(pkg.packageName, compilationReason,
                         DexoptOptions.DEXOPT_BOOT_COMPLETE));
 
         return commands;
@@ -360,10 +359,10 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         }
 
         // Look into all packages.
-        Collection<AndroidPackage> pkgs = mPackageManagerService.getPackages();
+        Collection<PackageParser.Package> pkgs = mPackageManagerService.getPackages();
         int packagePaths = 0;
         int pathsSuccessful = 0;
-        for (AndroidPackage pkg : pkgs) {
+        for (PackageParser.Package pkg : pkgs) {
             if (pkg == null) {
                 continue;
             }
@@ -372,28 +371,27 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
                 continue;
             }
-            if (pkg.getCodePath() == null) {
+            if (pkg.codePath == null) {
                 Slog.w(TAG, "Package " + pkg + " can be optimized but has null codePath");
                 continue;
             }
 
             // If the path is in /system, /vendor, /product or /system_ext, ignore. It will
             // have been ota-dexopted into /data/ota and moved into the dalvik-cache already.
-            if (pkg.getCodePath().startsWith("/system")
-                    || pkg.getCodePath().startsWith("/vendor")
-                    || pkg.getCodePath().startsWith("/product")
-                    || pkg.getCodePath().startsWith("/system_ext")) {
+            if (pkg.codePath.startsWith("/system")
+                    || pkg.codePath.startsWith("/vendor")
+                    || pkg.codePath.startsWith("/product")
+                    || pkg.codePath.startsWith("/system_ext")) {
                 continue;
             }
 
-            final String[] instructionSets = getAppDexInstructionSets(pkg.getPrimaryCpuAbi(),
-                    pkg.getSecondaryCpuAbi());
+            final String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
             final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
             final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
             for (String dexCodeInstructionSet : dexCodeInstructionSets) {
                 for (String path : paths) {
-                    String oatDir = PackageDexOptimizer.getOatDir(
-                            new File(pkg.getCodePath())).getAbsolutePath();
+                    String oatDir = PackageDexOptimizer.getOatDir(new File(pkg.codePath)).
+                            getAbsolutePath();
 
                     // TODO: Check first whether there is an artifact, to save the roundtrip time.
 
