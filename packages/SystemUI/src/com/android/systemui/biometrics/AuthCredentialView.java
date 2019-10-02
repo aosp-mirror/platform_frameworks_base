@@ -31,31 +31,23 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
-import java.util.List;
-
 /**
- * Shows Pin, Pattern, or Password for
+ * Abstract base class for Pin, Pattern, or Password authentication, for
  * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)}
  */
-public class AuthCredentialView extends LinearLayout {
+public abstract class AuthCredentialView extends LinearLayout {
 
+    private static final String TAG = "BiometricPrompt/AuthCredentialView";
     private static final int ERROR_DURATION_MS = 3000;
 
     private final AccessibilityManager mAccessibilityManager;
-    private final LockPatternUtils mLockPatternUtils;
-    private final Handler mHandler;
 
-    private LockPatternView mLockPatternView;
-    private int mUserId;
-    private AsyncTask<?, ?, ?> mPendingLockCheck;
-    private Callback mCallback;
-    private ErrorTimer mErrorTimer;
+    protected final Handler mHandler;
+
     private Bundle mBiometricPromptBundle;
     private AuthPanelController mPanelController;
     private boolean mShouldAnimatePanel;
@@ -64,13 +56,21 @@ public class AuthCredentialView extends LinearLayout {
     private TextView mTitleView;
     private TextView mSubtitleView;
     private TextView mDescriptionView;
-    private TextView mErrorView;
+    protected TextView mErrorView;
+
+    protected @Utils.CredentialType int mCredentialType;
+    protected final LockPatternUtils mLockPatternUtils;
+    protected AuthContainerView mContainerView;
+    protected Callback mCallback;
+    protected AsyncTask<?, ?, ?> mPendingLockCheck;
+    protected int mUserId;
+    protected ErrorTimer mErrorTimer;
 
     interface Callback {
         void onCredentialMatched();
     }
 
-    private static class ErrorTimer extends CountDownTimer {
+    protected static class ErrorTimer extends CountDownTimer {
         private final TextView mErrorView;
         private final Context mContext;
 
@@ -102,74 +102,7 @@ public class AuthCredentialView extends LinearLayout {
         }
     }
 
-    private class UnlockPatternListener implements LockPatternView.OnPatternListener {
-
-        @Override
-        public void onPatternStart() {
-
-        }
-
-        @Override
-        public void onPatternCleared() {
-
-        }
-
-        @Override
-        public void onPatternCellAdded(List<LockPatternView.Cell> pattern) {
-
-        }
-
-        @Override
-        public void onPatternDetected(List<LockPatternView.Cell> pattern) {
-            if (mPendingLockCheck != null) {
-                mPendingLockCheck.cancel(false);
-            }
-
-            mLockPatternView.setEnabled(false);
-
-            if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
-                // Pattern size is less than the minimum, do not count it as a failed attempt.
-                onPatternChecked(false /* matched */, 0 /* timeoutMs */);
-                return;
-            }
-
-            mPendingLockCheck = LockPatternChecker.checkPattern(
-                    mLockPatternUtils,
-                    pattern,
-                    mUserId,
-                    this::onPatternChecked);
-        }
-
-        private void onPatternChecked(boolean matched, int timeoutMs) {
-            mLockPatternView.setEnabled(true);
-
-            if (matched) {
-                mClearErrorRunnable.run();
-                mCallback.onCredentialMatched();
-            } else {
-                if (timeoutMs > 0) {
-                    mHandler.removeCallbacks(mClearErrorRunnable);
-                    mLockPatternView.setEnabled(false);
-                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline(mUserId, timeoutMs);
-                    mErrorTimer = new ErrorTimer(mContext,
-                            deadline - SystemClock.elapsedRealtime(),
-                            LockPatternUtils.FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS,
-                            mErrorView) {
-                        @Override
-                        public void onFinish() {
-                            mClearErrorRunnable.run();
-                            mLockPatternView.setEnabled(true);
-                        }
-                    };
-                    mErrorTimer.start();
-                } else {
-                    showError(getResources().getString(R.string.biometric_dialog_wrong_pattern));
-                }
-            }
-        }
-    }
-
-    private final Runnable mClearErrorRunnable = new Runnable() {
+    protected final Runnable mClearErrorRunnable = new Runnable() {
         @Override
         public void run() {
             mErrorView.setText("");
@@ -179,12 +112,12 @@ public class AuthCredentialView extends LinearLayout {
     public AuthCredentialView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mHandler = new Handler(Looper.getMainLooper());
         mLockPatternUtils = new LockPatternUtils(mContext);
+        mHandler = new Handler(Looper.getMainLooper());
         mAccessibilityManager = mContext.getSystemService(AccessibilityManager.class);
     }
 
-    private void showError(String error) {
+    protected void showError(String error) {
         mHandler.removeCallbacks(mClearErrorRunnable);
         mErrorView.setText(error);
         mHandler.postDelayed(mClearErrorRunnable, ERROR_DURATION_MS);
@@ -225,6 +158,10 @@ public class AuthCredentialView extends LinearLayout {
         mShouldAnimateContents = animateContents;
     }
 
+    void setContainerView(AuthContainerView containerView) {
+        mContainerView = containerView;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -263,14 +200,11 @@ public class AuthCredentialView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mCredentialType = Utils.getCredentialType(mContext, mUserId);
         mTitleView = findViewById(R.id.title);
         mSubtitleView = findViewById(R.id.subtitle);
         mDescriptionView = findViewById(R.id.description);
         mErrorView = findViewById(R.id.error);
-        mLockPatternView = findViewById(R.id.lockPattern);
-        mLockPatternView.setOnPatternListener(new UnlockPatternListener());
-        mLockPatternView.setInStealthMode(!mLockPatternUtils.isVisiblePatternEnabled(mUserId));
-        mLockPatternView.setTactileFeedbackEnabled(mLockPatternUtils.isTactileFeedbackEnabled());
     }
 
     @Override
@@ -286,4 +220,45 @@ public class AuthCredentialView extends LinearLayout {
         }
     }
 
+    protected void onErrorTimeoutFinish() {}
+
+    protected void onCredentialChecked(boolean matched, int timeoutMs) {
+        if (matched) {
+            mClearErrorRunnable.run();
+            mCallback.onCredentialMatched();
+        } else {
+            if (timeoutMs > 0) {
+                mHandler.removeCallbacks(mClearErrorRunnable);
+                long deadline = mLockPatternUtils.setLockoutAttemptDeadline(mUserId, timeoutMs);
+                mErrorTimer = new ErrorTimer(mContext,
+                        deadline - SystemClock.elapsedRealtime(),
+                        LockPatternUtils.FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS,
+                        mErrorView) {
+                    @Override
+                    public void onFinish() {
+                        onErrorTimeoutFinish();
+                        mClearErrorRunnable.run();
+                    }
+                };
+                mErrorTimer.start();
+            } else {
+                final int error;
+                switch (mCredentialType) {
+                    case Utils.CREDENTIAL_PIN:
+                        error = R.string.biometric_dialog_wrong_pin;
+                        break;
+                    case Utils.CREDENTIAL_PATTERN:
+                        error = R.string.biometric_dialog_wrong_pattern;
+                        break;
+                    case Utils.CREDENTIAL_PASSWORD:
+                        error = R.string.biometric_dialog_wrong_password;
+                        break;
+                    default:
+                        error = R.string.biometric_dialog_wrong_password;
+                        break;
+                }
+                showError(getResources().getString(error));
+            }
+        }
+    }
 }

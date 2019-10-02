@@ -307,8 +307,22 @@ public class AuthContainerView extends LinearLayout
      */
     private void addCredentialView(boolean animatePanel, boolean animateContents) {
         final LayoutInflater factory = LayoutInflater.from(mContext);
-        mCredentialView = (AuthCredentialView) factory.inflate(
-                R.layout.auth_credential_view, null, false);
+        final int credentialType = Utils.getCredentialType(mContext, mConfig.mUserId);
+        switch (credentialType) {
+            case Utils.CREDENTIAL_PATTERN:
+                mCredentialView = (AuthCredentialView) factory.inflate(
+                        R.layout.auth_credential_pattern_view, null, false);
+                break;
+            case Utils.CREDENTIAL_PIN:
+            case Utils.CREDENTIAL_PASSWORD:
+                mCredentialView = (AuthCredentialView) factory.inflate(
+                        R.layout.auth_credential_password_view, null, false);
+                break;
+            default:
+                throw new IllegalStateException("Unknown credential type: " + credentialType);
+        }
+
+        mCredentialView.setContainerView(this);
         mCredentialView.setUser(mConfig.mUserId);
         mCredentialView.setCallback(mCredentialCallback);
         mCredentialView.setBiometricPromptBundle(mConfig.mBiometricPromptBundle);

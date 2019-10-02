@@ -18,6 +18,8 @@ package com.android.systemui.biometrics;
 
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
 
+import android.annotation.IntDef;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricPrompt;
@@ -28,7 +30,23 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.internal.widget.LockPatternUtils;
+import com.android.systemui.R;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public class Utils {
+
+    public static final int CREDENTIAL_PIN = 1;
+    public static final int CREDENTIAL_PATTERN = 2;
+    public static final int CREDENTIAL_PASSWORD = 3;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CREDENTIAL_PIN, CREDENTIAL_PATTERN, CREDENTIAL_PASSWORD})
+    @interface CredentialType {}
+
+
     static float dpToPixels(Context context, float dp) {
         return dp * ((float) context.getResources().getDisplayMetrics().densityDpi
                 / DisplayMetrics.DENSITY_DEFAULT);
@@ -62,5 +80,23 @@ public class Utils {
 
     static int getAuthenticators(Bundle biometricPromptBundle) {
         return biometricPromptBundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+    }
+
+    static @CredentialType int getCredentialType(Context context, int userId) {
+        final LockPatternUtils lpu = new LockPatternUtils(context);
+        switch (lpu.getKeyguardStoredPasswordQuality(userId)) {
+            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+                return CREDENTIAL_PATTERN;
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                return CREDENTIAL_PIN;
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+                return CREDENTIAL_PASSWORD;
+            default:
+                return CREDENTIAL_PASSWORD;
+        }
     }
 }

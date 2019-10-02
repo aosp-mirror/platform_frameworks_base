@@ -629,19 +629,17 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         final String negativeText;
         if (isDeviceCredentialAllowed()) {
-            final LockPatternUtils lpu = new LockPatternUtils(mContext);
-            switch (lpu.getKeyguardStoredPasswordQuality(mUserId)) {
-                case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
-                    negativeText = getResources().getString(R.string.biometric_dialog_use_pattern);
-                    break;
-                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
-                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+
+            final @Utils.CredentialType int credentialType =
+                    Utils.getCredentialType(mContext, mUserId);
+            switch(credentialType) {
+                case Utils.CREDENTIAL_PIN:
                     negativeText = getResources().getString(R.string.biometric_dialog_use_pin);
                     break;
-                case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
-                case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
-                case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
-                case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+                case Utils.CREDENTIAL_PATTERN:
+                    negativeText = getResources().getString(R.string.biometric_dialog_use_pattern);
+                    break;
+                case Utils.CREDENTIAL_PASSWORD:
                     negativeText = getResources().getString(R.string.biometric_dialog_use_password);
                     break;
                 default:
