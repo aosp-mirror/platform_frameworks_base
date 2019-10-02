@@ -2009,9 +2009,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"सिस्टम"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"सेटिंग"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"स्टैंडबाई"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV डिवाइस जल्द ही बंद हो जाएगा. इसे चालू रखने के लिए किसी बटन को दबाएं."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"डिवाइस जल्द ही बंद हो जाएगा. इसे चालू रखने के लिए स्क्रीन पर टैप करें या किसी बटन को दबाएं."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"कैमरा"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"माइक्रोफ़ोन"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"आपकी स्क्रीन पर, इस्तेमाल हो रहे दूसरे ऐप्लिकेशन के ऊपर दिखाया जा रहा है"</string>

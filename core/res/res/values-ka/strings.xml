@@ -2009,9 +2009,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"შეეხეთ იმის სანახავად, თუ რა არის დაბლოკილი."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"სისტემა"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"პარამეტრები"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"მოლოდინის რეჟიმი"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV მოწყობილობა მალე გამოირთვება, დააჭირეთ ღილაკს, რომ ჩართული დარჩეს."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"მოწყობილობა მალე გამოირთვება, დააჭირეთ, რომ ჩართული დარჩეს."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"კამერა"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"მიკროფონი"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"სხვა აპების გადაფარვით ჩანს თქვენს ეკრანზე"</string>

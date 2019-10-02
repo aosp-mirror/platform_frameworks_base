@@ -2010,9 +2010,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"સિસ્ટમ"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"સેટિંગ"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"સ્ટૅન્ડબાય"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android ટીવી ડિવાઇસ ટૂંક સમયમાં બંધ થશે; તેને ચાલુ રાખવા માટે બટન દબાવો."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"ડિવાઇસ ટૂંક સમયમાં બંધ થશે; તેને ચાલુ રાખવા માટે દબાવો."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"કૅમેરા"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"માઇક્રોફોન"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"આ તમારી સ્ક્રીન પર અન્ય ઍપની ઉપર દેખાશે"</string>

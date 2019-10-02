@@ -2009,9 +2009,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Тохиргоо"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"Зогсолтын горим"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Андройд ТВ төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд дарна уу."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд дарна уу."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камер"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"таны дэлгэцэд бусад аппын дээр харуулж байна"</string>

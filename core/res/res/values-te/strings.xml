@@ -2010,9 +2010,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"సిస్టమ్"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"సెట్టింగ్‌లు"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"స్టాండ్‌బై"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV పరికరం త్వరలో ఆపివేయబడుతుంది; దాన్ని ఆన్‌లో ఉంచడానికి బటన్‌ను నొక్కండి."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"పరికరం త్వరలో ఆపివేయబడుతుంది; దీన్ని ఆన్‌లో ఉంచడానికి నొక్కండి."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"కెమెరా"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"మైక్రోఫోన్"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>

@@ -2009,9 +2009,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Σύστημα"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Ρυθμίσεις"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"Κατάσταση αναμονής"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Η συσκευή Android TV σύντομα θα απενεργοποιηθεί. Πατήστε ένα κουμπί για να την κρατήσετε ενεργοποιημένη."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Η συσκευή σύντομα θα απενεργοποιηθεί. Πατήστε για να την κρατήσετε ενεργοποιημένη."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Κάμερα"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Μικρόφωνο"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"εμφανίζεται πάνω σε άλλες εφαρμογές στην οθόνη σας"</string>

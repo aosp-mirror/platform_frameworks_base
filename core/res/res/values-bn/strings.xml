@@ -2010,9 +2010,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"সিস্টেম"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"সেটিংস"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"স্ট্যান্ডবাই"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Android TV ডিভাইস শীঘ্রই বন্ধ হয়ে যাবে, চালু রাখতে বোতাম প্রেস করুন।"</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"ডিভাইস শীঘ্রই বন্ধ হয়ে যাবে, চালু রাখতে প্রেস করুন।"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"ক্যামেরা"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"মাইক্রোফোন"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"স্ক্রিনে অন্যান্য অ্যাপের উপরে দেখানো হচ্ছে"</string>

@@ -2012,9 +2012,6 @@
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Допрете за да проверите што е блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"Поставки"</string>
-    <string name="standby_warning_title" msgid="9221585425153642453">"Подготвеност"</string>
-    <string name="standby_warning_message" product="tv" msgid="6373301881876406323">"Уредот со Android TV наскоро ќе се исклучи, притиснете копче за да остане вклучен."</string>
-    <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Уредот наскоро ќе се исклучи, притиснете за да остане вклучен."</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="633813008357934729">"се прикажува преку други апликации на вашиот екран"</string>
