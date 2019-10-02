@@ -151,7 +151,6 @@ public class TaskStackTests extends WindowTestsBase {
         // After removing, the task will be isolated.
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
-        assertNull(task.getController());
     }
 
     @Test
