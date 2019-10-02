@@ -16,6 +16,8 @@
 
 package com.android.server.integrity.engine;
 
+import com.android.server.integrity.model.Rule;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,22 +39,22 @@ import java.util.List;
  */
 final class RuleLoader {
 
-    List<String> loadRulesByPackageName(String packageName) {
+    List<Rule> loadRulesByPackageName(String packageName) {
         // TODO: Add logic based on rule storage.
         return new ArrayList<>();
     }
 
-    List<String> loadRulesByAppCertificate(String appCertificate) {
+    List<Rule> loadRulesByAppCertificate(String appCertificate) {
         // TODO: Add logic based on rule storage.
         return new ArrayList<>();
     }
 
-    List<String> loadRulesByInstallerName(String installerName) {
+    List<Rule> loadRulesByInstallerName(String installerName) {
         // TODO: Add logic based on rule storage.
         return new ArrayList<>();
     }
 
-    List<String> loadRulesByInstallerCertificate(String installerCertificate) {
+    List<Rule> loadRulesByInstallerCertificate(String installerCertificate) {
         // TODO: Add logic based on rule storage.
         return new ArrayList<>();
     }

@@ -16,6 +16,8 @@
 
 package com.android.server.integrity.engine;
 
+import com.android.server.integrity.model.Rule;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public final class RuleEvaluationEngine {
 
     // The subset of rules loaded to be used to evaluate an app install request.
     // TODO: Load rules relevant to app installs.
-    private List<String> mRules;
+    private List<Rule> mRules;
 
     private RuleEvaluationEngine() {
         // Initialize rules with the empty rule set.
