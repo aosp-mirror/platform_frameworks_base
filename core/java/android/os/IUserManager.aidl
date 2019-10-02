@@ -54,7 +54,7 @@ interface IUserManager {
     void setUserIcon(int userHandle, in Bitmap icon);
     ParcelFileDescriptor getUserIcon(int userHandle);
     UserInfo getPrimaryUser();
-    List<UserInfo> getUsers(boolean excludeDying);
+    List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying, boolean excludePreCreated);
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
     int[] getProfileIds(int userId, boolean enabledOnly);
     boolean canAddMoreManagedProfiles(int userHandle, boolean allowedToRemoveOne);
