@@ -80,6 +80,7 @@ public class MbmsGroupCallSession implements AutoCloseable {
     };
 
     private InternalGroupCallSessionCallback mInternalCallback;
+    private ServiceConnection mServiceConnection;
     private Set<GroupCall> mKnownActiveGroupCalls = new ArraySet<>();
 
     private final Context mContext;
@@ -163,7 +164,7 @@ public class MbmsGroupCallSession implements AutoCloseable {
     public void close() {
         try {
             IMbmsGroupCallService groupCallService = mService.get();
-            if (groupCallService == null) {
+            if (groupCallService == null || mServiceConnection == null) {
                 // Ignore and return, assume already disposed.
                 return;
             }
@@ -172,11 +173,13 @@ public class MbmsGroupCallSession implements AutoCloseable {
                 s.getCallback().stop();
             }
             mKnownActiveGroupCalls.clear();
+            mContext.unbindService(mServiceConnection);
         } catch (RemoteException e) {
             // Ignore for now
         } finally {
             mService.set(null);
             sIsInitialized.set(false);
+            mServiceConnection = null;
             mInternalCallback.stop();
         }
     }
@@ -244,59 +247,69 @@ public class MbmsGroupCallSession implements AutoCloseable {
     }
 
     private int bindAndInitialize() {
-        return MbmsUtils.startBinding(mContext, MBMS_GROUP_CALL_SERVICE_ACTION,
-                new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder service) {
-                        IMbmsGroupCallService groupCallService =
-                                IMbmsGroupCallService.Stub.asInterface(service);
-                        int result;
-                        try {
-                            result = groupCallService.initialize(mInternalCallback,
-                                    mSubscriptionId);
-                        } catch (RemoteException e) {
-                            Log.e(LOG_TAG, "Service died before initialization");
-                            mInternalCallback.onError(
-                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
-                                    e.toString());
-                            sIsInitialized.set(false);
-                            return;
-                        } catch (RuntimeException e) {
-                            Log.e(LOG_TAG, "Runtime exception during initialization");
-                            mInternalCallback.onError(
-                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
-                                    e.toString());
-                            sIsInitialized.set(false);
-                            return;
-                        }
-                        if (result == MbmsErrors.UNKNOWN) {
-                            // Unbind and throw an obvious error
-                            close();
-                            throw new IllegalStateException("Middleware must not return"
-                                    + " an unknown error code");
-                        }
-                        if (result != MbmsErrors.SUCCESS) {
-                            mInternalCallback.onError(result,
-                                    "Error returned during initialization");
-                            sIsInitialized.set(false);
-                            return;
-                        }
-                        try {
-                            groupCallService.asBinder().linkToDeath(mDeathRecipient, 0);
-                        } catch (RemoteException e) {
-                            mInternalCallback.onError(MbmsErrors.ERROR_MIDDLEWARE_LOST,
-                                    "Middleware lost during initialization");
-                            sIsInitialized.set(false);
-                            return;
-                        }
-                        mService.set(groupCallService);
-                    }
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                IMbmsGroupCallService groupCallService =
+                        IMbmsGroupCallService.Stub.asInterface(service);
+                int result;
+                try {
+                    result = groupCallService.initialize(mInternalCallback,
+                            mSubscriptionId);
+                } catch (RemoteException e) {
+                    Log.e(LOG_TAG, "Service died before initialization");
+                    mInternalCallback.onError(
+                            MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                            e.toString());
+                    sIsInitialized.set(false);
+                    return;
+                } catch (RuntimeException e) {
+                    Log.e(LOG_TAG, "Runtime exception during initialization");
+                    mInternalCallback.onError(
+                            MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                            e.toString());
+                    sIsInitialized.set(false);
+                    return;
+                }
+                if (result == MbmsErrors.UNKNOWN) {
+                    // Unbind and throw an obvious error
+                    close();
+                    throw new IllegalStateException("Middleware must not return"
+                            + " an unknown error code");
+                }
+                if (result != MbmsErrors.SUCCESS) {
+                    mInternalCallback.onError(result,
+                            "Error returned during initialization");
+                    sIsInitialized.set(false);
+                    return;
+                }
+                try {
+                    groupCallService.asBinder().linkToDeath(mDeathRecipient, 0);
+                } catch (RemoteException e) {
+                    mInternalCallback.onError(MbmsErrors.ERROR_MIDDLEWARE_LOST,
+                            "Middleware lost during initialization");
+                    sIsInitialized.set(false);
+                    return;
+                }
+                mService.set(groupCallService);
+            }
 
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                        sIsInitialized.set(false);
-                        mService.set(null);
-                    }
-                });
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                sIsInitialized.set(false);
+                mService.set(null);
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                Log.w(LOG_TAG, "bindAndInitialize: Remote service returned null");
+                mInternalCallback.onError(MbmsErrors.ERROR_MIDDLEWARE_LOST,
+                        "Middleware service binding returned null");
+                sIsInitialized.set(false);
+                mService.set(null);
+                mContext.unbindService(this);
+            }
+        };
+        return MbmsUtils.startBinding(mContext, MBMS_GROUP_CALL_SERVICE_ACTION, mServiceConnection);
     }
 }
