@@ -404,14 +404,14 @@ public final class ContentCaptureManager {
     @UiThread
     public void onActivityResumed() {
         if (mOptions.lite) return;
-        getMainContentCaptureSession().notifySessionLifecycle(/* started= */ true);
+        getMainContentCaptureSession().notifySessionResumed();
     }
 
     /** @hide */
     @UiThread
     public void onActivityPaused() {
         if (mOptions.lite) return;
-        getMainContentCaptureSession().notifySessionLifecycle(/* started= */ false);
+        getMainContentCaptureSession().notifySessionPaused();
     }
 
     /** @hide */

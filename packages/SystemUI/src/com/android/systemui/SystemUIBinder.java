@@ -20,6 +20,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
+import com.android.systemui.util.leak.GarbageMonitor;
 
 import dagger.Binds;
 import dagger.Module;
@@ -48,4 +49,10 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(Recents.class)
     public abstract SystemUI bindRecents(Recents sysui);
+
+    /** Inject into GarbageMonitor.Service. */
+    @Binds
+    @IntoMap
+    @ClassKey(GarbageMonitor.Service.class)
+    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
 }

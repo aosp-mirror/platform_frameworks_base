@@ -16,6 +16,8 @@
 
 package com.android.systemui.assist.ui;
 
+import android.util.Log;
+
 import androidx.annotation.ColorInt;
 
 /**
@@ -29,9 +31,12 @@ import androidx.annotation.ColorInt;
  * counter-clockwise.
  */
 public final class EdgeLight {
+
+    private static final String TAG = "EdgeLight";
+
     @ColorInt
     private int mColor;
-    private float mOffset;
+    private float mStart;
     private float mLength;
 
     /** Copies a list of EdgeLights. */
@@ -45,13 +50,13 @@ public final class EdgeLight {
 
     public EdgeLight(@ColorInt int color, float offset, float length) {
         mColor = color;
-        mOffset = offset;
+        mStart = offset;
         mLength = length;
     }
 
     public EdgeLight(EdgeLight sourceLight) {
         mColor = sourceLight.getColor();
-        mOffset = sourceLight.getOffset();
+        mStart = sourceLight.getStart();
         mLength = sourceLight.getLength();
     }
 
@@ -77,23 +82,41 @@ public final class EdgeLight {
     }
 
     /**
-     * Returns the current offset, in units of the total device perimeter and measured from the
-     * bottom-left corner (see class description).
+     * Sets the endpoints of the edge light, both measured from the bottom-left corner (see class
+     * description). This is a convenience method to avoid separate setStart and setLength calls.
      */
-    public float getOffset() {
-        return mOffset;
+    public void setEndpoints(float start, float end) {
+        if (start > end) {
+            Log.e(TAG, String.format("Endpoint must be >= start (add 1 if necessary). Got [%f, %f]",
+                    start, end));
+            return;
+        }
+        mStart = start;
+        mLength = end - start;
+    }
+
+    /**
+     * Returns the current starting position, in units of the total device perimeter and measured
+     * from the bottom-left corner (see class description).
+     */
+    public float getStart() {
+        return mStart;
     }
 
     /**
      * Sets the current offset, in units of the total device perimeter and measured from the
      * bottom-left corner (see class description).
      */
-    public void setOffset(float offset) {
-        mOffset = offset;
+    public void setStart(float start) {
+        mStart = start;
+    }
+
+    public float getEnd() {
+        return mStart + mLength;
     }
 
     /** Returns the center, measured from the bottom-left corner (see class description). */
     public float getCenter() {
-        return mOffset + (mLength / 2.f);
+        return mStart + (mLength / 2.f);
     }
 }

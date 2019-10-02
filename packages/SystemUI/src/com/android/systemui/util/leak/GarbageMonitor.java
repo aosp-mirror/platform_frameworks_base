@@ -49,7 +49,6 @@ import android.util.LongSparseArray;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -391,9 +390,9 @@ public class GarbageMonitor implements Dumpable {
         private boolean dumpInProgress;
 
         @Inject
-        public MemoryTile(QSHost host) {
+        public MemoryTile(QSHost host, GarbageMonitor monitor) {
             super(host);
-            gm = SystemUIFactory.getInstance().getRootComponent().createGarbageMonitor();
+            gm = monitor;
         }
 
         @Override
@@ -535,7 +534,12 @@ public class GarbageMonitor implements Dumpable {
 
     /** */
     public static class Service extends SystemUI implements Dumpable {
-        private GarbageMonitor mGarbageMonitor;
+        private final GarbageMonitor mGarbageMonitor;
+
+        @Inject
+        public Service(GarbageMonitor garbageMonitor) {
+            mGarbageMonitor = garbageMonitor;
+        }
 
         @Override
         public void start() {
@@ -543,8 +547,6 @@ public class GarbageMonitor implements Dumpable {
                     Settings.Secure.getInt(
                                     mContext.getContentResolver(), FORCE_ENABLE_LEAK_REPORTING, 0)
                             != 0;
-            mGarbageMonitor = SystemUIFactory.getInstance().getRootComponent()
-                   .createGarbageMonitor();
             if (LEAK_REPORTING_ENABLED || forceEnable) {
                 mGarbageMonitor.startLeakMonitor();
             }

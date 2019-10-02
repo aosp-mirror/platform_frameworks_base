@@ -804,7 +804,7 @@ public final class SystemServer {
 
         // Manages Overlay packages
         t.traceBegin("StartOverlayManagerService");
-        mSystemServiceManager.startService(new OverlayManagerService(mSystemContext, installer));
+        mSystemServiceManager.startService(new OverlayManagerService(mSystemContext));
         t.traceEnd();
 
         t.traceBegin("StartSensorPrivacyService");

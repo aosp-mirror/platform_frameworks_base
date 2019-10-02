@@ -41,4 +41,12 @@ public class WindowlessViewRoot {
     public void addView(View view, WindowManager.LayoutParams attrs) {
         mViewRoot.setView(view, attrs, null);
     }
+
+    public void relayout(WindowManager.LayoutParams attrs) {
+        mViewRoot.setLayoutParams(attrs, false);
+        mViewRoot.setReportNextDraw();
+        mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), (SurfaceControl.Transaction t) -> {
+            t.apply();
+        });
+    }
 }

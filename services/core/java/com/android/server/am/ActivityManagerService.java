@@ -8306,7 +8306,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean useApi = FeatureFlagUtils.isEnabled(mContext,
                 FeatureFlagUtils.USE_BUGREPORT_API);
 
-        if (useApi && bugreportType == BugreportParams.BUGREPORT_MODE_INTERACTIVE) {
+        if (useApi) {
             // Create intent to trigger Bugreport API via Shell
             Intent triggerShellBugreport = new Intent();
             triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);

@@ -237,7 +237,6 @@ public class NavigationBarController implements Callbacks {
 
     /** @return {@link AssistHandleViewController} (only on the default display). */
     public AssistHandleViewController getAssistHandlerViewController() {
-        NavigationBarFragment navBar = getDefaultNavigationBarFragment();
-        return navBar == null ? null : navBar.getAssistHandlerViewController();
+        return getDefaultNavigationBarFragment().getAssistHandlerViewController();
     }
 }

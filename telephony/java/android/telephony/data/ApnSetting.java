@@ -26,6 +26,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
+import android.telephony.Annotation.ApnType;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
@@ -108,23 +110,6 @@ public class ApnSetting implements Parcelable {
     public static final int TYPE_EMERGENCY = ApnTypes.EMERGENCY;
     /** APN type for MCX (Mission Critical Service) where X can be PTT/Video/Data */
     public static final int TYPE_MCX = ApnTypes.MCX;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
-        TYPE_DEFAULT,
-        TYPE_MMS,
-        TYPE_SUPL,
-        TYPE_DUN,
-        TYPE_HIPRI,
-        TYPE_FOTA,
-        TYPE_IMS,
-        TYPE_CBS,
-        TYPE_IA,
-        TYPE_EMERGENCY,
-        TYPE_MCX
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface ApnType {}
 
     // Possible values for authentication types.
     /** No authentication type. */
@@ -1425,7 +1410,7 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    public boolean canSupportNetworkType(@TelephonyManager.NetworkType int networkType) {
+    public boolean canSupportNetworkType(@NetworkType int networkType) {
         // Do a special checking for GSM. In reality, GSM is a voice only network type and can never
         // be used for data. We allow it here because in some DSDS corner cases, on the non-DDS
         // sub, modem reports data rat unknown. In that case if voice is GSM and this APN supports

@@ -23,28 +23,33 @@ import android.os.ServiceManager;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.CommandQueue.Callbacks;
+
 
 /**
- * Status bar implementation for "large screen" products that mostly present no on-screen nav
+ * Status bar implementation for "large screen" products that mostly present no on-screen nav.
+ * Serves as a collection of UI components, rather than showing its own UI.
+ * The following is the list of elements that constitute the TV-specific status bar:
+ * <ul>
+ * <li> {@link AudioRecordingDisclosureBar} - shown whenever applications are conducting audio
+ * recording, discloses the responsible applications </li>
+ * </ul>
  */
-
-public class TvStatusBar extends SystemUI implements Callbacks {
-
-    private IStatusBarService mBarService;
+public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
 
     @Override
     public void start() {
         putComponent(TvStatusBar.class, this);
-        CommandQueue commandQueue = getComponent(CommandQueue.class);
-        commandQueue.addCallback(this);
-        mBarService = IStatusBarService.Stub.asInterface(
+
+        final IStatusBarService barService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        final CommandQueue commandQueue = getComponent(CommandQueue.class);
+        commandQueue.addCallback(this);
         try {
-            mBarService.registerStatusBar(commandQueue);
+            barService.registerStatusBar(commandQueue);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
-    }
 
+        new AudioRecordingDisclosureBar(mContext).start();
+    }
 }

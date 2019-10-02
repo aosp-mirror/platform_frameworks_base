@@ -28,7 +28,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -240,11 +239,5 @@ public class NavigationBarControllerTest extends SysuiTestCase {
         mNavigationBarController.disableAnimationsDuringHide(SECONDARY_DISPLAY, 500L);
 
         verify(mSecondaryNavBar).disableAnimationsDuringHide(eq(500L));
-    }
-
-    @Test
-    public void testGetAssistHandlerViewController_noCrash() {
-        reset(mNavigationBarController.mNavigationBars);
-        mNavigationBarController.getAssistHandlerViewController();
     }
 }
