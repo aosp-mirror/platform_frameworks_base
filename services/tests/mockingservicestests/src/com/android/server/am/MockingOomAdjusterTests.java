@@ -82,6 +82,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
 import android.os.SystemClock;
+import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -103,6 +104,7 @@ import java.util.ArrayList;
  * Build/Install/Run:
  * atest MockingOomAdjusterTests
  */
+@Presubmit
 public class MockingOomAdjusterTests {
     private static final int MOCKAPP_PID = 12345;
     private static final int MOCKAPP_UID = 12345;
