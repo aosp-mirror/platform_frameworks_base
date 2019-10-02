@@ -26,6 +26,7 @@ java_library {
     java_resources: [
         ":debian.mime.types",
         ":android.mime.types",
+        ":vendor.mime.types",
     ],
 
     sdk_version: "core_platform",
@@ -39,5 +40,16 @@ filegroup {
     path: "java-res/",
     srcs: [
         "java-res/android.mime.types",
+    ],
+}
+
+filegroup {
+    name: "vendor.mime.types",
+    visibility: [
+        "//visibility:private",
+    ],
+    path: "java-res/",
+    srcs: [
+        "java-res/vendor.mime.types",
     ],
 }
