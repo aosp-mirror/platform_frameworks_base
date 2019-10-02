@@ -25,7 +25,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.app.UserSwitchObserver;
@@ -257,7 +256,6 @@ public class BiometricService extends SystemService {
     private final Injector mInjector;
     @VisibleForTesting
     final IBiometricService.Stub mImpl;
-    private final AppOpsManager mAppOps;
     private final boolean mHasFeatureFingerprint;
     private final boolean mHasFeatureIris;
     private final boolean mHasFeatureFace;
@@ -864,14 +862,6 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void checkAppOp(String opPackageName, int callingUid) {
-        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, callingUid,
-                opPackageName) != AppOpsManager.MODE_ALLOWED) {
-            Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
-            throw new SecurityException("Permission denied");
-        }
-    }
-
     private void checkInternalPermission() {
         getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
                 "Must have USE_BIOMETRIC_INTERNAL permission");
@@ -942,7 +932,6 @@ public class BiometricService extends SystemService {
 
         mInjector = injector;
         mImpl = new BiometricServiceWrapper();
-        mAppOps = context.getSystemService(AppOpsManager.class);
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);
