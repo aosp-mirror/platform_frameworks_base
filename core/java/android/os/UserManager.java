@@ -2389,15 +2389,26 @@ public class UserManager {
     /**
      * Returns information for all users on this device, including ones marked for deletion.
      * To retrieve only users that are alive, use {@link #getUsers(boolean)}.
-     * <p>
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
      * @return the list of users that exist on the device.
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public List<UserInfo> getUsers() {
+        return getUsers(/* excludeDying= */ false);
+    }
+
+    /**
+     * Returns information for all users on this device, based on the filtering parameters.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+            boolean excludePreCreated) {
         try {
-            return mService.getUsers(false);
+            return mService.getUsers(excludePartial, excludeDying, excludePreCreated);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2413,16 +2424,12 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public long[] getSerialNumbersOfUsers(boolean excludeDying) {
-        try {
-            List<UserInfo> users = mService.getUsers(excludeDying);
-            long[] result = new long[users.size()];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = users.get(i).serialNumber;
-            }
-            return result;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+        List<UserInfo> users = getUsers(excludeDying);
+        long[] result = new long[users.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = users.get(i).serialNumber;
         }
+        return result;
     }
 
     /**
@@ -2806,11 +2813,8 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-        try {
-            return mService.getUsers(excludeDying);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return getUsers(/*excludePartial= */ true, excludeDying,
+                /* excludePreCreated= */ true);
     }
 
     /**

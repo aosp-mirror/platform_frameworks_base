@@ -663,12 +663,12 @@ public class UserManagerService extends IUserManager.Stub {
         return null;
     }
 
-    @Override
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
         return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */ true);
     }
 
-    private @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+    @Override
+    public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
             boolean excludePreCreated) {
         checkManageOrCreateUsersPermission("query users");
         synchronized (mUsersLock) {
@@ -2738,6 +2738,8 @@ public class UserManagerService extends IUserManager.Stub {
 
         Preconditions.checkArgument(!UserInfo.isManagedProfile(flags),
                 "cannot pre-create managed profiles");
+
+        Slog.i(LOG_TAG, "Pre-creating user with flags " + UserInfo.flagsToString(flags));
 
         return createUserInternalUnchecked(/* name= */ null, flags,
                 /* parentId= */ UserHandle.USER_NULL, /* preCreate= */ true,
