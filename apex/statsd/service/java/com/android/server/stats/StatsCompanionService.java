@@ -2079,9 +2079,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
 
-            StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.APP_OPS, elapsedNanos,
-                    wallClockNanos);
-
             for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
                 final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
                 final int uid = uidOps.getUid();
@@ -2089,6 +2086,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
                     for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
                         final AppOpsManager.HistoricalOp op  = packageOps.getOpAt(opIdx);
+                        StatsLogEventWrapper e = new StatsLogEventWrapper(StatsLog.APP_OPS,
+                                elapsedNanos, wallClockNanos);
+
                         e.writeInt(uid);
                         e.writeString(packageOps.getPackageName());
                         e.writeInt(op.getOpCode());
