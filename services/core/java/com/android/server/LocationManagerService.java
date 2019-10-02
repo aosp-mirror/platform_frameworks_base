@@ -2719,8 +2719,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                     return true;
                 }
             }
-
             return false;
+        }
+    }
+
+    @Override
+    public List<String> getProviderPackages(String providerName) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG,
+                Manifest.permission.READ_DEVICE_CONFIG + " permission required");
+        synchronized (mLock) {
+            LocationProvider provider = getLocationProviderLocked(providerName);
+            return provider == null ? Collections.emptyList() : provider.getPackagesLocked();
         }
     }
 
