@@ -2499,13 +2499,6 @@ public class LocationManagerService extends ILocationManager.Stub {
         mContext.enforceCallingPermission(android.Manifest.permission.ACCESS_FINE_LOCATION,
                 "Access Fine Location permission not granted to inject Location");
 
-        if (location == null) {
-            if (D) {
-                Log.d(TAG, "injectLocation(): called with null location");
-            }
-            return false;
-        }
-
         synchronized (mLock) {
             LocationProvider provider = getLocationProviderLocked(location.getProvider());
             if (provider == null || !provider.isUseableLocked()) {
@@ -2708,9 +2701,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public ProviderProperties getProviderProperties(String providerName) {
         synchronized (mLock) {
-            checkResolutionLevelIsSufficientForProviderUseLocked(getCallerAllowedResolutionLevel(),
-                    providerName);
-
             LocationProvider provider = getLocationProviderLocked(providerName);
             if (provider == null) {
                 return null;
