@@ -19,9 +19,9 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
@@ -35,8 +35,9 @@ import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 import android.annotation.CallSuper;
 import android.os.Debug;
 import android.os.IBinder;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
@@ -135,8 +136,8 @@ class WindowToken extends WindowContainer<WindowState> {
     void removeAllWindowsIfPossible() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowState win = mChildren.get(i);
-            if (DEBUG_WINDOW_MOVEMENT) Slog.w(TAG_WM,
-                    "removeAllWindowsIfPossible: removing win=" + win);
+            ProtoLog.w(WM_DEBUG_WINDOW_MOVEMENT,
+                    "removeAllWindowsIfPossible: removing win=%s", win);
             win.removeIfPossible();
         }
     }
@@ -197,15 +198,15 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void addWindow(final WindowState win) {
-        if (DEBUG_FOCUS) Slog.d(TAG_WM,
-                "addWindow: win=" + win + " Callers=" + Debug.getCallers(5));
+        ProtoLog.d(WM_DEBUG_FOCUS,
+                "addWindow: win=%s Callers=%s", win, Debug.getCallers(5));
 
         if (win.isChildWindow()) {
             // Child windows are added to their parent windows.
             return;
         }
         if (!mChildren.contains(win)) {
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
+            ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", win, this);
             addChild(win, mWindowComparator);
             mWmService.mWindowsChanged = true;
             // TODO: Should we also be setting layout needed here and other places?

@@ -49,9 +49,11 @@ genrule {
     ],
     cmd: "cp $(location :generate-protolog.json) $(out) && " +
       "{ diff $(out) $(location :services.core.protolog.json) >/dev/null 2>&1 || " +
-      "{ echo -e '##### ProtoLog viewer config is stale. ### \nRun: \n " +
-      "cp $(location :generate-protolog.json) " +
-      "$(location :services.core.protolog.json)\n' >&2 && false; } }",
+      "{ echo -e '\\n\\n################################################################\\n#\\n" +
+      "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
+      "#  cp $(location :generate-protolog.json) " +
+      "$(location :services.core.protolog.json)\\n#\\n" +
+      "################################################################\\n\\n' >&2 && false; } }",
     out: ["services.core.protolog.json"],
 }
 
