@@ -18,6 +18,7 @@ package com.android.server;
 
 import static com.android.internal.util.ArrayUtils.appendInt;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
@@ -221,6 +222,12 @@ public class SystemConfig {
     private ArrayMap<String, Set<String>> mPackageToUserTypeWhitelist = new ArrayMap<>();
     private ArrayMap<String, Set<String>> mPackageToUserTypeBlacklist = new ArrayMap<>();
 
+    /**
+     * Map of system pre-defined, uniquely named actors; keys are namespace,
+     * value maps actor name to package name.
+     */
+    private ArrayMap<String, ArrayMap<String, String>> mNamedActors = null;
+
     public static SystemConfig getInstance() {
         if (!isSystemProcess()) {
             Slog.wtf(TAG, "SystemConfig is being accessed by a process other than "
@@ -398,12 +405,17 @@ public class SystemConfig {
         return r;
     }
 
+    @NonNull
+    public Map<String, ? extends Map<String, String>> getNamedActors() {
+        return mNamedActors != null ? mNamedActors : Collections.emptyMap();
+    }
+
     /**
      * Only use for testing. Do NOT use in production code.
      * @param readPermissions false to create an empty SystemConfig; true to read the permissions.
      */
     @VisibleForTesting
-    protected SystemConfig(boolean readPermissions) {
+    public SystemConfig(boolean readPermissions) {
         if (readPermissions) {
             Slog.w(TAG, "Constructing a test SystemConfig");
             readAllPermissions();
@@ -1027,6 +1039,44 @@ public class SystemConfig {
                         // NB: We allow any directory permission to declare install-in-user-type.
                         readInstallInUserType(parser,
                                 mPackageToUserTypeWhitelist, mPackageToUserTypeBlacklist);
+                    } break;
+                    case "named-actor": {
+                        String namespace = TextUtils.safeIntern(
+                                parser.getAttributeValue(null, "namespace"));
+                        String actorName = parser.getAttributeValue(null, "name");
+                        String pkgName = TextUtils.safeIntern(
+                                parser.getAttributeValue(null, "package"));
+                        if (TextUtils.isEmpty(namespace)) {
+                            Slog.wtf(TAG, "<" + name + "> without namespace in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(actorName)) {
+                            Slog.wtf(TAG, "<" + name + "> without actor name in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if (TextUtils.isEmpty(pkgName)) {
+                            Slog.wtf(TAG, "<" + name + "> without package name in " + permFile
+                                    + " at " + parser.getPositionDescription());
+                        } else if ("android".equalsIgnoreCase(namespace)) {
+                            throw new IllegalStateException("Defining " + actorName + " as "
+                                    + pkgName + " for the android namespace is not allowed");
+                        } else {
+                            if (mNamedActors == null) {
+                                mNamedActors = new ArrayMap<>();
+                            }
+
+                            ArrayMap<String, String> nameToPkgMap = mNamedActors.get(namespace);
+                            if (nameToPkgMap == null) {
+                                nameToPkgMap = new ArrayMap<>();
+                                mNamedActors.put(namespace, nameToPkgMap);
+                            } else if (nameToPkgMap.containsKey(actorName)) {
+                                String existing = nameToPkgMap.get(actorName);
+                                throw new IllegalStateException("Duplicate actor definition for "
+                                        + namespace + "/" + actorName
+                                        + "; defined as both " + existing + " and " + pkgName);
+                            }
+
+                            nameToPkgMap.put(actorName, pkgName);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
                     } break;
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "

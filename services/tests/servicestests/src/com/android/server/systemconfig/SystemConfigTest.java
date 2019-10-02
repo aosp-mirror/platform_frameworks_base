@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.systemconfig;
 
 import static org.junit.Assert.assertEquals;
 
@@ -24,6 +24,8 @@ import android.util.Log;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.SystemConfig;
 
 import org.junit.Before;
 import org.junit.Rule;

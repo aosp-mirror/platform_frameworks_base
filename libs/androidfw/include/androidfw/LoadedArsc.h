@@ -273,6 +273,8 @@ class LoadedPackage {
   ByteBucketArray<uint32_t> resource_ids_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
   std::vector<const std::pair<OverlayableInfo, std::unordered_set<uint32_t>>> overlayable_infos_;
+
+  // A map of overlayable name to actor
   std::unordered_map<std::string, std::string> overlayable_map_;
 };
 

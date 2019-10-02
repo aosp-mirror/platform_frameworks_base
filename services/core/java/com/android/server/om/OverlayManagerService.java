@@ -39,10 +39,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayableInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -63,6 +65,7 @@ import android.util.SparseArray;
 import com.android.server.FgThread;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.pm.UserManagerService;
 
@@ -229,6 +232,8 @@ public final class OverlayManagerService extends SystemService {
 
     private final OverlayManagerServiceImpl mImpl;
 
+    private final OverlayActorEnforcer mActorEnforcer;
+
     private final AtomicBoolean mPersistSettingsScheduled = new AtomicBoolean(false);
 
     public OverlayManagerService(@NonNull final Context context) {
@@ -237,12 +242,13 @@ public final class OverlayManagerService extends SystemService {
             traceBegin(TRACE_TAG_RRO, "OMS#OverlayManagerService");
             mSettingsFile = new AtomicFile(
                     new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
-            mPackageManager = new PackageManagerHelper();
+            mPackageManager = new PackageManagerHelper(context);
             mUserManager = UserManagerService.getInstance();
             IdmapManager im = new IdmapManager(mPackageManager);
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                     getDefaultOverlayPackages(), new OverlayChangeListener());
+            mActorEnforcer = new OverlayActorEnforcer(mPackageManager);
 
             final IntentFilter packageFilter = new IntentFilter();
             packageFilter.addAction(ACTION_PACKAGE_ADDED);
@@ -581,7 +587,7 @@ public final class OverlayManagerService extends SystemService {
                 int userId) throws RemoteException {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#setEnabled " + packageName + " " + enable);
-                enforceChangeOverlayPackagesPermission("setEnabled");
+                enforceActor(packageName, "setEnabled", userId);
                 userId = handleIncomingUser(userId, "setEnabled");
                 if (packageName == null) {
                     return false;
@@ -605,7 +611,7 @@ public final class OverlayManagerService extends SystemService {
                 int userId) throws RemoteException {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#setEnabledExclusive " + packageName + " " + enable);
-                enforceChangeOverlayPackagesPermission("setEnabledExclusive");
+                enforceActor(packageName, "setEnabledExclusive", userId);
                 userId = handleIncomingUser(userId, "setEnabledExclusive");
                 if (packageName == null || !enable) {
                     return false;
@@ -630,7 +636,7 @@ public final class OverlayManagerService extends SystemService {
                 throws RemoteException {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#setEnabledExclusiveInCategory " + packageName);
-                enforceChangeOverlayPackagesPermission("setEnabledExclusiveInCategory");
+                enforceActor(packageName, "setEnabledExclusiveInCategory", userId);
                 userId = handleIncomingUser(userId, "setEnabledExclusiveInCategory");
                 if (packageName == null) {
                     return false;
@@ -656,7 +662,7 @@ public final class OverlayManagerService extends SystemService {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#setPriority " + packageName + " "
                         + parentPackageName);
-                enforceChangeOverlayPackagesPermission("setPriority");
+                enforceActor(packageName, "setPriority", userId);
                 userId = handleIncomingUser(userId, "setPriority");
                 if (packageName == null || parentPackageName == null) {
                     return false;
@@ -680,7 +686,7 @@ public final class OverlayManagerService extends SystemService {
                 throws RemoteException {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#setHighestPriority " + packageName);
-                enforceChangeOverlayPackagesPermission("setHighestPriority");
+                enforceActor(packageName, "setHighestPriority", userId);
                 userId = handleIncomingUser(userId, "setHighestPriority");
                 if (packageName == null) {
                     return false;
@@ -704,7 +710,7 @@ public final class OverlayManagerService extends SystemService {
                 throws RemoteException {
             try {
                 traceBegin(TRACE_TAG_RRO, "OMS#setLowestPriority " + packageName);
-                enforceChangeOverlayPackagesPermission("setLowestPriority");
+                enforceActor(packageName, "setLowestPriority", userId);
                 userId = handleIncomingUser(userId, "setLowestPriority");
                 if (packageName == null) {
                     return false;
@@ -750,7 +756,7 @@ public final class OverlayManagerService extends SystemService {
                 return;
             }
 
-            enforceChangeOverlayPackagesPermission("invalidateCachesForOverlay");
+            enforceActor(packageName, "invalidateCachesForOverlay", userId);
             userId = handleIncomingUser(userId, "invalidateCachesForOverlay");
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -861,18 +867,6 @@ public final class OverlayManagerService extends SystemService {
         }
 
         /**
-         * Enforce that the caller holds the CHANGE_OVERLAY_PACKAGES permission (or is
-         * system or root).
-         *
-         * @param message used as message if SecurityException is thrown
-         * @throws SecurityException if the permission check fails
-         */
-        private void enforceChangeOverlayPackagesPermission(@NonNull final String message) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.CHANGE_OVERLAY_PACKAGES, message);
-        }
-
-        /**
          * Enforce that the caller holds the DUMP permission (or is system or root).
          *
          * @param message used as message if SecurityException is thrown
@@ -880,6 +874,13 @@ public final class OverlayManagerService extends SystemService {
          */
         private void enforceDumpPermission(@NonNull final String message) {
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, message);
+        }
+
+        private void enforceActor(String packageName, String methodName, int userId)
+                throws SecurityException {
+            OverlayInfo overlayInfo = mImpl.getOverlayInfo(packageName, userId);
+            int callingUid = Binder.getCallingUid();
+            mActorEnforcer.enforceActor(overlayInfo, methodName, callingUid, userId);
         }
     };
 
@@ -1035,9 +1036,16 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    private static final class PackageManagerHelper implements
-            OverlayManagerServiceImpl.PackageManagerHelper {
+    /**
+     * Delegate for {@link android.content.pm.PackageManager} and {@link PackageManagerInternal}
+     * functionality, separated for easy testing.
+     *
+     * @hide
+     */
+    public static final class PackageManagerHelper implements
+            OverlayManagerServiceImpl.PackageManagerHelper, OverlayActorEnforcer.VerifyCallback {
 
+        private final Context mContext;
         private final IPackageManager mPackageManager;
         private final PackageManagerInternal mPackageManagerInternal;
 
@@ -1048,11 +1056,14 @@ public final class OverlayManagerService extends SystemService {
         // behind until all pending intents have been processed.
         private final SparseArray<HashMap<String, PackageInfo>> mCache = new SparseArray<>();
 
-        PackageManagerHelper() {
+        PackageManagerHelper(Context context) {
+            mContext = context;
             mPackageManager = getPackageManager();
             mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         }
 
+        // TODO(b/143096091): Remove PackageInfo cache so that PackageManager is always queried
+        //  to enforce visibility/other permission checks
         public PackageInfo getPackageInfo(@NonNull final String packageName, final int userId,
                 final boolean useCache) {
             if (useCache) {
@@ -1075,7 +1086,19 @@ public final class OverlayManagerService extends SystemService {
 
         @Override
         public PackageInfo getPackageInfo(@NonNull final String packageName, final int userId) {
-            return getPackageInfo(packageName, userId, true);
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                return getPackageInfo(packageName, userId, true);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @NonNull
+        @Override
+        public Map<String, ? extends Map<String, String>> getNamedActors() {
+            return SystemConfig.getInstance().getNamedActors();
         }
 
         @Override
@@ -1095,6 +1118,70 @@ public final class OverlayManagerService extends SystemService {
         @Override
         public List<PackageInfo> getOverlayPackages(final int userId) {
             return mPackageManagerInternal.getOverlayPackages(userId);
+        }
+
+        @Nullable
+        @Override
+        public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
+                @Nullable String targetOverlayableName, int userId)
+                throws IOException {
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                PackageInfo packageInfo = getPackageInfo(packageName, userId);
+                if (packageInfo == null) {
+                    throw new IOException("Unable to get target package");
+                }
+
+                String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
+
+                ApkAssets apkAssets = null;
+                try {
+                    apkAssets = ApkAssets.loadFromPath(baseCodePath);
+                    return apkAssets.getOverlayableInfo(targetOverlayableName);
+                } finally {
+                    if (apkAssets != null) {
+                        try {
+                            apkAssets.close();
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public boolean doesTargetDefineOverlayable(String targetPackageName, int userId)
+                throws RemoteException, IOException {
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                PackageInfo packageInfo = mPackageManager.getPackageInfo(targetPackageName, 0,
+                        userId);
+                String baseCodePath = packageInfo.applicationInfo.getBaseCodePath();
+
+                ApkAssets apkAssets = null;
+                try {
+                    apkAssets = ApkAssets.loadFromPath(baseCodePath);
+                    return apkAssets.definesOverlayable();
+                } finally {
+                    if (apkAssets != null) {
+                        try {
+                            apkAssets.close();
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void enforcePermission(String permission, String message) throws SecurityException {
+            mContext.enforceCallingOrSelfPermission(permission, message);
         }
 
         public PackageInfo getCachedPackageInfo(@NonNull final String packageName,
@@ -1126,6 +1213,22 @@ public final class OverlayManagerService extends SystemService {
 
         public void forgetAllPackageInfos(final int userId) {
             mCache.delete(userId);
+        }
+
+        @Nullable
+        @Override
+        public String[] getPackagesForUid(int uid) {
+            // TODO(b/143096091): Remove clearing calling ID
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                try {
+                    return mPackageManager.getPackagesForUid(uid);
+                } catch (RemoteException ignored) {
+                    return null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
         }
 
         private static final String TAB1 = "    ";
