@@ -58,7 +58,10 @@ cc_library_shared {
         "android.hidl.token@1.0-utils",
     ],
 
-    header_libs: ["libhardware_headers"],
+    header_libs: [
+        "libhardware_headers",
+        "libmediadrm_headers",
+    ],
 
     static_libs: ["libgrallocusage"],
 
