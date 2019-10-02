@@ -16,14 +16,38 @@
 
 package com.android.server.integrity.engine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The engine used to evaluate rules against app installs.
  *
  * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation engine
  * to allow/block that install.
  */
-public final class RuleEvaluation {
+public final class RuleEvaluationEngine {
     private static final String TAG = "RuleEvaluation";
 
-    // TODO: Add singleton injection.
+    // The engine for loading rules, retrieving metadata for app installs, and evaluating app
+    // installs against rules.
+    private static RuleEvaluationEngine sRuleEvaluationEngine;
+
+    // The subset of rules loaded to be used to evaluate an app install request.
+    // TODO: Load rules relevant to app installs.
+    private List<String> mRules;
+
+    private RuleEvaluationEngine() {
+        // Initialize rules with the empty rule set.
+        mRules = new ArrayList<>();
+    }
+
+    /**
+     * Provide a singleton instance of the rule evaluation engine.
+     */
+    public static synchronized RuleEvaluationEngine getRuleEvaluationEngine() {
+        if (sRuleEvaluationEngine == null) {
+            return new RuleEvaluationEngine();
+        }
+        return sRuleEvaluationEngine;
+    }
 }
