@@ -169,7 +169,6 @@ static int register_jni_procs(const std::unordered_map<std::string, RegJNIRec>& 
 
 int AndroidRuntime::registerNativeMethods(JNIEnv* env,
         const char* className, const JNINativeMethod* gMethods, int numMethods) {
-    cout << "Register for class: " << className << endl;
     string classNameString = string(className);
     if (find(classesToDelegate.begin(), classesToDelegate.end(), classNameString)
             != classesToDelegate.end()) {
