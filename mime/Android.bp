@@ -12,24 +12,84 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+java_defaults {
+    name: "mimemap-defaults",
+    srcs: [
+        "java/android/content/type/DefaultMimeMapFactory.java",
+    ],
+    sdk_version: "core_platform",
+}
+
 java_library {
     name: "mimemap",
+    defaults: ["mimemap-defaults"],
+    static_libs: ["mimemap-res.jar"],
+    visibility: [
+        "//frameworks/base:__subpackages__",
+    ],
+}
+
+java_library {
+    name: "mimemap-testing",
+    defaults: ["mimemap-defaults"],
+    static_libs: ["mimemap-testing-res.jar"],
+    jarjar_rules: "jarjar-rules.txt",
     visibility: [
         "//cts/tests/tests/mimemap:__subpackages__",
         "//frameworks/base:__subpackages__",
     ],
+}
 
-    srcs: [
-        "java/android/content/type/DefaultMimeMapFactory.java",
+// The mimemap-res.jar and mimemap-testing-res.jar genrules produce a .jar that
+// has the resource file in a subdirectory res/ and testres/, respectively.
+// Those paths need to They need to be in different paths because one of them
+// ends up on a bootclasspath jar whereas the other one ends up in a test jar.
+// Bootclasspath resources hide test or application resources under the same
+// path because ClassLoader.getResource(String) consults the parent ClassLoader
+// first.
+//
+// Further notes:
+//  - the "cp" command will flatten any directory paths that occur in $(in),
+//    but here they happen to already be in the root directory. If we needed
+//    to preserve sub paths then we might want to zip the files first and then
+//    unzip them below the new parent directory.
+//  - the path names "res/" and "testres/" and duplicated in .java source files
+//    (DefaultMimeMapFactory.java and MimeMapTest.java, as of October 2019).
+java_genrule {
+    name: "mimemap-res.jar",
+    tools: [
+        "soong_zip",
     ],
+    srcs: [":mime.types"],
+    out: ["mimemap-res.jar"],
+    cmd: "mkdir $(genDir)/res/ && cp $(in) $(genDir)/res/ && $(location soong_zip) -C $(genDir) -o $(out) -D $(genDir)/res/",
+}
 
-    java_resources: [
+// The same as mimemap-res.jar except that the resources are placed in a different directory.
+// They get bundled with CTS so that CTS can compare a device's MimeMap implementation vs.
+// the stock Android one from when CTS was built.
+java_genrule {
+    name: "mimemap-testing-res.jar",
+    tools: [
+        "soong_zip",
+    ],
+    srcs: [":mime.types"],
+    out: ["mimemap-testing-res.jar"],
+    cmd: "mkdir $(genDir)/testres/ && cp $(in) $(genDir)/testres/ && $(location soong_zip) -C $(genDir) -o $(out) -D $(genDir)/testres/",
+}
+
+// Combination of all *mime.types resources.
+filegroup {
+    name: "mime.types",
+    visibility: [
+        "//visibility:private",
+    ],
+    srcs: [
         ":debian.mime.types",
         ":android.mime.types",
         ":vendor.mime.types",
     ],
-
-    sdk_version: "core_platform",
 }
 
 filegroup {
