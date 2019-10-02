@@ -57,6 +57,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import android.graphics.Insets;
 import android.graphics.Matrix;
@@ -546,5 +547,30 @@ public class WindowStateTests extends WindowTestsBase {
         matrix.getValues(values);
         assertEquals(OFFSET_SUM, values[Matrix.MTRANS_X], 0f);
         assertEquals(0f, values[Matrix.MTRANS_Y], 0f);
+    }
+
+    @Test
+    public void testCantReceiveTouchDuringRecentsAnimation() {
+        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
+
+        // Mock active recents animation
+        RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
+        when(recentsController.isAnimatingTask(win0.mAppToken.getTask())).thenReturn(true);
+        mWm.setRecentsAnimationController(recentsController);
+        assertTrue(win0.cantReceiveTouchInput());
+    }
+
+    @Test
+    public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
+        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
+        win0.mAppToken.hiddenRequested = true;
+        assertTrue(win0.cantReceiveTouchInput());
+    }
+
+    @Test
+    public void testCantReceiveTouchWhenShouldIgnoreInput() {
+        final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
+        win0.mAppToken.getStack().setAdjustedForMinimizedDock(1 /* Any non 0 value works */);
+        assertTrue(win0.cantReceiveTouchInput());
     }
 }

@@ -2622,8 +2622,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** @return false if this window desires touch events. */
     boolean cantReceiveTouchInput() {
-        return mAppToken != null && mAppToken.getTask() != null
-                && (mAppToken.getTask().mStack.shouldIgnoreInput() || mAppToken.hiddenRequested);
+        if (mAppToken == null || mAppToken.getTask() == null) {
+            return false;
+        }
+
+        return mAppToken.getTask().mStack.shouldIgnoreInput()
+                || mAppToken.hiddenRequested
+                || isAnimatingToRecents();
+    }
+
+    /**
+     * Returns {@code true} if the window is animating to home as part of the recents animation.
+     */
+    private boolean isAnimatingToRecents() {
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
+        return recentsAnimationController != null
+                && recentsAnimationController.isAnimatingTask(getTask())
+                && !recentsAnimationController.isTargetApp(mAppToken);
     }
 
     @Override
