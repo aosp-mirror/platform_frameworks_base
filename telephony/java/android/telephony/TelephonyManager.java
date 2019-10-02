@@ -1177,6 +1177,35 @@ public class TelephonyManager {
             "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
 
     /**
+     * Broadcast intent that indicates multi-SIM configuration is changed. For example, it changed
+     * from single SIM capable to dual-SIM capable (DSDS or DSDA) or triple-SIM mode.
+     *
+     * It doesn't indicate how many subscriptions are actually active, or which states SIMs are,
+     * or that all steps during multi-SIM change are done. To know those information you still need
+     * to listen to SIM_STATE changes or active subscription changes.
+     *
+     * See extra of {@link #EXTRA_NUM_OF_ACTIVE_SIM_SUPPORTED} for updated value.
+     */
+    public static final String ACTION_MULTI_SIM_CONFIG_CHANGED =
+            "android.telephony.action.MULTI_SIM_CONFIG_CHANGED";
+
+
+    /**
+     * The number of active SIM supported by current multi-SIM config. It's not related to how many
+     * SIM/subscriptions are currently active.
+     *
+     * For single SIM mode, it's 1.
+     * For DSDS or DSDA mode, it's 2.
+     * For triple-SIM mode, it's 3.
+     *
+     * Extra of {@link #ACTION_MULTI_SIM_CONFIG_CHANGED}.
+     *
+     * type: integer
+     */
+    public static final String EXTRA_NUM_OF_ACTIVE_SIM_SUPPORTED =
+            "android.telephony.extra.NUM_OF_ACTIVE_SIM_SUPPORTED";
+
+    /**
      * @hide
      */
     public static final String USSD_RESPONSE = "USSD_RESPONSE";
