@@ -167,7 +167,7 @@ public class CarrierTextController {
         mSeparator = separator;
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
         mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE)).getPhoneCount();
+                Context.TELEPHONY_SERVICE)).getMaxPhoneCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
     }
 
