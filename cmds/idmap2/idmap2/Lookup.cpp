@@ -33,10 +33,9 @@
 #include "androidfw/Util.h"
 #include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
-#include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
-#include "idmap2/XmlParser.h"
+#include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
 #include "utils/String16.h"
 #include "utils/String8.h"
@@ -58,7 +57,8 @@ using android::idmap2::IdmapHeader;
 using android::idmap2::ResourceId;
 using android::idmap2::Result;
 using android::idmap2::Unit;
-using android::idmap2::utils::ExtractOverlayManifestInfo;
+using android::idmap2::Xml;
+using android::idmap2::ZipFile;
 using android::util::Utf16ToUtf8;
 
 namespace {
@@ -132,6 +132,29 @@ Result<std::string> WARN_UNUSED GetValue(const AssetManager2& am, ResourceId res
   return out;
 }
 
+Result<std::string> GetTargetPackageNameFromManifest(const std::string& apk_path) {
+  const auto zip = ZipFile::Open(apk_path);
+  if (!zip) {
+    return Error("failed to open %s as zip", apk_path.c_str());
+  }
+  const auto entry = zip->Uncompress("AndroidManifest.xml");
+  if (!entry) {
+    return Error("failed to uncompress AndroidManifest.xml in %s", apk_path.c_str());
+  }
+  const auto xml = Xml::Create(entry->buf, entry->size);
+  if (!xml) {
+    return Error("failed to create XML buffer");
+  }
+  const auto tag = xml->FindTag("overlay");
+  if (!tag) {
+    return Error("failed to find <overlay> tag");
+  }
+  const auto iter = tag->find("targetPackage");
+  if (iter == tag->end()) {
+    return Error("failed to find targetPackage attribute");
+  }
+  return iter->second;
+}
 }  // namespace
 
 Result<Unit> Lookup(const std::vector<std::string>& args) {
@@ -179,12 +202,12 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
       }
       apk_assets.push_back(std::move(target_apk));
 
-      auto manifest_info = ExtractOverlayManifestInfo(idmap_header->GetOverlayPath().to_string(),
-                                                      true /* assert_overlay */);
-      if (!manifest_info) {
-        return manifest_info.GetError();
+      const Result<std::string> package_name =
+          GetTargetPackageNameFromManifest(idmap_header->GetOverlayPath().to_string());
+      if (!package_name) {
+        return Error("failed to parse android:targetPackage from overlay manifest");
       }
-      target_package_name = (*manifest_info).target_package;
+      target_package_name = *package_name;
     } else if (target_path != idmap_header->GetTargetPath()) {
       return Error("different target APKs (expected target APK %s but %s has target APK %s)",
                    target_path.c_str(), idmap_path.c_str(),

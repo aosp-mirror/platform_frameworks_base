@@ -33,7 +33,7 @@
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
-#include "idmap2/XmlParser.h"
+#include "idmap2/Xml.h"
 #include "idmap2/ZipFile.h"
 
 using android::idmap2::CommandLineOptions;
