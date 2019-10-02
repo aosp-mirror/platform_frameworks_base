@@ -110,6 +110,24 @@ enum CallStateEnum {
      * {@link android.telecom.Connection#CAPABILITY_CAN_PULL_CALL}.
      */
     PULLING = 10;
+
+    /**
+     * Indicates that an incoming call has been answered by the in-call UI, but Telephony hasn't yet
+     * set the call to active.
+     */
+    ANSWERED = 11;
+
+    /**
+     * Indicates that the call is undergoing audio processing by a different app in the background.
+     * @see android.telecom.Call#STATE_AUDIO_PROCESSING
+     */
+    AUDIO_PROCESSING = 12;
+
+    /**
+     * Indicates that the call is in a fake ringing state.
+     * @see android.telecom.Call#STATE_SIMULATED_RINGING
+     */
+    SIMULATED_RINGING = 13;
 }
 
 // Disconnect causes for a call. Primarily used by android/telecom/DisconnectCause.java
