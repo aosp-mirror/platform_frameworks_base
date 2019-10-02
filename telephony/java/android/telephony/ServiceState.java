@@ -30,6 +30,7 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation.RilRadioTechnology;
 import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
@@ -155,32 +156,6 @@ public class ServiceState implements Parcelable {
      */
     public static final int DUPLEX_MODE_TDD = 2;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "RIL_RADIO_TECHNOLOGY_" },
-            value = {
-                    RIL_RADIO_TECHNOLOGY_UNKNOWN,
-                    RIL_RADIO_TECHNOLOGY_GPRS,
-                    RIL_RADIO_TECHNOLOGY_EDGE,
-                    RIL_RADIO_TECHNOLOGY_UMTS,
-                    RIL_RADIO_TECHNOLOGY_IS95A,
-                    RIL_RADIO_TECHNOLOGY_IS95B,
-                    RIL_RADIO_TECHNOLOGY_1xRTT,
-                    RIL_RADIO_TECHNOLOGY_EVDO_0,
-                    RIL_RADIO_TECHNOLOGY_EVDO_A,
-                    RIL_RADIO_TECHNOLOGY_HSDPA,
-                    RIL_RADIO_TECHNOLOGY_HSUPA,
-                    RIL_RADIO_TECHNOLOGY_HSPA,
-                    RIL_RADIO_TECHNOLOGY_EVDO_B,
-                    RIL_RADIO_TECHNOLOGY_EHRPD,
-                    RIL_RADIO_TECHNOLOGY_LTE,
-                    RIL_RADIO_TECHNOLOGY_HSPAP,
-                    RIL_RADIO_TECHNOLOGY_GSM,
-                    RIL_RADIO_TECHNOLOGY_TD_SCDMA,
-                    RIL_RADIO_TECHNOLOGY_IWLAN,
-                    RIL_RADIO_TECHNOLOGY_LTE_CA,
-                    RIL_RADIO_TECHNOLOGY_NR})
-    public @interface RilRadioTechnology {}
     /**
      * Available radio technologies for GSM, UMTS and CDMA.
      * Duplicates the constants from hardware/radio/include/ril.h

@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.PreciseCallStates;
 import android.telephony.DisconnectCause;
 import android.telephony.PreciseDisconnectCause;
 
@@ -48,22 +49,6 @@ import java.util.Objects;
 @SystemApi
 public final class PreciseCallState implements Parcelable {
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"PRECISE_CALL_STATE_"},
-            value = {
-                    PRECISE_CALL_STATE_NOT_VALID,
-                    PRECISE_CALL_STATE_IDLE,
-                    PRECISE_CALL_STATE_ACTIVE,
-                    PRECISE_CALL_STATE_HOLDING,
-                    PRECISE_CALL_STATE_DIALING,
-                    PRECISE_CALL_STATE_ALERTING,
-                    PRECISE_CALL_STATE_INCOMING,
-                    PRECISE_CALL_STATE_WAITING,
-                    PRECISE_CALL_STATE_DISCONNECTED,
-                    PRECISE_CALL_STATE_DISCONNECTING})
-    public @interface State {}
-
     /** Call state is not valid (Not received a call state). */
     public static final int PRECISE_CALL_STATE_NOT_VALID =      -1;
     /** Call state: No activity. */
@@ -85,9 +70,9 @@ public final class PreciseCallState implements Parcelable {
     /** Call state: Disconnecting. */
     public static final int PRECISE_CALL_STATE_DISCONNECTING =  8;
 
-    private @State int mRingingCallState = PRECISE_CALL_STATE_NOT_VALID;
-    private @State int mForegroundCallState = PRECISE_CALL_STATE_NOT_VALID;
-    private @State int mBackgroundCallState = PRECISE_CALL_STATE_NOT_VALID;
+    private @PreciseCallStates int mRingingCallState = PRECISE_CALL_STATE_NOT_VALID;
+    private @PreciseCallStates int mForegroundCallState = PRECISE_CALL_STATE_NOT_VALID;
+    private @PreciseCallStates int mBackgroundCallState = PRECISE_CALL_STATE_NOT_VALID;
     private int mDisconnectCause = DisconnectCause.NOT_VALID;
     private int mPreciseDisconnectCause = PreciseDisconnectCause.NOT_VALID;
 
@@ -97,8 +82,9 @@ public final class PreciseCallState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public PreciseCallState(@State int ringingCall, @State int foregroundCall,
-                            @State int backgroundCall, int disconnectCause,
+    public PreciseCallState(@PreciseCallStates int ringingCall,
+                            @PreciseCallStates int foregroundCall,
+                            @PreciseCallStates int backgroundCall, int disconnectCause,
                             int preciseDisconnectCause) {
         mRingingCallState = ringingCall;
         mForegroundCallState = foregroundCall;
@@ -131,21 +117,21 @@ public final class PreciseCallState implements Parcelable {
     /**
      * Returns the precise ringing call state.
      */
-    public @State int getRingingCallState() {
+    public @PreciseCallStates int getRingingCallState() {
         return mRingingCallState;
     }
 
     /**
      * Returns the precise foreground call state.
      */
-    public @State int getForegroundCallState() {
+    public @PreciseCallStates int getForegroundCallState() {
         return mForegroundCallState;
     }
 
     /**
      * Returns the precise background call state.
      */
-    public @State int getBackgroundCallState() {
+    public @PreciseCallStates int getBackgroundCallState() {
         return mBackgroundCallState;
     }
 
