@@ -63,7 +63,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
-import android.util.MutableLong;
 import android.util.SparseBooleanArray;
 
 import androidx.test.filters.MediumTest;
@@ -72,6 +71,7 @@ import com.android.server.wm.RecentTasks.Callbacks;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -86,6 +86,7 @@ import java.util.Set;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RecentTasksTest extends ActivityTestsBase {
     private static final int TEST_USER_0_ID = 0;
     private static final int TEST_USER_1_ID = 10;
@@ -95,10 +96,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static final int INVALID_STACK_ID = 999;
 
     private ActivityDisplay mDisplay;
-    private ActivityDisplay mOtherDisplay;
-    private ActivityDisplay mSingleTaskDisplay;
     private ActivityStack mStack;
-    private ActivityStack mHomeStack;
     private TestTaskPersister mTaskPersister;
     private TestRecentTasks mRecentTasks;
     private TestRunningTasks mRunningTasks;
@@ -111,15 +109,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Before
     public void setUp() throws Exception {
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-
-        // Set testing displays
         mDisplay = mRootActivityContainer.getActivityDisplay(DEFAULT_DISPLAY);
-        mOtherDisplay = createNewActivityDisplay();
-        mSingleTaskDisplay = createNewActivityDisplay();
-        mSingleTaskDisplay.setDisplayToSingleTaskInstance();
-        mRootActivityContainer.addChild(mOtherDisplay, ActivityDisplay.POSITION_TOP);
-        mRootActivityContainer.addChild(mDisplay, ActivityDisplay.POSITION_TOP);
-        mRootActivityContainer.addChild(mSingleTaskDisplay, ActivityDisplay.POSITION_TOP);
 
         // Set the recent tasks we should use for testing in this class.
         mRecentTasks = new TestRecentTasks(mService, mTaskPersister);
@@ -131,8 +121,6 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRunningTasks = new TestRunningTasks();
         mService.mStackSupervisor.setRunningTasks(mRunningTasks);
 
-        mHomeStack = mDisplay.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
         mStack = mDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mCallbacksRecorder = new CallbacksRecorder();
@@ -269,7 +257,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         // other task
         TaskRecord task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
-                .setStack(mHomeStack).build();
+                .setStack(mDisplay.getHomeStack()).build();
         TaskRecord task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_MULTIPLE_TASK)
                 .setStack(mStack).build();
@@ -446,12 +434,12 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.add(task3);
         mRecentTasks.add(task4);
 
-        MutableLong prevLastActiveTime = new MutableLong(0);
+        long prevLastActiveTime = 0;
         final ArrayList<TaskRecord> tasks = mRecentTasks.getRawTasks();
         for (int i = 0; i < tasks.size(); i++) {
             final TaskRecord task = tasks.get(i);
-            assertThat(prevLastActiveTime.value).isLessThan(task.lastActiveTime);
-            prevLastActiveTime.value = task.lastActiveTime;
+            assertThat(prevLastActiveTime).isLessThan(task.lastActiveTime);
+            prevLastActiveTime = task.lastActiveTime;
         }
     }
 
@@ -618,7 +606,10 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
-        ActivityStack singleTaskStack = mSingleTaskDisplay.createStack(
+        final ActivityDisplay singleTaskDisplay =
+                addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        singleTaskDisplay.setDisplayToSingleTaskInstance();
+        ActivityStack singleTaskStack = singleTaskDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         TaskRecord excludedTask1 = createTaskBuilder(".ExcludedTask1")
@@ -795,7 +786,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.setParameters(-1 /* min */, 1 /* max */, -1 /* ms */);
 
         final ActivityStack homeStack = mDisplay.getHomeStack();
-        final ActivityStack otherDisplayStack = mOtherDisplay.createStack(
+        final ActivityDisplay otherDisplay = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final ActivityStack otherDisplayStack = otherDisplay.createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Add a number of tasks (beyond the max) on each display, ensure that the tasks are not
