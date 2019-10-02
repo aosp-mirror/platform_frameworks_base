@@ -1857,12 +1857,37 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Sets the microphone from switch mute on or off.
+     * <p>
+     * This method should only be used by InputManager to notify
+     * Audio Subsystem about Microphone Mute switch state.
+     *
+     * @param on set <var>true</var> to mute the microphone;
+     *           <var>false</var> to turn mute off
+     */
+    @UnsupportedAppUsage
+    public void setMicrophoneMuteFromSwitch(boolean on) {
+        final IAudioService service = getService();
+        try {
+            service.setMicrophoneMuteFromSwitch(on);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Checks whether the microphone mute is on or off.
      *
      * @return true if microphone is muted, false if it's not
      */
     public boolean isMicrophoneMute() {
-        return AudioSystem.isMicrophoneMuted();
+        final IAudioService service = getService();
+        try {
+            return service.isMicrophoneMuted();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
