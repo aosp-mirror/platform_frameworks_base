@@ -21,6 +21,7 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_DELEGAT
 import static com.android.server.accessibility.gestures.TouchState.STATE_DRAGGING;
 import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_EXPLORING;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -36,6 +37,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.utils.MotionEventMatcher;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -49,6 +51,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class TouchExplorerTest {
 
+    private static final String LOG_TAG = "TouchExplorerTest";
     private static final int FLAG_1FINGER = 0x8000;
     private static final int FLAG_2FINGERS = 0x0100;
     private static final int FLAG_3FINGERS = 0x0200;
@@ -86,7 +89,9 @@ public class TouchExplorerTest {
 
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+            MotionEventMatcher lastEventMatcher = new MotionEventMatcher(mLastEvent);
             mEvents.add(0, event.copy());
+            assertThat(rawEvent, lastEventMatcher);
         }
 
         @Override

@@ -71,6 +71,7 @@ public class TouchState {
     // Helper class to track received pointers.
     // Todo: collapse or hide this class so multiple classes don't modify it.
     private final ReceivedPointerTracker mReceivedPointerTracker;
+    private MotionEvent mLastReceivedEvent;
 
     public TouchState() {
         mReceivedPointerTracker = new ReceivedPointerTracker();
@@ -80,6 +81,10 @@ public class TouchState {
     public void clear() {
         setState(STATE_CLEAR);
         // Reset the pointer trackers.
+        if (mLastReceivedEvent != null) {
+            mLastReceivedEvent.recycle();
+            mLastReceivedEvent = null;
+        }
         mReceivedPointerTracker.clear();
     }
 
@@ -89,6 +94,10 @@ public class TouchState {
      * @param rawEvent The raw touch event.
      */
     public void onReceivedMotionEvent(MotionEvent rawEvent) {
+        if (mLastReceivedEvent != null) {
+            mLastReceivedEvent.recycle();
+        }
+        mLastReceivedEvent = MotionEvent.obtain(rawEvent);
         mReceivedPointerTracker.onMotionEvent(rawEvent);
     }
 
@@ -216,6 +225,11 @@ public class TouchState {
         return mReceivedPointerTracker;
     }
 
+    /** @return The last received event. */
+    public MotionEvent getLastReceivedEvent() {
+        return mLastReceivedEvent;
+    }
+
     /** This class tracks where and when a pointer went down. It does not track its movement. */
     class ReceivedPointerTracker {
         private static final String LOG_TAG_RECEIVED_POINTER_TRACKER = "ReceivedPointerTracker";
@@ -232,8 +246,6 @@ public class TouchState {
         // or if it goes up the next one that most recently went down.
         private int mPrimaryPointerId;
 
-        // Keep track of the last up pointer data.
-        private MotionEvent mLastReceivedEvent;
 
         ReceivedPointerTracker() {
             clear();
@@ -254,11 +266,6 @@ public class TouchState {
          * @param event The event to process.
          */
         public void onMotionEvent(MotionEvent event) {
-            if (mLastReceivedEvent != null) {
-                mLastReceivedEvent.recycle();
-            }
-            mLastReceivedEvent = MotionEvent.obtain(event);
-
             final int action = event.getActionMasked();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
@@ -277,11 +284,6 @@ public class TouchState {
             if (DEBUG) {
                 Slog.i(LOG_TAG_RECEIVED_POINTER_TRACKER, "Received pointer:\n" + toString());
             }
-        }
-
-        /** @return The last received event. */
-        public MotionEvent getLastReceivedEvent() {
-            return mLastReceivedEvent;
         }
 
         /** @return The number of received pointers that are down. */
