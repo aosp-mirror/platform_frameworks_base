@@ -16,7 +16,8 @@
 
 package android.net;
 
-
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -89,6 +90,15 @@ public class ProxyInfo implements Parcelable {
     }
 
     /**
+     * Construct a {@link ProxyInfo} object that will download and run the PAC script at the
+     * specified URL and port.
+     */
+    @NonNull
+    public static ProxyInfo buildPacProxy(@NonNull Uri pacUrl, int port) {
+        return new ProxyInfo(pacUrl, port);
+    }
+
+    /**
      * Create a ProxyProperties that points at a HTTP Proxy.
      * @hide
      */
@@ -105,7 +115,7 @@ public class ProxyInfo implements Parcelable {
      * Create a ProxyProperties that points at a PAC URL.
      * @hide
      */
-    public ProxyInfo(Uri pacFileUrl) {
+    public ProxyInfo(@NonNull Uri pacFileUrl) {
         mHost = LOCAL_HOST;
         mPort = LOCAL_PORT;
         mExclusionList = LOCAL_EXCL_LIST;
@@ -132,7 +142,7 @@ public class ProxyInfo implements Parcelable {
      * Only used in PacManager after Local Proxy is bound.
      * @hide
      */
-    public ProxyInfo(Uri pacFileUrl, int localProxyPort) {
+    public ProxyInfo(@NonNull Uri pacFileUrl, int localProxyPort) {
         mHost = LOCAL_HOST;
         mPort = localProxyPort;
         mExclusionList = LOCAL_EXCL_LIST;
@@ -159,11 +169,10 @@ public class ProxyInfo implements Parcelable {
         mPacFileUrl = Uri.EMPTY;
     }
 
-    // copy constructor instead of clone
     /**
-     * @hide
+     * A copy constructor to hold proxy properties.
      */
-    public ProxyInfo(ProxyInfo source) {
+    public ProxyInfo(@Nullable ProxyInfo source) {
         if (source != null) {
             mHost = source.getHost();
             mPort = source.getPort();
@@ -226,12 +235,13 @@ public class ProxyInfo implements Parcelable {
      * comma separated
      * @hide
      */
+    @Nullable
     public String getExclusionListAsString() {
         return mExclusionList;
     }
 
     /**
-     * @hide
+     * Return true if the pattern of proxy is valid, otherwise return false.
      */
     public boolean isValid() {
         if (!Uri.EMPTY.equals(mPacFileUrl)) return true;
