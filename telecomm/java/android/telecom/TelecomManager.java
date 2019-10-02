@@ -2059,12 +2059,13 @@ public class TelecomManager {
     /**
      * Handles {@link Intent#ACTION_CALL} intents trampolined from UserCallActivity.
      * @param intent The {@link Intent#ACTION_CALL} intent to handle.
+     * @param callingPackageProxy The original package that called this before it was trampolined.
      * @hide
      */
-    public void handleCallIntent(Intent intent) {
+    public void handleCallIntent(Intent intent, String callingPackageProxy) {
         try {
             if (isServiceConnected()) {
-                getTelecomService().handleCallIntent(intent);
+                getTelecomService().handleCallIntent(intent, callingPackageProxy);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException handleCallIntent: " + e);
