@@ -200,6 +200,12 @@ public abstract class DependencyBinder {
     /**
      */
     @Binds
+    public abstract SysuiStatusBarStateController providesSysuiStatusBarStateController(
+            StatusBarStateControllerImpl statusBarStateControllerImpl);
+
+    /**
+     */
+    @Binds
     public abstract StatusBarIconController provideStatusBarIconController(
             StatusBarIconControllerImpl controllerImpl);
 
@@ -235,10 +241,4 @@ public abstract class DependencyBinder {
      */
     @Binds
     public abstract FalsingManager provideFalsingmanager(FalsingManagerProxy falsingManagerImpl);
-
-    /**
-     */
-    @Binds
-    public abstract SysuiStatusBarStateController providesSysuiStatusBarStateController(
-            StatusBarStateControllerImpl statusBarStateControllerImpl);
 }

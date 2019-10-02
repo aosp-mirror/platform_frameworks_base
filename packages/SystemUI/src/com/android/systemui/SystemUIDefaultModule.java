@@ -40,6 +40,8 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 /**
  * A dagger module for injecting default implementations of components of System UI that may be
@@ -75,6 +77,11 @@ abstract class SystemUIDefaultModule {
     static ShadeController provideShadeController(Context context) {
         return SysUiServiceProvider.getComponent(context, StatusBar.class);
     }
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBar.class)
+    public abstract SystemUI providesStatusBar(StatusBar statusBar);
 
     @Singleton
     @Provides

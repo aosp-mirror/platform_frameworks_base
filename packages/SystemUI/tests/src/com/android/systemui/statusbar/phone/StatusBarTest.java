@@ -65,7 +65,7 @@ import android.view.ViewGroup.LayoutParams;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -89,7 +89,6 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -100,14 +99,15 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -122,10 +122,14 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -144,6 +148,15 @@ import java.util.HashSet;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 public class StatusBarTest extends SysuiTestCase {
+
+    private StatusBar mStatusBar;
+    private FakeMetricsLogger mMetricsLogger;
+    private PowerManager mPowerManager;
+    private TestableNotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    private CommandQueue mCommandQueue;
+
+    @Mock private LightBarController mLightBarController;
+    @Mock private StatusBarIconController mStatusBarIconController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
@@ -158,7 +171,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private NotificationData mNotificationData;
     @Mock private NotificationInterruptionStateProvider.HeadsUpSuppressor mHeadsUpSuppressor;
-    @Mock private NotificationViewHierarchyManager mViewHierarchyManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
@@ -185,17 +197,25 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NavigationBarController mNavigationBarController;
     @Mock private BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     @Mock private SysuiColorExtractor mColorExtractor;
+    @Mock private ColorExtractor.GradientColors mGradientColors;
     @Mock private DozeLog mDozeLog;
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
-    @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     @Mock private NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     @Mock private KeyguardBypassController mKeyguardBypassController;
-
-    private TestableStatusBar mStatusBar;
-    private FakeMetricsLogger mMetricsLogger;
-    private PowerManager mPowerManager;
-    private TestableNotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
-    private CommandQueue mCommandQueue;
+    @Mock private InjectionInflationController mInjectionInflationController;
+    @Mock private DynamicPrivacyController mDynamicPrivacyController;
+    @Mock private NotifPipelineInitializer mNotifPipelineInitializer;
+    @Mock private ZenModeController mZenModeController;
+    @Mock private AutoHideController mAutoHideController;
+    @Mock private NotificationViewHierarchyManager mNotificationViewHierarchyManager;
+    @Mock private UserSwitcherController mUserSwitcherController;
+    @Mock private NetworkController mNetworkController;
+    @Mock private VibratorHelper mVibratorHelper;
+    @Mock private BubbleController mBubbleController;
+    @Mock private NotificationGroupManager mGroupManager;
+    @Mock private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
+    @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private NotificationIconAreaController mNotificationIconAreaController;
 
     @Before
     public void setup() throws Exception {
@@ -249,65 +269,88 @@ public class StatusBarTest extends SysuiTestCase {
                 mHeadsUpManager, mHeadsUpSuppressor);
 
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-        mStatusBar = new TestableStatusBar(
-                mStatusBarKeyguardViewManager,
-                mKeyguardIndicationController,
-                mStackScroller,
-                mPowerManager,
-                mNotificationPanelView,
-                mBarService,
-                mNotificationListener,
-                notificationLogger,
-                mVisualStabilityManager,
-                mViewHierarchyManager,
-                entryManager,
-                mScrimController,
-                mBiometricUnlockController,
-                mKeyguardViewMediator,
-                mRemoteInputManager,
-                mock(NotificationGroupManager.class),
-                mock(NotificationGroupAlertTransferHelper.class),
-                new FalsingManagerFake(),
-                mock(StatusBarWindowController.class),
-                mock(NotificationIconAreaController.class),
-                mDozeScrimController,
-                mock(NotificationShelf.class),
-                mLockscreenUserManager,
-                mCommandQueue,
-                mNotificationPresenter,
-                mock(BubbleController.class),
-                mNavigationBarController,
-                mock(AutoHideController.class),
+
+        WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
+        wakefulnessLifecycle.dispatchStartedWakingUp();
+        wakefulnessLifecycle.dispatchFinishedWakingUp();
+
+        when(mGradientColors.supportsDarkText()).thenReturn(true);
+        when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
+        ConfigurationController configurationController = new ConfigurationControllerImpl(mContext);
+
+        mStatusBar = new StatusBar(
+                mLightBarController,
+                mAutoHideController,
                 mKeyguardUpdateMonitor,
-                mStatusBarWindowView,
-                mBroadcastDispatcher,
-                mAssistManager,
-                mNotificationGutsManager,
-                mNotificationMediaManager,
-                mForegroundServiceController,
-                mAppOpsController,
-                mStatusBarStateController,
-                mDeviceProvisionedController,
-                mNotificationAlertingManager,
-                mNotificationInterruptionStateProvider,
-                mMetricsLogger,
-                mHeadsUpManager,
-                mKeyguardStateController,
-                new ScreenLifecycle(),
-                mBypassHeadsUpNotifier,
-                mColorExtractor,
-                new DisplayMetrics(),
-                Dependency.get(UiOffloadThread.class),
+                mStatusBarIconController,
                 mDozeLog,
+                mInjectionInflationController,
                 mPulseExpansionHandler,
+                mNotificationWakeUpCoordinator,
+                mKeyguardBypassController,
+                mKeyguardStateController,
+                mHeadsUpManager,
+                mDynamicPrivacyController,
+                mBypassHeadsUpNotifier,
+                true,
+                mNotifPipelineInitializer,
+                new FalsingManagerFake(),
+                mBroadcastDispatcher,
                 new RemoteInputQuickSettingsDisabler(
                         mContext,
-                        new ConfigurationControllerImpl(mContext)
+                        configurationController
                 ),
-                mNotificationWakeUpCoordinator,
-                mKeyguardBypassController);
+                mNotificationGutsManager,
+                notificationLogger,
+                entryManager,
+                mNotificationInterruptionStateProvider,
+                mNotificationViewHierarchyManager,
+                mForegroundServiceController,
+                mAppOpsController,
+                mKeyguardViewMediator,
+                mZenModeController,
+                mNotificationAlertingManager,
+                new DisplayMetrics(),
+                mMetricsLogger,
+                Dependency.get(UiOffloadThread.class),
+                mNotificationMediaManager,
+                mLockscreenUserManager,
+                mRemoteInputManager,
+                mUserSwitcherController,
+                mNetworkController,
+                mBatteryController,
+                mColorExtractor,
+                new ScreenLifecycle(),
+                wakefulnessLifecycle,
+                mStatusBarStateController,
+                mVibratorHelper,
+                mBubbleController,
+                mGroupManager,
+                mGroupAlertTransferHelper,
+                mVisualStabilityManager,
+                mDeviceProvisionedController,
+                mNavigationBarController,
+                mAssistManager,
+                mNotificationListener,
+                configurationController,
+                mStatusBarWindowController);
+        // TODO: we should be able to call mStatusBar.start() and have all the below values
+        // initialized automatically.
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
+        mStatusBar.mStatusBarKeyguardViewManager = mStatusBarKeyguardViewManager;
+        mStatusBar.mStatusBarWindow = mStatusBarWindowView;
+        mStatusBar.mBiometricUnlockController = mBiometricUnlockController;
+        mStatusBar.mScrimController = mScrimController;
+        mStatusBar.mNotificationPanel = mNotificationPanelView;
+        mStatusBar.mCommandQueue = mCommandQueue;
+        mStatusBar.mDozeScrimController = mDozeScrimController;
+        mStatusBar.mNotificationIconAreaController = mNotificationIconAreaController;
+        mStatusBar.mPresenter = mNotificationPresenter;
+        mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;
+        mStatusBar.mPowerManager = mPowerManager;
+        mStatusBar.mBarService = mBarService;
+        mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
@@ -636,8 +679,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     public void testUpdateKeyguardState_DoesNotCrash() {
-        mStatusBar.mState = StatusBarState.KEYGUARD;
-        when(mStatusBar.mLockscreenUserManager.getCurrentProfiles()).thenReturn(
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(
                 new SparseArray<>());
         mStatusBar.onStateChanged(StatusBarState.SHADE);
     }
@@ -768,8 +811,7 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mStatusBarStateController).setState(eq(StatusBarState.KEYGUARD));
 
         // If useFullscreenUserSwitcher is true, state is set to FULLSCREEN_USER_SWITCHER.
-        mStatusBar.mUserSwitcherController = mock(UserSwitcherController.class);
-        when(mStatusBar.mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
+        when(mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
         mStatusBar.showKeyguardImpl();
         verify(mStatusBarStateController).setState(eq(StatusBarState.FULLSCREEN_USER_SWITCHER));
     }
@@ -821,136 +863,6 @@ public class StatusBarTest extends SysuiTestCase {
                 any(UserHandle.class));
     }
 
-    static class TestableStatusBar extends StatusBar {
-        public TestableStatusBar(StatusBarKeyguardViewManager man,
-                KeyguardIndicationController key,
-                NotificationStackScrollLayout stack,
-                PowerManager pm, NotificationPanelView panelView,
-                IStatusBarService barService, NotificationListener notificationListener,
-                NotificationLogger notificationLogger,
-                VisualStabilityManager visualStabilityManager,
-                NotificationViewHierarchyManager viewHierarchyManager,
-                TestableNotificationEntryManager entryManager, ScrimController scrimController,
-                BiometricUnlockController biometricUnlockController,
-                KeyguardViewMediator keyguardViewMediator,
-                NotificationRemoteInputManager notificationRemoteInputManager,
-                NotificationGroupManager notificationGroupManager,
-                NotificationGroupAlertTransferHelper notificationGroupAlertTransferHelper,
-                FalsingManager falsingManager,
-                StatusBarWindowController statusBarWindowController,
-                NotificationIconAreaController notificationIconAreaController,
-                DozeScrimController dozeScrimController,
-                NotificationShelf notificationShelf,
-                NotificationLockscreenUserManager notificationLockscreenUserManager,
-                CommandQueue commandQueue,
-                StatusBarNotificationPresenter notificationPresenter,
-                BubbleController bubbleController,
-                NavigationBarController navBarController,
-                AutoHideController autoHideController,
-                KeyguardUpdateMonitor keyguardUpdateMonitor,
-                StatusBarWindowView statusBarWindow,
-                BroadcastDispatcher broadcastDispatcher,
-                AssistManager assistManager,
-                NotificationGutsManager notificationGutsManager,
-                NotificationMediaManager notificationMediaManager,
-                ForegroundServiceController foregroundServiceController,
-                AppOpsController appOpsController,
-                SysuiStatusBarStateController statusBarStateController,
-                DeviceProvisionedController deviceProvisionedController,
-                NotificationAlertingManager notificationAlertingManager,
-                NotificationInterruptionStateProvider notificationInterruptionStateProvider,
-                MetricsLogger metricsLogger,
-                HeadsUpManagerPhone headsUpManager,
-                KeyguardStateController keyguardStateController,
-                ScreenLifecycle screenLifecycle,
-                BypassHeadsUpNotifier bypassHeadsUpNotifier,
-                SysuiColorExtractor colorExtractor, DisplayMetrics displayMetrics,
-                UiOffloadThread uiOffloadThread,
-                DozeLog dozeLog,
-                PulseExpansionHandler pulseExpansionHandler,
-                RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
-                NotificationWakeUpCoordinator notificationWakeUpCoordinator,
-                KeyguardBypassController keyguardBypassController) {
-            mStatusBarKeyguardViewManager = man;
-            mKeyguardIndicationController = key;
-            mStackScroller = stack;
-            mPowerManager = pm;
-            mNotificationPanel = panelView;
-            mBarService = barService;
-            mNotificationListener = notificationListener;
-            mNotificationLogger = notificationLogger;
-            mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
-            mVisualStabilityManager = visualStabilityManager;
-            mViewHierarchyManager = viewHierarchyManager;
-            mEntryManager = entryManager;
-            mScrimController = scrimController;
-            mBiometricUnlockController = biometricUnlockController;
-            mKeyguardViewMediator = keyguardViewMediator;
-            mRemoteInputManager = notificationRemoteInputManager;
-            mGroupManager = notificationGroupManager;
-            mGroupAlertTransferHelper = notificationGroupAlertTransferHelper;
-            mFalsingManager = falsingManager;
-            mStatusBarWindowController = statusBarWindowController;
-            mNotificationIconAreaController = notificationIconAreaController;
-            mDozeScrimController = dozeScrimController;
-            mNotificationShelf = notificationShelf;
-            mLockscreenUserManager = notificationLockscreenUserManager;
-            mCommandQueue = commandQueue;
-            mPresenter = notificationPresenter;
-            mGestureWakeLock = mock(PowerManager.WakeLock.class);
-            mBubbleController = bubbleController;
-            mNavigationBarController = navBarController;
-            mAutoHideController = autoHideController;
-            mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-            mStatusBarWindow = statusBarWindow;
-            mDozeServiceHost.mWakeLockScreenPerformsAuth = false;
-            mBroadcastDispatcher = broadcastDispatcher;
-            mAssistManager = assistManager;
-            mGutsManager = notificationGutsManager;
-            mMediaManager = notificationMediaManager;
-            mForegroundServiceController = foregroundServiceController;
-            mAppOpsController = appOpsController;
-            mStatusBarStateController = statusBarStateController;
-            mDeviceProvisionedController = deviceProvisionedController;
-            mNotificationAlertingManager = notificationAlertingManager;
-            mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
-            mMetricsLogger = metricsLogger;
-            mHeadsUpManager = headsUpManager;
-            mKeyguardStateController = keyguardStateController;
-            mScreenLifecycle = screenLifecycle;
-            mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
-            mColorExtractor = colorExtractor;
-            mDisplayMetrics = displayMetrics;
-            mUiOffloadThread = uiOffloadThread;
-            mDozeLog = dozeLog;
-            mPulseExpansionHandler = pulseExpansionHandler;
-            mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
-            mWakeUpCoordinator = notificationWakeUpCoordinator;
-            mKeyguardBypassController = keyguardBypassController;
-        }
-
-        private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
-            WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
-            wakefulnessLifecycle.dispatchStartedWakingUp();
-            wakefulnessLifecycle.dispatchFinishedWakingUp();
-            return wakefulnessLifecycle;
-        }
-
-        @Override
-        protected void updateTheme() {
-            // Do nothing for now, until we have more mocking and StatusBar is smaller.
-        }
-
-        public void setBarStateForTest(int state) {
-            mState = state;
-        }
-
-        public void setUserSetupForTest(boolean userSetup) {
-            mUserSetup = userSetup;
-        }
-
-    }
-
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
         public TestableNotificationEntryManager(Context context) {
@@ -969,7 +881,7 @@ public class StatusBarTest extends SysuiTestCase {
     public static class TestableNotificationInterruptionStateProvider extends
             NotificationInterruptionStateProvider {
 
-        public TestableNotificationInterruptionStateProvider(
+        TestableNotificationInterruptionStateProvider(
                 Context context,
                 PowerManager powerManager,
                 IDreamManager dreamManager,
