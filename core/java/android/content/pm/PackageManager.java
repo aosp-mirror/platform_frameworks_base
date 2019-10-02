@@ -917,8 +917,9 @@ public abstract class PackageManager {
     public static final int INSTALL_DRY_RUN = 0x00800000;
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "DONT_KILL_APP" }, value = {
-            DONT_KILL_APP
+    @IntDef(flag = true, value = {
+            DONT_KILL_APP,
+            SYNCHRONOUS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EnabledFlags {}
@@ -930,6 +931,14 @@ public abstract class PackageManager {
      * since changing component states can make the containing application's behavior unpredictable.
      */
     public static final int DONT_KILL_APP = 0x00000001;
+
+    /**
+     * Flag parameter for
+     * {@link #setComponentEnabledSetting(android.content.ComponentName, int, int)} to indicate
+     * that the given user's package restrictions state will be serialised to disk after the
+     * component state has been updated.
+     */
+    public static final int SYNCHRONOUS = 0x00000002;
 
     /** @hide */
     @IntDef(prefix = { "INSTALL_REASON_" }, value = {

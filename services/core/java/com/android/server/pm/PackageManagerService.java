@@ -19980,7 +19980,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         synchronized (mLock) {
-            scheduleWritePackageRestrictionsLocked(userId);
+            if ((flags & PackageManager.SYNCHRONOUS) != 0) {
+                flushPackageRestrictionsAsUserInternalLocked(userId);
+            } else {
+                scheduleWritePackageRestrictionsLocked(userId);
+            }
             updateSequenceNumberLP(pkgSetting, new int[] { userId });
             final long callingId = Binder.clearCallingIdentity();
             try {
@@ -20041,11 +20045,16 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId, false /* requireFullPermission*/,
                 false /* checkShell */, "flushPackageRestrictions");
         synchronized (mLock) {
-            mSettings.writePackageRestrictionsLPr(userId);
-            mDirtyUsers.remove(userId);
-            if (mDirtyUsers.isEmpty()) {
-                mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
-            }
+            flushPackageRestrictionsAsUserInternalLocked(userId);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void flushPackageRestrictionsAsUserInternalLocked(int userId) {
+        mSettings.writePackageRestrictionsLPr(userId);
+        mDirtyUsers.remove(userId);
+        if (mDirtyUsers.isEmpty()) {
+            mHandler.removeMessages(WRITE_PACKAGE_RESTRICTIONS);
         }
     }
 
