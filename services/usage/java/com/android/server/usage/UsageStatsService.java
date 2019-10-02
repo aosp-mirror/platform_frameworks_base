@@ -977,7 +977,9 @@ public class UsageStatsService extends SystemService implements
                 continue;
             }
             UserUsageStatsService service = mUserState.get(userId);
-            service.persistActiveStats();
+            if (service != null) {
+                service.persistActiveStats();
+            }
             mAppStandby.flushToDisk(userId);
         }
         mAppStandby.flushDurationsToDisk();
