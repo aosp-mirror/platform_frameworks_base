@@ -260,7 +260,7 @@ public class BiometricService extends SystemService {
     private final boolean mHasFeatureIris;
     private final boolean mHasFeatureFace;
     @VisibleForTesting
-    SettingObserver mSettingObserver;
+    final SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
     private final Random mRandom = new Random();
 
@@ -409,8 +409,8 @@ public class BiometricService extends SystemService {
     };
 
     private final class Authenticator {
-        int mType;
-        BiometricAuthenticator mAuthenticator;
+        final int mType;
+        final BiometricAuthenticator mAuthenticator;
 
         Authenticator(int type, BiometricAuthenticator authenticator) {
             mType = type;
@@ -443,9 +443,9 @@ public class BiometricService extends SystemService {
         private final ContentResolver mContentResolver;
         private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
 
-        private Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
-        private Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
-        private Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
 
         /**
          * Creates a content observer.
