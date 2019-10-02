@@ -6893,12 +6893,18 @@ package android.telecom {
 
   public final class Call {
     method @Deprecated public void addListener(android.telecom.Call.Listener);
+    method public void enterBackgroundAudioProcessing();
+    method public void exitBackgroundAudioProcessing(boolean);
     method @Deprecated public void removeListener(android.telecom.Call.Listener);
     field @Deprecated public static final int STATE_PRE_DIAL_WAIT = 8; // 0x8
   }
 
   @Deprecated public abstract static class Call.Listener extends android.telecom.Call.Callback {
     ctor @Deprecated public Call.Listener();
+  }
+
+  public static class CallScreeningService.CallResponse.Builder {
+    method public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallFurther(boolean);
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
