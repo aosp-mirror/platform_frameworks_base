@@ -973,6 +973,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
+
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
             = new WindowManagerInternal.AppTransitionListener() {
@@ -989,7 +990,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (atoken == null) {
                 return;
             }
-            if (atoken.mLaunchTaskBehind) {
+
+            // While running a recents animation, this will get called early because we show the
+            // recents animation target activity immediately when the animation starts. Defer the
+            // mLaunchTaskBehind updates until recents animation finishes.
+            final boolean isRecentsAnimationTarget = getRecentsAnimationController() != null
+                    && getRecentsAnimationController().isTargetApp(atoken);
+            if (atoken.mLaunchTaskBehind && !isRecentsAnimationTarget) {
                 try {
                     mActivityTaskManager.notifyLaunchTaskBehindComplete(atoken.token);
                 } catch (RemoteException e) {
@@ -997,20 +1004,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 atoken.mLaunchTaskBehind = false;
             } else {
                 atoken.updateReportedVisibilityLocked();
-                if (atoken.mEnteringAnimation) {
-                    if (getRecentsAnimationController() != null
-                            && getRecentsAnimationController().isTargetApp(atoken)) {
-                        // Currently running a recents animation, this will get called early because
-                        // we show the recents animation target activity immediately when the
-                        // animation starts. In this case, we should defer sending the finished
-                        // callback until the animation successfully finishes
-                        return;
-                    } else {
-                        atoken.mEnteringAnimation = false;
-                        try {
-                            mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
-                        } catch (RemoteException e) {
-                        }
+                // We should also defer sending the finished callback until the recents animation
+                // successfully finishes.
+                if (atoken.mEnteringAnimation && !isRecentsAnimationTarget) {
+                    atoken.mEnteringAnimation = false;
+                    try {
+                        mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
+                    } catch (RemoteException e) {
                     }
                 }
             }
