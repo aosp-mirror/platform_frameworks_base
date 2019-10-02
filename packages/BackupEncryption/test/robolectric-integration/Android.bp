@@ -23,6 +23,7 @@ android_robolectric_test {
         "platform-test-annotations",
         "testng",
         "truth-prebuilt",
+        "BackupEncryptionRoboTests",
     ],
     static_libs: [
         "androidx.test.core",
