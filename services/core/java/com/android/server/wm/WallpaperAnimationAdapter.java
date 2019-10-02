@@ -16,16 +16,16 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RECENTS_ANIMATIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_REMOTE_ANIMATIONS;
 
 import android.graphics.Point;
 import android.os.SystemClock;
-import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -68,15 +68,11 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         service.mRoot.forAllWallpaperWindows(wallpaperWindow -> {
             if (!wallpaperWindow.getDisplayContent().mWallpaperController.isWallpaperVisible()) {
-                if (DEBUG_REMOTE_ANIMATIONS || DEBUG_RECENTS_ANIMATIONS) {
-                    Slog.d(TAG, "\tNot visible=" + wallpaperWindow);
-                }
+                ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "\tNot visible=%s", wallpaperWindow);
                 return;
             }
 
-            if (DEBUG_REMOTE_ANIMATIONS || DEBUG_RECENTS_ANIMATIONS) {
-                Slog.d(TAG, "\tvisible=" + wallpaperWindow);
-            }
+            ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "\tvisible=%s", wallpaperWindow);
             final WallpaperAnimationAdapter wallpaperAdapter = new WallpaperAnimationAdapter(
                     wallpaperWindow, durationHint, statusBarTransitionDelay,
                     animationCanceledRunnable);
@@ -129,7 +125,7 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
     @Override
     public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
             SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
-        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "startAnimation");
+        ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
 
         // Restore z-layering until client has a chance to modify it.
         t.setLayer(animationLeash, mWallpaperToken.getPrefixOrderIndex());
@@ -139,7 +135,7 @@ class WallpaperAnimationAdapter implements AnimationAdapter {
 
     @Override
     public void onAnimationCancelled(SurfaceControl animationLeash) {
-        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "onAnimationCancelled");
+        ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "onAnimationCancelled");
         mAnimationCanceledRunnable.accept(this);
     }
 

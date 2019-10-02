@@ -42,7 +42,7 @@ import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIB
 import static com.android.internal.policy.DecorView.getColorViewLeftInset;
 import static com.android.internal.policy.DecorView.getColorViewTopInset;
 import static com.android.internal.policy.DecorView.getNavigationBarRect;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -79,6 +79,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.DecorView;
 import com.android.internal.view.BaseIWindow;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
+import com.android.server.protolog.common.ProtoLog;
 
 /**
  * This class represents a starting window that shows a snapshot.
@@ -259,14 +260,14 @@ class TaskSnapshotSurface implements StartingSurface {
             final long now = SystemClock.uptimeMillis();
             if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS) {
                 mHandler.postAtTime(this::remove, mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
-                if (DEBUG_STARTING_WINDOW) {
-                    Slog.v(TAG, "Defer removing snapshot surface in "  + (now - mShownTime) + "ms");
-                }
+                ProtoLog.v(WM_DEBUG_STARTING_WINDOW,
+                        "Defer removing snapshot surface in %dms", (now - mShownTime));
+
                 return;
             }
         }
         try {
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Removing snapshot surface");
+            ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Removing snapshot surface");
             mSession.remove(mWindow);
         } catch (RemoteException e) {
             // Local call.
@@ -286,8 +287,8 @@ class TaskSnapshotSurface implements StartingSurface {
     private void drawSnapshot() {
         mSurface.copyFrom(mSurfaceControl);
 
-        if (DEBUG_STARTING_WINDOW) Slog.v(TAG, "Drawing snapshot surface sizeMismatch="
-                + mSizeMismatch);
+        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Drawing snapshot surface sizeMismatch=%b",
+                mSizeMismatch);
         if (mSizeMismatch) {
             // The dimensions of the buffer and the window don't match, so attaching the buffer
             // will fail. Better create a child window with the exact dimensions and fill the parent

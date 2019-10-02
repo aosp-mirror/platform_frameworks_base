@@ -16,10 +16,9 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
 import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
@@ -39,6 +38,8 @@ import android.view.SurfaceControl;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
+
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 
@@ -215,10 +216,8 @@ class ScreenRotationAnimation {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
 
-        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-            Slog.i(TAG_WM,
-                    "  FREEZE " + mSurfaceControl + ": CREATE");
-        }
+        ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
+                    "  FREEZE %s: CREATE", mSurfaceControl);
         setRotation(t, originalRotation);
         t.apply();
     }
@@ -481,11 +480,7 @@ class ScreenRotationAnimation {
             mSurfaceRotationAnimationController = null;
         }
         if (mSurfaceControl != null) {
-            if (SHOW_TRANSACTIONS ||
-                    SHOW_SURFACE_ALLOC) {
-                Slog.i(TAG_WM,
-                        "  FREEZE " + mSurfaceControl + ": DESTROY");
-            }
+            ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "  FREEZE %s: DESTROY", mSurfaceControl);
             mSurfaceControl = null;
             SurfaceControl.Transaction t = mService.mTransactionFactory.get();
             if (mRotationLayer != null) {

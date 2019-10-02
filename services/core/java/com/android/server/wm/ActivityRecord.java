@@ -154,12 +154,11 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_W
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -239,6 +238,7 @@ import com.android.server.AttributeCache.Entry;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
@@ -1183,11 +1183,10 @@ final class ActivityRecord extends ConfigurationContainer {
                     info.applicationInfo.targetSdkVersion,
                     info.screenOrientation, mRotationAnimationHint,
                     mLaunchTaskBehind, isAlwaysFocusable());
-            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) {
-                Slog.v(TAG, "addAppToken: "
-                        + mAppWindowToken + " task=" + container + " at "
-                        + Integer.MAX_VALUE);
-            }
+            ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addAppToken: %s"
+                            + " task=%s at %d", mAppWindowToken, container,
+                    Integer.MAX_VALUE);
+
             container.addChild(mAppWindowToken, Integer.MAX_VALUE /* add on top */);
         }
 
@@ -1204,12 +1203,11 @@ final class ActivityRecord extends ConfigurationContainer {
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents) {
-        if (DEBUG_STARTING_WINDOW) {
-            Slog.v(TAG, "setAppStartingWindow: token=" + appToken
-                    + " pkg=" + pkg + " transferFrom=" + transferFrom + " newTask=" + newTask
-                    + " taskSwitch=" + taskSwitch + " processRunning=" + processRunning
-                    + " allowTaskSnapshot=" + allowTaskSnapshot);
-        }
+        ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "setAppStartingWindow: token=%s"
+                    + " pkg=%s transferFrom=%s newTask=%b taskSwitch=%b processRunning=%b"
+                    + " allowTaskSnapshot=%b", appToken, pkg, transferFrom, newTask, taskSwitch,
+                processRunning, allowTaskSnapshot);
+
         if (mAppWindowToken == null) {
             Slog.w(TAG_WM, "Attempted to set icon of non-existing app token: " + appToken);
             return false;
@@ -3215,7 +3213,7 @@ final class ActivityRecord extends ConfigurationContainer {
             // Window configuration changes only effect windows, so don't require a screen freeze.
             int freezableConfigChanges = configChanges & ~(CONFIG_WINDOW_CONFIGURATION);
             if (freezableConfigChanges == 0 && mAppWindowToken.okToDisplay()) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Skipping set freeze of " + appToken);
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "Skipping set freeze of %s", appToken);
                 return;
             }
 
@@ -3229,11 +3227,9 @@ final class ActivityRecord extends ConfigurationContainer {
             if (mAppWindowToken == null) {
                 return;
             }
-            if (DEBUG_ORIENTATION) {
-                Slog.v(TAG_WM, "Clear freezing of " + appToken + ": hidden="
-                        + mAppWindowToken.isHidden() + " freezing="
-                        + mAppWindowToken.isFreezingScreen());
-            }
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Clear freezing of %s: hidden=%b freezing=%b", appToken,
+                                mAppWindowToken.isHidden(), mAppWindowToken.isFreezingScreen());
             mAppWindowToken.stopFreezingScreen(true, force);
         }
     }
