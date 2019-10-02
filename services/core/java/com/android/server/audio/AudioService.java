@@ -59,6 +59,7 @@ import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiTvClient;
+import android.hardware.input.InputManager;
 import android.hardware.usb.UsbManager;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
@@ -545,6 +546,10 @@ public class AudioService extends IAudioService.Stub
     private String mEnabledSurroundFormats;
     private boolean mSurroundModeChanged;
 
+    private boolean mMicMuteFromSwitch;
+    private boolean mMicMuteFromApi;
+    private boolean mMicMuteFromRestrictions;
+
     @GuardedBy("mSettingsLock")
     private int mAssistantUid;
 
@@ -882,6 +887,8 @@ public class AudioService extends IAudioService.Stub
         mRoleObserver.register();
 
         onIndicateSystemReady();
+
+        setMicMuteFromSwitchInput();
     }
 
     RoleObserver mRoleObserver;
@@ -1021,6 +1028,8 @@ public class AudioService extends IAudioService.Stub
 
         sendMsg(mAudioHandler, MSG_DISPATCH_AUDIO_SERVER_STATE,
                 SENDMSG_QUEUE, 1, 0, null, 0);
+
+        setMicMuteFromSwitchInput();
     }
 
     private void onDispatchAudioServerStateChange(boolean state) {
@@ -2837,20 +2846,45 @@ public class AudioService extends IAudioService.Stub
                 != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        setMicrophoneMuteNoCallerCheck(on, userId);
+        mMicMuteFromApi = on;
+        setMicrophoneMuteNoCallerCheck(userId);
     }
 
-    private void setMicrophoneMuteNoCallerCheck(boolean on, int userId) {
+    /** @see AudioManager#setMicrophoneMuteFromSwitch(boolean) */
+    public void setMicrophoneMuteFromSwitch(boolean on) {
+        int userId = Binder.getCallingUid();
+        if (userId != android.os.Process.SYSTEM_UID) {
+            Log.e(TAG, "setMicrophoneMuteFromSwitch() called from non system user!");
+            return;
+        }
+        mMicMuteFromSwitch = on;
+        setMicrophoneMuteNoCallerCheck(userId);
+    }
+
+    private void setMicMuteFromSwitchInput() {
+        InputManager im = mContext.getSystemService(InputManager.class);
+        final int isMicMuted = im.isMicMuted();
+        if (isMicMuted != InputManager.SWITCH_STATE_UNKNOWN) {
+            setMicrophoneMuteFromSwitch(im.isMicMuted() != InputManager.SWITCH_STATE_OFF);
+        }
+    }
+
+    public boolean isMicrophoneMuted() {
+        return mMicMuteFromSwitch || mMicMuteFromRestrictions || mMicMuteFromApi;
+    }
+
+    private void setMicrophoneMuteNoCallerCheck(int userId) {
+        final boolean muted = isMicrophoneMuted();
         if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Mic mute %s, user=%d", on, userId));
+            Log.d(TAG, String.format("Mic mute %d, user=%d", muted, userId));
         }
         // only mute for the current user
-        if (getCurrentUserId() == userId) {
+        if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
             final boolean currentMute = AudioSystem.isMicrophoneMuted();
             final long identity = Binder.clearCallingIdentity();
-            AudioSystem.muteMicrophone(on);
+            AudioSystem.muteMicrophone(muted);
             Binder.restoreCallingIdentity(identity);
-            if (on != currentMute) {
+            if (muted != currentMute) {
                 mContext.sendBroadcastAsUser(
                         new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
                                 .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY), UserHandle.ALL);
@@ -5378,7 +5412,8 @@ public class AudioService extends IAudioService.Stub
                 final boolean isRestricted =
                         newRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE);
                 if (wasRestricted != isRestricted) {
-                    setMicrophoneMuteNoCallerCheck(isRestricted, userId);
+                    mMicMuteFromRestrictions = isRestricted;
+                    setMicrophoneMuteNoCallerCheck(userId);
                 }
             }
 

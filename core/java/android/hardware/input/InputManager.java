@@ -520,6 +520,22 @@ public final class InputManager {
     }
 
     /**
+     * Queries whether the device's microphone is muted
+     *
+     * @return The mic mute switch state which is one of {@link #SWITCH_STATE_UNKNOWN},
+     * {@link #SWITCH_STATE_OFF} or {@link #SWITCH_STATE_ON}.
+     * @hide
+     */
+    @SwitchState
+    public int isMicMuted() {
+        try {
+            return mIm.isMicMuted();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets information about all supported keyboard layouts.
      * <p>
      * The input manager consults the built-in keyboard layouts as well
