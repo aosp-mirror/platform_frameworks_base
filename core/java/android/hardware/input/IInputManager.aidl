@@ -76,6 +76,9 @@ interface IInputManager {
     // Registers a tablet mode change listener
     void registerTabletModeChangedListener(ITabletModeChangedListener listener);
 
+    // Queries whether the device's microphone is muted by switch
+    int isMicMuted();
+
     // Input device vibrator control.
     void vibrate(int deviceId, in long[] pattern, int repeat, IBinder token);
     void cancelVibrate(int deviceId, IBinder token);
