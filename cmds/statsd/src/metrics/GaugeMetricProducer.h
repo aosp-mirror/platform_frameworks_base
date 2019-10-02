@@ -58,11 +58,14 @@ class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
                         const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
-                        const int whatMatcherIndex,
-                        const sp<EventMatcherWizard>& matcherWizard,
+                        const int whatMatcherIndex,const sp<EventMatcherWizard>& matcherWizard,
                         const int pullTagId, const int triggerAtomId, const int atomId,
                         const int64_t timeBaseNs, const int64_t startTimeNs,
-                        const sp<StatsPullerManager>& pullerManager);
+                        const sp<StatsPullerManager>& pullerManager,
+                        const std::unordered_map<int, std::shared_ptr<Activation>>&
+                                eventActivationMap = {},
+                        const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                                eventDeactivationMap = {});
 
     virtual ~GaugeMetricProducer();
 
@@ -124,8 +127,6 @@ private:
 
     void flushCurrentBucketLocked(const int64_t& eventTimeNs,
                                   const int64_t& nextBucketStartTimeNs) override;
-
-    void prepareFirstBucketLocked() override;
 
     void pullAndMatchEventsLocked(const int64_t timestampNs);
 

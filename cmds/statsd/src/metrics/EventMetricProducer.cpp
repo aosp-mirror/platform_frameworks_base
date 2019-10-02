@@ -36,6 +36,7 @@ using std::map;
 using std::string;
 using std::unordered_map;
 using std::vector;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -54,8 +55,13 @@ const int FIELD_ID_ATOMS = 2;
 EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
-                                         const int64_t startTimeNs)
-    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
+                                         const int64_t startTimeNs,
+                                         const unordered_map<int, shared_ptr<Activation>>&
+                                                 eventActivationMap,
+                                         const unordered_map<int, vector<shared_ptr<Activation>>>&
+                                                 eventDeactivationMap)
+    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard, eventActivationMap,
+                     eventDeactivationMap) {
     if (metric.links().size() > 0) {
         for (const auto& link : metric.links()) {
             Metric2Condition mc;
