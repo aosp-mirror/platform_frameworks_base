@@ -14,15 +14,12 @@
      limitations under the License.
 -->
 <a>
-    <b type_string="fortytwo"
-       type_int_dec="42"
-       type_int_hex="0x2a"
-       type_int_boolean="true">
-
-        <c />
+    <b>
+        <c
+            type_string="fortytwo"
+            type_int_dec="42"
+            type_int_hex="0x2a"
+            type_int_boolean="true"
+            />
     </b>
-
-    <d>
-        <e />
-    </d>
 </a>
