@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
@@ -117,6 +118,20 @@ public final class Call {
      * manifest.
      */
     public static final int STATE_PULLING_CALL = 11;
+
+    /**
+     * The state of a call that is active with the network, but the audio from the call is
+     * being intercepted by an app on the local device. Telecom does not hold audio focus in this
+     * state, and the call will be invisible to the user except for a persistent notification.
+     */
+    public static final int STATE_AUDIO_PROCESSING = 12;
+
+    /**
+     * The state of a call that is being presented to the user after being in
+     * {@link #STATE_AUDIO_PROCESSING}. The call is still active with the network in this case, and
+     * Telecom will hold audio focus and play a ringtone if appropriate.
+     */
+    public static final int STATE_SIMULATED_RINGING = 13;
 
     /**
      * The key to retrieve the optional {@code PhoneAccount}s Telecom can bundle with its Call
@@ -1476,6 +1491,49 @@ public final class Call {
      */
     public void unhold() {
         mInCallAdapter.unholdCall(mTelecomCallId);
+    }
+
+    /**
+     * Instructs Telecom to put the call into the background audio processing state.
+     *
+     * This method can be called either when the call is in {@link #STATE_RINGING} or
+     * {@link #STATE_ACTIVE}. After Telecom acknowledges the request by setting the call's state to
+     * {@link #STATE_AUDIO_PROCESSING}, your app may setup the audio paths with the audio stack in
+     * order to capture and play audio on the call stream.
+     *
+     * This method can only be called by the default dialer app.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    //@RequiresPermission(android.Manifest.permission.BACKGROUND_CALL_AUDIO)
+    public void enterBackgroundAudioProcessing() {
+        if (mState != STATE_ACTIVE && mState != STATE_RINGING) {
+            throw new IllegalStateException("Call must be active or ringing");
+        }
+        mInCallAdapter.enterBackgroundAudioProcessing(mTelecomCallId);
+    }
+
+    /**
+     * Instructs Telecom to come out of the background audio processing state requested by
+     * {@link #enterBackgroundAudioProcessing()} or from the call screening service.
+     *
+     * This method can only be called when the call is in {@link #STATE_AUDIO_PROCESSING}.
+     *
+     * @param shouldRing If true, Telecom will put the call into the
+     *                   {@link #STATE_SIMULATED_RINGING} state and notify other apps that there is
+     *                   a ringing call. Otherwise, the call will go into {@link #STATE_ACTIVE}
+     *                   immediately.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    //@RequiresPermission(android.Manifest.permission.BACKGROUND_CALL_AUDIO)
+    public void exitBackgroundAudioProcessing(boolean shouldRing) {
+        if (mState != STATE_AUDIO_PROCESSING) {
+            throw new IllegalStateException("Call must in the audio processing state");
+        }
+        mInCallAdapter.exitBackgroundAudioProcessing(mTelecomCallId, shouldRing);
     }
 
     /**

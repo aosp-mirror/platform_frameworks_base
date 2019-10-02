@@ -44,6 +44,10 @@ oneway interface IInCallAdapter {
 
     void setAudioRoute(int route, String bluetoothAddress);
 
+    void enterBackgroundAudioProcessing(String callId);
+
+    void exitBackgroundAudioProcessing(String callId, boolean shouldRing);
+
     void playDtmfTone(String callId, char digit);
 
     void stopDtmfTone(String callId);
