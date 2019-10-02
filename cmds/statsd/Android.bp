@@ -138,6 +138,7 @@ cc_defaults {
         "libprotoutil",
         "libservices",
         "libstatslog",
+        "libstatssocket",
         "libsysutils",
         "libtimestats_proto",
         "libutils",

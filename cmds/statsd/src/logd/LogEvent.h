@@ -21,9 +21,9 @@
 #include <android/frameworks/stats/1.0/types.h>
 #include <android/os/StatsLogEventWrapper.h>
 #include <android/util/ProtoOutputStream.h>
-#include <log/log_event_list.h>
 #include <log/log_read.h>
 #include <private/android_logger.h>
+#include <stats_event_list.h>
 #include <utils/Errors.h>
 
 #include <string>
@@ -157,6 +157,7 @@ public:
     bool write(float value);
     bool write(const std::vector<AttributionNodeInternal>& nodes);
     bool write(const AttributionNodeInternal& node);
+    bool writeBytes(const std::string& value);
     bool writeKeyValuePairs(int32_t uid,
                             const std::map<int32_t, int32_t>& int_map,
                             const std::map<int32_t, int64_t>& long_map,

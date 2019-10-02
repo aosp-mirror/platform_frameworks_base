@@ -92,9 +92,15 @@ static bool pullGpuStatsAppInfo(const sp<IGpuService>& gpuService,
                 android::util::GPU_STATS_APP_INFO, getWallClockNs(), getElapsedRealtimeNs());
         if (!event->write(info.appPackageName)) return false;
         if (!event->write((int64_t)info.driverVersionCode)) return false;
-        if (!event->write(int64VectorToProtoByteString(info.glDriverLoadingTime))) return false;
-        if (!event->write(int64VectorToProtoByteString(info.vkDriverLoadingTime))) return false;
-        if (!event->write(int64VectorToProtoByteString(info.angleDriverLoadingTime))) return false;
+        if (!event->writeBytes(int64VectorToProtoByteString(info.glDriverLoadingTime)))  {
+            return false;
+        }
+        if (!event->writeBytes(int64VectorToProtoByteString(info.vkDriverLoadingTime))) {
+            return false;
+        }
+        if (!event->writeBytes(int64VectorToProtoByteString(info.angleDriverLoadingTime))) {
+            return false;
+        }
         if (!event->write(info.cpuVulkanInUse)) return false;
         if (!event->write(info.falsePrerotation)) return false;
         event->init();
