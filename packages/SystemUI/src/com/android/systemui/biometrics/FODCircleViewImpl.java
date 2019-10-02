@@ -17,12 +17,12 @@
 package com.android.systemui.biometrics;
 
 import android.content.pm.PackageManager;
+import android.util.Slog;
 import android.view.View;
 
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
-
 
 public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "FODCircleViewImpl";
