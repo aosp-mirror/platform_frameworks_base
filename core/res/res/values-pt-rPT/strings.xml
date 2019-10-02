@@ -229,7 +229,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Emergência"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Relatório de erros"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Terminar sessão"</string>
-    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de ecrã"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capt. ecrã"</string>
     <string name="bugreport_title" msgid="5981047024855257269">"Relatório de erro"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Será recolhida informação sobre o estado atual do seu dispositivo a enviar através de uma mensagem de email. Demorará algum tempo até que o relatório de erro esteja pronto para ser enviado. Aguarde um pouco."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Relatório interativo"</string>
@@ -1506,7 +1506,7 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Eliminar os itens"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Anular as eliminações"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Não fazer nada por agora"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Selecionar uma conta"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Selecione uma conta"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Adicionar uma conta"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Aumentar"</string>
