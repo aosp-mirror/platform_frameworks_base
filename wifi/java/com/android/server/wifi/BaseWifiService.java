@@ -23,6 +23,7 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
+import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.IOnWifiUsabilityStatsListener;
 import android.net.wifi.ISoftApCallback;
@@ -285,8 +286,14 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated replaced by {@link #startLocalOnlyHotspot(ILocalOnlyHotspotCallback, String)} */
+    @Deprecated
     public int startLocalOnlyHotspot(Messenger messenger, IBinder binder, String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int startLocalOnlyHotspot(ILocalOnlyHotspotCallback callback, String packageName) {
         throw new UnsupportedOperationException();
     }
 
@@ -295,8 +302,14 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    @Override
+    /** @deprecated replaced by {@link #startWatchLocalOnlyHotspot(ILocalOnlyHotspotCallback)} */
+    @Deprecated
     public void startWatchLocalOnlyHotspot(Messenger messenger, IBinder binder) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void startWatchLocalOnlyHotspot(ILocalOnlyHotspotCallback callback) {
         throw new UnsupportedOperationException();
     }
 

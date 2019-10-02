@@ -26,6 +26,7 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
+import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
@@ -138,11 +139,11 @@ interface IWifiManager
 
     boolean stopSoftAp();
 
-    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, String packageName);
+    int startLocalOnlyHotspot(in ILocalOnlyHotspotCallback callback, String packageName);
 
     void stopLocalOnlyHotspot();
 
-    void startWatchLocalOnlyHotspot(in Messenger messenger, in IBinder binder);
+    void startWatchLocalOnlyHotspot(in ILocalOnlyHotspotCallback callback);
 
     void stopWatchLocalOnlyHotspot();
 
