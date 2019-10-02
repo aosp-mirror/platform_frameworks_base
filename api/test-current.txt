@@ -2734,8 +2734,17 @@ package android.service.quicksettings {
 
 package android.telecom {
 
+  public final class Call {
+    method public void enterBackgroundAudioProcessing();
+    method public void exitBackgroundAudioProcessing(boolean);
+  }
+
   public final class CallAudioState implements android.os.Parcelable {
     ctor public CallAudioState(boolean, int, int, @Nullable android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.bluetooth.BluetoothDevice>);
+  }
+
+  public static class CallScreeningService.CallResponse.Builder {
+    method public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallFurther(boolean);
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
