@@ -753,7 +753,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false /* mockGetLaunchStack */);
 
         // Create a secondary display at bottom.
-        final TestActivityDisplay secondaryDisplay = spy(createNewActivityDisplay());
+        final TestActivityDisplay secondaryDisplay = createNewActivityDisplay();
         mRootActivityContainer.addChild(secondaryDisplay, POSITION_BOTTOM);
         final ActivityStack stack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
@@ -791,7 +791,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false /* mockGetLaunchStack */);
 
         // Create a secondary display with an activity.
-        final TestActivityDisplay secondaryDisplay = spy(createNewActivityDisplay());
+        final TestActivityDisplay secondaryDisplay = createNewActivityDisplay();
         mRootActivityContainer.addChild(secondaryDisplay, POSITION_TOP);
         final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
                 secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,

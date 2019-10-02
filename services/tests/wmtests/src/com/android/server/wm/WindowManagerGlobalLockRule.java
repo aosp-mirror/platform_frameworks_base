@@ -27,6 +27,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -59,34 +62,41 @@ class WindowManagerGlobalLockRule implements WindowTestRunner.MethodWrapper {
         return base;
     }
 
-    void waitUntilHandlersIdle() {
-        if (!mIsLocked) {
-            mSystemServicesTestRule.waitUntilWindowManagerHandlersIdle();
-            return;
-        }
-
-        waitForLocked(mSystemServicesTestRule::waitUntilWindowManagerHandlersIdle);
+    boolean runWithScissors(Handler handler, Runnable r, long timeout) {
+        return waitForLocked(() -> handler.runWithScissors(r, timeout));
     }
 
-    void runWithScissors(Handler handler, Runnable r, long timeout) {
-        if (!mIsLocked) {
-            handler.runWithScissors(r, timeout);
-            return;
-        }
-
-        waitForLocked(() -> handler.runWithScissors(r, timeout));
+    void waitForLocked(Runnable r) {
+        waitForLocked(() -> {
+            r.run();
+            return null;
+        });
     }
 
     /**
      * If the test holds the lock, we need to invoke {@link Object#wait} to release it so other
      * threads won't be blocked when we are waiting.
      */
-    private void waitForLocked(Runnable r) {
+    <T> T waitForLocked(Callable<T> callable) {
+        if (!mIsLocked) {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         final Object lock = mSystemServicesTestRule.getWindowManagerService().mGlobalLock;
         final AtomicBoolean done = new AtomicBoolean(false);
+        final List<T> result = Arrays.asList((T) null);
+        final Exception[] exception = { null };
 
         AsyncTask.SERIAL_EXECUTOR.execute(() -> {
-            r.run();
+            try {
+                result.set(0, callable.call());
+            } catch (Exception e) {
+                exception[0] = e;
+            }
             synchronized (lock) {
                 lock.notifyAll();
                 done.set(true);
@@ -101,6 +111,11 @@ class WindowManagerGlobalLockRule implements WindowTestRunner.MethodWrapper {
                 }
             }
         }
+        if (exception[0] != null) {
+            throw new RuntimeException(exception[0]);
+        }
+
+        return result.get(0);
     }
 
     /** Wraps methods annotated with {@link org.junit.Test}. */

@@ -42,7 +42,6 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.testing.DexmakerShareClassLoaderRule;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -55,7 +54,6 @@ import com.android.server.AttributeCache;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -65,7 +63,7 @@ import java.util.LinkedList;
  *
  * Make sure any requests to WM hold the WM lock if needed b/73966377
  */
-class WindowTestsBase {
+class WindowTestsBase extends SystemServiceTestsBase {
     private static final String TAG = WindowTestsBase.class.getSimpleName();
 
     WindowManagerService mWm;
@@ -91,16 +89,6 @@ class WindowTestsBase {
      * Spied {@link Transaction} class than can be used to verify calls.
      */
     Transaction mTransaction;
-
-    @Rule
-    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
-            new DexmakerShareClassLoaderRule();
-    @Rule
-    public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule();
-
-    @WindowTestRunner.MethodWrapperRule
-    public final WindowManagerGlobalLockRule mLockRule =
-            new WindowManagerGlobalLockRule(mSystemServicesTestRule);
 
     @BeforeClass
     public static void setUpOnceBase() {
@@ -203,13 +191,6 @@ class WindowTestsBase {
             win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
             return win;
         }
-    }
-
-    /**
-     * Waits until the main handler for WM has processed all messages.
-     */
-    void waitUntilHandlersIdle() {
-        mLockRule.waitUntilHandlersIdle();
     }
 
     private WindowToken createWindowToken(

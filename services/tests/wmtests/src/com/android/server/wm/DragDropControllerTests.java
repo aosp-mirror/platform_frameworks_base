@@ -23,7 +23,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertNotNull;
@@ -51,6 +50,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -59,10 +59,11 @@ import java.util.concurrent.TimeUnit;
  * Tests for the {@link DragDropController} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:DragDropControllerTests
+ *  atest WmTests:DragDropControllerTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class DragDropControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 3000;
     private TestDragDropController mTarget;
@@ -123,30 +124,25 @@ public class DragDropControllerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         mTarget = new TestDragDropController(mWm, mWm.mH.getLooper());
-        mDisplayContent = spy(mDisplayContent);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
         when(mWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
 
-        synchronized (mWm.mGlobalLock) {
-            mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
-        }
+        mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
     }
 
     @After
     public void tearDown() throws Exception {
         final CountDownLatch latch;
-        synchronized (mWm.mGlobalLock) {
-            if (!mTarget.dragDropActiveLocked()) {
-                return;
-            }
-            if (mToken != null) {
-                mTarget.cancelDragAndDrop(mToken, false);
-            }
-            latch = new CountDownLatch(1);
-            mTarget.setOnClosedCallbackLocked(latch::countDown);
+        if (!mTarget.dragDropActiveLocked()) {
+            return;
         }
-        assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        if (mToken != null) {
+            mTarget.cancelDragAndDrop(mToken, false);
+        }
+        latch = new CountDownLatch(1);
+        mTarget.setOnClosedCallbackLocked(latch::countDown);
+        assertTrue(awaitInWmLock(() -> latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)));
     }
 
     @Test

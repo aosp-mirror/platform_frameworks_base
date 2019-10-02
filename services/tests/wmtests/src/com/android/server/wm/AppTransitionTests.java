@@ -31,7 +31,6 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -55,6 +54,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link AppTransition}.
@@ -64,16 +64,13 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class AppTransitionTests extends WindowTestsBase {
     private DisplayContent mDc;
 
     @Before
     public void setUp() throws Exception {
-        synchronized (mWm.mGlobalLock) {
-            // Hold the lock to protect the stubbing from being accessed by other threads.
-            spyOn(mWm.mRoot);
-            doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
-        }
+        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
         mDc = mWm.getDefaultDisplayContentLocked();
     }
 

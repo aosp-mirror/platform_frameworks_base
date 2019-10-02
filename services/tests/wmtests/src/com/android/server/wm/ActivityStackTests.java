@@ -67,6 +67,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link ActivityStack} class.
@@ -76,6 +77,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityStackTests extends ActivityTestsBase {
     private ActivityDisplay mDefaultDisplay;
     private ActivityStack mStack;

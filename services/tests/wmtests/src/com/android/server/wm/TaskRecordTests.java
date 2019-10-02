@@ -51,7 +51,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
@@ -78,6 +77,7 @@ import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -98,6 +98,7 @@ import java.util.ArrayList;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskRecordTests extends ActivityTestsBase {
 
     private static final String TASK_TAG = "task";

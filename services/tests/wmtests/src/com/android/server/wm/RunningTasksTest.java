@@ -35,6 +35,7 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
@@ -44,6 +45,7 @@ import java.util.ArrayList;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RunningTasksTest extends ActivityTestsBase {
 
     private static final ArraySet<Integer> PROFILE_IDS = new ArraySet<>();

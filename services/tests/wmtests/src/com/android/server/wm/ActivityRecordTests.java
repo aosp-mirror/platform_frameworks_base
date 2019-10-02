@@ -103,8 +103,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.invocation.InvocationOnMock;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Tests for the {@link ActivityRecord} class.
  *
@@ -646,7 +644,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // The override configuration should be reset and the activity's process will be killed.
         assertFalse(mActivity.inSizeCompatMode());
         verify(mActivity).restartProcessIfVisible();
-        mLockRule.runWithScissors(mService.mH, () -> { }, TimeUnit.SECONDS.toMillis(3));
+        waitHandlerIdle(mService.mH);
         verify(mService.mAmInternal).killProcess(
                 eq(mActivity.app.mName), eq(mActivity.app.mUid), anyString());
     }
