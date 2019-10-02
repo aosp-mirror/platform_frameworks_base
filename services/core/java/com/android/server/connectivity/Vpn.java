@@ -199,13 +199,22 @@ public class Vpn {
      */
     private @NonNull List<String> mLockdownWhitelist = Collections.emptyList();
 
-    /**
-     * List of UIDs for which networking should be blocked until VPN is ready, during brief periods
-     * when VPN is not running. For example, during system startup or after a crash.
+     /**
+     * A memory of what UIDs this class told netd to block for the lockdown feature.
+     *
+     * Netd maintains ranges of UIDs for which network should be restricted to using only the VPN
+     * for the lockdown feature. This class manages these UIDs and sends this information to netd.
+     * To avoid sending the same commands multiple times (which would be wasteful) and to be able
+     * to revoke lists (when the rules should change), it's simplest to keep this cache of what
+     * netd knows, so it can be diffed and sent most efficiently.
+     *
+     * The contents of this list must only be changed when updating the UIDs lists with netd,
+     * since it needs to keep in sync with the picture netd has of them.
+     *
      * @see mLockdown
      */
     @GuardedBy("this")
-    private Set<UidRange> mBlockedUsers = new ArraySet<>();
+    private final Set<UidRange> mBlockedUidsAsToldToNetd = new ArraySet<>();
 
     // Handle of the user initiating VPN.
     private final int mUserHandle;
@@ -254,7 +263,7 @@ public class Vpn {
     }
 
     /**
-     * Update current state, dispaching event to listeners.
+     * Update current state, dispatching event to listeners.
      */
     @VisibleForTesting
     protected void updateState(DetailedState detailedState, String reason) {
@@ -1325,7 +1334,7 @@ public class Vpn {
      *                {@link Vpn} goes through a VPN connection or is blocked until one is
      *                available, {@code false} to lift the requirement.
      *
-     * @see #mBlockedUsers
+     * @see #mBlockedUidsAsToldToNetd
      */
     @GuardedBy("this")
     private void setVpnForcedLocked(boolean enforce) {
@@ -1336,37 +1345,47 @@ public class Vpn {
             exemptedPackages = new ArrayList<>(mLockdownWhitelist);
             exemptedPackages.add(mPackage);
         }
-        final Set<UidRange> removedRanges = new ArraySet<>(mBlockedUsers);
+        final Set<UidRange> rangesToTellNetdToRemove = new ArraySet<>(mBlockedUidsAsToldToNetd);
 
-        Set<UidRange> addedRanges = Collections.emptySet();
+        final Set<UidRange> rangesToTellNetdToAdd;
         if (enforce) {
-            addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
-                    /* allowedApplications */ null,
-                    /* disallowedApplications */ exemptedPackages);
+            final Set<UidRange> rangesThatShouldBeBlocked =
+                    createUserAndRestrictedProfilesRanges(mUserHandle,
+                            /* allowedApplications */ null,
+                            /* disallowedApplications */ exemptedPackages);
 
             // The UID range of the first user (0-99999) would block the IPSec traffic, which comes
             // directly from the kernel and is marked as uid=0. So we adjust the range to allow
             // it through (b/69873852).
-            for (UidRange range : addedRanges) {
+            for (UidRange range : rangesThatShouldBeBlocked) {
                 if (range.start == 0) {
-                    addedRanges.remove(range);
+                    rangesThatShouldBeBlocked.remove(range);
                     if (range.stop != 0) {
-                        addedRanges.add(new UidRange(1, range.stop));
+                        rangesThatShouldBeBlocked.add(new UidRange(1, range.stop));
                     }
                 }
             }
 
-            removedRanges.removeAll(addedRanges);
-            addedRanges.removeAll(mBlockedUsers);
+            rangesToTellNetdToRemove.removeAll(rangesThatShouldBeBlocked);
+            rangesToTellNetdToAdd = rangesThatShouldBeBlocked;
+            // The ranges to tell netd to add are the ones that should be blocked minus the
+            // ones it already knows to block. Note that this will change the contents of
+            // rangesThatShouldBeBlocked, but the list of ranges that should be blocked is
+            // not used after this so it's fine to destroy it.
+            rangesToTellNetdToAdd.removeAll(mBlockedUidsAsToldToNetd);
+        } else {
+            rangesToTellNetdToAdd = Collections.emptySet();
         }
 
-        setAllowOnlyVpnForUids(false, removedRanges);
-        setAllowOnlyVpnForUids(true, addedRanges);
+        // If mBlockedUidsAsToldToNetd used to be empty, this will always be a no-op.
+        setAllowOnlyVpnForUids(false, rangesToTellNetdToRemove);
+        // If nothing should be blocked now, this will now be a no-op.
+        setAllowOnlyVpnForUids(true, rangesToTellNetdToAdd);
     }
 
     /**
-     * Either add or remove a list of {@link UidRange}s to the list of UIDs that are only allowed
-     * to make connections through sockets that have had {@code protect()} called on them.
+     * Tell netd to add or remove a list of {@link UidRange}s to the list of UIDs that are only
+     * allowed to make connections through sockets that have had {@code protect()} called on them.
      *
      * @param enforce {@code true} to add to the blacklist, {@code false} to remove.
      * @param ranges {@link Collection} of {@link UidRange}s to add (if {@param enforce} is
@@ -1388,9 +1407,9 @@ public class Vpn {
             return false;
         }
         if (enforce) {
-            mBlockedUsers.addAll(ranges);
+            mBlockedUidsAsToldToNetd.addAll(ranges);
         } else {
-            mBlockedUsers.removeAll(ranges);
+            mBlockedUidsAsToldToNetd.removeAll(ranges);
         }
         return true;
     }
@@ -1557,17 +1576,18 @@ public class Vpn {
     /**
      * @param uid The target uid.
      *
-     * @return {@code true} if {@code uid} is included in one of the mBlockedUsers ranges and the
-     * VPN is not connected, or if the VPN is connected but does not apply to the {@code uid}.
+     * @return {@code true} if {@code uid} is included in one of the mBlockedUidsAsToldToNetd
+     * ranges and the VPN is not connected, or if the VPN is connected but does not apply to
+     * the {@code uid}.
      *
      * @apiNote This method don't check VPN lockdown status.
-     * @see #mBlockedUsers
+     * @see #mBlockedUidsAsToldToNetd
      */
     public synchronized boolean isBlockingUid(int uid) {
         if (mNetworkInfo.isConnected()) {
             return !appliesToUid(uid);
         } else {
-            return UidRange.containsUid(mBlockedUsers, uid);
+            return UidRange.containsUid(mBlockedUidsAsToldToNetd, uid);
         }
     }
 
