@@ -305,6 +305,12 @@ class ZygoteConnection {
     }
 
     private void handleBootCompleted() {
+        try {
+            mSocketOutStream.writeInt(0);
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Error writing to command socket", ioe);
+        }
+
         VMRuntime.bootCompleted();
     }
 
