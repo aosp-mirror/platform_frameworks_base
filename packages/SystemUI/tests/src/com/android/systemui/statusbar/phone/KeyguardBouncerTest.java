@@ -89,6 +89,8 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private Handler mHandler;
+    @Mock
+    private KeyguardSecurityModel mKeyguardSecurityModel;
 
     private KeyguardBouncer mBouncer;
 
@@ -97,6 +99,9 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
+        mDependency.injectTestDependency(KeyguardSecurityModel.class, mKeyguardSecurityModel);
+        when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
+                .thenReturn(KeyguardSecurityModel.SecurityMode.None);
         DejankUtils.setImmediate(true);
         final ViewGroup container = new FrameLayout(getContext());
         when(mKeyguardHostView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
@@ -303,14 +308,6 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.setExpansion(0.5f);
         verify(mKeyguardHostView).setAlpha(anyFloat());
         verify(mKeyguardHostView).setTranslationY(anyFloat());
-    }
-
-    @Test
-    public void testNeedsFullscreenBouncer_asksKeyguardView() {
-        mBouncer.ensureView();
-        mBouncer.needsFullscreenBouncer();
-        verify(mKeyguardHostView).getSecurityMode();
-        verify(mKeyguardHostView, never()).getCurrentSecurityMode();
     }
 
     @Test

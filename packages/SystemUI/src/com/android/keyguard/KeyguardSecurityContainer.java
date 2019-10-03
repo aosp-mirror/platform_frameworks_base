@@ -128,7 +128,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mSecurityModel = new KeyguardSecurityModel(context);
+        mSecurityModel = Dependency.get(KeyguardSecurityModel.class);
         mLockPatternUtils = new LockPatternUtils(context);
         mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mSpringAnimation = new SpringAnimation(this, DynamicAnimation.Y);

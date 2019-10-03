@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import android.content.Context;
@@ -38,11 +37,13 @@ import android.view.WindowInsets;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
@@ -461,15 +462,9 @@ public class KeyguardBouncer {
      * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
-        // TODO(b/140059518)
-        return whitelistIpcs(() -> {
-            ensureView();
-            if (mKeyguardView != null) {
-                SecurityMode mode = mKeyguardView.getSecurityMode();
-                return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
-            }
-            return false;
-        });
+        SecurityMode mode = Dependency.get(KeyguardSecurityModel.class).getSecurityMode(
+                KeyguardUpdateMonitor.getCurrentUser());
+        return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
     }
 
     /**
