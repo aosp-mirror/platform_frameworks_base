@@ -21,6 +21,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.hardware.usb.IUsbManager;
@@ -84,14 +85,27 @@ public class UsbPermissionActivity extends AlertActivity
         final AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = appName;
         if (mDevice == null) {
+            // Accessory Case
+
             ap.mMessage = getString(R.string.usb_accessory_permission_prompt, appName,
                     mAccessory.getDescription());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
         } else {
-            ap.mMessage = getString(R.string.usb_device_permission_prompt, appName,
-                    mDevice.getProductName());
+            boolean hasRecordPermission =
+                    PermissionChecker.checkPermission(
+                            this, android.Manifest.permission.RECORD_AUDIO, -1, aInfo.uid,
+                            mPackageName)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
+            boolean useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
+
+            int strID = useRecordWarning
+                    ? R.string.usb_device_permission_prompt_warn
+                    : R.string.usb_device_permission_prompt;
+            ap.mMessage = getString(strID, appName, mDevice.getProductName());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
         }
+
         ap.mPositiveButtonText = getString(android.R.string.ok);
         ap.mNegativeButtonText = getString(android.R.string.cancel);
         ap.mPositiveButtonListener = this;

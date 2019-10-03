@@ -309,17 +309,17 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public UsbDevice.Builder toAndroidUsbDevice() {
+    public UsbDevice.Builder toAndroidUsbDeviceBuilder() {
         if (mDeviceDescriptor == null) {
             Log.e(TAG, "toAndroidUsbDevice() ERROR - No Device Descriptor");
             return null;
         }
 
-        UsbDevice.Builder device = mDeviceDescriptor.toAndroid(this);
-        if (device == null) {
+        UsbDevice.Builder builder = mDeviceDescriptor.toAndroid(this);
+        if (builder == null) {
             Log.e(TAG, "toAndroidUsbDevice() ERROR Creating Device");
         }
-        return device;
+        return builder;
     }
 
     /**
@@ -519,6 +519,37 @@ public final class UsbDescriptorParser {
         ArrayList<UsbDescriptor> descriptors =
                 getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_AUDIO);
         return !descriptors.isEmpty();
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasAudioTerminal(int subType) {
+        for (UsbDescriptor descriptor : mDescriptors) {
+            if (descriptor instanceof UsbACInterface) {
+                if (((UsbACInterface) descriptor).getSubclass()
+                        == UsbDescriptor.AUDIO_AUDIOCONTROL
+                        && ((UsbACInterface) descriptor).getSubtype()
+                        == subType) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasAudioPlayback() {
+        return hasAudioTerminal(UsbACInterface.ACI_OUTPUT_TERMINAL);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasAudioCapture() {
+        return hasAudioTerminal(UsbACInterface.ACI_INPUT_TERMINAL);
     }
 
     /**
