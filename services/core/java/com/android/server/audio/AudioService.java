@@ -1566,12 +1566,13 @@ public class AudioService extends IAudioService.Stub
         AudioSystem.setMasterMute(masterMute);
         broadcastMasterMuteStatus(masterMute);
 
-        boolean microphoneMute = mUserManagerInternal.getUserRestriction(
+        mMicMuteFromRestrictions = mUserManagerInternal.getUserRestriction(
                 currentUser, UserManager.DISALLOW_UNMUTE_MICROPHONE);
         if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Mic mute %s, user=%d", microphoneMute, currentUser));
+            Log.d(TAG, String.format("Mic mute %b, user=%d", mMicMuteFromRestrictions,
+                    currentUser));
         }
-        AudioSystem.muteMicrophone(microphoneMute);
+        setMicrophoneMuteNoCallerCheck(currentUser);
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
@@ -2876,7 +2877,7 @@ public class AudioService extends IAudioService.Stub
     private void setMicrophoneMuteNoCallerCheck(int userId) {
         final boolean muted = isMicrophoneMuted();
         if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Mic mute %d, user=%d", muted, userId));
+            Log.d(TAG, String.format("Mic mute %b, user=%d", muted, userId));
         }
         // only mute for the current user
         if (getCurrentUserId() == userId || userId == android.os.Process.SYSTEM_UID) {
