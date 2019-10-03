@@ -224,7 +224,7 @@ public class InsetsController implements WindowInsetsController {
         show(types, false /* fromIme */);
     }
 
-    private void show(@InsetType int types, boolean fromIme) {
+    void show(@InsetType int types, boolean fromIme) {
         // TODO: Support a ResultReceiver for IME.
         // TODO(b/123718661): Make show() work for multi-session IME.
         int typesReady = 0;

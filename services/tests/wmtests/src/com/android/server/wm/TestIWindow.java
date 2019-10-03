@@ -111,4 +111,8 @@ public class TestIWindow extends IWindow.Stub {
     @Override
     public void dispatchPointerCaptureChanged(boolean hasCapture) {
     }
+
+    @Override
+    public void showInsets(int types, boolean fromIme) throws RemoteException {
+    }
 }

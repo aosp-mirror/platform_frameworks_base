@@ -30,6 +30,7 @@ import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.PointerIcon;
+import android.view.WindowInsets.Type.InsetType;
 
 import com.android.internal.os.IResultReceiver;
 
@@ -72,6 +73,10 @@ public class BaseIWindow extends IWindow.Stub {
     @Override
     public void insetsControlChanged(InsetsState insetsState,
             InsetsSourceControl[] activeControls) throws RemoteException {
+    }
+
+    @Override
+    public void showInsets(@InsetType int types, boolean fromIme)  throws RemoteException {
     }
 
     @Override
