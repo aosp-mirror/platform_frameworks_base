@@ -143,7 +143,9 @@ public class BiometricServiceTest {
                 false /* allowDeviceCredential */);
         waitForIdle();
         verify(mReceiver1).onError(
-                eq(BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT), eq(ERROR_HW_UNAVAILABLE));
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT),
+                eq(0 /* vendorCode */));
     }
 
     @Test
@@ -158,7 +160,9 @@ public class BiometricServiceTest {
                 false /* allowDeviceCredential */);
         waitForIdle();
         verify(mReceiver1).onError(
-                eq(BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS), any());
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
+                eq(BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS),
+                eq(0 /* vendorCode */));
     }
 
     @Test
@@ -175,7 +179,9 @@ public class BiometricServiceTest {
                 false /* allowDeviceCredential */);
         waitForIdle();
         verify(mReceiver1).onError(
-                eq(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE), eq(ERROR_HW_UNAVAILABLE));
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE),
+                eq(0 /* vendorCode */));
     }
 
     @Test
@@ -194,7 +200,9 @@ public class BiometricServiceTest {
                 false /* allowDeviceCredential */);
         waitForIdle();
         verify(mReceiver1).onError(
-                eq(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE), eq(ERROR_HW_UNAVAILABLE));
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE),
+                eq(0 /* vendorCode */));
 
         // Enrolled, not disabled in settings, user requires confirmation in settings
         resetReceiver();
@@ -204,7 +212,7 @@ public class BiometricServiceTest {
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 false /* allowDeviceCredential */);
         waitForIdle();
-        verify(mReceiver1, never()).onError(anyInt(), any(String.class));
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
         verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
                 eq(true) /* requireConfirmation */,
                 any(IBinder.class),
@@ -254,7 +262,7 @@ public class BiometricServiceTest {
 
         // Invokes <Modality>Service#prepareForAuthentication
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(mReceiver1, never()).onError(anyInt(), any(String.class));
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
         verify(mBiometricService.mAuthenticators.get(0).impl).prepareForAuthentication(
                 anyBoolean() /* requireConfirmation */,
                 any(IBinder.class),
@@ -297,8 +305,7 @@ public class BiometricServiceTest {
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_AUTHENTICATED_PENDING_SYSUI);
         // Notify SystemUI hardware authenticated
-        verify(mBiometricService.mStatusBarService).onBiometricAuthenticated(
-                eq(true) /* authenticated */, eq(null) /* failureReason */);
+        verify(mBiometricService.mStatusBarService).onBiometricAuthenticated();
 
         // SystemUI sends callback with dismissed reason
         mBiometricService.mInternalReceiver.onDialogDismissed(
@@ -369,8 +376,10 @@ public class BiometricServiceTest {
         mBiometricService.mInternalReceiver.onAuthenticationFailed();
         waitForIdle();
 
-        verify(mBiometricService.mStatusBarService)
-                .onBiometricAuthenticated(eq(false), eq(ERROR_NOT_RECOGNIZED));
+        verify(mBiometricService.mStatusBarService).onBiometricError(
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_PAUSED_REJECTED),
+                eq(0 /* vendorCode */));
         verify(mReceiver1).onAuthenticationFailed();
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_AUTH_PAUSED);
@@ -386,8 +395,10 @@ public class BiometricServiceTest {
         mBiometricService.mInternalReceiver.onAuthenticationFailed();
         waitForIdle();
 
-        verify(mBiometricService.mStatusBarService)
-                .onBiometricAuthenticated(eq(false), eq(ERROR_NOT_RECOGNIZED));
+        verify(mBiometricService.mStatusBarService).onBiometricError(
+                eq(BiometricAuthenticator.TYPE_NONE),
+                eq(BiometricConstants.BIOMETRIC_PAUSED_REJECTED),
+                eq(0 /* vendorCode */));
         verify(mReceiver1).onAuthenticationFailed();
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_AUTH_STARTED);
@@ -412,15 +423,15 @@ public class BiometricServiceTest {
                 BiometricService.STATE_AUTH_STARTED);
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
-                BiometricConstants.BIOMETRIC_ERROR_CANCELED, ERROR_CANCELED);
+                BiometricAuthenticator.TYPE_FINGERPRINT,
+                BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
         waitForIdle();
 
         // Auth session doesn't become null until SystemUI responds that the animation is completed
         assertNotNull(mBiometricService.mCurrentAuthSession);
         // ERROR_CANCELED is not sent until SystemUI responded that animation is completed
-        verify(mReceiver1, never()).onError(
-                anyInt(), anyString());
-        verify(mReceiver2, never()).onError(anyInt(), any(String.class));
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
+        verify(mReceiver2, never()).onError(anyInt(), anyInt(), anyInt());
 
         // SystemUI dialog closed
         verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
@@ -430,8 +441,9 @@ public class BiometricServiceTest {
                 .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
         waitForIdle();
         verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
-                eq(ERROR_CANCELED));
+                eq(0 /* vendorCode */));
         assertNull(mBiometricService.mCurrentAuthSession);
     }
 
@@ -443,14 +455,17 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
                 BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
-                ERROR_TIMEOUT);
+                0 /* vendorCode */);
         waitForIdle();
 
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_AUTH_PAUSED);
-        verify(mBiometricService.mStatusBarService)
-                .onBiometricAuthenticated(eq(false), eq(ERROR_TIMEOUT));
+        verify(mBiometricService.mStatusBarService).onBiometricError(
+                eq(BiometricAuthenticator.TYPE_FACE),
+                eq(BiometricConstants.BIOMETRIC_ERROR_TIMEOUT),
+                eq(0 /* vendorCode */));
         // Timeout does not count as fail as per BiometricPrompt documentation.
         verify(mReceiver1, never()).onAuthenticationFailed();
 
@@ -489,18 +504,21 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
                 BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
-                ERROR_TIMEOUT);
+                0 /* vendorCode */);
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
                 BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                ERROR_CANCELED);
+                0 /* vendorCode */);
         waitForIdle();
 
         // Client receives error immediately
         verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
-                eq(ERROR_CANCELED));
+                eq(0 /* vendorCode */));
         // Dialog is hidden immediately
         verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
         // Auth session is over
@@ -519,26 +537,29 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FINGERPRINT,
                 BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS,
-                ERROR_UNABLE_TO_PROCESS);
+                0 /* vendorCode */);
         waitForIdle();
 
         // Sends error to SystemUI and does not notify client yet
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
                 BiometricService.STATE_ERROR_PENDING_SYSUI);
         verify(mBiometricService.mStatusBarService).onBiometricError(
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS),
-                eq(ERROR_UNABLE_TO_PROCESS));
+                eq(0 /* vendorCode */));
         verify(mBiometricService.mStatusBarService, never()).hideAuthenticationDialog();
-        verify(mReceiver1, never()).onError(anyInt(), anyString());
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
         // SystemUI animation completed, client is notified, auth session is over
         mBiometricService.mInternalReceiver
                 .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_ERROR);
         waitForIdle();
         verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS),
-                eq(ERROR_UNABLE_TO_PROCESS));
+                eq(0 /* vendorCode */));
         assertNull(mBiometricService.mCurrentAuthSession);
     }
 
@@ -551,8 +572,9 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForPendingSession(mBiometricService.mPendingAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
                 BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
-                ERROR_LOCKOUT);
+                0 /* vendorCode */);
         waitForIdle();
 
         // Pending auth session becomes current auth session, since device credential should
@@ -583,8 +605,9 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForPendingSession(mBiometricService.mPendingAuthSession),
+                BiometricAuthenticator.TYPE_FINGERPRINT,
                 BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
-                ERROR_LOCKOUT);
+                0 /* vendorCode */);
         waitForIdle();
 
         // Error is sent to client
@@ -651,17 +674,18 @@ public class BiometricServiceTest {
 
         assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mState);
-        verify(mReceiver1, never()).onError(anyInt(), anyString());
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FINGERPRINT,
                 BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                ERROR_CANCELED);
+                0 /* vendorCode */);
         waitForIdle();
 
         assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mState);
-        verify(mReceiver1, never()).onError(anyInt(), anyString());
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
     }
 
     @Test
@@ -675,15 +699,17 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FINGERPRINT,
                 BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
-                ERROR_LOCKOUT);
+                0 /* vendorCode */);
         waitForIdle();
 
         assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mState);
         verify(mBiometricService.mStatusBarService).onBiometricError(
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_LOCKOUT),
-                eq(ERROR_LOCKOUT));
+                eq(0 /* vendorCode */));
     }
 
     @Test
@@ -697,15 +723,17 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FINGERPRINT,
                 BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS,
-                ERROR_UNABLE_TO_PROCESS);
+                0 /* vendorCode */);
         waitForIdle();
 
         assertEquals(BiometricService.STATE_ERROR_PENDING_SYSUI,
                 mBiometricService.mCurrentAuthSession.mState);
         verify(mBiometricService.mStatusBarService).onBiometricError(
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS),
-                eq(ERROR_UNABLE_TO_PROCESS));
+                eq(0 /* vendorCode */));
     }
 
     @Test
@@ -719,8 +747,9 @@ public class BiometricServiceTest {
                 .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
         waitForIdle();
         verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
-                eq(ERROR_USER_CANCELED));
+                eq(0 /* vendorCode */));
         verify(mBiometricService.mAuthenticators.get(0).impl).cancelAuthenticationFromService(
                 any(),
                 any(),
@@ -739,8 +768,9 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
                 BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
-                ERROR_TIMEOUT);
+                0 /* vendorCode */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
                 BiometricPrompt.DISMISSED_REASON_NEGATIVE);
         waitForIdle();
@@ -764,8 +794,9 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onError(
                 getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
                 BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
-                ERROR_TIMEOUT);
+                0 /* vendorCode */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
         waitForIdle();
@@ -803,8 +834,9 @@ public class BiometricServiceTest {
                 anyInt(),
                 anyBoolean());
         verify(mReceiver1).onError(
+                eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
-                eq(ERROR_USER_CANCELED));
+                eq(0 /* vendorCode */));
         assertNull(mBiometricService.mCurrentAuthSession);
     }
 

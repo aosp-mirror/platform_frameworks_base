@@ -273,9 +273,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         default void showAuthenticationDialog(Bundle bundle,
                 IBiometricServiceReceiverInternal receiver, int biometricModality,
                 boolean requireConfirmation, int userId, String opPackageName) { }
-        default void onBiometricAuthenticated(boolean authenticated, String failureReason) { }
+        default void onBiometricAuthenticated() { }
         default void onBiometricHelp(String message) { }
-        default void onBiometricError(int errorCode, String error) { }
+        default void onBiometricError(int modality, int error, int vendorCode) { }
         default void hideAuthenticationDialog() { }
 
         /**
@@ -757,12 +757,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void onBiometricAuthenticated(boolean authenticated, String failureReason) {
+    public void onBiometricAuthenticated() {
         synchronized (mLock) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = authenticated;
-            args.arg2 = failureReason;
-            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED, args).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
         }
     }
 
@@ -774,9 +771,13 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void onBiometricError(int errorCode, String error) {
+    public void onBiometricError(int modality, int error, int vendorCode) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_ERROR, errorCode, 0, error).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = modality;
+            args.argi2 = error;
+            args.argi3 = vendorCode;
+            mHandler.obtainMessage(MSG_BIOMETRIC_ERROR, args).sendToTarget();
         }
     }
 
@@ -1045,13 +1046,9 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     break;
                 }
                 case MSG_BIOMETRIC_AUTHENTICATED: {
-                    SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricAuthenticated(
-                                (boolean) someArgs.arg1 /* authenticated */,
-                                (String) someArgs.arg2 /* failureReason */);
+                        mCallbacks.get(i).onBiometricAuthenticated();
                     }
-                    someArgs.recycle();
                     break;
                 }
                 case MSG_BIOMETRIC_HELP:
@@ -1060,9 +1057,15 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     }
                     break;
                 case MSG_BIOMETRIC_ERROR:
+                    SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricError(msg.arg1, (String) msg.obj);
+                        mCallbacks.get(i).onBiometricError(
+                                someArgs.argi1 /* modality */,
+                                someArgs.argi2 /* error */,
+                                someArgs.argi3 /* vendorCode */
+                        );
                     }
+                    someArgs.recycle();
                     break;
                 case MSG_BIOMETRIC_HIDE:
                     for (int i = 0; i < mCallbacks.size(); i++) {

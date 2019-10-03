@@ -379,10 +379,9 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricAuthenticated() {
-        String failureReason = "test_failure_reason";
-        mCommandQueue.onBiometricAuthenticated(true /* authenticated */, failureReason);
+        mCommandQueue.onBiometricAuthenticated();
         waitForIdleSync();
-        verify(mCallbacks).onBiometricAuthenticated(eq(true), eq(failureReason));
+        verify(mCallbacks).onBiometricAuthenticated();
     }
 
     @Test
@@ -395,11 +394,12 @@ public class CommandQueueTest extends SysuiTestCase {
 
     @Test
     public void testOnBiometricError() {
-        final int errorCode = 1;
-        String errorMessage = "test_error_message";
-        mCommandQueue.onBiometricError(errorCode, errorMessage);
+        final int modality = 1;
+        final int error = 2;
+        final int vendorCode = 3;
+        mCommandQueue.onBiometricError(modality, error, vendorCode);
         waitForIdleSync();
-        verify(mCallbacks).onBiometricError(eq(errorCode), eq(errorMessage));
+        verify(mCallbacks).onBiometricError(eq(modality), eq(error), eq(vendorCode));
     }
 
     @Test

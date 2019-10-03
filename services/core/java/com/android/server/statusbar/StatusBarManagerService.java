@@ -623,11 +623,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBiometricAuthenticated(boolean authenticated, String failureReason) {
+    public void onBiometricAuthenticated() {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.onBiometricAuthenticated(authenticated, failureReason);
+                mBar.onBiometricAuthenticated();
             } catch (RemoteException ex) {
             }
         }
@@ -645,11 +645,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBiometricError(int errorCode, String error) {
+    public void onBiometricError(int modality, int error, int vendorCode) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.onBiometricError(errorCode, error);
+                mBar.onBiometricError(modality, error, vendorCode);
             } catch (RemoteException ex) {
             }
         }

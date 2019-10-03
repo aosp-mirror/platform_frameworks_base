@@ -104,12 +104,12 @@ interface IStatusBarService
     // Used to show the authentication dialog (Biometrics, Device Credential)
     void showAuthenticationDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver,
             int biometricModality, boolean requireConfirmation, int userId, String opPackageName);
-    // Used to notify the authentication dialog that a biometric has been authenticated or rejected
-    void onBiometricAuthenticated(boolean authenticated, String failureReason);
+    // Used to notify the authentication dialog that a biometric has been authenticated
+    void onBiometricAuthenticated();
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
     void onBiometricHelp(String message);
-    // Used to set a message - the dialog will dismiss after a certain amount of time
-    void onBiometricError(int errorCode, String error);
+    // Used to show an error - the dialog will dismiss after a certain amount of time
+    void onBiometricError(int modality, int error, int vendorCode);
     // Used to hide the authentication dialog, e.g. when the application cancels authentication
     void hideAuthenticationDialog();
 }

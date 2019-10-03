@@ -168,7 +168,7 @@ public class BiometricService extends SystemService {
         byte[] mTokenEscrow;
         // Waiting for SystemUI to complete animation
         int mErrorEscrow;
-        String mErrorStringEscrow;
+        int mVendorCodeEscrow;
 
         // Timestamp when authentication started
         private long mStartTimeMs;
@@ -254,7 +254,7 @@ public class BiometricService extends SystemService {
                 }
 
                 case MSG_ON_AUTHENTICATION_REJECTED: {
-                    handleAuthenticationRejected((String) msg.obj /* failureReason */);
+                    handleAuthenticationRejected();
                     break;
                 }
 
@@ -262,8 +262,9 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleOnError(
                             args.argi1 /* cookie */,
-                            args.argi2 /* error */,
-                            (String) args.arg1 /* message */);
+                            args.argi2 /* modality */,
+                            args.argi3 /* error */,
+                            args.argi4 /* vendorCode */);
                     args.recycle();
                     break;
                 }
@@ -323,7 +324,12 @@ public class BiometricService extends SystemService {
                 }
 
                 case MSG_ON_AUTHENTICATION_TIMED_OUT: {
-                    handleAuthenticationTimedOut((String) msg.obj /* errorMessage */);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    handleAuthenticationTimedOut(
+                            args.argi1 /* modality */,
+                            args.argi2 /* error */,
+                            args.argi3 /* vendorCode */);
+                    args.recycle();
                     break;
                 }
 
@@ -515,23 +521,28 @@ public class BiometricService extends SystemService {
         @Override
         public void onAuthenticationFailed()
                 throws RemoteException {
-            String failureReason = getContext().getString(R.string.biometric_not_recognized);
-            Slog.v(TAG, "onAuthenticationFailed: " + failureReason);
-            mHandler.obtainMessage(MSG_ON_AUTHENTICATION_REJECTED, failureReason).sendToTarget();
+            Slog.v(TAG, "onAuthenticationFailed");
+            mHandler.obtainMessage(MSG_ON_AUTHENTICATION_REJECTED).sendToTarget();
         }
 
         @Override
-        public void onError(int cookie, int error, String message) throws RemoteException {
+        public void onError(int cookie, int modality, int error, int vendorCode)
+                throws RemoteException {
             // Determine if error is hard or soft error. Certain errors (such as TIMEOUT) are
             // soft errors and we should allow the user to try authenticating again instead of
             // dismissing BiometricPrompt.
             if (error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT) {
-                mHandler.obtainMessage(MSG_ON_AUTHENTICATION_TIMED_OUT, message).sendToTarget();
+                SomeArgs args = SomeArgs.obtain();
+                args.argi1 = modality;
+                args.argi2 = error;
+                args.argi3 = vendorCode;
+                mHandler.obtainMessage(MSG_ON_AUTHENTICATION_TIMED_OUT, args).sendToTarget();
             } else {
                 SomeArgs args = SomeArgs.obtain();
                 args.argi1 = cookie;
-                args.argi2 = error;
-                args.arg1 = message;
+                args.argi2 = modality;
+                args.argi3 = error;
+                args.argi4 = vendorCode;
                 mHandler.obtainMessage(MSG_ON_ERROR, args).sendToTarget();
             }
         }
@@ -1088,14 +1099,14 @@ public class BiometricService extends SystemService {
 
             // Notify SysUI that the biometric has been authenticated. SysUI already knows
             // the implicit/explicit state and will react accordingly.
-            mStatusBarService.onBiometricAuthenticated(true, null /* failureReason */);
+            mStatusBarService.onBiometricAuthenticated();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
     }
 
-    private void handleAuthenticationRejected(String failureReason) {
-        Slog.v(TAG, "handleAuthenticationRejected: " + failureReason);
+    private void handleAuthenticationRejected() {
+        Slog.v(TAG, "handleAuthenticationRejected()");
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
@@ -1104,7 +1115,8 @@ public class BiometricService extends SystemService {
                 return;
             }
 
-            mStatusBarService.onBiometricAuthenticated(false, failureReason);
+            mStatusBarService.onBiometricError(TYPE_NONE,
+                    BiometricConstants.BIOMETRIC_PAUSED_REJECTED, 0 /* vendorCode */);
 
             // TODO: This logic will need to be updated if BP is multi-modal
             if ((mCurrentAuthSession.mModality & TYPE_FACE) != 0) {
@@ -1119,8 +1131,9 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleAuthenticationTimedOut(String message) {
-        Slog.v(TAG, "handleAuthenticationTimedOut: " + message);
+    private void handleAuthenticationTimedOut(int modality, int error, int vendorCode) {
+        Slog.v(TAG, String.format("handleAuthenticationTimedOut(%d, %d, %d)", modality, error,
+                vendorCode));
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
@@ -1129,14 +1142,14 @@ public class BiometricService extends SystemService {
                 return;
             }
 
-            mStatusBarService.onBiometricAuthenticated(false, message);
+            mStatusBarService.onBiometricError(modality, error, vendorCode);
             mCurrentAuthSession.mState = STATE_AUTH_PAUSED;
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
     }
 
-    private void handleOnError(int cookie, int error, String message) {
+    private void handleOnError(int cookie, int modality, int error, int vendorCode) {
         Slog.d(TAG, "handleOnError: " + error + " cookie: " + cookie);
         // Errors can either be from the current auth session or the pending auth session.
         // The pending auth session may receive errors such as ERROR_LOCKOUT before
@@ -1147,7 +1160,7 @@ public class BiometricService extends SystemService {
         try {
             if (mCurrentAuthSession != null && mCurrentAuthSession.containsCookie(cookie)) {
                 mCurrentAuthSession.mErrorEscrow = error;
-                mCurrentAuthSession.mErrorStringEscrow = message;
+                mCurrentAuthSession.mVendorCodeEscrow = vendorCode;
 
                 if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
                     final boolean errorLockout = error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
@@ -1155,20 +1168,20 @@ public class BiometricService extends SystemService {
                     if (mCurrentAuthSession.isAllowDeviceCredential() && errorLockout) {
                         // SystemUI handles transition from biometric to device credential.
                         mCurrentAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
-                        mStatusBarService.onBiometricError(error, message);
+                        mStatusBarService.onBiometricError(modality, error, vendorCode);
                     } else {
                         mCurrentAuthSession.mState = STATE_ERROR_PENDING_SYSUI;
                         if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
                             mStatusBarService.hideAuthenticationDialog();
                         } else {
-                            mStatusBarService.onBiometricError(error, message);
+                            mStatusBarService.onBiometricError(modality, error, vendorCode);
                         }
                     }
                 } else if (mCurrentAuthSession.mState == STATE_AUTH_PAUSED) {
                     // In the "try again" state, we should forward canceled errors to
                     // the client and and clean up. The only error we should get here is
                     // ERROR_CANCELED due to another client kicking us out.
-                    mCurrentAuthSession.mClientReceiver.onError(error, message);
+                    mCurrentAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                     mStatusBarService.hideAuthenticationDialog();
                     mCurrentAuthSession = null;
                 } else if (mCurrentAuthSession.mState == STATE_SHOWING_DEVICE_CREDENTIAL) {
@@ -1204,7 +1217,7 @@ public class BiometricService extends SystemService {
                                 mCurrentAuthSession.mUserId,
                                 mCurrentAuthSession.mOpPackageName);
                     } else {
-                        mPendingAuthSession.mClientReceiver.onError(error, message);
+                        mPendingAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                         mPendingAuthSession = null;
                     }
                 } else {
@@ -1268,8 +1281,10 @@ public class BiometricService extends SystemService {
 
                 case BiometricPrompt.DISMISSED_REASON_USER_CANCEL:
                     mCurrentAuthSession.mClientReceiver.onError(
+                            mCurrentAuthSession.mModality,
                             BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
-                            getContext().getString(R.string.biometric_error_user_canceled));
+                            0 /* vendorCode */
+                    );
                     // Cancel authentication. Skip the token/package check since we are cancelling
                     // from system server. The interface is permission protected so this is fine.
                     cancelInternal(null /* token */, null /* package */, false /* fromClient */);
@@ -1277,8 +1292,11 @@ public class BiometricService extends SystemService {
 
                 case BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED:
                 case BiometricPrompt.DISMISSED_REASON_ERROR:
-                    mCurrentAuthSession.mClientReceiver.onError(mCurrentAuthSession.mErrorEscrow,
-                            mCurrentAuthSession.mErrorStringEscrow);
+                    mCurrentAuthSession.mClientReceiver.onError(
+                            mCurrentAuthSession.mModality,
+                            mCurrentAuthSession.mErrorEscrow,
+                            mCurrentAuthSession.mVendorCodeEscrow
+                    );
                     break;
 
                 default:
@@ -1413,23 +1431,7 @@ public class BiometricService extends SystemService {
             } else if (error != BiometricConstants.BIOMETRIC_SUCCESS) {
                 // Check for errors, notify callback, and return
                 try {
-                    final String hardwareUnavailable =
-                            getContext().getString(R.string.biometric_error_hw_unavailable);
-                    switch (error) {
-                        case BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT:
-                            receiver.onError(error, hardwareUnavailable);
-                            break;
-                        case BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE:
-                            receiver.onError(error, hardwareUnavailable);
-                            break;
-                        case BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS:
-                            receiver.onError(error,
-                                    getErrorString(modality, error, 0 /* vendorCode */));
-                            break;
-                        default:
-                            Slog.e(TAG, "Unhandled error");
-                            break;
-                    }
+                    receiver.onError(modality, error, 0 /* vendorCode */);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Unable to send error", e);
                 }
@@ -1521,11 +1523,10 @@ public class BiometricService extends SystemService {
             try {
                 // Send error to client
                 mCurrentAuthSession.mClientReceiver.onError(
+                        mCurrentAuthSession.mModality,
                         BiometricConstants.BIOMETRIC_ERROR_CANCELED,
-                        getContext().getString(
-                                com.android.internal.R.string.biometric_error_user_canceled)
+                        0 /* vendorCode */
                 );
-
                 mCurrentAuthSession = null;
                 mStatusBarService.hideAuthenticationDialog();
             } catch (RemoteException e) {

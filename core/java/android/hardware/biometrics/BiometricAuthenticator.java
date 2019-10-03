@@ -36,23 +36,30 @@ public interface BiometricAuthenticator {
      * @hide
      */
     int TYPE_NONE = 0;
+
+    /**
+     * Constant representing credential (PIN, pattern, or password).
+     * @hide
+     */
+    int TYPE_CREDENTIAL = 1 << 0;
+
     /**
      * Constant representing fingerprint.
      * @hide
      */
-    int TYPE_FINGERPRINT = 1 << 0;
+    int TYPE_FINGERPRINT = 1 << 1;
 
     /**
      * Constant representing iris.
      * @hide
      */
-    int TYPE_IRIS = 1 << 1;
+    int TYPE_IRIS = 1 << 2;
 
     /**
      * Constant representing face.
      * @hide
      */
-    int TYPE_FACE = 1 << 2;
+    int TYPE_FACE = 1 << 3;
 
     /**
      * Container for biometric data
