@@ -483,7 +483,7 @@ class PackageManagerShellCommand extends ShellCommand {
      * @param pckg
      */
     private int displayPackageFilePath(String pckg, int userId) throws RemoteException {
-        PackageInfo info = mInterface.getPackageInfo(pckg, 0, userId);
+        PackageInfo info = mInterface.getPackageInfo(pckg, PackageManager.MATCH_APEX, userId);
         if (info != null && info.applicationInfo != null) {
             final PrintWriter pw = getOutPrintWriter();
             pw.print("package:");
