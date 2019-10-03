@@ -34,6 +34,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.Annotation.RilRadioTechnology;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
@@ -1958,7 +1959,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public final @ServiceState.RilRadioTechnology int getCallRadioTech() {
+    public final @RilRadioTechnology int getCallRadioTech() {
         int voiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         Bundle extras = getExtras();
         if (extras != null) {
@@ -2409,7 +2410,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @hide
      */
-    public final void setCallRadioTech(@ServiceState.RilRadioTechnology int vrat) {
+    public final void setCallRadioTech(@RilRadioTechnology int vrat) {
         putExtra(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
                 ServiceState.rilRadioTechnologyToNetworkType(vrat));
         // Propagates the call radio technology to its parent {@link android.telecom.Conference}
