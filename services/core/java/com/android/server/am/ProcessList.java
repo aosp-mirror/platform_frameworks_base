@@ -215,7 +215,7 @@ public final class ProcessList {
     // Memory pages are 4K.
     static final int PAGE_SIZE = 4 * 1024;
 
-    // Activity manager's version of Process.THREAD_GROUP_BG_NONINTERACTIVE
+    // Activity manager's version of Process.THREAD_GROUP_BACKGROUND
     static final int SCHED_GROUP_BACKGROUND = 0;
       // Activity manager's version of Process.THREAD_GROUP_RESTRICTED
     static final int SCHED_GROUP_RESTRICTED = 1;

@@ -420,10 +420,9 @@ public class Process {
      * Background thread group - All threads in
      * this group are scheduled with a reduced share of the CPU.
      * Value is same as constant SP_BACKGROUND of enum SchedPolicy.
-     * FIXME rename to THREAD_GROUP_BACKGROUND.
      * @hide
      */
-    public static final int THREAD_GROUP_BG_NONINTERACTIVE = 0;
+    public static final int THREAD_GROUP_BACKGROUND = 0;
 
     /**
      * Foreground thread group - All threads in
@@ -809,7 +808,7 @@ public class Process {
      *
      * group == THREAD_GROUP_DEFAULT means to move all non-background priority
      * threads to the foreground scheduling group, but to leave background
-     * priority threads alone.  group == THREAD_GROUP_BG_NONINTERACTIVE moves all
+     * priority threads alone.  group == THREAD_GROUP_BACKGROUND moves all
      * threads, regardless of priority, to the background scheduling group.
      * group == THREAD_GROUP_FOREGROUND is not allowed.
      *
