@@ -25,6 +25,9 @@ import android.util.Pools;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.DecConsumer;
+import com.android.internal.util.function.DecFunction;
+import com.android.internal.util.function.DecPredicate;
 import com.android.internal.util.function.HeptConsumer;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HeptPredicate;
@@ -46,6 +49,9 @@ import com.android.internal.util.function.QuintPredicate;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.TriPredicate;
+import com.android.internal.util.function.UndecConsumer;
+import com.android.internal.util.function.UndecFunction;
+import com.android.internal.util.function.UndecPredicate;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -62,12 +68,12 @@ import java.util.function.Supplier;
  * @hide
  */
 final class PooledLambdaImpl<R> extends OmniFunction<Object,
-        Object, Object, Object, Object, Object, Object, Object, Object, R> {
+        Object, Object, Object, Object, Object, Object, Object, Object, Object, Object, R> {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PooledLambdaImpl";
 
-    private static final int MAX_ARGS = 9;
+    private static final int MAX_ARGS = 11;
 
     private static final int MAX_POOL_SIZE = 50;
 
@@ -133,7 +139,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     /**
      * Bit schema:
-     * AAAAAAAAABCDEEEEEEFFFFFF
+     * AAAAAAAAAAABCDEEEEEEFFFFFF
      *
      * Where:
      * A - whether {@link #mArgs arg} at corresponding index was specified at
@@ -170,18 +176,18 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     @Override
     R invoke(Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7,
-            Object a8, Object a9) {
+            Object a8, Object a9, Object a10, Object a11) {
         checkNotRecycled();
         if (DEBUG) {
             Log.i(LOG_TAG, this + ".invoke("
                     + commaSeparateFirstN(
-                            new Object[] { a1, a2, a3, a4, a5, a6, a7, a8, a9 },
+                            new Object[] { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11 },
                             LambdaType.decodeArgCount(getFlags(MASK_EXPOSED_AS)))
                     + ")");
         }
         final boolean notUsed = fillInArg(a1) && fillInArg(a2) && fillInArg(a3) && fillInArg(a4)
                 && fillInArg(a5) && fillInArg(a6) && fillInArg(a7) && fillInArg(a8)
-                && fillInArg(a9);
+                && fillInArg(a9) && fillInArg(a10) && fillInArg(a11);
         int argCount = LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE));
         if (argCount != LambdaType.MASK_ARG_COUNT) {
             for (int i = 0; i < argCount; i++) {
@@ -409,6 +415,48 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                     }
                 }
             } break;
+
+            case 10: {
+                switch (returnType) {
+                    case LambdaType.ReturnType.VOID: {
+                        ((DecConsumer) mFunc).accept(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4), popArg(5),
+                                popArg(6), popArg(7), popArg(8), popArg(9));
+                        return null;
+                    }
+                    case LambdaType.ReturnType.BOOLEAN: {
+                        return (R) (Object) ((DecPredicate) mFunc).test(popArg(0),
+                                popArg(1), popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6), popArg(7), popArg(8), popArg(9));
+                    }
+                    case LambdaType.ReturnType.OBJECT: {
+                        return (R) ((DecFunction) mFunc).apply(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4), popArg(5),
+                                popArg(6), popArg(7), popArg(8), popArg(9));
+                    }
+                }
+            } break;
+
+            case 11: {
+                switch (returnType) {
+                    case LambdaType.ReturnType.VOID: {
+                        ((UndecConsumer) mFunc).accept(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4), popArg(5),
+                                popArg(6), popArg(7), popArg(8), popArg(9), popArg(10));
+                        return null;
+                    }
+                    case LambdaType.ReturnType.BOOLEAN: {
+                        return (R) (Object) ((UndecPredicate) mFunc).test(popArg(0),
+                                popArg(1), popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6), popArg(7), popArg(8), popArg(9), popArg(10));
+                    }
+                    case LambdaType.ReturnType.OBJECT: {
+                        return (R) ((UndecFunction) mFunc).apply(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4), popArg(5),
+                                popArg(6), popArg(7), popArg(8), popArg(9), popArg(10));
+                    }
+                }
+            } break;
         }
         throw new IllegalStateException("Unknown function type: " + LambdaType.toString(funcType));
     }
@@ -474,7 +522,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
      */
     static <E extends PooledLambda> E acquire(Pool pool, Object func,
             int fNumArgs, int numPlaceholders, int fReturnType, Object a, Object b, Object c,
-            Object d, Object e, Object f, Object g, Object h, Object i) {
+            Object d, Object e, Object f, Object g, Object h, Object i, Object j, Object k) {
         PooledLambdaImpl r = acquire(pool);
         if (DEBUG) {
             Log.i(LOG_TAG,
@@ -492,6 +540,8 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                             + ", g = " + g
                             + ", h = " + h
                             + ", i = " + i
+                            + ", j = " + j
+                            + ", k = " + k
                             + ")");
         }
         r.mFunc = Preconditions.checkNotNull(func);
@@ -507,6 +557,8 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         setIfInBounds(r.mArgs, 6, g);
         setIfInBounds(r.mArgs, 7, h);
         setIfInBounds(r.mArgs, 8, i);
+        setIfInBounds(r.mArgs, 9, j);
+        setIfInBounds(r.mArgs, 10, k);
         return (E) r;
     }
 
@@ -533,13 +585,13 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     @Override
     public OmniFunction<Object, Object, Object, Object, Object, Object, Object, Object, Object,
-            R> negate() {
+            Object, Object, R> negate() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public <V> OmniFunction<Object, Object, Object, Object, Object, Object, Object, Object, Object,
-            V> andThen(Function<? super R, ? extends V> after) {
+            Object, Object, V> andThen(Function<? super R, ? extends V> after) {
         throw new UnsupportedOperationException();
     }
 
@@ -560,7 +612,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     @Override
     public OmniFunction<Object, Object, Object, Object, Object, Object, Object, Object, Object,
-            R> recycleOnUse() {
+            Object, Object, R> recycleOnUse() {
         if (DEBUG) Log.i(LOG_TAG, this + ".recycleOnUse()");
         mFlags |= FLAG_RECYCLE_ON_USE;
         return this;
@@ -647,6 +699,8 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                 case 7: return "Hept";
                 case 8: return "Oct";
                 case 9: return "Nona";
+                case 10: return "Dec";
+                case 11: return "Undec";
                 default: return "" + argCount + "arg";
             }
         }

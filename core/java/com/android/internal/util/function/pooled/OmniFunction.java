@@ -18,6 +18,8 @@ package com.android.internal.util.function.pooled;
 
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
+import com.android.internal.util.function.DecConsumer;
+import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptConsumer;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexConsumer;
@@ -32,6 +34,8 @@ import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.TriConsumer;
 import com.android.internal.util.function.TriFunction;
+import com.android.internal.util.function.UndecConsumer;
+import com.android.internal.util.function.UndecFunction;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -43,62 +47,65 @@ import java.util.function.Function;
  *
  * @hide
  */
-abstract class OmniFunction<A, B, C, D, E, F, G, H, I, R> implements
+abstract class OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> implements
         PooledFunction<A, R>, BiFunction<A, B, R>, TriFunction<A, B, C, R>,
         QuadFunction<A, B, C, D, R>, QuintFunction<A, B, C, D, E, R>,
         HexFunction<A, B, C, D, E, F, R>, HeptFunction<A, B, C, D, E, F, G, R>,
         OctFunction<A, B, C, D, E, F, G, H, R>, NonaFunction<A, B, C, D, E, F, G, H, I, R>,
+        DecFunction<A, B, C, D, E, F, G, H, I, J, R>,
+        UndecFunction<A, B, C, D, E, F, G, H, I, J, K, R>,
         PooledConsumer<A>, BiConsumer<A, B>, TriConsumer<A, B, C>, QuadConsumer<A, B, C, D>,
         QuintConsumer<A, B, C, D, E>, HexConsumer<A, B, C, D, E, F>,
         HeptConsumer<A, B, C, D, E, F, G>, OctConsumer<A, B, C, D, E, F, G, H>,
-        NonaConsumer<A, B, C, D, E, F, G, H, I>, PooledPredicate<A>, BiPredicate<A, B>,
-        PooledSupplier<R>, PooledRunnable, ThrowingRunnable, ThrowingSupplier<R>,
-        PooledSupplier.OfInt, PooledSupplier.OfLong, PooledSupplier.OfDouble {
+        NonaConsumer<A, B, C, D, E, F, G, H, I>, DecConsumer<A, B, C, D, E, F, G, H, I, J>,
+        UndecConsumer<A, B, C, D, E, F, G, H, I, J, K>,
+        PooledPredicate<A>, BiPredicate<A, B>, PooledSupplier<R>, PooledRunnable, ThrowingRunnable,
+        ThrowingSupplier<R>, PooledSupplier.OfInt, PooledSupplier.OfLong, PooledSupplier.OfDouble {
 
-    abstract R invoke(A a, B b, C c, D d, E e, F f, G g, H h, I i);
+    abstract R invoke(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j, K k);
 
     @Override
     public R apply(A o, B o2) {
-        return invoke(o, o2, null, null, null, null, null, null, null);
+        return invoke(o, o2, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public R apply(A o) {
-        return invoke(o, null, null, null, null, null, null, null, null);
+        return invoke(o, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public abstract <V> OmniFunction<A, B, C, D, E, F, G, H, I, V> andThen(
+    public abstract <V> OmniFunction<A, B, C, D, E, F, G, H, I, J, K, V> andThen(
             Function<? super R, ? extends V> after);
-    public abstract OmniFunction<A, B, C, D, E, F, G, H, I, R> negate();
+    public abstract OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> negate();
 
     @Override
     public void accept(A o, B o2) {
-        invoke(o, o2, null, null, null, null, null, null, null);
+        invoke(o, o2, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public void accept(A o) {
-        invoke(o, null, null, null, null, null, null, null, null);
+        invoke(o, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public void run() {
-        invoke(null, null, null, null, null, null, null, null, null);
+        invoke(null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public R get() {
-        return invoke(null, null, null, null, null, null, null, null, null);
+        return invoke(null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public boolean test(A o, B o2) {
-        return (Boolean) invoke(o, o2, null, null, null, null, null, null, null);
+        return (Boolean) invoke(o, o2, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public boolean test(A o) {
-        return (Boolean) invoke(o, null, null, null, null, null, null, null, null);
+        return (Boolean) invoke(o, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Override
@@ -113,72 +120,92 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, R> implements
 
     @Override
     public R apply(A a, B b, C c) {
-        return invoke(a, b, c, null, null, null, null, null, null);
+        return invoke(a, b, c, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public void accept(A a, B b, C c) {
-        invoke(a, b, c, null, null, null, null, null, null);
+        invoke(a, b, c, null, null, null, null, null, null, null, null);
     }
 
     @Override
     public R apply(A a, B b, C c, D d) {
-        return invoke(a, b, c, d, null, null, null, null, null);
+        return invoke(a, b, c, d, null, null, null, null, null, null, null);
     }
 
     @Override
     public R apply(A a, B b, C c, D d, E e) {
-        return invoke(a, b, c, d, e, null, null, null, null);
+        return invoke(a, b, c, d, e, null, null, null, null, null, null);
     }
 
     @Override
     public R apply(A a, B b, C c, D d, E e, F f) {
-        return invoke(a, b, c, d, e, f, null, null, null);
+        return invoke(a, b, c, d, e, f, null, null, null, null, null);
     }
 
     @Override
     public R apply(A a, B b, C c, D d, E e, F f, G g) {
-        return invoke(a, b, c, d, e, f, g, null, null);
+        return invoke(a, b, c, d, e, f, g, null, null, null, null);
     }
 
     @Override
     public R apply(A a, B b, C c, D d, E e, F f, G g, H h) {
-        return invoke(a, b, c, d, e, f, g, h, null);
+        return invoke(a, b, c, d, e, f, g, h, null, null, null);
     }
 
     @Override
     public R apply(A a, B b, C c, D d, E e, F f, G g, H h, I i) {
-        return invoke(a, b, c, d, e, f, g, h, i);
+        return invoke(a, b, c, d, e, f, g, h, i, null, null);
+    }
+
+    @Override
+    public R apply(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j) {
+        return invoke(a, b, c, d, e, f, g, h, i, j, null);
+    }
+
+    @Override
+    public R apply(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j, K k) {
+        return invoke(a, b, c, d, e, f, g, h, i, j, k);
     }
 
     @Override
     public void accept(A a, B b, C c, D d) {
-        invoke(a, b, c, d, null, null, null, null, null);
+        invoke(a, b, c, d, null, null, null, null, null, null, null);
     }
 
     @Override
     public void accept(A a, B b, C c, D d, E e) {
-        invoke(a, b, c, d, e, null, null, null, null);
+        invoke(a, b, c, d, e, null, null, null, null, null, null);
     }
 
     @Override
     public void accept(A a, B b, C c, D d, E e, F f) {
-        invoke(a, b, c, d, e, f, null, null, null);
+        invoke(a, b, c, d, e, f, null, null, null, null, null);
     }
 
     @Override
     public void accept(A a, B b, C c, D d, E e, F f, G g) {
-        invoke(a, b, c, d, e, f, g, null, null);
+        invoke(a, b, c, d, e, f, g, null, null, null, null);
     }
 
     @Override
     public void accept(A a, B b, C c, D d, E e, F f, G g, H h) {
-        invoke(a, b, c, d, e, f, g, h, null);
+        invoke(a, b, c, d, e, f, g, h, null, null, null);
     }
 
     @Override
     public void accept(A a, B b, C c, D d, E e, F f, G g, H h, I i) {
-        invoke(a, b, c, d, e, f, g, h, i);
+        invoke(a, b, c, d, e, f, g, h, i, null, null);
+    }
+
+    @Override
+    public void accept(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j) {
+        invoke(a, b, c, d, e, f, g, h, i, j, null);
+    }
+
+    @Override
+    public void accept(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j, K k) {
+        invoke(a, b, c, d, e, f, g, h, i, j, k);
     }
 
     @Override
@@ -192,5 +219,5 @@ abstract class OmniFunction<A, B, C, D, E, F, G, H, I, R> implements
     }
 
     @Override
-    public abstract OmniFunction<A, B, C, D, E, F, G, H, I, R> recycleOnUse();
+    public abstract OmniFunction<A, B, C, D, E, F, G, H, I, J, K, R> recycleOnUse();
 }
