@@ -57,6 +57,7 @@ public class CarrierTextController {
     private static final String TAG = "CarrierTextController";
 
     private final boolean mIsEmergencyCallCapable;
+    private final Handler mMainHandler;
     private boolean mTelephonyCapable;
     private boolean mShowMissingSim;
     private boolean mShowAirplaneMode;
@@ -169,6 +170,7 @@ public class CarrierTextController {
         mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
                 Context.TELEPHONY_SERVICE)).getPhoneCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
+        mMainHandler = Dependency.get(Dependency.MAIN_HANDLER);
     }
 
     /**
@@ -227,7 +229,12 @@ public class CarrierTextController {
             if (whitelistIpcs(() -> ConnectivityManager.from(mContext).isNetworkSupported(
                     ConnectivityManager.TYPE_MOBILE))) {
                 mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-                mKeyguardUpdateMonitor.registerCallback(mCallback);
+                // Keyguard update monitor expects callbacks from main thread
+                mMainHandler.post(() -> {
+                    if (mKeyguardUpdateMonitor != null) {
+                        mKeyguardUpdateMonitor.registerCallback(mCallback);
+                    }
+                });
                 mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
                 telephonyManager.listen(mPhoneStateListener,
                         LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE);
@@ -239,7 +246,12 @@ public class CarrierTextController {
         } else {
             mCarrierTextCallback = null;
             if (mKeyguardUpdateMonitor != null) {
-                mKeyguardUpdateMonitor.removeCallback(mCallback);
+                // Keyguard update monitor expects callbacks from main thread
+                mMainHandler.post(() -> {
+                    if (mKeyguardUpdateMonitor != null) {
+                        mKeyguardUpdateMonitor.removeCallback(mCallback);
+                    }
+                });
                 mWakefulnessLifecycle.removeObserver(mWakefulnessObserver);
             }
             telephonyManager.listen(mPhoneStateListener, LISTEN_NONE);
@@ -364,10 +376,9 @@ public class CarrierTextController {
 
     @VisibleForTesting
     protected void postToCallback(CarrierTextCallbackInfo info) {
-        Handler handler = Dependency.get(Dependency.MAIN_HANDLER);
         final CarrierTextCallback callback = mCarrierTextCallback;
         if (callback != null) {
-            handler.post(() -> callback.updateCarrierInfo(info));
+            mMainHandler.post(() -> callback.updateCarrierInfo(info));
         }
     }
 

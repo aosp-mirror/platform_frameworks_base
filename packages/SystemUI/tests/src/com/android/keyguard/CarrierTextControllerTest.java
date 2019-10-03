@@ -26,20 +26,24 @@ import static junit.framework.TestCase.assertFalse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Process;
 import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -62,6 +66,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,6 +110,14 @@ public class CarrierTextControllerTest extends SysuiTestCase {
     private CarrierTextController mCarrierTextController;
     private TestableLooper mTestableLooper;
 
+    private Void checkMainThread(InvocationOnMock inv) {
+        Looper mainLooper = Dependency.get(Dependency.MAIN_HANDLER).getLooper();
+        if (!mainLooper.isCurrentThread()) {
+            fail("This call should be done from the main thread");
+        }
+        return null;
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -112,6 +125,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
         mContext.addMockSystemService(WifiManager.class, mWifiManager);
         mContext.addMockSystemService(ConnectivityManager.class, mConnectivityManager);
+        when(mConnectivityManager.isNetworkSupported(anyInt())).thenReturn(true);
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
         mContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
         mContext.getOrCreateTestableResources().addOverride(
@@ -121,16 +135,40 @@ public class CarrierTextControllerTest extends SysuiTestCase {
         mDependency.injectMockDependency(WakefulnessLifecycle.class);
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 new Handler(mTestableLooper.getLooper()));
-        mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
+        mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
+
+        doAnswer(this::checkMainThread).when(mKeyguardUpdateMonitor)
+                .registerCallback(any(KeyguardUpdateMonitorCallback.class));
+        doAnswer(this::checkMainThread).when(mKeyguardUpdateMonitor)
+                .removeCallback(any(KeyguardUpdateMonitorCallback.class));
 
         mCarrierTextCallbackInfo = new CarrierTextController.CarrierTextCallbackInfo("",
                 new CharSequence[]{}, false, new int[]{});
         when(mTelephonyManager.getPhoneCount()).thenReturn(3);
 
-        mCarrierTextController = new TestCarrierTextController(mContext, SEPARATOR, true, true,
-                mKeyguardUpdateMonitor);
-        // This should not start listening on any of the real dependencies
+        mCarrierTextController = new CarrierTextController(mContext, SEPARATOR, true, true);
+        // This should not start listening on any of the real dependencies but will test that
+        // callbacks in mKeyguardUpdateMonitor are done in the mTestableLooper thread
         mCarrierTextController.setListening(mCarrierTextCallback);
+    }
+
+    @Test
+    public void testKeyguardUpdateMonitorCalledInMainThread() throws Exception {
+        // This test will run on the main looper (which is not the same as the looper set as MAIN
+        // for CarrierTextCallback. This will fail if calls to mKeyguardUpdateMonitor are not done
+        // through the looper set in the set up
+        HandlerThread thread = new HandlerThread("testThread",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        TestableLooper testableLooper = new TestableLooper(thread.getLooper());
+        Handler h = new Handler(testableLooper.getLooper());
+        h.post(() -> {
+            mCarrierTextController.setListening(null);
+            mCarrierTextController.setListening(mCarrierTextCallback);
+        });
+        testableLooper.processAllMessages();
+        mTestableLooper.processAllMessages();
+        thread.quitSafely();
     }
 
     @Test
@@ -465,21 +503,5 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
         assertEquals(TEST_CARRIER + SEPARATOR + TEST_CARRIER,
                 captor.getValue().carrierText);
-    }
-
-    public static class TestCarrierTextController extends CarrierTextController {
-        private KeyguardUpdateMonitor mKUM;
-
-        public TestCarrierTextController(Context context, CharSequence separator,
-                boolean showAirplaneMode, boolean showMissingSim, KeyguardUpdateMonitor kum) {
-            super(context, separator, showAirplaneMode, showMissingSim);
-            mKUM = kum;
-        }
-
-        @Override
-        public void setListening(CarrierTextCallback callback) {
-            super.setListening(callback);
-            mKeyguardUpdateMonitor = mKUM;
-        }
     }
 }
