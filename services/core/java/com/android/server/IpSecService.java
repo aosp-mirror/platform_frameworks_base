@@ -1761,7 +1761,7 @@ public class IpSecService extends IIpSecService.Stub {
             socketRecord =
                     userRecord.mEncapSocketRecords.getResourceOrThrow(c.getEncapSocketResourceId());
         }
-        SpiRecord spiRecord = userRecord.mSpiRecords.getResourceOrThrow(c.getSpiResourceId());
+        SpiRecord spiRecord = transformInfo.getSpiRecord();
 
         int mark =
                 (direction == IpSecManager.DIRECTION_OUT)
@@ -1794,7 +1794,7 @@ public class IpSecService extends IIpSecService.Stub {
 
                 // Set outbound SPI only. We want inbound to use any valid SA (old, new) on rekeys,
                 // but want to guarantee outbound packets are sent over the new SA.
-                spi = transformInfo.getSpiRecord().getSpi();
+                spi = spiRecord.getSpi();
             }
 
             // Always update the policy with the relevant XFRM_IF_ID
