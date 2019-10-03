@@ -68,6 +68,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -120,6 +121,12 @@ public class DisplayRotationTests {
         sMockWm = mock(WindowManagerService.class);
         sMockWm.mPowerManagerInternal = mock(PowerManagerInternal.class);
         sMockWm.mPolicy = mock(WindowManagerPolicy.class);
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        // Make sure the fake settings are cleared after the last test method.
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     @Before
