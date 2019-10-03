@@ -265,6 +265,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @see #QUERY_ARG_SORT_COLUMNS
      * @see #QUERY_ARG_SORT_DIRECTION
      * @see #QUERY_ARG_SORT_COLLATION
+     * @see #QUERY_ARG_SORT_LOCALE
      */
     public static final String QUERY_ARG_SQL_SELECTION = "android:query-arg-sql-selection";
 
@@ -282,6 +283,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @see #QUERY_ARG_SORT_COLUMNS
      * @see #QUERY_ARG_SORT_DIRECTION
      * @see #QUERY_ARG_SORT_COLLATION
+     * @see #QUERY_ARG_SORT_LOCALE
      */
     public static final String QUERY_ARG_SQL_SELECTION_ARGS =
             "android:query-arg-sql-selection-args";
@@ -297,6 +299,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @see #QUERY_ARG_SORT_COLUMNS
      * @see #QUERY_ARG_SORT_DIRECTION
      * @see #QUERY_ARG_SORT_COLLATION
+     * @see #QUERY_ARG_SORT_LOCALE
      */
     public static final String QUERY_ARG_SQL_SORT_ORDER = "android:query-arg-sql-sort-order";
 
@@ -351,20 +354,22 @@ public abstract class ContentResolver implements ContentInterface {
 
     /**
      * Allows client to specify a hint to the provider declaring which collation
-     * to use when sorting text values.
-     *
-     * <p>Providers may support custom collators. When specifying a custom collator
+     * to use when sorting values.
+     * <p>
+     * Providers may support custom collators. When specifying a custom collator
      * the value is determined by the Provider.
-     *
-     * <li>{@link ContentProvider} implementations: When preparing data in
-     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)}, if sort collation
-     * is reflected in the returned Cursor, it is  strongly recommended that
-     * {@link #QUERY_ARG_SORT_COLLATION} then be included in the array of honored arguments
-     * reflected in {@link Cursor} extras {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
-     *
-     * <li>When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
-     * arguments {@link Bundle}, the Content framework will attempt to synthesize
-     * a QUERY_ARG_SQL* argument using the corresponding QUERY_ARG_SORT* values.
+     * <p>
+     * {@link ContentProvider} implementations: When preparing data in
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)},
+     * if sort collation is reflected in the returned Cursor, it is strongly
+     * recommended that {@link #QUERY_ARG_SORT_COLLATION} then be included in
+     * the array of honored arguments reflected in {@link Cursor} extras
+     * {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
+     * <p>
+     * When querying a provider, where no QUERY_ARG_SQL* otherwise exists in the
+     * arguments {@link Bundle}, the Content framework will attempt to
+     * synthesize a QUERY_ARG_SQL* argument using the corresponding
+     * QUERY_ARG_SORT* values.
      *
      * @see java.text.Collator#PRIMARY
      * @see java.text.Collator#SECONDARY
@@ -372,6 +377,28 @@ public abstract class ContentResolver implements ContentInterface {
      * @see java.text.Collator#IDENTICAL
      */
     public static final String QUERY_ARG_SORT_COLLATION = "android:query-arg-sort-collation";
+
+    /**
+     * Allows client to specify a hint to the provider declaring which locale to
+     * use when sorting values.
+     * <p>
+     * The value is defined as a RFC 3066 locale ID followed by an optional
+     * keyword list, which is the locale format used to configure ICU through
+     * classes like {@link android.icu.util.ULocale}. This supports requesting
+     * advanced sorting options, such as {@code de@collation=phonebook},
+     * {@code zh@collation=pinyin}, etc.
+     * <p>
+     * {@link ContentProvider} implementations: When preparing data in
+     * {@link ContentProvider#query(Uri, String[], Bundle, CancellationSignal)},
+     * if sort locale is reflected in the returned Cursor, it is strongly
+     * recommended that {@link #QUERY_ARG_SORT_LOCALE} then be included in the
+     * array of honored arguments reflected in {@link Cursor} extras
+     * {@link Bundle} under {@link #EXTRA_HONORED_ARGS}.
+     *
+     * @see java.util.Locale#Locale(String)
+     * @see android.icu.util.ULocale#ULocale(String)
+     */
+    public static final String QUERY_ARG_SORT_LOCALE = "android:query-arg-sort-locale";
 
     /**
      * Allows provider to report back to client which query keys are honored in a Cursor.
@@ -386,6 +413,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @see #QUERY_ARG_SORT_COLUMNS
      * @see #QUERY_ARG_SORT_DIRECTION
      * @see #QUERY_ARG_SORT_COLLATION
+     * @see #QUERY_ARG_SORT_LOCALE
      */
     public static final String EXTRA_HONORED_ARGS = "android.content.extra.HONORED_ARGS";
 
