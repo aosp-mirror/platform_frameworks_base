@@ -940,9 +940,8 @@ public class LocationManager {
             @Nullable LocationRequest locationRequest,
             @NonNull LocationListener listener,
             @Nullable Looper looper) {
-        requestLocationUpdates(locationRequest,
-                new LocationListenerTransport(looper == null ? new Handler() : new Handler(looper),
-                        listener));
+        Handler handler = looper == null ? new Handler() : new Handler(looper);
+        requestLocationUpdates(locationRequest, new HandlerExecutor(handler), listener);
     }
 
     /**
@@ -969,7 +968,31 @@ public class LocationManager {
             @Nullable LocationRequest locationRequest,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull LocationListener listener) {
-        requestLocationUpdates(locationRequest, new LocationListenerTransport(executor, listener));
+        synchronized (mListeners) {
+            LocationListenerTransport transport = mListeners.get(listener);
+            if (transport != null) {
+                transport.unregister();
+            } else {
+                transport = new LocationListenerTransport(listener);
+                mListeners.put(listener, transport);
+            }
+            transport.register(executor);
+
+            boolean registered = false;
+            try {
+                mService.requestLocationUpdates(locationRequest, transport, null,
+                        mContext.getPackageName());
+                registered = true;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } finally {
+                if (!registered) {
+                    // allow gc after exception
+                    transport.unregister();
+                    mListeners.remove(listener);
+                }
+            }
+        }
     }
 
     /**
@@ -1006,23 +1029,6 @@ public class LocationManager {
                     mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private void requestLocationUpdates(@Nullable LocationRequest request,
-            @NonNull LocationListenerTransport transport) {
-        synchronized (mListeners) {
-            LocationListenerTransport oldTransport = mListeners.put(transport.getKey(), transport);
-            if (oldTransport != null) {
-                oldTransport.unregisterListener();
-            }
-
-            try {
-                mService.requestLocationUpdates(request, transport, null,
-                        mContext.getPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
         }
     }
 
@@ -1079,7 +1085,7 @@ public class LocationManager {
             if (transport == null) {
                 return;
             }
-            transport.unregisterListener();
+            transport.unregister();
 
             try {
                 mService.removeUpdates(transport, null, mContext.getPackageName());
@@ -2237,49 +2243,45 @@ public class LocationManager {
 
     private class LocationListenerTransport extends ILocationListener.Stub {
 
-        private final Executor mExecutor;
-        @Nullable private volatile LocationListener mListener;
+        private final LocationListener mListener;
+        @Nullable private volatile Executor mExecutor = null;
 
-        private LocationListenerTransport(@NonNull Handler handler,
-                @NonNull LocationListener listener) {
-            Preconditions.checkArgument(handler != null, "invalid null handler");
+        private LocationListenerTransport(@NonNull LocationListener listener) {
             Preconditions.checkArgument(listener != null, "invalid null listener");
-
-            mExecutor = new HandlerExecutor(handler);
             mListener = listener;
         }
 
-        private LocationListenerTransport(@NonNull Executor executor,
-                @NonNull LocationListener listener) {
-            Preconditions.checkArgument(executor != null, "invalid null executor");
-            Preconditions.checkArgument(listener != null, "invalid null listener");
-
-            mExecutor = executor;
-            mListener = listener;
-        }
-
-        private LocationListener getKey() {
+        public LocationListener getKey() {
             return mListener;
         }
 
-        private void unregisterListener() {
-            mListener = null;
+        public void register(@NonNull Executor executor) {
+            Preconditions.checkArgument(executor != null, "invalid null executor");
+            mExecutor = executor;
+        }
+
+        public void unregister() {
+            mExecutor = null;
         }
 
         @Override
         public void onLocationChanged(Location location) {
+            Executor currentExecutor = mExecutor;
+            if (currentExecutor == null) {
+                return;
+            }
+
             try {
-                mExecutor.execute(() -> {
+                currentExecutor.execute(() -> {
                     try {
-                        LocationListener listener = mListener;
-                        if (listener == null) {
+                        if (currentExecutor != mExecutor) {
                             return;
                         }
 
                         // we may be under the binder identity if a direct executor is used
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            listener.onLocationChanged(location);
+                            mListener.onLocationChanged(location);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
@@ -2295,18 +2297,22 @@ public class LocationManager {
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
+            Executor currentExecutor = mExecutor;
+            if (currentExecutor == null) {
+                return;
+            }
+
             try {
-                mExecutor.execute(() -> {
+                currentExecutor.execute(() -> {
                     try {
-                        LocationListener listener = mListener;
-                        if (listener == null) {
+                        if (currentExecutor != mExecutor) {
                             return;
                         }
 
                         // we may be under the binder identity if a direct executor is used
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            listener.onStatusChanged(provider, status, extras);
+                            mListener.onStatusChanged(provider, status, extras);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
@@ -2322,18 +2328,22 @@ public class LocationManager {
 
         @Override
         public void onProviderEnabled(String provider) {
+            Executor currentExecutor = mExecutor;
+            if (currentExecutor == null) {
+                return;
+            }
+
             try {
-                mExecutor.execute(() -> {
+                currentExecutor.execute(() -> {
                     try {
-                        LocationListener listener = mListener;
-                        if (listener == null) {
+                        if (currentExecutor != mExecutor) {
                             return;
                         }
 
                         // we may be under the binder identity if a direct executor is used
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            listener.onProviderEnabled(provider);
+                            mListener.onProviderEnabled(provider);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
@@ -2349,18 +2359,22 @@ public class LocationManager {
 
         @Override
         public void onProviderDisabled(String provider) {
+            Executor currentExecutor = mExecutor;
+            if (currentExecutor == null) {
+                return;
+            }
+
             try {
-                mExecutor.execute(() -> {
+                currentExecutor.execute(() -> {
                     try {
-                        LocationListener listener = mListener;
-                        if (listener == null) {
+                        if (currentExecutor != mExecutor) {
                             return;
                         }
 
                         // we may be under the binder identity if a direct executor is used
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            listener.onProviderDisabled(provider);
+                            mListener.onProviderDisabled(provider);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
