@@ -32,8 +32,11 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.authsecret.V1_0.IAuthSecret;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
@@ -95,6 +98,9 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     UserManagerInternal mUserManagerInternal;
     DeviceStateCache mDeviceStateCache;
+    FingerprintManager mFingerprintManager;
+    FaceManager mFaceManager;
+    PackageManager mPackageManager;
     protected boolean mHasSecureLockScreen;
 
     @Override
@@ -114,6 +120,9 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mRecoverableKeyStoreManager = mock(RecoverableKeyStoreManager.class);
         mUserManagerInternal = mock(UserManagerInternal.class);
         mDeviceStateCache = mock(DeviceStateCache.class);
+        mFingerprintManager = mock(FingerprintManager.class);
+        mFaceManager = mock(FaceManager.class);
+        mPackageManager = mock(PackageManager.class);
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -123,7 +132,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
                 mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class),
-                mock(KeyguardManager.class));
+                mock(KeyguardManager.class), mFingerprintManager, mFaceManager, mPackageManager);
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
@@ -181,6 +190,8 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
                 new ComponentName("com.dummy.package", ".FakeDeviceOwner"));
         when(mUserManagerInternal.isDeviceManaged()).thenReturn(true);
         when(mDeviceStateCache.isDeviceProvisioned()).thenReturn(true);
+        mockBiometricsHardwareFingerprintsAndTemplates(PRIMARY_USER_ID);
+        mockBiometricsHardwareFingerprintsAndTemplates(MANAGED_PROFILE_USER_ID);
 
         mLocalService = LocalServices.getService(LockSettingsInternal.class);
     }
@@ -231,6 +242,18 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
             }
         }).when(sm).fixateNewestUserKeyAuth(anyInt());
         return sm;
+    }
+
+    private void mockBiometricsHardwareFingerprintsAndTemplates(int userId) {
+        // Hardware must be detected and fingerprints must be enrolled
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)).thenReturn(true);
+        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+        when(mFingerprintManager.hasEnrolledFingerprints(userId)).thenReturn(true);
+
+        // Hardware must be detected and templates must be enrolled
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true);
+        when(mFaceManager.isHardwareDetected()).thenReturn(true);
+        when(mFaceManager.hasEnrolledTemplates(userId)).thenReturn(true);
     }
 
     @Override
