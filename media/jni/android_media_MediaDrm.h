@@ -20,14 +20,11 @@
 #include "jni.h"
 
 #include <media/stagefright/foundation/ABase.h>
-#include <media/IDrm.h>
-#include <media/IDrmClient.h>
+#include <mediadrm/IDrm.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
 namespace android {
-
-struct IDrm;
 
 class DrmListener: virtual public RefBase
 {
