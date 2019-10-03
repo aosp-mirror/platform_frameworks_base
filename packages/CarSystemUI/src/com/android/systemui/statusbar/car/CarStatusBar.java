@@ -161,9 +161,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private BatteryMeterView mBatteryMeterView;
     private Drawable mNotificationPanelBackground;
 
+    private ViewGroup mTopNavigationBarContainer;
     private ViewGroup mNavigationBarWindow;
     private ViewGroup mLeftNavigationBarWindow;
     private ViewGroup mRightNavigationBarWindow;
+    private CarNavigationBarView mTopNavigationBarView;
     private CarNavigationBarView mNavigationBarView;
     private CarNavigationBarView mLeftNavigationBarView;
     private CarNavigationBarView mRightNavigationBarView;
@@ -175,7 +177,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private CarFacetButtonController mCarFacetButtonController;
     private ActivityManagerWrapper mActivityManagerWrapper;
     private DeviceProvisionedController mDeviceProvisionedController;
-    private boolean mDeviceIsProvisioned = true;
+    private boolean mDeviceIsSetUpForUser = true;
     private HvacController mHvacController;
     private DrivingStateHelper mDrivingStateHelper;
     private PowerManagerHelper mPowerManagerHelper;
@@ -196,6 +198,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private boolean mNotificationListAtBottom;
     // Was the notification list at the bottom when the user first touched the screen
     private boolean mNotificationListAtBottomAtTimeOfTouch;
+    // To be attached to the top navigation bar (i.e. status bar) to pull down the notification
+    // panel.
+    private View.OnTouchListener mTopNavBarNotificationTouchListener;
     // To be attached to the navigation bars such that they can close the notification panel if
     // it's open.
     private View.OnTouchListener mNavBarNotificationTouchListener;
@@ -359,7 +364,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // get the provisioned state before calling the parent class since it's that flow that
         // builds the nav bar
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mDeviceIsProvisioned = mDeviceProvisionedController.isDeviceProvisioned();
+        mDeviceIsSetUpForUser = mDeviceProvisionedController.isCurrentUserSetup();
 
         // Keyboard related setup, before nav bars are created.
         mHideNavBarForKeyboard = mContext.getResources().getBoolean(
@@ -370,6 +375,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // created.
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
+
+        // Need to initialize HVAC controller before calling super.start - before system bars are
+        // created.
+        mHvacController = new HvacController(mContext);
 
         super.start();
         mTaskStackListener = new TaskStackListenerImpl();
@@ -389,25 +398,18 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         mHvacController.connectToCarService();
 
-        CarSystemUIFactory factory = SystemUIFactory.getInstance();
-        if (!mDeviceIsProvisioned) {
-            mDeviceProvisionedController.addCallback(
-                    new DeviceProvisionedController.DeviceProvisionedListener() {
-                        @Override
-                        public void onDeviceProvisionedChanged() {
-                            mHandler.post(() -> {
-                                // on initial boot we are getting a call even though the value
-                                // is the same so we are confirming the reset is needed
-                                boolean deviceProvisioned =
-                                        mDeviceProvisionedController.isDeviceProvisioned();
-                                if (mDeviceIsProvisioned != deviceProvisioned) {
-                                    mDeviceIsProvisioned = deviceProvisioned;
-                                    restartNavBars();
-                                }
-                            });
-                        }
-                    });
-        }
+        mDeviceProvisionedController.addCallback(
+                new DeviceProvisionedController.DeviceProvisionedListener() {
+                    @Override
+                    public void onUserSetupChanged() {
+                        mHandler.post(() -> restartNavBarsIfNecessary());
+                    }
+
+                    @Override
+                    public void onUserSwitched() {
+                        mHandler.post(() -> restartNavBarsIfNecessary());
+                    }
+                });
 
         // Register a listener for driving state changes.
         mDrivingStateHelper = new DrivingStateHelper(mContext, this::onDrivingStateChanged);
@@ -419,6 +421,14 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
     }
 
+    private void restartNavBarsIfNecessary() {
+        boolean currentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
+        if (mDeviceIsSetUpForUser != currentUserSetup) {
+            mDeviceIsSetUpForUser = currentUserSetup;
+            restartNavBars();
+        }
+    }
+
     /**
      * Remove all content from navbars and rebuild them. Used to allow for different nav bars
      * before and after the device is provisioned. . Also for change of density and font size.
@@ -427,8 +437,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // remove and reattach all hvac components such that we don't keep a reference to unused
         // ui elements
         mHvacController.removeAllComponents();
-        addTemperatureViewToController(mStatusBarWindow);
         mCarFacetButtonController.removeAll();
+
         if (mNavigationBarWindow != null) {
             mNavigationBarWindow.removeAllViews();
             mNavigationBarView = null;
@@ -522,7 +532,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     @Override
     protected void makeStatusBarView(@Nullable RegisterStatusBarResult result) {
         super.makeStatusBarView(result);
-        mHvacController = new HvacController(mContext);
 
         CarSystemUIFactory factory = SystemUIFactory.getInstance();
         mCarFacetButtonController = factory.getCarDependencyComponent()
@@ -547,7 +556,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * touch listeners needed for opening and closing the notification panel
      */
     private void connectNotificationsUI() {
-        // Attached to the status bar to detect pull down of the notification shade.
+        // Attached to the top navigation bar (i.e. status bar) to detect pull down of the
+        // notification shade.
         GestureDetector openGestureDetector = new GestureDetector(mContext,
                 new OpenNotificationGestureListener() {
                     @Override
@@ -580,6 +590,18 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         GestureDetector handleBarCloseNotificationGestureDetector = new GestureDetector(mContext,
                 new HandleBarCloseNotificationGestureListener());
 
+        mTopNavBarNotificationTouchListener = (v, event) -> {
+            if (!mDeviceIsSetUpForUser) {
+                return true;
+            }
+            boolean consumed = openGestureDetector.onTouchEvent(event);
+            if (consumed) {
+                return true;
+            }
+            maybeCompleteAnimation(event);
+            return true;
+        };
+
         mNavBarNotificationTouchListener =
                 (v, event) -> {
                     boolean consumed = navBarCloseNotificationGestureDetector.onTouchEvent(event);
@@ -589,21 +611,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     maybeCompleteAnimation(event);
                     return true;
                 };
-
-        // The following are the ui elements that the user would call the status bar.
-        // This will set the status bar so it they can make call backs.
-        CarNavigationBarView topBar = mStatusBarWindow.findViewById(R.id.car_top_bar);
-        topBar.setStatusBar(this);
-        topBar.setStatusBarWindowTouchListener((v1, event1) -> {
-
-                    boolean consumed = openGestureDetector.onTouchEvent(event1);
-                    if (consumed) {
-                        return true;
-                    }
-                    maybeCompleteAnimation(event1);
-                    return true;
-                }
-        );
 
         mNotificationClickHandlerFactory = new NotificationClickHandlerFactory(mBarService);
         mNotificationClickHandlerFactory.registerClickListener((launchResult, alertEntry) -> {
@@ -911,23 +918,30 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     }
 
     private void buildNavBarContent() {
+        // Always build top bar.
+        buildTopBar((mDeviceIsSetUpForUser) ? R.layout.car_top_navigation_bar :
+                R.layout.car_top_navigation_bar_unprovisioned);
+
         if (mShowBottom) {
-            buildBottomBar((mDeviceIsProvisioned) ? R.layout.car_navigation_bar :
+            buildBottomBar((mDeviceIsSetUpForUser) ? R.layout.car_navigation_bar :
                     R.layout.car_navigation_bar_unprovisioned);
         }
 
         if (mShowLeft) {
-            buildLeft((mDeviceIsProvisioned) ? R.layout.car_left_navigation_bar :
+            buildLeft((mDeviceIsSetUpForUser) ? R.layout.car_left_navigation_bar :
                     R.layout.car_left_navigation_bar_unprovisioned);
         }
 
         if (mShowRight) {
-            buildRight((mDeviceIsProvisioned) ? R.layout.car_right_navigation_bar :
+            buildRight((mDeviceIsSetUpForUser) ? R.layout.car_right_navigation_bar :
                     R.layout.car_right_navigation_bar_unprovisioned);
         }
     }
 
     private void buildNavBarWindows() {
+        mTopNavigationBarContainer = mStatusBarWindow
+            .findViewById(R.id.car_top_navigation_bar_container);
+
         if (mShowBottom) {
             mNavigationBarWindow = (ViewGroup) View.inflate(mContext,
                     R.layout.navigation_bar_window, null);
@@ -1049,6 +1063,19 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mWindowManager.removeView(mNavigationBarWindow);
     }
 
+    private void buildTopBar(int layout) {
+        mTopNavigationBarContainer.removeAllViews();
+        View.inflate(mContext, layout, mTopNavigationBarContainer);
+        mTopNavigationBarView = (CarNavigationBarView) mTopNavigationBarContainer.getChildAt(0);
+        if (mTopNavigationBarView == null) {
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_top_navigation_bar");
+            throw new RuntimeException("Unable to build top nav bar due to missing layout");
+        }
+        mTopNavigationBarView.setStatusBar(this);
+        addTemperatureViewToController(mTopNavigationBarView);
+        mTopNavigationBarView.setStatusBarWindowTouchListener(mTopNavBarNotificationTouchListener);
+    }
+
     private void buildBottomBar(int layout) {
         // SystemUI requires that the navigation bar view have a parent. Since the regular
         // StatusBar inflates navigation_bar_window as this parent view, use the same view for the
@@ -1057,7 +1084,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mNavigationBarView = (CarNavigationBarView) mNavigationBarWindow.getChildAt(0);
         if (mNavigationBarView == null) {
             Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_navigation_bar");
-            throw new RuntimeException("Unable to build botom nav bar due to missing layout");
+            throw new RuntimeException("Unable to build bottom nav bar due to missing layout");
         }
         mNavigationBarView.setStatusBar(this);
         addTemperatureViewToController(mNavigationBarView);
@@ -1068,7 +1095,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         View.inflate(mContext, layout, mLeftNavigationBarWindow);
         mLeftNavigationBarView = (CarNavigationBarView) mLeftNavigationBarWindow.getChildAt(0);
         if (mLeftNavigationBarView == null) {
-            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_navigation_bar");
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_left_navigation_bar");
             throw new RuntimeException("Unable to build left nav bar due to missing layout");
         }
         mLeftNavigationBarView.setStatusBar(this);
@@ -1081,7 +1108,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         View.inflate(mContext, layout, mRightNavigationBarWindow);
         mRightNavigationBarView = (CarNavigationBarView) mRightNavigationBarWindow.getChildAt(0);
         if (mRightNavigationBarView == null) {
-            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_navigation_bar");
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_right_navigation_bar");
             throw new RuntimeException("Unable to build right nav bar due to missing layout");
         }
         mRightNavigationBarView.setStatusBar(this);
