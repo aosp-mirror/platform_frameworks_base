@@ -101,11 +101,15 @@ public class FlashlightTile extends QSTileImpl<BooleanState> implements
             state.slash = new SlashState();
         }
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
+        state.secondaryLabel = "";
         if (!mFlashlightController.isAvailable()) {
             state.icon = mIcon;
             state.slash.isSlashed = true;
+            state.secondaryLabel = mContext.getString(
+                    R.string.quick_settings_flashlight_camera_in_use);
             state.contentDescription = mContext.getString(
-                    R.string.accessibility_quick_settings_flashlight_unavailable);
+                    R.string.accessibility_quick_settings_flashlight_unavailable)
+                    + ", " + state.secondaryLabel;
             state.state = Tile.STATE_UNAVAILABLE;
             return;
         }
