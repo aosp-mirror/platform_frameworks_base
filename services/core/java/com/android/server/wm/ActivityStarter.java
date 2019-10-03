@@ -1907,14 +1907,17 @@ class ActivityStarter {
                 mAddingToTask = true;
             }
         } else if (mStartActivity.mActivityComponent.equals(targetTask.realActivity)) {
-            // In this case the top activity on the task is the same as the one being launched,
-            // so we take that as a request to bring the task to the foreground. If the top
-            // activity in the task is the root activity, deliver this new intent to it if it
-            // desires.
-            if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                    || LAUNCH_SINGLE_TOP == mLaunchMode)
-                    && targetTaskTop.mActivityComponent.equals(
-                    mStartActivity.mActivityComponent) && mStartActivity.resultTo == null) {
+            if (targetTask == mInTask) {
+                // In this case we are bringing up an existing activity from a recent task. We
+                // don't need to add a new activity instance on top.
+            } else if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
+                            || LAUNCH_SINGLE_TOP == mLaunchMode)
+                    && targetTaskTop.mActivityComponent.equals(mStartActivity.mActivityComponent)
+                    && mStartActivity.resultTo == null) {
+                // In this case the top activity on the task is the same as the one being launched,
+                // so we take that as a request to bring the task to the foreground. If the top
+                // activity in the task is the root activity, deliver this new intent to it if it
+                // desires.
                 if (targetTaskTop.isRootOfTask()) {
                     targetTaskTop.getTaskRecord().setIntent(mStartActivity);
                 }
