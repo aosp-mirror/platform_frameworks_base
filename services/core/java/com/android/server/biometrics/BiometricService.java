@@ -25,7 +25,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
 import android.app.UserSwitchObserver;
@@ -257,12 +256,11 @@ public class BiometricService extends SystemService {
     private final Injector mInjector;
     @VisibleForTesting
     final IBiometricService.Stub mImpl;
-    private final AppOpsManager mAppOps;
     private final boolean mHasFeatureFingerprint;
     private final boolean mHasFeatureIris;
     private final boolean mHasFeatureFace;
     @VisibleForTesting
-    SettingObserver mSettingObserver;
+    final SettingObserver mSettingObserver;
     private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
     private final Random mRandom = new Random();
 
@@ -411,8 +409,8 @@ public class BiometricService extends SystemService {
     };
 
     private final class Authenticator {
-        int mType;
-        BiometricAuthenticator mAuthenticator;
+        final int mType;
+        final BiometricAuthenticator mAuthenticator;
 
         Authenticator(int type, BiometricAuthenticator authenticator) {
             mType = type;
@@ -445,9 +443,9 @@ public class BiometricService extends SystemService {
         private final ContentResolver mContentResolver;
         private final List<BiometricService.EnabledOnKeyguardCallback> mCallbacks;
 
-        private Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
-        private Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
-        private Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnabledOnKeyguard = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceEnabledForApps = new HashMap<>();
+        private final Map<Integer, Boolean> mFaceAlwaysRequireConfirmation = new HashMap<>();
 
         /**
          * Creates a content observer.
@@ -864,14 +862,6 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void checkAppOp(String opPackageName, int callingUid) {
-        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, callingUid,
-                opPackageName) != AppOpsManager.MODE_ALLOWED) {
-            Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
-            throw new SecurityException("Permission denied");
-        }
-    }
-
     private void checkInternalPermission() {
         getContext().enforceCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL,
                 "Must have USE_BIOMETRIC_INTERNAL permission");
@@ -942,7 +932,6 @@ public class BiometricService extends SystemService {
 
         mInjector = injector;
         mImpl = new BiometricServiceWrapper();
-        mAppOps = context.getSystemService(AppOpsManager.class);
         mEnabledOnKeyguardCallbacks = new ArrayList<>();
         mSettingObserver = mInjector.getSettingObserver(context, mHandler,
                 mEnabledOnKeyguardCallbacks);

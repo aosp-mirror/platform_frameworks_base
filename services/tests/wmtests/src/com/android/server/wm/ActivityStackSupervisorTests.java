@@ -44,6 +44,7 @@ import androidx.test.filters.MediumTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link ActivityStackSupervisor} class.
@@ -53,6 +54,7 @@ import org.junit.Test;
  */
 @MediumTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ActivityStackSupervisorTests extends ActivityTestsBase {
     private ActivityStack mFullscreenStack;
 
@@ -79,32 +81,28 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     /**
      * Ensures that waiting results are notified of launches.
      */
-    @SuppressWarnings("SynchronizeOnNonFinalField")
     @Test
     public void testReportWaitingActivityLaunchedIfNeeded() {
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
 
-        // #notifyAll will be called on the ActivityManagerService. we must hold the object lock
-        // when this happens.
-        synchronized (mService.mGlobalLock) {
-            final WaitResult taskToFrontWait = new WaitResult();
-            mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
-            mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_TASK_TO_FRONT);
+        final WaitResult taskToFrontWait = new WaitResult();
+        mSupervisor.mWaitingActivityLaunched.add(taskToFrontWait);
+        // #notifyAll will be called on the ActivityTaskManagerService#mGlobalLock. The lock is hold
+        // implicitly by WindowManagerGlobalLockRule.
+        mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_TASK_TO_FRONT);
 
-            assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
-            assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
-            assertNull(taskToFrontWait.who);
+        assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
+        assertEquals(taskToFrontWait.result, START_TASK_TO_FRONT);
+        assertNull(taskToFrontWait.who);
 
-            final WaitResult deliverToTopWait = new WaitResult();
-            mSupervisor.mWaitingActivityLaunched.add(deliverToTopWait);
-            mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity,
-                    START_DELIVERED_TO_TOP);
+        final WaitResult deliverToTopWait = new WaitResult();
+        mSupervisor.mWaitingActivityLaunched.add(deliverToTopWait);
+        mSupervisor.reportWaitingActivityLaunchedIfNeeded(firstActivity, START_DELIVERED_TO_TOP);
 
-            assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
-            assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
-            assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
-        }
+        assertThat(mSupervisor.mWaitingActivityLaunched).isEmpty();
+        assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
+        assertEquals(deliverToTopWait.who, firstActivity.mActivityComponent);
     }
 
     /**

@@ -50,9 +50,9 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.RootActivityContainer.FindTaskResult;
 import static com.android.server.wm.RootActivityContainer.TAG_STATES;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -76,6 +76,7 @@ import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.EventLogTags;
+import com.android.server.protolog.common.ProtoLog;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -84,8 +85,7 @@ import java.util.ArrayList;
  * Exactly one of these classes per Display in the system. Capable of holding zero or more
  * attached {@link ActivityStack}s.
  */
-class ActivityDisplay extends ConfigurationContainer<ActivityStack>
-        implements WindowContainerListener {
+class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityDisplay" : TAG_ATM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -201,11 +201,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
     }
 
-    @Override
-    public void onInitializeOverrideConfiguration(Configuration config) {
-        getRequestedOverrideConfiguration().updateFrom(config);
-    }
-
     void addChild(ActivityStack stack, int position) {
         if (position == POSITION_BOTTOM) {
             position = 0;
@@ -291,9 +286,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
 
         // Since positionChildAt() is called during the creation process of pinned stacks,
-        // ActivityStack#getStack() can be null. In this special case,
-        // since DisplayContest#positionStackAt() is called in TaskStack#onConfigurationChanged(),
-        // we don't have to call WindowContainerController#positionChildAt() here.
+        // ActivityStack#getStack() can be null.
         if (stack.getTaskStack() != null && mDisplayContent != null) {
             mDisplayContent.positionStackAt(insertPosition,
                     stack.getTaskStack(), includingParents);
@@ -1202,8 +1195,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         // Stacks could be reparented from the removed display to other display. While
         // reparenting the last stack of the removed display, the remove display is ready to be
         // released (no more ActivityStack). But, we cannot release it at that moment or the
-        // related WindowContainer and WindowContainerController will also be removed. So, we
-        // set display as removed after reparenting stack finished.
+        // related WindowContainer will also be removed. So, we set display as removed after
+        // reparenting stack finished.
         final ActivityDisplay toDisplay = mRootActivityContainer.getDefaultDisplay();
         mRootActivityContainer.mStackSupervisor.beginDeferResume();
         try {
@@ -1304,8 +1297,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final AppWindowToken newFocus;
         final IBinder token = r.appToken;
         if (token == null) {
-            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Clearing focused app, displayId="
-                    + mDisplayId);
+            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Clearing focused app, displayId=%d",
+                    mDisplayId);
             newFocus = null;
         } else {
             newFocus = mService.mWindowManager.mRoot.getAppWindowToken(token);
@@ -1313,8 +1306,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token
                         + ", displayId=" + mDisplayId);
             }
-            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Set focused app to: " + newFocus
-                    + " moveFocusNow=" + moveFocusNow + " displayId=" + mDisplayId);
+            ProtoLog.v(WM_DEBUG_FOCUS_LIGHT,
+                    "Set focused app to: %s moveFocusNow=%b displayId=%d", newFocus,
+                            moveFocusNow, mDisplayId);
         }
 
         final boolean changed = mDisplayContent.setFocusedApp(newFocus);

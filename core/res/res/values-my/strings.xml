@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ် ပစ်မှတ်"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ် ပစ်မှတ်ကို အက်ပ်အား သတ်မှတ်ခွင့်ပြုသည်။"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
@@ -1362,6 +1364,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"\'စမ်းသပ်ခြင်းစနစ်မုဒ်\' ဖွင့်ထားသည်"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"\'စမ်းသပ်ခြင်းစနစ် မုဒ်\' ကိုပိတ်ရန် စက်ရုံထုတ်အတိုင်း ပြင်ဆင်သတ်မှတ်ပါ။"</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"အမှတ်စဉ် ကွန်ဆိုးလ်ကို ဖွင့်ထားသည်"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"စွမ်းဆောင်ရည်အပေါ် သက်ရောက်မှုရှိနိုင်ပါသည်။ ပိတ်ရန် bootloader ကို စစ်ဆေးပါ။"</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB ပို့တ်တွင် အရည် သို့မဟုတ် အမှိုက်စ ရှိနေသည်"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB ပို့တ်ကို အလိုအလျောက် ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB ပို့တ်ကို အသုံးပြုနိုင်သည်"</string>
@@ -1891,10 +1895,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"အမျိုးအစားမခွဲရသေးပါ"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်) ။"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား ။"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ဘာသာစကားအမည် ထည့်ပါ"</string>

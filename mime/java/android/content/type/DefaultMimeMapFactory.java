@@ -20,9 +20,13 @@ import libcore.net.MimeMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -44,24 +48,33 @@ public class DefaultMimeMapFactory {
      * Android's default mapping between MIME types and extensions.
      */
     public static MimeMap create() {
-        return parseFromResources("/mime.types", "/android.mime.types");
+        Class c = DefaultMimeMapFactory.class;
+        // The resources are placed into the res/ path by the "mimemap-res.jar" genrule.
+        return create(resourceName -> c.getResourceAsStream("/res/" + resourceName));
     }
 
     private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
 
-    static MimeMap parseFromResources(String... resourceNames) {
+    /**
+     * Creates a {@link MimeMap} instance whose resources are loaded from the
+     * InputStreams looked up in {@code resourceSupplier}.
+     *
+     * @hide
+     */
+    public static MimeMap create(Function<String, InputStream> resourceSupplier) {
         MimeMap.Builder builder = MimeMap.builder();
-        for (String resourceName : resourceNames) {
-            parseTypes(builder, resourceName);
-        }
+        parseTypes(builder, true, resourceSupplier, "mime.types");
+        parseTypes(builder, true, resourceSupplier, "android.mime.types");
+        parseTypes(builder, false, resourceSupplier, "vendor.mime.types");
         return builder.build();
     }
 
-    private static void parseTypes(MimeMap.Builder builder, String resource) {
-        try (BufferedReader r = new BufferedReader(
-                new InputStreamReader(DefaultMimeMapFactory.class.getResourceAsStream(resource)))) {
+    private static void parseTypes(MimeMap.Builder builder, boolean allowOverwrite,
+            Function<String, InputStream> resourceSupplier, String resourceName) {
+        try (InputStream inputStream = Objects.requireNonNull(resourceSupplier.apply(resourceName));
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
-            while ((line = r.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 int commentPos = line.indexOf('#');
                 if (commentPos >= 0) {
                     line = line.substring(0, commentPos);
@@ -71,11 +84,28 @@ public class DefaultMimeMapFactory {
                     continue;
                 }
                 List<String> specs = Arrays.asList(SPLIT_PATTERN.split(line));
+                if (!allowOverwrite) {
+                    // Pretend that the mimeType and each file extension listed in the line
+                    // carries a "?" prefix, which means that it can add new mappings but
+                    // not modify existing mappings (putIfAbsent() semantics).
+                    specs = ensurePrefix("?", specs);
+                }
                 builder.put(specs.get(0), specs.subList(1, specs.size()));
             }
         } catch (IOException | RuntimeException e) {
-            throw new RuntimeException("Failed to parse " + resource, e);
+            throw new RuntimeException("Failed to parse " + resourceName, e);
         }
+    }
+
+    private static List<String> ensurePrefix(String prefix, List<String> strings) {
+        List<String> result = new ArrayList<>(strings.size());
+        for (String s : strings) {
+            if (!s.startsWith(prefix)) {
+                s = prefix + s;
+            }
+            result.add(s);
+        }
+        return result;
     }
 
 }

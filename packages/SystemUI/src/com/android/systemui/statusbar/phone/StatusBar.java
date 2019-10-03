@@ -347,10 +347,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     private BrightnessMirrorController mBrightnessMirrorController;
     private boolean mBrightnessMirrorVisible;
     protected BiometricUnlockController mBiometricUnlockController;
-    private LightBarController mLightBarController;
+    @Inject LightBarController mLightBarController;
     protected LockscreenWallpaper mLockscreenWallpaper;
     @VisibleForTesting
-    protected AutoHideController mAutoHideController;
+    @Inject AutoHideController mAutoHideController;
 
     private int mNaturalBarHeight = -1;
 
@@ -361,7 +361,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     protected StatusBarWindowController mStatusBarWindowController;
     @VisibleForTesting
-    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    @Inject KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost = new DozeServiceHost();
     private boolean mWakeUpComingFromTouch;
@@ -369,7 +369,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final Object mQueueLock = new Object();
 
-    protected StatusBarIconController mIconController;
+    @Inject StatusBarIconController mIconController;
     @Inject
     DozeLog mDozeLog;
     @Inject
@@ -400,7 +400,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected FalsingManager mFalsingManager;
 
     @VisibleForTesting
-    BroadcastDispatcher mBroadcastDispatcher;
+    @Inject BroadcastDispatcher mBroadcastDispatcher;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -413,8 +413,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     // RemoteInputView to be activated after unlock
     private View mPendingRemoteInputView;
 
-    private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler =
-            Dependency.get(RemoteInputQuickSettingsDisabler.class);
+    @Inject RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
 
     private View mReportRejectedTouch;
 
@@ -423,18 +422,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final int[] mAbsPos = new int[2];
     private final ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
-    private NotificationGutsManager mGutsManager;
-    protected NotificationLogger mNotificationLogger;
-    protected NotificationEntryManager mEntryManager;
+    @Inject NotificationGutsManager mGutsManager;
+    @Inject NotificationLogger mNotificationLogger;
+    @Inject NotificationEntryManager mEntryManager;
     private NotificationListController mNotificationListController;
-    private NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
-    protected NotificationViewHierarchyManager mViewHierarchyManager;
-    protected ForegroundServiceController mForegroundServiceController;
-    protected AppOpsController mAppOpsController;
-    protected KeyguardViewMediator mKeyguardViewMediator;
-    private ZenModeController mZenController;
-    private final NotificationAlertingManager mNotificationAlertingManager =
-            Dependency.get(NotificationAlertingManager.class);
+    @Inject NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    @Inject NotificationViewHierarchyManager mViewHierarchyManager;
+    @Inject ForegroundServiceController mForegroundServiceController;
+    @Inject AppOpsController mAppOpsController;
+    @Inject KeyguardViewMediator mKeyguardViewMediator;
+    @Inject ZenModeController mZenController;
+    @Inject NotificationAlertingManager mNotificationAlertingManager;
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -445,7 +443,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final Rect mLastFullscreenStackBounds = new Rect();
     private final Rect mLastDockedStackBounds = new Rect();
 
-    private final DisplayMetrics mDisplayMetrics = Dependency.get(DisplayMetrics.class);
+    @Inject DisplayMetrics mDisplayMetrics;
 
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
@@ -454,7 +452,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private ScreenPinningRequest mScreenPinningRequest;
 
-    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    @Inject MetricsLogger mMetricsLogger;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     @VisibleForTesting
@@ -491,14 +489,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     protected ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    @Inject UiOffloadThread mUiOffloadThread;
 
     protected boolean mDozing;
     private boolean mDozingRequested;
 
-    private NotificationMediaManager mMediaManager;
-    protected NotificationLockscreenUserManager mLockscreenUserManager;
-    protected NotificationRemoteInputManager mRemoteInputManager;
+    @Inject NotificationMediaManager mMediaManager;
+    @Inject NotificationLockscreenUserManager mLockscreenUserManager;
+    @Inject NotificationRemoteInputManager mRemoteInputManager;
     private boolean mWallpaperSupported;
 
     private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
@@ -569,18 +567,18 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
-    protected UserSwitcherController mUserSwitcherController;
-    private NetworkController mNetworkController;
-    private BatteryController mBatteryController;
+    @Inject UserSwitcherController mUserSwitcherController;
+    @Inject NetworkController mNetworkController;
+    @Inject BatteryController mBatteryController;
     protected boolean mPanelExpanded;
     private UiModeManager mUiModeManager;
     protected boolean mIsKeyguard;
     private LogMaker mStatusBarStateLog;
     protected NotificationIconAreaController mNotificationIconAreaController;
     @Nullable private View mAmbientIndicationContainer;
-    private SysuiColorExtractor mColorExtractor;
-    private ScreenLifecycle mScreenLifecycle;
-    @VisibleForTesting WakefulnessLifecycle mWakefulnessLifecycle;
+    @Inject SysuiColorExtractor mColorExtractor;
+    @Inject ScreenLifecycle mScreenLifecycle;
+    @Inject @VisibleForTesting WakefulnessLifecycle mWakefulnessLifecycle;
 
     private final View.OnClickListener mGoToLockedShadeListener = v -> {
         if (mState == StatusBarState.KEYGUARD) {
@@ -589,8 +587,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
     private boolean mNoAnimationOnNextBarModeChange;
-    private final SysuiStatusBarStateController mStatusBarStateController =
-            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
+    @Inject SysuiStatusBarStateController mStatusBarStateController;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -611,19 +608,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mVibrateOnOpening;
-    private VibratorHelper mVibratorHelper;
+    @Inject VibratorHelper mVibratorHelper;
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     protected StatusBarNotificationPresenter mPresenter;
     private NotificationActivityStarter mNotificationActivityStarter;
     private boolean mPulsing;
-    protected BubbleController mBubbleController;
+    @Inject BubbleController mBubbleController;
     private final BubbleController.BubbleExpandListener mBubbleExpandListener =
             (isExpanding, key) -> {
                 mEntryManager.updateNotifications();
                 updateScrimController();
             };
     private ActivityIntentHelper mActivityIntentHelper;
-    private ShadeController mShadeController;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -641,41 +637,13 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void start() {
-        mGroupManager = Dependency.get(NotificationGroupManager.class);
-        mGroupAlertTransferHelper = Dependency.get(NotificationGroupAlertTransferHelper.class);
-        mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
-        mNotificationLogger = Dependency.get(NotificationLogger.class);
-        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
-        mNotificationListener =  Dependency.get(NotificationListener.class);
         mNotificationListener.registerAsSystemService();
-        mNetworkController = Dependency.get(NetworkController.class);
-        mUserSwitcherController = Dependency.get(UserSwitcherController.class);
-        mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
-        mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
-        mBatteryController = Dependency.get(BatteryController.class);
-        mAssistManager = Dependency.get(AssistManager.class);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
-        mLockscreenUserManager = Dependency.get(NotificationLockscreenUserManager.class);
-        mGutsManager = Dependency.get(NotificationGutsManager.class);
-        mMediaManager = Dependency.get(NotificationMediaManager.class);
-        mEntryManager = Dependency.get(NotificationEntryManager.class);
         mBypassHeadsUpNotifier.setUp(mEntryManager);
-        mNotificationInterruptionStateProvider =
-                Dependency.get(NotificationInterruptionStateProvider.class);
-        mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
-        mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
-        mAppOpsController = Dependency.get(AppOpsController.class);
-        mZenController = Dependency.get(ZenModeController.class);
-        mKeyguardViewMediator = getComponent(KeyguardViewMediator.class);
-        mColorExtractor = Dependency.get(SysuiColorExtractor.class);
-        mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
-        mNavigationBarController = Dependency.get(NavigationBarController.class);
-        mBubbleController = Dependency.get(BubbleController.class);
         mBubbleController.setExpandListener(mBubbleExpandListener);
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
-        mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
         if (sliceProvider != null) {
             sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
@@ -698,7 +666,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
-        mVibratorHelper = Dependency.get(VibratorHelper.class);
 
         DateTimeView.setReceiverHandler(Dependency.get(Dependency.TIME_TICK_HANDLER));
         putComponent(StatusBar.class, this);
@@ -712,7 +679,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
 
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
         mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -901,7 +867,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .replace(R.id.status_bar_container, new CollapsedStatusBarFragment(),
                         CollapsedStatusBarFragment.TAG)
                 .commit();
-        mIconController = Dependency.get(StatusBarIconController.class);
 
         mHeadsUpManager.setUp(mStatusBarWindow, mGroupManager, this, mVisualStabilityManager);
         Dependency.get(ConfigurationController.class).addCallback(mHeadsUpManager);
@@ -947,10 +912,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
-        mAutoHideController = Dependency.get(AutoHideController.class);
         mAutoHideController.setStatusBar(this);
-
-        mLightBarController = Dependency.get(LightBarController.class);
 
         ScrimView scrimBehind = mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
@@ -1123,7 +1085,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         final StatusBarRemoteInputCallback mStatusBarRemoteInputCallback =
                 (StatusBarRemoteInputCallback) Dependency.get(
                         NotificationRemoteInputManager.Callback.class);
-        mShadeController = Dependency.get(ShadeController.class);
         final ActivityStarter activityStarter = Dependency.get(ActivityStarter.class);
 
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
@@ -1131,7 +1092,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
                 mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
-                mLockscreenUserManager, mShadeController, mKeyguardStateController,
+                mLockscreenUserManager, this, mKeyguardStateController,
                 mNotificationInterruptionStateProvider, mMetricsLogger,
                 new LockPatternUtils(mContext), Dependency.get(MAIN_HANDLER),
                 Dependency.get(BG_HANDLER), mActivityIntentHelper, mBubbleController);
@@ -1140,7 +1101,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mEntryManager.setRowBinder(rowBinder);
         rowBinder.setNotificationClicker(new NotificationClicker(
-                this, Dependency.get(BubbleController.class), mNotificationActivityStarter));
+                this, mBubbleController, mNotificationActivityStarter));
 
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
         mNotificationListController.bind();
@@ -4227,12 +4188,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     // all notifications
     protected ViewGroup mStackScroller;
 
-    protected NotificationGroupManager mGroupManager;
-
-    protected NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
+    @Inject NotificationGroupManager mGroupManager;
+    @Inject NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
 
     // handling reordering
-    protected VisualStabilityManager mVisualStabilityManager;
+    @Inject VisualStabilityManager mVisualStabilityManager;
 
     protected AccessibilityManager mAccessibilityManager;
 
@@ -4248,10 +4208,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     protected KeyguardManager mKeyguardManager;
-    private DeviceProvisionedController mDeviceProvisionedController
-            = Dependency.get(DeviceProvisionedController.class);
+    @Inject DeviceProvisionedController mDeviceProvisionedController;
 
-    protected NavigationBarController mNavigationBarController;
+    @Inject protected NavigationBarController mNavigationBarController;
 
     // UI-specific methods
 
@@ -4267,7 +4226,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationShelf mNotificationShelf;
     protected EmptyShadeView mEmptyShadeView;
 
-    protected AssistManager mAssistManager;
+    @Inject AssistManager mAssistManager;
 
     public boolean isDeviceInteractive() {
         return mDeviceInteractive;
@@ -4326,7 +4285,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    protected NotificationListener mNotificationListener;
+    @Inject NotificationListener mNotificationListener;
 
     public void setNotificationSnoozed(StatusBarNotification sbn, SnoozeOption snoozeOption) {
         if (snoozeOption.getSnoozeCriterion() != null) {
@@ -4462,8 +4421,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         executeActionDismissingKeyguard(() -> {
             try {
                 intent.send(null, 0, null, null, null, null, getActivityOptions(
-                        mActivityLaunchAnimator.getLaunchAnimation(associatedView,
-                                mShadeController.isOccluded())));
+                        mActivityLaunchAnimator.getLaunchAnimation(associatedView, isOccluded())));
             } catch (PendingIntent.CanceledException e) {
                 // the stack trace isn't very helpful here.
                 // Just log the exception message.

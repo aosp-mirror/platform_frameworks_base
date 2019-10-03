@@ -43,16 +43,18 @@ import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /**
  * Tests for the {@link WindowState#computeFrameLw} method and other window frame machinery.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WindowFrameTests
+ *  atest WmTests:WindowFrameTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WindowFrameTests extends WindowTestsBase {
 
     private final IWindow mIWindow = new TestIWindow();

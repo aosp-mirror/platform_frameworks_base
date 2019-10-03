@@ -49,6 +49,7 @@ import android.util.LongSparseArray;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -386,13 +387,15 @@ public class GarbageMonitor implements Dumpable {
         public static final boolean ADD_TO_DEFAULT_ON_DEBUGGABLE_BUILDS = true;
 
         private final GarbageMonitor gm;
+        private final ActivityStarter mActivityStarter;
         private ProcessMemInfo pmi;
         private boolean dumpInProgress;
 
         @Inject
-        public MemoryTile(QSHost host, GarbageMonitor monitor) {
+        public MemoryTile(QSHost host, GarbageMonitor monitor, ActivityStarter starter) {
             super(host);
             gm = monitor;
+            mActivityStarter = starter;
         }
 
         @Override
@@ -423,7 +426,7 @@ public class GarbageMonitor implements Dumpable {
                         dumpInProgress = false;
                         refreshState();
                         getHost().collapsePanels();
-                        mContext.startActivity(shareIntent);
+                        mActivityStarter.postStartActivityDismissingKeyguard(shareIntent, 0);
                     });
                 }
             }.start();

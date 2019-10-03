@@ -66,15 +66,17 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
  * Build/Install/Run:
- *  atest FrameworksServicesTests:RecentsAnimationControllerTest
+ *  atest WmTests:RecentsAnimationControllerTest
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Mock SurfaceControl mMockLeash;
@@ -88,12 +90,8 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        synchronized (mWm.mGlobalLock) {
-            // Hold the lock to protect the stubbing from being accessed by other threads.
-            spyOn(mWm.mRoot);
-            doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
-            doReturn(mDisplayContent).when(mWm.mRoot).getDisplayContent(anyInt());
-        }
+        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        doReturn(mDisplayContent).when(mWm.mRoot).getDisplayContent(anyInt());
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY));

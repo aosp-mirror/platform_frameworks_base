@@ -21,6 +21,7 @@ import android.annotation.UserIdInt;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -34,9 +35,9 @@ import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
 import com.android.server.role.RoleManagerService;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Logic to retrieve the various legacy(pre-Q) equivalents of role holders.
@@ -125,9 +126,21 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
             }
             case RoleManager.ROLE_HOME: {
                 PackageManager packageManager = mContext.getPackageManager();
-                List<ResolveInfo> resolveInfos = new ArrayList<>();
-                ComponentName componentName = packageManager.getHomeActivities(resolveInfos);
-                String packageName = componentName != null ? componentName.getPackageName() : null;
+                String packageName;
+                if (packageManager.isDeviceUpgrading()) {
+                    ResolveInfo resolveInfo = packageManager.resolveActivityAsUser(
+                            new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME),
+                            PackageManager.MATCH_DEFAULT_ONLY
+                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+                    packageName = resolveInfo != null && resolveInfo.activityInfo != null
+                            ? resolveInfo.activityInfo.packageName : null;
+                    if (packageName != null && isSettingsApplication(packageName, userId)) {
+                        packageName = null;
+                    }
+                } else {
+                    packageName = null;
+                }
                 return CollectionUtils.singletonOrEmpty(packageName);
             }
             case RoleManager.ROLE_EMERGENCY: {
@@ -141,5 +154,17 @@ public class LegacyRoleResolutionPolicy implements RoleManagerService.RoleHolder
                 return Collections.emptyList();
             }
         }
+    }
+
+    private boolean isSettingsApplication(@NonNull String packageName, @UserIdInt int userId) {
+        PackageManager packageManager = mContext.getPackageManager();
+        ResolveInfo resolveInfo = packageManager.resolveActivityAsUser(new Intent(
+                Settings.ACTION_SETTINGS), PackageManager.MATCH_DEFAULT_ONLY
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+        if (resolveInfo == null || resolveInfo.activityInfo == null) {
+            return false;
+        }
+        return Objects.equals(packageName, resolveInfo.activityInfo.packageName);
     }
 }

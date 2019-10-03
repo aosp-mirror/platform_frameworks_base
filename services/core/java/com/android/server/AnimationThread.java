@@ -64,7 +64,7 @@ public final class AnimationThread extends ServiceThread {
      */
     @VisibleForTesting
     public static void dispose() {
-        synchronized (DisplayThread.class) {
+        synchronized (AnimationThread.class) {
             if (sInstance == null) {
                 return;
             }

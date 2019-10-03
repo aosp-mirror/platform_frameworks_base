@@ -2405,7 +2405,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final ActiveUids activeUids = new ActiveUids(this, false /* postChangesToAtm */);
         mProcessList.init(this, activeUids);
         mLowMemDetector = null;
-        mOomAdjuster = new OomAdjuster(this, mProcessList, activeUids, handlerThread);
+        mOomAdjuster = hasHandlerThread
+                ? new OomAdjuster(this, mProcessList, activeUids, handlerThread) : null;
 
         mIntentFirewall = hasHandlerThread
                 ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
@@ -7440,6 +7441,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         dst.setProcess(r);
                         dst.notifyAll();
                     }
+                    dst.mRestartCount = 0;
                     updateOomAdjLocked(r, true, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
                     maybeUpdateProviderUsageStatsLocked(r, src.info.packageName,
                             src.info.authority);
@@ -13883,9 +13885,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
+    /**
+     * Remove the dying provider from known provider map and launching provider map.
+     * @param proc The dying process recoder
+     * @param cpr The provider to be removed.
+     * @param always If true, remove the provider from launching map always, no more restart attempt
+     * @return true if the given provider is in launching
+     */
     private final boolean removeDyingProviderLocked(ProcessRecord proc,
             ContentProviderRecord cpr, boolean always) {
-        final boolean inLaunching = mLaunchingProviders.contains(cpr);
+        boolean inLaunching = mLaunchingProviders.contains(cpr);
+        if (inLaunching && !always && ++cpr.mRestartCount > ContentProviderRecord.MAX_RETRY_COUNT) {
+            // It's being launched but we've reached maximum attempts, force the removal
+            always = true;
+        }
 
         if (!inLaunching || always) {
             synchronized (cpr) {
@@ -13937,6 +13950,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (inLaunching && always) {
             mLaunchingProviders.remove(cpr);
+            cpr.mRestartCount = 0;
+            inLaunching = false;
         }
         return inLaunching;
     }
@@ -14152,6 +14167,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i = mLaunchingProviders.size() - 1; i >= 0; i--) {
             ContentProviderRecord cpr = mLaunchingProviders.get(i);
             if (cpr.launchingApp == app) {
+                if (++cpr.mRestartCount > ContentProviderRecord.MAX_RETRY_COUNT) {
+                    // It's being launched but we've reached maximum attempts, mark it as bad
+                    alwaysBad = true;
+                }
                 if (!alwaysBad && !app.bad && cpr.hasConnectionOrHandle()) {
                     restart = true;
                 } else {

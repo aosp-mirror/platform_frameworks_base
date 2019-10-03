@@ -661,6 +661,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Leidžiama programai skaityti ir rašyti „Do Not Disturb“ konfigūraciją."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"pradėti peržiūrėti leidimo naudojimą"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Leidžia savininkui pradėti naudoti programos leidimą. Įprastoms programoms to neturėtų prireikti."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"pritaikomumo sparčiojo klavišo tikslas"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Programai leidžiama apibrėžti pritaikomumo sparčiojo klavišo tikslą."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Valdykite, kokio ilgio ekrano užrakto slaptažodžius ir PIN kodus galima naudoti."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Stebėti bandymus atrakinti ekraną"</string>
@@ -1405,6 +1407,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Pasirinkite, kas išjungtumėte USB derinimą."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Testavimo sistemos režimas įgalintas"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Atkurkite gamyklinius duomenis, kad išjungtumėte testavimo sistemos režimą."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"Serijos pultas įgalintas"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"Našumas paveiktas. Norėdami išjungti, patikrinkite paleidyklę."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB prievade yra skysčių ar smulkių dalelių"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB prievadas automatiškai išjungtas. Palieskite, kad sužinotumėte daugiau."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Saugu naudoti USB prievadą"</string>
@@ -1958,10 +1962,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Be kategorijos"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Galite nustatyti šių pranešimų svarbą."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją (šią paskyrą naudojantis naudotojas jau yra)?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Pridėkite kalbą"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiono nuostata"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Įveskite kalbos pav."</string>

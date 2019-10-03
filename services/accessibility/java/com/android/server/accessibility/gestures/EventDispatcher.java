@@ -72,10 +72,16 @@ class EventDispatcher {
      *
      * @param prototype The prototype from which to create the injected events.
      * @param action The action of the event.
+     * @param rawEvent The original event prior to magnification or other transformations.
      * @param pointerIdBits The bits of the pointers to send.
      * @param policyFlags The policy flags associated with the event.
      */
-    void sendMotionEvent(MotionEvent prototype, int action, int pointerIdBits, int policyFlags) {
+    void sendMotionEvent(
+            MotionEvent prototype,
+            int action,
+            MotionEvent rawEvent,
+            int pointerIdBits,
+            int policyFlags) {
         prototype.setAction(action);
 
         MotionEvent event = null;
@@ -105,11 +111,8 @@ class EventDispatcher {
 
         // Make sure that the user will see the event.
         policyFlags |= WindowManagerPolicy.FLAG_PASS_TO_USER;
-        // TODO: For now pass null for the raw event since the touch
-        //       explorer is the last event transformation and it does
-        //       not care about the raw event.
         if (mReceiver != null) {
-            mReceiver.onMotionEvent(event, null, policyFlags);
+            mReceiver.onMotionEvent(event, rawEvent, policyFlags);
         } else {
             Slog.e(LOG_TAG, "Error sending event: no receiver specified.");
         }
@@ -280,7 +283,12 @@ class EventDispatcher {
             if (!isInjectedPointerDown(pointerId)) {
                 pointerIdBits |= (1 << pointerId);
                 final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
-                sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
+                sendMotionEvent(
+                        prototype,
+                        action,
+                        mState.getLastReceivedEvent(),
+                        pointerIdBits,
+                        policyFlags);
             }
         }
     }
@@ -303,7 +311,8 @@ class EventDispatcher {
             }
             pointerIdBits |= (1 << pointerId);
             final int action = computeInjectionAction(MotionEvent.ACTION_UP, i);
-            sendMotionEvent(prototype, action, pointerIdBits, policyFlags);
+            sendMotionEvent(
+                    prototype, action, mState.getLastReceivedEvent(), pointerIdBits, policyFlags);
         }
     }
 }

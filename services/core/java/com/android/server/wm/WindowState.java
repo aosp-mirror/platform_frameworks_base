@@ -90,20 +90,20 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RESIZE;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_POWER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_RESIZE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -206,6 +206,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.utils.InsetUtils;
 import com.android.server.wm.utils.WmDisplayCutout;
@@ -781,7 +782,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mSubLayer = mPolicy.getSubWindowLayerFromTypeLw(a.type);
             mIsChildWindow = true;
 
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG, "Adding " + this + " to " + parentWindow);
+            ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
 
             mLayoutAttached = mAttrs.type !=
@@ -1294,14 +1295,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || configChanged
                 || dragResizingChanged
                 || mReportOrientationChanged) {
-            if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
-                Slog.v(TAG_WM, "Resize reasons for w=" + this + ": "
-                        + " " + mWindowFrames.getInsetsChangedInfo()
-                        + " surfaceResized=" + winAnimator.mSurfaceResized
-                        + " configChanged=" + configChanged
-                        + " dragResizingChanged=" + dragResizingChanged
-                        + " reportOrientationChanged=" + mReportOrientationChanged);
-            }
+            ProtoLog.v(WM_DEBUG_RESIZE,
+                        "Resize reasons for w=%s:  %s surfaceResized=%b configChanged=%b "
+                                + "dragResizingChanged=%b reportOrientationChanged=%b",
+                        this, mWindowFrames.getInsetsChangedInfo(), winAnimator.mSurfaceResized,
+                        configChanged, dragResizingChanged, mReportOrientationChanged);
 
             // If it's a dead window left on screen, and the configuration changed, there is nothing
             // we can do about it. Remove the window now.
@@ -1318,10 +1316,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // redrawn; to do that, we need to go through the process of getting informed by the
             // application when it has finished drawing.
             if (getOrientationChanging() || dragResizingChanged) {
-                if (DEBUG_ANIM || DEBUG_ORIENTATION || DEBUG_RESIZE) {
-                    Slog.v(TAG_WM, "Orientation or resize start waiting for draw"
+                if (getOrientationChanging()) {
+                    Slog.v(TAG_WM, "Orientation start waiting for draw"
                             + ", mDrawState=DRAW_PENDING in " + this
                             + ", surfaceController " + winAnimator.mSurfaceController);
+                }
+                if (dragResizingChanged) {
+                    ProtoLog.v(WM_DEBUG_RESIZE,
+                            "Resize start waiting for draw, "
+                                    + "mDrawState=DRAW_PENDING in %s, surfaceController %s",
+                            this, winAnimator.mSurfaceController);
                 }
                 winAnimator.mDrawState = DRAW_PENDING;
                 if (mAppToken != null) {
@@ -1329,13 +1333,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
             if (!mWmService.mResizingWindows.contains(this)) {
-                if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG_WM, "Resizing window " + this);
+                ProtoLog.v(WM_DEBUG_RESIZE, "Resizing window %s", this);
                 mWmService.mResizingWindows.add(this);
             }
         } else if (getOrientationChanging()) {
             if (isDrawnLw()) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Orientation not waiting for draw in "
-                        + this + ", surfaceController " + winAnimator.mSurfaceController);
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Orientation not waiting for draw in %s, surfaceController %s", this,
+                        winAnimator.mSurfaceController);
                 setOrientationChanging(false);
                 mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
                         - mWmService.mDisplayFreezeTime);
@@ -1705,7 +1710,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void onMovedByResize() {
-        if (DEBUG_RESIZE) Slog.d(TAG, "onMovedByResize: Moving " + this);
+        ProtoLog.d(WM_DEBUG_RESIZE, "onMovedByResize: Moving %s", this);
         mMovedByResize = true;
         super.onMovedByResize();
     }
@@ -1779,7 +1784,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void onResize() {
         final ArrayList<WindowState> resizingWindows = mWmService.mResizingWindows;
         if (mHasSurface && !isGoneForLayoutLw() && !resizingWindows.contains(this)) {
-            if (DEBUG_RESIZE) Slog.d(TAG, "onResize: Resizing " + this);
+            ProtoLog.d(WM_DEBUG_RESIZE, "onResize: Resizing %s", this);
             resizingWindows.add(this);
         }
         if (isGoneForLayoutLw()) {
@@ -1922,8 +1927,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mRemoved) {
             // Nothing to do.
-            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                    "WS.removeImmediately: " + this + " Already removed...");
+            ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                    "WS.removeImmediately: %s Already removed...", this);
             return;
         }
 
@@ -1973,39 +1978,35 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void removeIfPossible(boolean keepVisibleDeadWindow) {
         mWindowRemovalAllowed = true;
-        if (DEBUG_ADD_REMOVE) Slog.v(TAG,
-                "removeIfPossible: " + this + " callers=" + Debug.getCallers(5));
+        ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                "removeIfPossible: %s callers=%s", this, Debug.getCallers(5));
 
         final boolean startingWindow = mAttrs.type == TYPE_APPLICATION_STARTING;
-        if (startingWindow && DEBUG_STARTING_WINDOW) Slog.d(TAG_WM,
-                "Starting window removed " + this);
-
-        if (DEBUG || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && isFocused()) {
-            Slog.v(TAG_WM, "Remove " + this + " client="
-                    + Integer.toHexString(System.identityHashCode(mClient.asBinder()))
-                    + ", surfaceController=" + mWinAnimator.mSurfaceController + " Callers="
-                    + Debug.getCallers(5));
+        if (startingWindow) {
+            ProtoLog.d(WM_DEBUG_STARTING_WINDOW, "Starting window removed %s", this);
         }
+
+        ProtoLog.v(WM_DEBUG_FOCUS, "Remove client=%x, surfaceController=%s Callers=%s",
+                    System.identityHashCode(mClient.asBinder()),
+                    mWinAnimator.mSurfaceController,
+                    Debug.getCallers(5));
+
 
         final long origId = Binder.clearCallingIdentity();
 
         try {
             disposeInputChannel();
 
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "Remove " + this
-                    + ": mSurfaceController=" + mWinAnimator.mSurfaceController
-                    + " mAnimatingExit=" + mAnimatingExit
-                    + " mRemoveOnExit=" + mRemoveOnExit
-                    + " mHasSurface=" + mHasSurface
-                    + " surfaceShowing=" + mWinAnimator.getShown()
-                    + " animating=" + isAnimating()
-                    + " app-animation="
-                    + (mAppToken != null ? mAppToken.isSelfAnimating() : "false")
-                    + " mWillReplaceWindow=" + mWillReplaceWindow
-                    + " inPendingTransaction="
-                    + (mAppToken != null ? mAppToken.inPendingTransaction : false)
-                    + " mDisplayFrozen=" + mWmService.mDisplayFrozen
-                    + " callers=" + Debug.getCallers(6));
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
+                    "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "
+                            + "mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b "
+                            + "mWillReplaceWindow=%b inPendingTransaction=%b mDisplayFrozen=%b "
+                            + "callers=%s",
+                    this, mWinAnimator.mSurfaceController, mAnimatingExit, mRemoveOnExit,
+                    mHasSurface, mWinAnimator.getShown(), isAnimating(),
+                    mAppToken != null && mAppToken.isSelfAnimating(), mWillReplaceWindow,
+                    mAppToken != null && mAppToken.inPendingTransaction,
+                    mWmService.mDisplayFrozen, Debug.getCallers(6));
 
             // Visibility of the removed window. Will be used later to update orientation later on.
             boolean wasVisible = false;
@@ -2017,8 +2018,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 if (mWillReplaceWindow) {
                     // This window is going to be replaced. We need to keep it around until the new one
                     // gets added, then we will get rid of this one.
-                    if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                            "Preserving " + this + " until the new one is " + "added");
+                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                            "Preserving %s until the new one is added", this);
                     // TODO: We are overloading mAnimatingExit flag to prevent the window state from
                     // been removed. We probably need another flag to indicate that window removal
                     // should be deffered vs. overloading the flag that says we are playing an exit
@@ -2032,8 +2033,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 wasVisible = isWinVisibleLw();
 
                 if (keepVisibleDeadWindow) {
-                    if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                            "Not removing " + this + " because app died while it's visible");
+                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                            "Not removing %s because app died while it's visible", this);
 
                     mAppDied = true;
                     setDisplayLayoutNeeded();
@@ -2074,8 +2075,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 if (mWinAnimator.getShown() && mAnimatingExit
                         && (!lastWindowIsStartingWindow || isAnimating)) {
                     // The exit animation is running or should run... wait for it!
-                    if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
-                            "Not removing " + this + " due to exit animation ");
+                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
+                            "Not removing %s due to exit animation", this);
                     setupWindowForRemoveOnExit();
                     if (mAppToken != null) {
                         mAppToken.updateReportedVisibilityLocked();
@@ -2242,7 +2243,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void removeReplacedWindow() {
-        if (DEBUG_ADD_REMOVE) Slog.d(TAG, "Removing replaced window: " + this);
+        ProtoLog.d(WM_DEBUG_ADD_REMOVE, "Removing replaced window: %s", this);
         mWillReplaceWindow = false;
         mAnimateReplacingWindow = false;
         mReplacingRemoveRequested = false;
@@ -2398,7 +2399,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (!isVisibleByPolicy()) {
                 mWinAnimator.hide("checkPolicyVisibilityChange");
                 if (isFocused()) {
-                    if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                    ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
                             "setAnimationLocked: setting mFocusMayChange true");
                     mWmService.mFocusMayChange = true;
                 }
@@ -2622,8 +2623,24 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** @return false if this window desires touch events. */
     boolean cantReceiveTouchInput() {
-        return mAppToken != null && mAppToken.getTask() != null
-                && (mAppToken.getTask().mStack.shouldIgnoreInput() || mAppToken.hiddenRequested);
+        if (mAppToken == null || mAppToken.getTask() == null) {
+            return false;
+        }
+
+        return mAppToken.getTask().mStack.shouldIgnoreInput()
+                || mAppToken.hiddenRequested
+                || isAnimatingToRecents();
+    }
+
+    /**
+     * Returns {@code true} if the window is animating to home as part of the recents animation.
+     */
+    private boolean isAnimatingToRecents() {
+        final RecentsAnimationController recentsAnimationController =
+                mWmService.getRecentsAnimationController();
+        return recentsAnimationController != null
+                && recentsAnimationController.isAnimatingTask(getTask())
+                && !recentsAnimationController.isTargetApp(mAppToken);
     }
 
     @Override
@@ -2721,7 +2738,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // we allow the display to be enabled now.
             mWmService.enableScreenIfNeededLocked();
             if (isFocused) {
-                if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
+                ProtoLog.i(WM_DEBUG_FOCUS_LIGHT,
                         "WindowState.hideLw: setting mFocusMayChange true");
                 mWmService.mFocusMayChange = true;
             }
@@ -2927,7 +2944,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (mHasSurface && !getOrientationChanging()
                 && mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "set mOrientationChanging of " + this);
+            ProtoLog.v(WM_DEBUG_ORIENTATION,
+                    "set mOrientationChanging of %s", this);
             setOrientationChanging(true);
             mWmService.mRoot.mOrientationChangeComplete = false;
         }
@@ -2955,10 +2973,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mDestroying) {
-            if (DEBUG_ADD_REMOVE) Slog.e(TAG_WM, "win=" + this
-                    + " destroySurfaces: appStopped=" + appStopped
-                    + " win.mWindowRemovalAllowed=" + mWindowRemovalAllowed
-                    + " win.mRemoveOnExit=" + mRemoveOnExit);
+            ProtoLog.e(WM_DEBUG_ADD_REMOVE, "win=%s"
+                    + " destroySurfaces: appStopped=%b"
+                    + " win.mWindowRemovalAllowed=%b"
+                    + " win.mRemoveOnExit=%b", this, appStopped,
+                    mWindowRemovalAllowed, mRemoveOnExit);
             if (!cleanupOnResume || mRemoveOnExit) {
                 destroySurfaceUnchecked();
             }
@@ -3226,16 +3245,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void reportResized() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wm.reportResized_" + getWindowTag());
         try {
-            if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
-                    + ": " + mWindowFrames.mCompatFrame);
+            ProtoLog.v(WM_DEBUG_RESIZE,
+                    "Reporting new frame to %s: %s", this,
+                            mWindowFrames.mCompatFrame);
             final MergedConfiguration mergedConfiguration =
                     new MergedConfiguration(mWmService.mRoot.getConfiguration(),
                     getMergedOverrideConfiguration());
 
             setLastReportedMergedConfiguration(mergedConfiguration);
 
-            if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
-                Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
+            if (mWinAnimator.mDrawState == DRAW_PENDING) {
+                ProtoLog.i(WM_DEBUG_ORIENTATION,
+                        "Resizing %s WITH DRAW PENDING", this);
+            }
 
             final Rect frame = mWindowFrames.mCompatFrame;
             final Rect overscanInsets = mWindowFrames.mLastOverscanInsets;
@@ -4378,9 +4400,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        if (DEBUG || DEBUG_ADD_REMOVE) {
-            Slog.v(TAG, "Exit animation finished in " + this + ": remove=" + mRemoveOnExit);
-        }
+        ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Exit animation finished in %s: remove=%b",
+                this, mRemoveOnExit);
 
         mDestroying = true;
 

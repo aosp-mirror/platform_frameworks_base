@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Insets;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -100,6 +101,8 @@ public class ActivityView extends ViewGroup {
     private final boolean mSingleTaskInstance;
 
     private Insets mForwardedInsets;
+
+    private float mCornerRadius;
 
     public ActivityView(Context context) {
         this(context, null /* attrs */);
@@ -201,6 +204,45 @@ public class ActivityView extends ViewGroup {
      */
     public void setCornerRadius(float cornerRadius) {
         mSurfaceView.setCornerRadius(cornerRadius);
+    }
+
+    /**
+     * @hide
+     */
+    public float getCornerRadius() {
+        return mSurfaceView.getCornerRadius();
+    }
+
+    /**
+     * Control whether the surface is clipped to the same bounds as the View. If true, then
+     * the bounds set by {@link #setSurfaceClipBounds(Rect)} are applied to the surface as
+     * window-crop.
+     *
+     * @param clippingEnabled whether to enable surface clipping
+     * @hide
+     */
+    public void setSurfaceClippingEnabled(boolean clippingEnabled) {
+        mSurfaceView.setEnableSurfaceClipping(clippingEnabled);
+    }
+
+    /**
+     * Sets an area on the contained surface to which it will be clipped
+     * when it is drawn. Setting the value to null will remove the clip bounds
+     * and the surface will draw normally, using its full bounds.
+     *
+     * @param clipBounds The rectangular area, in the local coordinates of
+     * this view, to which future drawing operations will be clipped.
+     * @hide
+     */
+    public void setSurfaceClipBounds(Rect clipBounds) {
+        mSurfaceView.setClipBounds(clipBounds);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getSurfaceClipBounds(Rect outRect) {
+        return mSurfaceView.getClipBounds(outRect);
     }
 
     /**

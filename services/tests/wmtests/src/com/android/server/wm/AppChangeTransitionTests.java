@@ -42,6 +42,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for change transitions
@@ -51,6 +52,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class AppChangeTransitionTests extends WindowTestsBase {
 
     private TaskStack mStack;

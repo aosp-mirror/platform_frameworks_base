@@ -3,7 +3,7 @@
 #
 # Android-specific MIME type <-> extension mappings
 #
-# Each line below defines an mapping from one MIME type to the first of the
+# Each line below defines a mapping from one MIME type to the first of the
 # listed extensions, and from listed extension back to the MIME type.
 # A mapping overrides any previous mapping _from_ that same MIME type or
 # extension (put() semantics), unless that MIME type / extension is prefixed with '?'

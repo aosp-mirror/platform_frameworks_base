@@ -332,6 +332,13 @@ bool LogEvent::write(float value) {
     return false;
 }
 
+bool LogEvent::writeBytes(const string& value) {
+    if (mContext) {
+        return android_log_write_char_array(mContext, value.c_str(), value.length()) >= 0;
+    }
+    return false;
+}
+
 bool LogEvent::writeKeyValuePairs(int32_t uid,
                                   const std::map<int32_t, int32_t>& int_map,
                                   const std::map<int32_t, int64_t>& long_map,

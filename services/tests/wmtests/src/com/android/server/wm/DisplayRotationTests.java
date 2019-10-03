@@ -238,15 +238,55 @@ public class DisplayRotationTests {
     }
 
     @Test
-    public void testReturnsUserRotation_UserRotationLocked_CompatibleAppRequest()
+    public void testReturnsLandscape_UserRotationLockedSeascape_AppRequestsLandscape()
             throws Exception {
         mBuilder.build();
-        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
+
+        freezeRotation(Surface.ROTATION_180);
+
+        assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, Surface.ROTATION_90));
+    }
+
+    @Test
+    public void testReturnsSeascape_UserRotationLockedSeascape_AppRequestsSeascape()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
 
         freezeRotation(Surface.ROTATION_180);
 
         assertEquals(Surface.ROTATION_180, mTarget.rotationForOrientation(
-                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, Surface.ROTATION_90));
+                ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE, Surface.ROTATION_90));
+    }
+
+    @Test
+    public void testReturnsPortrait_UserRotationLockedPortrait_AppRequestsPortrait()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
+
+        freezeRotation(Surface.ROTATION_270);
+
+        assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
+                ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testReturnsUpsideDown_UserRotationLockedUpsideDown_AppRequestsUpsideDown()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false /* isCar */,
+                false /* isTv */);
+
+        freezeRotation(Surface.ROTATION_90);
+
+        assertEquals(Surface.ROTATION_90, mTarget.rotationForOrientation(
+                ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT, Surface.ROTATION_0));
     }
 
     @Test

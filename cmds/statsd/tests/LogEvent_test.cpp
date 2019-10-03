@@ -582,7 +582,7 @@ TEST(LogEventTest, TestBinaryFieldAtom) {
     event1.write((int32_t)stats::launcher::LauncherAction::LONGPRESS);
     event1.write((int32_t)stats::launcher::LauncherState::OVERVIEW);
     event1.write((int64_t)stats::launcher::LauncherState::ALLAPPS);
-    event1.write(extension_str);
+    event1.writeBytes(extension_str);
     event1.init();
 
     ProtoOutputStream proto;
@@ -621,7 +621,7 @@ TEST(LogEventTest, TestBinaryFieldAtom_empty) {
     event1.write((int32_t)stats::launcher::LauncherAction::LONGPRESS);
     event1.write((int32_t)stats::launcher::LauncherState::OVERVIEW);
     event1.write((int64_t)stats::launcher::LauncherState::ALLAPPS);
-    event1.write(extension_str);
+    event1.writeBytes(extension_str);
     event1.init();
 
     ProtoOutputStream proto;

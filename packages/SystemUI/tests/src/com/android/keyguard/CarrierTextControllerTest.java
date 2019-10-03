@@ -125,7 +125,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
         mCarrierTextCallbackInfo = new CarrierTextController.CarrierTextCallbackInfo("",
                 new CharSequence[]{}, false, new int[]{});
-        when(mTelephonyManager.getPhoneCount()).thenReturn(3);
+        when(mTelephonyManager.getMaxPhoneCount()).thenReturn(3);
 
         mCarrierTextController = new TestCarrierTextController(mContext, SEPARATOR, true, true,
                 mKeyguardUpdateMonitor);

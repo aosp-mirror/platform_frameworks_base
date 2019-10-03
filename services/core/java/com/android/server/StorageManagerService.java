@@ -208,6 +208,12 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private static final String ISOLATED_STORAGE_ENABLED = "isolated_storage_enabled";
 
+    /**
+     * If {@code 1}, enables FuseDaemon to intercept file system ops. If {@code -1},
+     * disables FuseDaemon. If {@code 0}, uses the default value from the build system.
+     */
+    private static final String FUSE_ENABLED = "fuse_enabled";
+
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
 
@@ -817,8 +823,10 @@ class StorageManagerService extends IStorageManager.Stub
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 mContext.getMainExecutor(), (properties) -> {
                     refreshIsolatedStorageSettings();
+                    refreshFuseSettings();
                 });
         refreshIsolatedStorageSettings();
+        refreshFuseSettings();
     }
 
     /**
@@ -880,6 +888,18 @@ class StorageManagerService extends IStorageManager.Stub
         Slog.d(TAG, "Isolated storage local flag " + local + " and remote flag "
                 + remote + " resolved to " + res);
         SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE, Boolean.toString(res));
+    }
+
+    private void refreshFuseSettings() {
+        int isFuseEnabled = DeviceConfig.getInt(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                FUSE_ENABLED, 0);
+        if (isFuseEnabled == 1) {
+            SystemProperties.set(StorageManager.PROP_FUSE, "true");
+        } else if (isFuseEnabled == -1) {
+            SystemProperties.set(StorageManager.PROP_FUSE, "false");
+        }
+        // else, keep the build config.
+        // This can be overridden be direct adjustment of persist.sys.prop
     }
 
     /**

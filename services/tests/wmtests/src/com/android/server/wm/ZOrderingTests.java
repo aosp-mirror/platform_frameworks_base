@@ -47,6 +47,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,7 @@ import java.util.function.Function;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class ZOrderingTests extends WindowTestsBase {
 
     private static class LayerRecordingTransaction extends SurfaceControl.Transaction {

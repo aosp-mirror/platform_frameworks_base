@@ -216,44 +216,6 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveImmediately_WithController() {
-        final WindowContainer container = new WindowContainer(mWm);
-        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
-
-        container.setController(controller);
-        assertEquals(controller, container.getController());
-        assertEquals(container, controller.mContainer);
-
-        container.removeImmediately();
-        assertNull(container.getController());
-        assertNull(controller.mContainer);
-    }
-
-    @Test
-    public void testSetController() {
-        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
-        final WindowContainer container = new WindowContainer(mWm);
-
-        container.setController(controller);
-        assertEquals(controller, container.getController());
-        assertEquals(container, controller.mContainer);
-
-        // Assert we can't change the controller to another one once set
-        boolean gotException = false;
-        try {
-            container.setController(new WindowContainerController<>(null, mWm));
-        } catch (IllegalArgumentException e) {
-            gotException = true;
-        }
-        assertTrue(gotException);
-
-        // Assert that we can set the controller to null.
-        container.setController(null);
-        assertNull(container.getController());
-        assertNull(controller.mContainer);
-    }
-
-    @Test
     public void testAddChildByIndex() {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();

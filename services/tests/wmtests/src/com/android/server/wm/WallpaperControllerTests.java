@@ -30,6 +30,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link WallpaperController} class.
@@ -39,37 +40,36 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class WallpaperControllerTests extends WindowTestsBase {
     @Test
     public void testWallpaperScreenshot() {
         WindowSurfaceController windowSurfaceController = mock(WindowSurfaceController.class);
 
-        synchronized (mWm.mGlobalLock) {
-            // No wallpaper
-            final DisplayContent dc = createNewDisplay();
-            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
+        // No wallpaper
+        final DisplayContent dc = createNewDisplay();
+        assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
-            // No wallpaper WSA Surface
-            WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),
-                    true, dc, true /* ownerCanManageAppTokens */);
-            WindowState wallpaperWindow = createWindow(null /* parent */, TYPE_WALLPAPER,
-                    wallpaperWindowToken, "wallpaperWindow");
-            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
+        // No wallpaper WSA Surface
+        WindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm, mock(IBinder.class),
+                true, dc, true /* ownerCanManageAppTokens */);
+        WindowState wallpaperWindow = createWindow(null /* parent */, TYPE_WALLPAPER,
+                wallpaperWindowToken, "wallpaperWindow");
+        assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
-            // Wallpaper with not visible WSA surface.
-            wallpaperWindow.mWinAnimator.mSurfaceController = windowSurfaceController;
-            wallpaperWindow.mWinAnimator.mLastAlpha = 1;
-            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
+        // Wallpaper with not visible WSA surface.
+        wallpaperWindow.mWinAnimator.mSurfaceController = windowSurfaceController;
+        wallpaperWindow.mWinAnimator.mLastAlpha = 1;
+        assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
-            when(windowSurfaceController.getShown()).thenReturn(true);
+        when(windowSurfaceController.getShown()).thenReturn(true);
 
-            // Wallpaper with WSA alpha set to 0.
-            wallpaperWindow.mWinAnimator.mLastAlpha = 0;
-            assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
+        // Wallpaper with WSA alpha set to 0.
+        wallpaperWindow.mWinAnimator.mLastAlpha = 0;
+        assertFalse(dc.mWallpaperController.canScreenshotWallpaper());
 
-            // Wallpaper window with WSA Surface
-            wallpaperWindow.mWinAnimator.mLastAlpha = 1;
-            assertTrue(dc.mWallpaperController.canScreenshotWallpaper());
-        }
+        // Wallpaper window with WSA Surface
+        wallpaperWindow.mWinAnimator.mLastAlpha = 1;
+        assertTrue(dc.mWallpaperController.canScreenshotWallpaper());
     }
 }

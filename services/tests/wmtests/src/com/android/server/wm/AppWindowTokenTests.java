@@ -62,6 +62,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /**
@@ -72,6 +73,7 @@ import org.mockito.Mockito;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class AppWindowTokenTests extends WindowTestsBase {
 
     TaskStack mStack;
@@ -324,40 +326,36 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testReportOrientationChangeOnVisibilityChange() {
-        synchronized (mWm.mGlobalLock) {
-            mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-            mDisplayContent.getDisplayRotation().setFixedToUserRotation(
-                    DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
+        mDisplayContent.getDisplayRotation().setFixedToUserRotation(
+                DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
 
-            doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
-                    .getRequestedConfigurationOrientation();
+        doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
+                .getRequestedConfigurationOrientation();
 
-            mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
-            mToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
-                    true /* performLayout */, false /* isVoiceInteraction */);
-        }
+        mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
+        mToken.commitVisibility(null /* lp */, false /* visible */, TRANSIT_UNSET,
+                true /* performLayout */, false /* isVoiceInteraction */);
 
         verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
     }
 
     @Test
     public void testReportOrientationChangeOnOpeningClosingAppChange() {
-        synchronized (mWm.mGlobalLock) {
-            mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-            mDisplayContent.getDisplayRotation().setFixedToUserRotation(
-                    DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
-            mDisplayContent.getDisplayInfo().state = Display.STATE_ON;
-            mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_CLOSE,
-                    false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
+        mDisplayContent.getDisplayRotation().setFixedToUserRotation(
+                DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
+        mDisplayContent.getDisplayInfo().state = Display.STATE_ON;
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_CLOSE,
+                false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
 
-            doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
-                    .getRequestedConfigurationOrientation();
+        doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
+                .getRequestedConfigurationOrientation();
 
-            mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
-            mToken.setVisibility(false, false);
-        }
+        mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
+        mToken.setVisibility(false /* visible */, false /* deferHidingClient */);
 
         verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
     }

@@ -655,6 +655,8 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
+    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"యాక్సెసిబిలిటీ షార్ట్‌కట్ లక్ష్యం"</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"యాక్సెసిబిలిటీ షార్ట్‌కట్ లక్ష్యాన్ని నిర్వచించడానికి యాప్‌ను అనుమతించండి."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"స్క్రీన్ అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
@@ -1330,7 +1332,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"పూర్తయింది"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"మొబైల్ నెట్‌వర్క్‌ను యాక్సెస్ చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"రీస్టార్ట్ చేయి"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"మొబైల్ సేవను సక్రియం చేయండి"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"మీ కొత్త SIMని సక్రియం చేయడానికి క్యారియర్ యాప్‌ను డౌన్‌లోడ్ చేయండి"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"మీ కొత్త SIMని సక్రియం చేయడం కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> యాప్‌ని డౌన్‌లోడ్ చేయండి"</string>
@@ -1362,6 +1364,8 @@
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"డీబగ్గింగ్‌ని నిలిపివేయడానికి ఎంచుకోండి."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"పరీక్ష నియంత్రణ మోడ్ ప్రారంభించబడింది"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
+    <string name="console_running_notification_title" msgid="4955436518220103382">"సీరియల్ కన్సోల్ ప్రారంభించబడింది"</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"పని తీరు ప్రభావితమైంది. నిలిపివేయడానికి, బూట్‌లోడర్‌ను తనిఖీ చేయండి."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"USB పోర్ట్‌లో ద్రవ లేదా వ్యర్థ పదార్థాలు ఉన్నాయి"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"USB పోర్ట్ ఆటోమేటిక్‌గా నిలిపివేయబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"USB పోర్ట్‌ను ఉపయోగించడం సురక్షితం"</string>
@@ -1891,10 +1895,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"వర్గీకరించబడలేదు"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
-    <!-- no translation found for user_creation_account_exists (6559477114648176531) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (9089159170398841763) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>

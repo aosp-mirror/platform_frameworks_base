@@ -22,7 +22,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertFalse;
@@ -38,6 +37,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link TaskPositioningController} class.
@@ -47,6 +47,7 @@ import org.junit.Test;
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskPositioningControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 1000;
 
@@ -64,30 +65,23 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
         mWindow.mInputChannel = new InputChannel();
-        synchronized (mWm.mGlobalLock) {
-            mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
-            spyOn(mDisplayContent);
-            doReturn(mock(InputMonitor.class)).when(mDisplayContent).getInputMonitor();
-        }
+        mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
+        doReturn(mock(InputMonitor.class)).when(mDisplayContent).getInputMonitor();
     }
 
     @Test
     public void testStartAndFinishPositioning() {
-        synchronized (mWm.mGlobalLock) {
-            assertFalse(mTarget.isPositioningLocked());
-            assertNull(mTarget.getDragWindowHandleLocked());
-        }
+        assertFalse(mTarget.isPositioningLocked());
+        assertNull(mTarget.getDragWindowHandleLocked());
 
         assertTrue(mTarget.startMovingTask(mWindow.mClient, 0, 0));
 
-        synchronized (mWm.mGlobalLock) {
-            assertTrue(mTarget.isPositioningLocked());
-            assertNotNull(mTarget.getDragWindowHandleLocked());
-        }
+        assertTrue(mTarget.isPositioningLocked());
+        assertNotNull(mTarget.getDragWindowHandleLocked());
 
         mTarget.finishTaskPositioning();
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
@@ -96,21 +90,17 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
     @FlakyTest(bugId = 129507487)
     @Test
     public void testFinishPositioningWhenAppRequested() {
-        synchronized (mWm.mGlobalLock) {
-            assertFalse(mTarget.isPositioningLocked());
-            assertNull(mTarget.getDragWindowHandleLocked());
-        }
+        assertFalse(mTarget.isPositioningLocked());
+        assertNull(mTarget.getDragWindowHandleLocked());
 
         assertTrue(mTarget.startMovingTask(mWindow.mClient, 0, 0));
 
-        synchronized (mWm.mGlobalLock) {
-            assertTrue(mTarget.isPositioningLocked());
-            assertNotNull(mTarget.getDragWindowHandleLocked());
-        }
+        assertTrue(mTarget.isPositioningLocked());
+        assertNotNull(mTarget.getDragWindowHandleLocked());
 
         mTarget.finishTaskPositioning(mWindow.mClient);
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
@@ -118,10 +108,8 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
     @Test
     public void testHandleTapOutsideTask() {
-        synchronized (mWm.mGlobalLock) {
-            assertFalse(mTarget.isPositioningLocked());
-            assertNull(mTarget.getDragWindowHandleLocked());
-        }
+        assertFalse(mTarget.isPositioningLocked());
+        assertNull(mTarget.getDragWindowHandleLocked());
 
         final DisplayContent content = mock(DisplayContent.class);
         when(content.findTaskForResizePoint(anyInt(), anyInt())).thenReturn(mWindow.getTask());
@@ -129,16 +117,14 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mTarget.handleTapOutsideTask(content, 0, 0);
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
 
-        synchronized (mWm.mGlobalLock) {
-            assertTrue(mTarget.isPositioningLocked());
-            assertNotNull(mTarget.getDragWindowHandleLocked());
-        }
+        assertTrue(mTarget.isPositioningLocked());
+        assertNotNull(mTarget.getDragWindowHandleLocked());
 
         mTarget.finishTaskPositioning();
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
+        assertTrue(waitHandlerIdle(mWm.mH, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());

@@ -23,8 +23,8 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
@@ -58,6 +58,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowOrientationListener;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
@@ -399,7 +400,7 @@ public class DisplayRotation {
             if (mDeferredRotationPauseCount > 0) {
                 // Rotation updates have been paused temporarily. Defer the update until updates
                 // have been resumed.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, rotation is paused.");
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "Deferring rotation, rotation is paused.");
                 return false;
             }
 
@@ -409,14 +410,14 @@ public class DisplayRotation {
                 // Rotation updates cannot be performed while the previous rotation change animation
                 // is still in progress. Skip this update. We will try updating again after the
                 // animation is finished and the display is unfrozen.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, animation in progress.");
+                ProtoLog.v(WM_DEBUG_ORIENTATION, "Deferring rotation, animation in progress.");
                 return false;
             }
             if (mService.mDisplayFrozen) {
                 // Even if the screen rotation animation has finished (e.g. isAnimating returns
                 // false), there is still some time where we haven't yet unfrozen the display. We
                 // also need to abort rotation here.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
                         "Deferring rotation, still finishing previous rotation");
                 return false;
             }
@@ -424,30 +425,30 @@ public class DisplayRotation {
 
         if (!mService.mDisplayEnabled) {
             // No point choosing a rotation if the display is not enabled.
-            if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, display is not enabled.");
+            ProtoLog.v(WM_DEBUG_ORIENTATION, "Deferring rotation, display is not enabled.");
             return false;
         }
 
         final int oldRotation = mRotation;
         final int lastOrientation = mLastOrientation;
         final int rotation = rotationForOrientation(lastOrientation, oldRotation);
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Computed rotation=" + rotation + " for display id="
-                + displayId + " based on lastOrientation=" + lastOrientation
-                + " and oldRotation=" + oldRotation);
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "Computed rotation=%d for display id=%d based on lastOrientation=%d and "
+                        + "oldRotation=%d",
+                rotation, displayId, lastOrientation, oldRotation);
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + displayId
-                + " selected orientation " + lastOrientation
-                + ", got rotation " + rotation);
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "Display id=%d selected orientation %d, got rotation %d", displayId,
+                        lastOrientation, rotation);
 
         if (oldRotation == rotation) {
             // No change.
             return false;
         }
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + displayId
-                + " rotation changed to " + rotation
-                + " from " + oldRotation
-                + ", lastOrientation=" + lastOrientation);
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
+                        displayId, rotation, oldRotation, lastOrientation);
 
         if (DisplayContent.deltaRotation(rotation, oldRotation) != 2) {
             mDisplayContent.mWaitingForConfig = true;
@@ -551,9 +552,8 @@ public class DisplayRotation {
             mSeamlessRotationCount--;
         }
         if (mSeamlessRotationCount == 0) {
-            if (DEBUG_ORIENTATION) {
-                Slog.i(TAG, "Performing post-rotate rotation after seamless rotation");
-            }
+            ProtoLog.i(WM_DEBUG_ORIENTATION,
+                    "Performing post-rotate rotation after seamless rotation");
             // Finish seamless rotation.
             mRotatingSeamlessly = false;
 
@@ -844,11 +844,12 @@ public class DisplayRotation {
 
         // Could have been invoked due to screen turning on or off or
         // change of the currently visible window's orientation.
-        if (DEBUG_ORIENTATION) Slog.v(TAG, "screenOnEarly=" + screenOnEarly
-                + ", awake=" + awake + ", currentAppOrientation=" + mCurrentAppOrientation
-                + ", orientationSensorEnabled=" + mOrientationListener.mEnabled
-                + ", keyguardDrawComplete=" + keyguardDrawComplete
-                + ", windowManagerDrawComplete=" + windowManagerDrawComplete);
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "screenOnEarly=%b, awake=%b, currentAppOrientation=%d, "
+                        + "orientationSensorEnabled=%b, keyguardDrawComplete=%b, "
+                        + "windowManagerDrawComplete=%b",
+                screenOnEarly, awake, mCurrentAppOrientation, mOrientationListener.mEnabled,
+                keyguardDrawComplete, windowManagerDrawComplete);
 
         boolean disable = true;
         // Note: We postpone the rotating of the screen until the keyguard as well as the
@@ -952,14 +953,11 @@ public class DisplayRotation {
      */
     @VisibleForTesting
     int rotationForOrientation(int orientation, int lastRotation) {
-        if (DEBUG_ORIENTATION) {
-            Slog.v(TAG, "rotationForOrientation(orient="
-                        + orientation + ", last=" + lastRotation
-                        + "); user=" + mUserRotation + " "
-                        + (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
-                            ? "USER_ROTATION_LOCKED" : "")
+        ProtoLog.v(WM_DEBUG_ORIENTATION, "rotationForOrientation(orient=%d, last=%d); user=%d %s",
+                    orientation, lastRotation, mUserRotation,
+                    mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
+                            ? "USER_ROTATION_LOCKED" : ""
                         );
-        }
 
         if (isFixedToUserRotation()) {
             return mUserRotation;
@@ -1059,11 +1057,19 @@ public class DisplayRotation {
                 preferredRotation = lastRotation;
             }
         } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED
-                && orientation != ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
-            // Apply rotation lock.  Does not apply to NOSENSOR.
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                && orientation != ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT) {
+            // Apply rotation lock. Does not apply to NOSENSOR or specific rotations.
             // The idea is that the user rotation expresses a weak preference for the direction
             // of gravity and as NOSENSOR is never affected by gravity, then neither should
             // NOSENSOR be affected by rotation lock (although it will be affected by docks).
+            // Also avoid setting user rotation when app has preference over one particular rotation
+            // to avoid leaving the rotation to the reverse of it which has the compatible
+            // orientation, but isn't what app wants, when the user rotation is the reverse of the
+            // preferred rotation.
             preferredRotation = mUserRotation;
         } else {
             // No overriding preference.
@@ -1372,7 +1378,7 @@ public class DisplayRotation {
 
         @Override
         public void onProposedRotationChanged(int rotation) {
-            if (DEBUG_ORIENTATION) Slog.v(TAG, "onProposedRotationChanged, rotation=" + rotation);
+            ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
             Runnable r = mRunnableCache.get(rotation, null);
             if (r == null) {
                 r = new UpdateRunnable(rotation);
@@ -1385,14 +1391,14 @@ public class DisplayRotation {
         public void enable(boolean clearCurrentRotation) {
             super.enable(clearCurrentRotation);
             mEnabled = true;
-            if (DEBUG_ORIENTATION) Slog.v(TAG, "Enabling listeners");
+            ProtoLog.v(WM_DEBUG_ORIENTATION, "Enabling listeners");
         }
 
         @Override
         public void disable() {
             super.disable();
             mEnabled = false;
-            if (DEBUG_ORIENTATION) Slog.v(TAG, "Disabling listeners");
+            ProtoLog.v(WM_DEBUG_ORIENTATION, "Disabling listeners");
         }
     }
 

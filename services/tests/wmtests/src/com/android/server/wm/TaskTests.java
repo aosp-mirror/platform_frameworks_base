@@ -29,15 +29,17 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link Task}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskTests
+ *  atest WmTests:TaskTests
  */
 @SmallTest
 @Presubmit
+@RunWith(WindowTestRunner.class)
 public class TaskTests extends WindowTestsBase {
 
     @Test
