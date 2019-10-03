@@ -408,9 +408,6 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         cancelGesture();
     }
 
-    public boolean firstTapDetected() {
-        return mFirstTapDetected;
-    }
 
     @Override
     public void onLongPress(MotionEvent e) {

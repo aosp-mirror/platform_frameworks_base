@@ -411,24 +411,12 @@ public class TouchExplorer extends BaseEventStreamTransformation
         // we resent the delayed callback and wait again.
         mSendHoverEnterAndMoveDelayed.cancel();
         mSendHoverExitDelayed.cancel();
-
         // If a touch exploration gesture is in progress send events for its end.
         if (mState.isTouchExploring()) {
             sendHoverExitAndTouchExplorationGestureEndIfNeeded(policyFlags);
         }
 
-        // Avoid duplicated TYPE_TOUCH_INTERACTION_START event when 2nd tap of double
-        // tap.
-        if (!mGestureDetector.firstTapDetected() && mState.isClear()) {
-            mSendTouchExplorationEndDelayed.forceSendAndRemove();
-            mSendTouchInteractionEndDelayed.forceSendAndRemove();
-            mDispatcher.sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
-        } else {
-            // Let gesture to handle to avoid duplicated TYPE_TOUCH_INTERACTION_END event.
-            mSendTouchInteractionEndDelayed.cancel();
-        }
-
-        if (!mGestureDetector.firstTapDetected() && !mState.isTouchExploring()) {
+        if (mState.isClear()) {
             if (!mSendHoverEnterAndMoveDelayed.isPending()) {
                 // Queue a delayed transition to STATE_TOUCH_EXPLORING.
                 // If we do not detect that this is a gesture, delegation or drag the transition
@@ -441,6 +429,12 @@ public class TouchExplorer extends BaseEventStreamTransformation
                 // Cache the event until we discern exploration from gesturing.
                 mSendHoverEnterAndMoveDelayed.addEvent(event, rawEvent);
             }
+            mSendTouchExplorationEndDelayed.forceSendAndRemove();
+            mSendTouchInteractionEndDelayed.forceSendAndRemove();
+            mDispatcher.sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_START);
+        } else {
+            // Avoid duplicated TYPE_TOUCH_INTERACTION_START event when 2nd tap of double tap.
+            mSendTouchInteractionEndDelayed.cancel();
         }
     }
 
