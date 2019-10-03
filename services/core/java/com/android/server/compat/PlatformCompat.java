@@ -47,7 +47,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     public void reportChange(long changeId, ApplicationInfo appInfo) {
-        reportChange(changeId, appInfo, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
+        reportChange(changeId, appInfo.uid,
+                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
     }
 
     @Override
@@ -60,13 +61,18 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public void reportChangeByUid(long changeId, int uid) {
+        reportChange(changeId, uid, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
+    }
+
+    @Override
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
         if (CompatConfig.get().isChangeEnabled(changeId, appInfo)) {
-            reportChange(changeId, appInfo,
+            reportChange(changeId, appInfo.uid,
                     StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED);
             return true;
         }
-        reportChange(changeId, appInfo,
+        reportChange(changeId, appInfo.uid,
                 StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED);
         return false;
     }
@@ -78,6 +84,19 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             return true;
         }
         return isChangeEnabled(changeId, appInfo);
+    }
+
+    @Override
+    public boolean isChangeEnabledByUid(long changeId, int uid) {
+        String[] packages = mContext.getPackageManager().getPackagesForUid(uid);
+        if (packages == null || packages.length == 0) {
+            return true;
+        }
+        boolean enabled = true;
+        for (String packageName : packages) {
+            enabled = enabled && isChangeEnabledByPackageName(changeId, packageName);
+        }
+        return enabled;
     }
 
     @Override
@@ -95,8 +114,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         return null;
     }
 
-    private void reportChange(long changeId, ApplicationInfo appInfo, int state) {
-        int uid = appInfo.uid;
+    private void reportChange(long changeId, int uid, int state) {
         mChangeReporter.reportChange(uid, changeId, state);
     }
 }
