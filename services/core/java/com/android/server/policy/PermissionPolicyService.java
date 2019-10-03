@@ -499,8 +499,7 @@ public final class PermissionPolicyService extends SystemService {
 
         private void addPermissionAppOp(@NonNull PackageInfo packageInfo,
                 @NonNull PermissionInfo permissionInfo) {
-            // TODO: Sync all permissions in the future.
-            if (!permissionInfo.isRestricted() && permissionInfo.backgroundPermission == null) {
+            if (!permissionInfo.isRuntime()) {
                 return;
             }
 
