@@ -46,9 +46,11 @@ public class BootImageProfileTest implements IDeviceTest {
      */
     @Test
     public void testProperties() throws Exception {
-        String res = mTestDevice.getProperty("dalvik.vm.profilebootclasspath");
+        String res = mTestDevice.getProperty(
+                "persist.device_config.runtime_native_boot.profilebootclasspath");
         assertTrue("profile boot class path not enabled", res != null && res.equals("true"));
-        res = mTestDevice.getProperty("dalvik.vm.profilesystemserver");
+        res = mTestDevice.getProperty(
+                "persist.device_config.runtime_native_boot.profilesystemserver");
         assertTrue("profile system server not enabled", res != null && res.equals("true"));
     }
 
