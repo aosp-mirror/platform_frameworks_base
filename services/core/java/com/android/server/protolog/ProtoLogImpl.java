@@ -121,7 +121,7 @@ public class ProtoLogImpl {
 
     /** Returns true iff logging is enabled for the given {@code IProtoLogGroup}. */
     public static boolean isEnabled(IProtoLogGroup group) {
-        return group.isLogToProto()
+        return group.isLogToLogcat()
                 || (group.isLogToProto() && getSingleInstance().isProtoEnabled());
     }
 

@@ -129,7 +129,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
     private static class Consts {
         private static final String TAG_WM = "WindowManager";
 
-        private static final boolean ENABLE_DEBUG = false;
+        private static final boolean ENABLE_DEBUG = true;
         private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;
     }
 }
