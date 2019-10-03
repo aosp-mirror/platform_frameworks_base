@@ -137,6 +137,7 @@ oneway interface IApplicationThread {
             IVoiceInteractor voiceInteractor);
     void handleTrustStorageUpdate();
     void attachAgent(String path);
+    void attachStartupAgents(String dataDir);
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
     void setNetworkBlockSeq(long procStateSeq);
     void scheduleTransaction(in ClientTransaction transaction);
