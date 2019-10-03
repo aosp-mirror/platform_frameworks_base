@@ -986,6 +986,9 @@ public class ServiceState implements Parcelable {
             case RIL_RADIO_TECHNOLOGY_LTE_CA:
                 rtString = "LTE_CA";
                 break;
+            case RIL_RADIO_TECHNOLOGY_NR:
+                rtString = "LTE_NR";
+                break;
             default:
                 rtString = "Unexpected";
                 Rlog.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
@@ -1552,6 +1555,7 @@ public class ServiceState implements Parcelable {
                 return AccessNetworkType.CDMA2000;
             case RIL_RADIO_TECHNOLOGY_LTE:
             case RIL_RADIO_TECHNOLOGY_LTE_CA:
+            case RIL_RADIO_TECHNOLOGY_NR:
                 return AccessNetworkType.EUTRAN;
             case RIL_RADIO_TECHNOLOGY_IWLAN:
                 return AccessNetworkType.IWLAN;
@@ -1600,6 +1604,8 @@ public class ServiceState implements Parcelable {
                 return ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN;
             case TelephonyManager.NETWORK_TYPE_LTE_CA:
                 return ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_NR;
             default:
                 return ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN;
         }
@@ -1690,7 +1696,8 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_GSM
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_TD_SCDMA
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_IWLAN
-                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA;
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
 
     }
 
