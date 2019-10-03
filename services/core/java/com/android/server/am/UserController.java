@@ -1166,7 +1166,7 @@ class UserController implements Handler.Callback {
                     updateStartedUserArrayLU();
                 }
                 needStart = true;
-                t.traceBegin("updateStateStopping");
+                t.traceEnd();
             }
 
             if (uss.state == UserState.STATE_BOOTING) {
