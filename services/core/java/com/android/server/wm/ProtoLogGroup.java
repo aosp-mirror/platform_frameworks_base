@@ -28,7 +28,7 @@ import com.android.server.protolog.common.ProtoLog;
  */
 public enum ProtoLogGroup implements IProtoLogGroup {
     WM_ERROR(true, true, true, Consts.TAG_WM),
-    WM_DEBUG_ORIENTATION(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
+    WM_DEBUG_ORIENTATION(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
     WM_DEBUG_FOCUS_LIGHT(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
@@ -129,7 +129,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
     private static class Consts {
         private static final String TAG_WM = "WindowManager";
 
-        private static final boolean ENABLE_DEBUG = true;
+        private static final boolean ENABLE_DEBUG = false;
         private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;
     }
 }
