@@ -321,6 +321,9 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
         } else if (base::StartsWith(name, "/memfd:jit-cache")) {
           which_heap = HEAP_DALVIK_OTHER;
           sub_heap = HEAP_DALVIK_OTHER_APP_CODE_CACHE;
+        } else if (base::StartsWith(name, "/memfd:jit-zygote-cache")) {
+          which_heap = HEAP_DALVIK_OTHER;
+          sub_heap = HEAP_DALVIK_OTHER_ZYGOTE_CODE_CACHE;
         } else if (base::StartsWith(name, "[anon:")) {
             which_heap = HEAP_UNKNOWN;
             if (base::StartsWith(name, "[anon:dalvik-")) {
