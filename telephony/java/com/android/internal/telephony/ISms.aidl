@@ -573,7 +573,8 @@ interface ISms {
      *
      * @param destAddress the destination address to test for possible short code
      */
-    int checkSmsShortCodeDestination(int subId, String callingApk, String destAddress, String countryIso);
+    int checkSmsShortCodeDestination(int subId, String callingApk, String callingFeatureId,
+            String destAddress, String countryIso);
 
     /**
      * Gets the SMSC address from (U)SIM.
