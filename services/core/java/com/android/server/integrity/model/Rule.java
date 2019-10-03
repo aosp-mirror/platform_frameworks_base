@@ -16,12 +16,19 @@
 
 package com.android.server.integrity.model;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.Nullable;
 
 /**
  * Represent rules to be used in the rule evaluation engine to match against app installs.
+ *
+ * <p>Instances of this class are immutable.
  */
 public final class Rule {
+
+    // Holds an empty rule instance.
+    public static final Rule EMPTY = new Rule();
 
     enum Key {
         PACKAGE_NAME,
@@ -50,25 +57,49 @@ public final class Rule {
         NOT
     }
 
-    final Formula mFormula;
-    final Effect mEffect;
+    private final Formula mFormula;
+    private final Effect mEffect;
+
+    private Rule() {
+        this.mFormula = null;
+        this.mEffect = null;
+    }
 
     public Rule(Formula formula, Effect effect) {
-        this.mFormula = formula;
-        this.mEffect = effect;
+        this.mFormula = checkNotNull(formula);
+        this.mEffect = checkNotNull(effect);
     }
+
+    /**
+     * Indicates whether the rule is empty or not.
+     *
+     * @return {@code true} if the rule is empty, and {@code false} otherwise.
+     */
+    public boolean isEmpty() {
+        return mFormula == null && mEffect == null;
+    }
+
+    public Formula getFormula() {
+        return mFormula;
+    }
+
+    public Effect getEffect() {
+        return mEffect;
+    }
+
+    // TODO: Consider moving the sub-components to their respective model class.
 
     /**
      * Represents a rule logic/content.
      */
-    abstract class Formula {
+    abstract static class Formula {
 
     }
 
     /**
      * Represents a simple formula consisting of an app install metadata field and a value.
      */
-    public final class AtomicFormula extends Formula {
+    public static final class AtomicFormula extends Formula {
 
         final Key mKey;
         final Operator mOperator;
@@ -113,15 +144,16 @@ public final class Rule {
     /**
      * Represents a complex formula consisting of other simple and complex formulas.
      */
-    public final class OpenFormula extends Formula {
+    public static final class OpenFormula extends Formula {
 
         final Connector mConnector;
         final Formula mMainFormula;
         final Formula mAuxiliaryFormula;
 
-        public OpenFormula(Connector connector, Formula mainFormula, Formula auxiliaryFormula) {
-            this.mConnector = connector;
-            this.mMainFormula = mainFormula;
+        public OpenFormula(Connector connector, Formula mainFormula,
+                @Nullable Formula auxiliaryFormula) {
+            this.mConnector = checkNotNull(connector);
+            this.mMainFormula = checkNotNull(mainFormula);
             this.mAuxiliaryFormula = auxiliaryFormula;
         }
     }
