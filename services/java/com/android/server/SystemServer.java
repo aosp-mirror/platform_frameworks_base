@@ -501,7 +501,7 @@ public final class SystemServer {
                     mRuntimeStartElapsedTime, mRuntimeStartUptime);
             LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
             // Prepare the thread pool for init tasks that can be parallelized
-            SystemServerInitThreadPool.get();
+            SystemServerInitThreadPool.start();
         } finally {
             t.traceEnd();  // InitBeforeStartServices
         }
