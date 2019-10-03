@@ -868,6 +868,94 @@ public class ViewDebug {
         return null;
     }
 
+    private static class StreamingPictureCallbackHandler implements AutoCloseable,
+            HardwareRenderer.PictureCapturedCallback, Runnable {
+        private final HardwareRenderer mRenderer;
+        private final Callable<OutputStream> mCallback;
+        private final Executor mExecutor;
+        private final ReentrantLock mLock = new ReentrantLock(false);
+        private final ArrayDeque<byte[]> mQueue = new ArrayDeque<>(3);
+        private final ByteArrayOutputStream mByteStream = new ByteArrayOutputStream();
+        private boolean mStopListening;
+        private Thread mRenderThread;
+
+        private StreamingPictureCallbackHandler(HardwareRenderer renderer,
+                Callable<OutputStream> callback, Executor executor) {
+            mRenderer = renderer;
+            mCallback = callback;
+            mExecutor = executor;
+            mRenderer.setPictureCaptureCallback(this);
+        }
+
+        @Override
+        public void close() {
+            mLock.lock();
+            mStopListening = true;
+            mLock.unlock();
+            mRenderer.setPictureCaptureCallback(null);
+        }
+
+        @Override
+        public void onPictureCaptured(Picture picture) {
+            mLock.lock();
+            if (mStopListening) {
+                mLock.unlock();
+                mRenderer.setPictureCaptureCallback(null);
+                return;
+            }
+            if (mRenderThread == null) {
+                mRenderThread = Thread.currentThread();
+            }
+            boolean needsInvoke = true;
+            if (mQueue.size() == 3) {
+                mQueue.removeLast();
+                needsInvoke = false;
+            }
+            picture.writeToStream(mByteStream);
+            mQueue.add(mByteStream.toByteArray());
+            mByteStream.reset();
+            mLock.unlock();
+
+            if (needsInvoke) {
+                mExecutor.execute(this);
+            }
+        }
+
+        @Override
+        public void run() {
+            mLock.lock();
+            final byte[] picture = mQueue.poll();
+            final boolean isStopped = mStopListening;
+            mLock.unlock();
+            if (Thread.currentThread() == mRenderThread) {
+                close();
+                throw new IllegalStateException(
+                        "ViewDebug#startRenderingCommandsCapture must be given an executor that "
+                        + "invokes asynchronously");
+            }
+            if (isStopped) {
+                return;
+            }
+            OutputStream stream = null;
+            try {
+                stream = mCallback.call();
+            } catch (Exception ex) {
+                Log.w("ViewDebug", "Aborting rendering commands capture "
+                        + "because callback threw exception", ex);
+            }
+            if (stream != null) {
+                try {
+                    stream.write(picture);
+                } catch (IOException ex) {
+                    Log.w("ViewDebug", "Aborting rendering commands capture "
+                            + "due to IOException writing to output stream", ex);
+                }
+            } else {
+                close();
+            }
+        }
+    }
+
     /**
      * Begins capturing the entire rendering commands for the view tree referenced by the given
      * view. The view passed may be any View in the tree as long as it is attached. That is,
@@ -913,18 +1001,7 @@ public class ViewDebug {
         }
         final HardwareRenderer renderer = attachInfo.mThreadedRenderer;
         if (renderer != null) {
-            return new PictureCallbackHandler(renderer, (picture -> {
-                try {
-                    OutputStream stream = callback.call();
-                    if (stream != null) {
-                        picture.writeToStream(stream);
-                        return true;
-                    }
-                } catch (Exception ex) {
-                    // fall through
-                }
-                return false;
-            }), executor);
+            return new StreamingPictureCallbackHandler(renderer, callback, executor);
         }
         return null;
     }
