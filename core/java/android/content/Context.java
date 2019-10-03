@@ -3293,7 +3293,7 @@ public abstract class Context {
      *  <dt> {@link #VIBRATOR_SERVICE} ("vibrator")
      *  <dd> A {@link android.os.Vibrator} for interacting with the vibrator
      *  hardware.
-     *  <dt> {@link #CONNECTIVITY_SERVICE} ("connection")
+     *  <dt> {@link #CONNECTIVITY_SERVICE} ("connectivity")
      *  <dd> A {@link android.net.ConnectivityManager ConnectivityManager} for
      *  handling management of network connections.
      *  <dt> {@link #IPSEC_SERVICE} ("ipsec")
