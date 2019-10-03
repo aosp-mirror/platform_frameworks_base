@@ -90,9 +90,10 @@ public class GsmSmsCbMessage {
      * Create a new SmsCbMessage object from a header object plus one or more received PDUs.
      *
      * @param pdus PDU bytes
+     * @slotIndex slotIndex for which received sms cb message
      */
     public static SmsCbMessage createSmsCbMessage(Context context, SmsCbHeader header,
-            SmsCbLocation location, byte[][] pdus)
+            SmsCbLocation location, byte[][] pdus, int slotIndex)
             throws IllegalArgumentException {
         long receivedTimeMillis = System.currentTimeMillis();
         if (header.isEtwsPrimaryNotification()) {
@@ -104,7 +105,7 @@ public class GsmSmsCbMessage {
                     header.getSerialNumber(), location, header.getServiceCategory(), null,
                     getEtwsPrimaryMessage(context, header.getEtwsInfo().getWarningType()),
                     SmsCbMessage.MESSAGE_PRIORITY_EMERGENCY, header.getEtwsInfo(),
-                    header.getCmasInfo(), 0, null /* geometries */, receivedTimeMillis);
+                    header.getCmasInfo(), 0, null /* geometries */, receivedTimeMillis, slotIndex);
         } else if (header.isUmtsFormat()) {
             // UMTS format has only 1 PDU
             byte[] pdu = pdus[0];
@@ -138,7 +139,7 @@ public class GsmSmsCbMessage {
                     header.getGeographicalScope(), header.getSerialNumber(), location,
                     header.getServiceCategory(), language, body, priority,
                     header.getEtwsInfo(), header.getCmasInfo(), maximumWaitingTimeSec, geometries,
-                    receivedTimeMillis);
+                    receivedTimeMillis, slotIndex);
         } else {
             String language = null;
             StringBuilder sb = new StringBuilder();
@@ -154,7 +155,7 @@ public class GsmSmsCbMessage {
                     header.getGeographicalScope(), header.getSerialNumber(), location,
                     header.getServiceCategory(), language, sb.toString(), priority,
                     header.getEtwsInfo(), header.getCmasInfo(), 0, null /* geometries */,
-                    receivedTimeMillis);
+                    receivedTimeMillis, slotIndex);
         }
     }
 
