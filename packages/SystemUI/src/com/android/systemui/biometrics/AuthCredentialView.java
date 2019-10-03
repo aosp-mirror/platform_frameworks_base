@@ -166,6 +166,8 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        mCredentialType = Utils.getCredentialType(mContext, mUserId);
+
         setText(mTitleView, mBiometricPromptBundle.getString(BiometricPrompt.KEY_TITLE));
         setTextOrHide(mSubtitleView,
                 mBiometricPromptBundle.getString(BiometricPrompt.KEY_SUBTITLE));
@@ -200,7 +202,6 @@ public abstract class AuthCredentialView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mCredentialType = Utils.getCredentialType(mContext, mUserId);
         mTitleView = findViewById(R.id.title);
         mSubtitleView = findViewById(R.id.subtitle);
         mDescriptionView = findViewById(R.id.description);

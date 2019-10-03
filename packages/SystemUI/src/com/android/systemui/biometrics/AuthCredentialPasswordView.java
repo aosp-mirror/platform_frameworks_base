@@ -51,12 +51,6 @@ public class AuthCredentialPasswordView extends AuthCredentialView
         super.onFinishInflate();
         mPasswordField = findViewById(R.id.lockPassword);
         mPasswordField.setOnEditorActionListener(this);
-
-        if (mCredentialType == Utils.CREDENTIAL_PIN) {
-            mPasswordField.setInputType(
-                    InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        }
-
         mPasswordField.setOnKeyListener((v, keyCode, event) -> {
             if (keyCode != KeyEvent.KEYCODE_BACK) {
                 return false;
@@ -71,6 +65,11 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+        if (mCredentialType == Utils.CREDENTIAL_PIN) {
+            mPasswordField.setInputType(
+                    InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        }
 
         // Wait a bit to focus the field so the focusable flag on the window is already set then.
         post(() -> {

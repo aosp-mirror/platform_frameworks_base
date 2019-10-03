@@ -353,6 +353,28 @@ public class BiometricServiceTest {
     }
 
     @Test
+    public void testAuthenticate_noBiometrics_credentialAllowed() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
+        when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(false);
+        invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
+                true /* requireConfirmation */, true /* allowDeviceCredential */);
+        waitForIdle();
+
+        assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
+                mBiometricService.mCurrentAuthSession.mState);
+        assertEquals(Authenticator.TYPE_CREDENTIAL,
+                mBiometricService.mCurrentAuthSession.mBundle
+                        .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+        verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
+                eq(mBiometricService.mCurrentAuthSession.mBundle),
+                any(IBiometricServiceReceiverInternal.class),
+                eq(0 /* biometricModality */),
+                anyBoolean() /* requireConfirmation */,
+                anyInt() /* userId */,
+                eq(TEST_PACKAGE_NAME));
+    }
+
+    @Test
     public void testAuthenticate_happyPathWithConfirmation() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE);
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
@@ -624,7 +646,7 @@ public class BiometricServiceTest {
         bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
         authenticators = Authenticator.TYPE_CREDENTIAL | Authenticator.TYPE_BIOMETRIC;
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        BiometricService.combineAuthenticatorBundles(bundle);
+        Utils.combineAuthenticatorBundles(bundle);
         assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
         assertEquals(authenticators, bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
 
@@ -638,7 +660,7 @@ public class BiometricServiceTest {
         bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
         authenticators = Authenticator.TYPE_BIOMETRIC;
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        BiometricService.combineAuthenticatorBundles(bundle);
+        Utils.combineAuthenticatorBundles(bundle);
         assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
         assertEquals(authenticators, bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
 
@@ -651,7 +673,7 @@ public class BiometricServiceTest {
         bundle = new Bundle();
         authenticators = Authenticator.TYPE_BIOMETRIC | Authenticator.TYPE_CREDENTIAL;
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        BiometricService.combineAuthenticatorBundles(bundle);
+        Utils.combineAuthenticatorBundles(bundle);
         assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
         assertEquals(authenticators, bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
     }

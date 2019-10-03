@@ -212,8 +212,7 @@ public class BiometricService extends SystemService {
         }
 
         boolean isAllowDeviceCredential() {
-            final int authenticators = mBundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
-            return (authenticators & Authenticator.TYPE_CREDENTIAL) != 0;
+            return Utils.isDeviceCredentialAllowed(mBundle);
         }
     }
 
@@ -613,7 +612,7 @@ public class BiometricService extends SystemService {
                 checkInternalPermission();
             }
 
-            combineAuthenticatorBundles(bundle);
+            Utils.combineAuthenticatorBundles(bundle);
 
             // Check the usage of this in system server. Need to remove this check if it becomes
             // a public API.
@@ -1392,8 +1391,14 @@ public class BiometricService extends SystemService {
             final int modality = result.first;
             final int error = result.second;
 
-            // Check for errors, notify callback, and return
-            if (error != BiometricConstants.BIOMETRIC_SUCCESS) {
+            final boolean credentialAllowed = Utils.isDeviceCredentialAllowed(bundle);
+
+            if (error != BiometricConstants.BIOMETRIC_SUCCESS && credentialAllowed) {
+                // If there's a problem but device credential is allowed, only show credential UI.
+                bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                        Authenticator.TYPE_CREDENTIAL);
+            } else if (error != BiometricConstants.BIOMETRIC_SUCCESS) {
+                // Check for errors, notify callback, and return
                 try {
                     final String hardwareUnavailable =
                             getContext().getString(R.string.biometric_error_hw_unavailable);
@@ -1450,27 +1455,49 @@ public class BiometricService extends SystemService {
             // with the cookie. Once all cookies are received, we can show the prompt
             // and let the services start authenticating. The cookie should be non-zero.
             final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
+            final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
             Slog.d(TAG, "Creating auth session. Modality: " + modality
-                    + ", cookie: " + cookie);
-            final HashMap<Integer, Integer> authenticators = new HashMap<>();
-            authenticators.put(modality, cookie);
-            mPendingAuthSession = new AuthSession(authenticators, token, sessionId, userId,
+                    + ", cookie: " + cookie
+                    + ", authenticators: " + authenticators);
+            final HashMap<Integer, Integer> modalities = new HashMap<>();
+
+            // If it's only device credential, we don't need to wait - LockSettingsService is
+            // always ready to check credential (SystemUI invokes that path).
+            if ((authenticators & ~Authenticator.TYPE_CREDENTIAL) != 0) {
+                modalities.put(modality, cookie);
+            }
+            mPendingAuthSession = new AuthSession(modalities, token, sessionId, userId,
                     receiver, opPackageName, bundle, callingUid, callingPid, callingUserId,
                     modality, requireConfirmation);
-            mPendingAuthSession.mState = STATE_AUTH_CALLED;
-            // No polymorphism :(
-            if ((modality & TYPE_FINGERPRINT) != 0) {
-                mFingerprintService.prepareForAuthentication(token, sessionId, userId,
-                        mInternalReceiver, opPackageName, cookie,
-                        callingUid, callingPid, callingUserId);
-            }
-            if ((modality & TYPE_IRIS) != 0) {
-                Slog.w(TAG, "Iris unsupported");
-            }
-            if ((modality & TYPE_FACE) != 0) {
-                mFaceService.prepareForAuthentication(requireConfirmation,
-                        token, sessionId, userId, mInternalReceiver, opPackageName,
-                        cookie, callingUid, callingPid, callingUserId);
+
+            if (authenticators == Authenticator.TYPE_CREDENTIAL) {
+                mPendingAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
+                mCurrentAuthSession = mPendingAuthSession;
+                mPendingAuthSession = null;
+
+                mStatusBarService.showAuthenticationDialog(
+                        mCurrentAuthSession.mBundle,
+                        mInternalReceiver,
+                        0 /* biometricModality */,
+                        false /* requireConfirmation */,
+                        mCurrentAuthSession.mUserId,
+                        mCurrentAuthSession.mOpPackageName);
+            } else {
+                mPendingAuthSession.mState = STATE_AUTH_CALLED;
+                // No polymorphism :(
+                if ((modality & TYPE_FINGERPRINT) != 0) {
+                    mFingerprintService.prepareForAuthentication(token, sessionId, userId,
+                            mInternalReceiver, opPackageName, cookie,
+                            callingUid, callingPid, callingUserId);
+                }
+                if ((modality & TYPE_IRIS) != 0) {
+                    Slog.w(TAG, "Iris unsupported");
+                }
+                if ((modality & TYPE_FACE) != 0) {
+                    mFaceService.prepareForAuthentication(requireConfirmation,
+                            token, sessionId, userId, mInternalReceiver, opPackageName,
+                            cookie, callingUid, callingPid, callingUserId);
+                }
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to start authentication", e);
@@ -1535,39 +1562,5 @@ public class BiometricService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to cancel authentication");
         }
-    }
-
-
-    /**
-     * Combine {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
-     * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible
-     * enough.
-     */
-    @VisibleForTesting
-    static void combineAuthenticatorBundles(Bundle bundle) {
-        boolean biometricEnabled = true; // enabled by default
-        boolean credentialEnabled = false; // disabled by default
-        if (bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false)) {
-            credentialEnabled = true;
-        }
-        if (bundle.get(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED) != null) {
-            final int authenticatorFlags =
-                    bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
-            biometricEnabled = (authenticatorFlags & Authenticator.TYPE_BIOMETRIC) != 0;
-            // Using both KEY_ALLOW_DEVICE_CREDENTIAL and KEY_AUTHENTICATORS_ALLOWED together
-            // is not supported. Default to overwriting.
-            credentialEnabled = (authenticatorFlags & Authenticator.TYPE_CREDENTIAL) != 0;
-        }
-
-        bundle.remove(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
-
-        int authenticators = 0;
-        if (biometricEnabled) {
-            authenticators |= Authenticator.TYPE_BIOMETRIC;
-        }
-        if (credentialEnabled) {
-            authenticators |= Authenticator.TYPE_CREDENTIAL;
-        }
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
     }
 }
