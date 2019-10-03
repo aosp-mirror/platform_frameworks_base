@@ -53,6 +53,10 @@ Do NOT include any apps that are updatable via Play Store!
   <hidden-api-whitelisted-app package="com.android.providers.media" />
   <hidden-api-whitelisted-app package="com.android.providers.tv" />
   <hidden-api-whitelisted-app package="com.android.providers.userdictionary" />
+  <!-- TODO (b/141954427): Remove networkstack -->
+  <hidden-api-whitelisted-app package="com.android.networkstack" />
+  <!-- TODO (b/141954427): Remove wifistack -->
+  <hidden-api-whitelisted-app package="com.android.server.wifistack" />
   <hidden-api-whitelisted-app package="com.android.smspush" />
   <hidden-api-whitelisted-app package="com.android.spare_parts" />
   <hidden-api-whitelisted-app package="com.android.statementservice" />
