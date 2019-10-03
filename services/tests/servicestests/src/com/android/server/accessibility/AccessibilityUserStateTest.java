@@ -207,14 +207,14 @@ public class AccessibilityUserStateTest {
     }
 
     @Test
-    public void serviceDisconnected_removeServiceAndAddToBinding() {
+    public void serviceDisconnected_removeServiceAndAddToCrashed() {
         when(mMockConnection.getComponentName()).thenReturn(COMPONENT_NAME);
         mUserState.addServiceLocked(mMockConnection);
 
         mUserState.serviceDisconnectedLocked(mMockConnection);
 
         assertFalse(mUserState.getBoundServicesLocked().contains(mMockConnection));
-        assertTrue(mUserState.getBindingServicesLocked().contains(COMPONENT_NAME));
+        assertTrue(mUserState.getCrashedServicesLocked().contains(COMPONENT_NAME));
     }
 
     @Test

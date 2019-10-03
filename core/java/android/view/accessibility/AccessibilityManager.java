@@ -707,10 +707,10 @@ public final class AccessibilityManager {
         try {
             services = service.getEnabledAccessibilityServiceList(feedbackTypeFlags, userId);
             if (DEBUG) {
-                Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+                Log.i(LOG_TAG, "Enabled AccessibilityServices " + services);
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
+            Log.e(LOG_TAG, "Error while obtaining the enabled AccessibilityServices. ", re);
         }
         if (mAccessibilityPolicy != null) {
             services = mAccessibilityPolicy.getEnabledAccessibilityServiceList(

@@ -366,9 +366,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (userId != mCurrentUserId) {
                         return;
                     }
-                    AccessibilityUserState userState = getUserStateLocked(userId);
-                    boolean reboundAService = userState.getBindingServicesLocked().removeIf(
+                    final AccessibilityUserState userState = getUserStateLocked(userId);
+                    final boolean reboundAService = userState.getBindingServicesLocked().removeIf(
                             component -> component != null
+                                    && component.getPackageName().equals(packageName))
+                            || userState.mCrashedServices.removeIf(component -> component != null
                                     && component.getPackageName().equals(packageName));
                     if (reboundAService) {
                         onUserStateChangedLocked(userState);
@@ -393,6 +395,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         if (compPkg.equals(packageName)) {
                             it.remove();
                             userState.getBindingServicesLocked().remove(comp);
+                            userState.getCrashedServicesLocked().remove(comp);
                             // Update the enabled services setting.
                             persistComponentNamesToSettingLocked(
                                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
@@ -753,6 +756,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState.mEnabledServices.clear();
             userState.mEnabledServices.add(service);
             userState.getBindingServicesLocked().clear();
+            userState.getCrashedServicesLocked().clear();
             userState.mTouchExplorationGrantedServices.clear();
             userState.mTouchExplorationGrantedServices.add(service);
 
@@ -1178,6 +1182,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityServiceInfo accessibilityServiceInfo;
             try {
                 accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
+                if (userState.mCrashedServices.contains(serviceInfo.getComponentName())) {
+                    // Restore the crashed attribute.
+                    accessibilityServiceInfo.crashed = true;
+                }
                 mTempAccessibilityServiceInfoList.add(accessibilityServiceInfo);
             } catch (XmlPullParserException | IOException xppe) {
                 Slog.e(LOG_TAG, "Error while initializing AccessibilityServiceInfo", xppe);
@@ -1418,8 +1426,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 continue;
             }
 
-            // Wait for the binding if it is in process.
-            if (userState.getBindingServicesLocked().contains(componentName)) {
+            // Skip the component since it may be in process or crashed.
+            if (userState.getBindingServicesLocked().contains(componentName)
+                    || userState.getCrashedServicesLocked().contains(componentName)) {
                 continue;
             }
             if (userState.mEnabledServices.contains(componentName)
@@ -2687,6 +2696,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 } else if (mEnabledAccessibilityServicesUri.equals(uri)) {
                     if (readEnabledAccessibilityServicesLocked(userState)) {
+                        userState.updateCrashedServicesIfNeededLocked();
                         onUserStateChangedLocked(userState);
                     }
                 } else if (mTouchExplorationGrantedAccessibilityServicesUri.equals(uri)) {
