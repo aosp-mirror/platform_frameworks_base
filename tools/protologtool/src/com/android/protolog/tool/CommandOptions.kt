@@ -27,19 +27,21 @@ class CommandOptions(args: Array<String>) {
 
         private const val PROTOLOG_CLASS_PARAM = "--protolog-class"
         private const val PROTOLOGIMPL_CLASS_PARAM = "--protolog-impl-class"
+        private const val PROTOLOGCACHE_CLASS_PARAM = "--protolog-cache-class"
         private const val PROTOLOGGROUP_CLASS_PARAM = "--loggroups-class"
         private const val PROTOLOGGROUP_JAR_PARAM = "--loggroups-jar"
         private const val VIEWER_CONFIG_JSON_PARAM = "--viewer-conf"
         private const val OUTPUT_SOURCE_JAR_PARAM = "--output-srcjar"
         private val parameters = setOf(PROTOLOG_CLASS_PARAM, PROTOLOGIMPL_CLASS_PARAM,
-                PROTOLOGGROUP_CLASS_PARAM, PROTOLOGGROUP_JAR_PARAM, VIEWER_CONFIG_JSON_PARAM,
-                OUTPUT_SOURCE_JAR_PARAM)
+                PROTOLOGCACHE_CLASS_PARAM, PROTOLOGGROUP_CLASS_PARAM, PROTOLOGGROUP_JAR_PARAM,
+                VIEWER_CONFIG_JSON_PARAM, OUTPUT_SOURCE_JAR_PARAM)
 
         val USAGE = """
             Usage: ${Constants.NAME} <command> [<args>]
             Available commands:
 
             $TRANSFORM_CALLS_CMD $PROTOLOG_CLASS_PARAM <class name> $PROTOLOGIMPL_CLASS_PARAM
+                <class name> $PROTOLOGCACHE_CLASS_PARAM
                 <class name> $PROTOLOGGROUP_CLASS_PARAM <class name> $PROTOLOGGROUP_JAR_PARAM
                 <config.jar> $OUTPUT_SOURCE_JAR_PARAM <output.srcjar> [<input.java>]
             - processes java files replacing stub calls with logging code.
@@ -54,7 +56,7 @@ class CommandOptions(args: Array<String>) {
         """.trimIndent()
 
         private fun validateClassName(name: String): String {
-            if (!Pattern.matches("^([a-z]+[A-Za-z0-9]*\\.)+([A-Za-z0-9]+)$", name)) {
+            if (!Pattern.matches("^([a-z]+[A-Za-z0-9]*\\.)+([A-Za-z0-9$]+)$", name)) {
                 throw InvalidCommandException("Invalid class name $name")
             }
             return name
@@ -121,6 +123,7 @@ class CommandOptions(args: Array<String>) {
     val protoLogClassNameArg: String
     val protoLogGroupsClassNameArg: String
     val protoLogImplClassNameArg: String
+    val protoLogCacheClassNameArg: String
     val protoLogGroupsJarArg: String
     val viewerConfigJsonArg: String
     val outputSourceJarArg: String
@@ -170,6 +173,8 @@ class CommandOptions(args: Array<String>) {
                         params))
                 protoLogImplClassNameArg = validateClassName(getParam(PROTOLOGIMPL_CLASS_PARAM,
                         params))
+                protoLogCacheClassNameArg = validateClassName(getParam(PROTOLOGCACHE_CLASS_PARAM,
+                        params))
                 protoLogGroupsJarArg = validateJarName(getParam(PROTOLOGGROUP_JAR_PARAM, params))
                 viewerConfigJsonArg = validateNotSpecified(VIEWER_CONFIG_JSON_PARAM, params)
                 outputSourceJarArg = validateSrcJarName(getParam(OUTPUT_SOURCE_JAR_PARAM, params))
@@ -181,6 +186,7 @@ class CommandOptions(args: Array<String>) {
                 protoLogGroupsClassNameArg = validateClassName(getParam(PROTOLOGGROUP_CLASS_PARAM,
                         params))
                 protoLogImplClassNameArg = validateNotSpecified(PROTOLOGIMPL_CLASS_PARAM, params)
+                protoLogCacheClassNameArg = validateNotSpecified(PROTOLOGCACHE_CLASS_PARAM, params)
                 protoLogGroupsJarArg = validateJarName(getParam(PROTOLOGGROUP_JAR_PARAM, params))
                 viewerConfigJsonArg = validateJSONName(getParam(VIEWER_CONFIG_JSON_PARAM, params))
                 outputSourceJarArg = validateNotSpecified(OUTPUT_SOURCE_JAR_PARAM, params)
@@ -191,6 +197,7 @@ class CommandOptions(args: Array<String>) {
                 protoLogClassNameArg = validateNotSpecified(PROTOLOG_CLASS_PARAM, params)
                 protoLogGroupsClassNameArg = validateNotSpecified(PROTOLOGGROUP_CLASS_PARAM, params)
                 protoLogImplClassNameArg = validateNotSpecified(PROTOLOGIMPL_CLASS_PARAM, params)
+                protoLogCacheClassNameArg = validateNotSpecified(PROTOLOGCACHE_CLASS_PARAM, params)
                 protoLogGroupsJarArg = validateNotSpecified(PROTOLOGGROUP_JAR_PARAM, params)
                 viewerConfigJsonArg = validateJSONName(getParam(VIEWER_CONFIG_JSON_PARAM, params))
                 outputSourceJarArg = validateNotSpecified(OUTPUT_SOURCE_JAR_PARAM, params)

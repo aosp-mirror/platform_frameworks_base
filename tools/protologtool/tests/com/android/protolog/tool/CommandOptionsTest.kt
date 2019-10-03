@@ -30,6 +30,7 @@ class CommandOptionsTest {
         )
         private const val TEST_PROTOLOG_CLASS = "com.android.server.wm.ProtoLog"
         private const val TEST_PROTOLOGIMPL_CLASS = "com.android.server.wm.ProtoLogImpl"
+        private const val TEST_PROTOLOGCACHE_CLASS = "com.android.server.wm.ProtoLog\$Cache"
         private const val TEST_PROTOLOGGROUP_CLASS = "com.android.server.wm.ProtoLogGroup"
         private const val TEST_PROTOLOGGROUP_JAR = "out/soong/.intermediates/frameworks/base/" +
                 "services/core/services.core.wm.protologgroups/android_common/javac/" +
@@ -56,6 +57,7 @@ class CommandOptionsTest {
     fun transformClasses() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -73,6 +75,7 @@ class CommandOptionsTest {
     fun transformClasses_noProtoLogClass() {
         val testLine = "transform-protolog-calls " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -82,6 +85,17 @@ class CommandOptionsTest {
     @Test(expected = InvalidCommandException::class)
     fun transformClasses_noProtoLogImplClass() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
+                "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
+                "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
+                "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
+        CommandOptions(testLine.split(' ').toTypedArray())
+    }
+
+    @Test(expected = InvalidCommandException::class)
+    fun transformClasses_noProtoLogCacheClass() {
+        val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
+                "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -92,6 +106,7 @@ class CommandOptionsTest {
     fun transformClasses_noProtoLogGroupClass() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
         CommandOptions(testLine.split(' ').toTypedArray())
@@ -101,6 +116,7 @@ class CommandOptionsTest {
     fun transformClasses_noProtoLogGroupJar() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
         CommandOptions(testLine.split(' ').toTypedArray())
@@ -110,6 +126,7 @@ class CommandOptionsTest {
     fun transformClasses_noOutJar() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 TEST_JAVA_SRC.joinToString(" ")
@@ -120,6 +137,7 @@ class CommandOptionsTest {
     fun transformClasses_noJavaInput() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR"
@@ -130,6 +148,7 @@ class CommandOptionsTest {
     fun transformClasses_invalidProtoLogClass() {
         val testLine = "transform-protolog-calls --protolog-class invalid " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -140,6 +159,18 @@ class CommandOptionsTest {
     fun transformClasses_invalidProtoLogImplClass() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class invalid " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
+                "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
+                "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
+                "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
+        CommandOptions(testLine.split(' ').toTypedArray())
+    }
+
+    @Test(expected = InvalidCommandException::class)
+    fun transformClasses_invalidProtoLogCacheClass() {
+        val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
+                "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class invalid " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -150,6 +181,7 @@ class CommandOptionsTest {
     fun transformClasses_invalidProtoLogGroupClass() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class invalid " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -160,6 +192,7 @@ class CommandOptionsTest {
     fun transformClasses_invalidProtoLogGroupJar() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar invalid.txt " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -170,6 +203,7 @@ class CommandOptionsTest {
     fun transformClasses_invalidOutJar() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar invalid.db ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -180,6 +214,7 @@ class CommandOptionsTest {
     fun transformClasses_invalidJavaInput() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR invalid.py"
@@ -190,6 +225,7 @@ class CommandOptionsTest {
     fun transformClasses_unknownParam() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--unknown test --protolog-impl-class $TEST_PROTOLOGIMPL_CLASS " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
@@ -200,6 +236,7 @@ class CommandOptionsTest {
     fun transformClasses_noValue() {
         val testLine = "transform-protolog-calls --protolog-class $TEST_PROTOLOG_CLASS " +
                 "--protolog-impl-class " +
+                "--protolog-cache-class $TEST_PROTOLOGCACHE_CLASS " +
                 "--loggroups-class $TEST_PROTOLOGGROUP_CLASS " +
                 "--loggroups-jar $TEST_PROTOLOGGROUP_JAR " +
                 "--output-srcjar $TEST_SRC_JAR ${TEST_JAVA_SRC.joinToString(" ")}"
