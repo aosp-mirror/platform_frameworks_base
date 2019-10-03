@@ -58,6 +58,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
@@ -329,6 +330,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private SparseBooleanArray mUserIsUnlocked = new SparseBooleanArray();
     private SparseBooleanArray mUserHasTrust = new SparseBooleanArray();
     private SparseBooleanArray mUserTrustIsManaged = new SparseBooleanArray();
+    private SparseBooleanArray mUserTrustIsUsuallyManaged = new SparseBooleanArray();
     private SparseBooleanArray mUserFingerprintAuthenticated = new SparseBooleanArray();
     private SparseBooleanArray mUserFaceAuthenticated = new SparseBooleanArray();
     private SparseBooleanArray mUserFaceUnlockRunning = new SparseBooleanArray();
@@ -472,6 +474,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public void onTrustManagedChanged(boolean managed, int userId) {
         checkIsHandlerThread();
         mUserTrustIsManaged.put(userId, managed);
+        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -923,6 +926,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean getUserTrustIsManaged(int userId) {
         return mUserTrustIsManaged.get(userId) && !isTrustDisabled(userId);
+    }
+
+    /**
+     * Cached version of {@link TrustManager#isTrustUsuallyManaged(int)}.
+     */
+    public boolean isTrustUsuallyManaged(int userId) {
+        checkIsHandlerThread();
+        return mUserTrustIsUsuallyManaged.get(userId);
     }
 
     public boolean isUnlockingWithBiometricAllowed() {
@@ -1474,9 +1485,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mUserIsUnlocked.put(userId, mUserManager.isUserUnlocked(userId));
     }
 
-    private void handleUserRemoved(int userId) {
+    @VisibleForTesting
+    void handleUserRemoved(int userId) {
         checkIsHandlerThread();
         mUserIsUnlocked.delete(userId);
+        mUserTrustIsUsuallyManaged.delete(userId);
     }
 
     @VisibleForTesting
@@ -1662,7 +1675,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             e.rethrowAsRuntimeException();
         }
 
-        mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
+        mTrustManager = context.getSystemService(TrustManager.class);
         mTrustManager.registerTrustListener(this);
         mLockPatternUtils = new LockPatternUtils(context);
         mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
@@ -1697,6 +1710,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mUserIsUnlocked.put(user, mUserManager.isUserUnlocked(user));
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mLogoutEnabled = mDevicePolicyManager.isLogoutEnabled();
+        List<UserInfo> allUsers = mUserManager.getUsers();
+        for (UserInfo userInfo : allUsers) {
+            mUserTrustIsUsuallyManaged.put(userInfo.id,
+                    mTrustManager.isTrustUsuallyManaged(userInfo.id));
+        }
         updateAirplaneModeState();
 
         TelephonyManager telephony =
@@ -2048,6 +2066,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     private void handleUserSwitching(int userId, IRemoteCallback reply) {
         checkIsHandlerThread();
+        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {

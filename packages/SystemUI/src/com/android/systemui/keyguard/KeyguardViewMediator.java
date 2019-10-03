@@ -650,29 +650,26 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public int getBouncerPromptReason() {
-            // TODO(b/140053364)
-            return whitelistIpcs(() -> {
-                int currentUser = ActivityManager.getCurrentUser();
-                boolean trust = mTrustManager.isTrustUsuallyManaged(currentUser);
-                boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
-                boolean any = trust || biometrics;
-                KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
-                        mUpdateMonitor.getStrongAuthTracker();
-                int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
+            int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+            boolean trust = mUpdateMonitor.isTrustUsuallyManaged(currentUser);
+            boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
+            boolean any = trust || biometrics;
+            KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                    mUpdateMonitor.getStrongAuthTracker();
+            int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
 
-                if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
-                    return KeyguardSecurityView.PROMPT_REASON_RESTART;
-                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
-                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
-                } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
-                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
-                }
-                return KeyguardSecurityView.PROMPT_REASON_NONE;
-            });
+            if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
+                return KeyguardSecurityView.PROMPT_REASON_RESTART;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
+            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
+            }
+            return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
 
         @Override
@@ -701,7 +698,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void setupLocked() {
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mTrustManager = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
+        mTrustManager = mContext.getSystemService(TrustManager.class);
 
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
