@@ -120,9 +120,9 @@ import java.util.concurrent.CountDownLatch;
  * Manages the standby state of an app, listening to various events.
  *
  * Unit test:
-   atest ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/servicestests/src/com/android/server/usage/AppStandbyControllerTests.java
+   atest com.android.server.usage.AppStandbyControllerTests
  */
-public class AppStandbyController {
+public class AppStandbyController implements AppStandbyInternal {
 
     private static final String TAG = "AppStandbyController";
     static final boolean DEBUG = false;
@@ -247,7 +247,7 @@ public class AppStandbyController {
     /** The length of time phone must be charging before considered stable enough to run jobs  */
     long mStableChargingThresholdMillis;
 
-    volatile boolean mAppIdleEnabled;
+    private volatile boolean mAppIdleEnabled;
     boolean mAppIdleTempParoled;
     boolean mCharging;
     boolean mChargingStable;
@@ -320,7 +320,7 @@ public class AppStandbyController {
         }
     }
 
-    AppStandbyController(Context context, Looper looper) {
+    public AppStandbyController(Context context, Looper looper) {
         this(new Injector(context, looper));
     }
 
@@ -351,6 +351,7 @@ public class AppStandbyController {
                 null, mHandler);
     }
 
+    @VisibleForTesting
     void setAppIdleEnabled(boolean enabled) {
         synchronized (mAppIdleLock) {
             if (mAppIdleEnabled != enabled) {
@@ -363,6 +364,12 @@ public class AppStandbyController {
         }
     }
 
+    @Override
+    public boolean isAppIdleEnabled() {
+        return mAppIdleEnabled;
+    }
+
+    @Override
     public void onBootPhase(int phase) {
         mInjector.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
@@ -400,7 +407,7 @@ public class AppStandbyController {
         }
     }
 
-    void reportContentProviderUsage(String authority, String providerPkgName, int userId) {
+    private void reportContentProviderUsage(String authority, String providerPkgName, int userId) {
         if (!mAppIdleEnabled) return;
 
         // Get sync adapters for the authority
@@ -432,7 +439,7 @@ public class AppStandbyController {
         }
     }
 
-    void reportExemptedSyncScheduled(String packageName, int userId) {
+    private void reportExemptedSyncScheduled(String packageName, int userId) {
         if (!mAppIdleEnabled) return;
 
         final int bucketToPromote;
@@ -463,7 +470,7 @@ public class AppStandbyController {
         }
     }
 
-    void reportUnexemptedSyncScheduled(String packageName, int userId) {
+    private void reportUnexemptedSyncScheduled(String packageName, int userId) {
         if (!mAppIdleEnabled) return;
 
         final long elapsedRealtime = mInjector.elapsedRealtime();
@@ -482,7 +489,7 @@ public class AppStandbyController {
         }
     }
 
-    void reportExemptedSyncStart(String packageName, int userId) {
+    private void reportExemptedSyncStart(String packageName, int userId) {
         if (!mAppIdleEnabled) return;
 
         final long elapsedRealtime = mInjector.elapsedRealtime();
@@ -497,6 +504,7 @@ public class AppStandbyController {
         }
     }
 
+    @VisibleForTesting
     void setChargingState(boolean charging) {
         synchronized (mAppIdleLock) {
             if (mCharging != charging) {
@@ -517,7 +525,7 @@ public class AppStandbyController {
         }
     }
 
-    void updateChargingStableState() {
+    private void updateChargingStableState() {
         synchronized (mAppIdleLock) {
             if (mChargingStable != mCharging) {
                 if (DEBUG) Slog.d(TAG, "Setting mChargingStable to " + mCharging);
@@ -527,8 +535,7 @@ public class AppStandbyController {
         }
     }
 
-    /** Paroled here means temporary pardon from being inactive */
-    void setAppIdleParoled(boolean paroled) {
+    private void setAppIdleParoled(boolean paroled) {
         synchronized (mAppIdleLock) {
             final long now = mInjector.currentTimeMillis();
             if (mAppIdleTempParoled != paroled) {
@@ -545,7 +552,8 @@ public class AppStandbyController {
         }
     }
 
-    boolean isParoledOrCharging() {
+    @Override
+    public boolean isParoledOrCharging() {
         if (!mAppIdleEnabled) return true;
         synchronized (mAppIdleLock) {
             // Only consider stable charging when determining charge state.
@@ -583,15 +591,13 @@ public class AppStandbyController {
         mHandler.sendEmptyMessage(MSG_PAROLE_STATE_CHANGED);
     }
 
-    void postCheckIdleStates(int userId) {
+    @Override
+    public void postCheckIdleStates(int userId) {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_CHECK_IDLE_STATES, userId, 0));
     }
 
-    /**
-     * We send a different message to check idle states once, otherwise we would end up
-     * scheduling a series of repeating checkIdleStates each time we fired off one.
-     */
-    void postOneTimeCheckIdleStates() {
+    @Override
+    public void postOneTimeCheckIdleStates() {
         if (mInjector.getBootPhase() < PHASE_SYSTEM_SERVICES_READY) {
             // Not booted yet; wait for it!
             mPendingOneTimeCheckIdleStates = true;
@@ -601,10 +607,7 @@ public class AppStandbyController {
         }
     }
 
-    /**
-     * Check all running users' or specified user's apps to see if they enter an idle state.
-     * @return Returns whether checking should continue periodically.
-     */
+    @VisibleForTesting
     boolean checkIdleStates(int checkUserId) {
         if (!mAppIdleEnabled) {
             return false;
@@ -776,19 +779,15 @@ public class AppStandbyController {
      * @return the bucket for the app, based on time since last used
      */
     @GuardedBy("mAppIdleLock")
-    @StandbyBuckets int getBucketForLocked(String packageName, int userId,
+    @StandbyBuckets
+    private int getBucketForLocked(String packageName, int userId,
             long elapsedRealtime) {
         int bucketIndex = mAppIdleHistory.getThresholdIndex(packageName, userId,
                 elapsedRealtime, mAppStandbyScreenThresholds, mAppStandbyElapsedThresholds);
         return THRESHOLD_BUCKETS[bucketIndex];
     }
 
-    /**
-     * Check if it's been a while since last parole and let idle apps do some work.
-     * If network is not available, delay parole until it is available up until the end of the
-     * parole window. Force the parole to be set if end of the parole window is reached.
-     */
-    void checkParoleTimeout() {
+    private void checkParoleTimeout() {
         boolean setParoled = false;
         boolean waitForNetwork = false;
         NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
@@ -845,7 +844,7 @@ public class AppStandbyController {
         }
     }
 
-    void onDeviceIdleModeChanged() {
+    private void onDeviceIdleModeChanged() {
         final boolean deviceIdle = mPowerManager.isDeviceIdleMode();
         if (DEBUG) Slog.i(TAG, "DeviceIdleMode changed to " + deviceIdle);
         boolean paroled = false;
@@ -869,7 +868,8 @@ public class AppStandbyController {
         setAppIdleParoled(paroled);
     }
 
-    void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId) {
+    @Override
+    public void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId) {
         if (!mAppIdleEnabled) return;
         synchronized (mAppIdleLock) {
             // TODO: Ideally this should call isAppIdleFiltered() to avoid calling back
@@ -950,14 +950,7 @@ public class AppStandbyController {
         }
     }
 
-    /**
-     * Forces the app's beginIdleTime and lastUsedTime to reflect idle or active. If idle,
-     * then it rolls back the beginIdleTime and lastUsedTime to a point in time that's behind
-     * the threshold for idle.
-     *
-     * This method is always called from the handler thread, so not much synchronization is
-     * required.
-     */
+    @VisibleForTesting
     void forceIdleState(String packageName, int userId, boolean idle) {
         if (!mAppIdleEnabled) return;
 
@@ -983,12 +976,14 @@ public class AppStandbyController {
         }
     }
 
+    @Override
     public void setLastJobRunTime(String packageName, int userId, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.setLastJobRunTime(packageName, userId, elapsedRealtime);
         }
     }
 
+    @Override
     public long getTimeSinceLastJobRun(String packageName, int userId) {
         final long elapsedRealtime = mInjector.elapsedRealtime();
         synchronized (mAppIdleLock) {
@@ -996,6 +991,7 @@ public class AppStandbyController {
         }
     }
 
+    @Override
     public void onUserRemoved(int userId) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.onUserRemoved(userId);
@@ -1011,7 +1007,8 @@ public class AppStandbyController {
         }
     }
 
-    void addListener(AppIdleStateChangeListener listener) {
+    @Override
+    public void addListener(AppIdleStateChangeListener listener) {
         synchronized (mPackageAccessListeners) {
             if (!mPackageAccessListeners.contains(listener)) {
                 mPackageAccessListeners.add(listener);
@@ -1019,13 +1016,15 @@ public class AppStandbyController {
         }
     }
 
-    void removeListener(AppIdleStateChangeListener listener) {
+    @Override
+    public void removeListener(AppIdleStateChangeListener listener) {
         synchronized (mPackageAccessListeners) {
             mPackageAccessListeners.remove(listener);
         }
     }
 
-    int getAppId(String packageName) {
+    @Override
+    public int getAppId(String packageName) {
         try {
             ApplicationInfo ai = mPackageManager.getApplicationInfo(packageName,
                     PackageManager.MATCH_ANY_USER
@@ -1036,7 +1035,8 @@ public class AppStandbyController {
         }
     }
 
-    boolean isAppIdleFilteredOrParoled(String packageName, int userId, long elapsedRealtime,
+    @Override
+    public boolean isAppIdleFilteredOrParoled(String packageName, int userId, long elapsedRealtime,
             boolean shouldObfuscateInstantApps) {
         if (isParoledOrCharging()) {
             return false;
@@ -1048,8 +1048,7 @@ public class AppStandbyController {
         return isAppIdleFiltered(packageName, getAppId(packageName), userId, elapsedRealtime);
     }
 
-    /** Returns true if this app should be whitelisted for some reason, to never go into standby */
-    boolean isAppSpecial(String packageName, int appId, int userId) {
+    private boolean isAppSpecial(String packageName, int appId, int userId) {
         if (packageName == null) return false;
         // If not enabled at all, of course nobody is ever idle.
         if (!mAppIdleEnabled) {
@@ -1102,13 +1101,8 @@ public class AppStandbyController {
         return false;
     }
 
-    /**
-     * Checks if an app has been idle for a while and filters out apps that are excluded.
-     * It returns false if the current system state allows all apps to be considered active.
-     * This happens if the device is plugged in or temporarily allowed to make exceptions.
-     * Called by interface impls.
-     */
-    boolean isAppIdleFiltered(String packageName, int appId, int userId,
+    @Override
+    public boolean isAppIdleFiltered(String packageName, int appId, int userId,
             long elapsedRealtime) {
         if (isAppSpecial(packageName, appId, userId)) {
             return false;
@@ -1117,7 +1111,8 @@ public class AppStandbyController {
         }
     }
 
-    int[] getIdleUidsForUser(int userId) {
+    @Override
+    public int[] getIdleUidsForUser(int userId) {
         if (!mAppIdleEnabled) {
             return new int[0];
         }
@@ -1181,13 +1176,15 @@ public class AppStandbyController {
         return res;
     }
 
-    void setAppIdleAsync(String packageName, boolean idle, int userId) {
+    @Override
+    public void setAppIdleAsync(String packageName, boolean idle, int userId) {
         if (packageName == null || !mAppIdleEnabled) return;
 
         mHandler.obtainMessage(MSG_FORCE_IDLE_STATE, userId, idle ? 1 : 0, packageName)
                 .sendToTarget();
     }
 
+    @Override
     @StandbyBuckets public int getAppStandbyBucket(String packageName, int userId,
             long elapsedRealtime, boolean shouldObfuscateInstantApps) {
         if (!mAppIdleEnabled || (shouldObfuscateInstantApps
@@ -1200,18 +1197,21 @@ public class AppStandbyController {
         }
     }
 
+    @Override
     public List<AppStandbyInfo> getAppStandbyBuckets(int userId) {
         synchronized (mAppIdleLock) {
             return mAppIdleHistory.getAppStandbyBuckets(userId, mAppIdleEnabled);
         }
     }
 
+    @VisibleForTesting
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             int reason, long elapsedRealtime) {
         setAppStandbyBucket(packageName, userId, newBucket, reason, elapsedRealtime, false);
     }
 
-    void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
+    @Override
+    public void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             int reason, long elapsedRealtime, boolean resetTimeout) {
         synchronized (mAppIdleLock) {
             // If the package is not installed, don't allow the bucket to be set.
@@ -1279,6 +1279,7 @@ public class AppStandbyController {
         }
     }
 
+    @Override
     public void addActiveDeviceAdmin(String adminPkg, int userId) {
         synchronized (mActiveAdminApps) {
             Set<String> adminPkgs = mActiveAdminApps.get(userId);
@@ -1290,6 +1291,7 @@ public class AppStandbyController {
         }
     }
 
+    @Override
     public void setActiveAdminApps(Set<String> adminPkgs, int userId) {
         synchronized (mActiveAdminApps) {
             if (adminPkgs == null) {
@@ -1300,6 +1302,7 @@ public class AppStandbyController {
         }
     }
 
+    @Override
     public void onAdminDataAvailable() {
         mAdminDataAvailableLatch.countDown();
     }
@@ -1314,6 +1317,7 @@ public class AppStandbyController {
         }
     }
 
+    @VisibleForTesting
     Set<String> getActiveAdminAppsForTest(int userId) {
         synchronized (mActiveAdminApps) {
             return mActiveAdminApps.get(userId);
@@ -1342,7 +1346,8 @@ public class AppStandbyController {
         }
     }
 
-    void clearCarrierPrivilegedApps() {
+    @Override
+    public void clearCarrierPrivilegedApps() {
         if (DEBUG) {
             Slog.i(TAG, "Clearing carrier privileged apps list");
         }
@@ -1368,7 +1373,7 @@ public class AppStandbyController {
         return packageName != null && packageName.equals(activeScorer);
     }
 
-    void informListeners(String packageName, int userId, int bucket, int reason,
+    private void informListeners(String packageName, int userId, int bucket, int reason,
             boolean userInteraction) {
         final boolean idle = bucket >= STANDBY_BUCKET_RARE;
         synchronized (mPackageAccessListeners) {
@@ -1381,7 +1386,7 @@ public class AppStandbyController {
         }
     }
 
-    void informParoleStateChanged() {
+    private void informParoleStateChanged() {
         final boolean paroled = isParoledOrCharging();
         synchronized (mPackageAccessListeners) {
             for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
@@ -1390,13 +1395,15 @@ public class AppStandbyController {
         }
     }
 
-    void flushToDisk(int userId) {
+    @Override
+    public void flushToDisk(int userId) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.writeAppIdleTimes(userId);
         }
     }
 
-    void flushDurationsToDisk() {
+    @Override
+    public void flushDurationsToDisk() {
         // Persist elapsed and screen on time. If this fails for whatever reason, the apps will be
         // considered not-idle, which is the safest outcome in such an event.
         synchronized (mAppIdleLock) {
@@ -1404,10 +1411,11 @@ public class AppStandbyController {
         }
     }
 
-    boolean isDisplayOn() {
+    private boolean isDisplayOn() {
         return mInjector.isDefaultDisplayOn();
     }
 
+    @VisibleForTesting
     void clearAppIdleForPackage(String packageName, int userId) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.clearUsage(packageName, userId);
@@ -1431,7 +1439,8 @@ public class AppStandbyController {
         }
     }
 
-    void initializeDefaultsForSystemApps(int userId) {
+    @Override
+    public void initializeDefaultsForSystemApps(int userId) {
         if (!mSystemServicesReady) {
             // Do it later, since SettingsProvider wasn't queried yet for app_standby_enabled
             mPendingInitializeDefaults = true;
@@ -1461,7 +1470,8 @@ public class AppStandbyController {
         }
     }
 
-    void postReportContentProviderUsage(String name, String packageName, int userId) {
+    @Override
+    public void postReportContentProviderUsage(String name, String packageName, int userId) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = name;
         args.arg2 = packageName;
@@ -1470,23 +1480,27 @@ public class AppStandbyController {
                 .sendToTarget();
     }
 
-    void postReportSyncScheduled(String packageName, int userId, boolean exempted) {
+    @Override
+    public void postReportSyncScheduled(String packageName, int userId, boolean exempted) {
         mHandler.obtainMessage(MSG_REPORT_SYNC_SCHEDULED, userId, exempted ? 1 : 0, packageName)
                 .sendToTarget();
     }
 
-    void postReportExemptedSyncStart(String packageName, int userId) {
+    @Override
+    public void postReportExemptedSyncStart(String packageName, int userId) {
         mHandler.obtainMessage(MSG_REPORT_EXEMPTED_SYNC_START, userId, 0, packageName)
                 .sendToTarget();
     }
 
-    void dumpUser(IndentingPrintWriter idpw, int userId, String pkg) {
+    @Override
+    public void dumpUser(IndentingPrintWriter idpw, int userId, String pkg) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.dump(idpw, userId, pkg);
         }
     }
 
-    void dumpState(String[] args, PrintWriter pw) {
+    @Override
+    public void dumpState(String[] args, PrintWriter pw) {
         synchronized (mAppIdleLock) {
             pw.println("Carrier privileged apps (have=" + mHaveCarrierPrivilegedApps
                     + "): " + mCarrierPrivilegedApps);
