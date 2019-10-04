@@ -76,7 +76,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     // How much you need to drag the bouncer to trigger an auth retry (in dps.)
     private static final float MIN_DRAG_SIZE = 10;
     // How much to scale the default slop by, to avoid accidental drags.
-    private static final float SLOP_SCALE = 2f;
+    private static final float SLOP_SCALE = 4f;
 
     private KeyguardSecurityModel mSecurityModel;
     private LockPatternUtils mLockPatternUtils;
