@@ -11830,10 +11830,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     try {
                         int uid = packageManager.getPackageUidAsUser(packageName,
                                 user.getIdentifier());
-
-                        // TODO: Prevent noting the app-op
-                        granted = PermissionChecker.checkPermission(mContext, permission, -1,
-                                uid, packageName);
+                        if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                                PermissionChecker.PID_UNKNOWN, uid, packageName)
+                                        != PermissionChecker.PERMISSION_GRANTED) {
+                            granted = PackageManager.PERMISSION_DENIED;
+                        } else {
+                            granted = PackageManager.PERMISSION_GRANTED;
+                        }
                     } catch (NameNotFoundException e) {
                         throw new RemoteException(
                                 "Cannot check if " + permission + "is a runtime permission", e,
