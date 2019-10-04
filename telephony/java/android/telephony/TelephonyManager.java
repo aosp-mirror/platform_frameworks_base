@@ -365,6 +365,16 @@ public class TelephonyManager {
         return ActivityThread.currentOpPackageName();
     }
 
+    private String getFeatureId() {
+        // For legacy reasons the TelephonyManager has API for getting
+        // a static instance with no context set preventing us from
+        // getting the feature Id.
+        if (mContext != null) {
+            return mContext.getFeatureId();
+        }
+        return null;
+    }
+
     private boolean isSystemProcess() {
         return Process.myUid() == Process.SYSTEM_UID;
     }
@@ -2029,7 +2039,8 @@ public class TelephonyManager {
                 return null;
             }
 
-            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName());
+            Bundle bundle = telephony.getCellLocation(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
             if (bundle == null || bundle.isEmpty()) {
                 Rlog.d(TAG, "getCellLocation returning null because CellLocation is unavailable");
                 return null;
@@ -2117,7 +2128,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getNeighboringCellInfo(mContext.getOpPackageName());
+            return telephony.getNeighboringCellInfo(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -5519,8 +5531,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getAllCellInfo(
-                    getOpPackageName());
+            return telephony.getAllCellInfo(getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -5612,7 +5623,7 @@ public class TelephonyManager {
                                             errorCode,
                                             createThrowableByClassName(exceptionName, message))));
                         }
-                    }, getOpPackageName());
+                    }, getOpPackageName(), getFeatureId());
         } catch (RemoteException ex) {
         }
     }
@@ -5654,7 +5665,7 @@ public class TelephonyManager {
                                             errorCode,
                                             createThrowableByClassName(exceptionName, message))));
                         }
-                    }, getOpPackageName(), workSource);
+                    }, getOpPackageName(), getFeatureId(), workSource);
         } catch (RemoteException ex) {
         }
     }
@@ -7478,7 +7489,8 @@ public class TelephonyManager {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName());
+                return telephony.getCellNetworkScanResults(getSubId(), getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getAvailableNetworks RemoteException", ex);
@@ -7533,7 +7545,7 @@ public class TelephonyManager {
             }
         }
         return mTelephonyScanManager.requestNetworkScan(getSubId(), request, executor, callback,
-                getOpPackageName());
+                getOpPackageName(), getFeatureId());
     }
 
     /**
@@ -9664,7 +9676,8 @@ public class TelephonyManager {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                return service.getServiceStateForSubscriber(subId, getOpPackageName());
+                return service.getServiceStateForSubscriber(subId, getOpPackageName(),
+                        getFeatureId());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);

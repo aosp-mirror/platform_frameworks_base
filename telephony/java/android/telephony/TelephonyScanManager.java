@@ -18,6 +18,7 @@ package android.telephony;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Bundle;
@@ -195,18 +196,21 @@ public final class TelephonyScanManager {
      *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
      * @param callback Returns network scan results or errors.
+     * @param callingPackage The package name of the caller
+     * @param callingFeatureId The feature id inside of the calling package
      * @return A NetworkScan obj which contains a callback which can stop the scan.
      * @hide
      */
     public NetworkScan requestNetworkScan(int subId,
             NetworkScanRequest request, Executor executor, NetworkScanCallback callback,
-            String callingPackage) {
+            String callingPackage, @Nullable String callingFeatureId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 synchronized (mScanInfo) {
                     int scanId = telephony.requestNetworkScan(
-                            subId, request, mMessenger, new Binder(), callingPackage);
+                            subId, request, mMessenger, new Binder(), callingPackage,
+                            callingFeatureId);
                     if (scanId == INVALID_SCAN_ID) {
                         Rlog.e(TAG, "Failed to initiate network scan");
                         return null;

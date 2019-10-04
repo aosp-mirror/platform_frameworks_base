@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -59,6 +60,7 @@ public final class LocationAccessPolicy {
 
     public static class LocationPermissionQuery {
         public final String callingPackage;
+        public final String callingFeatureId;
         public final int callingUid;
         public final int callingPid;
         public final int minSdkVersionForCoarse;
@@ -66,10 +68,11 @@ public final class LocationAccessPolicy {
         public final boolean logAsInfo;
         public final String method;
 
-        private LocationPermissionQuery(String callingPackage, int callingUid, int callingPid,
-                int minSdkVersionForCoarse, int minSdkVersionForFine, boolean logAsInfo,
-                String method) {
+        private LocationPermissionQuery(String callingPackage, @Nullable String callingFeatureId,
+                int callingUid, int callingPid, int minSdkVersionForCoarse,
+                int minSdkVersionForFine, boolean logAsInfo, String method) {
             this.callingPackage = callingPackage;
+            this.callingFeatureId = callingFeatureId;
             this.callingUid = callingUid;
             this.callingPid = callingPid;
             this.minSdkVersionForCoarse = minSdkVersionForCoarse;
@@ -80,6 +83,7 @@ public final class LocationAccessPolicy {
 
         public static class Builder {
             private String mCallingPackage;
+            private String mCallingFeatureId;
             private int mCallingUid;
             private int mCallingPid;
             private int mMinSdkVersionForCoarse = Integer.MAX_VALUE;
@@ -92,6 +96,14 @@ public final class LocationAccessPolicy {
              */
             public Builder setCallingPackage(String callingPackage) {
                 mCallingPackage = callingPackage;
+                return this;
+            }
+
+            /**
+             * Mandatory parameter, used for performing permission checks.
+             */
+            public Builder setCallingFeatureId(@Nullable String callingFeatureId) {
+                mCallingFeatureId = callingFeatureId;
                 return this;
             }
 
@@ -148,8 +160,8 @@ public final class LocationAccessPolicy {
             }
 
             public LocationPermissionQuery build() {
-                return new LocationPermissionQuery(mCallingPackage, mCallingUid,
-                        mCallingPid, mMinSdkVersionForCoarse, mMinSdkVersionForFine,
+                return new LocationPermissionQuery(mCallingPackage, mCallingFeatureId,
+                        mCallingUid, mCallingPid, mMinSdkVersionForCoarse, mMinSdkVersionForFine,
                         mLogAsInfo, mMethod);
             }
         }
@@ -195,7 +207,7 @@ public final class LocationAccessPolicy {
             // Only check the app op if the app has the permission.
             int appOpMode = context.getSystemService(AppOpsManager.class)
                     .noteOpNoThrow(AppOpsManager.permissionToOpCode(permissionToCheck),
-                            query.callingUid, query.callingPackage);
+                            query.callingUid, query.callingPackage, query.callingFeatureId, null);
             if (appOpMode == AppOpsManager.MODE_ALLOWED) {
                 // If the app did everything right, return without logging.
                 return LocationPermissionResult.ALLOWED;
