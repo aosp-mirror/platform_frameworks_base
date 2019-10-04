@@ -39,11 +39,15 @@ import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
+import android.view.IWindowContainer;
+import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -102,6 +106,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     // Return value from {@link setBounds} indicating the size of the override bounds changed.
     static final int BOUNDS_CHANGE_SIZE = 1 << 1;
 
+    /**
+     * Used as a unique, cross-process identifier for this Container. It also serves a minimal
+     * interface to other processes.
+     */
+    RemoteToken mRemoteToken = null;
 
     /**
      * Returns full configuration applied to this configuration container.
@@ -634,4 +643,37 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     abstract protected E getChildAt(int index);
 
     abstract protected ConfigurationContainer getParent();
+
+    // TODO: Consider moving to WindowContainer once hierarchies and Task/Stack are merged.
+    static class RemoteToken extends IWindowContainer.Stub {
+        final WeakReference<ConfigurationContainer> mWeakRef;
+
+        RemoteToken(ConfigurationContainer container) {
+            mWeakRef = new WeakReference<>(container);
+        }
+
+        ConfigurationContainer getContainer() {
+            return mWeakRef.get();
+        }
+
+        static RemoteToken fromBinder(IBinder binder) {
+            return (RemoteToken) binder;
+        }
+
+        @Override
+        public SurfaceControl getLeash() {
+            throw new RuntimeException("Not implemented");
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("RemoteToken{");
+            sb.append(Integer.toHexString(System.identityHashCode(this)));
+            sb.append(' ');
+            sb.append(mWeakRef.get());
+            sb.append('}');
+            return sb.toString();
+        }
+    }
 }

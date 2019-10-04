@@ -440,6 +440,34 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
+     * Copies the fields specified by mask from delta into this Configuration object.
+     * @hide
+     */
+    public void setTo(@NonNull WindowConfiguration delta, @WindowConfig int mask) {
+        if ((mask & WINDOW_CONFIG_BOUNDS) != 0) {
+            setBounds(delta.mBounds);
+        }
+        if ((mask & WINDOW_CONFIG_APP_BOUNDS) != 0) {
+            setAppBounds(delta.mAppBounds);
+        }
+        if ((mask & WINDOW_CONFIG_WINDOWING_MODE) != 0) {
+            setWindowingMode(delta.mWindowingMode);
+        }
+        if ((mask & WINDOW_CONFIG_ACTIVITY_TYPE) != 0) {
+            setActivityType(delta.mActivityType);
+        }
+        if ((mask & WINDOW_CONFIG_ALWAYS_ON_TOP) != 0) {
+            setAlwaysOnTop(delta.mAlwaysOnTop);
+        }
+        if ((mask & WINDOW_CONFIG_ROTATION) != 0) {
+            setRotation(delta.mRotation);
+        }
+        if ((mask & WINDOW_CONFIG_DISPLAY_WINDOWING_MODE) != 0) {
+            setDisplayWindowingMode(delta.mDisplayWindowingMode);
+        }
+    }
+
+    /**
      * Return a bit mask of the differences between this Configuration object and the given one.
      * Does not change the values of either. Any undefined fields in <var>other</var> are ignored.
      * @param other The configuration to diff against.

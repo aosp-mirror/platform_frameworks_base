@@ -70,6 +70,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
+import android.view.WindowContainerTransaction;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -220,6 +221,7 @@ interface IActivityTaskManager {
     void setTaskResizeable(int taskId, int resizeableMode);
     void toggleFreeformWindowingMode(in IBinder token);
     void resizeTask(int taskId, in Rect bounds, int resizeMode);
+    void applyContainerTransaction(in WindowContainerTransaction t);
     void moveStackToDisplay(int stackId, int displayId);
     void removeStack(int stackId);
 
