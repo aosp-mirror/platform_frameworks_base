@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.ForegroundServiceLifetimeExtender.MIN_FGS_TIME_MS;
+
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
@@ -54,11 +56,13 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
+import java.util.Map;
 import junit.framework.Assert;
 
 import org.junit.Before;
@@ -426,5 +430,49 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
         Assert.assertTrue(newSbn.getNotification().extras
                 .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
+    }
+
+    @Test
+    public void testForegroundServiceNotificationKeptForFiveSeconds() {
+        // sbn posted "just now"
+        Notification n = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .build();
+        n.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+                0, n, new UserHandle(ActivityManager.getCurrentUser()), null,
+                System.currentTimeMillis());
+        mEntry = new Entry(mSbn);
+        mEntryManager.getNotificationData().add(mEntry);
+        mEntryManager.removeNotification(mEntry.key, mRankingMap);
+
+        Map<NotificationData.Entry, NotificationLifetimeExtender> map =
+                mEntryManager.getRetainedNotificationMap();
+
+        Assert.assertTrue(map.containsKey(mEntry));
+    }
+
+    @Test
+    public void testForegroundServiceNotification_notRetainedIfShownForFiveSeconds() {
+        // sbn posted "more than 5 seconds ago"
+        Notification n = new Notification.Builder(mContext, "")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .build();
+        n.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
+                0, n, new UserHandle(ActivityManager.getCurrentUser()), null,
+                System.currentTimeMillis() - MIN_FGS_TIME_MS - 1);
+        mEntry = new Entry(mSbn);
+        mEntryManager.getNotificationData().add(mEntry);
+        mEntryManager.removeNotification(mEntry.key, mRankingMap);
+
+        Map<NotificationData.Entry, NotificationLifetimeExtender> map =
+                mEntryManager.getRetainedNotificationMap();
+
+        Assert.assertFalse(map.containsKey(mEntry));
     }
 }
