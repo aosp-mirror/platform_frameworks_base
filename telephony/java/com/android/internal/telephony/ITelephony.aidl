@@ -2035,4 +2035,9 @@ interface ITelephony {
      * data might be disabled on non-default data subscription but explicitly turned on by settings.
      */
     boolean isDataAllowedInVoiceCall(int subId);
+
+    /**
+     * Command line command to enable or disable handling of CEP data for test purposes.
+     */
+    oneway void setCepEnabled(boolean isCepEnabled);
 }
