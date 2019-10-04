@@ -1274,16 +1274,15 @@ public class NotificationManagerService extends SystemService {
                     uidList = new int[] {intent.getIntExtra(Intent.EXTRA_UID, -1)};
                 }
                 if (pkgList != null && (pkgList.length > 0)) {
-                    for (String pkgName : pkgList) {
-                        if (cancelNotifications) {
+                    if (cancelNotifications) {
+                        for (String pkgName : pkgList) {
                             cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, null, 0, 0,
                                     !queryRestart, changeUserId, reason, null);
-                        } else if (hideNotifications) {
-                            hideNotificationsForPackages(pkgList);
-                        } else if (unhideNotifications) {
-                            unhideNotificationsForPackages(pkgList);
                         }
-
+                    } else if (hideNotifications) {
+                        hideNotificationsForPackages(pkgList);
+                    } else if (unhideNotifications) {
+                        unhideNotificationsForPackages(pkgList);
                     }
                 }
 
