@@ -232,6 +232,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleGiveSystemAudioModeStatus_originalOff() throws Exception {
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildReportSystemAudioMode(
@@ -301,6 +302,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleSetSystemAudioMode_setOn_orignalOff() throws Exception {
         mMusicMute = true;
         HdmiCecMessage messageSet =
@@ -328,6 +330,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleSystemAudioModeRequest_turnOffByTv() throws Exception {
         assertThat(mMusicMute).isFalse();
         // Check if feature correctly turned off
@@ -497,6 +500,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleRequestArcTerminate_arcIsNotOn() throws Exception {
         assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isFalse();
         HdmiCecMessage message =
@@ -671,6 +675,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/120845532")
     public void handleReportPhysicalAddress_differentPath_addDevice() {
         assertThat(mInvokeDeviceEventState).isNotEqualTo(DEVICE_EVENT_ADD_DEVICE);
         HdmiDeviceInfo oldDevice = new HdmiDeviceInfo(
