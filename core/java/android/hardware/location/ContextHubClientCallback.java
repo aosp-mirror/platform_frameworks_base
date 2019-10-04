@@ -66,7 +66,9 @@ public class ContextHubClientCallback {
     public void onNanoAppAborted(ContextHubClient client, long nanoAppId, int abortCode) {}
 
     /**
-     * Callback invoked when a nanoapp is loaded at the attached Context Hub.
+     * Callback invoked when a nanoapp is dynamically loaded at the attached Context Hub through
+     * the {@link android.hardware.location.ContextHubManager}. This callback is not invoked for a
+     * nanoapp that is loaded internally by CHRE (e.g. nanoapps that are preloaded by the system).
      *
      * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been loaded
@@ -74,7 +76,8 @@ public class ContextHubClientCallback {
     public void onNanoAppLoaded(ContextHubClient client, long nanoAppId) {}
 
     /**
-     * Callback invoked when a nanoapp is unloaded from the attached Context Hub.
+     * Callback invoked when a nanoapp is dynamically unloaded from the attached Context Hub through
+     * the {@link android.hardware.location.ContextHubManager}.
      *
      * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been unloaded
@@ -82,7 +85,8 @@ public class ContextHubClientCallback {
     public void onNanoAppUnloaded(ContextHubClient client, long nanoAppId) {}
 
     /**
-     * Callback invoked when a nanoapp is enabled at the attached Context Hub.
+     * Callback invoked when a nanoapp is dynamically enabled at the attached Context Hub through
+     * the {@link android.hardware.location.ContextHubManager}.
      *
      * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been enabled
@@ -90,7 +94,8 @@ public class ContextHubClientCallback {
     public void onNanoAppEnabled(ContextHubClient client, long nanoAppId) {}
 
     /**
-     * Callback invoked when a nanoapp is disabled at the attached Context Hub.
+     * Callback invoked when a nanoapp is dynamically disabled at the attached Context Hub through
+     * the {@link android.hardware.location.ContextHubManager}.
      *
      * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been disabled
