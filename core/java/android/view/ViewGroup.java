@@ -2634,8 +2634,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                     final int childrenCount = mChildrenCount;
                     if (newTouchTarget == null && childrenCount != 0) {
-                        final float x = ev.getX(actionIndex);
-                        final float y = ev.getY(actionIndex);
+                        final float x =
+                                isMouseEvent ? ev.getXCursorPosition() : ev.getX(actionIndex);
+                        final float y =
+                                isMouseEvent ? ev.getYCursorPosition() : ev.getY(actionIndex);
                         // Find a child that can receive the event.
                         // Scan children from front to back.
                         final ArrayList<View> preorderedList = buildTouchDispatchChildList();
