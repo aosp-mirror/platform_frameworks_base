@@ -31,7 +31,7 @@ import android.mtp.MtpConstants;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import libcore.net.MimeMap;
+import libcore.content.type.MimeMap;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
