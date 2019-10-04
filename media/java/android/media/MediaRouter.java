@@ -49,6 +49,8 @@ import android.view.Display;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -82,6 +84,7 @@ public class MediaRouter {
 
         final ArrayList<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
         final ArrayList<RouteCategory> mCategories = new ArrayList<RouteCategory>();
+        List<String> mControlCategories = Collections.emptyList();
 
         final RouteCategory mSystemCategory;
 
@@ -358,6 +361,18 @@ public class MediaRouter {
             return mDisplayService.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION);
         }
 
+        public void setControlCategories(Collection<String> controlCategories) {
+            List<String> newControlCategories = new ArrayList<>(controlCategories);
+            mControlCategories = newControlCategories;
+            if (mClient != null) {
+                try {
+                    mMediaRouterService.setControlCategories(mClient, newControlCategories);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Unable to set control categories.", ex);
+                }
+            }
+        }
+
         private void updatePresentationDisplays(int changedDisplayId) {
             final int count = mRoutes.size();
             for (int i = 0; i < count; i++) {
@@ -406,6 +421,7 @@ public class MediaRouter {
                 try {
                     Client client = new Client();
                     mMediaRouterService.registerClientAsUser(client, mPackageName, userId);
+                    mMediaRouterService.setControlCategories(client, mControlCategories);
                     mClient = client;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to register media router client.", ex);
@@ -1300,6 +1316,19 @@ public class MediaRouter {
      */
     public void rebindAsUser(int userId) {
         sStatic.rebindAsUser(userId);
+    }
+
+    /**
+     * Sets the control categories of the application.
+     * Routes that support at least one of the given control categories only exists and are handled
+     * by the media router.
+     *
+     * @hide
+     */
+    public void setControlCategories(@NonNull Collection<String> controlCategories) {
+        Objects.requireNonNull(controlCategories, "control categories must not be null");
+
+        sStatic.setControlCategories(controlCategories);
     }
 
     static void updateRoute(final RouteInfo info) {
