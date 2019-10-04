@@ -935,6 +935,35 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     /**
+     * Verify that finish request won't change the state of next top activity if the current
+     * finishing activity doesn't need to be destroyed immediately. The case is usually like
+     * from {@link ActivityStack#completePauseLocked(boolean, ActivityRecord)} to
+     * {@link ActivityRecord#completeFinishing(String)}, so the complete-pause should take the
+     * responsibility to resume the next activity with updating the state.
+     */
+    @Test
+    public void testCompleteFinishing_keepStateOfNextInvisible() {
+        final ActivityRecord currentTop = mActivity;
+        currentTop.visible = currentTop.nowVisible = true;
+
+        // Simulates that {@code currentTop} starts an existing activity from background (so its
+        // state is stopped) and the starting flow just goes to place it at top.
+        final ActivityStack nextStack = new StackBuilder(mRootActivityContainer).build();
+        final ActivityRecord nextTop = nextStack.getTopActivity();
+        nextTop.setState(STOPPED, "test");
+
+        mStack.mPausingActivity = currentTop;
+        currentTop.finishing = true;
+        currentTop.setState(PAUSED, "test");
+        currentTop.completeFinishing("completePauseLocked");
+
+        // Current top becomes stopping because it is visible and the next is invisible.
+        assertEquals(STOPPING, currentTop.getState());
+        // The state of next activity shouldn't be changed.
+        assertEquals(STOPPED, nextTop.getState());
+    }
+
+    /**
      * Verify that complete finish request for visible activity must be delayed before the next one
      * becomes visible.
      */
