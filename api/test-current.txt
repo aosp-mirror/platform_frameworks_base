@@ -2033,10 +2033,18 @@ package android.os {
   public final class UserHandle implements android.os.Parcelable {
     method public static int getAppId(int);
     method public int getIdentifier();
+    method public static int getUid(int, int);
+    method public static int getUserId(int);
     method public static boolean isApp(int);
+    method public static int myUserId();
+    method public static android.os.UserHandle of(int);
     field @NonNull public static final android.os.UserHandle ALL;
     field @NonNull public static final android.os.UserHandle CURRENT;
+    field public static final int MIN_SECONDARY_USER_ID = 10; // 0xa
     field @NonNull public static final android.os.UserHandle SYSTEM;
+    field public static final int USER_ALL = -1; // 0xffffffff
+    field public static final int USER_NULL = -10000; // 0xffffd8f0
+    field public static final int USER_SYSTEM = 0; // 0x0
   }
 
   public class UserManager {
