@@ -19,7 +19,6 @@ package com.android.internal.telephony;
 import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.telephony.IFinancialSmsCallback;
 import com.android.internal.telephony.SmsRawData;
 
 /**
@@ -568,17 +567,6 @@ interface ISms {
      */
     String createAppSpecificSmsTokenWithPackageInfo(
             int subId, String callingPkg, String prefixes, in PendingIntent intent);
-
-    /**
-     * Get sms inbox messages for the calling financial app.
-     *
-     * @param subId the SIM id.
-     * @param callingPkg the package name of the calling app.
-     * @param params parameters to filter the sms messages.
-     * @param callback the callback interface to deliver the result.
-     */
-    void getSmsMessagesForFinancialApp(
-        int subId, String callingPkg, in Bundle params, in IFinancialSmsCallback callback);
 
     /**
      * Check if the destination is a possible premium short code.
