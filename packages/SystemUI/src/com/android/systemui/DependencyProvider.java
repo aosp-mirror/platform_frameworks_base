@@ -40,6 +40,7 @@ import android.view.WindowManagerGlobal;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -237,5 +238,11 @@ public class DependencyProvider {
     @Provides
     public AlarmManager provideAlarmManager(Context context) {
         return context.getSystemService(AlarmManager.class);
+    }
+
+    /** */
+    @Provides
+    public LockPatternUtils provideLockPatternUtils(Context context) {
+        return new LockPatternUtils(context);
     }
 }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.car;
 
+import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -34,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -57,35 +60,82 @@ import com.android.car.notification.NotificationClickHandlerFactory;
 import com.android.car.notification.NotificationDataManager;
 import com.android.car.notification.NotificationViewController;
 import com.android.car.notification.PreprocessingManager;
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.CarSystemUIFactory;
 import com.android.systemui.Dependency;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.UiOffloadThread;
+import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingLog;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.car.hvac.TemperatureView;
+import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
+import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.util.InjectionInflationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
@@ -175,6 +225,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private boolean mHideNavBarForKeyboard;
     private boolean mBottomNavBarVisible;
 
+    private final NavigationBarController mNavigationBarController;
+
     private final CarPowerStateListener mCarPowerStateListener =
             (int state) -> {
                 // When the car powers on, clear all notifications and mute/unread states.
@@ -188,6 +240,116 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     }
                 }
             };
+
+    @Inject
+    public CarStatusBar(
+            LightBarController lightBarController,
+            AutoHideController autoHideController,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            StatusBarIconController statusBarIconController,
+            DozeLog dozeLog,
+            InjectionInflationController injectionInflationController,
+            PulseExpansionHandler pulseExpansionHandler,
+            NotificationWakeUpCoordinator notificationWakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController,
+            KeyguardStateController keyguardStateController,
+            HeadsUpManagerPhone headsUpManagerPhone,
+            DynamicPrivacyController dynamicPrivacyController,
+            BypassHeadsUpNotifier bypassHeadsUpNotifier,
+            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowNotificationLongPress,
+            NotifPipelineInitializer notifPipelineInitializer,
+            FalsingManager falsingManager,
+            BroadcastDispatcher broadcastDispatcher,
+            RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
+            NotificationGutsManager notificationGutsManager,
+            NotificationLogger notificationLogger,
+            NotificationEntryManager notificationEntryManager,
+            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+            NotificationViewHierarchyManager notificationViewHierarchyManager,
+            ForegroundServiceController foregroundServiceController,
+            AppOpsController appOpsController,
+            KeyguardViewMediator keyguardViewMediator,
+            ZenModeController zenModeController,
+            NotificationAlertingManager notificationAlertingManager,
+            DisplayMetrics displayMetrics,
+            MetricsLogger metricsLogger,
+            UiOffloadThread uiOffloadThread,
+            NotificationMediaManager notificationMediaManager,
+            NotificationLockscreenUserManager lockScreenUserManager,
+            NotificationRemoteInputManager remoteInputManager,
+            UserSwitcherController userSwitcherController,
+            NetworkController networkController,
+            BatteryController batteryController,
+            SysuiColorExtractor colorExtractor,
+            ScreenLifecycle screenLifecycle,
+            WakefulnessLifecycle wakefulnessLifecycle,
+            SysuiStatusBarStateController statusBarStateController,
+            VibratorHelper vibratorHelper,
+            BubbleController bubbleController,
+            NotificationGroupManager groupManager,
+            NotificationGroupAlertTransferHelper groupAlertTransferHelper,
+            VisualStabilityManager visualStabilityManager,
+            DeviceProvisionedController deviceProvisionedController,
+            NavigationBarController navigationBarController,
+            AssistManager assistManager,
+            NotificationListener notificationListener,
+            ConfigurationController configurationController,
+            StatusBarWindowController statusBarWindowController) {
+        super(
+                lightBarController,
+                autoHideController,
+                keyguardUpdateMonitor,
+                statusBarIconController,
+                dozeLog,
+                injectionInflationController,
+                pulseExpansionHandler,
+                notificationWakeUpCoordinator,
+                keyguardBypassController,
+                keyguardStateController,
+                headsUpManagerPhone,
+                dynamicPrivacyController,
+                bypassHeadsUpNotifier,
+                allowNotificationLongPress,
+                notifPipelineInitializer,
+                falsingManager,
+                broadcastDispatcher,
+                remoteInputQuickSettingsDisabler,
+                notificationGutsManager,
+                notificationLogger,
+                notificationEntryManager,
+                notificationInterruptionStateProvider,
+                notificationViewHierarchyManager,
+                foregroundServiceController,
+                appOpsController,
+                keyguardViewMediator,
+                zenModeController,
+                notificationAlertingManager,
+                displayMetrics,
+                metricsLogger,
+                uiOffloadThread,
+                notificationMediaManager,
+                lockScreenUserManager,
+                remoteInputManager,
+                userSwitcherController,
+                networkController,
+                batteryController,
+                colorExtractor,
+                screenLifecycle,
+                wakefulnessLifecycle,
+                statusBarStateController,
+                vibratorHelper,
+                bubbleController,
+                groupManager,
+                groupAlertTransferHelper,
+                visualStabilityManager,
+                deviceProvisionedController,
+                navigationBarController,
+                assistManager,
+                notificationListener,
+                configurationController,
+                statusBarWindowController);
+        mNavigationBarController = navigationBarController;
+    }
 
     @Override
     public void start() {

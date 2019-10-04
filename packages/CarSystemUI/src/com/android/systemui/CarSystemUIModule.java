@@ -29,6 +29,7 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
+import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
@@ -42,6 +43,8 @@ import javax.inject.Singleton;
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
 @Module
 abstract class CarSystemUIModule {
@@ -94,4 +97,9 @@ abstract class CarSystemUIModule {
     @Binds
     abstract SystemUIRootComponent bindSystemUIRootComponent(
             CarSystemUIRootComponent systemUIRootComponent);
+
+    @Binds
+    @IntoMap
+    @ClassKey(StatusBar.class)
+    public abstract SystemUI providesStatusBar(CarStatusBar statusBar);
 }
