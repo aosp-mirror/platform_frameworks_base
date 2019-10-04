@@ -87,6 +87,14 @@ private fun ClassPrinter.appendExpr(sb: StringBuilder, ex: Expression?) {
         is IntegerLiteralExpr -> sb.append(ex.asInt()).append("L")
         is LongLiteralExpr -> sb.append(ex.asLong()).append("L")
         is DoubleLiteralExpr -> sb.append(ex.asDouble())
+        is ArrayInitializerExpr -> {
+            sb.append("{")
+            ex.values.forEachLastAware { arrayElem, isLast ->
+                appendExpr(sb, arrayElem)
+                if (!isLast) sb.append(", ")
+            }
+            sb.append("}")
+        }
         else -> sb.append(ex)
     }
 }

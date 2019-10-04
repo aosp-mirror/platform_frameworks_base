@@ -1,9 +1,6 @@
 package com.android.codegen
 
-import com.github.javaparser.ast.Modifier
-import com.github.javaparser.ast.expr.AnnotationExpr
-import com.github.javaparser.ast.expr.Expression
-import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr
+import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.nodeTypes.NodeWithModifiers
 import java.time.Instant
 import java.time.ZoneId
@@ -88,3 +85,10 @@ fun abort(msg: String): Nothing {
 }
 
 fun bitAtExpr(bitIndex: Int) = "0x${java.lang.Long.toHexString(1L shl bitIndex)}"
+
+val AnnotationExpr.args: Map<String, Expression> get() = when (this) {
+    is MarkerAnnotationExpr -> emptyMap()
+    is SingleMemberAnnotationExpr -> mapOf("value" to memberValue)
+    is NormalAnnotationExpr -> pairs.map { it.name.asString() to it.value }.toMap()
+    else -> throw IllegalArgumentException("Unknown annotation expression: $this")
+}
