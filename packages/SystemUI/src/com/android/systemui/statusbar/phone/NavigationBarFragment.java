@@ -539,6 +539,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 }
                 mAutoHideController.touchAutoHide();
             }
+            if (mNavigationBarView != null) {
+                mNavigationBarView.onSystemUiVisibilityChanged(mSystemUiVisibility);
+            }
         }
         mLightBarController.onNavigationVisibilityChanged(
                 vis, mask, nbModeChanged, mNavigationBarMode, navbarColorManagedByIme);
