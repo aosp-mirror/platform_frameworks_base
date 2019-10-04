@@ -384,7 +384,7 @@ class UserController implements Handler.Callback {
 
         // We need to delay unlocking managed profiles until the parent user
         // is also unlocked.
-        if (mInjector.getUserManager().isManagedProfile(userId)) {
+        if (mInjector.getUserManager().isProfile(userId)) {
             final UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
             if (parent != null
                     && isUserRunning(parent.id, ActivityManager.FLAG_AND_UNLOCKED)) {

@@ -143,8 +143,8 @@ public abstract class UserManagerInternal {
      * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
      * createAndManageUser is called by the device owner.
      */
-    public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags,
-            String[] disallowedPackages);
+    public abstract UserInfo createUserEvenWhenDisallowed(String name, String userType,
+            int flags, String[] disallowedPackages);
 
     /**
      * Same as {@link UserManager#removeUser(int userId)}, but bypasses the check for
@@ -202,8 +202,7 @@ public abstract class UserManagerInternal {
 
     /**
      * Checks if the {@code callingUserId} and {@code targetUserId} are same or in same group
-     * and that the {@code callingUserId} is not a managed profile and
-     * {@code targetUserId} is enabled.
+     * and that the {@code callingUserId} is not a profile and {@code targetUserId} is enabled.
      *
      * @return TRUE if the {@code callingUserId} can access {@code targetUserId}. FALSE
      * otherwise
@@ -215,8 +214,7 @@ public abstract class UserManagerInternal {
             String debugMsg, boolean throwSecurityException);
 
     /**
-     * If {@code userId} is of a managed profile, return the parent user ID. Otherwise return
-     * itself.
+     * If {@code userId} is of a profile, return the parent user ID. Otherwise return itself.
      */
     public abstract int getProfileParentId(int userId);
 

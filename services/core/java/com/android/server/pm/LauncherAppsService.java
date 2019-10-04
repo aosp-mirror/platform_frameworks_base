@@ -304,7 +304,7 @@ public class LauncherAppsService extends SystemService {
             long ident = injectClearCallingIdentity();
             try {
                 final UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
-                if (callingUserInfo != null && callingUserInfo.isManagedProfile()) {
+                if (callingUserInfo != null && callingUserInfo.isProfile()) {
                     Slog.w(TAG, message + " for another profile "
                             + targetUserId + " from " + callingUserId + " not allowed");
                     return false;
