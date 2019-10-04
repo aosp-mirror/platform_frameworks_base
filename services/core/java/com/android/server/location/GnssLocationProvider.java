@@ -67,6 +67,7 @@ import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
@@ -303,6 +304,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private final ExponentialBackOff mPsdsBackOff = new ExponentialBackOff(RETRY_INTERVAL,
             MAX_RETRY_INTERVAL);
+
+    private static boolean sIsInitialized = false;
+    private static boolean sStaticTestOverride = false;
 
     // True if we are enabled
     @GuardedBy("mLock")
@@ -576,7 +580,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
+    @VisibleForTesting
+    public static void setIsSupportedForTest(boolean override) {
+        sStaticTestOverride = override;
+    }
+
     public static boolean isSupported() {
+        if (sStaticTestOverride) {
+            return true;
+        }
         return native_is_supported();
     }
 
@@ -597,6 +609,13 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     public GnssLocationProvider(Context context, LocationProviderManager locationProviderManager,
             Looper looper) {
         super(context, locationProviderManager);
+
+        synchronized (mLock) {
+            if (!sIsInitialized) {
+                class_init_native();
+            }
+            sIsInitialized = true;
+        }
 
         mLooper = looper;
 
@@ -2223,10 +2242,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
-
-    static {
-        class_init_native();
-    }
 
     private static native void class_init_native();
 

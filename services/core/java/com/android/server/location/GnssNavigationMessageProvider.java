@@ -45,7 +45,7 @@ public abstract class GnssNavigationMessageProvider
     }
 
     @VisibleForTesting
-    GnssNavigationMessageProvider(Context context, Handler handler,
+    public GnssNavigationMessageProvider(Context context, Handler handler,
             GnssNavigationMessageProviderNative aNative) {
         super(context, handler, TAG);
         mNative = aNative;
@@ -142,7 +142,7 @@ public abstract class GnssNavigationMessageProvider
     }
 
     @VisibleForTesting
-    static class GnssNavigationMessageProviderNative {
+    public static class GnssNavigationMessageProviderNative {
         public boolean isNavigationMessageSupported() {
             return native_is_navigation_message_supported();
         }

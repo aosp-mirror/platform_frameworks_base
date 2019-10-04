@@ -30,7 +30,7 @@ import java.time.Instant;
 /**
  * Logger for Location API usage logging.
  */
-class LocationUsageLogger {
+public class LocationUsageLogger {
     private static final String TAG = "LocationUsageLogger";
     private static final boolean D = Log.isLoggable(TAG, Log.DEBUG);
 
