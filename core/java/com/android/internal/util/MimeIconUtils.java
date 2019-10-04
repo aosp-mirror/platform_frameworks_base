@@ -27,7 +27,7 @@ import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
-import libcore.net.MimeMap;
+import libcore.content.type.MimeMap;
 
 import java.util.Locale;
 import java.util.Objects;
