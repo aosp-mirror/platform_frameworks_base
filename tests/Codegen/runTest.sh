@@ -14,6 +14,8 @@ else
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/SampleDataClass.java && \
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/SampleWithCustomBuilder.java && \
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/ParcelAllTheThingsDataClass.java && \
+        header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/HierrarchicalDataClassBase.java && \
+        header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/HierrarchicalDataClassChild.java && \
         cd $ANDROID_BUILD_TOP &&
         header_and_eval mmma -j16 frameworks/base/tests/Codegen && \
         header_and_eval adb install -r -t $ANDROID_PRODUCT_OUT/testcases/CodegenTests/arm64/CodegenTests.apk && \
