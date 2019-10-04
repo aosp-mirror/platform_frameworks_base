@@ -192,7 +192,8 @@ public class AuthContainerViewTest extends SysuiTestCase {
         }
 
         @Override
-        public AuthPanelController getPanelController(Context context, View view) {
+        public AuthPanelController getPanelController(Context context, View view,
+                boolean isManagedProfile) {
             return mock(AuthPanelController.class);
         }
 

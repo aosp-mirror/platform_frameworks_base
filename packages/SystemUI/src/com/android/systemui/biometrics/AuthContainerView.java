@@ -165,8 +165,9 @@ public class AuthContainerView extends LinearLayout
                     R.layout.auth_container_view, root, false /* attachToRoot */);
         }
 
-        AuthPanelController getPanelController(Context context, View panelView) {
-            return new AuthPanelController(context, panelView);
+        AuthPanelController getPanelController(Context context, View panelView,
+                boolean isManagedProfile) {
+            return new AuthPanelController(context, panelView, isManagedProfile);
         }
 
         ImageView getBackgroundView(FrameLayout parent) {
@@ -234,8 +235,10 @@ public class AuthContainerView extends LinearLayout
         final LayoutInflater factory = LayoutInflater.from(mContext);
         mFrameLayout = mInjector.inflateContainerView(factory, this);
 
+        final boolean isManagedProfile = Utils.isManagedProfile(mContext, mConfig.mUserId);
+
         mPanelView = mInjector.getPanelView(mFrameLayout);
-        mPanelController = mInjector.getPanelController(mContext, mPanelView);
+        mPanelController = mInjector.getPanelController(mContext, mPanelView, isManagedProfile);
 
         // Inflate biometric view only if necessary.
         if (Utils.isBiometricAllowed(mConfig.mBiometricPromptBundle)) {
@@ -257,11 +260,11 @@ public class AuthContainerView extends LinearLayout
         mBiometricScrollView = mInjector.getBiometricScrollView(mFrameLayout);
         mBackgroundView = mInjector.getBackgroundView(mFrameLayout);
 
-        UserManager userManager = mContext.getSystemService(UserManager.class);
-        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        if (userManager.isManagedProfile(mConfig.mUserId)) {
+
+        if (isManagedProfile) {
             final Drawable image = getResources().getDrawable(R.drawable.work_challenge_background,
                     mContext.getTheme());
+            final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
             image.setColorFilter(dpm.getOrganizationColorForUser(mConfig.mUserId),
                     PorterDuff.Mode.DARKEN);
             mBackgroundView.setScaleType(ImageView.ScaleType.CENTER_CROP);

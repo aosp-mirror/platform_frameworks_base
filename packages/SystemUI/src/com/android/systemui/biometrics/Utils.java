@@ -24,6 +24,7 @@ import android.content.Context;
 import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Bundle;
+import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,5 +99,10 @@ public class Utils {
             default:
                 return CREDENTIAL_PASSWORD;
         }
+    }
+
+    static boolean isManagedProfile(Context context, int userId) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        return userManager.isManagedProfile(userId);
     }
 }

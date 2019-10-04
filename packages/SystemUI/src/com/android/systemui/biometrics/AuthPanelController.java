@@ -19,10 +19,12 @@ package com.android.systemui.biometrics;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Outline;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.android.systemui.R;
 
@@ -36,6 +38,7 @@ public class AuthPanelController extends ViewOutlineProvider {
 
     private final Context mContext;
     private final View mPanelView;
+    private final boolean mIsManagedProfile;
 
     private boolean mUseFullScreen;
 
@@ -77,6 +80,24 @@ public class AuthPanelController extends ViewOutlineProvider {
         mUseFullScreen = fullScreen;
     }
 
+    public ValueAnimator getTranslationAnimator(float relativeTranslationY) {
+        final ValueAnimator animator = ValueAnimator.ofFloat(
+                mPanelView.getY(), mPanelView.getY() - relativeTranslationY);
+        animator.addUpdateListener(animation -> {
+            final float translation = (float) animation.getAnimatedValue();
+            mPanelView.setTranslationY(translation);
+        });
+        return animator;
+    }
+
+    public ValueAnimator getAlphaAnimator(float alpha) {
+        final ValueAnimator animator = ValueAnimator.ofFloat(mPanelView.getAlpha(), alpha);
+        animator.addUpdateListener(animation -> {
+            mPanelView.setAlpha((float) animation.getAnimatedValue());
+        });
+        return animator;
+    }
+
     public void updateForContentDimensions(int contentWidth, int contentHeight,
             int animateDurationMs) {
         if (DEBUG) {
@@ -94,6 +115,13 @@ public class AuthPanelController extends ViewOutlineProvider {
                 .getDimension(R.dimen.biometric_dialog_border_padding);
         final float cornerRadius = mUseFullScreen ? 0 : mContext.getResources()
                 .getDimension(R.dimen.biometric_dialog_corner_size);
+
+        // When going to full-screen for managed profiles, fade away so the managed profile
+        // background behind this view becomes visible.
+        final boolean shouldFadeAway = mUseFullScreen && mIsManagedProfile;
+        final int alpha = shouldFadeAway ? 0 : 255;
+        final float elevation = shouldFadeAway ? 0 :
+                mContext.getResources().getDimension(R.dimen.biometric_dialog_elevation);
 
         if (animateDurationMs > 0) {
             // Animate margin
@@ -122,16 +150,28 @@ public class AuthPanelController extends ViewOutlineProvider {
                 mContentWidth = (int) animation.getAnimatedValue();
             });
 
+            // Animate background
+            ValueAnimator alphaAnimator = ValueAnimator.ofInt(
+                    mPanelView.getBackground().getAlpha(), alpha);
+            alphaAnimator.addUpdateListener((animation) -> {
+                if (shouldFadeAway) {
+                    mPanelView.getBackground().setAlpha((int) animation.getAnimatedValue());
+                }
+            });
+
             // Play together
             AnimatorSet as = new AnimatorSet();
             as.setDuration(animateDurationMs);
-            as.playTogether(cornerAnimator, heightAnimator, widthAnimator, marginAnimator);
+            as.setInterpolator(new AccelerateDecelerateInterpolator());
+            as.playTogether(cornerAnimator, widthAnimator, marginAnimator, alphaAnimator);
             as.start();
+
         } else {
             mMargin = margin;
             mCornerRadius = cornerRadius;
             mContentWidth = contentWidth;
             mContentHeight = contentHeight;
+            mPanelView.getBackground().setAlpha(alpha);
             mPanelView.invalidateOutline();
         }
     }
@@ -144,9 +184,10 @@ public class AuthPanelController extends ViewOutlineProvider {
         return mContainerHeight;
     }
 
-    AuthPanelController(Context context, View panelView) {
+    AuthPanelController(Context context, View panelView, boolean isManagedProfile) {
         mContext = context;
         mPanelView = panelView;
+        mIsManagedProfile = isManagedProfile;
         mCornerRadius = context.getResources()
                 .getDimension(R.dimen.biometric_dialog_corner_size);
         mMargin = (int) context.getResources()
