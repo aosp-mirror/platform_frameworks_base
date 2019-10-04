@@ -9736,6 +9736,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             sb.append("Foreground: ")
                     .append(process.isInterestingToUserLocked() ? "Yes" : "No")
                     .append("\n");
+            if (process.startTime > 0) {
+                long runtimeMillis = SystemClock.elapsedRealtime() - process.startTime;
+                sb.append("Process-Runtime: ").append(runtimeMillis).append("\n");
+            }
         }
         if (activityShortComponentName != null) {
             sb.append("Activity: ").append(activityShortComponentName).append("\n");
