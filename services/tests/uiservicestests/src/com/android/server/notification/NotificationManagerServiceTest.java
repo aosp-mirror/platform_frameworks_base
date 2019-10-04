@@ -506,6 +506,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         return new NotificationRecord(mContext, sbn, channel);
     }
 
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel, int userId) {
+        if (channel == null) {
+            channel = mTestNotificationChannel;
+        }
+        Notification.Builder nb = new Notification.Builder(mContext, channel.getId())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
+                nb.build(), new UserHandle(userId), null, 0);
+        return new NotificationRecord(mContext, sbn, channel);
+    }
+
     private Map<String, Answer> getSignalExtractorSideEffects() {
         Map<String, Answer> answers = new ArrayMap<>();
 
@@ -5225,6 +5237,112 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
         assertEquals((notifsAfter[0].getNotification().flags & FLAG_BUBBLE), 0);
+    }
+
+    @Test
+    public void testGrantInlineReplyUriPermission_recordExists() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel, 0);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // A notification exists for the given record
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+
+        reset(mPackageManager);
+
+        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri, nr.sbn.getUid());
+
+        // Grant permission called for the UID of SystemUI under the target user ID
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
+                eq(nr.sbn.getUid()), eq(nr.sbn.getPackageName()), eq(uri), anyInt(), anyInt(),
+                eq(nr.sbn.getUserId()));
+    }
+
+    @Test
+    public void testGrantInlineReplyUriPermission_userAll() throws Exception {
+        // generate a NotificationRecord for USER_ALL to make sure it's converted into USER_SYSTEM
+        NotificationRecord nr =
+                generateNotificationRecord(mTestNotificationChannel, UserHandle.USER_ALL);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // A notification exists for the given record
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+
+        reset(mPackageManager);
+
+        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(
+                nr.getKey(), uri, nr.sbn.getUid());
+
+        // Target user for the grant is USER_ALL instead of USER_SYSTEM
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
+                eq(nr.sbn.getUid()), eq(nr.sbn.getPackageName()), eq(uri), anyInt(), anyInt(),
+                eq(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testGrantInlineReplyUriPermission_acrossUsers() throws Exception {
+        // generate a NotificationRecord for USER_ALL to make sure it's converted into USER_SYSTEM
+        int otherUserId = 11;
+        NotificationRecord nr =
+                generateNotificationRecord(mTestNotificationChannel, otherUserId);
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag",
+                nr.sbn.getId(), nr.sbn.getNotification(), nr.sbn.getUserId());
+        waitForIdle();
+
+        // A notification exists for the given record
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(1, notifsBefore.length);
+
+        reset(mPackageManager);
+
+        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+
+        int uid = 0; // sysui on primary user
+        int otherUserUid = (otherUserId * 100000) + 1; // SystemUI as a different user
+        String sysuiPackage = "sysui";
+        final String[] sysuiPackages = new String[] { sysuiPackage };
+        when(mPackageManager.getPackagesForUid(uid)).thenReturn(sysuiPackages);
+
+        // Make sure to mock call for USER_SYSTEM and not USER_ALL, since it's been replaced by the
+        // time this is called
+        when(mPackageManager.getPackageUid(sysuiPackage, 0, otherUserId))
+                .thenReturn(otherUserUid);
+
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(nr.getKey(), uri, uid);
+
+        // Target user for the grant is USER_ALL instead of USER_SYSTEM
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(),
+                eq(otherUserUid), eq(nr.sbn.getPackageName()), eq(uri), anyInt(), anyInt(),
+                eq(otherUserId));
+    }
+
+    @Test
+    public void testGrantInlineReplyUriPermission_noRecordExists() throws Exception {
+        NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        waitForIdle();
+
+        // No notifications exist for the given record
+        StatusBarNotification[] notifsBefore = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifsBefore.length);
+
+        Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, 1);
+        int uid = 0; // sysui on primary user
+
+        mService.mNotificationDelegate.grantInlineReplyUriPermission(nr.getKey(), uri, uid);
+
+        // Grant permission not called if no record exists for the given key
+        verify(mUgm, times(0)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+                eq(uri), anyInt(), anyInt(), anyInt());
     }
 
     @Test

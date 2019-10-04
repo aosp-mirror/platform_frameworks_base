@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1328,6 +1329,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         long identity = Binder.clearCallingIdentity();
         try {
             mNotificationDelegate.onNotificationBubbleChanged(key, isBubble);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void grantInlineReplyUriPermission(String key, Uri uri) {
+        enforceStatusBarService();
+        int callingUid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.grantInlineReplyUriPermission(key, uri, callingUid);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

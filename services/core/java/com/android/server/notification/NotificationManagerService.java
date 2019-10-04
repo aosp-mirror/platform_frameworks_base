@@ -1078,6 +1078,56 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        /**
+         * Grant permission to read the specified URI to the package specified in the
+         * NotificationRecord associated with the given key. The callingUid represents the UID of
+         * SystemUI from which this method is being called.
+         *
+         * For this to work, SystemUI must have permission to read the URI when running under the
+         * user associated with the NotificationRecord, and this grant will fail when trying
+         * to grant URI permissions across users.
+         */
+        public void grantInlineReplyUriPermission(String key, Uri uri, int callingUid) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    IBinder owner = r.permissionOwner;
+                    if (owner == null) {
+                        r.permissionOwner = mUgmInternal.newUriPermissionOwner("NOTIF:" + key);
+                        owner = r.permissionOwner;
+                    }
+                    int uid = callingUid;
+                    int userId = r.sbn.getUserId();
+                    if (userId == UserHandle.USER_ALL) {
+                        userId = USER_SYSTEM;
+                    }
+                    if (UserHandle.getUserId(uid) != userId) {
+                        try {
+                            final String[] pkgs = mPackageManager.getPackagesForUid(callingUid);
+                            if (pkgs == null) {
+                                Log.e(TAG, "Cannot grant uri permission to unknown UID: "
+                                        + callingUid);
+                            }
+                            final String pkg = pkgs[0]; // Get the SystemUI package
+                            // Find the UID for SystemUI for the correct user
+                            uid =  mPackageManager.getPackageUid(pkg, 0, userId);
+                        } catch (RemoteException re) {
+                            Log.e(TAG, "Cannot talk to package manager", re);
+                        }
+                    }
+                    grantUriPermission(owner, uri, uid, r.sbn.getPackageName(), userId);
+                } else {
+                    Log.w(TAG, "No record found for notification key:" + key);
+
+                    // TODO: figure out cancel story. I think it's: sysui needs to tell us
+                    // whenever noitifications held by a lifetimextender go away
+                    // IBinder owner = mUgmInternal.newUriPermissionOwner("InlineReply:" + key);
+                    // pass in userId and package as well as key (key for logging purposes)
+                }
+            }
+        }
     };
 
     @VisibleForTesting
@@ -6785,7 +6835,6 @@ public class NotificationManagerService extends SystemService {
     private void grantUriPermission(IBinder owner, Uri uri, int sourceUid, String targetPkg,
             int targetUserId) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
-
         final long ident = Binder.clearCallingIdentity();
         try {
             mUgm.grantUriPermissionFromOwner(owner, sourceUid, targetPkg,
