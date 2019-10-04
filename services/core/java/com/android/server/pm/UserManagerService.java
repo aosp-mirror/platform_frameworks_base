@@ -3897,9 +3897,14 @@ public class UserManagerService extends IUserManager.Stub {
         long now = System.currentTimeMillis();
         final long nowRealtime = SystemClock.elapsedRealtime();
 
-        final int currentUser = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
-        pw.print("Current user: "); pw.println(currentUser);
+        final ActivityManagerInternal amInternal = LocalServices
+                .getService(ActivityManagerInternal.class);
+        pw.print("Current user: ");
+        if (amInternal != null) {
+            pw.println(amInternal.getCurrentUserId());
+        } else {
+            pw.println("N/A");
+        }
 
         StringBuilder sb = new StringBuilder();
         synchronized (mPackagesLock) {
