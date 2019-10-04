@@ -878,6 +878,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
+    @TestApi
     public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
         // default implementation empty
     }
@@ -889,6 +890,7 @@ public class PhoneStateListener {
      * @hide
      */
     @SystemApi
+    @TestApi
     public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
         // default implementation empty
     }
