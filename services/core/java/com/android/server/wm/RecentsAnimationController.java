@@ -494,7 +494,8 @@ public class RecentsAnimationController implements DeathRecipient {
         }
         final SparseIntArray reasons = new SparseIntArray();
         reasons.put(WINDOWING_MODE_FULLSCREEN, APP_TRANSITION_RECENTS_ANIM);
-        mService.mAtmInternal.notifyAppTransitionStarting(reasons, SystemClock.uptimeMillis());
+        mService.mAtmInternal
+            .notifyAppTransitionStarting(reasons, SystemClock.elapsedRealtimeNanos());
     }
 
     private RemoteAnimationTarget[] createAppAnimations() {

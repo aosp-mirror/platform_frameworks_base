@@ -212,7 +212,7 @@ public class AppTransitionController {
         mDisplayContent.computeImeTarget(true /* updateImeTarget */);
 
         mService.mAtmInternal.notifyAppTransitionStarting(mTempTransitionReasons.clone(),
-                SystemClock.uptimeMillis());
+            SystemClock.elapsedRealtimeNanos());
 
         if (transit == TRANSIT_SHOW_SINGLE_TASK_DISPLAY) {
             mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {

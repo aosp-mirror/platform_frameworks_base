@@ -3102,7 +3102,7 @@ final class ActivityRecord extends AppWindowToken {
 
     void reportFullyDrawnLocked(boolean restoredFromBundle) {
         final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
-                .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
+            .getActivityMetricsLogger().logAppTransitionReportedDrawn(this, restoredFromBundle);
         if (info != null) {
             mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,
                     info.windowsFullyDrawnDelayMs, info.getLaunchState());
@@ -3110,13 +3110,13 @@ final class ActivityRecord extends AppWindowToken {
     }
 
     /** Called when the windows associated app window container are drawn. */
-    void onWindowsDrawn(boolean drawn, long timestamp) {
+    void onWindowsDrawn(boolean drawn, long timestampNs) {
         mDrawn = drawn;
         if (!drawn) {
             return;
         }
         final WindowingModeTransitionInfoSnapshot info = mStackSupervisor
-                .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestamp);
+            .getActivityMetricsLogger().notifyWindowsDrawn(getWindowingMode(), timestampNs);
         final int windowsDrawnDelayMs = info != null ? info.windowsDrawnDelayMs : INVALID_DELAY;
         final @LaunchState int launchState = info != null ? info.getLaunchState() : -1;
         mStackSupervisor.reportActivityLaunchedLocked(false /* timeout */, this,

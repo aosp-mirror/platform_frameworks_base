@@ -116,7 +116,7 @@ public interface ActivityMetricsLaunchObserver {
      * Multiple calls to this method cannot occur without first terminating the current
      * launch sequence.
      */
-    public void onIntentStarted(@NonNull Intent intent);
+    public void onIntentStarted(@NonNull Intent intent, long timestampNanos);
 
     /**
      * Notifies the observer that the current launch sequence has failed to launch an activity.
@@ -182,6 +182,9 @@ public interface ActivityMetricsLaunchObserver {
      * drawn for the first time: the top-most activity at the time is what's reported here.
      *
      * @param finalActivity the top-most activity whose windows were first to fully draw
+     * @param timestampNanos the timestamp of ActivityLaunchFinished event in nanoseconds.
+     *        To compute the TotalTime duration, deduct the timestamp {@link #onIntentStarted}
+     *        from {@code timestampNanos}.
      *
      * Multiple calls to this method cannot occur without first terminating the current
      * launch sequence.
@@ -191,7 +194,8 @@ public interface ActivityMetricsLaunchObserver {
      *          and only the latest activity that was top-most during first-frame drawn
      *          is reported here.
      */
-    public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] finalActivity);
+    public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] finalActivity,
+                                         long timestampNanos);
 
     /**
      * Notifies the observer that the application self-reported itself as being fully drawn.

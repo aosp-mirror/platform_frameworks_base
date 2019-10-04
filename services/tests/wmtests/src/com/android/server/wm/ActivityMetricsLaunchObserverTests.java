@@ -129,7 +129,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         mActivityMetricsLogger.notifyActivityLaunching(intent);
 
-        verifyAsync(mLaunchObserver).onIntentStarted(eq(intent));
+        verifyAsync(mLaunchObserver).onIntentStarted(eq(intent), anyLong());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -164,12 +164,12 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
        testOnActivityLaunched();
 
        mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
        mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecord.getWindowingMode(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
-       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecord));
+       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecord), anyLong());
        verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -217,12 +217,13 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
        testOnActivityLaunchedTrampoline();
 
        mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
        mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecordTrampoline.getWindowingMode(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
-       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecordTrampoline));
+       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecordTrampoline),
+                                                             anyLong());
        verifyNoMoreInteractions(mLaunchObserver);
     }
 

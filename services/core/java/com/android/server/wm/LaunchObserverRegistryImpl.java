@@ -70,9 +70,12 @@ class LaunchObserverRegistryImpl implements
     }
 
     @Override
-    public void onIntentStarted(Intent intent) {
+    public void onIntentStarted(Intent intent, long timestampNs) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
-                LaunchObserverRegistryImpl::handleOnIntentStarted, this, intent));
+                LaunchObserverRegistryImpl::handleOnIntentStarted,
+                this,
+                intent,
+                timestampNs));
     }
 
     @Override
@@ -99,18 +102,22 @@ class LaunchObserverRegistryImpl implements
 
     @Override
     public void onActivityLaunchFinished(
-        @ActivityRecordProto byte[] activity) {
+        @ActivityRecordProto byte[] activity,
+        long timestampNs) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
-                LaunchObserverRegistryImpl::handleOnActivityLaunchFinished, this, activity));
+            LaunchObserverRegistryImpl::handleOnActivityLaunchFinished,
+            this,
+            activity,
+            timestampNs));
     }
 
     @Override
-    public void onReportFullyDrawn(@ActivityRecordProto byte[] activity, long timestampNanos) {
+    public void onReportFullyDrawn(@ActivityRecordProto byte[] activity, long timestampNs) {
         mHandler.sendMessage(PooledLambda.obtainMessage(
             LaunchObserverRegistryImpl::handleOnReportFullyDrawn,
             this,
             activity,
-            timestampNanos));
+            timestampNs));
     }
 
     // Use PooledLambda.obtainMessage to invoke below methods. Every method reference must be
@@ -125,11 +132,11 @@ class LaunchObserverRegistryImpl implements
         mList.remove(observer);
     }
 
-    private void handleOnIntentStarted(Intent intent) {
+    private void handleOnIntentStarted(Intent intent, long timestampNs) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
              ActivityMetricsLaunchObserver o = mList.get(i);
-             o.onIntentStarted(intent);
+             o.onIntentStarted(intent, timestampNs);
         }
     }
 
@@ -161,20 +168,20 @@ class LaunchObserverRegistryImpl implements
     }
 
     private void handleOnActivityLaunchFinished(
-            @ActivityRecordProto byte[] activity) {
+            @ActivityRecordProto byte[] activity, long timestampNs) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
             ActivityMetricsLaunchObserver o = mList.get(i);
-            o.onActivityLaunchFinished(activity);
+            o.onActivityLaunchFinished(activity, timestampNs);
         }
     }
 
     private void handleOnReportFullyDrawn(
-            @ActivityRecordProto byte[] activity, long timestampNanos) {
+            @ActivityRecordProto byte[] activity, long timestampNs) {
         // Traverse start-to-end to meet the registerLaunchObserver multi-cast order guarantee.
         for (int i = 0; i < mList.size(); i++) {
             ActivityMetricsLaunchObserver o = mList.get(i);
-            o.onReportFullyDrawn(activity, timestampNanos);
+            o.onReportFullyDrawn(activity, timestampNs);
         }
     }
 }
