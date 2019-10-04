@@ -1,5 +1,5 @@
 {
-    "presubmit": [
+    "presubmit-devicepolicy": [
         {
             "name": "CtsDevicePolicyManagerTestCases",
             "options": [
