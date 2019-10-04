@@ -175,7 +175,7 @@ final class StringBlock {
         }
     }
 
-    public void close() throws Throwable {
+    public void close() {
         synchronized (this) {
             if (mOpen) {
                 mOpen = false;

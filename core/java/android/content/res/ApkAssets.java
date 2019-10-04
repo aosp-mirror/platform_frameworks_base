@@ -188,7 +188,7 @@ public final class ApkAssets {
     /**
      * Closes this class and the contained {@link #mStringBlock}.
      */
-    public void close() throws Throwable {
+    public void close() {
         synchronized (this) {
             if (mOpen) {
                 mOpen = false;

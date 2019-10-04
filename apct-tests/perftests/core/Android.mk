@@ -9,8 +9,11 @@ LOCAL_SRC_FILES := \
   src/android/os/ISomeService.aidl
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    androidx.appcompat_appcompat \
     androidx.test.rules \
     androidx.annotation_annotation \
+    apct-perftests-overlay-apps \
+    apct-perftests-resources-manager-apps \
     apct-perftests-utils \
     guava
 
@@ -25,5 +28,6 @@ LOCAL_JNI_SHARED_LIBRARIES := libperftestscore_jni
 LOCAL_ASSET_DIR := $(TOP)/external/google-fonts/dancing-script
 
 LOCAL_COMPATIBILITY_SUITE += device-tests
+LOCAL_CERTIFICATE := platform
 
 include $(BUILD_PACKAGE)
