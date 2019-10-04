@@ -191,9 +191,21 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     return -1;
 }
 
+static bool verifyGroup(JNIEnv* env, int grp)
+{
+    if (grp < SP_DEFAULT || grp  >= SP_CNT) {
+        signalExceptionForError(env, EINVAL, grp);
+        return false;
+    }
+    return true;
+}
+
 void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint grp)
 {
     ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
+    if (!verifyGroup(env, grp)) {
+        return;
+    }
     SchedPolicy sp = (SchedPolicy) grp;
     int res = set_sched_policy(tid, sp);
     if (res != NO_ERROR) {
@@ -204,6 +216,9 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
 void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int tid, jint grp)
 {
     ALOGV("%s tid=%d grp=%" PRId32, __func__, tid, grp);
+    if (!verifyGroup(env, grp)) {
+        return;
+    }
     SchedPolicy sp = (SchedPolicy) grp;
     int res = set_sched_policy(tid, sp);
 
@@ -233,6 +248,9 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     if (grp < 0) {
         grp = SP_FOREGROUND;
         isDefault = true;
+    }
+    if (!verifyGroup(env, grp)) {
+        return;
     }
     SchedPolicy sp = (SchedPolicy) grp;
 
