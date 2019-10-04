@@ -35,7 +35,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -57,6 +56,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -102,7 +102,6 @@ public class GarbageMonitor implements Dumpable {
 
     private final LongSparseArray<ProcessMemInfo> mData = new LongSparseArray<>();
     private final ArrayList<Long> mPids = new ArrayList<>();
-    private int[] mPidsArray = new int[1];
 
     private long mHeapLimit;
 
@@ -164,8 +163,8 @@ public class GarbageMonitor implements Dumpable {
         return mData.get(pid);
     }
 
-    public int[] getTrackedProcesses() {
-        return mPidsArray;
+    public List<Long> getTrackedProcesses() {
+        return mPids;
     }
 
     public void startTrackingProcess(long pid, String name, long start) {
@@ -173,43 +172,40 @@ public class GarbageMonitor implements Dumpable {
             if (mPids.contains(pid)) return;
 
             mPids.add(pid);
-            updatePidsArrayL();
+            logPids();
 
             mData.put(pid, new ProcessMemInfo(pid, name, start));
         }
     }
 
-    private void updatePidsArrayL() {
-        final int N = mPids.size();
-        mPidsArray = new int[N];
-        StringBuffer sb = new StringBuffer("Now tracking processes: ");
-        for (int i = 0; i < N; i++) {
-            final int p = mPids.get(i).intValue();
-            mPidsArray[i] = p;
-            sb.append(p);
-            sb.append(" ");
+    private void logPids() {
+        if (DEBUG) {
+            StringBuffer sb = new StringBuffer("Now tracking processes: ");
+            for (int i = 0; i < mPids.size(); i++) {
+                final int p = mPids.get(i).intValue();
+                sb.append(" ");
+            }
+            Log.v(TAG, sb.toString());
         }
-        if (DEBUG) Log.v(TAG, sb.toString());
     }
 
     private void update() {
         synchronized (mPids) {
-            Debug.MemoryInfo[] dinfos = mAm.getProcessMemoryInfo(mPidsArray);
-            for (int i = 0; i < dinfos.length; i++) {
-                Debug.MemoryInfo dinfo = dinfos[i];
-                if (i > mPids.size()) {
-                    if (DEBUG) Log.e(TAG, "update: unknown process info received: " + dinfo);
+            for (int i = 0; i < mPids.size(); i++) {
+                final int pid = mPids.get(i).intValue();
+                // rssValues contains [VmRSS, RssFile, RssAnon, VmSwap].
+                long[] rssValues = Process.getRss(pid);
+                if (rssValues == null && rssValues.length == 0) {
+                    if (DEBUG) Log.e(TAG, "update: Process.getRss() didn't provide any values.");
                     break;
                 }
-                final long pid = mPids.get(i).intValue();
+                long rss = rssValues[0];
                 final ProcessMemInfo info = mData.get(pid);
-                info.pss[info.head] = info.currentPss = dinfo.getTotalPss();
-                info.uss[info.head] = info.currentUss = dinfo.getTotalPrivateDirty();
-                info.head = (info.head + 1) % info.pss.length;
-                if (info.currentPss > info.max) info.max = info.currentPss;
-                if (info.currentUss > info.max) info.max = info.currentUss;
-                if (info.currentPss == 0) {
-                    if (DEBUG) Log.v(TAG, "update: pid " + pid + " has pss=0, it probably died");
+                info.rss[info.head] = info.currentRss = rss;
+                info.head = (info.head + 1) % info.rss.length;
+                if (info.currentRss > info.max) info.max = info.currentRss;
+                if (info.currentRss == 0) {
+                    if (DEBUG) Log.v(TAG, "update: pid " + pid + " has rss=0, it probably died");
                     mData.remove(pid);
                 }
             }
@@ -217,7 +213,7 @@ public class GarbageMonitor implements Dumpable {
                 final long pid = mPids.get(i).intValue();
                 if (mData.get(pid) == null) {
                     mPids.remove(i);
-                    updatePidsArrayL();
+                    logPids();
                 }
             }
         }
@@ -270,7 +266,7 @@ public class GarbageMonitor implements Dumpable {
 
 
     private static class MemoryIconDrawable extends Drawable {
-        long pss, limit;
+        long rss, limit;
         final Drawable baseIcon;
         final Paint paint = new Paint();
         final float dp;
@@ -281,9 +277,9 @@ public class GarbageMonitor implements Dumpable {
             paint.setColor(QSTileImpl.getColorForState(context, STATE_ACTIVE));
         }
 
-        public void setPss(long pss) {
-            if (pss != this.pss) {
-                this.pss = pss;
+        public void setRss(long rss) {
+            if (rss != this.rss) {
+                this.rss = rss;
                 invalidateSelf();
             }
         }
@@ -299,8 +295,8 @@ public class GarbageMonitor implements Dumpable {
         public void draw(Canvas canvas) {
             baseIcon.draw(canvas);
 
-            if (limit > 0 && pss > 0) {
-                float frac = Math.min(1f, (float) pss / limit);
+            if (limit > 0 && rss > 0) {
+                float frac = Math.min(1f, (float) rss / limit);
 
                 final Rect bounds = getBounds();
                 canvas.translate(bounds.left + 8 * dp, bounds.top + 5 * dp);
@@ -361,10 +357,10 @@ public class GarbageMonitor implements Dumpable {
     }
 
     private static class MemoryGraphIcon extends QSTile.Icon {
-        long pss, limit;
+        long rss, limit;
 
-        public void setPss(long pss) {
-            this.pss = pss;
+        public void setRss(long rss) {
+            this.rss = rss;
         }
 
         public void setHeapLimit(long limit) {
@@ -374,7 +370,7 @@ public class GarbageMonitor implements Dumpable {
         @Override
         public Drawable getDrawable(Context context) {
             final MemoryIconDrawable drawable = new MemoryIconDrawable(context);
-            drawable.setPss(pss);
+            drawable.setRss(rss);
             drawable.setLimit(limit);
             return drawable;
         }
@@ -462,14 +458,14 @@ public class GarbageMonitor implements Dumpable {
                     ? "Dumping..."
                     : mContext.getString(R.string.heap_dump_tile_name);
             if (pmi != null) {
-                icon.setPss(pmi.currentPss);
+                icon.setRss(pmi.currentRss);
                 state.secondaryLabel =
                         String.format(
-                                "pss: %s / %s",
-                                formatBytes(pmi.currentPss * 1024),
+                                "rss: %s / %s",
+                                formatBytes(pmi.currentRss * 1024),
                                 formatBytes(gm.mHeapLimit * 1024));
             } else {
-                icon.setPss(0);
+                icon.setRss(0);
                 state.secondaryLabel = null;
             }
             state.icon = icon;
@@ -479,8 +475,8 @@ public class GarbageMonitor implements Dumpable {
             refreshState();
         }
 
-        public long getPss() {
-            return pmi != null ? pmi.currentPss : 0;
+        public long getRss() {
+            return pmi != null ? pmi.currentRss : 0;
         }
 
         public long getHeapLimit() {
@@ -493,9 +489,8 @@ public class GarbageMonitor implements Dumpable {
         public long pid;
         public String name;
         public long startTime;
-        public long currentPss, currentUss;
-        public long[] pss = new long[HEAP_TRACK_HISTORY_LEN];
-        public long[] uss = new long[HEAP_TRACK_HISTORY_LEN];
+        public long currentRss;
+        public long[] rss = new long[HEAP_TRACK_HISTORY_LEN];
         public long max = 1;
         public int head = 0;
 
@@ -517,17 +512,12 @@ public class GarbageMonitor implements Dumpable {
             pw.print(name.replace('"', '-'));
             pw.print("\", \"start\": ");
             pw.print(startTime);
-            pw.print(", \"pss\": [");
-            // write pss values starting from the oldest, which is pss[head], wrapping around to
-            // pss[(head-1) % pss.length]
-            for (int i = 0; i < pss.length; i++) {
+            pw.print(", \"rss\": [");
+            // write rss values starting from the oldest, which is rss[head], wrapping around to
+            // rss[(head-1) % rss.length]
+            for (int i = 0; i < rss.length; i++) {
                 if (i > 0) pw.print(",");
-                pw.print(pss[(head + i) % pss.length]);
-            }
-            pw.print("], \"uss\": [");
-            for (int i = 0; i < uss.length; i++) {
-                if (i > 0) pw.print(",");
-                pw.print(uss[(head + i) % uss.length]);
+                pw.print(rss[(head + i) % rss.length]);
             }
             pw.println("] }");
         }
