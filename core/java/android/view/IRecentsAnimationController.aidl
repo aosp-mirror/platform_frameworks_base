@@ -120,4 +120,10 @@ interface IRecentsAnimationController {
      * @see IRecentsAnimationRunner#onCancelled
      */
     void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot);
+
+    /**
+     * Sets a state for controller to decide which surface is the destination when the recents
+     * animation is cancelled through fail safe mechanism.
+     */
+    void setWillFinishToHome(boolean willFinishToHome);
 }
