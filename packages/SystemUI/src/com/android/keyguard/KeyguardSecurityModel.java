@@ -25,6 +25,10 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class KeyguardSecurityModel {
 
     /**
@@ -46,6 +50,7 @@ public class KeyguardSecurityModel {
 
     private LockPatternUtils mLockPatternUtils;
 
+    @Inject
     KeyguardSecurityModel(Context context) {
         mContext = context;
         mLockPatternUtils = new LockPatternUtils(context);
@@ -57,7 +62,7 @@ public class KeyguardSecurityModel {
         mLockPatternUtils = utils;
     }
 
-    SecurityMode getSecurityMode(int userId) {
+    public SecurityMode getSecurityMode(int userId) {
         KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
 
         if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(

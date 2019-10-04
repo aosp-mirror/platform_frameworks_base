@@ -30,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
+import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.clock.ClockManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
@@ -316,6 +317,7 @@ public class Dependency {
     @Inject Lazy<FalsingManager> mFalsingManager;
     @Inject Lazy<SysUiState> mSysUiStateFlagsContainer;
     @Inject Lazy<AlarmManager> mAlarmManager;
+    @Inject Lazy<KeyguardSecurityModel> mKeyguardSecurityModel;
 
     @Inject
     public Dependency() {
@@ -501,6 +503,7 @@ public class Dependency {
         mProviders.put(FalsingManager.class, mFalsingManager::get);
         mProviders.put(SysUiState.class, mSysUiStateFlagsContainer::get);
         mProviders.put(AlarmManager.class, mAlarmManager::get);
+        mProviders.put(KeyguardSecurityModel.class, mKeyguardSecurityModel::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add
