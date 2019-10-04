@@ -41,7 +41,6 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
@@ -145,8 +144,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     private class TestableNotificationEntryManager extends NotificationEntryManager {
         private final CountDownLatch mCountDownLatch;
 
-        TestableNotificationEntryManager(Context context) {
-            super(context);
+        TestableNotificationEntryManager() {
+            super(new NotificationData(mock(NotificationSectionsFeatureManager.class)));
             mCountDownLatch = new CountDownLatch(1);
         }
 
@@ -250,7 +249,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
-        mEntryManager = new TestableNotificationEntryManager(mContext);
+        mEntryManager = new TestableNotificationEntryManager();
         Dependency.get(InitController.class).executePostInitTasks();
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
         mEntryManager.addNotificationEntryListener(mEntryListener);

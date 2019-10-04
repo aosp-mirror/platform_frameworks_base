@@ -24,7 +24,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Person;
-import android.content.Context;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
@@ -35,7 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
-import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -45,6 +44,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+
+import javax.inject.Inject;
 
 /**
  * The list of currently displaying notifications.
@@ -73,8 +74,9 @@ public class NotificationData {
     private final Ranking mTmpRanking = new Ranking();
     private final boolean mUsePeopleFiltering;
 
-    public NotificationData(Context context) {
-        mUsePeopleFiltering = NotificationUtils.usePeopleFiltering(context);
+    @Inject
+    public NotificationData(NotificationSectionsFeatureManager sectionsFeatureManager) {
+        mUsePeopleFiltering = sectionsFeatureManager.isFilteringEnabled();
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
@@ -480,19 +482,6 @@ public class NotificationData {
     private static boolean isSystemNotification(StatusBarNotification sbn) {
         String sbnPackage = sbn.getPackageName();
         return "android".equals(sbnPackage) || "com.android.systemui".equals(sbnPackage);
-    }
-
-    /**
-     * Get the current set of buckets for notification entries, as defined here
-     */
-    public static int[] getNotificationBuckets(Context context) {
-        if (NotificationUtils.usePeopleFiltering(context)) {
-            return new int[]{BUCKET_PEOPLE, BUCKET_ALERTING, BUCKET_SILENT};
-        } else if (NotificationUtils.useNewInterruptionModel(context)) {
-            return new int[]{BUCKET_ALERTING, BUCKET_SILENT};
-        } else {
-            return new int[]{BUCKET_ALERTING};
-        }
     }
 
     /**
