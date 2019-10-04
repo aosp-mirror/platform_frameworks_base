@@ -420,10 +420,10 @@ public class UserInfo implements Parcelable {
         lastLoggedInTime = source.readLong();
         lastLoggedInFingerprint = source.readString();
         partial = source.readBoolean();
+        preCreated = source.readBoolean();
         profileGroupId = source.readInt();
         guestToRemove = source.readBoolean();
         restrictedProfileParentId = source.readInt();
         profileBadge = source.readInt();
-        preCreated = source.readBoolean();
     }
 }
