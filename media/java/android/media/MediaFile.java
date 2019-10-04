@@ -23,7 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.mtp.MtpConstants;
 
-import libcore.net.MimeMap;
+import libcore.content.type.MimeMap;
 
 import java.util.HashMap;
 
