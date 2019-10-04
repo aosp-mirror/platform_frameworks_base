@@ -25,7 +25,6 @@ import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.BG_HANDLER;
 import static com.android.systemui.Dependency.MAIN_HANDLER;
@@ -3877,20 +3876,17 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     boolean isCameraAllowedByAdmin() {
-        // TODO(b/140060745)
-        return whitelistIpcs(() -> {
-            if (mDevicePolicyManager.getCameraDisabled(null,
-                    mLockscreenUserManager.getCurrentUserId())) {
-                return false;
-            } else if (mStatusBarKeyguardViewManager == null
-                    || (isKeyguardShowing() && isKeyguardSecure())) {
-                // Check if the admin has disabled the camera specifically for the keyguard
-                return (mDevicePolicyManager.getKeyguardDisabledFeatures(null,
-                        mLockscreenUserManager.getCurrentUserId())
-                        & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
-            }
-            return true;
-        });
+        if (mDevicePolicyManager.getCameraDisabled(null,
+                mLockscreenUserManager.getCurrentUserId())) {
+            return false;
+        } else if (mStatusBarKeyguardViewManager == null
+                || (isKeyguardShowing() && isKeyguardSecure())) {
+            // Check if the admin has disabled the camera specifically for the keyguard
+            return (mDevicePolicyManager.getKeyguardDisabledFeatures(null,
+                    mLockscreenUserManager.getCurrentUserId())
+                    & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
+        }
+        return true;
     }
 
     private boolean isGoingToSleep() {
