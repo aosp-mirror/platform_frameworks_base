@@ -2615,7 +2615,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     || actionMasked == MotionEvent.ACTION_CANCEL;
 
             // Update list of touch targets for pointer down, if needed.
-            final boolean split = (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) != 0;
+            final boolean isMouseEvent = ev.getSource() == InputDevice.SOURCE_MOUSE;
+            final boolean split = (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) != 0
+                    && !isMouseEvent;
             TouchTarget newTouchTarget = null;
             boolean alreadyDispatchedToNewTouchTarget = false;
             if (!canceled && !intercepted) {
