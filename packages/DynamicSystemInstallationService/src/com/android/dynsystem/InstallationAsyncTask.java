@@ -102,9 +102,10 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
             Thread thread =
                     new Thread(
                             () -> {
-                                mDynSystem.startInstallation("userdata", mUserdataSize, false);
+                                mDynSystem.startInstallation();
+                                mDynSystem.createPartition("userdata", mUserdataSize, false);
                                 mInstallationSession =
-                                        mDynSystem.startInstallation("system", mSystemSize, true);
+                                        mDynSystem.createPartition("system", mSystemSize, true);
                             });
 
             thread.start();
@@ -157,6 +158,7 @@ class InstallationAsyncTask extends AsyncTask<String, Long, Throwable> {
                     reportedInstalledSize = installedSize;
                 }
             }
+            mDynSystem.finishInstallation();
             return null;
 
         } catch (Exception e) {
