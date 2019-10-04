@@ -4782,6 +4782,20 @@ public abstract class Context {
     public static final String DYNAMIC_SYSTEM_SERVICE = "dynamic_system";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.app.blob.BlobStoreManager} for contributing and accessing data blobs
+     * from the blob store maintained by the system.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.blob.BlobStoreManager
+     *
+     * TODO: make this public once BlobStoreManager is ready.
+     * @hide
+     */
+    @TestApi
+    public static final String BLOB_STORE_SERVICE = "blob_store";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link TelephonyRegistryManager}.
      * @hide

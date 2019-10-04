@@ -546,6 +546,7 @@ android.app.backup.IBackupManager$Stub$Proxy
 android.app.backup.IBackupManager$Stub
 android.app.backup.IBackupManager
 android.app.backup.SharedPreferencesBackupHelper
+android.app.blob.BlobStoreManagerFrameworkInitializer
 android.app.contentsuggestions.ContentSuggestionsManager
 android.app.job.IJobCallback$Stub$Proxy
 android.app.job.IJobCallback$Stub
