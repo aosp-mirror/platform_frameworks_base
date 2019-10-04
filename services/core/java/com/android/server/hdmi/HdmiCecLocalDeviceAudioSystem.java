@@ -850,36 +850,25 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                         mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
 
         if (systemAudioStatusOn) {
+            // If TV sends out SAM Request with a path of a non-CEC device, which should not show
+            // up in the CEC device list and not under the current AVR device, the AVR would switch
+            // to ARC.
             int sourcePhysicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
-            if (sourcePhysicalAddress != getActiveSource().physicalAddress) {
-                // If the Active Source recorded by the current device is not synced up with TV,
-                // update the Active Source internally.
-                if (sourcePhysicalAddress == mService.getPhysicalAddress()) {
-                    // If the active path is the current device itself, update with local info
-                    if (mService.playback() != null) {
-                        setActiveSource(mService.playback().mAddress, sourcePhysicalAddress);
-                    } else {
-                        setActiveSource(mAddress, sourcePhysicalAddress);
-                    }
-                } else {
-                    // If it's not the current device, look for the device info from the list
-                    for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
-                        if (info.getPhysicalAddress() == sourcePhysicalAddress) {
-                            setActiveSource(info.getLogicalAddress(), info.getPhysicalAddress());
-                            break;
-                        }
-                    }
-                }
-                // If the Active path from TV's System Audio Mode request does not belong to any
-                // device in the local device list, record the new Active physicalAddress with an
-                // unregistered logical address first. Then query the Active Source again.
-                if (sourcePhysicalAddress != getActiveSource().physicalAddress) {
-                    setActiveSource(Constants.ADDR_UNREGISTERED, sourcePhysicalAddress);
-                    mService.sendCecCommand(
-                        HdmiCecMessageBuilder.buildRequestActiveSource(mAddress));
+            if (HdmiUtils.getLocalPortFromPhysicalAddress(
+                    sourcePhysicalAddress, getDeviceInfo().getPhysicalAddress())
+                            != HdmiUtils.TARGET_NOT_UNDER_LOCAL_DEVICE) {
+                return true;
+            }
+            boolean isDeviceInCecDeviceList = false;
+            for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
+                if (info.getPhysicalAddress() == sourcePhysicalAddress) {
+                    isDeviceInCecDeviceList = true;
+                    break;
                 }
             }
-            switchInputOnReceivingNewActivePath(sourcePhysicalAddress);
+            if (!isDeviceInCecDeviceList) {
+                switchInputOnReceivingNewActivePath(sourcePhysicalAddress);
+            }
         }
         return true;
     }
