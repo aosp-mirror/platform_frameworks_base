@@ -135,7 +135,7 @@ void CacheManager::trimStaleResources() {
         return;
     }
     mGrContext->flush();
-    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
+    mGrContext->performDeferredCleanup(std::chrono::seconds(30));
 }
 
 sp<skiapipeline::VectorDrawableAtlas> CacheManager::acquireVectorDrawableAtlas() {
