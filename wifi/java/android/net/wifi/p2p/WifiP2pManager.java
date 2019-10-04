@@ -345,6 +345,13 @@ public class WifiP2pManager {
             "android.net.wifi.p2p.CALLING_PACKAGE";
 
     /**
+     * The lookup key for a calling feature id from WifiP2pManager
+     * @hide
+     */
+    public static final String CALLING_FEATURE_ID =
+            "android.net.wifi.p2p.CALLING_FEATURE_ID";
+
+    /**
      * The lookup key for a calling package binder from WifiP2pManager
      * @hide
      */
@@ -1159,6 +1166,7 @@ public class WifiP2pManager {
                 == AsyncChannel.STATUS_SUCCESSFUL) {
             Bundle bundle = new Bundle();
             bundle.putString(CALLING_PACKAGE, c.mContext.getOpPackageName());
+            bundle.putString(CALLING_FEATURE_ID, c.mContext.getFeatureId());
             bundle.putBinder(CALLING_BINDER, binder);
             c.mAsyncChannel.sendMessage(UPDATE_CHANNEL_INFO, 0,
                     c.putListener(null), bundle);

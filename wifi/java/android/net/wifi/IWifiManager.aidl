@@ -64,9 +64,9 @@ interface IWifiManager
      */
     oneway void requestActivityInfo(in ResultReceiver result);
 
-    ParceledListSlice getConfiguredNetworks(String packageName);
+    ParceledListSlice getConfiguredNetworks(String packageName, String featureId);
 
-    ParceledListSlice getPrivilegedConfiguredNetworks(String packageName);
+    ParceledListSlice getPrivilegedConfiguredNetworks(String packageName, String featureId);
 
     Map getAllMatchingFqdnsForScanResults(in List<ScanResult> scanResult);
 
@@ -98,9 +98,9 @@ interface IWifiManager
 
     void allowAutojoin(int netId, boolean choice);
 
-    boolean startScan(String packageName);
+    boolean startScan(String packageName, String featureId);
 
-    List<ScanResult> getScanResults(String callingPackage);
+    List<ScanResult> getScanResults(String callingPackage, String callingFeatureId);
 
     boolean disconnect(String packageName);
 
@@ -108,7 +108,7 @@ interface IWifiManager
 
     boolean reassociate(String packageName);
 
-    WifiInfo getConnectionInfo(String callingPackage);
+    WifiInfo getConnectionInfo(String callingPackage, String callingFeatureId);
 
     boolean setWifiEnabled(String packageName, boolean enable);
 
@@ -145,7 +145,7 @@ interface IWifiManager
     boolean stopSoftAp();
 
     int startLocalOnlyHotspot(in ILocalOnlyHotspotCallback callback, String packageName,
-                              in SoftApConfiguration customConfig);
+                              String featureId, in SoftApConfiguration customConfig);
 
     void stopLocalOnlyHotspot();
 
@@ -206,7 +206,8 @@ interface IWifiManager
 
     void unregisterNetworkRequestMatchCallback(int callbackIdentifier);
 
-    int addNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
+    int addNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName,
+        in String featureId);
 
     int removeNetworkSuggestions(in List<WifiNetworkSuggestion> networkSuggestions, in String packageName);
 
@@ -238,7 +239,7 @@ interface IWifiManager
 
     void unregisterScanResultsListener(int listenerIdentifier);
 
-    void registerSuggestionConnectionStatusListener(in IBinder binder, in ISuggestionConnectionStatusListener listener, int listenerIdentifier, String packageName);
+    void registerSuggestionConnectionStatusListener(in IBinder binder, in ISuggestionConnectionStatusListener listener, int listenerIdentifier, String packageName, String featureId);
 
     void unregisterSuggestionConnectionStatusListener(int listenerIdentifier, String packageName);
 }

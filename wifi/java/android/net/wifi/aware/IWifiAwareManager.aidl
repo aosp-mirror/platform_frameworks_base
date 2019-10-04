@@ -38,14 +38,15 @@ interface IWifiAwareManager
     Characteristics getCharacteristics();
 
     // client API
-    void connect(in IBinder binder, in String callingPackage, in IWifiAwareEventCallback callback,
-            in ConfigRequest configRequest, boolean notifyOnIdentityChanged);
+    void connect(in IBinder binder, in String callingPackage, in String callingFeatureId,
+            in IWifiAwareEventCallback callback, in ConfigRequest configRequest,
+            boolean notifyOnIdentityChanged);
     void disconnect(int clientId, in IBinder binder);
 
-    void publish(in String callingPackage, int clientId, in PublishConfig publishConfig,
-            in IWifiAwareDiscoverySessionCallback callback);
-    void subscribe(in String callingPackage, int clientId, in SubscribeConfig subscribeConfig,
-            in IWifiAwareDiscoverySessionCallback callback);
+    void publish(in String callingPackage, in String callingFeatureId, int clientId,
+            in PublishConfig publishConfig, in IWifiAwareDiscoverySessionCallback callback);
+    void subscribe(in String callingPackage, in String callingFeatureId, int clientId,
+            in SubscribeConfig subscribeConfig, in IWifiAwareDiscoverySessionCallback callback);
 
     // session API
     void updatePublish(int clientId, int discoverySessionId, in PublishConfig publishConfig);

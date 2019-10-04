@@ -1254,7 +1254,8 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return Collections.emptyList();
             ParceledListSlice<WifiConfiguration> parceledList =
-                    iWifiManager.getConfiguredNetworks(mContext.getOpPackageName());
+                    iWifiManager.getConfiguredNetworks(mContext.getOpPackageName(),
+                            mContext.getFeatureId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1272,7 +1273,8 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return Collections.emptyList();
             ParceledListSlice<WifiConfiguration> parceledList =
-                    iWifiManager.getPrivilegedConfiguredNetworks(mContext.getOpPackageName());
+                    iWifiManager.getPrivilegedConfiguredNetworks(mContext.getOpPackageName(),
+                            mContext.getFeatureId());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1764,7 +1766,7 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return STATUS_NETWORK_SUGGESTIONS_ERROR_INTERNAL;
             return iWifiManager.addNetworkSuggestions(
-                    networkSuggestions, mContext.getOpPackageName());
+                    networkSuggestions, mContext.getOpPackageName(), mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2449,7 +2451,8 @@ public class WifiManager {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return false;
             String packageName = mContext.getOpPackageName();
-            return iWifiManager.startScan(packageName);
+            String featureId = mContext.getFeatureId();
+            return iWifiManager.startScan(packageName, featureId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2480,7 +2483,8 @@ public class WifiManager {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return null;
-            return iWifiManager.getConnectionInfo(mContext.getOpPackageName());
+            return iWifiManager.getConnectionInfo(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2496,7 +2500,8 @@ public class WifiManager {
         try {
             IWifiManager iWifiManager = getIWifiManager();
             if (iWifiManager == null) return Collections.emptyList();
-            return iWifiManager.getScanResults(mContext.getOpPackageName());
+            return iWifiManager.getScanResults(mContext.getOpPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2914,7 +2919,9 @@ public class WifiManager {
                     throw new RemoteException("Wifi service is not running");
                 }
                 String packageName = mContext.getOpPackageName();
-                int returnCode = iWifiManager.startLocalOnlyHotspot(proxy, packageName, config);
+                String featureId = mContext.getFeatureId();
+                int returnCode = iWifiManager.startLocalOnlyHotspot(proxy, packageName, featureId,
+                        config);
                 if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
                     // Send message to the proxy to make sure we call back on the correct thread
                     proxy.onHotspotFailed(returnCode);
@@ -5439,7 +5446,7 @@ public class WifiManager {
             }
             iWifiManager.registerSuggestionConnectionStatusListener(new Binder(),
                     new SuggestionConnectionStatusListenerProxy(executor, listener),
-                    listener.hashCode(), mContext.getOpPackageName());
+                    listener.hashCode(), mContext.getOpPackageName(), mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

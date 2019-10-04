@@ -267,6 +267,8 @@ public class WifiScannerTest {
         assertNull(messageBundle.getParcelable(WifiScanner.SCAN_PARAMS_WORK_SOURCE_KEY));
         assertEquals(mContext.getOpPackageName(),
                 messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
+        assertEquals(mContext.getFeatureId(),
+                messageBundle.getParcelable(WifiScanner.REQUEST_FEATURE_ID_KEY));
 
     }
 
@@ -295,7 +297,8 @@ public class WifiScannerTest {
         Bundle messageBundle = (Bundle) message.obj;
         assertEquals(mContext.getOpPackageName(),
                 messageBundle.getParcelable(WifiScanner.REQUEST_PACKAGE_NAME_KEY));
-
+        assertEquals(mContext.getFeatureId(),
+                messageBundle.getParcelable(WifiScanner.REQUEST_FEATURE_ID_KEY));
     }
 
     /**
