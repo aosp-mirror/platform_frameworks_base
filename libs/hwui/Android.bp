@@ -219,7 +219,6 @@ cc_defaults {
                 "pipeline/skia/SkiaPipeline.cpp",
                 "pipeline/skia/SkiaProfileRenderer.cpp",
                 "pipeline/skia/SkiaVulkanPipeline.cpp",
-                "pipeline/skia/VectorDrawableAtlas.cpp",
                 "pipeline/skia/VkFunctorDrawable.cpp",
                 "pipeline/skia/VkInteropFunctorDrawable.cpp",
                 "renderstate/RenderState.cpp",
@@ -345,7 +344,6 @@ cc_test {
         "tests/unit/ThreadBaseTests.cpp",
         "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
-        "tests/unit/VectorDrawableAtlasTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
     ],
 }

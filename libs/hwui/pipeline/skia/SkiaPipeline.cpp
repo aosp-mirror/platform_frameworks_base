@@ -43,7 +43,6 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaPipeline::SkiaPipeline(RenderThread& thread) : mRenderThread(thread) {
-    mVectorDrawables.reserve(30);
 }
 
 SkiaPipeline::~SkiaPipeline() {
@@ -73,18 +72,11 @@ void SkiaPipeline::unpinImages() {
     mPinnedImages.clear();
 }
 
-void SkiaPipeline::onPrepareTree() {
-    // The only time mVectorDrawables is not empty is if prepare tree was called 2 times without
-    // a renderFrame in the middle.
-    mVectorDrawables.clear();
-}
-
 void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
                                 LayerUpdateQueue* layerUpdateQueue, bool opaque,
                                 const LightInfo& lightInfo) {
     LightingInfo::updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
-    renderVectorDrawableCache();
     renderLayersImpl(*layerUpdateQueue, opaque);
     layerUpdateQueue->clear();
 }
@@ -210,19 +202,6 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
             SkImage_pinAsTexture(image.get(), context);
             SkImage_unpinAsTexture(image.get(), context);
         }
-    }
-}
-
-void SkiaPipeline::renderVectorDrawableCache() {
-    if (!mVectorDrawables.empty()) {
-        sp<VectorDrawableAtlas> atlas = mRenderThread.cacheManager().acquireVectorDrawableAtlas();
-        auto grContext = mRenderThread.getGrContext();
-        atlas->prepareForDraw(grContext);
-        ATRACE_NAME("Update VectorDrawables");
-        for (auto vd : mVectorDrawables) {
-            vd->updateCache(atlas, grContext);
-        }
-        mVectorDrawables.clear();
     }
 }
 
@@ -379,8 +358,6 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
     if (mPictureCapturedCallback) {
         Properties::skpCaptureEnabled = true;
     }
-
-    renderVectorDrawableCache();
 
     // draw all layers up front
     renderLayersImpl(layers, opaque);

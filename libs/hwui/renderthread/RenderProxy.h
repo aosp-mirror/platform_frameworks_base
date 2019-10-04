@@ -150,10 +150,6 @@ public:
 
     ANDROID_API static void preload();
 
-    static void repackVectorDrawableAtlas();
-
-    static void releaseVDAtlasEntries();
-
 private:
     RenderThread& mRenderThread;
     CanvasContext* mContext;

@@ -41,7 +41,6 @@ public:
     bool pinImages(std::vector<SkImage*>& mutableImages) override;
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override { return false; }
     void unpinImages() override;
-    void onPrepareTree() override;
 
     void renderLayers(const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
                       bool opaque, const LightInfo& lightInfo) override;
@@ -56,8 +55,6 @@ public:
                      const std::vector<sp<RenderNode>>& nodes, bool opaque,
                      const Rect& contentDrawBounds, sk_sp<SkSurface> surface,
                      const SkMatrix& preTransform);
-
-    std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
 
@@ -93,11 +90,6 @@ private:
                         const std::vector<sp<RenderNode>>& nodes, const Rect& contentDrawBounds,
                         sk_sp<SkSurface> surface, const SkMatrix& preTransform);
 
-    /**
-     *  Render mVectorDrawables into offscreen buffers.
-     */
-    void renderVectorDrawableCache();
-
     // Called every frame. Normally returns early with screen canvas.
     // But when capture is enabled, returns an nwaycanvas where commands are also recorded.
     SkCanvas* tryCapture(SkSurface* surface);
@@ -112,11 +104,6 @@ private:
     bool setupMultiFrameCapture();
 
     std::vector<sk_sp<SkImage>> mPinnedImages;
-
-    /**
-     *  populated by prepareTree with dirty VDs
-     */
-    std::vector<VectorDrawableRoot*> mVectorDrawables;
 
     // Block of properties used only for debugging to record a SkPicture and save it in a file.
     // There are three possible ways of recording drawing commands.

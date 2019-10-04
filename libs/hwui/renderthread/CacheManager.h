@@ -25,8 +25,6 @@
 #include <utils/String8.h>
 #include <vector>
 
-#include "pipeline/skia/VectorDrawableAtlas.h"
-
 namespace android {
 
 class Surface;
@@ -50,8 +48,6 @@ public:
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
-
-    sp<skiapipeline::VectorDrawableAtlas> acquireVectorDrawableAtlas();
 
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
@@ -77,13 +73,6 @@ private:
     const size_t mMaxGpuFontAtlasBytes;
     const size_t mMaxCpuFontCacheBytes;
     const size_t mBackgroundCpuFontCacheBytes;
-
-    struct PipelineProps {
-        const void* pipelineKey = nullptr;
-        size_t surfaceArea = 0;
-    };
-
-    sp<skiapipeline::VectorDrawableAtlas> mVectorDrawableAtlas;
 };
 
 } /* namespace renderthread */

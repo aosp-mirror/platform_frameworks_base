@@ -150,12 +150,7 @@ bool SkiaDisplayList::prepareListAndChildren(
             const SkRect& bounds = vectorDrawable->properties().getBounds();
             if (intersects(info.screenSize, totalMatrix, bounds)) {
                 isDirty = true;
-#ifdef __ANDROID__ // Layoutlib does not support CanvasContext
-                static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
-                        ->getVectorDrawables()
-                        ->push_back(vectorDrawable);
                 vectorDrawable->setPropertyChangeWillBeConsumed(true);
-#endif
             }
         }
     }

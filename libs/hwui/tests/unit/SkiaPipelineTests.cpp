@@ -61,39 +61,6 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
-RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
-    auto redNode = TestUtils::createSkiaNode(
-            0, 0, 1, 1, [](RenderProperties& props, SkiaRecordingCanvas& redCanvas) {
-                redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
-            });
-
-    LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRectMakeLargest();
-    std::vector<sp<RenderNode>> renderNodes;
-    renderNodes.push_back(redNode);
-    bool opaque = true;
-    android::uirenderer::Rect contentDrawBounds(0, 0, 1, 1);
-    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    {
-        // add a pointer to a deleted vector drawable object in the pipeline
-        sp<VectorDrawableRoot> dirtyVD(new VectorDrawableRoot(new VectorDrawable::Group()));
-        dirtyVD->mutateProperties()->setScaledSize(5, 5);
-        pipeline->getVectorDrawables()->push_back(dirtyVD.get());
-    }
-
-    // pipeline should clean list of dirty vector drawables before prepare tree
-    pipeline->onPrepareTree();
-
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
-    surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-
-    // drawFrame will crash if "SkiaPipeline::onPrepareTree" did not clean invalid VD pointer
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
-            SkMatrix::I());
-    ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
-}
-
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto halfGreenNode = TestUtils::createSkiaNode(
             0, 0, 2, 2, [](RenderProperties& props, SkiaRecordingCanvas& bottomHalfGreenCanvas) {
