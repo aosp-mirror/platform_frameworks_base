@@ -6361,6 +6361,7 @@ package android.service.autofill {
     method public android.os.IBinder onBind(android.content.Intent);
     method @Nullable public float[][] onCalculateScores(@NonNull java.util.List<android.view.autofill.AutofillValue>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @Nullable String, @Nullable android.os.Bundle, @Nullable java.util.Map, @Nullable java.util.Map);
     method @Deprecated @Nullable public float[][] onGetScores(@Nullable String, @Nullable android.os.Bundle, @NonNull java.util.List<android.view.autofill.AutofillValue>, @NonNull java.util.List<java.lang.String>);
+    field public static final String REQUIRED_ALGORITHM_CREDIT_CARD = "CREDIT_CARD";
     field public static final String REQUIRED_ALGORITHM_EDIT_DISTANCE = "EDIT_DISTANCE";
     field public static final String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
     field public static final String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
