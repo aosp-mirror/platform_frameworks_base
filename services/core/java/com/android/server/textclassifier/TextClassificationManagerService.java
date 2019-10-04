@@ -365,10 +365,16 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, fout)) return;
         IndentingPrintWriter pw = new IndentingPrintWriter(fout, "  ");
-        TextClassificationManager tcm = mContext.getSystemService(TextClassificationManager.class);
-        tcm.dump(pw);
 
-        pw.printPair("context", mContext); pw.println();
+        // Create a TCM instance with the system server identity. TCM creates a ContentObserver
+        // to listen for settings changes. It does not pass the checkContentProviderAccess check
+        // if we are using the shell identity, because AMS does not track of processes spawn from
+        // shell.
+        Binder.withCleanCallingIdentity(
+                () -> mContext.getSystemService(TextClassificationManager.class).dump(pw));
+
+        pw.printPair("context", mContext);
+        pw.println();
         synchronized (mLock) {
             int size = mUserStates.size();
             pw.print("Number user states: "); pw.println(size);
