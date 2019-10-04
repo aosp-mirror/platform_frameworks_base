@@ -16,6 +16,8 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.View.NAVIGATION_BAR_TRANSIENT;
 
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -154,6 +156,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private boolean mIsAttached;
     private boolean mIsGesturalModeEnabled;
     private boolean mIsEnabled;
+    private boolean mIsInTransientImmersiveStickyState;
 
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
@@ -213,6 +216,12 @@ public class EdgeBackGestureHandler implements DisplayListener {
         mIsGesturalModeEnabled = QuickStepContract.isGesturalMode(mode);
         updateIsEnabled();
         updateCurrentUserResources(currentUserContext.getResources());
+    }
+
+    public void onSystemUiVisibilityChanged(int systemUiVisibility) {
+        mIsInTransientImmersiveStickyState =
+                (systemUiVisibility & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
+                && (systemUiVisibility & NAVIGATION_BAR_TRANSIENT) != 0;
     }
 
     private void disposeInputChannel() {
@@ -315,13 +324,21 @@ public class EdgeBackGestureHandler implements DisplayListener {
     }
 
     private boolean isWithinTouchRegion(int x, int y) {
+        // Disallow if over the IME
         if (y > (mDisplaySize.y - Math.max(mImeHeight, mNavBarHeight))) {
             return false;
         }
 
+        // Disallow if too far from the edge
         if (x > mEdgeWidth + mLeftInset && x < (mDisplaySize.x - mEdgeWidth - mRightInset)) {
             return false;
         }
+
+        // Always allow if the user is in a transient sticky immersive state
+        if (mIsInTransientImmersiveStickyState) {
+            return true;
+        }
+
         boolean isInExcludedRegion = mExcludeRegion.contains(x, y);
         if (isInExcludedRegion) {
             mOverviewProxyService.notifyBackAction(false /* completed */, -1, -1,
