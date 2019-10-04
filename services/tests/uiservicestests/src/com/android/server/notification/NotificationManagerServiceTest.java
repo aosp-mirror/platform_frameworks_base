@@ -3601,7 +3601,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.simulatePackageDistractionBroadcast(
                 PackageManager.RESTRICTION_HIDE_NOTIFICATIONS, new String[] {"a", "b"});
         ArgumentCaptor<List<NotificationRecord>> captorHide = ArgumentCaptor.forClass(List.class);
-        verify(mListeners, times(2)).notifyHiddenLocked(captorHide.capture());
+
+        // should be called only once.
+        verify(mListeners, times(1)).notifyHiddenLocked(captorHide.capture());
         assertEquals(2, captorHide.getValue().size());
         assertEquals("a", captorHide.getValue().get(0).sbn.getPackageName());
         assertEquals("b", captorHide.getValue().get(1).sbn.getPackageName());
@@ -3610,7 +3612,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.simulatePackageDistractionBroadcast(
                 PackageManager.RESTRICTION_HIDE_FROM_SUGGESTIONS, new String[] {"a", "b"});
         ArgumentCaptor<List<NotificationRecord>> captorUnhide = ArgumentCaptor.forClass(List.class);
-        verify(mListeners, times(2)).notifyUnhiddenLocked(captorUnhide.capture());
+
+        // should be called only once.
+        verify(mListeners, times(1)).notifyUnhiddenLocked(captorUnhide.capture());
         assertEquals(2, captorUnhide.getValue().size());
         assertEquals("a", captorUnhide.getValue().get(0).sbn.getPackageName());
         assertEquals("b", captorUnhide.getValue().get(1).sbn.getPackageName());
