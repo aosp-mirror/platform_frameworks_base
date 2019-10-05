@@ -752,9 +752,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 andResume = false;
             }
 
-            if (getKeyguardController().isKeyguardLocked()) {
-                r.notifyUnknownVisibilityLaunched();
-            }
+            r.notifyUnknownVisibilityLaunchedForKeyguardTransition();
 
             // Have the window manager re-evaluate the orientation of the screen based on the new
             // activity order.  Note that as a result of this, it can call back into the activity
@@ -992,12 +990,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             knownToBeDead = true;
         }
 
-        // Suppress transition until the new activity becomes ready, otherwise the keyguard can
-        // appear for a short amount of time before the new process with the new activity had the
-        // ability to set its showWhenLocked flags.
-        if (getKeyguardController().isKeyguardLocked()) {
-            r.notifyUnknownVisibilityLaunched();
-        }
+        r.notifyUnknownVisibilityLaunchedForKeyguardTransition();
 
         final boolean isTop = andResume && r.isTopRunningActivity();
         mService.startProcessAsync(r, knownToBeDead, isTop, isTop ? "top-activity" : "activity");

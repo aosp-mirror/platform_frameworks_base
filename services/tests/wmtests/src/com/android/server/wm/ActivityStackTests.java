@@ -1140,12 +1140,50 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testClearUnknownAppVisibilityBehindFullscreenActivity() {
+        final UnknownAppVisibilityController unknownAppVisibilityController =
+                mDefaultDisplay.mDisplayContent.mUnknownAppVisibilityController;
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
+        doReturn(true).when(keyguardController).isKeyguardLocked();
+
+        // Start 2 activities that their processes have not yet started.
+        final ActivityRecord[] activities = new ActivityRecord[2];
+        mSupervisor.beginDeferResume();
+        for (int i = 0; i < activities.length; i++) {
+            final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
+            activities[i] = r;
+            doReturn(null).when(mService).getProcessController(
+                    eq(r.processName), eq(r.info.applicationInfo.uid));
+            r.setState(ActivityStack.ActivityState.INITIALIZING, "test");
+            // Ensure precondition that the activity is opaque.
+            assertTrue(r.occludesParent());
+            mSupervisor.startSpecificActivityLocked(r, false /* andResume */,
+                    false /* checkConfig */);
+        }
+        mSupervisor.endDeferResume();
+
+        doReturn(false).when(mService).isBooting();
+        doReturn(true).when(mService).isBooted();
+        // 2 activities are started while keyguard is locked, so they are waiting to be resolved.
+        assertFalse(unknownAppVisibilityController.allResolved());
+
+        // Assume the top activity is going to resume and
+        // {@link RootActivityContainer#cancelInitializingActivities} should clear the unknown
+        // visibility records that are occluded.
+        mStack.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+        // Assume the top activity relayouted, just remove it directly.
+        unknownAppVisibilityController.appRemovedOrHidden(activities[1]);
+        // All unresolved records should be removed.
+        assertTrue(unknownAppVisibilityController.allResolved());
+    }
+
+    @Test
     public void testNonTopVisibleActivityNotResume() {
         final ActivityRecord nonTopVisibleActivity =
                 new ActivityBuilder(mService).setTask(mTask).build();
         new ActivityBuilder(mService).setTask(mTask).build();
         doReturn(false).when(nonTopVisibleActivity).attachedToProcess();
-        doReturn(true).when(nonTopVisibleActivity).shouldBeVisibleIgnoringKeyguard(anyBoolean());
+        doReturn(true).when(nonTopVisibleActivity).shouldBeVisible(anyBoolean(), anyBoolean());
         doNothing().when(mSupervisor).startSpecificActivityLocked(any(), anyBoolean(),
                 anyBoolean());
 
