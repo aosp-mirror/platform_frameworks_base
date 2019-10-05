@@ -52,6 +52,7 @@ cc_library_static {
         "com_android_server_GraphicsStatsService.cpp",
         "com_android_server_am_AppCompactor.cpp",
         "com_android_server_am_LowMemDetector.cpp",
+        "com_android_server_activityTriggerService.cpp",
         "onload.cpp",
         ":lib_networkStatsFactory_native",
     ],
