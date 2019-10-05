@@ -117,6 +117,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
     private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
 
+    private final boolean mShowLeftAffordance;
+    private final boolean mShowCameraAffordance;
+
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
     private ViewGroup mIndicationArea;
@@ -184,6 +187,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public KeyguardBottomAreaView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mShowLeftAffordance = getResources().getBoolean(R.bool.config_keyguardShowLeftAffordance);
+        mShowCameraAffordance = getResources()
+                .getBoolean(R.bool.config_keyguardShowCameraAffordance);
     }
 
     private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
@@ -371,8 +377,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             // Things are not set up yet; reply hazy, ask again later
             return;
         }
-        mRightAffordanceView.setVisibility(!mDozing && mRightButton.getIcon().isVisible
-                ? View.VISIBLE : View.GONE);
+        mRightAffordanceView.setVisibility(!mDozing && mShowCameraAffordance
+                && mRightButton.getIcon().isVisible ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -384,8 +390,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     private void updateLeftAffordanceIcon() {
+        if (!mShowLeftAffordance || mDozing) {
+            mLeftAffordanceView.setVisibility(GONE);
+            return;
+        }
         IconState state = mLeftButton.getIcon();
-        mLeftAffordanceView.setVisibility(!mDozing && state.isVisible ? View.VISIBLE : View.GONE);
+        mLeftAffordanceView.setVisibility(state.isVisible ? View.VISIBLE : View.GONE);
         if (state.drawable != mLeftAffordanceView.getDrawable()
                 || state.tint != mLeftAffordanceView.shouldTint()) {
             mLeftAffordanceView.setImageDrawable(state.drawable, state.tint);
@@ -767,10 +777,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         @Override
         public IconState getIcon() {
             mLeftIsVoiceAssist = canLaunchVoiceAssist();
-            final boolean showAffordance =
-                    getResources().getBoolean(R.bool.config_keyguardShowLeftAffordance);
             if (mLeftIsVoiceAssist) {
-                mIconState.isVisible = mUserSetupComplete && showAffordance;
+                mIconState.isVisible = mUserSetupComplete && mShowLeftAffordance;
                 if (mLeftAssistIcon == null) {
                     mIconState.drawable = mContext.getDrawable(R.drawable.ic_mic_26dp);
                 } else {
@@ -779,7 +787,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 mIconState.contentDescription = mContext.getString(
                         R.string.accessibility_voice_assist_button);
             } else {
-                mIconState.isVisible = mUserSetupComplete && showAffordance && isPhoneVisible();
+                mIconState.isVisible = mUserSetupComplete && mShowLeftAffordance
+                        && isPhoneVisible();
                 mIconState.drawable = mContext.getDrawable(
                         com.android.internal.R.drawable.ic_phone);
                 mIconState.contentDescription = mContext.getString(
@@ -802,7 +811,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public IconState getIcon() {
             boolean isCameraDisabled = (mStatusBar != null) && !mStatusBar.isCameraAllowedByAdmin();
             mIconState.isVisible = !isCameraDisabled
-                    && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
+                    && mShowCameraAffordance
                     && mUserSetupComplete
                     && resolveCameraIntent() != null;
             mIconState.drawable = mContext.getDrawable(R.drawable.ic_camera_alt_24dp);
