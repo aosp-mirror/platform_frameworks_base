@@ -259,23 +259,38 @@ public final class AccessibilityInteractionClient
     }
 
     /**
-     * Gets the info for all windows.
+     * Gets the info for all windows of the default display.
      *
      * @param connectionId The id of a connection for interacting with the system.
      * @return The {@link AccessibilityWindowInfo} list.
      */
     public List<AccessibilityWindowInfo> getWindows(int connectionId) {
+        final SparseArray<List<AccessibilityWindowInfo>> windows =
+                getWindowsOnAllDisplays(connectionId);
+        if (windows.size() > 0) {
+            return windows.valueAt(Display.DEFAULT_DISPLAY);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Gets the info for all windows of all displays.
+     *
+     * @param connectionId The id of a connection for interacting with the system.
+     * @return The SparseArray of {@link AccessibilityWindowInfo} list.
+     *         The key of SparseArray is display ID.
+     */
+    public SparseArray<List<AccessibilityWindowInfo>> getWindowsOnAllDisplays(int connectionId) {
         try {
             IAccessibilityServiceConnection connection = getConnection(connectionId);
             if (connection != null) {
-                SparseArray<List<AccessibilityWindowInfo>> allWindows =
+                SparseArray<List<AccessibilityWindowInfo>> windows =
                         sAccessibilityCache.getWindowsOnAllDisplays();
-                List<AccessibilityWindowInfo> windows;
-                if (allWindows != null) {
+                if (windows != null) {
                     if (DEBUG) {
                         Log.i(LOG_TAG, "Windows cache hit");
                     }
-                    return allWindows.valueAt(Display.DEFAULT_DISPLAY);
+                    return windows;
                 }
                 if (DEBUG) {
                     Log.i(LOG_TAG, "Windows cache miss");
@@ -287,9 +302,7 @@ public final class AccessibilityInteractionClient
                     Binder.restoreCallingIdentity(identityToken);
                 }
                 if (windows != null) {
-                    allWindows = new SparseArray<>();
-                    allWindows.put(Display.DEFAULT_DISPLAY, windows);
-                    sAccessibilityCache.setWindowsOnAllDisplays(allWindows);
+                    sAccessibilityCache.setWindowsOnAllDisplays(windows);
                     return windows;
                 }
             } else {
@@ -298,9 +311,11 @@ public final class AccessibilityInteractionClient
                 }
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error while calling remote getWindows", re);
+            Log.e(LOG_TAG, "Error while calling remote getWindowsOnAllDisplays", re);
         }
-        return Collections.emptyList();
+
+        final SparseArray<List<AccessibilityWindowInfo>> emptyWindows = new SparseArray<>();
+        return emptyWindows;
     }
 
     /**
