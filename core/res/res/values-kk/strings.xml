@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Қолданбаға SMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"мәтін хабарларын алу (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Қолданбаға MMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ұялы хабар тарату хабарларын оқу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Қолданбаға ұялы таратылым хабарларын оқу мүмкіндігін береді. Ұялы таратылым дабылдары кейбір аймақтарда төтенше жағдай туралы ескерту үшін қолданылады. Төтенше ұялы хабарлар келгенде залалды қолданбалар құрылғының жұмысына кедергі жасауы мүмкін."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылған ағындарды оқу"</string>

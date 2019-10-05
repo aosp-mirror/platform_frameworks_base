@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS मेसेज प्राप्त करण्याची आणि त्यावर प्रक्रिया करण्याची अ‍ॅप ला अनुमती देते. म्हणजेच अ‍ॅप आपल्या डीव्हाइसवर पाठविलेले मेसेज तुम्हाला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"मजकूर मेसेज मिळवा (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अ‍ॅप ला अनुमती देते. म्हणजेच अ‍ॅप आपल्या डिव्हाइसवर पाठविलेले मेसेज तुम्हाला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारण मेसेज वाचा"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"आपल्या डिव्हाइसद्वारे प्राप्त केलेले सेल प्रसारण मेसेज वाचण्यासाठी अ‍ॅप ला अनुमती देते. काही स्थानांमध्ये तुम्हाला आणीबाणीच्या परिस्थितीची चेतावणी देण्यासाठी सेल प्रसारण सूचना वितरीत केल्या जातात. आणीबाणी सेल प्रसारण प्राप्त होते तेव्हा आपल्या डिव्हाइसच्या कार्यप्रदर्शनात किंवा कार्यात दुर्भावनापूर्ण अ‍ॅप्स व्यत्यय आणू शकतात."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता घेतलेली फीड वाचा"</string>
@@ -1001,7 +1005,7 @@
     <string name="weeks" msgid="6509623834583944518">"आठवडे"</string>
     <string name="year" msgid="4001118221013892076">"वर्ष"</string>
     <string name="years" msgid="6881577717993213522">"वर्षे"</string>
-    <string name="now_string_shortest" msgid="8912796667087856402">"आत्ता"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"आता"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मि</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>मि</item>

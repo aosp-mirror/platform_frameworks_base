@@ -347,6 +347,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Omogućava aplikaciji primanje i obradu SMS poruka. Ovo znači da aplikacija može pratiti ili brisati poruke poslane na vaš uređaj, a da vam ih pritom ne prikazuje."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primanje tekstualnih poruka (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Omogućava aplikaciji prijem i obradu MMS poruka. Ovo znači da aplikacija može pratiti ili brisati poruke poslane na vaš uređaj, a da vam ih pritom ne prikazuje."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitanje poruka info servisa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućava aplikaciji čitanje poruka info servisa koje je primio vaš uređaj. Upozorenja koja emitira info servis se isporučuju na nekim lokacijama kako bi vas upozorila na vanredne situacije. Zlonamjerne aplikacije mogu ometati performanse ili rad vašeg uređaja kada primite informaciju o vanrednoj situaciji od info servisa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čitanje sadržaja na koje ste pretplaćeni"</string>

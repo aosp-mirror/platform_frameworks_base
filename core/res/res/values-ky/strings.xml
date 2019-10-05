@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна байланыштарыңызды пайдаланууга уруксат берилсинби?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Жайгашкан жер"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"түзмөктүн жайгашкан жерин аныктоого"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосу бул түзмөктүн кайда жүргөнүн көрүп турганга уруксат бересизби?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосу бул түзмөктүн кайда жүргөнүн көрүп турсунбу?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Колдонмону колдонуп жаткан маалда гана, ал сиздин кайда жүргөнүңүздү билип турат."</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосу бул түзмөктүн жүргөн жерин &lt;b&gt;ар дайым&lt;/b&gt; билип турсунбу?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Колдонмону пайдаланып жаткан учурда гана ал жайгашкан жерди көрө алат"</string>
@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Колдонмого SMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"билдирүүлөрдү (MMS) кабыл алуу"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Колдонмого MMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"уюктук берүү билдирүүлөрүн окуу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Колдонмого түзмөгүңүз кабыл алган уюк берүүнүн билдирүүлөрүн окууга жол берет. Шашылыш эскертүү билдирүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралу сизди эскертүү үчүн жөнөтүлөт. Зыяндуу колдономолор шашылыш эскертүүлөр берилип жатканда, сиздин түзмөктүн иштешине жолтоо болушу мүмкүн."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылган түрмөктөрдү окуу"</string>
@@ -1077,7 +1081,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Түн ортосу"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Бардыгын тандоо"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Баарын тандоо"</string>
     <string name="cut" msgid="3092569408438626261">"Кесүү"</string>
     <string name="copy" msgid="2681946229533511987">"Көчүрүү"</string>
     <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Алмашуу буферине көчүрүлбөй калды"</string>
@@ -1317,7 +1321,7 @@
     <string name="sms_control_title" msgid="7296612781128917719">"SMS билдирүүлөр жөнөтүлүүдө"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; көп SMS билдирүүлөрдү жөнөтүп жатат. Бул колдонмо билдирүүлөрдү жөнөтө берсинби?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Ооба"</string>
-    <string name="sms_control_no" msgid="625438561395534982">"Жок"</string>
+    <string name="sms_control_no" msgid="625438561395534982">"Тыюу салынат"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; номуруна билдирүү жөнөткөнү жатат."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Бул уюлдук эсебиңиздеги төлөмдөргө "<b>"алып келиши мүмкүн"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Бул уюлдук эсебиңиздеги төлөмдөргө алып келет."</b></string>
@@ -1359,8 +1363,8 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Туташкан түзмөк кубатталууда. Дагы параметрлерди көрүү үчүн таптап коюңуз."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Аналогдук аудио жабдуу табылды"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Тиркелген түзмөк бул телефонго шайкеш келбейт. Көбүрөөк маалымат алуу үчүн таптап коюңуз."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Мүчүлүштүктөрдү USB аркылуу оңдоо иштетилген"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"USB арклуу мүчүлштктрдү оңдоону өчрүү үчүн басып коюңуз"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Мүчүлүштүктөрдү USB аркылуу оңдоо иштеп жатат"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Өчүрүү үчүн тийип коюңуз"</string>
     <!-- no translation found for adb_active_notification_message (8470296818270110396) -->
     <skip />
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Сыноо программасынын режими иштетилди"</string>
@@ -1455,7 +1459,7 @@
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Бул өтүнүчкө уруксат бересизби?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Жетки талабы"</string>
     <string name="allow" msgid="7225948811296386551">"Уруксат берүү"</string>
-    <string name="deny" msgid="2081879885755434506">"Жок"</string>
+    <string name="deny" msgid="2081879885755434506">"Уруксат берилбейт"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Уруксат талап кылуу"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Кийинки эсепке\nуруксат талап кылынууда: <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Бул колдонмо жумуш профилиңиздин сыртында колдонулуп жатат"</string>
