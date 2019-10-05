@@ -1454,10 +1454,13 @@ public class AudioService extends IAudioService.Stub
         }
         if (!TextUtils.isEmpty(packageName)) {
             PackageManager pm = mContext.getPackageManager();
+            ActivityManager am =
+                          (ActivityManager) mContext.getSystemService(mContext.ACTIVITY_SERVICE);
+
             if (pm.checkPermission(Manifest.permission.CAPTURE_AUDIO_HOTWORD, packageName)
                     == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    assistantUid = pm.getPackageUid(packageName, 0);
+                    assistantUid = pm.getPackageUidAsUser(packageName, am.getCurrentUser());
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.e(TAG,
                             "updateAssistantUId() could not find UID for package: " + packageName);
