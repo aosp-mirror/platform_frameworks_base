@@ -311,6 +311,21 @@
     <!-- Talkback string when a biometric is authenticated [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_authenticated">Authenticated</string>
 
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pin) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_pin">Use PIN</string>
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pattern) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_pattern">Use pattern</string>
+    <!-- Button text shown on BiometricPrompt giving the user the option to use an alternate form of authentication (Pass) [CHAR LIMIT=30] -->
+    <string name="biometric_dialog_use_password">Use password</string>
+    <!-- Error string shown when the user enters an incorrect PIN [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_wrong_pin">Wrong PIN</string>
+    <!-- Error string shown when the user enters an incorrect pattern [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_wrong_pattern">Wrong pattern</string>
+    <!-- Error string shown when the user enters an incorrect password [CHAR LIMIT=40]-->
+    <string name="biometric_dialog_wrong_password">Wrong password</string>
+    <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
+    <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
     <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->

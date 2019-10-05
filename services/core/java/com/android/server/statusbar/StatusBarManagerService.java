@@ -609,13 +609,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int type, boolean requireConfirmation, int userId, String opPackageName) {
+    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.showBiometricDialog(bundle, receiver, type, requireConfirmation, userId,
-                        opPackageName);
+                mBar.showAuthenticationDialog(bundle, receiver, biometricModality,
+                        requireConfirmation, userId, opPackageName);
             } catch (RemoteException ex) {
             }
         }
@@ -644,22 +644,22 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void onBiometricError(String error) {
+    public void onBiometricError(int errorCode, String error) {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.onBiometricError(error);
+                mBar.onBiometricError(errorCode, error);
             } catch (RemoteException ex) {
             }
         }
     }
 
     @Override
-    public void hideBiometricDialog() {
+    public void hideAuthenticationDialog() {
         enforceBiometricDialog();
         if (mBar != null) {
             try {
-                mBar.hideBiometricDialog();
+                mBar.hideAuthenticationDialog();
             } catch (RemoteException ex) {
             }
         }

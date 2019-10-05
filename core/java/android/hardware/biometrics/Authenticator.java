@@ -17,10 +17,19 @@
 package android.hardware.biometrics;
 
 /**
- * Communication channel between ConfirmDeviceCredential / ConfirmLock* and BiometricService.
+ * Type of authenticators defined on a granularity that the BiometricManager / BiometricPrompt
+ * supports.
  * @hide
  */
-interface IBiometricConfirmDeviceCredentialCallback {
-    // Invoked when authentication should be canceled.
-    oneway void cancel();
+public class Authenticator {
+
+    /**
+     * Device credential, e.g. Pin/Pattern/Password.
+     */
+    public static final int TYPE_CREDENTIAL = 1 << 0;
+    /**
+     * Encompasses all biometrics on the device, e.g. Fingerprint/Iris/Face.
+     */
+    public static final int TYPE_BIOMETRIC = 1 << 1;
+
 }

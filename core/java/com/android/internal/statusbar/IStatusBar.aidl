@@ -151,17 +151,17 @@ oneway interface IStatusBar
 
     void showShutdownUi(boolean isReboot, String reason);
 
-    // Used to show the dialog when BiometricService starts authentication
-    void showBiometricDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver, int type,
-            boolean requireConfirmation, int userId, String opPackageName);
-    // Used to hide the dialog when a biometric is authenticated
+    // Used to show the authentication dialog (Biometrics, Device Credential)
+    void showAuthenticationDialog(in Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName);
+    // Used to notify the authentication dialog that a biometric has been authenticated or rejected
     void onBiometricAuthenticated(boolean authenticated, String failureReason);
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
     void onBiometricHelp(String message);
     // Used to set a message - the dialog will dismiss after a certain amount of time
-    void onBiometricError(String error);
-    // Used to hide the biometric dialog when the AuthenticationClient is stopped
-    void hideBiometricDialog();
+    void onBiometricError(int errorCode, String error);
+    // Used to hide the authentication dialog, e.g. when the application cancels authentication
+    void hideAuthenticationDialog();
 
     /**
      * Notifies System UI that the display is ready to show system decorations.

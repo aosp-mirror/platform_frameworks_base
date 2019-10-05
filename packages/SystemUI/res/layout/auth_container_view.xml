@@ -34,7 +34,7 @@
         android:elevation="@dimen/biometric_dialog_elevation"/>
 
     <ScrollView
-        android:id="@+id/scrollview"
+        android:id="@+id/biometric_scrollview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"

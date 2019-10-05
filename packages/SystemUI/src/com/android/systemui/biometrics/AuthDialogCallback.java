@@ -27,17 +27,18 @@ public interface AuthDialogCallback {
     int DISMISSED_USER_CANCELED = 1;
     int DISMISSED_BUTTON_NEGATIVE = 2;
     int DISMISSED_BUTTON_POSITIVE = 3;
-
-    int DISMISSED_AUTHENTICATED = 4;
+    int DISMISSED_BIOMETRIC_AUTHENTICATED = 4;
     int DISMISSED_ERROR = 5;
     int DISMISSED_BY_SYSTEM_SERVER = 6;
+    int DISMISSED_CREDENTIAL_AUTHENTICATED = 7;
 
     @IntDef({DISMISSED_USER_CANCELED,
             DISMISSED_BUTTON_NEGATIVE,
             DISMISSED_BUTTON_POSITIVE,
-            DISMISSED_AUTHENTICATED,
+            DISMISSED_BIOMETRIC_AUTHENTICATED,
             DISMISSED_ERROR,
-            DISMISSED_BY_SYSTEM_SERVER})
+            DISMISSED_BY_SYSTEM_SERVER,
+            DISMISSED_CREDENTIAL_AUTHENTICATED})
     @interface DismissedReason {}
 
     /**
@@ -50,4 +51,9 @@ public interface AuthDialogCallback {
      * Invoked when the "try again" button is clicked
      */
     void onTryAgainPressed();
+
+    /**
+     * Invoked when the "use password" button is clicked
+     */
+    void onDeviceCredentialPressed();
 }
