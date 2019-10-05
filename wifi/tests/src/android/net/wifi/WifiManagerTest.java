@@ -99,8 +99,7 @@ public class WifiManagerTest {
     private static final String[] TEST_MAC_ADDRESSES = {"da:a1:19:0:0:0"};
 
     @Mock Context mContext;
-    @Mock
-    android.net.wifi.IWifiManager mWifiService;
+    @Mock android.net.wifi.IWifiManager mWifiService;
     @Mock ApplicationInfo mApplicationInfo;
     @Mock WifiConfiguration mApConfig;
     @Mock SoftApCallback mSoftApCallback;
@@ -115,7 +114,8 @@ public class WifiManagerTest {
     private TestLooper mLooper;
     private WifiManager mWifiManager;
 
-    @Before public void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mLooper = new TestLooper();
         mHandler = spy(new Handler(mLooper.getLooper()));
@@ -210,7 +210,7 @@ public class WifiManagerTest {
     @Test
     public void testCreationOfLocalOnlyHotspotSubscription() throws Exception {
         try (WifiManager.LocalOnlyHotspotSubscription sub =
-                mWifiManager.new LocalOnlyHotspotSubscription()) {
+                     mWifiManager.new LocalOnlyHotspotSubscription()) {
             sub.close();
         }
     }
@@ -752,17 +752,17 @@ public class WifiManagerTest {
      * Verify client-provided callback is being called through callback proxy
      */
     @Test
-    public void softApCallbackProxyCallsOnNumClientsChanged() throws Exception {
+    public void softApCallbackProxyCallsOnConnectedClientsChanged() throws Exception {
         ArgumentCaptor<ISoftApCallback.Stub> callbackCaptor =
                 ArgumentCaptor.forClass(ISoftApCallback.Stub.class);
         mWifiManager.registerSoftApCallback(mSoftApCallback, mHandler);
         verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
                 anyInt());
 
-        final int testNumClients = 3;
-        callbackCaptor.getValue().onNumClientsChanged(testNumClients);
+        final List<WifiClient> testClients = new ArrayList();
+        callbackCaptor.getValue().onConnectedClientsChanged(testClients);
         mLooper.dispatchAll();
-        verify(mSoftApCallback).onNumClientsChanged(testNumClients);
+        verify(mSoftApCallback).onConnectedClientsChanged(testClients);
     }
 
     /*
@@ -776,14 +776,14 @@ public class WifiManagerTest {
         verify(mWifiService).registerSoftApCallback(any(IBinder.class), callbackCaptor.capture(),
                 anyInt());
 
-        final int testNumClients = 5;
+        final List<WifiClient> testClients = new ArrayList();
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_ENABLING, 0);
-        callbackCaptor.getValue().onNumClientsChanged(testNumClients);
+        callbackCaptor.getValue().onConnectedClientsChanged(testClients);
         callbackCaptor.getValue().onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
 
         mLooper.dispatchAll();
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_ENABLING, 0);
-        verify(mSoftApCallback).onNumClientsChanged(testNumClients);
+        verify(mSoftApCallback).onConnectedClientsChanged(testClients);
         verify(mSoftApCallback).onStateChanged(WIFI_AP_STATE_FAILED, SAP_START_FAILURE_GENERAL);
     }
 
@@ -1020,8 +1020,8 @@ public class WifiManagerTest {
         verifyNoMoreInteractions(mWifiService);
     }
 
-   /**
-i     * Verify that a call to cancel WPS immediately returns a failure.
+    /**
+     * Verify that a call to cancel WPS immediately returns a failure.
      */
     @Test
     public void testCancelWpsImmediatelyFailsWithCallback() {
@@ -1324,7 +1324,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Verify getting the factory MAC address.
-     * @throws Exception
      */
     @Test
     public void testGetFactoryMacAddress() throws Exception {
@@ -1371,7 +1370,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of isEnhancedOpenSupported
-     * @throws Exception
      */
     @Test
     public void testIsEnhancedOpenSupported() throws Exception {
@@ -1385,7 +1383,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of isWpa3SaeSupported
-     * @throws Exception
      */
     @Test
     public void testIsWpa3SaeSupported() throws Exception {
@@ -1399,7 +1396,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of isWpa3SuiteBSupported
-     * @throws Exception
      */
     @Test
     public void testIsWpa3SuiteBSupported() throws Exception {
@@ -1413,7 +1409,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of isEasyConnectSupported
-     * @throws Exception
      */
     @Test
     public void testIsEasyConnectSupported() throws Exception {
@@ -1427,7 +1422,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#addNetwork(WifiConfiguration)}
-     * @throws Exception
      */
     @Test
     public void testAddNetwork() throws Exception {
@@ -1444,7 +1438,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#addNetwork(WifiConfiguration)}
-     * @throws Exception
      */
     @Test
     public void testUpdateNetwork() throws Exception {
@@ -1466,7 +1459,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#enableNetwork(int, boolean)}
-     * @throws Exception
      */
     @Test
     public void testEnableNetwork() throws Exception {
@@ -1478,7 +1470,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#disableNetwork(int)}
-     * @throws Exception
      */
     @Test
     public void testDisableNetwork() throws Exception {
@@ -1500,7 +1491,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#disconnect()}
-     * @throws Exception
      */
     @Test
     public void testDisconnect() throws Exception {
@@ -1511,7 +1501,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#reconnect()}
-     * @throws Exception
      */
     @Test
     public void testReconnect() throws Exception {
@@ -1522,7 +1511,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#reassociate()}
-     * @throws Exception
      */
     @Test
     public void testReassociate() throws Exception {
@@ -1533,7 +1521,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#getSupportedFeatures()}
-     * @throws Exception
      */
     @Test
     public void testGetSupportedFeatures() throws Exception {
@@ -1560,7 +1547,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#getControllerActivityEnergyInfo()}
-     * @throws Exception
      */
     @Test
     public void testGetControllerActivityEnergyInfo() throws Exception {
@@ -1573,7 +1559,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#getConnectionInfo()}
-     * @throws Exception
      */
     @Test
     public void testGetConnectionInfo() throws Exception {
@@ -1585,7 +1570,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#isDualModeSupported()} ()}
-     * @throws Exception
      */
     @Test
     public void testIsDualModeSupported() throws Exception {
@@ -1596,7 +1580,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#isDualBandSupported()}
-     * @throws Exception
      */
     @Test
     public void testIsDualBandSupported() throws Exception {
@@ -1607,7 +1590,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#getDhcpInfo()}
-     * @throws Exception
      */
     @Test
     public void testGetDhcpInfo() throws Exception {
@@ -1620,7 +1602,6 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
     /**
      * Test behavior of {@link WifiManager#setWifiEnabled(boolean)}
-     * @throws Exception
      */
     @Test
     public void testSetWifiEnabled() throws Exception {

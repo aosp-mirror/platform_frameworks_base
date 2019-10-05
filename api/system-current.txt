@@ -4733,6 +4733,13 @@ package android.net.wifi {
     field @Deprecated public byte id;
   }
 
+  public final class WifiClient implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.net.MacAddress getMacAddress();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiClient> CREATOR;
+  }
+
   @Deprecated public class WifiConfiguration implements android.os.Parcelable {
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();

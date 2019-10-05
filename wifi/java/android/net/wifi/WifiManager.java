@@ -3254,21 +3254,22 @@ public class WifiManager {
         /**
          * Called when soft AP state changes.
          *
-         * @param state new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
-         *        {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
-         *        {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
+         * @param state         new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
+         *                      {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
+         *                      {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
          * @param failureReason reason when in failed state. One of
-         *        {@link #SAP_START_FAILURE_GENERAL}, {@link #SAP_START_FAILURE_NO_CHANNEL}
+         *                      {@link #SAP_START_FAILURE_GENERAL},
+         *                      {@link #SAP_START_FAILURE_NO_CHANNEL}
          */
-        public abstract void onStateChanged(@WifiApState int state,
+        void onStateChanged(@WifiApState int state,
                 @SapStartFailure int failureReason);
 
         /**
-         * Called when number of connected clients to soft AP changes.
+         * Called when the connected clients to soft AP changes.
          *
-         * @param numClients number of connected clients
+         * @param clients the currently connected clients
          */
-        public abstract void onNumClientsChanged(int numClients);
+        void onConnectedClientsChanged(@NonNull List<WifiClient> clients);
     }
 
     /**
@@ -3291,18 +3292,21 @@ public class WifiManager {
                 Log.v(TAG, "SoftApCallbackProxy: onStateChanged: state=" + state
                         + ", failureReason=" + failureReason);
             }
+
             mHandler.post(() -> {
                 mCallback.onStateChanged(state, failureReason);
             });
         }
 
         @Override
-        public void onNumClientsChanged(int numClients) {
+        public void onConnectedClientsChanged(List<WifiClient> clients) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "SoftApCallbackProxy: onNumClientsChanged: numClients=" + numClients);
+                Log.v(TAG, "SoftApCallbackProxy: onConnectedClientsChanged: clients="
+                        + clients.size() + " clients");
             }
+
             mHandler.post(() -> {
-                mCallback.onNumClientsChanged(numClients);
+                mCallback.onConnectedClientsChanged(clients);
             });
         }
     }
