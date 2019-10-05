@@ -111,8 +111,9 @@ public class RecentLocationAccesses {
             for (int op : LOCATION_OPS) {
                 final String permission = AppOpsManager.opToPermission(op);
                 final int permissionFlags = pm.getPermissionFlags(permission, packageName, user);
-                if (PermissionChecker.checkPermission(mContext, permission, -1, uid, packageName)
-                        == PermissionChecker.PERMISSION_GRANTED) {
+                if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                        PermissionChecker.PID_UNKNOWN, uid, packageName)
+                                == PermissionChecker.PERMISSION_GRANTED) {
                     if ((permissionFlags
                             & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) == 0) {
                         showApp = false;
