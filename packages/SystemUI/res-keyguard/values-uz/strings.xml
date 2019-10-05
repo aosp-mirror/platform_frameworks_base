@@ -33,9 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Parolni kiriting"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN kodi xato."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM karta yaroqsiz."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for keyguard_charged (3316115607283493413) -->
-    <skip />
+    <string name="keyguard_charged" msgid="2222329688813033109">"Batareya quvvati to‘ldi"</string>
     <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Simsiz quvvatlanyapti"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tezkor quvvat olmoqda"</string>

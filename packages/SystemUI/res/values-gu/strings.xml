@@ -47,6 +47,8 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ઇનપુટ પદ્ધતિઓ સેટ કરો"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ભૌતિક કીબોર્ડ"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ના ઍક્સેસ માટે <xliff:g id="APPLICATION">%1$s</xliff:g>ને મંજૂરી આપીએ?"</string>
+    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
+    <skip />
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ના ઍક્સેસ માટે <xliff:g id="APPLICATION">%1$s</xliff:g>ને મંજૂરી આપીએ?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ને હૅન્ડલ કરવા માટે <xliff:g id="APPLICATION">%1$s</xliff:g>ને ખોલીએ?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ને હૅન્ડલ કરવા માટે <xliff:g id="APPLICATION">%1$s</xliff:g>ને ખોલીએ?"</string>
@@ -56,7 +58,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"જ્યારે <xliff:g id="USB_DEVICE">%2$s</xliff:g> કનેક્ટેડ હોય ત્યારે <xliff:g id="APPLICATION">%1$s</xliff:g>ને હંમેશા ખોલો"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"જ્યારે <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> કનેક્ટેડ હોય ત્યારે <xliff:g id="APPLICATION">%1$s</xliff:g>ને હંમેશા ખોલો"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ડિબગિંગને મંજૂરી આપીએ?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"કમ્પ્યુટરની RSA મુખ્ય ફિંગરપ્રિંટ આ છે:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"કમ્પ્યુટરની RSA મુખ્ય ફિંગરપ્રિન્ટ આ છે:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"હંમેશા આ કમ્પ્યુટરથી મંજૂરી આપો"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"મંજૂરી આપો"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ડીબગિંગની મંજૂરી નથી"</string>
@@ -126,6 +128,20 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"પુષ્ટિ કરી"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"પરીક્ષણ પૂર્ણ કરવા કન્ફર્મ કરોને ટૅપ કરો"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"પ્રમાણિત"</string>
+    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ફિંગરપ્રિન્ટના સેન્સરને સ્પર્શ કરો"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ફિંગરપ્રિન્ટનું આઇકન"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"તમારા માટે શોધી રહ્યાં છે..."</string>
@@ -364,6 +380,8 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"નોટિફિકેશનો"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ફ્લેશલાઇટ"</string>
+    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
+    <skip />
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"મોબાઇલ ડેટા"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ડેટા વપરાશ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"બાકી ડેટા"</string>
