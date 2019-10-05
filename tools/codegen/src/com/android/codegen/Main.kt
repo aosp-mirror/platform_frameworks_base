@@ -152,8 +152,7 @@ fun main(args: Array<String>) {
             generateConstructor("public")
         } else if (FeatureFlag.BUILDER()
                 || FeatureFlag.COPY_CONSTRUCTOR()
-                || FeatureFlag.WITHERS()
-                || FeatureFlag.PARCELABLE()) {
+                || FeatureFlag.WITHERS()) {
             generateConstructor("/* package-private */")
         }
         if (FeatureFlag.COPY_CONSTRUCTOR()) generateCopyConstructor()
