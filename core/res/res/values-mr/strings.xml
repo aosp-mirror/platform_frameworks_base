@@ -996,7 +996,7 @@
     <string name="weeks" msgid="6509623834583944518">"आठवडे"</string>
     <string name="year" msgid="4001118221013892076">"वर्ष"</string>
     <string name="years" msgid="6881577717993213522">"वर्षे"</string>
-    <string name="now_string_shortest" msgid="8912796667087856402">"आत्ता"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"आता"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मि</item>
       <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>मि</item>

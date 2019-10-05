@@ -279,37 +279,37 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Aldatu laneko profilera"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"atzitu kontaktuak"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari kontaktuak atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Kontaktuak atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Kokapena"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"atzitu gailuaren kokapena"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Gailuaren kokapena atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Hura erabiltzen ari zarenean soilik atzituko du aplikazioak kokapena"</string>
-    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena &lt;b&gt;beti&lt;/b&gt; atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Gailuaren kokapena &lt;b&gt;beti&lt;/b&gt; atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Aplikazioak hura darabilzunean atzi dezake kokapena"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"atzitu egutegia"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari egutegia atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Egutegia atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS mezuak"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"bidali eta ikusi SMS mezuak"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari SMS mezuak bidaltzeko eta ikusteko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"SMS mezuak bidaltzeko eta ikusteko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Memoria"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"atzitu gailuko argazkiak, multimedia-edukia eta fitxategiak"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuko argazkiak, multimedia-edukia eta fitxategiak atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Gailuko argazkiak, multimedia-edukia eta fitxategiak atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonoa"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"grabatu audioa"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari audioa grabatzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Audioa grabatzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"Ariketa fisikoa"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"ariketa fisikoak atzitu"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"Zure ariketa fisikoak atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"atera argazkiak eta grabatu bideoak"</string>
-    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari argazkiak ateratzeko eta bideoak grabatzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Argazkiak ateratzeko eta bideoak grabatzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Deien erregistroa"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"irakurri telefonoko deien erregistroa eta idatzi bertan"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefonoko deien erregistroa atzitzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Telefonoko deien erregistroa atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefonoa"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"egin eta kudeatu telefono-deiak"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari telefono-deiak egiteko eta kudeatzeko baimena eman nahi diozu?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Telefono-deiak egiteko eta kudeatzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
     <string name="permgrouplab_sensors" msgid="4838614103153567532">"Gorputz-sentsoreak"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"atzitu bizi-konstanteei buruzko sentsorearen datuak"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Bizi-konstanteei buruzko sentsorearen datuak atzitzeko baimena eman nahi diozu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari?"</string>
@@ -1889,8 +1889,8 @@
     <string name="default_notification_channel_label" msgid="5929663562028088222">"Kategoriarik gabea"</string>
     <string name="importance_from_user" msgid="7318955817386549931">"Zuk ezarri duzu jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Garrantzitsua da eragiten dien pertsonengatik."</string>
-    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu? (Badago kontu hori duen erabiltzaile bat)"</string>
-    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu?"</string>
+    <string name="user_creation_account_exists" msgid="6559477114648176531">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari? (Badago kontu hori duen erabiltzaile bat)"</string>
+    <string name="user_creation_adding" msgid="9089159170398841763">"<xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzeko baimena eman nahi diozu <xliff:g id="APP">%1$s</xliff:g> aplikazioari?"</string>
     <string name="language_selection_title" msgid="2680677278159281088">"Gehitu hizkuntza"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>

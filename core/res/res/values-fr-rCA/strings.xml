@@ -527,9 +527,9 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Données biométriques non reconnues"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Authentification annulée"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Aucun NIP, schéma ou mot de passe défini"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez essayer de nouveau."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Empreinte digitale partielle détectée. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossible de reconnaître l\'empreinte digitale. Veuillez réessayer."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et essayer de nouveau."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Le capteur d\'empreintes digitales est sale. Veuillez le nettoyer et réessayer."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Vous avez déplacé votre doigt trop rapidement. Veuillez réessayer."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Vous avez déplacé votre doigt trop lentement. Veuillez réessayer."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -537,10 +537,10 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Visage authentifié, veuillez appuyer sur le bouton Confirmer"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte numérique indisponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Matériel d\'empreinte digitale numérique indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empreinte digitale ne peut pas être enregistrée. Veuillez supprimer une empreinte existante."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Le temps attribué pour lire l\'empreinte est écoulé. Veuillez essayer de nouveau."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte numérique annulée."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Le temps attribué pour lire l\'empreinte digitale est écoulé. Veuillez réessayer."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Opération d\'empreinte digitale numérique annulée."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"L\'opération d\'empreinte digitale a été annulée par l\'utilisateur."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Trop de tentatives. Veuillez réessayer plus tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Trop de tentatives. Capteur d\'empreintes digitales désactivé."</string>
@@ -1577,8 +1577,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Expire le :"</string>
     <string name="serial_number" msgid="758814067660862493">"Numéro de série :"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Empreintes :"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Empreinte SHA-256 :"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte SHA-1 :"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Empreinte digitale SHA-256 :"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte digitale SHA-1 :"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Tout afficher"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Sélectionnez une activité"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Partagez avec"</string>

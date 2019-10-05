@@ -1579,8 +1579,8 @@
     <string name="expires_on" msgid="3676242949915959821">"ផុត​កំណត់​នៅ៖"</string>
     <string name="serial_number" msgid="758814067660862493">"លេខ​ស៊េរី៖"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ស្នាម​ម្រាមដៃ​៖"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"ស្នាម​ម្រាមដៃ SHA​-256 ​៖"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"ស្នាម​ម្រាម​ដៃ SHA-1 ៖"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"ស្នាម​ម្រាមដៃ SHA​-256៖"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"ស្នាម​ម្រាម​ដៃ SHA-1៖"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"មើល​ទាំងអស់"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ជ្រើស​សកម្មភាព"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"ចែករំលែក​ជា​មួយ"</string>

@@ -282,7 +282,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai tuoi contatti?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizz."</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione del dispositivo?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"L\'app avrà accesso alla posizione soltanto quando la usi"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere &lt;b&gt;sempre&lt;/b&gt; alla posizione di questo dispositivo?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"L\'app al momento può accedere alla posizione soltanto mentre la usi"</string>
@@ -323,8 +323,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Controlla il livello di zoom e la posizione del display."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Eseguire gesti"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Consente di toccare, far scorrere, pizzicare ed eseguire altri gesti."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gesti con sensore di impronte digitali"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"È in grado di rilevare i gesti compiuti con il sensore di impronte digitali dei dispositivi."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gesti con sensore di impronte"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"È in grado di rilevare i gesti compiuti con il sensore di impronte dei dispositivi."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"disattivazione o modifica della barra di stato"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Consente all\'applicazione di disattivare la barra di stato o di aggiungere e rimuovere icone di sistema."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"ruolo di barra di stato"</string>
@@ -509,10 +509,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Consente all\'app di conoscere il livello di complessità del blocco schermo (alto, medio, basso o nessuno), che indica l\'intervallo di caratteri possibile e il tipo di blocco schermo. L\'app può inoltre suggerire agli utenti di aggiornare il blocco schermo a un livello specifico di complessità, ma gli utenti possono ignorare liberamente il suggerimento e uscire. Tieni presente che il blocco schermo non viene memorizzato come testo non crittografato, quindi l\'app non conosce la password esatta."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"utilizzo di hardware biometrico"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Consente all\'app di utilizzare hardware biometrico per eseguire l\'autenticazione"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestione di hardware per il riconoscimento delle impronte digitali"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Consente all\'app di richiamare metodi per aggiungere e rimuovere modelli di impronte digitali da utilizzare."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizzo di hardware per il riconoscimento delle impronte digitali"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Consente all\'app di utilizzare l\'hardware per il riconoscimento delle impronte digitali per eseguire l\'autenticazione"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gestione di hardware per il riconoscimento delle impronte"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Consente all\'app di richiamare metodi per aggiungere e rimuovere modelli di impronte da utilizzare."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizzo di hardware per il riconoscimento delle impronte"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Consente all\'app di utilizzare l\'hardware per il riconoscimento delle impronte per eseguire l\'autenticazione"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"modifica della tua raccolta musicale"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Consente all\'app di modificare la tua raccolta musicale."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"modifica della tua raccolta di video"</string>
@@ -527,30 +527,30 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Non riconosciuto"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Autenticazione annullata"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Non hai impostato PIN, sequenza o password"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta digitale parziale. Riprova."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta digitale. Riprova."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Il sensore di impronte digitali è sporco. Puliscilo e riprova."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta parziale. Riprova."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta. Riprova."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Il sensore di impronte è sporco. Puliscilo e riprova."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Movimento del dito troppo rapido. Riprova."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Movimento del dito troppo lento. Riprova."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Impronta digitale autenticata"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Impronta autenticata"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Volto autenticato"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Volto autenticato, premi Conferma"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware per l\'impronta digitale non disponibile."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossibile memorizzare l\'impronta digitale. Rimuovi un\'impronta esistente."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timeout impronta digitale. Riprova."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operazione associata all\'impronta digitale annullata."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Operazione di autenticazione dell\'impronta digitale annullata dall\'utente."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware per l\'impronta non disponibile."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossibile memorizzare l\'impronta. Rimuovi un\'impronta esistente."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timeout impronta. Riprova."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operazione associata all\'impronta annullata."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Operazione di autenticazione dell\'impronta annullata dall\'utente."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Troppi tentativi. Riprova più tardi."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Troppi tentativi. Sensore di impronte digitali disattivato."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Troppi tentativi. Sensore di impronte disattivato."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Riprova."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nessuna impronta digitale registrata."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Questo dispositivo non dispone di sensore di impronte digitali."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Questo dispositivo non dispone di sensore di impronte."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona dell\'impronta digitale"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona dell\'impronta"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"gestione dell\'hardware per Sblocco col sorriso"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"Consente all\'app di richiamare i metodi per aggiungere e rimuovere i modelli di volti."</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"utilizzo dell\'hardware per Sblocco col sorriso"</string>
@@ -1577,8 +1577,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Scade il:"</string>
     <string name="serial_number" msgid="758814067660862493">"Numero di serie:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Fingerprint:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Fingerprint SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Fingerprint SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Impronta SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Impronta SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Mostra tutto"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Scegli attività"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Condividi con"</string>
