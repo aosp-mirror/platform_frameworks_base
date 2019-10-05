@@ -274,8 +274,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 PhoneStateListener.LISTEN_PRECISE_DATA_CONNECTION_STATE;
 
     static final int READ_ACTIVE_EMERGENCY_SESSION_PERMISSION_MASK =
-            PhoneStateListener.LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER
-                    | PhoneStateListener.LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER;
+            PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL
+                    | PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_SMS;
 
     private static final int MSG_USER_SWITCHED = 1;
     private static final int MSG_UPDATE_DEFAULT_SUB = 2;
@@ -1932,7 +1932,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mOutgoingCallEmergencyNumber[phoneId] = emergencyNumber;
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
-                            PhoneStateListener.LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER)
+                            PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_CALL)
                                     && idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onOutgoingEmergencyCall(emergencyNumber);
@@ -1957,7 +1957,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mOutgoingSmsEmergencyNumber[phoneId] = emergencyNumber;
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
-                            PhoneStateListener.LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER)
+                            PhoneStateListener.LISTEN_OUTGOING_EMERGENCY_SMS)
                                     && idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onOutgoingEmergencySms(emergencyNumber);

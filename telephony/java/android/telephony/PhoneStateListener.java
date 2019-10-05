@@ -374,7 +374,7 @@ public class PhoneStateListener {
     @SystemApi
     @TestApi
     @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
-    public static final int LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER           = 0x10000000;
+    public static final int LISTEN_OUTGOING_EMERGENCY_CALL                  = 0x10000000;
 
     /**
      * Listen for the emergency number placed from an outgoing SMS.
@@ -387,7 +387,7 @@ public class PhoneStateListener {
     @SystemApi
     @TestApi
     @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
-    public static final int LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER            = 0x20000000;
+    public static final int LISTEN_OUTGOING_EMERGENCY_SMS                   = 0x20000000;
 
     /*
      * Subscription used to listen to the phone state changes
