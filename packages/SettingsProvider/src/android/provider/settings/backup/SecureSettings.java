@@ -114,7 +114,6 @@ public class SecureSettings {
         Settings.Secure.ASSIST_GESTURE_WAKE_ENABLED,
         Settings.Secure.VR_DISPLAY_MODE,
         Settings.Secure.NOTIFICATION_BADGING,
-        Settings.Secure.NOTIFICATION_BUBBLES,
         Settings.Secure.NOTIFICATION_DISMISS_RTL,
         Settings.Secure.QS_AUTO_ADDED_TILES,
         Settings.Secure.SCREENSAVER_ENABLED,

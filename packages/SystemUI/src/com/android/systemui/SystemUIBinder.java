@@ -44,7 +44,7 @@ public abstract class SystemUIBinder {
     @ClassKey(PowerUI.class)
     public abstract SystemUI bindPowerUI(PowerUI sysui);
 
-    /** Inject into StatusBar. */
+    /** Inject into Recents. */
     @Binds
     @IntoMap
     @ClassKey(Recents.class)

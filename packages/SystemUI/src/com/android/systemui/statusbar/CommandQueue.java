@@ -270,12 +270,13 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-                int type, boolean requireConfirmation, int userId, String opPackageName) { }
+        default void showAuthenticationDialog(Bundle bundle,
+                IBiometricServiceReceiverInternal receiver, int biometricModality,
+                boolean requireConfirmation, int userId, String opPackageName) { }
         default void onBiometricAuthenticated(boolean authenticated, String failureReason) { }
         default void onBiometricHelp(String message) { }
-        default void onBiometricError(String error) { }
-        default void hideBiometricDialog() { }
+        default void onBiometricError(int errorCode, String error) { }
+        default void hideAuthenticationDialog() { }
 
         /**
          * @see IStatusBar#onDisplayReady(int)
@@ -740,13 +741,13 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int type, boolean requireConfirmation, int userId, String opPackageName) {
+    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
             args.arg2 = receiver;
-            args.argi1 = type;
+            args.argi1 = biometricModality;
             args.arg3 = requireConfirmation;
             args.argi2 = userId;
             args.arg4 = opPackageName;
@@ -773,14 +774,14 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     @Override
-    public void onBiometricError(String error) {
+    public void onBiometricError(int errorCode, String error) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_BIOMETRIC_ERROR, error).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_ERROR, errorCode, 0, error).sendToTarget();
         }
     }
 
     @Override
-    public void hideBiometricDialog() {
+    public void hideAuthenticationDialog() {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_BIOMETRIC_HIDE).sendToTarget();
         }
@@ -1032,10 +1033,10 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     mHandler.removeMessages(MSG_BIOMETRIC_AUTHENTICATED);
                     SomeArgs someArgs = (SomeArgs) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showBiometricDialog(
+                        mCallbacks.get(i).showAuthenticationDialog(
                                 (Bundle) someArgs.arg1,
                                 (IBiometricServiceReceiverInternal) someArgs.arg2,
-                                someArgs.argi1 /* type */,
+                                someArgs.argi1 /* biometricModality */,
                                 (boolean) someArgs.arg3 /* requireConfirmation */,
                                 someArgs.argi2 /* userId */,
                                 (String) someArgs.arg4 /* opPackageName */);
@@ -1060,12 +1061,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
                     break;
                 case MSG_BIOMETRIC_ERROR:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onBiometricError((String) msg.obj);
+                        mCallbacks.get(i).onBiometricError(msg.arg1, (String) msg.obj);
                     }
                     break;
                 case MSG_BIOMETRIC_HIDE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).hideBiometricDialog();
+                        mCallbacks.get(i).hideAuthenticationDialog();
                     }
                     break;
                 case MSG_SHOW_CHARGING_ANIMATION:

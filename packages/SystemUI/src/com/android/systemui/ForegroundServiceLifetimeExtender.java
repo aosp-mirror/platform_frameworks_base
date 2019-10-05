@@ -83,7 +83,9 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
                 }
             }
         };
-        mHandler.postDelayed(r, MIN_FGS_TIME_MS);
+        long delayAmt = MIN_FGS_TIME_MS
+                - (System.currentTimeMillis() - entry.notification.getPostTime());
+        mHandler.postDelayed(r, delayAmt);
     }
 }
 

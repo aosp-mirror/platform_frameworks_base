@@ -26,9 +26,12 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.accessibility.AccessibilityEvent.WindowsChangeTypes;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -797,4 +800,49 @@ public final class AccessibilityWindowInfo implements Parcelable {
             return new AccessibilityWindowInfo[size];
         }
     };
+
+    /**
+     * Transfers a sparsearray with lists having {@link AccessibilityWindowInfo}s across an IPC.
+     * The key of this sparsearray is display Id.
+     *
+     * @hide
+     */
+    public static final class WindowListSparseArray
+            extends SparseArray<List<AccessibilityWindowInfo>> implements Parcelable {
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            final int count = size();
+            dest.writeInt(count);
+            for (int i = 0; i < count; i++) {
+                dest.writeParcelableList(valueAt(i), 0);
+                dest.writeInt(keyAt(i));
+            }
+        }
+
+        public static final Parcelable.Creator<WindowListSparseArray> CREATOR =
+                new Parcelable.Creator<WindowListSparseArray>() {
+            public WindowListSparseArray createFromParcel(
+                    Parcel source) {
+                final WindowListSparseArray array = new WindowListSparseArray();
+                final ClassLoader loader = array.getClass().getClassLoader();
+                final int count = source.readInt();
+                for (int i = 0; i < count; i++) {
+                    List<AccessibilityWindowInfo> windows = new ArrayList<>();
+                    source.readParcelableList(windows, loader);
+                    array.put(source.readInt(), windows);
+                }
+                return array;
+            }
+
+            public WindowListSparseArray[] newArray(int size) {
+                return new WindowListSparseArray[size];
+            }
+        };
+    }
 }

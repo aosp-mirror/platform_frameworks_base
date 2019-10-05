@@ -33,7 +33,6 @@
     },
     {
       "name": "FrameworksMockingServicesTests",
-      "file_patterns": ["AppCompactor\\.java"],
       "options": [
         {
           "include-filter": "com.android.server.am."

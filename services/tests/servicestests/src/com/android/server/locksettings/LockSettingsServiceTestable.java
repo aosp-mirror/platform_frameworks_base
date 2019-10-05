@@ -23,7 +23,6 @@ import android.app.admin.DeviceStateCache;
 import android.content.Context;
 import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserManagerInternal;
@@ -32,6 +31,7 @@ import android.security.KeyStore;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.ServiceThread;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 
 import java.io.FileNotFoundException;
@@ -70,8 +70,8 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
-        public Handler getHandler() {
-            return new Handler(Looper.getMainLooper());
+        public Handler getHandler(ServiceThread handlerThread) {
+            return new Handler(handlerThread.getLooper());
         }
 
         @Override

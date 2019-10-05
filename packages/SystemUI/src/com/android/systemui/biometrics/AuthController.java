@@ -23,6 +23,8 @@ import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.hardware.biometrics.Authenticator;
+import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.os.Bundle;
@@ -105,6 +107,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
+    public void onDeviceCredentialPressed() {
+        try {
+            mReceiver.onDeviceCredentialPressed();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException when handling credential button", e);
+        }
+    }
+
+    @Override
     public void onDismissed(@DismissedReason int reason) {
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
@@ -116,11 +127,12 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 break;
 
             case AuthDialogCallback.DISMISSED_BUTTON_POSITIVE:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRMED);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
                 break;
 
-            case AuthDialogCallback.DISMISSED_AUTHENTICATED:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CONFIRM_NOT_REQUIRED);
+            case AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED:
+                sendResultAndCleanUp(
+                        BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
                 break;
 
             case AuthDialogCallback.DISMISSED_ERROR:
@@ -129,6 +141,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
             case AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER:
                 sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
+                break;
+
+            case AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED:
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
                 break;
 
             default:
@@ -185,16 +201,19 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void showBiometricDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int type, boolean requireConfirmation, int userId, String opPackageName) {
+    public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName) {
+        final int authenticators = Utils.getAuthenticators(bundle);
+
         if (DEBUG) {
-            Log.d(TAG, "showBiometricDialog, type: " + type
+            Log.d(TAG, "showAuthenticationDialog, authenticators: " + authenticators
+                    + ", biometricModality: " + biometricModality
                     + ", requireConfirmation: " + requireConfirmation);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
         args.arg2 = receiver;
-        args.argi1 = type;
+        args.argi1 = biometricModality;
         args.arg3 = requireConfirmation;
         args.argi2 = userId;
         args.arg4 = opPackageName;
@@ -204,6 +223,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             Log.w(TAG, "mCurrentDialog: " + mCurrentDialog);
             skipAnimation = true;
         }
+
         showDialog(args, skipAnimation, null /* savedState */);
     }
 
@@ -227,14 +247,21 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void onBiometricError(String error) {
-        if (DEBUG) Log.d(TAG, "onBiometricError: " + error);
-        mCurrentDialog.onError(error);
+    public void onBiometricError(int errorCode, String error) {
+        if (DEBUG) Log.d(TAG, "onBiometricError: " + errorCode + ", " + error);
+
+        final boolean isLockout = errorCode == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                || errorCode == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+        if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
+            mCurrentDialog.animateToCredentialUI();
+        } else {
+            mCurrentDialog.onError(error);
+        }
     }
 
     @Override
-    public void hideBiometricDialog() {
-        if (DEBUG) Log.d(TAG, "hideBiometricDialog");
+    public void hideAuthenticationDialog() {
+        if (DEBUG) Log.d(TAG, "hideAuthenticationDialog");
 
         mCurrentDialog.dismissFromSystemServer();
     }
@@ -262,7 +289,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
 
         if (DEBUG) {
-            Log.d(TAG, "showDialog, "
+            Log.d(TAG, "showDialog: " + args
                     + " savedState: " + savedState
                     + " mCurrentDialog: " + mCurrentDialog
                     + " newDialog: " + newDialog
@@ -306,6 +333,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
             // to send its pending callback immediately.
             if (savedState.getInt(AuthDialog.KEY_CONTAINER_STATE)
                     != AuthContainerView.STATE_ANIMATING_OUT) {
+                final boolean credentialShowing =
+                        savedState.getBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING);
+                if (credentialShowing) {
+                    // TODO: Clean this up
+                    Bundle bundle = (Bundle) mCurrentDialogArgs.arg1;
+                    bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
+                            Authenticator.TYPE_CREDENTIAL);
+                }
+
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);
             }
         }

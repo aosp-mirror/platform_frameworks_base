@@ -46,6 +46,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ROOT_NODE_ID;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -140,6 +141,8 @@ public class AbstractAccessibilityServiceConnectionTest {
     private final List<AccessibilityWindowInfo> mA11yWindowInfosOnSecondDisplay = new ArrayList<>();
     private Callable[] mFindA11yNodesFunctions;
     private Callable<Boolean> mPerformA11yAction;
+    private ArrayList<Integer> mDisplayList = new ArrayList<>(Arrays.asList(
+            Display.DEFAULT_DISPLAY, SECONDARY_DISPLAY_ID));
 
     // To mock package-private class.
     @Rule public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -184,6 +187,7 @@ public class AbstractAccessibilityServiceConnectionTest {
         addA11yWindowInfo(mA11yWindowInfos, PIP_WINDOWID, true, Display.DEFAULT_DISPLAY);
         addA11yWindowInfo(mA11yWindowInfosOnSecondDisplay, WINDOWID_ONSECONDDISPLAY, false,
                 SECONDARY_DISPLAY_ID);
+        when(mMockA11yWindowManager.getDisplayListLocked()).thenReturn(mDisplayList);
         when(mMockA11yWindowManager.getWindowListLocked(Display.DEFAULT_DISPLAY))
                 .thenReturn(mA11yWindowInfos);
         when(mMockA11yWindowManager.findA11yWindowInfoByIdLocked(WINDOWID))
@@ -285,7 +289,14 @@ public class AbstractAccessibilityServiceConnectionTest {
 
     @Test
     public void getWindows() {
-        assertThat(mServiceConnection.getWindows(), is(mA11yWindowInfos));
+        final AccessibilityWindowInfo.WindowListSparseArray allWindows =
+                mServiceConnection.getWindows();
+
+        assertEquals(2, allWindows.size());
+        assertThat(allWindows.get(Display.DEFAULT_DISPLAY), is(mA11yWindowInfos));
+        assertEquals(2, allWindows.get(Display.DEFAULT_DISPLAY).size());
+        assertThat(allWindows.get(SECONDARY_DISPLAY_ID), is(mA11yWindowInfosOnSecondDisplay));
+        assertEquals(1, allWindows.get(SECONDARY_DISPLAY_ID).size());
     }
 
     @Test

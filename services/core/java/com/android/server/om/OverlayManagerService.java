@@ -738,6 +738,25 @@ public final class OverlayManagerService extends SystemService {
         }
 
         @Override
+        public void invalidateCachesForOverlay(@Nullable String packageName, int userId)
+                throws RemoteException {
+            if (packageName == null) {
+                return;
+            }
+
+            enforceChangeOverlayPackagesPermission("invalidateCachesForOverlay");
+            userId = handleIncomingUser(userId, "invalidateCachesForOverlay");
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    mImpl.removeIdmapForOverlay(packageName, userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
         public void onShellCommand(@NonNull final FileDescriptor in,
                 @NonNull final FileDescriptor out, @NonNull final FileDescriptor err,
                 @NonNull final String[] args, @NonNull final ShellCallback callback,

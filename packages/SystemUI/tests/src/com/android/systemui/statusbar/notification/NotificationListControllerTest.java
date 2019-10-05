@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.util.DeviceConfigProxyFake;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +74,9 @@ public class NotificationListControllerTest extends SysuiTestCase {
     private DeviceProvisionedListener mProvisionedListener;
 
     // TODO: Remove this once EntryManager no longer needs to be mocked
-    private NotificationData mNotificationData = new NotificationData(mContext);
+    private NotificationData mNotificationData =
+            new NotificationData(new NotificationSectionsFeatureManager(
+                    new DeviceConfigProxyFake(), mContext));
 
     private int mNextNotifId = 0;
 

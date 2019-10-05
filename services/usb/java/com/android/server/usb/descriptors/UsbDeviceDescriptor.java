@@ -156,11 +156,10 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         for (int index = 0; index < mConfigDescriptors.size(); index++) {
             configs[index] = mConfigDescriptors.get(index).toAndroid(parser);
         }
-        UsbDevice.Builder device = new UsbDevice.Builder(parser.getDeviceAddr(), mVendorID,
-                mProductID, mDevClass, mDevSubClass, mProtocol, mfgName, prodName, versionString,
-                configs, serialStr);
 
-        return device;
+        return new UsbDevice.Builder(parser.getDeviceAddr(), mVendorID,
+                mProductID, mDevClass, mDevSubClass, mProtocol, mfgName, prodName, versionString,
+                configs, serialStr, parser.hasAudioPlayback(), parser.hasAudioCapture());
     }
 
     @Override

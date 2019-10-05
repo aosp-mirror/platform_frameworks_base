@@ -386,6 +386,8 @@ public class ActivityStartController {
                     throw new IllegalArgumentException("File descriptors passed in Intent");
                 }
 
+                // Get the flag earlier because the intent may be modified in resolveActivity below.
+                final boolean componentSpecified = intent.getComponent() != null;
                 // Don't modify the client's object!
                 intent = new Intent(intent);
 
@@ -409,7 +411,6 @@ public class ActivityStartController {
                         .setCaller(caller)
                         .setResolvedType(resolvedTypes[i])
                         .setActivityInfo(aInfo)
-                        .setResultTo(resultTo)
                         .setRequestCode(-1)
                         .setCallingPid(callingPid)
                         .setCallingUid(callingUid)
@@ -417,7 +418,7 @@ public class ActivityStartController {
                         .setRealCallingPid(realCallingPid)
                         .setRealCallingUid(realCallingUid)
                         .setActivityOptions(checkedOptions)
-                        .setComponentSpecified(intent.getComponent() != null)
+                        .setComponentSpecified(componentSpecified)
 
                         // Top activity decides on animation being run, so we allow only for the
                         // top one as otherwise an activity below might consume it.
@@ -430,7 +431,8 @@ public class ActivityStartController {
             // Lock the loop to ensure the activities launched in a sequence.
             synchronized (mService.mGlobalLock) {
                 for (int i = 0; i < starters.length; i++) {
-                    final int startResult = starters[i].setOutActivity(outActivity).execute();
+                    final int startResult = starters[i].setResultTo(resultTo)
+                            .setOutActivity(outActivity).execute();
                     if (startResult < START_SUCCESS) {
                         // Abort by error result and recycle unused starters.
                         for (int j = i + 1; j < starters.length; j++) {

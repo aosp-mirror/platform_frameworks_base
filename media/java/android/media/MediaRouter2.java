@@ -129,7 +129,7 @@ public class MediaRouter2 {
                 Client client = new Client();
                 try {
                     mMediaRouterService.registerClient2(client, mPackageName);
-                    mMediaRouterService.setControlCategories(client, mControlCategories);
+                    mMediaRouterService.setControlCategories2(client, mControlCategories);
                     mClient = client;
                 } catch (RemoteException ex) {
                     Log.e(TAG, "Unable to register media router.", ex);
@@ -188,7 +188,7 @@ public class MediaRouter2 {
         }
         if (client != null) {
             try {
-                mMediaRouterService.setControlCategories(client, newControlCategories);
+                mMediaRouterService.setControlCategories2(client, newControlCategories);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to set control categories.", ex);
             }

@@ -24,6 +24,7 @@ package android {
     field public static final String BACKUP = "android.permission.BACKUP";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
+    field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
     field @Deprecated public static final String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
     field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
@@ -6361,6 +6362,7 @@ package android.service.autofill {
     method public android.os.IBinder onBind(android.content.Intent);
     method @Nullable public float[][] onCalculateScores(@NonNull java.util.List<android.view.autofill.AutofillValue>, @NonNull java.util.List<java.lang.String>, @NonNull java.util.List<java.lang.String>, @Nullable String, @Nullable android.os.Bundle, @Nullable java.util.Map, @Nullable java.util.Map);
     method @Deprecated @Nullable public float[][] onGetScores(@Nullable String, @Nullable android.os.Bundle, @NonNull java.util.List<android.view.autofill.AutofillValue>, @NonNull java.util.List<java.lang.String>);
+    field public static final String REQUIRED_ALGORITHM_CREDIT_CARD = "CREDIT_CARD";
     field public static final String REQUIRED_ALGORITHM_EDIT_DISTANCE = "EDIT_DISTANCE";
     field public static final String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
     field public static final String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
@@ -7303,6 +7305,14 @@ package android.telephony {
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
   }
 
+  public abstract class CellBroadcastService extends android.app.Service {
+    ctor public CellBroadcastService();
+    method @CallSuper public android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onCdmaCellBroadcastSms(int, byte[]);
+    method public abstract void onGsmCellBroadcastSms(int, byte[]);
+    field public static final String CELL_BROADCAST_SERVICE_INTERFACE = "android.telephony.CellBroadcastService";
+  }
+
   public final class DataFailCause {
     field public static final int ACCESS_ATTEMPT_ALREADY_IN_PROGRESS = 2219; // 0x8ab
     field public static final int ACCESS_BLOCK = 2087; // 0x827
@@ -7875,8 +7885,8 @@ package android.telephony {
     field public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_CALL_DISCONNECT_CAUSES = 33554432; // 0x2000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES = 134217728; // 0x8000000
-    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_CALL_EMERGENCY_NUMBER = 268435456; // 0x10000000
-    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_SMS_EMERGENCY_NUMBER = 536870912; // 0x20000000
+    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
+    field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_CALL_STATE = 2048; // 0x800
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_PRECISE_DATA_CONNECTION_STATE = 4096; // 0x1000
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
@@ -8245,7 +8255,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
     method public static long getMaxNumberVerificationTimeoutMillis();
-    method @NonNull public String getNetworkCountryIso(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getNetworkCountryIso(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();

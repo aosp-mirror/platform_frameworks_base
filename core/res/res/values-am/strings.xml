@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"መተግበሪያው የኤስ.ኤም.ኤስ. መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ማለት መተግበሪያው ወደ መሳሪያህ የተላኩ መልዕክቶችን ላንተ ሳያሳይህ ሊቆጣጠር ወይም ሊሰርዝ ይችላል።"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"የፅሁፍ መልዕክቶችን ተቀበል (ኤም.ኤም.ኤስ.)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"መተግበሪያው የኤም.ኤም.ኤስ. መልዕክቶችን እንዲያነብ እና እንዲያካሂድ ይፈቅዳል። ይህ ማለት መተግበሪያው ወደ መሳሪያህ የተላኩ መልዕክቶችን ላንተ ሳያሳይህ ሊቆጣጠር ወይም ሊሰርዝ ይችላል።"</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"የህዋስ ስርጭት መልዕክቶችን አንብብ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"መሣሪያህ የህዋስ ስርጭት መልዕክቶች ሲቀበል መተግበሪያው እንዲያነበው ይፈቅድለታል። የህዋስ ስርጭት ማንቂያዎች አስቸኳይ ሁኔታዎች ሲያጋጥሙ አንዳንድ አካባቢዎች ላይ የሚላኩ ናቸው። የህዋስ ስርጭት ሲደርስ ተንኮል አዘል መተግበሪያዎች በመሣሪያህ አፈጻጸም ወይም አሰራር ላይ ጣልቃ ሊገቡ ይችላሉ።"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"የምዝገባ መግቦች አንበብ"</string>

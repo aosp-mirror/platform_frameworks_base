@@ -1343,13 +1343,13 @@ public final class SystemServiceRegistry {
      * @hide
      */
     public static <T> void registerCachedService(String serviceName, Class<T> serviceWrapperClass,
-            BiFunction<ContextImpl, IBinder, T> serviceFetcher) {
+            BiFunction<Context, IBinder, T> serviceFetcher) {
         registerService(serviceName, serviceWrapperClass,
                 new CachedServiceFetcher<T>() {
                     @Override
                     public T createService(ContextImpl ctx) throws ServiceNotFoundException {
                         IBinder b = ServiceManager.getServiceOrThrow(serviceName);
-                        return serviceFetcher.apply(ctx, b);
+                        return serviceFetcher.apply(ctx.getOuterContext(), b);
                     }});
     }
 

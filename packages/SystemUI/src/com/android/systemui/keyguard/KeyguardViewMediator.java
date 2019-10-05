@@ -100,6 +100,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -142,6 +143,7 @@ import javax.inject.Inject;
  * directly to the keyguard UI is posted to a {@link android.os.Handler} to ensure it is taken on the UI
  * thread of the keyguard.
  */
+@Singleton
 public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
@@ -232,7 +234,7 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private PowerManager.WakeLock mShowKeyguardWakeLock;
 
-    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     // these are protected by synchronized (this)
 
@@ -315,7 +317,7 @@ public class KeyguardViewMediator extends SystemUI {
      * the keyguard.
      */
     private boolean mWaitingUntilKeyguardVisible = false;
-    private LockPatternUtils mLockPatternUtils;
+    private final LockPatternUtils mLockPatternUtils;
     private boolean mKeyguardDonePending = false;
     private boolean mHideAnimationRun = false;
     private boolean mHideAnimationRunning = false;
@@ -648,29 +650,26 @@ public class KeyguardViewMediator extends SystemUI {
 
         @Override
         public int getBouncerPromptReason() {
-            // TODO(b/140053364)
-            return whitelistIpcs(() -> {
-                int currentUser = ActivityManager.getCurrentUser();
-                boolean trust = mTrustManager.isTrustUsuallyManaged(currentUser);
-                boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
-                boolean any = trust || biometrics;
-                KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
-                        mUpdateMonitor.getStrongAuthTracker();
-                int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
+            int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+            boolean trust = mUpdateMonitor.isTrustUsuallyManaged(currentUser);
+            boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
+            boolean any = trust || biometrics;
+            KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                    mUpdateMonitor.getStrongAuthTracker();
+            int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
 
-                if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
-                    return KeyguardSecurityView.PROMPT_REASON_RESTART;
-                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
-                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
-                } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
-                } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
-                    return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
-                }
-                return KeyguardSecurityView.PROMPT_REASON_NONE;
-            });
+            if (any && !strongAuthTracker.hasUserAuthenticatedSinceBoot()) {
+                return KeyguardSecurityView.PROMPT_REASON_RESTART;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
+            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
+            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0) {
+                return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
+            }
+            return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
 
         @Override
@@ -682,10 +681,21 @@ public class KeyguardViewMediator extends SystemUI {
     };
 
     @Inject
-    public KeyguardViewMediator(FalsingManager falsingManager) {
+    public KeyguardViewMediator(
+            Context context,
+            FalsingManager falsingManager,
+            LockPatternUtils lockPatternUtils) {
         super();
 
+        mContext = context;
         mFalsingManager = falsingManager;
+
+        mLockPatternUtils = lockPatternUtils;
+        mStatusBarKeyguardViewManager =
+                SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(
+                        mContext,
+                        mViewMediatorCallback,
+                        mLockPatternUtils);
     }
 
     public void userActivity() {
@@ -699,7 +709,7 @@ public class KeyguardViewMediator extends SystemUI {
 
     private void setupLocked() {
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mTrustManager = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
+        mTrustManager = mContext.getSystemService(TrustManager.class);
 
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
@@ -723,7 +733,6 @@ public class KeyguardViewMediator extends SystemUI {
 
         mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
 
-        mLockPatternUtils = new LockPatternUtils(mContext);
         KeyguardUpdateMonitor.setCurrentUser(ActivityManager.getCurrentUser());
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure, unless Keyguard
@@ -737,9 +746,6 @@ public class KeyguardViewMediator extends SystemUI {
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
 
-        mStatusBarKeyguardViewManager =
-                SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(mContext,
-                        mViewMediatorCallback, mLockPatternUtils);
         final ContentResolver cr = mContext.getContentResolver();
 
         mDeviceInteractive = mPM.isInteractive();

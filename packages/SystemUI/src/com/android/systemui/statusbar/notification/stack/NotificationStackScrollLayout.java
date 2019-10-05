@@ -109,11 +109,11 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -517,7 +517,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             StatusBarStateController statusBarStateController,
             HeadsUpManagerPhone headsUpManager,
             KeyguardBypassController keyguardBypassController,
-            FalsingManager falsingManager) {
+            FalsingManager falsingManager,
+            NotificationSectionsFeatureManager sectionsFeatureManager) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -531,7 +532,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mKeyguardBypassController = keyguardBypassController;
         mFalsingManager = falsingManager;
 
-        int[] buckets = NotificationData.getNotificationBuckets(context);
+        int[] buckets = sectionsFeatureManager.getNotificationBuckets();
         mSectionsManager =
                 new NotificationSectionsManager(
                         this,

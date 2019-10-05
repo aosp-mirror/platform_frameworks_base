@@ -95,7 +95,13 @@ In addition, for any field mMyField(or myField) of type FieldType you can define
       you can use with final fields.
 
 Version: $CODEGEN_VERSION
-Questions? Feedback? Contact: eugenesusla@
+
+Questions? Feedback?
+Contact: eugenesusla@
+Bug/feature request: http://go/codegen-bug
+
+Slides: http://go/android-codegen
+In-depth example: http://go/SampleDataClass
 """
 
 fun main(args: Array<String>) {
@@ -146,8 +152,7 @@ fun main(args: Array<String>) {
             generateConstructor("public")
         } else if (FeatureFlag.BUILDER()
                 || FeatureFlag.COPY_CONSTRUCTOR()
-                || FeatureFlag.WITHERS()
-                || FeatureFlag.PARCELABLE()) {
+                || FeatureFlag.WITHERS()) {
             generateConstructor("/* package-private */")
         }
         if (FeatureFlag.COPY_CONSTRUCTOR()) generateCopyConstructor()

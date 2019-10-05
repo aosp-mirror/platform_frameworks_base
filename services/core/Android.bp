@@ -48,7 +48,7 @@ genrule {
         ":services.core.protolog.json",
     ],
     cmd: "cp $(location :generate-protolog.json) $(out) && " +
-      "{ diff $(out) $(location :services.core.protolog.json) >/dev/null 2>&1 || " +
+      "{ ! (diff $(out) $(location :services.core.protolog.json) | grep -q '^<') || " +
       "{ echo -e '\\n\\n################################################################\\n#\\n" +
       "#  ERROR: ProtoLog viewer config is stale.  To update it, run:\\n#\\n" +
       "#  cp $(location :generate-protolog.json) " +
@@ -108,7 +108,7 @@ java_library_static {
         "android.hardware.biometrics.fingerprint-V2.1-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.tetheroffload.control-V1.0-java",
-        "android.hardware.vibrator-V1.0-java",
+        "android.hardware.vibrator-V1.4-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
         "android.hidl.manager-V1.2-java",

@@ -50,14 +50,19 @@ object ProtoLogTool {
         command.javaSourceArgs.forEach { path ->
             val file = File(path)
             val text = file.readText()
-            val code = tryParse(text, path)
-            val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
-                    .get().nameAsString else ""
-            val newPath = pack.replace('.', '/') + '/' + file.name
-            val outSrc = when {
-                containsProtoLogText(text, command.protoLogClassNameArg) ->
+            val newPath = path
+            val outSrc = try {
+                val code = tryParse(text, path)
+                if (containsProtoLogText(text, command.protoLogClassNameArg)) {
                     transformer.processClass(text, newPath, code)
-                else -> text
+                } else {
+                    text
+                }
+            } catch (ex: ParsingException) {
+                // If we cannot parse this file, skip it (and log why). Compilation will fail
+                // in a subsequent build step.
+                println("\n${ex.message}\n")
+                text
             }
             outJar.putNextEntry(ZipEntry(newPath))
             outJar.write(outSrc.toByteArray())
@@ -91,11 +96,17 @@ object ProtoLogTool {
             val file = File(path)
             val text = file.readText()
             if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                val code = tryParse(text, path)
-                val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
-                        .get().nameAsString else ""
-                val newPath = pack.replace('.', '/') + '/' + file.name
-                builder.processClass(code, newPath)
+                try {
+                    val code = tryParse(text, path)
+                    val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
+                            .get().nameAsString else ""
+                    val newPath = pack.replace('.', '/') + '/' + file.name
+                    builder.processClass(code, newPath)
+                } catch (ex: ParsingException) {
+                    // If we cannot parse this file, skip it (and log why). Compilation will fail
+                    // in a subsequent build step.
+                    println("\n${ex.message}\n")
+                }
             }
         }
         val out = FileOutputStream(command.viewerConfigJsonArg)

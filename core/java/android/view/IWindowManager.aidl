@@ -644,4 +644,16 @@ interface IWindowManager
      * Enables/disables SurfaceFlinger layer tracing.
      */
     void setLayerTracing(boolean enabled);
+
+    /**
+     * Mirrors a specified display. The root of the mirrored hierarchy will be stored in
+     * outSurfaceControl.
+     * Requires the ACCESS_SURFACE_FLINGER permission.
+     *
+     * @param displayId The id of the display to mirror
+     * @param outSurfaceControl The SurfaceControl for the root of the mirrored hierarchy.
+     *
+     * @return true if the display was successfully mirrored.
+     */
+    boolean mirrorDisplay(int displayId, out SurfaceControl outSurfaceControl);
 }

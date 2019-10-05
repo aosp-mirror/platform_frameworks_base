@@ -206,11 +206,6 @@ public class BaseWifiService extends IWifiManager.Stub {
         throw new UnsupportedOperationException();
     }
 
-    /** @removed */
-    public void setCountryCode(String country) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public String getCountryCode() {
         throw new UnsupportedOperationException();
@@ -335,11 +330,6 @@ public class BaseWifiService extends IWifiManager.Stub {
 
     @Override
     public void notifyUserOfApBandConversion(String packageName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /** @removed */
-    public Messenger getWifiServiceMessenger(String packageName) {
         throw new UnsupportedOperationException();
     }
 

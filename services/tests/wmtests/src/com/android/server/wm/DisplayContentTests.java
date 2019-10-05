@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
@@ -46,6 +47,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
@@ -394,6 +396,59 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(!window1.isFocused());
         assertEquals(window1.getDisplayId(),
                 mWm.mRoot.getTopFocusedDisplayContent().getDisplayId());
+    }
+
+    @Test
+    public void testShouldWaitForSystemDecorWindowsOnBoot_OnDefaultDisplay() {
+        mWm.mSystemBooted = true;
+        final DisplayContent defaultDisplay = mWm.getDefaultDisplayContentLocked();
+        final WindowState[] windows = createNotDrawnWindowsOn(defaultDisplay,
+                TYPE_WALLPAPER, TYPE_APPLICATION);
+
+        // Verify waiting for windows to be drawn.
+        assertTrue(defaultDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+
+        // Verify not waiting for drawn windows.
+        makeWindowsDrawn(windows);
+        assertFalse(defaultDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+    }
+
+    @Test
+    public void testShouldWaitForSystemDecorWindowsOnBoot_OnSecondaryDisplay() {
+        mWm.mSystemBooted = true;
+        final DisplayContent secondaryDisplay = createNewDisplay();
+        final WindowState[] windows = createNotDrawnWindowsOn(secondaryDisplay,
+                TYPE_WALLPAPER, TYPE_APPLICATION);
+
+        // Verify not waiting for display without system decorations.
+        doReturn(false).when(secondaryDisplay).supportsSystemDecorations();
+        assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+
+        // Verify waiting for non-drawn windows on display with system decorations.
+        reset(secondaryDisplay);
+        doReturn(true).when(secondaryDisplay).supportsSystemDecorations();
+        assertTrue(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+
+        // Verify not waiting for drawn windows on display with system decorations.
+        makeWindowsDrawn(windows);
+        assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+    }
+
+    private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
+        final WindowState[] windows = new WindowState[types.length];
+        for (int i = 0; i < types.length; i++) {
+            final int type = types[i];
+            windows[i] = createWindow(null /* parent */, type, displayContent, "window-" + type);
+            windows[i].mHasSurface = false;
+        }
+        return windows;
+    }
+
+    private static void makeWindowsDrawn(WindowState[] windows) {
+        for (WindowState window : windows) {
+            window.mHasSurface = true;
+            window.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        }
     }
 
     /**

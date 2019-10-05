@@ -20,6 +20,7 @@ import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -191,6 +192,17 @@ public class ResourcesManager {
                 }
             }
             Log.i(TAG, "Invalidated " + count + " asset managers that referenced " + path);
+
+            for (int i = mCachedApkAssets.size() - 1; i >= 0; i--) {
+                final ApkKey key = mCachedApkAssets.keyAt(i);
+                if (key.path.equals(path)) {
+                    WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.remove(key);
+                    if (apkAssetsRef != null && apkAssetsRef.get() != null) {
+                        apkAssetsRef.get().close();
+                    }
+                    mCachedApkAssets.remove(key);
+                }
+            }
         }
     }
 
@@ -997,6 +1009,14 @@ public class ResourcesManager {
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+        }
+    }
+
+    @TestApi
+    public final boolean applyConfigurationToResources(@NonNull Configuration config,
+            @Nullable CompatibilityInfo compat) {
+        synchronized(this) {
+            return applyConfigurationToResourcesLocked(config, compat);
         }
     }
 

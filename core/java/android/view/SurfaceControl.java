@@ -91,7 +91,7 @@ public final class SurfaceControl implements Parcelable {
             boolean captureSecureLayers);
     private static native ScreenshotGraphicBuffer nativeCaptureLayers(IBinder displayToken,
             long layerObject, Rect sourceCrop, float frameScale, long[] excludeLayerObjects);
-
+    private static native long nativeMirrorSurface(long mirrorOfObject);
     private static native long nativeCreateTransaction();
     private static native long nativeGetNativeTransactionFinalizer();
     private static native void nativeApplyTransaction(long transactionObj, boolean sync);
@@ -2032,6 +2032,28 @@ public final class SurfaceControl implements Parcelable {
                     + " or -1 to turn the backlight off.");
         }
         return nativeSetDisplayBrightness(displayToken, brightness);
+    }
+
+    /**
+     * Creates a mirrored hierarchy for the mirrorOf {@link SurfaceControl}
+     *
+     * Real Hierarchy    Mirror
+     *                     SC (value that's returned)
+     *                      |
+     *      A               A'
+     *      |               |
+     *      B               B'
+     *
+     * @param mirrorOf The root of the hierarchy that should be mirrored.
+     * @return A SurfaceControl that's the parent of the root of the mirrored hierarchy.
+     *
+     * @hide
+     */
+    public static SurfaceControl mirrorSurface(SurfaceControl mirrorOf) {
+        long nativeObj = nativeMirrorSurface(mirrorOf.mNativeObject);
+        SurfaceControl sc = new SurfaceControl();
+        sc.assignNativeObject(nativeObj);
+        return sc;
     }
 
      /**

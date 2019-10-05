@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.engine;
+package com.android.server.integrity.model;
 
 /**
  * The app install metadata.
@@ -32,7 +32,7 @@ public final class AppInstallMetadata {
     final int mVersionCode;
     final boolean mIsPreInstalled;
 
-    AppInstallMetadata(String packageName, String appCertificate, String installerName,
+    public AppInstallMetadata(String packageName, String appCertificate, String installerName,
             String installerCertificate, int versionCode, boolean isPreInstalled) {
         this.mPackageName = packageName;
         this.mAppCertificate = appCertificate;

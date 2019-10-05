@@ -1,6 +1,7 @@
 package com.android.codegen
 
 import com.github.javaparser.ast.Modifier
+import com.github.javaparser.ast.body.CallableDeclaration
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.*
@@ -37,6 +38,7 @@ class ClassPrinter(
     val GeneratedMember by lazy { classRef("com.android.internal.util.DataClass.Generated.Member") }
     val Parcelling by lazy { classRef("com.android.internal.util.Parcelling") }
     val Parcelable by lazy { classRef("android.os.Parcelable") }
+    val Parcel by lazy { classRef("android.os.Parcel") }
     val UnsupportedAppUsage by lazy { classRef("android.annotation.UnsupportedAppUsage") }
 
     init {
@@ -354,7 +356,9 @@ class ClassPrinter(
     }
 
     fun hasMethod(name: String, vararg argTypes: String): Boolean {
-        return classAst.methods.any {
+        val members: List<CallableDeclaration<*>> =
+                if (name == ClassName) classAst.constructors else classAst.methods
+        return members.any {
             it.name.asString() == name &&
                     it.parameters.map { it.type.asString() } == argTypes.toList()
         }
@@ -364,6 +368,10 @@ class ClassPrinter(
             .filter { it.isTransient && !it.isStatic }
             .mapIndexed { i, node -> FieldInfo(index = i, fieldAst = node, classInfo = this) }
             .filter { hasMethod("lazyInit${it.NameUpperCamel}") }
+
+    val extendsParcelableClass by lazy {
+        Parcelable !in superInterfaces && superClass != null
+    }
 
     init {
         val builderFactoryOverride = classAst.methods.find {

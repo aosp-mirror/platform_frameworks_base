@@ -61,7 +61,10 @@ import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -117,6 +120,7 @@ import com.android.internal.widget.LockPatternUtils.CredentialType;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LocalServices;
+import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
@@ -387,8 +391,15 @@ public class LockSettingsService extends ILockSettings.Stub {
             return mContext;
         }
 
-        public Handler getHandler() {
-            return new Handler();
+        public ServiceThread getServiceThread() {
+            ServiceThread handlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
+                    true /*allowIo*/);
+            handlerThread.start();
+            return handlerThread;
+        }
+
+        public Handler getHandler(ServiceThread handlerThread) {
+            return new Handler(handlerThread.getLooper());
         }
 
         public LockSettingsStorage getStorage() {
@@ -483,6 +494,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         public boolean isGsiRunning() {
             return SystemProperties.getInt(GSI_RUNNING_PROP, 0) > 0;
         }
+
+        public FingerprintManager getFingerprintManager() {
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                return (FingerprintManager) mContext.getSystemService(Context.FINGERPRINT_SERVICE);
+            } else {
+                return null;
+            }
+        }
+
+        public FaceManager getFaceManager() {
+            if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
+                return (FaceManager) mContext.getSystemService(Context.FACE_SERVICE);
+            } else {
+                return null;
+            }
+        }
+
     }
 
     public LockSettingsService(Context context) {
@@ -495,7 +523,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext = injector.getContext();
         mKeyStore = injector.getKeyStore();
         mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager(mKeyStore);
-        mHandler = injector.getHandler();
+        mHandler = injector.getHandler(injector.getServiceThread());
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
 
@@ -2713,6 +2741,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);
+            removeBiometricsForUser(userId);
         }
         setSyntheticPasswordHandleLocked(newHandle, userId);
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
@@ -2726,6 +2755,85 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         return newHandle;
+    }
+
+    private void removeBiometricsForUser(int userId) {
+        removeAllFingerprintForUser(userId);
+        removeAllFaceForUser(userId);
+    }
+
+    private void removeAllFingerprintForUser(final int userId) {
+        FingerprintManager mFingerprintManager = mInjector.getFingerprintManager();
+        if (mFingerprintManager != null && mFingerprintManager.isHardwareDetected()) {
+            if (mFingerprintManager.hasEnrolledFingerprints(userId)) {
+                mFingerprintManager.setActiveUser(userId);
+                CountDownLatch latch = new CountDownLatch(1);
+                // For the purposes of M and N, groupId is the same as userId.
+                Fingerprint finger = new Fingerprint(null, userId, 0, 0);
+                mFingerprintManager.remove(finger, userId,
+                        fingerprintManagerRemovalCallback(latch));
+                try {
+                    latch.await(10000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Slog.e(TAG, "Latch interrupted when removing fingerprint", e);
+                }
+            }
+        }
+    }
+
+    private void removeAllFaceForUser(final int userId) {
+        FaceManager mFaceManager = mInjector.getFaceManager();
+        if (mFaceManager != null && mFaceManager.isHardwareDetected()) {
+            if (mFaceManager.hasEnrolledTemplates(userId)) {
+                mFaceManager.setActiveUser(userId);
+                CountDownLatch latch = new CountDownLatch(1);
+                Face face = new Face(null, 0, 0);
+                mFaceManager.remove(face, userId, faceManagerRemovalCallback(latch));
+                try {
+                    latch.await(10000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Slog.e(TAG, "Latch interrupted when removing face", e);
+                }
+            }
+        }
+    }
+
+    private FingerprintManager.RemovalCallback fingerprintManagerRemovalCallback(
+            CountDownLatch latch) {
+        return new FingerprintManager.RemovalCallback() {
+            @Override
+            public void onRemovalError(Fingerprint fp, int errMsgId, CharSequence err) {
+                Slog.e(TAG, String.format(
+                        "Can't remove fingerprint %d in group %d. Reason: %s",
+                        fp.getBiometricId(), fp.getGroupId(), err));
+                latch.countDown();
+            }
+
+            @Override
+            public void onRemovalSucceeded(Fingerprint fp, int remaining) {
+                if (remaining == 0) {
+                    latch.countDown();
+                }
+            }
+        };
+    }
+
+    private FaceManager.RemovalCallback faceManagerRemovalCallback(CountDownLatch latch) {
+        return new FaceManager.RemovalCallback() {
+            @Override
+            public void onRemovalError(Face face, int errMsgId, CharSequence err) {
+                Slog.e(TAG, String.format("Can't remove face %d. Reason: %s",
+                        face.getBiometricId(), err));
+                latch.countDown();
+            }
+
+            @Override
+            public void onRemovalSucceeded(Face face, int remaining) {
+                if (remaining == 0) {
+                    latch.countDown();
+                }
+            }
+        };
     }
 
     @GuardedBy("mSpManager")

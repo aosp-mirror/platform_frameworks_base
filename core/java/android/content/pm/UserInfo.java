@@ -187,6 +187,18 @@ public class UserInfo implements Parcelable {
     @UnsupportedAppUsage
     public boolean guestToRemove;
 
+    /**
+     * This is used to optimize the creation of an user, i.e. OEMs might choose to pre-create a
+     * number of users at the first boot, so the actual creation later is faster.
+     *
+     * <p>A {@code preCreated} user is not a real user yet, so it should not show up on regular
+     * user operations (other than user creation per se).
+     *
+     * <p>Once the pre-created is used to create a "real" user later on, {@code preCreate} is set to
+     * {@code false}.
+     */
+    public boolean preCreated;
+
     @UnsupportedAppUsage
     public UserInfo(int id, String name, int flags) {
         this(id, name, null, flags);
@@ -214,6 +226,13 @@ public class UserInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public boolean isGuest() {
+        return isGuest(flags);
+    }
+
+    /**
+     * Checks if the flag denotes a guest user.
+     */
+    public static boolean isGuest(@UserInfoFlag int flags) {
         return (flags & FLAG_GUEST) == FLAG_GUEST;
     }
 
@@ -224,6 +243,13 @@ public class UserInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public boolean isManagedProfile() {
+        return isManagedProfile(flags);
+    }
+
+    /**
+     * Checks if the flag denotes a managed profile.
+     */
+    public static boolean isManagedProfile(@UserInfoFlag int flags) {
         return (flags & FLAG_MANAGED_PROFILE) == FLAG_MANAGED_PROFILE;
     }
 
@@ -315,6 +341,7 @@ public class UserInfo implements Parcelable {
         lastLoggedInTime = orig.lastLoggedInTime;
         lastLoggedInFingerprint = orig.lastLoggedInFingerprint;
         partial = orig.partial;
+        preCreated = orig.preCreated;
         profileGroupId = orig.profileGroupId;
         restrictedProfileParentId = orig.restrictedProfileParentId;
         guestToRemove = orig.guestToRemove;
@@ -339,6 +366,8 @@ public class UserInfo implements Parcelable {
         return "UserInfo[id=" + id
                 + ", name=" + name
                 + ", flags=" + flagsToString(flags)
+                + (preCreated ? " (pre-created)" : "")
+                + (partial ? " (partial)" : "")
                 + "]";
     }
 
@@ -362,9 +391,10 @@ public class UserInfo implements Parcelable {
         dest.writeLong(creationTime);
         dest.writeLong(lastLoggedInTime);
         dest.writeString(lastLoggedInFingerprint);
-        dest.writeInt(partial ? 1 : 0);
+        dest.writeBoolean(partial);
+        dest.writeBoolean(preCreated);
         dest.writeInt(profileGroupId);
-        dest.writeInt(guestToRemove ? 1 : 0);
+        dest.writeBoolean(guestToRemove);
         dest.writeInt(restrictedProfileParentId);
         dest.writeInt(profileBadge);
     }
@@ -389,9 +419,10 @@ public class UserInfo implements Parcelable {
         creationTime = source.readLong();
         lastLoggedInTime = source.readLong();
         lastLoggedInFingerprint = source.readString();
-        partial = source.readInt() != 0;
+        partial = source.readBoolean();
+        preCreated = source.readBoolean();
         profileGroupId = source.readInt();
-        guestToRemove = source.readInt() != 0;
+        guestToRemove = source.readBoolean();
         restrictedProfileParentId = source.readInt();
         profileBadge = source.readInt();
     }

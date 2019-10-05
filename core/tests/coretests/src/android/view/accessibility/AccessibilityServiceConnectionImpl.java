@@ -23,8 +23,6 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.IBinder;
 
-import java.util.List;
-
 /**
  * Stub implementation of IAccessibilityServiceConnection so each test doesn't need to implement
  * all of the methods
@@ -73,7 +71,7 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return null;
     }
 
-    public List<AccessibilityWindowInfo> getWindows() {
+    public AccessibilityWindowInfo.WindowListSparseArray getWindows() {
         return null;
     }
 

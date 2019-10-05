@@ -302,7 +302,7 @@ interface ITelephony {
      * operator's MCC (Mobile Country Code).
      * @see android.telephony.TelephonyManager#getNetworkCountryIso
      */
-    String getNetworkCountryIsoForPhone(int phoneId);
+    String getNetworkCountryIsoForPhone(int phoneId, String callingPkg);
 
     /**
      * Returns the neighboring cell information of the device.

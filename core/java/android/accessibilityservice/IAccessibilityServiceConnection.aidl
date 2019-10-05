@@ -60,7 +60,7 @@ interface IAccessibilityServiceConnection {
 
     AccessibilityWindowInfo getWindow(int windowId);
 
-    List<AccessibilityWindowInfo> getWindows();
+    AccessibilityWindowInfo.WindowListSparseArray getWindows();
 
     AccessibilityServiceInfo getServiceInfo();
 

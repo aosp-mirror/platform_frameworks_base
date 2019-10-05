@@ -16,10 +16,9 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import android.content.Context;
 import android.util.MathUtils;
 
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -52,8 +51,8 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     @Inject
     NotificationRoundnessManager(
             KeyguardBypassController keyguardBypassController,
-            Context context) {
-        int numberOfSections = NotificationData.getNotificationBuckets(context).length;
+            NotificationSectionsFeatureManager sectionsFeatureManager) {
+        int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
         mFirstInSectionViews = new ActivatableNotificationView[numberOfSections];
         mLastInSectionViews = new ActivatableNotificationView[numberOfSections];
         mTmpFirstInSectionViews = new ActivatableNotificationView[numberOfSections];

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package android.hardware.biometrics;
+package com.android.internal.util.function;
+
+import java.util.function.Consumer;
 
 /**
- * Communication channel between ConfirmDeviceCredential / ConfirmLock* and BiometricService.
+ * A 10-argument {@link Consumer}
+ *
  * @hide
  */
-interface IBiometricConfirmDeviceCredentialCallback {
-    // Invoked when authentication should be canceled.
-    oneway void cancel();
+public interface DecConsumer<A, B, C, D, E, F, G, H, I, J> {
+    void accept(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j);
 }

@@ -104,12 +104,6 @@ it should be shown.
 Shows the drag handle for the divider between two apps when in split screen
 mode.
 
-### [com.android.systemui.SystemBars](/packages/SystemUI/src/com/android/systemui/SystemBars.java)
-
-This is a proxy to the actual SystemUI for the status bar. This loads from
-config_statusBarComponent which defaults to StatusBar. (maybe this should be
-removed and copy how config_systemUiVendorServiceComponent works)
-
 ### [com.android.systemui.status.phone.StatusBar](/packages/SystemUI/src/com/android/systemui/status/phone/StatusBar.java)
 
 This shows the UI for the status bar and the notification shade it contains.

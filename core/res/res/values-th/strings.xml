@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรายชื่อติดต่อไหม"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ตำแหน่ง"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"เข้าถึงตำแหน่งของอุปกรณ์นี้"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงตำแหน่งของอุปกรณ์นี้ไหม"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"อนุญาตให้&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;เข้าถึงตำแหน่งของอุปกรณ์นี้ไหม"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"แอปจะมีสิทธิ์เข้าถึงตำแหน่งในขณะที่คุณใช้แอปเท่านั้น"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงตำแหน่งของอุปกรณ์นี้&lt;b&gt;ตลอดเวลา&lt;/b&gt;ไหม"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"ปัจจุบันแอปมีสิทธิ์เข้าถึงตำแหน่งในขณะที่คุณใช้แอปเท่านั้น"</string>
@@ -298,7 +298,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงรูปภาพ สื่อ และไฟล์ในอุปกรณ์ไหม"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"บันทึกเสียง"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; บันทึกเสียงไหม"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"อนุญาตให้&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;บันทึกเสียงไหม"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"การเคลื่อนไหวร่างกาย"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"เข้าถึงกิจกรรมการเคลื่อนไหวร่างกายของคุณ"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"อนุญาตให้ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; เข้าถึงกิจกรรมการเคลื่อนไหวร่างกายของคุณไหม"</string>
@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ SMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"รับข้อความ (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ MMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"อ่านข้อความที่ได้รับจากสถานีมือถือ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"อนุญาตให้แอปอ่านข้อความจากสถานีมือถือที่อุปกรณ์ได้รับ การแจ้งเตือนทางมือถือมีให้บริการในบางพื้นที่ โดยจะแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจเข้าแทรกแซงการทำงานของอุปกรณ์เมื่อได้รับข้อความแจ้งเตือนฉุกเฉิน"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"อ่านฟีดข้อมูลที่สมัครไว้"</string>

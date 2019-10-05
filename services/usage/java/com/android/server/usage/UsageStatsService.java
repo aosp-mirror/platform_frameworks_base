@@ -97,6 +97,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -159,7 +161,7 @@ public class UsageStatsService extends SystemService implements
     int mUsageSource;
 
     /** Manages the standby state of apps. */
-    AppStandbyController mAppStandby;
+    AppStandbyInternal mAppStandby;
 
     /** Manages app time limit observers */
     AppTimeLimitController mAppTimeLimit;
@@ -208,7 +210,9 @@ public class UsageStatsService extends SystemService implements
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mHandler = new H(BackgroundThread.get().getLooper());
 
-        mAppStandby = new AppStandbyController(getContext(), BackgroundThread.get().getLooper());
+        mAppStandby = AppStandbyInternal.newAppStandbyController(
+                UsageStatsService.class.getClassLoader(), getContext(),
+                BackgroundThread.get().getLooper());
 
         mAppTimeLimit = new AppTimeLimitController(
                 new AppTimeLimitController.TimeLimitCallbackListener() {
@@ -1010,7 +1014,7 @@ public class UsageStatsService extends SystemService implements
                         pw.println("Flushed stats to disk");
                         return;
                     } else if ("is-app-standby-enabled".equals(arg)) {
-                        pw.println(mAppStandby.mAppIdleEnabled);
+                        pw.println(mAppStandby.isAppIdleEnabled());
                         return;
                     } else if ("apptimelimit".equals(arg)) {
                         if (i + 1 >= args.length) {

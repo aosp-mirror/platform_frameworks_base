@@ -29,6 +29,8 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
@@ -65,6 +67,10 @@ import java.util.Locale;
 @SmallTest
 @Presubmit
 public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
+    private static final Rect DISPLAY_BOUNDS = new Rect(/* left */ 0, /* top */ 0,
+            /* right */ 1920, /* bottom */ 1080);
+    private static final Rect DISPLAY_STABLE_BOUNDS = new Rect(/* left */ 100,
+            /* top */ 200, /* right */ 1620, /* bottom */ 680);
 
     private ActivityRecord mActivity;
 
@@ -614,7 +620,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(0, mResult.mBounds.left);
+        assertEquals(DISPLAY_STABLE_BOUNDS.left, mResult.mBounds.left);
     }
 
     @Test
@@ -630,7 +636,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(0, mResult.mBounds.top);
+        assertEquals(DISPLAY_STABLE_BOUNDS.top, mResult.mBounds.top);
     }
 
     @Test
@@ -646,8 +652,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(0, mResult.mBounds.left);
-        assertEquals(0, mResult.mBounds.top);
+        assertEquals(DISPLAY_STABLE_BOUNDS.left, mResult.mBounds.left);
+        assertEquals(DISPLAY_STABLE_BOUNDS.top, mResult.mBounds.top);
     }
 
     @Test
@@ -663,7 +669,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(1920, mResult.mBounds.right);
+        assertEquals(DISPLAY_STABLE_BOUNDS.right, mResult.mBounds.right);
     }
 
     @Test
@@ -679,7 +685,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(1080, mResult.mBounds.bottom);
+        assertEquals(DISPLAY_STABLE_BOUNDS.bottom, mResult.mBounds.bottom);
     }
 
     @Test
@@ -695,8 +701,8 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(1920, mResult.mBounds.right);
-        assertEquals(1080, mResult.mBounds.bottom);
+        assertEquals(DISPLAY_STABLE_BOUNDS.right, mResult.mBounds.right);
+        assertEquals(DISPLAY_STABLE_BOUNDS.bottom, mResult.mBounds.bottom);
     }
 
     @Test
@@ -712,7 +718,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(900, 500, 1020, 580), mResult.mBounds);
+        assertEquals(new Rect(800, 400, 920, 480), mResult.mBounds);
     }
 
     @Test
@@ -728,7 +734,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(0, 500, 120, 580), mResult.mBounds);
+        assertEquals(new Rect(100, 400, 220, 480), mResult.mBounds);
     }
 
     @Test
@@ -744,7 +750,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(900, 0, 1020, 80), mResult.mBounds);
+        assertEquals(new Rect(800, 200, 920, 280), mResult.mBounds);
     }
 
     @Test
@@ -760,7 +766,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(0, 0, 120, 80), mResult.mBounds);
+        assertEquals(new Rect(100, 200, 220, 280), mResult.mBounds);
     }
 
     @Test
@@ -776,7 +782,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(1800, 500, 1920, 580), mResult.mBounds);
+        assertEquals(new Rect(1500, 400, 1620, 480), mResult.mBounds);
     }
 
     @Test
@@ -792,7 +798,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(900, 1000, 1020, 1080), mResult.mBounds);
+        assertEquals(new Rect(800, 600, 920, 680), mResult.mBounds);
     }
 
     @Test
@@ -808,7 +814,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(1800, 1000, 1920, 1080), mResult.mBounds);
+        assertEquals(new Rect(1500, 600, 1620, 680), mResult.mBounds);
     }
 
     @Test
@@ -819,12 +825,12 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.mPreferredDisplayId = freeformDisplay.mDisplayId;
 
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
-                .setWidthFraction(0.0625f).setHeightFraction(0.1f).build();
+                .setWidthFraction(0.125f).setHeightFraction(0.1f).build();
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquals(new Rect(900, 486, 1020, 594), mResult.mBounds);
+        assertEquals(new Rect(765, 416, 955, 464), mResult.mBounds);
     }
 
     @Test
@@ -952,13 +958,12 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
-        final Rect displayBounds = freeformDisplay.getBounds();
         assertEquals("Distance to left and right should be equal.",
-                mResult.mBounds.left - displayBounds.left,
-                displayBounds.right - mResult.mBounds.right);
+                mResult.mBounds.left - DISPLAY_STABLE_BOUNDS.left,
+                DISPLAY_STABLE_BOUNDS.right - mResult.mBounds.right, /* delta */ 1);
         assertEquals("Distance to top and bottom should be equal.",
-                mResult.mBounds.top - displayBounds.top,
-                displayBounds.bottom - mResult.mBounds.bottom);
+                mResult.mBounds.top - DISPLAY_STABLE_BOUNDS.top,
+                DISPLAY_STABLE_BOUNDS.bottom - mResult.mBounds.bottom, /* delta */ 1);
     }
 
     @Test
@@ -1041,15 +1046,16 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
 
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
-        mCurrent.mBounds.set(100, 200, 2120, 1380);
+        mCurrent.mBounds.set(100, 300, 1820, 1380);
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
-        assertTrue("Result bounds should start from origin, but it's " + mResult.mBounds,
-                mResult.mBounds.left == 0 && mResult.mBounds.top == 0);
+        assertTrue("Result bounds should start from app bounds's origin, but it's "
+                        + mResult.mBounds,
+                mResult.mBounds.left == 100 && mResult.mBounds.top == 200);
     }
 
     @Test
@@ -1067,21 +1073,27 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
 
         mCurrent.mWindowingMode = WINDOWING_MODE_FREEFORM;
-        mCurrent.mBounds.set(100, 200, 2120, 1380);
+        mCurrent.mBounds.set(100, 300, 1820, 1380);
 
         mActivity.info.applicationInfo.targetSdkVersion = Build.VERSION_CODES.LOLLIPOP;
 
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
-        assertTrue("Result bounds should start from origin, but it's " + mResult.mBounds,
-                mResult.mBounds.left == -100 && mResult.mBounds.top == 0);
+        assertTrue("Result bounds should start from top-right corner of app bounds, but "
+                        + "it's " + mResult.mBounds,
+                mResult.mBounds.left == -100 && mResult.mBounds.top == 200);
     }
 
     @Test
     public void testRespectsLayoutMinDimensions() {
         final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
                 WINDOWING_MODE_FREEFORM);
+
+        // This test case requires a relatively big app bounds to ensure the default size calculated
+        // by letterbox won't be too small to hold the minimum width/height.
+        freeformDisplay.mDisplayContent.mDisplayFrames.mStable.set(/* left */ 10, /* top */ 10,
+                /* right */ 1910, /* top */ 1070);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchDisplayId(freeformDisplay.mDisplayId);
@@ -1245,7 +1257,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
-        assertEquals(new Rect(0, 0, 300, 300), mResult.mBounds);
+        assertEquals(new Rect(100, 200, 400, 500), mResult.mBounds);
     }
 
     @Test
@@ -1301,9 +1313,15 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     private TestActivityDisplay createNewActivityDisplay(int windowingMode) {
         final TestActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
         display.setWindowingMode(windowingMode);
-        display.setBounds(/* left */ 0, /* top */ 0, /* right */ 1920, /* bottom */ 1080);
+        display.setBounds(DISPLAY_BOUNDS);
         display.getConfiguration().densityDpi = DENSITY_DEFAULT;
         display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
+        display.mDisplayContent.mDisplayFrames.mStable.set(DISPLAY_STABLE_BOUNDS);
+        spyOn(display.mDisplayContent.mDisplayFrames);
+
+        // We didn't set up the overall environment for this test, so we need to mute the side
+        // effect of layout passes that loosen the stable frame.
+        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout();
         return display;
     }
 

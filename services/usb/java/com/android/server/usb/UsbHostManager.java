@@ -386,7 +386,7 @@ public class UsbHostManager {
                 return false;
             }
 
-            UsbDevice.Builder newDeviceBuilder = parser.toAndroidUsbDevice();
+            UsbDevice.Builder newDeviceBuilder = parser.toAndroidUsbDeviceBuilder();
             if (newDeviceBuilder == null) {
                 Slog.e(TAG, "Couldn't create UsbDevice object.");
                 // Tracking

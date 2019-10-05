@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -479,6 +480,25 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         // Invalid user should not be unlocked.
         int randomUser = 99;
         assertThat(mKeyguardUpdateMonitor.isUserUnlocked(randomUser)).isFalse();
+    }
+
+    @Test
+    public void testTrustUsuallyManaged_whenTrustChanges() {
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        when(mTrustManager.isTrustUsuallyManaged(eq(user))).thenReturn(true);
+        mKeyguardUpdateMonitor.onTrustManagedChanged(false /* managed */, user);
+        assertThat(mKeyguardUpdateMonitor.isTrustUsuallyManaged(user)).isTrue();
+    }
+
+    @Test
+    public void testTrustUsuallyManaged_resetWhenUserIsRemoved() {
+        int user = KeyguardUpdateMonitor.getCurrentUser();
+        when(mTrustManager.isTrustUsuallyManaged(eq(user))).thenReturn(true);
+        mKeyguardUpdateMonitor.onTrustManagedChanged(false /* managed */, user);
+        assertThat(mKeyguardUpdateMonitor.isTrustUsuallyManaged(user)).isTrue();
+
+        mKeyguardUpdateMonitor.handleUserRemoved(user);
+        assertThat(mKeyguardUpdateMonitor.isTrustUsuallyManaged(user)).isFalse();
     }
 
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {

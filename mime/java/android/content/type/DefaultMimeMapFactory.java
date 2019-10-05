@@ -16,7 +16,7 @@
 
 package android.content.type;
 
-import libcore.net.MimeMap;
+import libcore.content.type.MimeMap;
 
 import java.io.BufferedReader;
 import java.io.IOException;

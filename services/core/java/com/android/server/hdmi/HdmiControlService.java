@@ -311,6 +311,11 @@ public class HdmiControlService extends SystemService {
     private IHdmiControlCallback mDisplayStatusCallback = null;
 
     @Nullable
+    // Save callback when the device is still under logcial address allocation
+    // Invoke once new local device is ready.
+    private IHdmiControlCallback mOtpCallbackPendingAddressAllocation = null;
+
+    @Nullable
     private HdmiCecController mCecController;
 
     // HDMI port information. Stored in the unmodifiable list to keep the static information
@@ -785,17 +790,21 @@ public class HdmiControlService extends SystemService {
                     // Address allocation completed for all devices. Notify each device.
                     if (allocatingDevices.size() == ++finished[0]) {
                         mAddressAllocated = true;
-                        // Reinvoke the saved display status callback once the local device is ready.
-                        if (mDisplayStatusCallback != null) {
-                            queryDisplayStatus(mDisplayStatusCallback);
-                            mDisplayStatusCallback = null;
-                        }
                         if (initiatedBy != INITIATED_BY_HOTPLUG) {
                             // In case of the hotplug we don't call onInitializeCecComplete()
                             // since we reallocate the logical address only.
                             onInitializeCecComplete(initiatedBy);
                         }
                         notifyAddressAllocated(allocatedDevices, initiatedBy);
+                        // Reinvoke the saved display status callback once the local device is ready.
+                        if (mDisplayStatusCallback != null) {
+                            queryDisplayStatus(mDisplayStatusCallback);
+                            mDisplayStatusCallback = null;
+                        }
+                        if (mOtpCallbackPendingAddressAllocation != null) {
+                            oneTouchPlay(mOtpCallbackPendingAddressAllocation);
+                            mOtpCallbackPendingAddressAllocation = null;
+                        }
                         mCecMessageBuffer.processMessages();
                     }
                 }
@@ -2246,8 +2255,16 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void oneTouchPlay(final IHdmiControlCallback callback) {
+    @VisibleForTesting
+    protected void oneTouchPlay(final IHdmiControlCallback callback) {
         assertRunOnServiceThread();
+        if (!mAddressAllocated) {
+            mOtpCallbackPendingAddressAllocation = callback;
+            Slog.d(TAG, "Local device is under address allocation. "
+                        + "Save OTP callback for later process.");
+            return;
+        }
+
         HdmiCecLocalDeviceSource source = playback();
         if (source == null) {
             source = audioSystem();

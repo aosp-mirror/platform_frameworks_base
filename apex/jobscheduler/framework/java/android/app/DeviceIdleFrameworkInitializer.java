@@ -36,7 +36,7 @@ public class DeviceIdleFrameworkInitializer {
         SystemServiceRegistry.registerCachedService(
                 Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
                 (context, b) -> new DeviceIdleManager(
-                        context.getOuterContext(), IDeviceIdleController.Stub.asInterface(b)));
+                        context, IDeviceIdleController.Stub.asInterface(b)));
         PowerManager.setIsIgnoringBatteryOptimizationsCallback((packageName) -> {
             // No need for synchronization on sIDeviceIdleController; worst case
             // we just initialize it twice.

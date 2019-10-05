@@ -38,6 +38,11 @@ open class ClassInfo(val sourceLines: List<String>) {
     val superInterfaces = (fileAst.types[0] as ClassOrInterfaceDeclaration)
             .implementedTypes.map { it.asString() }
 
+    val superClass = run {
+        val superClasses = (fileAst.types[0] as ClassOrInterfaceDeclaration).extendedTypes
+        if (superClasses.isNonEmpty) superClasses[0] else null
+    }
+
     val ClassName = classAst.nameAsString
     private val genericArgsAst = classAst.typeParameters
     val genericArgs = if (genericArgsAst.isEmpty()) "" else {

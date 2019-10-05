@@ -398,9 +398,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             return;
         }
 
-        final Rect bounds = display.getBounds();
-        final int defaultWidth = bounds.width();
-        final int defaultHeight = bounds.height();
+        // Use stable frame instead of raw frame to avoid launching freeform windows on top of
+        // stable insets, which usually are system widgets such as sysbar & navbar.
+        final Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
+        final int defaultWidth = displayStableBounds.width();
+        final int defaultHeight = displayStableBounds.height();
 
         int width;
         int height;
@@ -451,6 +453,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         outBounds.set(0, 0, width, height);
+        outBounds.offset(displayStableBounds.left, displayStableBounds.top);
         final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
         final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
         outBounds.offset(xOffset, yOffset);
@@ -627,10 +630,14 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
         // Default size, which is letterboxing/pillarboxing in display. That's to say the large
         // dimension of default size is the small dimension of display size, and the small dimension
-        // of default size is calculated to keep the same aspect ratio as the display's.
-        Rect displayBounds = display.getBounds();
-        final int portraitHeight = Math.min(displayBounds.width(), displayBounds.height());
-        final int otherDimension = Math.max(displayBounds.width(), displayBounds.height());
+        // of default size is calculated to keep the same aspect ratio as the display's. Here we use
+        // stable bounds of displays because that indicates the area that isn't occupied by system
+        // widgets (e.g. sysbar and navbar).
+        Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
+        final int portraitHeight =
+                Math.min(displayStableBounds.width(), displayStableBounds.height());
+        final int otherDimension =
+                Math.max(displayStableBounds.width(), displayStableBounds.height());
         final int portraitWidth = (portraitHeight * portraitHeight) / otherDimension;
         final int defaultWidth = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? portraitHeight
                 : portraitWidth;
@@ -656,16 +663,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         final int height = Math.min(defaultHeight, Math.max(phoneHeight, layoutMinHeight));
 
         bounds.set(0, 0, width, height);
+        bounds.offset(displayStableBounds.left, displayStableBounds.top);
     }
 
     /**
      * Gets centered bounds of width x height. If inOutBounds is not empty, the result bounds
-     * centers at its center or display's center if inOutBounds is empty.
+     * centers at its center or display's app bounds center if inOutBounds is empty.
      */
     private void centerBounds(@NonNull ActivityDisplay display, int width, int height,
             @NonNull Rect inOutBounds) {
         if (inOutBounds.isEmpty()) {
-            display.getBounds(inOutBounds);
+            inOutBounds.set(display.mDisplayContent.mDisplayFrames.mStable);
         }
         final int left = inOutBounds.centerX() - width / 2;
         final int top = inOutBounds.centerY() - height / 2;
@@ -674,40 +682,40 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
 
     private void adjustBoundsToFitInDisplay(@NonNull ActivityDisplay display,
             @NonNull Rect inOutBounds) {
-        final Rect displayBounds = display.getBounds();
+        final Rect displayStableBounds = display.mDisplayContent.mDisplayFrames.mStable;
 
-        if (displayBounds.width() < inOutBounds.width()
-                || displayBounds.height() < inOutBounds.height()) {
+        if (displayStableBounds.width() < inOutBounds.width()
+                || displayStableBounds.height() < inOutBounds.height()) {
             // There is no way for us to fit the bounds in the display without changing width
             // or height. Just move the start to align with the display.
             final int layoutDirection =
                     mSupervisor.mRootActivityContainer.getConfiguration().getLayoutDirection();
             final int left = layoutDirection == View.LAYOUT_DIRECTION_RTL
-                    ? displayBounds.width() - inOutBounds.width()
-                    : 0;
-            inOutBounds.offsetTo(left, 0 /* newTop */);
+                    ? displayStableBounds.right - inOutBounds.right + inOutBounds.left
+                    : displayStableBounds.left;
+            inOutBounds.offsetTo(left, displayStableBounds.top);
             return;
         }
 
         final int dx;
-        if (inOutBounds.right > displayBounds.right) {
+        if (inOutBounds.right > displayStableBounds.right) {
             // Right edge is out of display.
-            dx = displayBounds.right - inOutBounds.right;
-        } else if (inOutBounds.left < displayBounds.left) {
+            dx = displayStableBounds.right - inOutBounds.right;
+        } else if (inOutBounds.left < displayStableBounds.left) {
             // Left edge is out of display.
-            dx = displayBounds.left - inOutBounds.left;
+            dx = displayStableBounds.left - inOutBounds.left;
         } else {
             // Vertical edges are all in display.
             dx = 0;
         }
 
         final int dy;
-        if (inOutBounds.top < displayBounds.top) {
+        if (inOutBounds.top < displayStableBounds.top) {
             // Top edge is out of display.
-            dy = displayBounds.top - inOutBounds.top;
-        } else if (inOutBounds.bottom > displayBounds.bottom) {
+            dy = displayStableBounds.top - inOutBounds.top;
+        } else if (inOutBounds.bottom > displayStableBounds.bottom) {
             // Bottom edge is out of display.
-            dy = displayBounds.bottom - inOutBounds.bottom;
+            dy = displayStableBounds.bottom - inOutBounds.bottom;
         } else {
             // Horizontal edges are all in display.
             dy = 0;

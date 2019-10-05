@@ -330,6 +330,27 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
                 .lockScreenSecretChanged(CREDENTIAL_TYPE_NONE, null, MANAGED_PROFILE_USER_ID);
     }
 
+    public void testSetLockCredential_nullCredential_removeBiometrics() throws RemoteException {
+        final String oldCredential = "oldPassword";
+
+        initializeStorageWithCredential(
+                PRIMARY_USER_ID,
+                oldCredential,
+                CREDENTIAL_TYPE_PATTERN,
+                PASSWORD_QUALITY_SOMETHING);
+        mService.setSeparateProfileChallengeEnabled(MANAGED_PROFILE_USER_ID, false, null);
+
+        mService.setLockCredential(null, CREDENTIAL_TYPE_NONE, oldCredential.getBytes(),
+                PASSWORD_QUALITY_UNSPECIFIED, PRIMARY_USER_ID, false);
+
+        // Verify fingerprint is removed
+        verify(mFingerprintManager).remove(any(), eq(PRIMARY_USER_ID), any());
+        verify(mFaceManager).remove(any(), eq(PRIMARY_USER_ID), any());
+
+        verify(mFingerprintManager).remove(any(), eq(MANAGED_PROFILE_USER_ID), any());
+        verify(mFaceManager).remove(any(), eq(MANAGED_PROFILE_USER_ID), any());
+    }
+
     public void testSetLockCredential_forUnifiedToSeparateChallengeProfile_sendsNewCredentials()
             throws Exception {
         final String parentPassword = "parentPassword";

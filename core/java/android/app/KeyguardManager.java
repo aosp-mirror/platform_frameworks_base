@@ -87,12 +87,6 @@ public class KeyguardManager {
             "android.app.action.CONFIRM_FRP_CREDENTIAL";
 
     /**
-     * @hide
-     */
-    public static final String EXTRA_BIOMETRIC_PROMPT_BUNDLE =
-            "android.app.extra.BIOMETRIC_PROMPT_BUNDLE";
-
-    /**
      * A CharSequence dialog title to show to the user when used with a
      * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL}.
      * @hide

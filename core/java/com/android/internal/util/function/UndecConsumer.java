@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.server.integrity.engine;
+package com.android.internal.util.function;
+
+import java.util.function.Consumer;
 
 /**
- * The engine used to evaluate rules against app installs.
+ * A 11-argument {@link Consumer}
  *
- * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation engine
- * to allow/block that install.
+ * @hide
  */
-public final class RuleEvaluation {
-    private static final String TAG = "RuleEvaluation";
-
-    // TODO: Add singleton injection.
+public interface UndecConsumer<A, B, C, D, E, F, G, H, I, J, K> {
+    void accept(A a, B b, C c, D d, E e, F f, G g, H h, I i, J j, K k);
 }

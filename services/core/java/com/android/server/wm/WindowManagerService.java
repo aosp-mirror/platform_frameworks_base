@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.ACCESS_SURFACE_FLINGER;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -974,6 +975,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
+
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
             = new WindowManagerInternal.AppTransitionListener() {
@@ -990,7 +992,13 @@ public class WindowManagerService extends IWindowManager.Stub
             if (atoken == null) {
                 return;
             }
-            if (atoken.mLaunchTaskBehind) {
+
+            // While running a recents animation, this will get called early because we show the
+            // recents animation target activity immediately when the animation starts. Defer the
+            // mLaunchTaskBehind updates until recents animation finishes.
+            final boolean isRecentsAnimationTarget = getRecentsAnimationController() != null
+                    && getRecentsAnimationController().isTargetApp(atoken);
+            if (atoken.mLaunchTaskBehind && !isRecentsAnimationTarget) {
                 try {
                     mActivityTaskManager.notifyLaunchTaskBehindComplete(atoken.token);
                 } catch (RemoteException e) {
@@ -998,20 +1006,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 atoken.mLaunchTaskBehind = false;
             } else {
                 atoken.updateReportedVisibilityLocked();
-                if (atoken.mEnteringAnimation) {
-                    if (getRecentsAnimationController() != null
-                            && getRecentsAnimationController().isTargetApp(atoken)) {
-                        // Currently running a recents animation, this will get called early because
-                        // we show the recents animation target activity immediately when the
-                        // animation starts. In this case, we should defer sending the finished
-                        // callback until the animation successfully finishes
-                        return;
-                    } else {
-                        atoken.mEnteringAnimation = false;
-                        try {
-                            mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
-                        } catch (RemoteException e) {
-                        }
+                // We should also defer sending the finished callback until the recents animation
+                // successfully finishes.
+                if (atoken.mEnteringAnimation && !isRecentsAnimationTarget) {
+                    atoken.mEnteringAnimation = false;
+                    try {
+                        mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
+                    } catch (RemoteException e) {
                     }
                 }
             }
@@ -3290,10 +3291,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Don't enable the screen until all existing windows have been drawn.
-            if (!mForceDisplayEnabled
-                    // TODO(multidisplay): Expand to all displays?
-                    && getDefaultDisplayContentLocked().checkWaitingForWindows()) {
-                return;
+            if (!mForceDisplayEnabled) {
+                for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
+                    if (mRoot.getChildAt(i).shouldWaitForSystemDecorWindowsOnBoot()) {
+                        return;
+                    }
+                }
             }
 
             if (!mBootAnimationStopped) {
@@ -7744,5 +7747,28 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public boolean mirrorDisplay(int displayId, SurfaceControl outSurfaceControl) {
+        if (!checkCallingPermission(ACCESS_SURFACE_FLINGER, "mirrorDisplay()")) {
+            throw new SecurityException("Requires ACCESS_SURFACE_FLINGER permission");
+        }
+
+        final SurfaceControl displaySc;
+        synchronized (mGlobalLock) {
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.e(TAG, "Invalid displayId " + displayId + " for mirrorDisplay");
+                return false;
+            }
+
+            displaySc = displayContent.getSurfaceControl();
+        }
+
+        final SurfaceControl mirror = SurfaceControl.mirrorSurface(displaySc);
+        outSurfaceControl.copyFrom(mirror);
+
+        return true;
     }
 }
