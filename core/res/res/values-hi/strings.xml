@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"एप्लिकेशन को मैसेज (एसएमएस) पाने और प्रोसेस करने देता है. इसका मतलब है कि एप्लिकेशन आपके डिवाइस पर भेजे गए मैसेज की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"मैसेज (एमएमएस) पाएं"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ऐप को मल्टीमीडिया मैसेज (एमएमएस) को पाने और उन पर कार्रवाई करने देता है. इसका मतलब है कि ऐप आपके डिवाइस पर भेजे गए मैसेज की निगरानी आपको दिखाए बिना कर सकता है और उन्‍हें हटा सकता है."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल ब्रॉडकास्ट (CBC) मैसेज पढ़ें"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ऐप को, वो सेल ब्रॉडकास्ट (CBC) मैसेज पढ़ने देता है जो आपके डिवाइस को मिले हैं. सेल ब्रॉडकास्ट (CBC) अलर्ट कुछ स्थानों (लोकेशन) पर आपको आपातकालीन स्‍थितियों की चेतावनी देने के लिए दिए जाते हैं. आपातकालीन सेल ब्रॉडकास्ट (CBC) मिलने पर, धोखा देने वाले ऐप आपके डिवाइस के परफ़ॉर्मेंस या कार्यवाही में दखल दे सकते हैं."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता वाली फ़ीड पढ़ें"</string>

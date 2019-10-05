@@ -324,7 +324,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ڈسپلے کے زوم کی سطح اور پوزیشن کو کنٹرول کریں۔"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"اشارے انجام دینے کی"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"تھپتھپانا، سوائپ کرنا، چٹکی بھرنا اور دیگر اشارے انجام دے سکتی ہے"</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"فنگرپرنٹ کے اشارے"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"فنگر پرنٹ کے اشارے"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏ایپ کو SMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"‏متنی پیغامات (MMS) حاصل کریں"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"‏ایپ کو MMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"سیل کے نشریاتی پیغامات پڑھیں"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"سبسکرائب کردہ فیڈز پڑھیں"</string>

@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lejon aplikacionin të marrë dhe përpunojë mesazhe SMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prano mesazhe në tekst (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lejon aplikacionin të marrë dhe përpunojë mesazhe MMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lexo mesazhet e transmetimit të qelizës"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lejon aplikacionin të lexojë mesazhet e transmetimit të qelizës, të marra nga pajisja jote. Alarmet e transmetimit të qelizës dërgohen në disa vendndodhje për të të paralajmëruar në situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në veprimtarinë ose operacionin e pajisjes tënde kur merret një transmetim urgjent i qelizës."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lexo informacione të abonuara"</string>
@@ -549,7 +553,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Shumë përpjekje. Sensori i gjurmës së gishtit u çaktivizua."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Provo përsëri."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Nuk ka asnjë gjurmë gishti të regjistruar."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Kjo pajisje nuk ka një sensor të gjurmës së gishtit."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"Kjo pajisje nuk ka sensor të gjurmës së gishtit."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Gishti <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1359,7 +1363,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Pajisja e lidhur po karikohet. Trokit për opsione të tjera."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"U zbulua aksesor i audios analoge"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Pajisja e bashkuar nuk është e pajtueshme me këtë telefon. Trokit për të mësuar më shumë."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së i lidhur"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Korrigjuesi i USB-së është i lidhur"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Trokit për të çaktivizuar korrigjimin e USB-së"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Përzgjidhe për të çaktivizuar korrigjimin e gabimeve të USB-së"</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Modaliteti i lidhjes së testimit është aktivizuar"</string>
@@ -1584,8 +1588,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Skadon më:"</string>
     <string name="serial_number" msgid="758814067660862493">"Numri serik:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Shenjat e gishtave:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Shenja e gishtit SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Shenja e gishtit SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Gjurma e gishtit SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Gjurma e gishtit SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Shikoji të gjitha"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Zgjidh aktivitetin"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Shpërnda publikisht me"</string>

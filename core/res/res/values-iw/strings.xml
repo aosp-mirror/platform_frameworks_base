@@ -350,6 +350,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏מאפשר לאפליקציה לקבל ולעבד הודעות SMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"‏קבלת הודעות טקסט (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"‏מאפשר לאפליקציה לקבל ולעבד הודעות MMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"קריאת הודעות שידור סלולרי"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"מאפשר לאפליקציה לקרוא הודעות שידור סלולרי שהתקבלו במכשיר שלך. התראות שידור סלולרי נשלחות במקומות מסוימים על מנת להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר שלך כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"קרא עדכוני מנויים"</string>

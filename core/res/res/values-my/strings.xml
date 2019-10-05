@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"အပလီကေးရှင်းအား စာတိုများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"စာပို့ခြင်းအား လက်ခံရယူခြင်း (ရုပ်သံစာ)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"အပလီကေးရှင်းအား ရုပ်သံစာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"စာတိုများ ဖြန့်ဝေခြင်းစနစ်အား ဖတ်ခြင်း"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"အပလီကေးရှင်းကို သင်၏ စက်ပစ္စည်းမှ လက်ခံရရှိသော အများလွှင့်ထုတ်ချက်များကို ဖတ်ရန် ခွင့်ပြုသည်။  အများလွှင့်ထုတ်ချက်များသည် အရေးပေါ်အခြေအနေများကို သင့်အား သတိပေးရန် အချို့ နေရာများတွင် ပို့ပေးသည်။ အရေးပေါ်သတိပေးချက် ထုတ်လွှင့်ချက်ကို လက်ခံရရှိချိန်တွင်အန္တရာယ် ဖြစ်စေနိုင်သော အပလီကေးရှင်းများသည် သင့်စက်ပစ္စည်း၏ လုပ်ငန်းလည်ပတ်မှုနှင့် စွမ်းဆောင်မှုကို ဝင်စွက်ဖက်နိုင်သည်။"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"အမည်သွင်းထားသောဖိဖ့်များကို ဖတ်ခြင်း"</string>
@@ -1453,8 +1457,8 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"အောက်ပါထဲက အက်ပ်တစ်ခု သို့မဟုတ် ပိုလျက် သင်၏ အကောင့်ကို၊ ယခု နှင့် အနာဂတ်မှာ ရယူအသုံးချရန် ခွင့်ပြုချက်ကို တောင်းထားသည်။"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"ဤတောင်းခံမှုအားခွင့်ပြုမည်လား"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"သုံးစွဲခွင့် တောင်းဆိုရန်"</string>
-    <string name="allow" msgid="7225948811296386551">"ခွင့်ပြုသည်"</string>
-    <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်သည်"</string>
+    <string name="allow" msgid="7225948811296386551">"ခွင့်ပြုရန်"</string>
+    <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်ရန်"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ခွင့်ပြုချက် တောင်းခံထားခြင်း"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"အကောင့် <xliff:g id="ACCOUNT">%s</xliff:g> အတွက် \n ခွင့်ပြုချက် တောင်းခံထားပြီး"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"သင်သည် ဒီအက်ပ်ကို သင့်အလုပ်ပရိုဖိုင် ပြင်ပတွင် အသုံးပြုနေ၏"</string>

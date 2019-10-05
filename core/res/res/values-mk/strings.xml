@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до контактите?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"пристапува до локацијата на овој уред"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до локацијата на уредот?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до локацијата на уредов?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"Апликацијата ќе има пристап до локацијата само додека ја користите"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"Да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до локацијата на уредов &lt;b&gt;во секое време&lt;/b&gt;?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"Апликацијата во моментов може да пристапува до локацијата само додека ја користите"</string>
@@ -344,6 +344,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Овозможува апликацијата да прима и да обработува SMS пораки. Тоа значи дека апликацијата може да следи или да брише пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"прими текстуални пораки (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Овозможува апликацијата да прима и да обработува MMS пораки. Тоа значи дека апликацијата може да следи или да брише пораки испратени до вашиот уред без да ви ги прикаже вам."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"прочитај пораки за мобилно емитување"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Овозможува апликациите да ги читаат пораките за мобилно емитување што ги прима вашиот уред. Предупредувањата за мобилно емитување се доставуваат на некои локации, за да ве предупредат на итни ситуации. Злонамерните апликации може да пречат во ефикасноста или работењето на вашиот уред кога се прима емитување за итен случај."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"читај претплатени навестувања на содржина"</string>
@@ -656,7 +660,7 @@
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"започнете со користење на дозволата за приказ"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Дозволува сопственикот да почне со користење на дозволата за апликација. Не треба да се користи за стандардни апликации."</string>
     <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"цел на кратенката за пристапност"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Дозволува апликација да ја дефинира целта на кратенката за пристап."</string>
+    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Дозволува апликација да одреди цел на кратенката за пристапност."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Следи ги обидите за отклучување на екранот"</string>

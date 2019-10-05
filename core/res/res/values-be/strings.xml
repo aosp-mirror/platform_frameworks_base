@@ -350,6 +350,10 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Дазваляе прыкладанням атрымліваць і апрацоўваць SMS-паведамленні. Гэта значыць, што прыкладанне можа кантраляваць або выдаляць паведамленні, адпраўленыя на прыладу, не паказваючы іх вам."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"атрыманне тэкставых паведамленняў (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Дазваляе прыкладанням атрымліваць і апрацоўваць MMS-паведамленнi. Гэта значыць, што прыкладанне можа кантраляваць або выдаляць паведамленні, адпраўленыя на прыладу, не паказваючы іх вам."</string>
+    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
+    <skip />
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"чытаць паведамленні базавай станцыі"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Дазваляе прыкладанню чытаць паведамленні базавай станцыі, атрыманыя прыладай. Папярэджанні базавай станцыі дасылаюцца ў некаторыя месцы, каб папярэдзіць вас аб надзвычайных сітуацыях. Шкоднасныя прыкладанні могуць уплываць на прадукцыйнасць ці працу прылады пры атрыманні паведамлення базавай станцыі аб надзвычайнай сітуацыі."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"чытаць падпісаныя каналы"</string>
@@ -1408,7 +1412,7 @@
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Тэставы рэжым уключаны"</string>
     <string name="test_harness_mode_notification_message" msgid="1343197173054407119">"Каб выключыць тэставы рэжым, скіньце налады да заводскіх значэнняў."</string>
     <string name="console_running_notification_title" msgid="4955436518220103382">"Паслядоўная кансоль уключана"</string>
-    <string name="console_running_notification_message" msgid="1331995933976263865">"Змянілася эфектыўнасць. Каб выключыць, праверце загрузчык."</string>
+    <string name="console_running_notification_message" msgid="1331995933976263865">"Паказчык эфектыўнасці змяніўся. Каб выключыць кансоль, праверце загрузчык."</string>
     <string name="usb_contaminant_detected_title" msgid="7136400633704058349">"Вадкасць або смецце ў порце USB"</string>
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"Порт USB аўтаматычна адключаны. Каб даведацца больш, націсніце тут."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"Порт USB можна выкарыстоўваць"</string>
