@@ -2635,13 +2635,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
         }
         for (int i = mOpeningApps.size() - 1; i >= 0; i--) {
-            mOpeningApps.valueAt(i).mActivityRecord.writeIdentifierToProto(proto, OPENING_APPS);
+            mOpeningApps.valueAt(i).writeIdentifierToProto(proto, OPENING_APPS);
         }
         for (int i = mClosingApps.size() - 1; i >= 0; i--) {
-            mClosingApps.valueAt(i).mActivityRecord.writeIdentifierToProto(proto, CLOSING_APPS);
+            mClosingApps.valueAt(i).writeIdentifierToProto(proto, CLOSING_APPS);
         }
         for (int i = mChangingApps.size() - 1; i >= 0; i--) {
-            mChangingApps.valueAt(i).mActivityRecord.writeIdentifierToProto(proto, CHANGING_APPS);
+            mChangingApps.valueAt(i).writeIdentifierToProto(proto, CHANGING_APPS);
         }
         proto.end(token);
     }

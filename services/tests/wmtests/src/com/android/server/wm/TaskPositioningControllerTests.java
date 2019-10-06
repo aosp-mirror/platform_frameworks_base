@@ -112,7 +112,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNull(mTarget.getDragWindowHandleLocked());
 
         final DisplayContent content = mock(DisplayContent.class);
-        when(content.findTaskForResizePoint(anyInt(), anyInt())).thenReturn(mWindow.getTask());
+        doReturn(mWindow.getTask()).when(content).findTaskForResizePoint(anyInt(), anyInt());
         assertNotNull(mWindow.getTask().getTopVisibleAppMainWindow());
 
         mTarget.handleTapOutsideTask(content, 0, 0);

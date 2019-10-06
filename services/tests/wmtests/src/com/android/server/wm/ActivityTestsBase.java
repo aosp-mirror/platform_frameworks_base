@@ -27,6 +27,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
@@ -38,8 +39,11 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
+import android.testing.DexmakerShareClassLoaderRule;
+import android.util.Pair;
 import android.view.DisplayInfo;
 
 import com.android.server.AttributeCache;
@@ -212,6 +216,23 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        static Pair<Intent, ActivityInfo> createIntentAndActivityInfo() {
+            // TODO: Look into consolidating with dup. code in build() method below.
+            final int id = sCurrentActivityId++;
+            final ComponentName component = ComponentName.createRelative(
+                    DEFAULT_COMPONENT_PACKAGE_NAME, DEFAULT_COMPONENT_CLASS_NAME + id);
+
+            final Intent intent = new Intent();
+            intent.setComponent(component);
+
+            final ActivityInfo aInfo = new ActivityInfo();
+            aInfo.applicationInfo = new ApplicationInfo();
+            aInfo.applicationInfo.packageName = component.getPackageName();
+            aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+            aInfo.packageName = component.getPackageName();
+            return new Pair<>(intent, aInfo);
+        }
+
         ActivityRecord build() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
@@ -257,12 +278,10 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             if (mTaskRecord != null) {
                 // fullscreen value is normally read from resources in ctor, so for testing we need
                 // to set it somewhere else since we can't mock resources.
-                activity.fullscreen = true;
+                doReturn(true).when(activity).occludesParent();
                 activity.setTask(mTaskRecord);
-                activity.createAppWindowToken();
-                spyOn(activity.mAppWindowToken);
                 // Make visible by default...
-                activity.mAppWindowToken.setHidden(false);
+                activity.setHidden(false);
             }
 
             final WindowProcessController wpc = new WindowProcessController(mService,
@@ -271,6 +290,8 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                     mock(WindowProcessListener.class));
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
+            doReturn(wpc).when(mService).getProcessController(
+                    activity.processName, activity.info.applicationInfo.uid);
 
             // Resume top activities to make sure all other signals in the system are connected.
             mService.mRootActivityContainer.resumeFocusedStacksTopActivities();

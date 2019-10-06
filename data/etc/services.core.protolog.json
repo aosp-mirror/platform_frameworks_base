@@ -823,6 +823,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "-415912575": {
+      "message": "setTask: %s at top.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-415865166": {
       "message": "findFocusedWindow: Found new focus @ %s",
       "level": "VERBOSE",
@@ -924,12 +930,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "-117925665": {
-      "message": "addAppToken: %s task=%s at %d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-116086365": {
       "message": "******************** ENABLING SCREEN!",

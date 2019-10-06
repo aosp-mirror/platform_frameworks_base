@@ -57,6 +57,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 
 import android.app.ActivityOptions;
@@ -368,6 +369,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(false).when(mockPackageManager).isPermissionsReviewRequired(any(), anyInt());
         doNothing().when(mockPackageManager).grantImplicitAccess(
                 anyInt(), any(), anyInt(), anyInt());
+        doNothing().when(mockPackageManager).notifyPackageUse(anyString(), anyInt());
 
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);

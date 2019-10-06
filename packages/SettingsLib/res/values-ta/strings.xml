@@ -138,8 +138,8 @@
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"கடவுச்சொல் தேவைப்படாத திறந்த நெட்வொர்க்"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"கடவுச்சொல் தேவைப்படும் பாதுகாப்பான நெட்வொர்க்"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
-    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"அகற்றப்பட்ட பயன்பாடுகள்"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"அகற்றப்பட்ட பயன்பாடுகள் மற்றும் பயனர்கள்"</string>
+    <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"அகற்றப்பட்ட ஆப்ஸ்"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"அகற்றப்பட்ட ஆப்ஸ் மற்றும் பயனர்கள்"</string>
     <string name="data_usage_ota" msgid="5377889154805560860">"சிஸ்டம் புதுப்பிப்புகள்"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB டெதெரிங்"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"போர்ட்டபிள் ஹாட்ஸ்பாட்"</string>
@@ -402,8 +402,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"டேப்லெட் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"சாதனம் விரைவில் ஆஃப் ஆகக்கூடும் (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g>ம் ஆகும்"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
+    <string name="power_remaining_charging_duration_only" msgid="6672239353042034265">"முழு சார்ஜாக <xliff:g id="TIME">%1$s</xliff:g> ஆகும்"</string>
+    <string name="power_charging_duration" msgid="5850751284103249125">"<xliff:g id="LEVEL">%1$s</xliff:g> - முழு சார்ஜாக <xliff:g id="TIME">%2$s</xliff:g> ஆகும்"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"அறியப்படாத"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"சார்ஜ் ஆகிறது"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"சார்ஜ் ஆகிறது"</string>

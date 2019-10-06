@@ -1896,7 +1896,7 @@ class ActivityStack extends ConfigurationContainer {
                     continue;
                 }
 
-                if (r.fullscreen || r.hasWallpaper) {
+                if (r.occludesParent() || r.hasWallpaper) {
                     // Stack isn't translucent if it has at least one fullscreen activity
                     // that is visible.
                     return false;
@@ -2259,8 +2259,7 @@ class ActivityStack extends ConfigurationContainer {
                 .isKeyguardOrAodShowing(displayId);
         final boolean keyguardLocked = mStackSupervisor.getKeyguardController().isKeyguardLocked();
         final boolean showWhenLocked = r.canShowWhenLocked();
-        final boolean dismissKeyguard = r.mAppWindowToken != null
-                && r.mAppWindowToken.containsDismissKeyguardWindow();
+        final boolean dismissKeyguard = r.containsDismissKeyguardWindow();
         if (shouldBeVisible) {
             if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
                 mTopDismissingKeyguardActivity = r;
@@ -2329,7 +2328,7 @@ class ActivityStack extends ConfigurationContainer {
             // get it started and resume if no other stack in this stack is resumed.
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
             if (r != starting) {
-                r.startFreezingScreenLocked(r.app, configChanges);
+                r.startFreezingScreenLocked(configChanges);
             }
             if (!r.visible || r.mLaunchTaskBehind) {
                 if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
@@ -2345,7 +2344,7 @@ class ActivityStack extends ConfigurationContainer {
 
     private boolean updateBehindFullscreen(boolean stackInvisible, boolean behindFullscreenActivity,
             ActivityRecord r) {
-        if (r.fullscreen) {
+        if (r.occludesParent()) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
                         + " stackInvisible=" + stackInvisible
                         + " behindFullscreenActivity=" + behindFullscreenActivity);
@@ -2431,12 +2430,12 @@ class ActivityStack extends ConfigurationContainer {
                     if (r == topActivity) {
                         aboveTop = false;
                     }
-                    behindFullscreenActivity |= r.fullscreen;
+                    behindFullscreenActivity |= r.occludesParent();
                     continue;
                 }
 
                 r.removeOrphanedStartingWindow(behindFullscreenActivity);
-                behindFullscreenActivity |= r.fullscreen;
+                behindFullscreenActivity |= r.occludesParent();
             }
         }
     }
@@ -2566,8 +2565,7 @@ class ActivityStack extends ConfigurationContainer {
                 final boolean canShowWhenLocked = !mTopActivityOccludesKeyguard
                         && next.canShowWhenLocked();
                 final boolean mayDismissKeyguard = mTopDismissingKeyguardActivity != next
-                        && next.mAppWindowToken != null
-                        && next.mAppWindowToken.containsDismissKeyguardWindow();
+                        && next.containsDismissKeyguardWindow();
 
                 if (canShowWhenLocked || mayDismissKeyguard) {
                     ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
@@ -2776,7 +2774,7 @@ class ActivityStack extends ConfigurationContainer {
             final boolean lastActivityTranslucent = lastFocusedStack != null
                     && (lastFocusedStack.inMultiWindowMode()
                     || (lastFocusedStack.mLastPausedActivity != null
-                    && !lastFocusedStack.mLastPausedActivity.fullscreen));
+                    && !lastFocusedStack.mLastPausedActivity.occludesParent()));
 
             // This activity is now becoming visible.
             if (!next.visible || next.stopped || lastActivityTranslucent) {
@@ -3055,7 +3053,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (!startIt) {
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to task "
                                 + task, new RuntimeException("here").fillInStackTrace());
-                        r.createAppWindowToken();
+                        r.setTask(rTask);
                         ActivityOptions.abort(options);
                         return;
                     }
@@ -3082,12 +3080,7 @@ class ActivityStack extends ConfigurationContainer {
         // Slot the activity into the history stack and proceed
         if (DEBUG_ADD_REMOVE) Slog.i(TAG, "Adding activity " + r + " to stack to task " + task,
                 new RuntimeException("here").fillInStackTrace());
-        // TODO: Need to investigate if it is okay for the controller to already be created by the
-        // time we get to this point. I think it is, but need to double check.
-        // Use test in b/34179495 to trace the call path.
-        if (r.mAppWindowToken == null) {
-            r.createAppWindowToken();
-        }
+        r.setTask(task);
 
         // The transition animation and starting window are not needed if {@code allowMoveToFront}
         // is false, because the activity won't be visible.
@@ -3944,7 +3937,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (r.finishing) {
                     continue;
                 }
-                if (r.fullscreen) {
+                if (r.occludesParent()) {
                     lastIsOpaque = true;
                 }
                 if (owner != null && r.app != owner) {
@@ -4335,7 +4328,7 @@ class ActivityStack extends ConfigurationContainer {
                 final ActivityRecord r = activities.get(activityIndex);
                 updatedConfig |= r.ensureActivityConfiguration(0 /* globalChanges */,
                         preserveWindow);
-                if (r.fullscreen) {
+                if (r.occludesParent()) {
                     behindFullscreen = true;
                     break;
                 }
@@ -4438,7 +4431,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (r.appToken == token) {
                     return true;
                 }
-                if (r.fullscreen && !r.finishing) {
+                if (r.occludesParent() && !r.finishing) {
                     return false;
                 }
             }
@@ -4718,8 +4711,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (a.info.packageName.equals(packageName)) {
                     a.forceNewConfig = true;
                     if (starting != null && a == starting && a.visible) {
-                        a.startFreezingScreenLocked(starting.app,
-                                CONFIG_SCREEN_LAYOUT);
+                        a.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
                     }
                 }
             }
@@ -4950,7 +4942,7 @@ class ActivityStack extends ConfigurationContainer {
             if (top != null && !top.isConfigurationCompatible(parentConfig)) {
                 // The final orientation of this activity will change after moving to full screen.
                 // Start freezing screen here to prevent showing a temporary full screen window.
-                top.startFreezingScreenLocked(top.app, CONFIG_SCREEN_LAYOUT);
+                top.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
                 mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
                 return;
             }

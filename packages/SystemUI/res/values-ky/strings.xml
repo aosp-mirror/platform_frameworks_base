@@ -47,6 +47,8 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Киргизүү ыкмасын тууралоо"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Аппараттык тергич"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу <xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүн колдоно берсинби?"</string>
+    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
+    <skip />
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> кабелин колдоно берсинби?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> түзмөгүнө туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу ачылсынбы?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> кабелине туташуу үчүн <xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу ачылсынбы?"</string>
@@ -126,6 +128,20 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Ырасталды"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Бүтүрүү үчүн \"Ырастоо\" баскычын басыңыз"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Аныктыгы текшерилди"</string>
+    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Манжа изинин сенсорун басыңыз"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Манжа изинин сүрөтчөсү"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Жүзүңүз изделүүдө…"</string>
@@ -364,6 +380,8 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Билдирмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
+    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
+    <skip />
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобилдик Интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Дайындардын өткөрүлүшү"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Калган дайындар"</string>
@@ -902,7 +920,7 @@
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунда аракеттерди аткарат"</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> бардык колдонмолордун үлгүлөрүн көрсөтүүгө уруксат берүү"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Уруксат берүү"</string>
-    <string name="slice_permission_deny" msgid="7683681514008048807">"Жок"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Тыюу салынат"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Батареяны үнөмдөгүчтүн тартибин жөндөө үчүн басыңыз"</string>
     <string name="auto_saver_text" msgid="2563289953551438248">"Батареянын кубаты түгөнүп калганда, күйгүзүлсүн"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Жок, рахмат"</string>
@@ -926,7 +944,7 @@
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> көбүктөрүнүн жөндөөлөрү"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун калкып чыкма билдирмелерине уруксат бересизби?"</string>
     <string name="manage_bubbles_text" msgid="7027739766859191408">"Башкаруу"</string>
-    <string name="no_bubbles" msgid="337101288173078247">"Жок"</string>
+    <string name="no_bubbles" msgid="337101288173078247">"Тыюу салынат"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Уруксат берүү"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Кийинчерээк суралсын"</string>
     <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>

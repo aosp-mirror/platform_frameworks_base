@@ -47,6 +47,8 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configura metodi di immissione"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tastiera fisica"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
+    <skip />
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Vuoi aprire <xliff:g id="APPLICATION">%1$s</xliff:g> per gestire <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Vuoi aprire <xliff:g id="APPLICATION">%1$s</xliff:g> per gestire <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -56,7 +58,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"Apri sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quando si collega <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Apri sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quando si collega <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Consentire debug USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Fingerprint della chiave RSA del computer: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Impronta della chiave RSA del computer: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Consenti sempre da questo computer"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Consenti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debug USB non consentito"</string>
@@ -108,8 +110,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefono"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Sblocca"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"In attesa dell\'impronta digitale"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Sblocca senza utilizzare l\'impronta digitale"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"In attesa dell\'impronta"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Sblocca senza utilizzare l\'impronta"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Scansione del viso"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Invia"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Gestisci notifiche"</string>
@@ -126,8 +128,22 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confermato"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tocca Conferma per completare"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Autenticazione eseguita"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Tocca il sensore di impronte digitali"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona dell\'impronta digitale"</string>
+    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
+    <skip />
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Tocca il sensore di impronte"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona dell\'impronta"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"In attesa del volto…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Icona volto"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Pulsante zoom compatibilità."</string>
@@ -364,6 +380,8 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifiche"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Torcia"</string>
+    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
+    <skip />
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Dati mobili"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Utilizzo dati"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dati rimanenti"</string>

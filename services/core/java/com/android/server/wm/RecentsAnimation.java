@@ -137,9 +137,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             mStackSupervisor.startSpecificActivityLocked(targetActivity, false /* andResume */,
                     false /* checkConfig */);
             // Make sure the activity won't be involved in transition.
-            if (targetActivity.mAppWindowToken != null) {
-                targetActivity.mAppWindowToken.getDisplayContent().mUnknownAppVisibilityController
-                        .appRemovedOrHidden(targetActivity.mAppWindowToken);
+            if (targetActivity.getDisplayContent() != null) {
+                targetActivity.getDisplayContent().mUnknownAppVisibilityController
+                        .appRemovedOrHidden(targetActivity);
             }
         }
 
@@ -429,7 +429,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         // 1) The next launching task is not being animated by the recents animation
         // 2) The next task is home activity. (i.e. pressing home key to back home in recents).
         if ((!controller.isAnimatingTask(stack.getTaskStack().getTopChild())
-                || controller.isTargetApp(stack.getTopActivity().mAppWindowToken))
+                || controller.isTargetApp(stack.getTopActivity()))
                 && controller.shouldDeferCancelUntilNextTransition()) {
             // Always prepare an app transition since we rely on the transition callbacks to cleanup
             mWindowManager.prepareAppTransition(TRANSIT_NONE, false);

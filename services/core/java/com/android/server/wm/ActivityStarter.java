@@ -1684,14 +1684,16 @@ class ActivityStarter {
                         == (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
                         && mLaunchMode == LAUNCH_MULTIPLE;
 
-        // If mStartActivity does not have a task associated with it, associate it with the
-        // reused activity's task. Do not do so if we're clearing top and resetting for a
-        // standard launchMode activity.
-        if (mStartActivity.getTaskRecord() == null && !clearTopAndResetStandardLaunchMode) {
-            mStartActivity.setTask(targetTask);
-        }
-
+        boolean clearTaskForReuse = false;
         if (reusedActivity != null) {
+            // If mStartActivity does not have a task associated with it, associate it with the
+            // reused activity's task. Do not do so if we're clearing top and resetting for a
+            // standard launchMode activity.
+            if (mStartActivity.getTaskRecord() == null && !clearTopAndResetStandardLaunchMode) {
+                mStartActivity.setTaskForReuse(reusedActivity.getTaskRecord());
+                clearTaskForReuse = true;
+            }
+
             if (targetTask.intent == null) {
                 // This task was started because of movement of the activity based on
                 // affinity...
@@ -1738,6 +1740,13 @@ class ActivityStarter {
         }
 
         complyActivityFlags(targetTask, reusedActivity);
+
+        if (clearTaskForReuse) {
+            // Clear task for re-use so later code to methods
+            // {@link #setTaskFromReuseOrCreateNewTask}, {@link #setTaskFromSourceRecord}, or
+            // {@link #setTaskFromInTask} can parent it to the task.
+            mStartActivity.setTaskForReuse(null);
+        }
 
         if (mAddingToTask) {
             return START_SUCCESS;

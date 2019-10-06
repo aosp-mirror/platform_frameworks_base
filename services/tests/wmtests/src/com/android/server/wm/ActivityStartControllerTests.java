@@ -73,7 +73,9 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         final Random random = new Random();
 
         final ActivityRecord activity = new ActivityBuilder(mService).build();
-        final ActivityRecord source = new ActivityBuilder(mService).build();
+        final ActivityRecord source = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .build();
         final int startFlags = random.nextInt();
         final ActivityStack stack = mService.mRootActivityContainer.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);

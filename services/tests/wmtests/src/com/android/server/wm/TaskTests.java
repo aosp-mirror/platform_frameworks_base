@@ -46,7 +46,7 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
-        final WindowTestUtils.TestAppWindowToken appToken =
+        final AppWindowToken appToken =
                 WindowTestUtils.createAppWindowTokenInTask(mDisplayContent, task);
 
         task.removeIfPossible();
@@ -60,7 +60,7 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer_deferRemoval() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
-        final WindowTestUtils.TestAppWindowToken appToken =
+        final AppWindowToken appToken =
                 WindowTestUtils.createAppWindowTokenInTask(mDisplayContent, task);
 
         task.mShouldDeferRemoval = true;

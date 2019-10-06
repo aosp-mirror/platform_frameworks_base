@@ -1,5 +1,5 @@
 {
-  "presubmit": [
+  "presubmit-devicepolicy": [
     {
       "name": "CtsDevicePolicyManagerTestCases",
       "options": [
@@ -12,7 +12,7 @@
       ]
     }
   ],
-  "postsubmit": [
+  "postsubmit-devicepolicy": [
     {
       "name": "CtsDevicePolicyManagerTestCases"
     }
