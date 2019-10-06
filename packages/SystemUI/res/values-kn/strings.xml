@@ -449,7 +449,7 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ಬಳಕೆದಾರರನ್ನು ತೆಗೆದುಹಾಕುವುದೇ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"ಈ ಬಳಕೆದಾರರ ಎಲ್ಲಾ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುವುದು."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ರಕ್ಷಕ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ಬ್ಯಾಟರಿ ಸೇವರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"ಕಾರ್ಯಕ್ಷಮತೆ ಮತ್ತು ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ"</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="media_projection_dialog_text" msgid="8585357687598538511">"ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಅಥವಾ ಕ್ಯಾಸ್ಟಿಂಗ್ ಮಾಡುವಾಗ, ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯಂತಹ ಆಡಿಯೋ, ಪಾಸ್‌ವರ್ಡ್‌ಗಳು, ಪಾವತಿ ಮಾಹಿತಿ, ಫೋಟೋಗಳು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಮೇಲೆ ಡಿಸ್‌ಪ್ಲೇ ಮಾಡಿದ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದಿಂದ ಪ್ಲೇ ಮಾಡಿದ ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ಮಾಹಿತಿಯನ್ನು <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಕ್ಯಾಪ್ಚರ್ ಮಾಡಬಹುದು."</string>

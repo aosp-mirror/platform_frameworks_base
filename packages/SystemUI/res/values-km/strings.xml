@@ -542,8 +542,8 @@
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកការដៅ។ អូសឡើងលើ​ឱ្យជាប់ ដើម្បី​ដក​ការដៅ។"</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការ​ដៅ។ សូម​សង្កត់​ប៊ូតុង​ទិដ្ឋភាពរួម​​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុច​ប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"ដើម្បី​ដក​ការ​ដៅ​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យ​ជាប់"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ដើម្បី​ដក​ការ​ដៅ​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យ​ជាប់"</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"ដើម្បី​ដកខ្ទាស់​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យ​ជាប់"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"ដើម្បី​ដកខ្ទាស់​អេក្រង់​នេះ សូម​ចុច​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យ​ជាប់"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"ទេ អរគុណ"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"បាន​ដៅ​អេក្រង់"</string>

@@ -548,8 +548,8 @@
     <string name="screen_pinning_description_gestural" msgid="1191513974909607884">"Экран будет зафиксирован, пока вы не отмените блокировку (для этого нужно провести вверх и удерживать)."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
-    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\""</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы отменить блокировку, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\""</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"ОК"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Нет, спасибо"</string>
     <string name="screen_pinning_start" msgid="1022122128489278317">"Блокировка включена"</string>
