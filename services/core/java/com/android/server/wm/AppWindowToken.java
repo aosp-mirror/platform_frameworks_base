@@ -21,8 +21,15 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.content.pm.ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED;
+import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+import static android.content.pm.ActivityInfo.FLAG_TURN_SCREEN_ON;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
+import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -62,6 +69,9 @@ import static com.android.server.wm.AppWindowTokenProto.STARTING_MOVED;
 import static com.android.server.wm.AppWindowTokenProto.STARTING_WINDOW;
 import static com.android.server.wm.AppWindowTokenProto.THUMBNAIL;
 import static com.android.server.wm.AppWindowTokenProto.WINDOW_TOKEN;
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
@@ -84,12 +94,17 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.annotation.Size;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -98,14 +113,13 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Debug;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.IApplicationToken;
 import android.view.InputApplicationHandle;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -140,8 +154,8 @@ class AppTokenList extends ArrayList<AppWindowToken> {
  * Version of WindowToken that is specifically for a particular application (or
  * really activity) that is displaying windows.
  */
-class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener,
-        ConfigurationContainerListener {
+// TODO: Fully merge this class into ActivityRecord class since they are really the same thing...
+class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowToken" : TAG_WM;
 
     /**
@@ -149,17 +163,36 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @VisibleForTesting static final int Z_BOOST_BASE = 800570000;
 
+    final ActivityTaskManagerService mAtmService;
     // Non-null only for application tokens.
-    final IApplicationToken appToken;
+    // TODO: rename to mActivityToken
+    final ActivityRecord.Token appToken;
+    // All about me
+    final ActivityInfo mActivityInfo;
+    // Which user is this running for?
+    final int mUserId;
+    // The package implementing intent's component
+    // TODO: rename to mPackageName
+    final String packageName;
+    // the intent component, or target of an alias.
     final ComponentName mActivityComponent;
-    final boolean mVoiceInteraction;
+    boolean mVoiceInteraction;
 
     /**
      * The activity is opaque and fills the entire space of this task.
      * @see WindowContainer#fillsParent()
      */
     private boolean mOccludesParent;
+    // Has a wallpaper window as a background.
+    // TODO: Rename to mHasWallpaper and also see if it possible to combine this with the
+    // mOccludesParent field.
+    final boolean hasWallpaper;
+    // activity is not displayed?
+    // TODO: rename to mNoDisplay
+    @VisibleForTesting
+    boolean noDisplay;
     boolean mShowForAllUsers;
+    // TODO: Make this final
     int mTargetSdk;
 
     // Flag set while reparenting to prevent actions normally triggered by an individual parent
@@ -234,10 +267,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
 
-    private boolean mAlwaysFocusable;
-
     boolean mAppStopped;
-    int mRotationAnimationHint;
+    // A hint to override the window specified rotation animation, or -1 to use the window specified
+    // value. We use this so that we can select the right animation in the cases of starting
+    // windows, where the app hasn't had time to set a value on the window.
+    int mRotationAnimationHint = -1;
+
     private int mPendingRelaunchCount;
 
     private boolean mLastContainsShowWhenLockedWindow;
@@ -260,9 +295,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private boolean mDisablePreviewScreenshots;
 
     private Task mLastParent;
-
-    // TODO: Remove after unification
-    ActivityRecord mActivityRecord;
 
     /**
      * @see #currentLaunchCanTurnScreenOn()
@@ -327,6 +359,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private static final int STARTING_WINDOW_TYPE_SNAPSHOT = 1;
     private static final int STARTING_WINDOW_TYPE_SPLASH_SCREEN = 2;
 
+    private boolean mShowWhenLocked;
+    private boolean mInheritShownWhenLocked;
+    private boolean mTurnScreenOn;
+
     private AppSaturationInfo mLastAppSaturationInfo;
 
     private final ColorDisplayService.ColorTransformController mColorTransformController =
@@ -341,23 +377,67 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 }
             });
 
-    AppWindowToken(WindowManagerService service, IApplicationToken token,
-            ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
-            long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
-            int targetSdk, int orientation, int rotationAnimationHint,
-            boolean launchTaskBehind, boolean alwaysFocusable,
-            ActivityRecord activityRecord) {
-        this(service, token, activityComponent, voiceInteraction, dc, fullscreen);
-        // TODO: remove after unification
-        mActivityRecord = activityRecord;
-        mActivityRecord.registerConfigurationChangeListener(this);
-        mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
-        mShowForAllUsers = showForAllUsers;
-        mTargetSdk = targetSdk;
-        mOrientation = orientation;
-        mLaunchTaskBehind = launchTaskBehind;
-        mAlwaysFocusable = alwaysFocusable;
-        mRotationAnimationHint = rotationAnimationHint;
+    AppWindowToken(WindowManagerService service, ActivityTaskManagerService atm,
+            ActivityRecord.Token token, ActivityInfo aInfo, ActivityOptions options, Intent intent,
+            DisplayContent dc) {
+        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
+                false /* ownerCanManageAppTokens */);
+        mAtmService = atm;
+        appToken = token;
+        mActivityInfo = aInfo;
+        mUserId = UserHandle.getUserId(mActivityInfo.applicationInfo.uid);
+        packageName = mActivityInfo.applicationInfo.packageName;
+        mInputApplicationHandle = new InputApplicationHandle(appToken);
+
+        // If the class name in the intent doesn't match that of the target, this is probably an
+        // alias. We have to create a new ComponentName object to keep track of the real activity
+        // name, so that FLAG_ACTIVITY_CLEAR_TOP is handled properly.
+        if (mActivityInfo.targetActivity == null
+                || (mActivityInfo.targetActivity.equals(intent.getComponent().getClassName())
+                && (mActivityInfo.launchMode == LAUNCH_MULTIPLE
+                || mActivityInfo.launchMode == LAUNCH_SINGLE_TOP))) {
+            mActivityComponent = intent.getComponent();
+        } else {
+            mActivityComponent =
+                    new ComponentName(mActivityInfo.packageName, mActivityInfo.targetActivity);
+        }
+
+        mTargetSdk = mActivityInfo.applicationInfo.targetSdkVersion;
+        mShowForAllUsers = (mActivityInfo.flags & FLAG_SHOW_FOR_ALL_USERS) != 0;
+        setOrientation(mActivityInfo.screenOrientation);
+        mRotationAnimationHint = mActivityInfo.rotationAnimation;
+
+        mShowWhenLocked = (aInfo.flags & ActivityInfo.FLAG_SHOW_WHEN_LOCKED) != 0;
+        mInheritShownWhenLocked = (aInfo.privateFlags & FLAG_INHERIT_SHOW_WHEN_LOCKED) != 0;
+        mTurnScreenOn = (aInfo.flags & FLAG_TURN_SCREEN_ON) != 0;
+
+        int realTheme = mActivityInfo.getThemeResource();
+        if (realTheme == Resources.ID_NULL) {
+            realTheme = aInfo.applicationInfo.targetSdkVersion < HONEYCOMB
+                    ? android.R.style.Theme : android.R.style.Theme_Holo;
+        }
+
+        final AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
+                realTheme, com.android.internal.R.styleable.Window, mUserId);
+
+        if (ent != null) {
+            mOccludesParent = !ActivityInfo.isTranslucentOrFloating(ent.array);
+            hasWallpaper = ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
+            noDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
+        } else {
+            hasWallpaper = false;
+            noDisplay = false;
+        }
+
+        if (options != null) {
+            mLaunchTaskBehind = options.getLaunchTaskBehind();
+
+            final int rotationAnimation = options.getRotationAnimationHint();
+            // Only override manifest supplied option if set.
+            if (rotationAnimation >= 0) {
+                mRotationAnimationHint = rotationAnimation;
+            }
+        }
 
         // Application tokens start out hidden.
         setHidden(true);
@@ -365,20 +445,19 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         ColorDisplayService.ColorDisplayServiceInternal cds = LocalServices.getService(
                 ColorDisplayService.ColorDisplayServiceInternal.class);
-        cds.attachColorTransformController(activityRecord.packageName, activityRecord.mUserId,
+        cds.attachColorTransformController(packageName, mUserId,
                 new WeakReference<>(mColorTransformController));
     }
 
-    AppWindowToken(WindowManagerService service, IApplicationToken token,
-            ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
-            boolean fillsParent) {
-        super(service, token != null ? token.asBinder() : null, TYPE_APPLICATION, true, dc,
-                false /* ownerCanManageAppTokens */);
-        appToken = token;
-        mActivityComponent = activityComponent;
+    void onAttachToTask(boolean voiceInteraction, DisplayContent dc,
+            long inputDispatchingTimeoutNanos) {
+        mInputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
         mVoiceInteraction = voiceInteraction;
-        mOccludesParent = fillsParent;
-        mInputApplicationHandle = new InputApplicationHandle(appToken.asBinder());
+        onDisplayChanged(dc);
+
+        // Application tokens start out hidden.
+        setHidden(true);
+        hiddenRequested = true;
     }
 
     void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {
@@ -433,43 +512,33 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
         if (nowDrawn != reportedDrawn) {
-            if (mActivityRecord != null) {
-                mActivityRecord.onWindowsDrawn(nowDrawn, SystemClock.uptimeMillis());
-            }
+            onWindowsDrawn(nowDrawn, SystemClock.uptimeMillis());
             reportedDrawn = nowDrawn;
         }
         if (nowVisible != reportedVisible) {
             if (DEBUG_VISIBILITY) Slog.v(TAG,
                     "Visibility changed in " + this + ": vis=" + nowVisible);
             reportedVisible = nowVisible;
-            if (mActivityRecord != null) {
-                if (nowVisible) {
-                    onWindowsVisible();
-                } else {
-                    onWindowsGone();
-                }
+            if (nowVisible) {
+                onWindowsVisible();
+            } else {
+                onWindowsGone();
             }
         }
     }
 
-    private void onWindowsGone() {
-        if (mActivityRecord == null) {
-            return;
-        }
-        if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_WM, "Reporting gone in " + mActivityRecord.appToken);
-        }
-        mActivityRecord.onWindowsGone();
+    // Mostly implemented in ActivityRecord.
+    void onWindowsDrawn(boolean drawn, long timestamp) {
     }
 
-    private void onWindowsVisible() {
-        if (mActivityRecord == null) {
-            return;
-        }
-        if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_WM, "Reporting visible in " + mActivityRecord.appToken);
-        }
-        mActivityRecord.onWindowsVisible();
+    // Mostly implemented in ActivityRecord. Keeping here for the logpoint.
+    void onWindowsGone() {
+        if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting gone in " + appToken);
+    }
+
+    // Mostly implemented in ActivityRecord. Keeping here for the logpoint.
+    void onWindowsVisible() {
+        if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting visible in " + appToken);
     }
 
     boolean isClientHidden() {
@@ -604,8 +673,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     }
                 }
             }
-            // Changes in opening apps and closing apps may cause orientation change.
-            reportDescendantOrientationChangeIfNeeded();
             return;
         }
 
@@ -762,29 +829,27 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 }
                 SurfaceControl.closeTransaction();
             }
-
-            // Visibility changes may cause orientation request change.
-            reportDescendantOrientationChangeIfNeeded();
         }
 
         return delayed;
     }
 
-    private void reportDescendantOrientationChangeIfNeeded() {
+    boolean mayFreezeScreenLocked() {
+        return false;
+    }
+
+    void reportDescendantOrientationChangeIfNeeded() {
         // Orientation request is exposed only when we're visible. Therefore visibility change
         // will change requested orientation. Notify upward the hierarchy ladder to adjust
         // configuration. This is important to cases where activities with incompatible
         // orientations launch, or user goes back from an activity of bi-orientation to an
         // activity with specified orientation.
-        if (mActivityRecord.getRequestedConfigurationOrientation() == getConfiguration().orientation
-                || getOrientationIgnoreVisibility() == SCREEN_ORIENTATION_UNSET) {
+        if (getRequestedOrientation() == SCREEN_ORIENTATION_UNSET) {
             return;
         }
 
-        final IBinder freezeToken =
-                mActivityRecord.mayFreezeScreenLocked(mActivityRecord.app)
-                        ? mActivityRecord.appToken : null;
-        onDescendantOrientationChanged(freezeToken, mActivityRecord);
+        final IBinder freezeToken = mayFreezeScreenLocked() ? appToken : null;
+        onDescendantOrientationChanged(freezeToken, this);
     }
 
     /**
@@ -834,10 +899,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return candidate;
     }
 
+    boolean isAlwaysFocusable() {
+        return (mActivityInfo.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
+    }
+
+    // TODO: Does this really need to be different from isAlwaysFocusable()? For the activity side
+    // focusable means resumeable. I guess with that in mind maybe we should rename the other
+    // method to isResumeable() or something like that.
     boolean windowsAreFocusable() {
         if (mTargetSdk < Build.VERSION_CODES.Q) {
-            final int pid = mActivityRecord != null
-                    ? (mActivityRecord.app != null ? mActivityRecord.app.getPid() : 0) : 0;
+            final int pid = getPid();
             final AppWindowToken topFocusedAppOfMyProcess =
                     mWmService.mRoot.mTopFocusedAppByProcess.get(pid);
             if (topFocusedAppOfMyProcess != null && topFocusedAppOfMyProcess != this) {
@@ -846,7 +917,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 return false;
             }
         }
-        return getWindowConfiguration().canReceiveKeys() || mAlwaysFocusable;
+        return getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable();
+    }
+
+    // Mostly implemented in ActivityRecord...
+    int getPid() {
+        return 0;
     }
 
     @Override
@@ -859,9 +935,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     void removeImmediately() {
         onRemovedFromDisplay();
-        if (mActivityRecord != null) {
-            mActivityRecord.unregisterConfigurationChangeListener(this);
-        }
         super.removeImmediately();
     }
 
@@ -1065,7 +1138,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (task == null) {
                 // It is possible we have been marked as a closing app earlier. We must remove ourselves
                 // from this list so we do not participate in any future animations.
-                getDisplayContent().mClosingApps.remove(this);
+                if (getDisplayContent() != null) {
+                    getDisplayContent().mClosingApps.remove(this);
+                }
             } else if (mLastParent != null && mLastParent.mStack != null) {
                 task.mStack.mExitingAppTokens.remove(this);
             }
@@ -1655,7 +1730,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     /** Returns the app's preferred orientation regardless of its currently visibility state. */
-    int getOrientationIgnoreVisibility() {
+    int getRequestedOrientation() {
         return mOrientation;
     }
 
@@ -1667,15 +1742,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     float getSizeCompatScale() {
         return inSizeCompatMode() ? mSizeCompatScale : super.getSizeCompatScale();
-    }
-
-    /**
-     * @return Non-empty bounds if the activity has override bounds.
-     * @see ActivityRecord#resolveOverrideConfiguration(Configuration)
-     */
-    Rect getResolvedOverrideBounds() {
-        // Get bounds from resolved override configuration because it is computed with orientation.
-        return getResolvedOverrideConfiguration().windowConfiguration.getBounds();
     }
 
     @Override
@@ -1708,7 +1774,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         final int winMode = getWindowingMode();
 
-        if (prevWinMode == winMode) {
+        if (prevWinMode == winMode || mDisplayContent == null) {
             return;
         }
 
@@ -1951,8 +2017,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
+    // Mostly implemented in ActivityRecord...
     boolean keyDispatchingTimedOut(String reason, int windowPid) {
-        return mActivityRecord != null && mActivityRecord.keyDispatchingTimedOut(reason, windowPid);
+        return false;
     }
 
     /**
@@ -2019,14 +2086,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     }
                 }
             } else if (w.isDrawnLw()) {
-                if (mActivityRecord != null) {
-                    mActivityRecord.onStartingWindowDrawn(SystemClock.uptimeMillis());
-                }
+                onStartingWindowDrawn(SystemClock.uptimeMillis());
                 startingDisplayed = true;
             }
         }
 
         return isInterestingAndDrawn;
+    }
+
+    /** Called when the starting window for this container is drawn. */
+    private void onStartingWindowDrawn(long timestamp) {
+        synchronized (mAtmService.mGlobalLock) {
+            mAtmService.mStackSupervisor.getActivityMetricsLogger().notifyStartingWindowDrawn(
+                    getWindowingMode(), timestamp);
+        }
     }
 
     void layoutLetterbox(WindowState winHint) {
@@ -2411,6 +2484,66 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         return false;
+    }
+
+    void setShowWhenLocked(boolean showWhenLocked) {
+        mShowWhenLocked = showWhenLocked;
+        mAtmService.mRootActivityContainer.ensureActivitiesVisible(null /* starting */,
+                0 /* configChanges */, false /* preserveWindows */);
+    }
+
+    void setInheritShowWhenLocked(boolean inheritShowWhenLocked) {
+        mInheritShownWhenLocked = inheritShowWhenLocked;
+        mAtmService.mRootActivityContainer.ensureActivitiesVisible(null /* starting */,
+                0 /* configChanges */, false /* preserveWindows */);
+    }
+
+    /**
+     * @return {@code true} if the activity windowing mode is not
+     *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and a) activity
+     *         contains windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the
+     *         activity has set {@link #mShowWhenLocked}, or b) if the activity has set
+     *         {@link #mInheritShownWhenLocked} and the activity behind this satisfies the
+     *         conditions a) above.
+     *         Multi-windowing mode will be exited if {@code true} is returned.
+     */
+    boolean canShowWhenLocked() {
+        if (!inPinnedWindowingMode() && (mShowWhenLocked || containsShowWhenLockedWindow())) {
+            return true;
+        } else if (mInheritShownWhenLocked) {
+            final AppWindowToken r = getActivityBelow();
+            return r != null && !r.inPinnedWindowingMode() && (r.mShowWhenLocked
+                    || r.containsShowWhenLockedWindow());
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return an {@link ActivityRecord} of the activity below this activity, or {@code null} if no
+     * such activity exists.
+     */
+    @Nullable
+    private AppWindowToken getActivityBelow() {
+        final Task task = getTask();
+        final int pos = task.mChildren.indexOf(this);
+        if (pos == -1) {
+            throw new IllegalStateException("Activity not found in its task");
+        }
+        return pos == 0 ? null : task.getChildAt(pos - 1);
+    }
+
+    void setTurnScreenOn(boolean turnScreenOn) {
+        mTurnScreenOn = turnScreenOn;
+    }
+
+    /** Mostly implemented in ActivityRecord. */
+    boolean canTurnScreenOn() {
+        return mTurnScreenOn;
+    }
+
+    boolean getTurnScreenOnFlag() {
+        return mTurnScreenOn;
     }
 
     void checkKeyguardFlagsChanged() {
@@ -2890,7 +3023,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         getDisplayContent().mAppTransition.notifyAppTransitionFinishedLocked(token);
         scheduleAnimation();
 
-        mActivityRecord.onAnimationFinished();
+        if (mAtmService.mRootActivityContainer.allResumedActivitiesIdle()
+                || mAtmService.mStackSupervisor.isStoppingNoHistoryActivity()) {
+            // If all activities are already idle or there is an activity that must be
+            // stopped immediately after visible, then we now need to make sure we perform
+            // the full stop of this activity. This is because we won't do that while they are still
+            // waiting for the animation to finish.
+            if (mAtmService.mStackSupervisor.mStoppingActivities.contains(this)) {
+                mAtmService.mStackSupervisor.scheduleIdleLocked();
+            }
+        } else {
+            // Instead of doing the full stop routine here, let's just hide any activities
+            // we now can, and let them stop when the normal idle happens.
+            mAtmService.mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
+                    false /* remove */, true /* processPausingActivities */);
+        }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
@@ -2957,10 +3104,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     boolean isWaitingForTransitionStart() {
-        return getDisplayContent().mAppTransition.isTransitionSet()
-                && (getDisplayContent().mOpeningApps.contains(this)
-                    || getDisplayContent().mClosingApps.contains(this)
-                    || getDisplayContent().mChangingApps.contains(this));
+        final DisplayContent dc = getDisplayContent();
+        // TODO: Test for null can be removed once unification is done.
+        if (dc == null) return false;
+        return dc.mAppTransition.isTransitionSet()
+                && (dc.mOpeningApps.contains(this)
+                    || dc.mClosingApps.contains(this)
+                    || dc.mChangingApps.contains(this));
     }
 
     public int getTransit() {
@@ -3204,27 +3354,17 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     void writeNameToProto(ProtoOutputStream proto, long fieldId) {
-        if (appToken == null) {
-            return;
-        }
-        try {
+        if (appToken != null) {
             proto.write(fieldId, appToken.getName());
-        } catch (RemoteException e) {
-            // This shouldn't happen, but in this case fall back to outputting nothing
-            Slog.e(TAG, e.toString());
         }
     }
 
-    @Override
-    public String toString() {
-        if (stringName == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("AppWindowToken{");
-            sb.append(Integer.toHexString(System.identityHashCode(this)));
-            sb.append(" token="); sb.append(token); sb.append('}');
-            stringName = sb.toString();
-        }
-        return stringName + ((mIsExiting) ? " mIsExiting=" : "");
+    void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        proto.write(USER_ID, mUserId);
+        proto.write(TITLE, ((ActivityRecord) this).intent.getComponent().flattenToShortString());
+        proto.end(token);
     }
 
     Rect getLetterboxInsets() {

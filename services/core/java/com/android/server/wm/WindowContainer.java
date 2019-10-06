@@ -19,6 +19,11 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ActivityInfo.isFixedOrientationLandscape;
+import static android.content.pm.ActivityInfo.isFixedOrientationPortrait;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.SurfaceControl.Transaction;
 
 import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER;
@@ -33,9 +38,11 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.WindowConfiguration;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.IBinder;
 import android.util.Pools;
 import android.util.Slog;
@@ -133,6 +140,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * surface to the animation leash
      */
     private boolean mCommittedReparentToAnimationLeash;
+
+    private final Configuration mTmpConfig = new Configuration();
 
     /**
      * Callback which is triggered while changing the parent, after setting up the surface but
@@ -260,7 +269,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (child.getParent() != null) {
             throw new IllegalArgumentException("addChild: container=" + child.getName()
                     + " is already a child of container=" + child.getParent().getName()
-                    + " can't add to container=" + getName());
+                    + " can't add to container=" + getName()
+                    + "\n callers=" + Debug.getCallers(15, "\n"));
         }
 
         if ((index < 0 && index != POSITION_BOTTOM)
@@ -751,6 +761,31 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Get the configuration orientation by the requested screen orientation
+     * ({@link ActivityInfo.ScreenOrientation}) of this activity.
+     *
+     * @return orientation in ({@link Configuration#ORIENTATION_LANDSCAPE},
+     *         {@link Configuration#ORIENTATION_PORTRAIT},
+     *         {@link Configuration#ORIENTATION_UNDEFINED}).
+     */
+    int getRequestedConfigurationOrientation() {
+        if (mOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
+            // NOSENSOR means the display's "natural" orientation, so return that.
+            if (mDisplayContent != null) {
+                return mDisplayContent.getNaturalOrientation();
+            }
+        } else if (mOrientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
+            // LOCKED means the activity's orientation remains unchanged, so return existing value.
+            return getConfiguration().orientation;
+        } else if (isFixedOrientationLandscape(mOrientation)) {
+            return ORIENTATION_LANDSCAPE;
+        } else if (isFixedOrientationPortrait(mOrientation)) {
+            return ORIENTATION_PORTRAIT;
+        }
+        return ORIENTATION_UNDEFINED;
+    }
+
+    /**
      * Calls {@link #setOrientation(int, IBinder, ActivityRecord)} with {@code null} to the last 2
      * parameters.
      *
@@ -780,6 +815,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         mOrientation = orientation;
+        final int configOrientation = getRequestedConfigurationOrientation();
+        if (getRequestedOverrideConfiguration().orientation != configOrientation) {
+            mTmpConfig.setTo(getRequestedOverrideConfiguration());
+            mTmpConfig.orientation = configOrientation;
+            onRequestedOverrideConfigurationChanged(mTmpConfig);
+        }
+
         final WindowContainer parent = getParent();
         if (parent != null) {
             onDescendantOrientationChanged(freezeDisplayToken, requestingContainer);

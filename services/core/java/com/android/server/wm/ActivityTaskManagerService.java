@@ -807,7 +807,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mUiHandler = new UiHandler();
         mIntentFirewall = intentFirewall;
         final File systemDir = SystemServiceManager.ensureSystemDir();
-        mAppWarnings = new AppWarnings(this, mUiContext, mH, mUiHandler, systemDir);
+        mAppWarnings = createAppWarnings(mUiContext, mH, mUiHandler, systemDir);
         mCompatModePackages = new CompatModePackages(this, systemDir, mH);
         mPendingIntentController = intentController;
 
@@ -843,6 +843,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final ActivityStackSupervisor supervisor = new ActivityStackSupervisor(this, mH.getLooper());
         supervisor.initialize();
         return supervisor;
+    }
+
+    protected AppWarnings createAppWarnings(
+            Context uiContext, Handler handler, Handler uiHandler, File systemDir) {
+        return new AppWarnings(this, uiContext, handler, uiHandler, systemDir);
     }
 
     public void setWindowManager(WindowManagerService wm) {
@@ -1813,11 +1818,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public int getRequestedOrientation(IBinder token) {
         synchronized (mGlobalLock) {
-            ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-            }
-            return r.getOrientation();
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            return (r != null)
+                    ? r.getRequestedOrientation() : ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
     }
 

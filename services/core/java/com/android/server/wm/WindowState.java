@@ -2424,15 +2424,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void prepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         // We need to turn on screen regardless of visibility.
         final boolean hasTurnScreenOnFlag = (mAttrs.flags & FLAG_TURN_SCREEN_ON) != 0
-                || (mAppToken != null && mAppToken.mActivityRecord.canTurnScreenOn());
+                || (mAppToken != null && mAppToken.canTurnScreenOn());
 
         // The screen will turn on if the following conditions are met
         // 1. The window has the flag FLAG_TURN_SCREEN_ON or ActivityRecord#canTurnScreenOn.
         // 2. The WMS allows theater mode.
         // 3. No AWT or the AWT allows the screen to be turned on. This should only be true once
         // per resume to prevent the screen getting getting turned on for each relayout. Set
-        // canTurnScreenOn will be set to false so the window doesn't turn the screen on again
-        // during this resume.
+        // currentLaunchCanTurnScreenOn will be set to false so the window doesn't turn the screen
+        // on again during this resume.
         // 4. When the screen is not interactive. This is because when the screen is already
         // interactive, the value may persist until the next animation, which could potentially
         // be occurring while turning off the screen. This would lead to the screen incorrectly
@@ -2617,7 +2617,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean canShowWhenLocked() {
         final boolean showBecauseOfActivity =
-                mAppToken != null && mAppToken.mActivityRecord.canShowWhenLocked();
+                mAppToken != null && mAppToken.canShowWhenLocked();
         final boolean showBecauseOfWindow = (getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
         return showBecauseOfActivity || showBecauseOfWindow;
     }

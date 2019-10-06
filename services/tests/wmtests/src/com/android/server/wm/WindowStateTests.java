@@ -330,7 +330,7 @@ public class WindowStateTests extends WindowTestsBase {
         // turn on the screen.
         appWindowToken.setCurrentLaunchCanTurnScreenOn(true);
         first.mAttrs.flags &= ~WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-        doReturn(true).when(appWindowToken.mActivityRecord).canTurnScreenOn();
+        doReturn(true).when(appWindowToken).canTurnScreenOn();
 
         testPrepareWindowToDisplayDuringRelayout(first, true /* expectedWakeupCalled */,
                 false /* expectedCurrentLaunchCanTurnScreenOn */);

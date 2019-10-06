@@ -53,7 +53,6 @@ import static org.mockito.Mockito.verify;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -78,7 +77,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     TaskStack mStack;
     Task mTask;
-    WindowTestUtils.TestAppWindowToken mToken;
+    AppWindowToken mToken;
 
     private final String mPackageName = getInstrumentation().getTargetContext().getPackageName();
 
@@ -94,7 +93,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     @Presubmit
     public void testAddWindow_Order() {
-        assertEquals(0, mToken.getWindowsCount());
+        assertEquals(0, mToken.getChildCount());
 
         final WindowState win1 = createWindow(null, TYPE_APPLICATION, mToken, "win1");
         final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, mToken,
@@ -103,17 +102,17 @@ public class AppWindowTokenTests extends WindowTestsBase {
         final WindowState win4 = createWindow(null, TYPE_APPLICATION, mToken, "win4");
 
         // Should not contain the windows that were added above.
-        assertEquals(4, mToken.getWindowsCount());
-        assertTrue(mToken.hasWindow(win1));
-        assertTrue(mToken.hasWindow(startingWin));
-        assertTrue(mToken.hasWindow(baseWin));
-        assertTrue(mToken.hasWindow(win4));
+        assertEquals(4, mToken.getChildCount());
+        assertTrue(mToken.mChildren.contains(win1));
+        assertTrue(mToken.mChildren.contains(startingWin));
+        assertTrue(mToken.mChildren.contains(baseWin));
+        assertTrue(mToken.mChildren.contains(win4));
 
         // The starting window should be on-top of all other windows.
-        assertEquals(startingWin, mToken.getLastChild());
+        assertEquals(startingWin, mToken.mChildren.peekLast());
 
         // The base application window should be below all other windows.
-        assertEquals(baseWin, mToken.getFirstChild());
+        assertEquals(baseWin, mToken.mChildren.peekFirst());
         mToken.removeImmediately();
     }
 
@@ -325,37 +324,14 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
-    public void testReportOrientationChangeOnVisibilityChange() {
+    public void testReportOrientationChange() {
         mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         mDisplayContent.getDisplayRotation().setFixedToUserRotation(
                 DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
 
-        doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
-                .getRequestedConfigurationOrientation();
-
         mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
-        mToken.commitVisibility(null /* lp */, false /* visible */, TRANSIT_UNSET,
-                true /* performLayout */, false /* isVoiceInteraction */);
-
-        verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
-    }
-
-    @Test
-    public void testReportOrientationChangeOnOpeningClosingAppChange() {
-        mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-
-        mDisplayContent.getDisplayRotation().setFixedToUserRotation(
-                DisplayRotation.FIXED_TO_USER_ROTATION_ENABLED);
-        mDisplayContent.getDisplayInfo().state = Display.STATE_ON;
-        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_CLOSE,
-                false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
-
-        doReturn(Configuration.ORIENTATION_LANDSCAPE).when(mToken.mActivityRecord)
-                .getRequestedConfigurationOrientation();
-
-        mTask.mTaskRecord = Mockito.mock(TaskRecord.class, RETURNS_DEEP_STUBS);
-        mToken.setVisibility(false /* visible */, false /* deferHidingClient */);
+        mToken.reportDescendantOrientationChangeIfNeeded();
 
         verify(mTask.mTaskRecord).onConfigurationChanged(any(Configuration.class));
     }
@@ -378,7 +354,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows
         for (int i = 0; i < 1000; i++) {
-            final WindowTestUtils.TestAppWindowToken appToken = createIsolatedTestAppWindowToken();
+            final AppWindowToken appToken = createIsolatedTestAppWindowToken();
 
             appToken.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
@@ -393,8 +369,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindow() {
-        final WindowTestUtils.TestAppWindowToken token1 = createIsolatedTestAppWindowToken();
-        final WindowTestUtils.TestAppWindowToken token2 = createIsolatedTestAppWindowToken();
+        final AppWindowToken token1 = createIsolatedTestAppWindowToken();
+        final AppWindowToken token2 = createIsolatedTestAppWindowToken();
         token1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                 false, false);
@@ -409,8 +385,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindowWhileCreating() {
-        final WindowTestUtils.TestAppWindowToken token1 = createIsolatedTestAppWindowToken();
-        final WindowTestUtils.TestAppWindowToken token2 = createIsolatedTestAppWindowToken();
+        final AppWindowToken token1 = createIsolatedTestAppWindowToken();
+        final AppWindowToken token2 = createIsolatedTestAppWindowToken();
         ((TestWindowManagerPolicy) token1.mWmService.mPolicy).setRunnableWhenAddingSplashScreen(
                 () -> {
                     // Surprise, ...! Transfer window in the middle of the creation flow.
@@ -427,14 +403,14 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertHasStartingWindow(token2);
     }
 
-    private WindowTestUtils.TestAppWindowToken createIsolatedTestAppWindowToken() {
+    private AppWindowToken createIsolatedTestAppWindowToken() {
         final TaskStack taskStack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(taskStack, 0 /* userId */);
         return createTestAppWindowTokenForGivenTask(task);
     }
 
-    private WindowTestUtils.TestAppWindowToken createTestAppWindowTokenForGivenTask(Task task) {
-        final WindowTestUtils.TestAppWindowToken appToken =
+    private AppWindowToken createTestAppWindowTokenForGivenTask(Task task) {
+        final AppWindowToken appToken =
                 WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         task.addChild(appToken, 0);
         waitUntilHandlersIdle();
@@ -444,8 +420,8 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testTryTransferStartingWindowFromHiddenAboveToken() {
         // Add two tasks on top of each other.
-        final WindowTestUtils.TestAppWindowToken tokenTop = createIsolatedTestAppWindowToken();
-        final WindowTestUtils.TestAppWindowToken tokenBottom =
+        final AppWindowToken tokenTop = createIsolatedTestAppWindowToken();
+        final AppWindowToken tokenBottom =
                 createTestAppWindowTokenForGivenTask(tokenTop.getTask());
 
         // Add a starting window.

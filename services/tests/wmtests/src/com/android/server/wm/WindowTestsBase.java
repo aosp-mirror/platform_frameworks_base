@@ -208,11 +208,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return createTestAppWindowToken(dc, windowingMode, activityType);
     }
 
-    WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
+    AppWindowToken createTestAppWindowToken(DisplayContent dc, int
             windowingMode, int activityType) {
         final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final WindowTestUtils.TestAppWindowToken appWindowToken =
+        final AppWindowToken appWindowToken =
                 WindowTestUtils.createTestAppWindowToken(dc);
         task.addChild(appWindowToken, 0);
         return appWindowToken;

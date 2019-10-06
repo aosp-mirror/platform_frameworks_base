@@ -238,7 +238,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         ActivityStack stack = new StackBuilder(mRootActivityContainer).setDisplay(display)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         TaskRecord task = stack.getChildAt(0);
-        task.getRootActivity().mAppWindowToken.setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
         DisplayInfo info = new DisplayInfo();
         display.mDisplay.getDisplayInfo(info);
         final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
