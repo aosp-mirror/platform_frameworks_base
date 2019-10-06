@@ -1072,7 +1072,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Middernag"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Kies alle"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Kies alles"</string>
     <string name="cut" msgid="3092569408438626261">"Sny"</string>
     <string name="copy" msgid="2681946229533511987">"Kopieer"</string>
     <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Kon nie na knipbord toe kopieer nie"</string>
@@ -1354,7 +1354,7 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Laai tans gekoppelde toestel. Tik vir meer opsies."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Analoë oudiobykomstigheid bespeur"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Die aangehegde toestel is nie met hierdie foon versoenbaar nie. Tik om meer te wete te kom."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouting gekoppel"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"Tik om USB-ontfouting af te skakel"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Kies om USB-ontfouting te deaktiveer."</string>
     <string name="test_harness_mode_notification_title" msgid="2216359742631914387">"Toetsraamwerkmodus is geaktiveer"</string>

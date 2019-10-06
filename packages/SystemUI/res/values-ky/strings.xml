@@ -901,7 +901,7 @@
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунда аракеттерди аткарат"</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> бардык колдонмолордун үлгүлөрүн көрсөтүүгө уруксат берүү"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Уруксат берүү"</string>
-    <string name="slice_permission_deny" msgid="7683681514008048807">"Жок"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Тыюу салынат"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Батареяны үнөмдөгүчтүн тартибин жөндөө үчүн басыңыз"</string>
     <string name="auto_saver_text" msgid="2563289953551438248">"Батареянын кубаты түгөнүп калганда, күйгүзүлсүн"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Жок, рахмат"</string>
@@ -925,7 +925,7 @@
     <string name="bubbles_settings_button_description" msgid="2970630476657287189">"<xliff:g id="APP_NAME">%1$s</xliff:g> көбүктөрүнүн жөндөөлөрү"</string>
     <string name="bubbles_prompt" msgid="8807968030159469710">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосунун калкып чыкма билдирмелерине уруксат бересизби?"</string>
     <string name="manage_bubbles_text" msgid="7027739766859191408">"Башкаруу"</string>
-    <string name="no_bubbles" msgid="337101288173078247">"Жок"</string>
+    <string name="no_bubbles" msgid="337101288173078247">"Тыюу салынат"</string>
     <string name="yes_bubbles" msgid="668809525728633841">"Уруксат берүү"</string>
     <string name="ask_me_later_bubbles" msgid="2147688438402939029">"Кийинчерээк суралсын"</string>
     <string name="bubble_content_description_single" msgid="1184462974339387516">"<xliff:g id="APP_NAME">%2$s</xliff:g> колдонмосунан <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>

@@ -323,7 +323,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"ڈسپلے کے زوم کی سطح اور پوزیشن کو کنٹرول کریں۔"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"اشارے انجام دینے کی"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"تھپتھپانا، سوائپ کرنا، چٹکی بھرنا اور دیگر اشارے انجام دے سکتی ہے"</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"فنگرپرنٹ کے اشارے"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"فنگر پرنٹ کے اشارے"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>

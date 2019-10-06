@@ -1447,8 +1447,8 @@
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"အောက်ပါထဲက အက်ပ်တစ်ခု သို့မဟုတ် ပိုလျက် သင်၏ အကောင့်ကို၊ ယခု နှင့် အနာဂတ်မှာ ရယူအသုံးချရန် ခွင့်ပြုချက်ကို တောင်းထားသည်။"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"ဤတောင်းခံမှုအားခွင့်ပြုမည်လား"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"သုံးစွဲခွင့် တောင်းဆိုရန်"</string>
-    <string name="allow" msgid="7225948811296386551">"ခွင့်ပြုသည်"</string>
-    <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်သည်"</string>
+    <string name="allow" msgid="7225948811296386551">"ခွင့်ပြုရန်"</string>
+    <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်ရန်"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"ခွင့်ပြုချက် တောင်းခံထားခြင်း"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"အကောင့် <xliff:g id="ACCOUNT">%s</xliff:g> အတွက် \n ခွင့်ပြုချက် တောင်းခံထားပြီး"</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"သင်သည် ဒီအက်ပ်ကို သင့်အလုပ်ပရိုဖိုင် ပြင်ပတွင် အသုံးပြုနေ၏"</string>
