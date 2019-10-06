@@ -707,7 +707,7 @@ public class LockTaskControllerTest {
         TaskRecord tr = mock(TaskRecord.class);
         tr.mLockTaskAuth = lockTaskAuth;
         tr.intent = intent;
-        tr.userId = TEST_USER_ID;
+        tr.mUserId = TEST_USER_ID;
         return tr;
     }
 

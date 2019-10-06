@@ -90,7 +90,6 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
 
 import static com.android.server.am.ActivityRecordProto.APP_WINDOW_TOKEN;
-import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
 import static com.android.server.am.ActivityRecordProto.PROC_ID;
@@ -145,9 +144,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.wm.IdentifierProto.HASH_CODE;
-import static com.android.server.wm.IdentifierProto.TITLE;
-import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
@@ -1578,7 +1574,7 @@ final class ActivityRecord extends AppWindowToken {
             final TaskRecord task = getTaskRecord();
             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                     mUserId, System.identityHashCode(this),
-                    task.taskId, shortComponentName, reason);
+                    task.mTaskId, shortComponentName, reason);
             final ArrayList<ActivityRecord> activities = task.mActivities;
             final int index = activities.indexOf(this);
             if (index < (activities.size() - 1)) {
@@ -1838,7 +1834,7 @@ final class ActivityRecord extends AppWindowToken {
         }
 
         EventLog.writeEvent(EventLogTags.AM_DESTROY_ACTIVITY, mUserId,
-                System.identityHashCode(this), getTaskRecord().taskId, shortComponentName, reason);
+                System.identityHashCode(this), getTaskRecord().mTaskId, shortComponentName, reason);
 
         boolean removedFromHistory = false;
 
@@ -1976,7 +1972,7 @@ final class ActivityRecord extends AppWindowToken {
                 // work.
                 // TODO: If the callers to removeTask() changes such that we have multiple places
                 //       where we are destroying the task, move this back into removeTask()
-                mStackSupervisor.removeTaskByIdLocked(task.taskId, false /* killProcess */,
+                mStackSupervisor.removeTaskByIdLocked(task.mTaskId, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, reason);
             }
 
@@ -2090,7 +2086,7 @@ final class ActivityRecord extends AppWindowToken {
         final String strData = data != null ? data.toSafeString() : null;
 
         EventLog.writeEvent(tag,
-                mUserId, System.identityHashCode(this), task.taskId,
+                mUserId, System.identityHashCode(this), task.mTaskId,
                 shortComponentName, intent.getAction(),
                 intent.getType(), strData, intent.getFlags());
     }
@@ -3244,7 +3240,7 @@ final class ActivityRecord extends AppWindowToken {
                 || (onlyRoot && activityNdx > task.findRootIndex(true /* effectiveRoot */))) {
             return INVALID_TASK_ID;
         }
-        return task.taskId;
+        return task.mTaskId;
     }
 
     static ActivityRecord isInStackLocked(IBinder token) {
@@ -3299,8 +3295,8 @@ final class ActivityRecord extends AppWindowToken {
         Bitmap icon;
         if (_taskDescription.getIconFilename() == null &&
                 (icon = _taskDescription.getIcon()) != null) {
-            final String iconFilename = createImageFilename(createTime, task.taskId);
-            final File iconFile = new File(TaskPersister.getUserImagesDir(task.userId),
+            final String iconFilename = createImageFilename(createTime, task.mTaskId);
+            final File iconFile = new File(TaskPersister.getUserImagesDir(task.mUserId),
                     iconFilename);
             final String iconFilePath = iconFile.getAbsolutePath();
             mAtmService.getRecentTasks().saveImage(icon, iconFilePath);
@@ -3359,7 +3355,7 @@ final class ActivityRecord extends AppWindowToken {
     void setRequestedOrientation(int requestedOrientation) {
         setOrientation(requestedOrientation, mayFreezeScreenLocked());
         mAtmService.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(
-                task.taskId, requestedOrientation);
+                task.mTaskId, requestedOrientation);
     }
 
     private void setOrientation(int requestedOrientation, boolean freezeScreenIfNeeded) {
@@ -4065,7 +4061,7 @@ final class ActivityRecord extends AppWindowToken {
                         + " preserveWindow=" + preserveWindow);
         EventLog.writeEvent(andResume ? AM_RELAUNCH_RESUME_ACTIVITY
                         : AM_RELAUNCH_ACTIVITY, mUserId, System.identityHashCode(this),
-                task.taskId, shortComponentName);
+                task.mTaskId, shortComponentName);
 
         startFreezingScreenLocked(0);
 
@@ -4400,7 +4396,7 @@ final class ActivityRecord extends AppWindowToken {
     @Override
     public String toString() {
         if (stringName != null) {
-            return stringName + " t" + (task == null ? INVALID_TASK_ID : task.taskId) +
+            return stringName + " t" + (task == null ? INVALID_TASK_ID : task.mTaskId) +
                     (finishing ? " f}" : "") + (mIsExiting ? " mIsExiting=" : "") + "}";
         }
         StringBuilder sb = new StringBuilder(128);

@@ -122,7 +122,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         mPersisterQueue.removeItems(
                 item -> {
                     File file = new File(item.mFilePath);
-                    return file.getName().startsWith(Integer.toString(task.taskId));
+                    return file.getName().startsWith(Integer.toString(task.mTaskId));
                 },
                 ImageWriteQueueItem.class);
     }
@@ -262,7 +262,7 @@ public class TaskPersister implements PersisterQueue.Listener {
         }
         for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = tasks.get(taskNdx);
-            if (task.taskId == taskId) {
+            if (task.mTaskId == taskId) {
                 return task;
             }
         }
@@ -329,14 +329,14 @@ public class TaskPersister implements PersisterQueue.Listener {
                                 // read the same thing again.
                                 // mWriteQueue.add(new TaskWriteQueueItem(task));
 
-                                final int taskId = task.taskId;
+                                final int taskId = task.mTaskId;
                                 if (mService.mRootActivityContainer.anyTaskForId(taskId,
                                         MATCH_TASK_IN_STACKS_OR_RECENT_TASKS) != null) {
                                     // Should not happen.
                                     Slog.wtf(TAG, "Existing task with taskId " + taskId + "found");
-                                } else if (userId != task.userId) {
+                                } else if (userId != task.mUserId) {
                                     // Should not happen.
-                                    Slog.wtf(TAG, "Task with userId " + task.userId + " found in "
+                                    Slog.wtf(TAG, "Task with userId " + task.mUserId + " found in "
                                             + userTasksDir.getAbsolutePath());
                                 } else {
                                     // Looks fine.
@@ -560,14 +560,14 @@ public class TaskPersister implements PersisterQueue.Listener {
                 FileOutputStream file = null;
                 AtomicFile atomicFile = null;
                 try {
-                    File userTasksDir = getUserTasksDir(task.userId);
+                    File userTasksDir = getUserTasksDir(task.mUserId);
                     if (!userTasksDir.isDirectory() && !userTasksDir.mkdirs()) {
-                        Slog.e(TAG, "Failure creating tasks directory for user " + task.userId
+                        Slog.e(TAG, "Failure creating tasks directory for user " + task.mUserId
                                 + ": " + userTasksDir + " Dropping persistence for task " + task);
                         return;
                     }
                     atomicFile = new AtomicFile(new File(userTasksDir,
-                            String.valueOf(task.taskId) + TASK_FILENAME_SUFFIX));
+                            String.valueOf(task.mTaskId) + TASK_FILENAME_SUFFIX));
                     file = atomicFile.startWrite();
                     file.write(stringWriter.toString().getBytes());
                     file.write('\n');

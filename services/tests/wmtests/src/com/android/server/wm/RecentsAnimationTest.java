@@ -345,7 +345,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 .setCreateTask(true)
                 .setComponent(new ComponentName(mContext.getPackageName(), "Home2"))
                 .build();
-        otherUserHomeActivity.getTaskRecord().userId = TEST_USER_ID;
+        otherUserHomeActivity.getTaskRecord().mUserId = TEST_USER_ID;
 
         ActivityStack fullscreenStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);

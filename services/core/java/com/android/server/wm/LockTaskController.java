@@ -317,12 +317,12 @@ public class LockTaskController {
         }
 
         // Allow recents activity if enabled by policy
-        if (task.isActivityTypeRecents() && isRecentsAllowed(task.userId)) {
+        if (task.isActivityTypeRecents() && isRecentsAllowed(task.mUserId)) {
             return false;
         }
 
         // Allow emergency calling when the device is protected by a locked keyguard
-        if (isKeyguardAllowed(task.userId) && isEmergencyCallTask(task)) {
+        if (isKeyguardAllowed(task.mUserId) && isEmergencyCallTask(task)) {
             return false;
         }
 
@@ -474,7 +474,7 @@ public class LockTaskController {
         if (mLockTaskModeTasks.isEmpty()) {
             if (DEBUG_LOCKTASK) Slog.d(TAG_LOCKTASK, "removeLockedTask: task=" + task +
                     " last task, reverting locktask mode. Callers=" + Debug.getCallers(3));
-            mHandler.post(() -> performStopLockTask(task.userId));
+            mHandler.post(() -> performStopLockTask(task.mUserId));
         }
     }
 
@@ -537,7 +537,7 @@ public class LockTaskController {
                 StatusBarManagerInternal statusBarManager = LocalServices.getService(
                         StatusBarManagerInternal.class);
                 if (statusBarManager != null) {
-                    statusBarManager.showScreenPinningRequest(task.taskId);
+                    statusBarManager.showScreenPinningRequest(task.mTaskId);
                 }
                 return;
             }
@@ -570,11 +570,11 @@ public class LockTaskController {
 
         final Intent taskIntent = task.intent;
         if (mLockTaskModeTasks.isEmpty() && taskIntent != null) {
-            mSupervisor.mRecentTasks.onLockTaskModeStateChanged(lockTaskModeState, task.userId);
+            mSupervisor.mRecentTasks.onLockTaskModeStateChanged(lockTaskModeState, task.mUserId);
             // Start lock task on the handler thread
             mHandler.post(() -> performStartLockTask(
                     taskIntent.getComponent().getPackageName(),
-                    task.userId,
+                    task.mUserId,
                     lockTaskModeState));
         }
         if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "setLockTaskMode: Locking to " + task +
@@ -640,7 +640,7 @@ public class LockTaskController {
                     || lockedTask.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED;
 
             if (mLockTaskModeState != LOCK_TASK_MODE_LOCKED
-                    || lockedTask.userId != userId
+                    || lockedTask.mUserId != userId
                     || !wasWhitelisted || isWhitelisted) {
                 continue;
             }
@@ -704,7 +704,7 @@ public class LockTaskController {
         }
 
         mLockTaskFeatures.put(userId, flags);
-        if (!mLockTaskModeTasks.isEmpty() && userId == mLockTaskModeTasks.get(0).userId) {
+        if (!mLockTaskModeTasks.isEmpty() && userId == mLockTaskModeTasks.get(0).mUserId) {
             mHandler.post(() -> {
                 if (mLockTaskModeState == LOCK_TASK_MODE_LOCKED) {
                     setStatusBarState(mLockTaskModeState, userId);
