@@ -896,7 +896,7 @@
     <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wifi-sare baten bidez soilik konektatu ahal izango zara Internetera."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"Uneko operadorea"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
-    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioari <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakusteko baimena eman nahi diozu?"</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakusteko baimena eman nahi diozu <xliff:g id="APP_0">%1$s</xliff:g> aplikazioari?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioaren informazioa irakur dezake."</string>
     <string name="slice_permission_text_2" msgid="3146758297471143723">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioan ekintzak gauza ditzake."</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Baimendu <xliff:g id="APP">%1$s</xliff:g> aplikazioari edozein aplikazioren zatiak erakustea"</string>

@@ -376,7 +376,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"സൂര്യോദയം വരെ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>-ന്"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> വരെ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ഇരുണ്ട തീം"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ഡാർക്ക് തീം"</string>
     <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"ഇരുണ്ട തീം\nബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC പ്രവർത്തനരഹിതമാക്കി"</string>
