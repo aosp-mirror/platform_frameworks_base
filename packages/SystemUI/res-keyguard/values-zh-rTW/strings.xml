@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="5397328359341314506">"輸入密碼"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN 碼不正確。"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"卡片無效。"</string>
-    <string name="keyguard_charged" msgid="3316115607283493413">"充電完成"</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"充電完成"</string>
     <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 無線充電"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 快速充電中"</string>

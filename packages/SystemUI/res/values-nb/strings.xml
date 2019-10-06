@@ -47,6 +47,8 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfigurer inndatametoder"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Fysisk tastatur"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Vil du gi <xliff:g id="APPLICATION">%1$s</xliff:g> tilgang til <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
+    <skip />
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Vil du gi <xliff:g id="APPLICATION">%1$s</xliff:g> tilgang til <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Vil du åpne <xliff:g id="APPLICATION">%1$s</xliff:g> for å behandle <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Vil du åpne <xliff:g id="APPLICATION">%1$s</xliff:g> for å behandle <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
@@ -126,6 +128,20 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Bekreftet"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Trykk på Bekreft for å fullføre"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Autentisert"</string>
+    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Trykk på fingeravtrykkssensoren"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikon for fingeravtrykk"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Ser etter deg …"</string>
@@ -364,6 +380,8 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Varsler"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lommelykt"</string>
+    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
+    <skip />
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobildata"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Databruk"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Gjenværende data"</string>

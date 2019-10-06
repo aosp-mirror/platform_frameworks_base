@@ -33,7 +33,7 @@
     <string name="keyguard_enter_your_password" msgid="5397328359341314506">"आफ्नो पासवर्ड प्रविष्ट गर्नु…"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN कोड गलत छ।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"अमान्य कार्ड।"</string>
-    <string name="keyguard_charged" msgid="3316115607283493413">"पूर्ण चार्ज भएको"</string>
+    <string name="keyguard_charged" msgid="2222329688813033109">"चार्ज भयो"</string>
     <string name="keyguard_plugged_in_wireless" msgid="8404159927155454732">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तारविनै चार्ज गर्दै"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै"</string>

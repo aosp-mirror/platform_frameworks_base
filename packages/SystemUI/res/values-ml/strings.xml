@@ -47,6 +47,8 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ടൈപ്പുചെയ്യൽ രീതികൾ സജ്ജീകരിക്കുക"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഫിസിക്കൽ കീബോഡ്"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g>-നെ അനുവദിക്കണോ?"</string>
+    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
+    <skip />
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g>-നെ അനുവദിക്കണോ?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> കൈകാര്യം ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കണോ?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> കൈകാര്യം ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കണോ?"</string>
@@ -126,6 +128,20 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"സ്ഥിരീകരിച്ചു"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"പൂർത്തിയാക്കാൻ സ്ഥിരീകരിക്കുക ടാപ്പ് ചെയ്യൂ"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
+    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
+    <skip />
+    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"വിരലടയാള സെൻസർ സ്‌പർശിക്കുക"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"വിരലടയാള ഐക്കൺ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"നിങ്ങൾക്കായി തിരയുന്നു…"</string>
@@ -364,6 +380,8 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"അറിയിപ്പുകൾ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ടോർച്ച്"</string>
+    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
+    <skip />
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ഡാറ്റാ ഉപയോഗം"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ശേഷിക്കുന്ന ഡാറ്റ"</string>
@@ -377,7 +395,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"സൂര്യോദയം വരെ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>-ന്"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> വരെ"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ഇരുണ്ട തീം"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="3419947801072692538">"ഡാർക്ക് തീം"</string>
     <string name="quick_settings_ui_mode_night_label_battery_saver" msgid="7438725724589758362">"ഇരുണ്ട തീം\nബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC പ്രവർത്തനരഹിതമാക്കി"</string>
