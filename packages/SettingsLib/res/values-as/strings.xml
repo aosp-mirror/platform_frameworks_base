@@ -402,8 +402,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"টেবলেটটো সোনকালেই বন্ধ হ\'ব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ডিভাইচটো সোনকালেই বন্ধ হ\'ব পাৰে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"সম্পূৰ্ণকৈ চ্চাৰ্জ হ\'বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> সম্পূৰ্ণৰূপে চ্চাৰ্জ হোৱা পৰ্যন্ত"</string>
+    <string name="power_remaining_charging_duration_only" msgid="6672239353042034265">"চাৰ্জ হ’বলৈ <xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
+    <string name="power_charging_duration" msgid="5850751284103249125">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> চাৰ্জ হ\'বলৈ"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"অজ্ঞাত"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"চ্চাৰ্জ হৈ আছে"</string>

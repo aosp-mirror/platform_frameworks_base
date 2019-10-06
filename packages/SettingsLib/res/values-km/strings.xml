@@ -402,8 +402,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"ថេប្លេត​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ឧបករណ៍​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបសាកថ្មពេញ"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើបសាកថ្មពេញ"</string>
+    <string name="power_remaining_charging_duration_only" msgid="6672239353042034265">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើប​ត្រូវសាក"</string>
+    <string name="power_charging_duration" msgid="5850751284103249125">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​ត្រូវសាក"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"កំពុងបញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"កំពុង​សាក​ថ្ម"</string>

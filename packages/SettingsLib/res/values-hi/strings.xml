@@ -402,8 +402,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"टैबलेट जल्दी ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"डिवाइस जल्दी ही बंद हो सकता है (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"पूरी तरह से चार्ज होने में <xliff:g id="TIME">%1$s</xliff:g> शेष"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> पूरी तरह से चार्ज होने तक"</string>
+    <string name="power_remaining_charging_duration_only" msgid="6672239353042034265">"चार्ज पूरा होने में <xliff:g id="TIME">%1$s</xliff:g> बचा है"</string>
+    <string name="power_charging_duration" msgid="5850751284103249125">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में पूरा चार्ज हो जाएगा"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज किया जा रहा है"</string>
