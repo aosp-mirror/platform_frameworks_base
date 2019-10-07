@@ -30,7 +30,7 @@
         <item name="colorBackgroundFloating">@color/black</item>
 
         <!-- volume background -->
-        <item name="panelColorBackground">@color/material_grey_800</item>
+        <item name="panelColorBackground">@color/black</item>
     </style>
 
     <style name="Theme.DeviceDefault.QuickSettings.Dialog" parent="Theme.DeviceDefault.Dialog" />
