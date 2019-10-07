@@ -209,7 +209,8 @@ public class UserManagerService extends IUserManager.Stub {
             | UserInfo.FLAG_DEMO;
 
     @VisibleForTesting
-    static final int MIN_USER_ID = 10;
+    static final int MIN_USER_ID = UserHandle.MIN_SECONDARY_USER_ID;
+
     // We need to keep process uid within Integer.MAX_VALUE.
     @VisibleForTesting
     static final int MAX_USER_ID = Integer.MAX_VALUE / UserHandle.PER_USER_RANGE;

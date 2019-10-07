@@ -39,6 +39,7 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user id to indicate all users on the device */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_ALL = -1;
 
     /** @hide A user handle to indicate all users on the device */
@@ -69,7 +70,10 @@ public final class UserHandle implements Parcelable {
 
     /** @hide An undefined user id */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_NULL = -10000;
+
+    private static final @NonNull UserHandle NULL = new UserHandle(USER_NULL);
 
     /**
      * @hide A user id constant to indicate the "owner" user of the device
@@ -91,6 +95,7 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user id constant to indicate the "system" user of the device */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_SYSTEM = 0;
 
     /** @hide A user serial constant to indicate the "system" user of the device */
@@ -108,6 +113,27 @@ public final class UserHandle implements Parcelable {
      */
     @UnsupportedAppUsage
     public static final boolean MU_ENABLED = true;
+
+    /** @hide */
+    @TestApi
+    public static final int MIN_SECONDARY_USER_ID = 10;
+
+    /**
+     * Arbitrary user handle cache size. We use the cache even when {@link #MU_ENABLED} is false
+     * anyway, so we can always assume in CTS that UserHandle.of(10) returns a cached instance
+     * even on non-multiuser devices.
+     */
+    private static final int NUM_CACHED_USERS = 4;
+
+    private static final UserHandle[] CACHED_USER_INFOS = new UserHandle[NUM_CACHED_USERS];
+
+    static {
+        // Not lazily initializing the cache, so that we can share them across processes.
+        // (We'll create them in zygote.)
+        for (int i = 0; i < CACHED_USER_INFOS.length; i++) {
+            CACHED_USER_INFOS[i] = new UserHandle(MIN_SECONDARY_USER_ID + i);
+        }
+    }
 
     /** @hide */
     @UnsupportedAppUsage
@@ -209,6 +235,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static @UserIdInt int getUserId(int uid) {
         if (MU_ENABLED) {
             return uid / PER_USER_RANGE;
@@ -229,9 +256,31 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     @SystemApi
     public static UserHandle of(@UserIdInt int userId) {
-        return userId == USER_SYSTEM ? SYSTEM : new UserHandle(userId);
+        if (userId == USER_SYSTEM) {
+            return SYSTEM; // Most common.
+        }
+        // These are sequential; so use a switch. Maybe they'll be optimized to a table lookup.
+        switch (userId) {
+            case USER_ALL:
+                return ALL;
+
+            case USER_CURRENT:
+                return CURRENT;
+
+            case USER_CURRENT_OR_SELF:
+                return CURRENT_OR_SELF;
+        }
+        if (userId >= MIN_SECONDARY_USER_ID
+                && userId < (MIN_SECONDARY_USER_ID + CACHED_USER_INFOS.length)) {
+            return CACHED_USER_INFOS[userId - MIN_SECONDARY_USER_ID];
+        }
+        if (userId == USER_NULL) { // Not common.
+            return NULL;
+        }
+        return new UserHandle(userId);
     }
 
     /**
@@ -239,6 +288,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     public static int getUid(@UserIdInt int userId, @AppIdInt int appId) {
         if (MU_ENABLED) {
             return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
@@ -404,6 +454,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static @UserIdInt int myUserId() {
         return getUserId(Process.myUid());
     }
@@ -513,7 +564,9 @@ public final class UserHandle implements Parcelable {
     public static final @android.annotation.NonNull Parcelable.Creator<UserHandle> CREATOR
             = new Parcelable.Creator<UserHandle>() {
         public UserHandle createFromParcel(Parcel in) {
-            return new UserHandle(in);
+            // Try to avoid allocation; use of() here. Keep this and the constructor below
+            // in sync.
+            return UserHandle.of(in.readInt());
         }
 
         public UserHandle[] newArray(int size) {
@@ -532,6 +585,6 @@ public final class UserHandle implements Parcelable {
      * positioned at the location in the buffer where it was written.
      */
     public UserHandle(Parcel in) {
-        mHandle = in.readInt();
+        mHandle = in.readInt(); // Keep this and createFromParcel() in sync.
     }
 }
