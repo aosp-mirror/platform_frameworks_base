@@ -221,7 +221,7 @@ import java.util.function.Predicate;
  * particular Display.
  */
 class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer>
-        implements WindowManagerPolicy.DisplayContentInfo {
+        implements WindowManagerPolicy.DisplayContentInfo, ConfigurationContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
 
     /** The default scaling mode that scales content automatically. */
@@ -1136,10 +1136,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * values from being replaced by the initializing {@link #ActivityDisplay}.
      */
     void initializeDisplayOverrideConfiguration() {
-        if (mActivityDisplay != null) {
-            mActivityDisplay.getRequestedOverrideConfiguration()
-                    .updateFrom(getRequestedOverrideConfiguration());
+        if (mActivityDisplay == null) {
+            return;
         }
+        mActivityDisplay.onRequestedOverrideConfigurationChanged(
+                getResolvedOverrideConfiguration());
+        mActivityDisplay.registerConfigurationChangeListener(this);
     }
 
     void reconfigureDisplayLocked() {
@@ -2373,6 +2375,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void removeImmediately() {
         mRemovingDisplay = true;
         try {
+            if (mActivityDisplay != null) {
+                mActivityDisplay.unregisterConfigurationChangeListener(this);
+            }
             if (mParentWindow != null) {
                 mParentWindow.removeEmbeddedDisplayContent(this);
             }
