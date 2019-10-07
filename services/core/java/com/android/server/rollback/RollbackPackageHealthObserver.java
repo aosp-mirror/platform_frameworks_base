@@ -370,7 +370,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     private void checkAndMitigateNativeCrashes() {
         mNumberOfNativeCrashPollsRemaining--;
         // Check if native watchdog reported a crash
-        if ("1".equals(SystemProperties.get("ro.init.updatable_crashing"))) {
+        if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
             execute(getModuleMetadataPackage());
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
