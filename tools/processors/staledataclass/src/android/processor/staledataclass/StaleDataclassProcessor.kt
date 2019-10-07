@@ -182,6 +182,11 @@ class StaleDataclassProcessor: AbstractProcessor() {
                 .filterNot {
                     it.kind == ElementKind.CLASS
                             || it.kind == ElementKind.CONSTRUCTOR
+                            || it.kind == ElementKind.INTERFACE
+                            || it.kind == ElementKind.ENUM
+                            || it.kind == ElementKind.ANNOTATION_TYPE
+                            || it.kind == ElementKind.INSTANCE_INIT
+                            || it.kind == ElementKind.STATIC_INIT
                             || isGenerated(it)
                 }.map {
                     elemToString(it)
