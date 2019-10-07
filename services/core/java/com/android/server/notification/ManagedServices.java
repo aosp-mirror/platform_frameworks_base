@@ -185,7 +185,7 @@ abstract public class ManagedServices {
     }
 
     protected void addDefaultComponentOrPackage(String packageOrComponent) {
-        if (packageOrComponent != null) {
+        if (!TextUtils.isEmpty(packageOrComponent)) {
             synchronized (mDefaultsLock) {
                 ComponentName cn = ComponentName.unflattenFromString(packageOrComponent);
                 if (cn == null) {
