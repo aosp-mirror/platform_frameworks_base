@@ -43,6 +43,8 @@ import java.util.Objects;
 public class RollbackStoreTest {
 
     private static final int ID = 123;
+    private static final int USER = 0;
+    private static final String INSTALLER = "some.installer";
 
     private static final Correspondence<VersionedPackage, VersionedPackage> VER_PKG_CORR =
             new Correspondence<VersionedPackage, VersionedPackage>() {
@@ -97,7 +99,8 @@ public class RollbackStoreTest {
             + "'longVersionCode':23},{'packageName':'something','longVersionCode':999}],"
             + "'committedSessionId':45654465},'timestamp':'2019-10-01T12:29:08.855Z',"
             + "'stagedSessionId':-1,'state':'enabling','apkSessionId':-1,"
-            + "'restoreUserDataInProgress':true}";
+            + "'restoreUserDataInProgress':true, 'userId':0,"
+            + "'installerPackageName':'some.installer'}";
 
     @Rule
     public TemporaryFolder mFolder = new TemporaryFolder();
@@ -115,7 +118,7 @@ public class RollbackStoreTest {
 
     @Test
     public void createNonStaged() {
-        Rollback rollback = mRollbackStore.createNonStagedRollback(ID);
+        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
 
         assertThat(rollback.getBackupDir().getAbsolutePath())
                 .isEqualTo(mFolder.getRoot().getAbsolutePath() + "/" + ID);
@@ -128,7 +131,7 @@ public class RollbackStoreTest {
 
     @Test
     public void createStaged() {
-        Rollback rollback = mRollbackStore.createStagedRollback(ID, 897);
+        Rollback rollback = mRollbackStore.createStagedRollback(ID, 897, USER, INSTALLER);
 
         assertThat(rollback.getBackupDir().getAbsolutePath())
                 .isEqualTo(mFolder.getRoot().getAbsolutePath() + "/" + ID);
@@ -143,7 +146,7 @@ public class RollbackStoreTest {
 
     @Test
     public void saveAndLoadRollback() {
-        Rollback origRb = mRollbackStore.createNonStagedRollback(ID);
+        Rollback origRb = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
 
         origRb.setRestoreUserDataInProgress(true);
         origRb.info.getCausePackages().add(new VersionedPackage("com.made.up", 2));
@@ -193,7 +196,7 @@ public class RollbackStoreTest {
 
     @Test
     public void loadFromJson() throws Exception {
-        Rollback expectedRb = mRollbackStore.createNonStagedRollback(ID);
+        Rollback expectedRb = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
 
         expectedRb.setTimestamp(Instant.parse("2019-10-01T12:29:08.855Z"));
         expectedRb.setRestoreUserDataInProgress(true);
@@ -242,7 +245,7 @@ public class RollbackStoreTest {
 
     @Test
     public void saveAndDelete() {
-        Rollback rollback = mRollbackStore.createNonStagedRollback(ID);
+        Rollback rollback = mRollbackStore.createNonStagedRollback(ID, USER, INSTALLER);
 
         RollbackStore.saveRollback(rollback);
 
@@ -287,6 +290,9 @@ public class RollbackStoreTest {
             assertPackageRollbacksAreEquivalent(
                     b.info.getPackages().get(i), a.info.getPackages().get(i));
         }
+
+        assertThat(a.getUserId()).isEqualTo(b.getUserId());
+        assertThat(a.getInstallerPackageName()).isEqualTo(b.getInstallerPackageName());
     }
 
     private void assertPackageRollbacksAreEquivalent(PackageRollbackInfo b, PackageRollbackInfo a) {

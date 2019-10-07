@@ -52,6 +52,8 @@ public class RollbackUnitTest {
     private static final String PKG_2 = "test.testpackage.pkg2";
     private static final String PKG_3 = "com.blah.hello.three";
     private static final String PKG_4 = "com.something.4pack";
+    private static final int USER = 0;
+    private static final String INSTALLER = "some.installer";
 
     @Mock private AppDataRollbackHelper mMockDataHelper;
 
@@ -66,7 +68,7 @@ public class RollbackUnitTest {
         int sessionId = 567;
         File file = new File("/test/testing");
 
-        Rollback rollback = new Rollback(rollbackId, file, sessionId);
+        Rollback rollback = new Rollback(rollbackId, file, sessionId, USER, INSTALLER);
 
         assertThat(rollback.isEnabling()).isTrue();
         assertThat(rollback.getBackupDir().getAbsolutePath()).isEqualTo("/test/testing");
@@ -79,7 +81,7 @@ public class RollbackUnitTest {
         int rollbackId = 123;
         File file = new File("/test/testing");
 
-        Rollback rollback = new Rollback(rollbackId, file, -1);
+        Rollback rollback = new Rollback(rollbackId, file, -1, USER, INSTALLER);
 
         assertThat(rollback.isEnabling()).isTrue();
         assertThat(rollback.getBackupDir().getAbsolutePath()).isEqualTo("/test/testing");
@@ -88,7 +90,8 @@ public class RollbackUnitTest {
 
     @Test
     public void rollbackMadeAvailable() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER,
+                INSTALLER);
 
         assertThat(rollback.isEnabling()).isTrue();
         assertThat(rollback.isAvailable()).isFalse();
@@ -106,7 +109,7 @@ public class RollbackUnitTest {
 
     @Test
     public void deletedRollbackCannotBeMadeAvailable() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
 
         rollback.delete(mMockDataHelper);
 
@@ -120,7 +123,7 @@ public class RollbackUnitTest {
 
     @Test
     public void getPackageNamesAllAndJustApex() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 11, true);
         PackageRollbackInfo pkgInfo3 = newPkgInfoFor(PKG_3, 19, 1, false);
@@ -134,7 +137,7 @@ public class RollbackUnitTest {
 
     @Test
     public void includesPackagesAfterEnable() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         PackageRollbackInfo pkgInfo3 = newPkgInfoFor(PKG_3, 157, 156, false);
@@ -162,7 +165,7 @@ public class RollbackUnitTest {
 
     @Test
     public void snapshotWhenEnabling() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
@@ -180,7 +183,7 @@ public class RollbackUnitTest {
 
     @Test
     public void snapshotWhenAvailable() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
@@ -201,7 +204,7 @@ public class RollbackUnitTest {
 
     @Test
     public void snapshotWhenDeleted() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
@@ -222,7 +225,7 @@ public class RollbackUnitTest {
 
     @Test
     public void snapshotThenDelete() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
@@ -242,7 +245,7 @@ public class RollbackUnitTest {
 
     @Test
     public void restoreUserDataDoesNothingIfNotInProgress() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
@@ -257,7 +260,7 @@ public class RollbackUnitTest {
 
     @Test
     public void restoreUserDataDoesNothingIfPackageNotFound() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));
@@ -273,7 +276,7 @@ public class RollbackUnitTest {
 
     @Test
     public void restoreUserDataRestoresIfInProgressAndPackageFound() {
-        Rollback rollback = new Rollback(123, new File("/test/testing"), -1);
+        Rollback rollback = new Rollback(123, new File("/test/testing"), -1, USER, INSTALLER);
         PackageRollbackInfo pkgInfo1 = newPkgInfoFor(PKG_1, 12, 10, false);
         PackageRollbackInfo pkgInfo2 = newPkgInfoFor(PKG_2, 18, 12, true);
         rollback.info.getPackages().addAll(Arrays.asList(pkgInfo1, pkgInfo2));

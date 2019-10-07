@@ -106,6 +106,11 @@ public class AppDataRollbackHelperTest {
         return createPackageRollbackInfo(packageName, new int[] {});
     }
 
+    private static Rollback createRollbackForId(int rollbackId) {
+        return new Rollback(rollbackId, new File("/does/not/exist"), -1,
+                0, "com.xyz");
+    }
+
     @Test
     public void testRestoreAppDataSnapshot_pendingBackupForUser() throws Exception {
         Installer installer = mock(Installer.class);
@@ -232,18 +237,16 @@ public class AppDataRollbackHelperTest {
         wasRecentlyRestored.getPendingRestores().add(
                 new RestoreInfo(73 /* userId */, 239 /* appId*/, "seInfo"));
 
-        Rollback dataWithPendingBackup = new Rollback(101, new File("/does/not/exist"), -1);
+        Rollback dataWithPendingBackup = createRollbackForId(101);
         dataWithPendingBackup.info.getPackages().add(pendingBackup);
 
-        Rollback dataWithRecentRestore = new Rollback(17239, new File("/does/not/exist"),
-                -1);
+        Rollback dataWithRecentRestore = createRollbackForId(17239);
         dataWithRecentRestore.info.getPackages().add(wasRecentlyRestored);
 
-        Rollback dataForDifferentUser = new Rollback(17239, new File("/does/not/exist"),
-                -1);
+        Rollback dataForDifferentUser = createRollbackForId(17239);
         dataForDifferentUser.info.getPackages().add(ignoredInfo);
 
-        Rollback dataForRestore = new Rollback(17239, new File("/does/not/exist"), -1);
+        Rollback dataForRestore = createRollbackForId(17239);
         dataForRestore.info.getPackages().add(pendingRestore);
         dataForRestore.info.getPackages().add(wasRecentlyRestored);
 

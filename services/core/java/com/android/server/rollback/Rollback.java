@@ -21,6 +21,7 @@ import static com.android.server.rollback.RollbackManagerServiceImpl.sendFailure
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -33,7 +34,9 @@ import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseLongArray;
@@ -142,18 +145,37 @@ class Rollback {
     private final Object mLock = new Object();
 
     /**
+     * The user that performed the install with rollback enabled.
+     */
+    public final int mUserId;
+
+    /**
+     * The installer package name from the install session that enabled the rollback. May be null if
+     * that session did not set this value.
+     *
+     * If this is an empty string then the installer package name will be resolved by
+     * PackageManager.
+     */
+    @Nullable public final String mInstallerPackageName;
+
+    /**
      * Constructs a new, empty Rollback instance.
      *
      * @param rollbackId the id of the rollback.
      * @param backupDir the directory where the rollback data is stored.
      * @param stagedSessionId the session id if this is a staged rollback, -1 otherwise.
+     * @param userId the user that performed the install with rollback enabled.
+     * @param installerPackageName the installer package name from the original install session.
      */
-    Rollback(int rollbackId, File backupDir, int stagedSessionId) {
+    Rollback(int rollbackId, File backupDir, int stagedSessionId, int userId,
+            String installerPackageName) {
         this.info = new RollbackInfo(rollbackId,
                 /* packages */ new ArrayList<>(),
                 /* isStaged */ stagedSessionId != -1,
                 /* causePackages */ new ArrayList<>(),
                 /* committedSessionId */ -1);
+        mUserId = userId;
+        mInstallerPackageName = installerPackageName;
         mBackupDir = backupDir;
         mStagedSessionId = stagedSessionId;
         mState = ROLLBACK_STATE_ENABLING;
@@ -164,8 +186,11 @@ class Rollback {
      * Constructs a pre-populated Rollback instance.
      */
     Rollback(RollbackInfo info, File backupDir, Instant timestamp, int stagedSessionId,
-            @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress) {
+            @RollbackState int state, int apkSessionId, boolean restoreUserDataInProgress,
+            int userId, String installerPackageName) {
         this.info = info;
+        mUserId = userId;
+        mInstallerPackageName = installerPackageName;
         mBackupDir = backupDir;
         mTimestamp = timestamp;
         mStagedSessionId = stagedSessionId;
@@ -213,6 +238,21 @@ class Rollback {
      */
     int getStagedSessionId() {
         return mStagedSessionId;
+    }
+
+    /**
+     * Returns the ID of the user that performed the install with rollback enabled.
+     */
+    int getUserId() {
+        return mUserId;
+    }
+
+    /**
+     * Returns the installer package name from the install session that enabled the rollback. In the
+     * case that this is called on a rollback from an older version, returns the empty string.
+     */
+    @Nullable String getInstallerPackageName() {
+        return mInstallerPackageName;
     }
 
     /**
@@ -360,7 +400,8 @@ class Rollback {
             // Get a context to use to install the downgraded version of the package.
             Context pkgContext;
             try {
-                pkgContext = context.createPackageContext(callerPackageName, 0);
+                pkgContext = context.createPackageContextAsUser(callerPackageName, 0,
+                        UserHandle.of(mUserId));
             } catch (PackageManager.NameNotFoundException e) {
                 sendFailure(context, statusReceiver, RollbackManager.STATUS_FAILURE,
                         "Invalid callerPackageName");
@@ -385,15 +426,13 @@ class Rollback {
                 for (PackageRollbackInfo pkgRollbackInfo : info.getPackages()) {
                     PackageInstaller.SessionParams params = new PackageInstaller.SessionParams(
                             PackageInstaller.SessionParams.MODE_FULL_INSTALL);
-                    // TODO: We can't get the installerPackageName for apex
-                    // (b/123920130). Is it okay to ignore the installer package
-                    // for apex?
-                    if (!pkgRollbackInfo.isApex()) {
-                        String installerPackageName =
-                                pm.getInstallerPackageName(pkgRollbackInfo.getPackageName());
-                        if (installerPackageName != null) {
-                            params.setInstallerPackageName(installerPackageName);
-                        }
+                    String installerPackageName = mInstallerPackageName;
+                    if (TextUtils.isEmpty(mInstallerPackageName)) {
+                        installerPackageName = pm.getInstallerPackageName(
+                                pkgRollbackInfo.getPackageName());
+                    }
+                    if (installerPackageName != null) {
+                        params.setInstallerPackageName(installerPackageName);
                     }
                     params.setRequestDowngrade(true);
                     params.setRequiredInstalledVersionCode(
