@@ -16,55 +16,89 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
+import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.Dependency;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.doze.DozeLog;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.DragDownHelper;
-import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidJUnit4.class)
-@TestableLooper.RunWithLooper
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class StatusBarWindowViewTest extends SysuiTestCase {
 
     private StatusBarWindowView mView;
-    private StatusBar mStatusBar;
-    private DragDownHelper mDragDownHelper;
-    private NotificationStackScrollLayout mStackScrollLayout;
+    private StatusBarWindowViewController mController;
+
+    @Mock private NotificationWakeUpCoordinator mCoordinator;
+    @Mock private PulseExpansionHandler mPulseExpansionHandler;
+    @Mock private DynamicPrivacyController mDynamicPrivacyController;
+    @Mock private KeyguardBypassController mBypassController;
+    @Mock private PluginManager mPluginManager;
+    @Mock private TunerService mTunerService;
+    @Mock private DragDownHelper mDragDownHelper;
+    @Mock private ShadeController mShadeController;
+    @Mock private NotificationLockscreenUserManager mNotificationLockScreenUserManager;
+    @Mock private NotificationEntryManager mNotificationEntryManager;
+    @Mock private StatusBar mStatusBar;
+    @Mock private DozeLog mDozeLog;
 
     @Before
     public void setUp() {
-        mDependency.injectMockDependency(StatusBarStateController.class);
-        mView = spy(new StatusBarWindowView(getContext(), null));
-        mStackScrollLayout = mock(NotificationStackScrollLayout.class);
-        when(mView.getStackScrollLayout()).thenReturn(mStackScrollLayout);
-        mStatusBar = mock(StatusBar.class);
-        mView.setService(mStatusBar);
-        mDragDownHelper = mock(DragDownHelper.class);
-        mView.setDragDownHelper(mDragDownHelper);
+        MockitoAnnotations.initMocks(this);
+
+        mView = new StatusBarWindowView(getContext(), null);
+        mContext.putComponent(StatusBar.class, mStatusBar);
+        when(mStatusBar.isDozing()).thenReturn(false);
+        mDependency.injectTestDependency(ShadeController.class, mShadeController);
+
+        mController = new StatusBarWindowViewController.Builder(
+                new InjectionInflationController(
+                        SystemUIFactory.getInstance().getRootComponent()),
+                mCoordinator,
+                mPulseExpansionHandler,
+                mDynamicPrivacyController,
+                mBypassController,
+                new FalsingManagerFake(),
+                mPluginManager,
+                mTunerService,
+                mNotificationLockScreenUserManager,
+                mNotificationEntryManager,
+                mDozeLog)
+                .setShadeController(mShadeController)
+                .setStatusBarWindowView(mView)
+                .build();
+        mController.setService(mStatusBar);
+        mController.setDragDownHelper(mDragDownHelper);
+
     }
 
     @Test
-    public void testDragDownHelperCalledWhenDraggingDown() throws Exception {
-        when(Dependency.get(StatusBarStateController.class).getState())
-                .thenReturn(StatusBarState.SHADE);
+    public void testDragDownHelperCalledWhenDraggingDown() {
         when(mDragDownHelper.isDraggingDown()).thenReturn(true);
         long now = SystemClock.elapsedRealtime();
         MotionEvent ev = MotionEvent.obtain(now, now, MotionEvent.ACTION_UP, 0 /* x */, 0 /* y */,

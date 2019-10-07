@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
+import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -294,7 +295,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             AssistManager assistManager,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
-            StatusBarWindowController statusBarWindowController) {
+            StatusBarWindowController statusBarWindowController,
+            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild) {
         super(
                 lightBarController,
                 autoHideController,
@@ -347,7 +349,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 assistManager,
                 notificationListener,
                 configurationController,
-                statusBarWindowController);
+                statusBarWindowController,
+                statusBarWindowViewControllerBuild);
         mNavigationBarController = navigationBarController;
     }
 
@@ -778,7 +781,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             return;
         }
         mStatusBarWindowController.setStatusBarFocusable(false);
-        mStatusBarWindow.cancelExpandHelper();
+        mStatusBarWindowViewController.cancelExpandHelper();
         mStatusBarView.collapsePanel(true /* animate */, delayed, speedUpFactor);
 
         animateNotificationPanel(mClosingVelocity, true);

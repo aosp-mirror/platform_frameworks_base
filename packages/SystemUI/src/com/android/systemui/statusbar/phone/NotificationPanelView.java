@@ -408,14 +408,11 @@ public class NotificationPanelView extends PanelView implements
             .setDuration(200)
             .setAnimationFinishListener(mAnimatorListenerAdapter)
             .setCustomInterpolator(PANEL_ALPHA.getProperty(), Interpolators.ALPHA_IN);
-    private final NotificationEntryManager mEntryManager =
-            Dependency.get(NotificationEntryManager.class);
+    private final NotificationEntryManager mEntryManager;
 
     private final CommandQueue mCommandQueue;
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    private final ShadeController mShadeController =
-            Dependency.get(ShadeController.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final ShadeController mShadeController;
     private int mDisplayId;
 
     /**
@@ -461,6 +458,9 @@ public class NotificationPanelView extends PanelView implements
             KeyguardBypassController bypassController,
             FalsingManager falsingManager,
             PluginManager pluginManager,
+            ShadeController shadeController,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            NotificationEntryManager notificationEntryManager,
             DozeLog dozeLog) {
         super(context, attrs, falsingManager, dozeLog);
         setWillNotDraw(!DEBUG);
@@ -495,6 +495,11 @@ public class NotificationPanelView extends PanelView implements
         mBottomAreaShadeAlphaAnimator.setDuration(160);
         mBottomAreaShadeAlphaAnimator.setInterpolator(Interpolators.ALPHA_OUT);
         mPluginManager = pluginManager;
+        mShadeController = shadeController;
+        mLockscreenUserManager = notificationLockscreenUserManager;
+        mEntryManager = notificationEntryManager;
+
+        setBackgroundColor(Color.TRANSPARENT);
     }
 
     /**
@@ -509,9 +514,10 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardBottomArea.setStatusBar(mStatusBar);
     }
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
+    /**
+     * Call after this view has been fully inflated and had its children attached.
+     */
+    public void onChildrenAttached() {
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
 
@@ -554,7 +560,7 @@ public class NotificationPanelView extends PanelView implements
             }
         });
 
-        Dependency.get(PluginManager.class).addPluginListener(
+        mPluginManager.addPluginListener(
                 new PluginListener<HomeControlsPlugin>() {
 
                     @Override

@@ -216,6 +216,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
     @Mock private StatusBarWindowController mStatusBarWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
+    @Mock private StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
+    @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
 
     @Before
     public void setup() throws Exception {
@@ -278,6 +280,9 @@ public class StatusBarTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
         ConfigurationController configurationController = new ConfigurationControllerImpl(mContext);
 
+        when(mStatusBarWindowViewControllerBuilder.build())
+                .thenReturn(mStatusBarWindowViewController);
+
         mStatusBar = new StatusBar(
                 mLightBarController,
                 mAutoHideController,
@@ -333,7 +338,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mAssistManager,
                 mNotificationListener,
                 configurationController,
-                mStatusBarWindowController);
+                mStatusBarWindowController,
+                mStatusBarWindowViewControllerBuilder);
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mContext = mContext;
@@ -351,6 +357,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mPowerManager = mPowerManager;
         mStatusBar.mBarService = mBarService;
         mStatusBar.mStackScroller = mStackScroller;
+        mStatusBar.mStatusBarWindowViewController = mStatusBarWindowViewController;
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,
@@ -784,11 +791,11 @@ public class StatusBarTest extends SysuiTestCase {
         // Starting a pulse while docking should suppress wakeup gesture
         mStatusBar.mDozeServiceHost.pulseWhileDozing(mock(DozeHost.PulseCallback.class),
                 DozeEvent.PULSE_REASON_DOCKING);
-        verify(mStatusBarWindowView).suppressWakeUpGesture(eq(true));
+        verify(mStatusBarWindowViewController).suppressWakeUpGesture(eq(true));
 
         // Ending a pulse should restore wakeup gesture
         pulseCallback[0].onPulseFinished();
-        verify(mStatusBarWindowView).suppressWakeUpGesture(eq(false));
+        verify(mStatusBarWindowViewController).suppressWakeUpGesture(eq(false));
     }
 
     @Test

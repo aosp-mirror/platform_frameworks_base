@@ -17,11 +17,8 @@
 package com.android.systemui.statusbar.notification;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,23 +27,20 @@ import android.app.ActivityManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 import android.view.RemoteAnimationAdapter;
 import android.view.View;
-import android.widget.FrameLayout;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
+import com.android.systemui.statusbar.phone.StatusBarWindowViewController;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.stubbing.Answer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -55,6 +49,8 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
 
     private ActivityLaunchAnimator mLaunchAnimator;
     private ActivityLaunchAnimator.Callback mCallback = mock(ActivityLaunchAnimator.Callback.class);
+    private StatusBarWindowViewController mStatusBarWindowViewController = mock(
+            StatusBarWindowViewController.class);
     private StatusBarWindowView mStatusBarWindowView = mock(StatusBarWindowView.class);
     private NotificationListContainer mNotificationContainer
             = mock(NotificationListContainer.class);
@@ -62,10 +58,11 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        when(mStatusBarWindowViewController.getView()).thenReturn(mStatusBarWindowView);
         when(mStatusBarWindowView.getResources()).thenReturn(mContext.getResources());
         when(mCallback.areLaunchAnimationsEnabled()).thenReturn(true);
         mLaunchAnimator = new ActivityLaunchAnimator(
-                mStatusBarWindowView,
+                mStatusBarWindowViewController,
                 mCallback,
                 mock(NotificationPanelView.class),
                 mNotificationContainer);
