@@ -272,9 +272,14 @@ class RecentTasks {
      * app, or a timeout occurs.
      */
     void setFreezeTaskListReordering() {
+        // Only fire the callback once per quickswitch session, not on every individual switch
+        if (!mFreezeTaskListReordering) {
+            mTaskNotificationController.notifyTaskListFrozen(true);
+            mFreezeTaskListReordering = true;
+        }
+
         // Always update the reordering time when this is called to ensure that the timeout
         // is reset
-        mFreezeTaskListReordering = true;
         mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
         mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, mFreezeTaskListTimeoutMs);
     }
@@ -302,6 +307,7 @@ class RecentTasks {
         trimInactiveRecentTasks();
 
         mTaskNotificationController.notifyTaskStackChanged();
+        mTaskNotificationController.notifyTaskListFrozen(false);
     }
 
     /**

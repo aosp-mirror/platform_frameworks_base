@@ -197,4 +197,11 @@ oneway interface ITaskStackListener {
      * Called when any additions or deletions to the recent tasks list have been made.
      */
     void onRecentTaskListUpdated();
+
+    /**
+     * Called when Recent Tasks list is frozen or unfrozen.
+     *
+     * @param frozen if true, Recents Tasks list is currently frozen, false otherwise
+     */
+    void onRecentTaskListFrozenChanged(boolean frozen);
 }
