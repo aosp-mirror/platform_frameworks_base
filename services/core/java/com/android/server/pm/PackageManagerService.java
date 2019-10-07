@@ -13247,22 +13247,18 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
-        boolean ensureVerifyAppsEnabled = isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS);
-
         // Check if installing from ADB
         if ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0) {
             // Do not run verification in a test harness environment
             if (ActivityManager.isRunningInTestHarness()) {
                 return false;
             }
-            if (ensureVerifyAppsEnabled) {
+            if (isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
                 return true;
             }
             // Check if the developer does not want package verification for ADB installs
-            if (android.provider.Settings.Global.getInt(mContext.getContentResolver(),
-                    android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) == 0) {
-                return false;
-            }
+            return Global.getInt(mContext.getContentResolver(),
+                    Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
         } else {
             // only when not installed from ADB, skip verification for instant apps when
             // the installer and verifier are the same.
@@ -13280,14 +13276,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     } catch (SecurityException ignore) { }
                 }
             }
-        }
-
-        if (ensureVerifyAppsEnabled) {
             return true;
         }
-
-        return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE, 1) == 1;
     }
 
     @Override
