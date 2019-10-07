@@ -44,6 +44,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
@@ -129,6 +130,7 @@ import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestablePermissions;
+import android.testing.TestableResources;
 import android.text.Html;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -3278,7 +3280,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     public void testRestore() throws Exception {
         int systemChecks = mService.countSystemChecks;
-        mBinderService.applyRestore(null, UserHandle.USER_SYSTEM);
+        mBinderService.applyRestore(null, USER_SYSTEM);
         assertEquals(1, mService.countSystemChecks - systemChecks);
     }
 
@@ -3347,7 +3349,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         reset(mUgmInternal);
         when(mUgmInternal.newUriPermissionOwner(any())).thenReturn(new Binder());
         mService.updateUriPermissions(recordA, null, mContext.getPackageName(),
-                UserHandle.USER_SYSTEM);
+                USER_SYSTEM);
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
                 eq(message1.getDataUri()), anyInt(), anyInt(), anyInt());
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
@@ -3363,21 +3365,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Update means we drop access to first
         reset(mUgmInternal);
         mService.updateUriPermissions(recordB, recordA, mContext.getPackageName(),
-                UserHandle.USER_SYSTEM);
+                USER_SYSTEM);
         verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(any(),
                 eq(message1.getDataUri()), anyInt(), anyInt());
 
         // Update back means we grant access to first again
         reset(mUgm);
         mService.updateUriPermissions(recordA, recordB, mContext.getPackageName(),
-                UserHandle.USER_SYSTEM);
+                USER_SYSTEM);
         verify(mUgm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
                 eq(message1.getDataUri()), anyInt(), anyInt(), anyInt());
 
         // And update to empty means we drop everything
         reset(mUgmInternal);
         mService.updateUriPermissions(null, recordB, mContext.getPackageName(),
-                UserHandle.USER_SYSTEM);
+                USER_SYSTEM);
         verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(any(), eq(null),
                 anyInt(), anyInt());
     }
@@ -4077,7 +4079,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testIsCallerInstantApp_userAllNotification() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(UserHandle.USER_SYSTEM)))
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(USER_SYSTEM)))
                 .thenReturn(info);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(new String[]{"any"});
 
@@ -5666,4 +5668,33 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         StatusBarNotification[] notifsAfter = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifsAfter.length);
     }
+
+    @Test
+    public void testLoadDefaultApprovedServices_emptyResources() {
+        TestableResources tr = mContext.getOrCreateTestableResources();
+        tr.addOverride(com.android.internal.R.string.config_defaultListenerAccessPackages, "");
+        tr.addOverride(com.android.internal.R.string.config_defaultDndAccessPackages, "");
+        tr.addOverride(com.android.internal.R.string.config_defaultAssistantAccessComponent, "");
+        setDefaultAssistantInDeviceConfig("");
+
+        mService.loadDefaultApprovedServices(USER_SYSTEM);
+
+        verify(mListeners, never()).addDefaultComponentOrPackage(anyString());
+        verify(mConditionProviders, never()).addDefaultComponentOrPackage(anyString());
+        verify(mAssistants, never()).addDefaultComponentOrPackage(anyString());
+    }
+
+    @Test
+    public void testLoadDefaultApprovedServices_dnd() {
+        TestableResources tr = mContext.getOrCreateTestableResources();
+        tr.addOverride(com.android.internal.R.string.config_defaultDndAccessPackages, "test");
+        when(mListeners.queryPackageForServices(anyString(), anyInt(), anyInt()))
+                .thenReturn(new ArraySet<>());
+
+        mService.loadDefaultApprovedServices(USER_SYSTEM);
+
+        verify(mConditionProviders, times(1)).addDefaultComponentOrPackage("test");
+    }
+
+    // TODO: add tests for the rest of the non-empty cases
 }
