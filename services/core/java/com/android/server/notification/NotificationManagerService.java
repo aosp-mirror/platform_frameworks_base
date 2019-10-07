@@ -5014,12 +5014,13 @@ public class NotificationManagerService extends SystemService {
         final int contentViewSize = contentView.estimateMemoryUsage();
         if (contentViewSize > mWarnRemoteViewsSizeBytes
                 && contentViewSize < mStripRemoteViewsSizeBytes) {
-            Slog.w(TAG, "RemoteViews too large on tag: " + tag + " id: " + id
+            Slog.w(TAG, "RemoteViews too large on pkg: " + pkg + " tag: " + tag + " id: " + id
                     + " this might be stripped in a future release");
         }
         if (contentViewSize >= mStripRemoteViewsSizeBytes) {
             mUsageStats.registerImageRemoved(pkg);
-            Slog.w(TAG, "Removed too large RemoteViews on tag: " + tag + " id: " + id);
+            Slog.w(TAG,
+                    "Removed too large RemoteViews on pkg: " + pkg + " tag: " + tag + " id: " + id);
             return true;
         }
         return false;
