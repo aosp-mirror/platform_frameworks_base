@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
@@ -224,6 +225,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(SmartReplyController.class, mSmartReplyController);
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
+        mDependency.injectMockDependency(NotificationMediaManager.class);
 
         mCountDownLatch = new CountDownLatch(1);
 
