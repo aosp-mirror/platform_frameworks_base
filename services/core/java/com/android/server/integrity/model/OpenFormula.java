@@ -39,8 +39,10 @@ public final class OpenFormula extends Formula {
 
     public OpenFormula(Connector connector, Formula mainFormula,
             @Nullable Formula auxiliaryFormula) {
+        validateAuxiliaryFormula(connector, auxiliaryFormula);
         this.mConnector = checkNotNull(connector);
         this.mMainFormula = checkNotNull(mainFormula);
+        // TODO: Add validators on auxiliary formula
         this.mAuxiliaryFormula = auxiliaryFormula;
     }
 
@@ -54,5 +56,24 @@ public final class OpenFormula extends Formula {
 
     public Formula getAuxiliaryFormula() {
         return mAuxiliaryFormula;
+    }
+
+    private void validateAuxiliaryFormula(Connector connector, Formula auxiliaryFormula) {
+        boolean validAuxiliaryFormula;
+        switch (connector) {
+            case AND:
+            case OR:
+                validAuxiliaryFormula = (auxiliaryFormula != null);
+                break;
+            case NOT:
+                validAuxiliaryFormula = (auxiliaryFormula == null);
+                break;
+            default:
+                validAuxiliaryFormula = false;
+        }
+        if (!validAuxiliaryFormula) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid formulas used for connector %s", connector));
+        }
     }
 }

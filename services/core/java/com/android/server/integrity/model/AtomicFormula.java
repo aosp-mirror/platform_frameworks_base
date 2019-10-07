@@ -16,6 +16,9 @@
 
 package com.android.server.integrity.model;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.Nullable;
 
 /**
@@ -48,37 +51,45 @@ public final class AtomicFormula extends Formula {
     // The value of a key can take either 1 of 3 forms: String, Integer, or Boolean.
     // It cannot have multiple values.
     @Nullable
-    final String mStringValue;
+    private final String mStringValue;
     @Nullable
-    final Integer mIntValue;
+    private final Integer mIntValue;
     @Nullable
-    final Boolean mBoolValue;
+    private final Boolean mBoolValue;
 
     public AtomicFormula(Key key, Operator operator, String stringValue) {
-        // TODO: Add validators
-        this.mKey = key;
-        this.mOperator = operator;
-        this.mStringValue = stringValue;
+        validateOperator(key, operator);
+        checkArgument(
+                key == Key.PACKAGE_NAME || key == Key.APP_CERTIFICATE || key == Key.INSTALLER_NAME
+                        || key == Key.INSTALLER_CERTIFICATE,
+                String.format("Key %s cannot have string value", key));
+        this.mKey = checkNotNull(key);
+        this.mOperator = checkNotNull(operator);
+        this.mStringValue = checkNotNull(stringValue);
         this.mIntValue = null;
         this.mBoolValue = null;
     }
 
     public AtomicFormula(Key key, Operator operator, Integer intValue) {
-        // TODO: Add validators
-        this.mKey = key;
-        this.mOperator = operator;
+        validateOperator(key, operator);
+        checkArgument(key == Key.VERSION_CODE,
+                String.format("Key %s cannot have integer value", key));
+        this.mKey = checkNotNull(key);
+        this.mOperator = checkNotNull(operator);
         this.mStringValue = null;
-        this.mIntValue = intValue;
+        this.mIntValue = checkNotNull(intValue);
         this.mBoolValue = null;
     }
 
     public AtomicFormula(Key key, Operator operator, Boolean boolValue) {
-        // TODO: Add validators
-        this.mKey = key;
-        this.mOperator = operator;
+        validateOperator(key, operator);
+        checkArgument(key == Key.PRE_INSTALLED,
+                String.format("Key %s cannot have boolean value", key));
+        this.mKey = checkNotNull(key);
+        this.mOperator = checkNotNull(operator);
         this.mStringValue = null;
         this.mIntValue = null;
-        this.mBoolValue = boolValue;
+        this.mBoolValue = checkNotNull(boolValue);
     }
 
     public Key getKey() {
@@ -99,5 +110,27 @@ public final class AtomicFormula extends Formula {
 
     public Boolean getBoolValue() {
         return mBoolValue;
+    }
+
+    private void validateOperator(Key key, Operator operator) {
+        boolean validOperator;
+        switch (key) {
+            case PACKAGE_NAME:
+            case APP_CERTIFICATE:
+            case INSTALLER_NAME:
+            case INSTALLER_CERTIFICATE:
+            case PRE_INSTALLED:
+                validOperator = (operator == Operator.EQ);
+                break;
+            case VERSION_CODE:
+                validOperator = true;
+                break;
+            default:
+                validOperator = false;
+        }
+        if (!validOperator) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid operator %s used for key %s", operator, key));
+        }
     }
 }
