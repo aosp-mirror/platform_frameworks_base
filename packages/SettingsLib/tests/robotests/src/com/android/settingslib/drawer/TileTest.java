@@ -23,7 +23,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadow.api.Shadow;
 import org.robolectric.shadows.ShadowPackageManager;
-import org.robolectric.util.ReflectionHelpers;
 
 @RunWith(RobolectricTestRunner.class)
 public class TileTest {
@@ -41,7 +40,7 @@ public class TileTest {
         mActivityInfo.name = "abc";
         mActivityInfo.icon = com.android.internal.R.drawable.ic_plus;
         mActivityInfo.metaData = new Bundle();
-        mTile = new Tile(mActivityInfo, "category");
+        mTile = new ActivityTile(mActivityInfo, "category");
     }
 
     @Test
@@ -70,7 +69,7 @@ public class TileTest {
     @Test
     public void getIcon_noContextOrMetadata_returnNull() {
         mActivityInfo.metaData = null;
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
         assertThat(tile.getIcon(null)).isNull();
         assertThat(tile.getIcon(RuntimeEnvironment.application)).isNull();
     }
@@ -100,7 +99,7 @@ public class TileTest {
 
     @Test
     public void isIconTintable_hasMetadata_shouldReturnIconTintableMetadata() {
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         mActivityInfo.metaData.putBoolean(TileUtils.META_DATA_PREFERENCE_ICON_TINTABLE, false);
         assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isFalse();
@@ -111,14 +110,14 @@ public class TileTest {
 
     @Test
     public void isIconTintable_noIcon_shouldReturnFalse() {
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isFalse();
     }
 
     @Test
     public void isIconTintable_noTintableMetadata_shouldReturnFalse() {
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
         mActivityInfo.metaData.putInt(META_DATA_PREFERENCE_ICON, android.R.drawable.ic_info);
 
         assertThat(tile.isIconTintable(RuntimeEnvironment.application)).isFalse();
@@ -126,7 +125,7 @@ public class TileTest {
 
     @Test
     public void getPriority_noMetadata_return0() {
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         assertThat(tile.getOrder()).isEqualTo(0);
     }
@@ -135,7 +134,7 @@ public class TileTest {
     public void getPriority_badMetadata_return0() {
         mActivityInfo.metaData.putString(META_DATA_KEY_ORDER, "1");
 
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         assertThat(tile.getOrder()).isEqualTo(0);
     }
@@ -144,7 +143,7 @@ public class TileTest {
     public void getPriority_validMetadata_returnMetadataValue() {
         mActivityInfo.metaData.putInt(META_DATA_KEY_ORDER, 1);
 
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
 
         assertThat(tile.getOrder()).isEqualTo(1);
     }
@@ -157,7 +156,7 @@ public class TileTest {
         spm.addResolveInfoForIntent(
                 new Intent().setClassName(mActivityInfo.packageName, mActivityInfo.name), info);
 
-        final Tile tile = new Tile(mActivityInfo, "category");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
         final long staleTimeStamp = -10000;
         tile.mLastUpdateTime = staleTimeStamp;
 
@@ -173,8 +172,8 @@ public class TileTest {
         final ShadowPackageManager spm = Shadow.extract(mContext.getPackageManager());
         spm.removePackage(mActivityInfo.packageName);
 
-        final Tile tile = new Tile(mActivityInfo, "category");
-        ReflectionHelpers.setField(tile, "mActivityInfo", null);
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+        tile.mComponentInfo = null;
 
         assertThat(tile.getTitle(RuntimeEnvironment.application)).isNull();
     }
