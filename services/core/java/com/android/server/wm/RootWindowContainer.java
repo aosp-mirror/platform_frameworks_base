@@ -230,7 +230,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final DisplayContent existing = getDisplayContent(displayId);
 
         if (existing != null) {
-            existing.mAcitvityDisplay = activityDisplay;
+            existing.mActivityDisplay = activityDisplay;
             existing.initializeDisplayOverrideConfiguration();
             return existing;
         }
@@ -1067,7 +1067,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     void positionChildAt(int position, DisplayContent child, boolean includingParents) {
         super.positionChildAt(position, child, includingParents);
         if (mRootActivityContainer != null) {
-            mRootActivityContainer.onChildPositionChanged(child.mAcitvityDisplay, position);
+            mRootActivityContainer.onChildPositionChanged(child.mActivityDisplay, position);
         }
     }
 

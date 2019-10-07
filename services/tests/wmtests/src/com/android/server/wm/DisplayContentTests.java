@@ -706,13 +706,13 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
-                        .setDisplay(dc.mAcitvityDisplay).build();
+                        .setDisplay(dc.mActivityDisplay).build();
         final ActivityRecord activity = stack.topTask().getTopActivity();
 
         activity.setRequestedOrientation(newOrientation);
 
         final ArgumentCaptor<Configuration> captor = ArgumentCaptor.forClass(Configuration.class);
-        verify(dc.mAcitvityDisplay).updateDisplayOverrideConfigurationLocked(captor.capture(),
+        verify(dc.mActivityDisplay).updateDisplayOverrideConfigurationLocked(captor.capture(),
                 same(activity), anyBoolean(), same(null));
         final Configuration newDisplayConfig = captor.getValue();
         final int expectedOrientation = newOrientation == SCREEN_ORIENTATION_PORTRAIT
@@ -732,12 +732,12 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final ActivityStack stack =
                 new ActivityTestsBase.StackBuilder(mWm.mAtmService.mRootActivityContainer)
-                        .setDisplay(dc.mAcitvityDisplay).build();
+                        .setDisplay(dc.mActivityDisplay).build();
         final ActivityRecord activity = stack.topTask().getTopActivity();
 
         activity.setRequestedOrientation(newOrientation);
 
-        verify(dc.mAcitvityDisplay, never()).updateDisplayOverrideConfigurationLocked(any(),
+        verify(dc.mActivityDisplay, never()).updateDisplayOverrideConfigurationLocked(any(),
                 eq(activity), anyBoolean(), same(null));
         assertEquals(dc.getDisplayRotation().getUserRotation(), dc.getRotation());
     }
