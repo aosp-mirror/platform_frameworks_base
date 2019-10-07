@@ -26,20 +26,20 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportStats;
 
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Handles creation and cleanup of {@link IntermediateEncryptingTransport} instances.
- */
+/** Handles creation and cleanup of {@link IntermediateEncryptingTransport} instances. */
 public class IntermediateEncryptingTransportManager {
     private static final String CALLER = "IntermediateEncryptingTransportManager";
     private final TransportClientManager mTransportClientManager;
     private final Object mTransportsLock = new Object();
     private final Map<ComponentName, IntermediateEncryptingTransport> mTransports = new HashMap<>();
+    private Context mContext;
 
     @VisibleForTesting
     IntermediateEncryptingTransportManager(TransportClientManager transportClientManager) {
@@ -48,6 +48,7 @@ public class IntermediateEncryptingTransportManager {
 
     public IntermediateEncryptingTransportManager(Context context) {
         this(new TransportClientManager(UserHandle.myUserId(), context, new TransportStats()));
+        mContext = context;
     }
 
     /**
@@ -55,31 +56,42 @@ public class IntermediateEncryptingTransportManager {
      * provide a {@link IntermediateEncryptingTransport} which is an implementation of {@link
      * IBackupTransport} that encrypts (or decrypts) the data when sending it (or receiving it) from
      * the real {@link IBackupTransport}.
+     *
      * @param intent {@link Intent} created with a call to {@link
-     * TransportClientManager.getEncryptingTransportIntent(ComponentName)}.
+     *     TransportClientManager.getEncryptingTransportIntent(ComponentName)}.
      * @return
      */
     public IntermediateEncryptingTransport get(Intent intent) {
         Intent transportIntent = TransportClientManager.getRealTransportIntent(intent);
         Log.i(TAG, "get: intent:" + intent + " transportIntent:" + transportIntent);
         synchronized (mTransportsLock) {
-            return mTransports.computeIfAbsent(transportIntent.getComponent(),
-                    c -> create(transportIntent));
+            return mTransports.computeIfAbsent(
+                    transportIntent.getComponent(), c -> create(transportIntent));
         }
     }
 
-    /**
-     * Create an instance of {@link IntermediateEncryptingTransport}.
-     */
+    /** Create an instance of {@link IntermediateEncryptingTransport}. */
     private IntermediateEncryptingTransport create(Intent realTransportIntent) {
         Log.d(TAG, "create: intent:" + realTransportIntent);
-        return new IntermediateEncryptingTransport(mTransportClientManager.getTransportClient(
-                realTransportIntent.getComponent(), realTransportIntent.getExtras(), CALLER));
+
+        LockPatternUtils patternUtils = new LockPatternUtils(mContext);
+        boolean shouldEncrypt =
+                realTransportIntent.getComponent().getClassName().contains("EncryptedLocalTransport")
+                        && (patternUtils.isLockPatternEnabled(UserHandle.myUserId())
+                                || patternUtils.isLockPasswordEnabled(UserHandle.myUserId()));
+
+        return new IntermediateEncryptingTransport(
+                mTransportClientManager.getTransportClient(
+                        realTransportIntent.getComponent(),
+                        realTransportIntent.getExtras(),
+                        CALLER),
+                mContext,
+                shouldEncrypt);
     }
 
     /**
-     * Cleanup the {@link IntermediateEncryptingTransport} which was created by a call to
-     * {@link #get(Intent)} with this {@link Intent}.
+     * Cleanup the {@link IntermediateEncryptingTransport} which was created by a call to {@link
+     * #get(Intent)} with this {@link Intent}.
      */
     public void cleanup(Intent intent) {
         Intent transportIntent = TransportClientManager.getRealTransportIntent(intent);

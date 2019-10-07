@@ -71,19 +71,19 @@ public class LocalTransport extends BackupTransport {
 
     // Size quotas at reasonable values, similar to the current cloud-storage limits
     private static final long FULL_BACKUP_SIZE_QUOTA = 25 * 1024 * 1024;
-    private static final long KEY_VALUE_BACKUP_SIZE_QUOTA = 5 * 1024 * 1024;
+    protected static final long KEY_VALUE_BACKUP_SIZE_QUOTA = 5 * 1024 * 1024;
 
     private Context mContext;
     private File mDataDir;
     private File mCurrentSetDir;
-    private File mCurrentSetIncrementalDir;
+    protected File mCurrentSetIncrementalDir;
     private File mCurrentSetFullDir;
 
-    private PackageInfo[] mRestorePackages = null;
-    private int mRestorePackage = -1;  // Index into mRestorePackages
-    private int mRestoreType;
+    protected PackageInfo[] mRestorePackages = null;
+    protected int mRestorePackage = -1;  // Index into mRestorePackages
+    protected int mRestoreType;
     private File mRestoreSetDir;
-    private File mRestoreSetIncrementalDir;
+    protected File mRestoreSetIncrementalDir;
     private File mRestoreSetFullDir;
 
     // Additional bookkeeping for full backup
@@ -115,7 +115,7 @@ public class LocalTransport extends BackupTransport {
         makeDataDirs();
     }
 
-    LocalTransportParameters getParameters() {
+    public LocalTransportParameters getParameters() {
         return mParameters;
     }
 
@@ -537,14 +537,14 @@ public class LocalTransport extends BackupTransport {
         int bytesLeft = numBytes;
         while (bytesLeft > 0) {
             try {
-            int nRead = mSocketInputStream.read(mFullBackupBuffer, 0, bytesLeft);
-            if (nRead < 0) {
-                // Something went wrong if we expect data but saw EOD
-                Log.w(TAG, "Unexpected EOD; failing backup");
-                return TRANSPORT_ERROR;
-            }
-            mFullBackupOutputStream.write(mFullBackupBuffer, 0, nRead);
-            bytesLeft -= nRead;
+                int nRead = mSocketInputStream.read(mFullBackupBuffer, 0, bytesLeft);
+                if (nRead < 0) {
+                    // Something went wrong if we expect data but saw EOD
+                    Log.w(TAG, "Unexpected EOD; failing backup");
+                    return TRANSPORT_ERROR;
+                }
+                mFullBackupOutputStream.write(mFullBackupBuffer, 0, nRead);
+                bytesLeft -= nRead;
             } catch (IOException e) {
                 Log.e(TAG, "Error handling backup data for " + mFullTargetPackage);
                 return TRANSPORT_ERROR;
@@ -620,20 +620,15 @@ public class LocalTransport extends BackupTransport {
         }
         if (mRestorePackages == null) throw new IllegalStateException("startRestore not called");
 
-        boolean found = false;
+        boolean found;
         while (++mRestorePackage < mRestorePackages.length) {
             String name = mRestorePackages[mRestorePackage].packageName;
 
             // If we have key/value data for this package, deliver that
             // skip packages where we have a data dir but no actual contents
-            String[] contents = (new File(mRestoreSetIncrementalDir, name)).list();
-            if (contents != null && contents.length > 0) {
-                if (DEBUG) {
-                    Log.v(TAG, "  nextRestorePackage(TYPE_KEY_VALUE) @ "
-                        + mRestorePackage + " = " + name);
-                }
+            found = hasRestoreDataForPackage(name);
+            if (found) {
                 mRestoreType = RestoreDescription.TYPE_KEY_VALUE;
-                found = true;
             }
 
             if (!found) {
@@ -662,6 +657,18 @@ public class LocalTransport extends BackupTransport {
 
         if (DEBUG) Log.v(TAG, "  no more packages to restore");
         return RestoreDescription.NO_MORE_PACKAGES;
+    }
+
+    protected boolean hasRestoreDataForPackage(String packageName) {
+        String[] contents = (new File(mRestoreSetIncrementalDir, packageName)).list();
+        if (contents != null && contents.length > 0) {
+            if (DEBUG) {
+                Log.v(TAG, "  nextRestorePackage(TYPE_KEY_VALUE) @ "
+                        + mRestorePackage + " = " + packageName);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

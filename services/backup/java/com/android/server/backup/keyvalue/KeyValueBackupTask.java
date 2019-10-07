@@ -239,7 +239,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     private final KeyValueBackupReporter mReporter;
     private final OnTaskFinishedListener mTaskFinishedListener;
     private final boolean mUserInitiated;
-    private final boolean mNonIncremental;
     private final int mCurrentOpToken;
     private final int mUserId;
     private final File mStateDirectory;
@@ -264,6 +263,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
     // and at least one of the packages had data. Used to avoid updating current token for
     // empty backups.
     private boolean mHasDataToBackup;
+    private boolean mNonIncremental;
 
     /**
      * This {@link ConditionVariable} is used to signal that the cancel operation has been
@@ -412,6 +412,11 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         try {
             IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.startTask()");
             String transportName = transport.name();
+            if (transportName.contains("EncryptedLocalTransport")) {
+                // Temporary code for EiTF POC. Only supports non-incremental backups.
+                mNonIncremental = true;
+            }
+
             mReporter.onTransportReady(transportName);
 
             // If we haven't stored PM metadata yet, we must initialize the transport.
