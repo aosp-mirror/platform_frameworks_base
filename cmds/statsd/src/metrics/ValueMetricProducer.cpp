@@ -83,9 +83,11 @@ ValueMetricProducer::ValueMetricProducer(
         const sp<EventMatcherWizard>& matcherWizard, const int pullTagId, const int64_t timeBaseNs,
         const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
         const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
-        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap)
+        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
+        const vector<int>& slicedStateAtoms,
+        const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, conditionWizard,
-                     eventActivationMap, eventDeactivationMap),
+                     eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap),
       mWhatMatcherIndex(whatMatcherIndex),
       mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),

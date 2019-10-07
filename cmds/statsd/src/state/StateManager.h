@@ -15,10 +15,11 @@
  */
 #pragma once
 
-//#include <utils/Log.h>
+#include <gtest/gtest_prod.h>
+#include <inttypes.h>
 #include <utils/RefBase.h>
-#include "HashableDimensionKey.h"
 
+#include "HashableDimensionKey.h"
 #include "state/StateListener.h"
 #include "state/StateTracker.h"
 
@@ -38,29 +39,29 @@ public:
     // Notifies the correct StateTracker of an event.
     void onLogEvent(const LogEvent& event);
 
-    // Returns true if stateAtomId is the id of a state atom and notifies the
-    // correct StateTracker to register the listener. If the correct
-    // StateTracker does not exist, a new StateTracker is created.
-    bool registerListener(int stateAtomId, wp<StateListener> listener);
+    // Returns true if atomId is being tracked and is associated with a state
+    // atom. StateManager notifies the correct StateTracker to register listener.
+    // If the correct StateTracker does not exist, a new StateTracker is created.
+    bool registerListener(int atomId, wp<StateListener> listener);
 
     // Notifies the correct StateTracker to unregister a listener
     // and removes the tracker if it no longer has any listeners.
-    void unregisterListener(int stateAtomId, wp<StateListener> listener);
+    void unregisterListener(int atomId, wp<StateListener> listener);
 
-    // Queries the correct StateTracker for the state that is mapped to the given
-    // query key.
+    // Queries the correct StateTracker for the original/un-mapped state value
+    // that is mapped to the given query key.
     // If the StateTracker doesn't exist, returns StateTracker::kStateUnknown.
-    int getState(int stateAtomId, const HashableDimensionKey& queryKey);
+    int getStateValue(int atomId, const HashableDimensionKey& queryKey);
 
     inline int getStateTrackersCount() {
         std::lock_guard<std::mutex> lock(mMutex);
         return mStateTrackers.size();
     }
 
-    inline int getListenersCount(int stateAtomId) {
+    inline int getListenersCount(int atomId) {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mStateTrackers.find(stateAtomId) != mStateTrackers.end()) {
-            return mStateTrackers[stateAtomId]->getListenersCount();
+        if (mStateTrackers.find(atomId) != mStateTrackers.end()) {
+            return mStateTrackers[atomId]->getListenersCount();
         }
         return -1;
     }

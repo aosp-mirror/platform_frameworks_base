@@ -104,6 +104,37 @@ Predicate CreateIsSyncingPredicate();
 // Create a Predicate proto for app is in background.
 Predicate CreateIsInBackgroundPredicate();
 
+// Create State proto for screen state atom.
+State CreateScreenState();
+
+// Create State proto for uid process state atom.
+State CreateUidProcessState();
+
+// Create State proto for overlay state atom.
+State CreateOverlayState();
+
+State CreateScreenStateWithOnOffMap();
+
+State CreateScreenStateWithInDozeMap();
+
+// Create StateGroup proto for ScreenState ON group
+StateMap_StateGroup CreateScreenStateOnGroup();
+
+// Create StateGroup proto for ScreenState OFF group
+StateMap_StateGroup CreateScreenStateOffGroup();
+
+// Create StateMap proto for ScreenState ON/OFF map
+StateMap CreateScreenStateOnOffMap();
+
+// Create StateGroup proto for ScreenState IN DOZE group
+StateMap_StateGroup CreateScreenStateInDozeGroup();
+
+// Create StateGroup proto for ScreenState NOT IN DOZE group
+StateMap_StateGroup CreateScreenStateNotDozeGroup();
+
+// Create StateMap proto for ScreenState IN DOZE map
+StateMap CreateScreenStateInDozeMap();
+
 // Add a predicate to the predicate combination.
 void addPredicateToPredicateCombination(const Predicate& predicate, Predicate* combination);
 

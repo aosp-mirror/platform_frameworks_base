@@ -230,6 +230,7 @@ cc_test {
         "tests/e2e/Anomaly_duration_sum_e2e_test.cpp",
         "tests/e2e/Attribution_e2e_test.cpp",
         "tests/e2e/ConfigTtl_e2e_test.cpp",
+        "tests/e2e/CountMetric_e2e_test.cpp",
         "tests/e2e/DurationMetric_e2e_test.cpp",
         "tests/e2e/GaugeMetric_e2e_pull_test.cpp",
         "tests/e2e/GaugeMetric_e2e_push_test.cpp",

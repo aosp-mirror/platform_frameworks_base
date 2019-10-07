@@ -35,26 +35,25 @@ void StateManager::onLogEvent(const LogEvent& event) {
     }
 }
 
-bool StateManager::registerListener(int stateAtomId, wp<StateListener> listener) {
+bool StateManager::registerListener(int atomId, wp<StateListener> listener) {
     std::lock_guard<std::mutex> lock(mMutex);
 
     // Check if state tracker already exists
-    if (mStateTrackers.find(stateAtomId) == mStateTrackers.end()) {
+    if (mStateTrackers.find(atomId) == mStateTrackers.end()) {
         // Create a new state tracker iff atom is a state atom
-        auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(stateAtomId);
+        auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(atomId);
         if (it != android::util::AtomsInfo::kStateAtomsFieldOptions.end()) {
-            mStateTrackers[stateAtomId] = new StateTracker(stateAtomId, it->second);
+            mStateTrackers[atomId] = new StateTracker(atomId, it->second);
         } else {
-            ALOGE("StateManager cannot register listener, Atom %d is not a state atom",
-                  stateAtomId);
+            ALOGE("StateManager cannot register listener, Atom %d is not a state atom", atomId);
             return false;
         }
     }
-    mStateTrackers[stateAtomId]->registerListener(listener);
+    mStateTrackers[atomId]->registerListener(listener);
     return true;
 }
 
-void StateManager::unregisterListener(int stateAtomId, wp<StateListener> listener) {
+void StateManager::unregisterListener(int atomId, wp<StateListener> listener) {
     std::unique_lock<std::mutex> lock(mMutex);
 
     // Hold the sp<> until the lock is released so that ~StateTracker() is
@@ -62,7 +61,7 @@ void StateManager::unregisterListener(int stateAtomId, wp<StateListener> listene
     sp<StateTracker> toRemove;
 
     // Unregister listener from correct StateTracker
-    auto it = mStateTrackers.find(stateAtomId);
+    auto it = mStateTrackers.find(atomId);
     if (it != mStateTrackers.end()) {
         it->second->unregisterListener(listener);
 
@@ -73,15 +72,15 @@ void StateManager::unregisterListener(int stateAtomId, wp<StateListener> listene
         }
     } else {
         ALOGE("StateManager cannot unregister listener, StateTracker for atom %d does not exist",
-              stateAtomId);
+              atomId);
     }
     lock.unlock();
 }
 
-int StateManager::getState(int stateAtomId, const HashableDimensionKey& key) {
+int StateManager::getStateValue(int atomId, const HashableDimensionKey& key) {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mStateTrackers.find(stateAtomId) != mStateTrackers.end()) {
-        return mStateTrackers[stateAtomId]->getState(key);
+    if (mStateTrackers.find(atomId) != mStateTrackers.end()) {
+        return mStateTrackers[atomId]->getStateValue(key);
     }
 
     return StateTracker::kStateUnknown;

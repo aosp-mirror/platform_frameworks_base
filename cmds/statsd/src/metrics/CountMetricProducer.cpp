@@ -18,12 +18,14 @@
 #include "Log.h"
 
 #include "CountMetricProducer.h"
-#include "guardrail/StatsdStats.h"
-#include "stats_util.h"
-#include "stats_log_util.h"
 
+#include <inttypes.h>
 #include <limits.h>
 #include <stdlib.h>
+
+#include "guardrail/StatsdStats.h"
+#include "stats_log_util.h"
+#include "stats_util.h"
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
@@ -65,16 +67,16 @@ const int FIELD_ID_BUCKET_NUM = 4;
 const int FIELD_ID_START_BUCKET_ELAPSED_MILLIS = 5;
 const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
-CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
-                                         const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard,
-                                         const int64_t timeBaseNs, const int64_t startTimeNs,
-                                         const unordered_map<int, shared_ptr<Activation>>&
-                                                 eventActivationMap,
-                                         const unordered_map<int, vector<shared_ptr<Activation>>>&
-                                                 eventDeactivationMap)
+CountMetricProducer::CountMetricProducer(
+        const ConfigKey& key, const CountMetric& metric, const int conditionIndex,
+        const sp<ConditionWizard>& wizard, const int64_t timeBaseNs, const int64_t startTimeNs,
+
+        const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
+        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
+        const vector<int>& slicedStateAtoms,
+        const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard, eventActivationMap,
-                     eventDeactivationMap) {
+                     eventDeactivationMap, slicedStateAtoms, stateGroupMap) {
     if (metric.has_bucket()) {
         mBucketSizeNs =
                 TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
@@ -100,6 +102,8 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
         mConditionSliced = true;
     }
 
+    // TODO(tsaichristine): b/142124705 handle metric state links
+
     flushIfNeededLocked(startTimeNs);
     // Adjust start for partial bucket
     mCurrentBucketStartTimeNs = startTimeNs;
@@ -110,6 +114,12 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
 
 CountMetricProducer::~CountMetricProducer() {
     VLOG("~CountMetricProducer() called");
+}
+
+void CountMetricProducer::onStateChanged(int atomId, const HashableDimensionKey& primaryKey,
+                                         int oldState, int newState) {
+    VLOG("CountMetric %lld onStateChanged State%d, key %s, %d -> %d", (long long)mMetricId, atomId,
+         primaryKey.toString().c_str(), oldState, newState);
 }
 
 void CountMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {

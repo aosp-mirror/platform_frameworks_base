@@ -56,16 +56,17 @@ typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>
 // producer always reports the guage at the earliest time of the bucket when the condition is met.
 class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
-    GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
-                        const int whatMatcherIndex,const sp<EventMatcherWizard>& matcherWizard,
-                        const int pullTagId, const int triggerAtomId, const int atomId,
-                        const int64_t timeBaseNs, const int64_t startTimeNs,
-                        const sp<StatsPullerManager>& pullerManager,
-                        const std::unordered_map<int, std::shared_ptr<Activation>>&
-                                eventActivationMap = {},
-                        const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
-                                eventDeactivationMap = {});
+    GaugeMetricProducer(
+            const ConfigKey& key, const GaugeMetric& gaugeMetric, const int conditionIndex,
+            const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
+            const sp<EventMatcherWizard>& matcherWizard, const int pullTagId,
+            const int triggerAtomId, const int atomId, const int64_t timeBaseNs,
+            const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
+            const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
+            const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                    eventDeactivationMap = {},
+            const vector<int>& slicedStateAtoms = {},
+            const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
 
     virtual ~GaugeMetricProducer();
 

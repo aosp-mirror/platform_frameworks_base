@@ -44,7 +44,7 @@ public:
 
     std::vector<Update> updates;
 
-    void onStateChanged(int stateAtomId, const HashableDimensionKey& primaryKey, int oldState,
+    void onStateChanged(int atomId, const HashableDimensionKey& primaryKey, int oldState,
                         int newState) {
         updates.emplace_back(primaryKey, newState);
     }
@@ -82,12 +82,25 @@ std::shared_ptr<LogEvent> buildOverlayEvent(int uid, const std::string& packageN
     return event;
 }
 
+// Incorrect event - missing fields
 std::shared_ptr<LogEvent> buildIncorrectOverlayEvent(int uid, const std::string& packageName, int state) {
     std::shared_ptr<LogEvent> event =
             std::make_shared<LogEvent>(android::util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
     event->write((int32_t)uid);
     event->write(packageName);
     event->write((int32_t)state);
+    event->init();
+    return event;
+}
+
+// Incorrect event - exclusive state has wrong type
+std::shared_ptr<LogEvent> buildOverlayEventBadStateType(int uid, const std::string& packageName) {
+    std::shared_ptr<LogEvent> event =
+            std::make_shared<LogEvent>(android::util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
+    event->write((int32_t)uid);
+    event->write(packageName);
+    event->write(true);
+    event->write("string");  // exclusive state: string instead of int
     event->init();
     return event;
 }
@@ -148,22 +161,22 @@ TEST(StateTrackerTest, TestRegisterListener) {
 
     // Register listener to non-existing StateTracker
     EXPECT_EQ(0, mgr.getStateTrackersCount());
-    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
+    EXPECT_TRUE(mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
     EXPECT_EQ(1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
 
     // Register listener to existing StateTracker
-    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2);
+    EXPECT_TRUE(mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
     EXPECT_EQ(2, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
 
     // Register already registered listener to existing StateTracker
-    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2);
+    EXPECT_TRUE(mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
     EXPECT_EQ(2, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
 
     // Register listener to non-state atom
-    mgr.registerListener(android::util::BATTERY_LEVEL_CHANGED, listener2);
+    EXPECT_FALSE(mgr.registerListener(android::util::BATTERY_LEVEL_CHANGED, listener2));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
 }
 
@@ -227,12 +240,12 @@ TEST(StateTrackerTest, TestStateChangeNoPrimaryFields) {
 
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey = DEFAULT_DIMENSION_KEY;
-    EXPECT_EQ(2, mgr.getState(android::util::SCREEN_STATE_CHANGED, queryKey));
+    EXPECT_EQ(2, mgr.getStateValue(android::util::SCREEN_STATE_CHANGED, queryKey));
 }
 
 /**
  * Test StateManager's onLogEvent and StateListener's onStateChanged correctly
- * updates listener for states with primary keys.
+ * updates listener for states with one primary key.
  */
 TEST(StateTrackerTest, TestStateChangeOnePrimaryField) {
     sp<TestStateListener> listener1 = new TestStateListener();
@@ -240,9 +253,8 @@ TEST(StateTrackerTest, TestStateChangeOnePrimaryField) {
     mgr.registerListener(android::util::UID_PROCESS_STATE_CHANGED, listener1);
 
     // log event
-    std::shared_ptr<LogEvent> event = buildUidProcessEvent(
-            1000,
-            android::app::ProcessStateEnum::PROCESS_STATE_TOP);  //  state value: 1002
+    std::shared_ptr<LogEvent> event =
+            buildUidProcessEvent(1000 /* uid */, android::app::ProcessStateEnum::PROCESS_STATE_TOP);
     mgr.onLogEvent(*event);
 
     // check listener was updated
@@ -252,23 +264,33 @@ TEST(StateTrackerTest, TestStateChangeOnePrimaryField) {
 
     // check StateTracker was updated by querying for state
     HashableDimensionKey queryKey;
-    getUidProcessKey(1000, &queryKey);
-    EXPECT_EQ(1002, mgr.getState(android::util::UID_PROCESS_STATE_CHANGED, queryKey));
+    getUidProcessKey(1000 /* uid */, &queryKey);
+    EXPECT_EQ(1002, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED, queryKey));
 }
 
+/**
+ * Test StateManager's onLogEvent and StateListener's onStateChanged correctly
+ * updates listener for states with multiple primary keys.
+ */
 TEST(StateTrackerTest, TestStateChangeMultiplePrimaryFields) {
     sp<TestStateListener> listener1 = new TestStateListener();
     StateManager mgr;
     mgr.registerListener(android::util::OVERLAY_STATE_CHANGED, listener1);
 
     // log event
-    std::shared_ptr<LogEvent> event = buildOverlayEvent(1000, "package1", 1);  // state: ENTERED
+    std::shared_ptr<LogEvent> event =
+            buildOverlayEvent(1000 /* uid */, "package1", 1);  // state: ENTERED
     mgr.onLogEvent(*event);
 
-    // check listener update
+    // check listener was updated
     EXPECT_EQ(1, listener1->updates.size());
     EXPECT_EQ(1000, listener1->updates[0].mKey.getValues()[0].mValue.int_value);
     EXPECT_EQ(1, listener1->updates[0].mState);
+
+    // check StateTracker was updated by querying for state
+    HashableDimensionKey queryKey;
+    getOverlayKey(1000 /* uid */, "package1", &queryKey);
+    EXPECT_EQ(1, mgr.getStateValue(android::util::OVERLAY_STATE_CHANGED, queryKey));
 }
 
 /**
@@ -282,11 +304,14 @@ TEST(StateTrackerTest, TestStateChangeEventError) {
     mgr.registerListener(android::util::OVERLAY_STATE_CHANGED, listener1);
 
     // log event
-    std::shared_ptr<LogEvent> event =
-            buildIncorrectOverlayEvent(1000, "package1", 1);  // state: ENTERED
-    mgr.onLogEvent(*event);
+    std::shared_ptr<LogEvent> event1 =
+            buildIncorrectOverlayEvent(1000 /* uid */, "package1", 1 /* state */);
+    std::shared_ptr<LogEvent> event2 = buildOverlayEventBadStateType(1001 /* uid */, "package2");
 
-    // check listener update
+    // check listener was updated
+    mgr.onLogEvent(*event1);
+    EXPECT_EQ(0, listener1->updates.size());
+    mgr.onLogEvent(*event2);
     EXPECT_EQ(0, listener1->updates.size());
 }
 
@@ -301,18 +326,19 @@ TEST(StateTrackerTest, TestStateQuery) {
 
     std::shared_ptr<LogEvent> event1 = buildUidProcessEvent(
             1000,
-            android::app::ProcessStateEnum::PROCESS_STATE_TOP);  // state value: 1002
+            android::app::ProcessStateEnum::PROCESS_STATE_TOP);  //  state value: 1002
     std::shared_ptr<LogEvent> event2 = buildUidProcessEvent(
             1001,
-            android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE);  // state value: 1003
+            android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE);  //  state value:
+                                                                                //  1003
     std::shared_ptr<LogEvent> event3 = buildUidProcessEvent(
             1002,
-            android::app::ProcessStateEnum::PROCESS_STATE_PERSISTENT);  // state value: 1000
+            android::app::ProcessStateEnum::PROCESS_STATE_PERSISTENT);  //  state value: 1000
     std::shared_ptr<LogEvent> event4 = buildUidProcessEvent(
             1001,
-            android::app::ProcessStateEnum::PROCESS_STATE_TOP);  // state value: 1002
+            android::app::ProcessStateEnum::PROCESS_STATE_TOP);  //  state value: 1002
     std::shared_ptr<LogEvent> event5 =
-            buildScreenEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON);  // state value:
+            buildScreenEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON);
     std::shared_ptr<LogEvent> event6 = buildOverlayEvent(1000, "package1", 1);
     std::shared_ptr<LogEvent> event7 = buildOverlayEvent(1000, "package2", 2);
 
@@ -327,25 +353,25 @@ TEST(StateTrackerTest, TestStateQuery) {
     // Query for UidProcessState of uid 1001
     HashableDimensionKey queryKey1;
     getUidProcessKey(1001, &queryKey1);
-    EXPECT_EQ(1003, mgr.getState(android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+    EXPECT_EQ(1003, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
 
     // Query for UidProcessState of uid 1004 - not in state map
     HashableDimensionKey queryKey2;
     getUidProcessKey(1004, &queryKey2);
-    EXPECT_EQ(-1,
-              mgr.getState(android::util::UID_PROCESS_STATE_CHANGED, queryKey2));  // default state
+    EXPECT_EQ(-1, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED,
+                                    queryKey2));  // default state
 
     // Query for UidProcessState of uid 1001 - after change in state
     mgr.onLogEvent(*event4);
-    EXPECT_EQ(1002, mgr.getState(android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+    EXPECT_EQ(1002, mgr.getStateValue(android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
 
     // Query for ScreenState
-    EXPECT_EQ(2, mgr.getState(android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
+    EXPECT_EQ(2, mgr.getStateValue(android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
 
     // Query for OverlayState of uid 1000, package name "package2"
     HashableDimensionKey queryKey3;
     getOverlayKey(1000, "package2", &queryKey3);
-    EXPECT_EQ(2, mgr.getState(android::util::OVERLAY_STATE_CHANGED, queryKey3));
+    EXPECT_EQ(2, mgr.getStateValue(android::util::OVERLAY_STATE_CHANGED, queryKey3));
 }
 
 }  // namespace statsd

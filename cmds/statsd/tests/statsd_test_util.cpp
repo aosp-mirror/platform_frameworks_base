@@ -251,6 +251,101 @@ Predicate CreateIsInBackgroundPredicate() {
     return predicate;
 }
 
+State CreateScreenState() {
+    State state;
+    state.set_id(StringToId("ScreenState"));
+    state.set_atom_id(29);
+    return state;
+}
+
+State CreateUidProcessState() {
+    State state;
+    state.set_id(StringToId("UidProcessState"));
+    state.set_atom_id(27);
+    return state;
+}
+
+State CreateOverlayState() {
+    State state;
+    state.set_id(StringToId("OverlayState"));
+    state.set_atom_id(59);
+    return state;
+}
+
+State CreateScreenStateWithOnOffMap() {
+    State state;
+    state.set_id(StringToId("ScreenStateOnOff"));
+    state.set_atom_id(29);
+
+    auto map = CreateScreenStateOnOffMap();
+    *state.mutable_map() = map;
+
+    return state;
+}
+
+State CreateScreenStateWithInDozeMap() {
+    State state;
+    state.set_id(StringToId("ScreenStateInDoze"));
+    state.set_atom_id(29);
+
+    auto map = CreateScreenStateInDozeMap();
+    *state.mutable_map() = map;
+
+    return state;
+}
+
+StateMap_StateGroup CreateScreenStateOnGroup() {
+    StateMap_StateGroup group;
+    group.set_group_id(StringToId("SCREEN_ON"));
+    group.add_value(2);
+    group.add_value(5);
+    group.add_value(6);
+    return group;
+}
+
+StateMap_StateGroup CreateScreenStateOffGroup() {
+    StateMap_StateGroup group;
+    group.set_group_id(StringToId("SCREEN_OFF"));
+    group.add_value(0);
+    group.add_value(1);
+    group.add_value(3);
+    group.add_value(4);
+    return group;
+}
+
+StateMap CreateScreenStateOnOffMap() {
+    StateMap map;
+    *map.add_group() = CreateScreenStateOnGroup();
+    *map.add_group() = CreateScreenStateOffGroup();
+    return map;
+}
+
+StateMap_StateGroup CreateScreenStateInDozeGroup() {
+    StateMap_StateGroup group;
+    group.set_group_id(StringToId("SCREEN_DOZE"));
+    group.add_value(3);
+    group.add_value(4);
+    return group;
+}
+
+StateMap_StateGroup CreateScreenStateNotDozeGroup() {
+    StateMap_StateGroup group;
+    group.set_group_id(StringToId("SCREEN_NOT_DOZE"));
+    group.add_value(0);
+    group.add_value(1);
+    group.add_value(2);
+    group.add_value(5);
+    group.add_value(6);
+    return group;
+}
+
+StateMap CreateScreenStateInDozeMap() {
+    StateMap map;
+    *map.add_group() = CreateScreenStateInDozeGroup();
+    *map.add_group() = CreateScreenStateNotDozeGroup();
+    return map;
+}
+
 void addPredicateToPredicateCombination(const Predicate& predicate,
                                         Predicate* combinationPredicate) {
     combinationPredicate->mutable_combination()->add_predicate(predicate.id());
