@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -53,7 +54,7 @@ public class DumpTruck {
 
     private final Context context;
     private Uri hprofUri;
-    private long pss;
+    private long rss;
     final StringBuilder body = new StringBuilder();
 
     public DumpTruck(Context context) {
@@ -66,7 +67,7 @@ public class DumpTruck {
      * @param pids
      * @return this, for chaining
      */
-    public DumpTruck captureHeaps(int[] pids) {
+    public DumpTruck captureHeaps(List<Long> pids) {
         final GarbageMonitor gm = Dependency.get(GarbageMonitor.class);
 
         final File dumpDir = new File(context.getCacheDir(), FILEPROVIDER_PATH);
@@ -79,8 +80,8 @@ public class DumpTruck {
         final ArrayList<String> paths = new ArrayList<String>();
         final int myPid = android.os.Process.myPid();
 
-        final int[] pids_copy = Arrays.copyOf(pids, pids.length);
-        for (int pid : pids_copy) {
+        for (Long pidL : pids) {
+            final int pid = pidL.intValue();
             body.append("  pid ").append(pid);
             if (gm != null) {
                 GarbageMonitor.ProcessMemInfo info = gm.getMemInfo(pid);
@@ -88,11 +89,9 @@ public class DumpTruck {
                     body.append(":")
                             .append(" up=")
                             .append(info.getUptime())
-                            .append(" pss=")
-                            .append(info.currentPss)
-                            .append(" uss=")
-                            .append(info.currentUss);
-                    pss = info.currentPss;
+                            .append(" rss=")
+                            .append(info.currentRss);
+                    rss = info.currentRss;
                 }
             }
             if (pid == myPid) {
@@ -147,7 +146,7 @@ public class DumpTruck {
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         shareIntent.putExtra(Intent.EXTRA_SUBJECT,
-                String.format("SystemUI memory dump (pss=%dM)", pss / 1024));
+                String.format("SystemUI memory dump (rss=%dM)", rss / 1024));
 
         shareIntent.putExtra(Intent.EXTRA_TEXT, body.toString());
 
