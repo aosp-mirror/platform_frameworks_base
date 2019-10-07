@@ -31,7 +31,7 @@
     <color name="primary_dark_material_dark">@color/black</color>
     <color name="primary_dark_material_light">@color/material_grey_600</color>
     <color name="primary_dark_material_light_light_status_bar">@color/material_grey_300</color>
-    <color name="primary_dark_material_settings">@color/material_blue_grey_950</color>
+    <color name="primary_dark_material_settings">@color/black</color>
     <color name="primary_dark_material_settings_light">@color/material_grey_300</color>
 
     <color name="secondary_material_settings">@color/material_blue_grey_800</color>
