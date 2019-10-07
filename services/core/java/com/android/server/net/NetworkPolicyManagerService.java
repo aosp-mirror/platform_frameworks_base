@@ -364,7 +364,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             "com.android.server.net.action.SNOOZE_RAPID";
 
     /**
-     * Indicates the maximum wait time for admin data to be available;
+     * Indicates the maximum wait time for admin data to be available.
      */
     private static final long WAIT_FOR_ADMIN_DATA_TIMEOUT_MS = 10_000;
 

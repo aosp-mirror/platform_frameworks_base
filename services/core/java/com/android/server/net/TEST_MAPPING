@@ -1,0 +1,31 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsHostsideNetworkTests",
+      "file_patterns": ["(/|^)NetworkPolicy[^/]*\\.java"],
+      "options": [
+        {
+          "include-filter": "com.android.cts.net.HostsideRestrictBackgroundNetworkTests"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "file_patterns": ["(/|^)NetworkPolicy[^/]*\\.java"],
+      "options": [
+        {
+          "include-filter": "com.android.server.net."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ]
+}
