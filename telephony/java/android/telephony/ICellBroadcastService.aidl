@@ -28,5 +28,5 @@ interface ICellBroadcastService {
     oneway void handleGsmCellBroadcastSms(int slotId, in byte[] message);
 
     /** @see android.telephony.CellBroadcastService#onCdmaCellBroadcastSms */
-    oneway void handleCdmaCellBroadcastSms(int slotId, in byte[] message);
+    oneway void handleCdmaCellBroadcastSms(int slotId, in byte[] bearerData, int serviceCategory);
 }
