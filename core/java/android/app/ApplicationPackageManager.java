@@ -3160,6 +3160,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String[] getTelephonyPackageNames() {
+        try {
+            return mPM.getTelephonyPackageNames();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getSystemCaptionsServicePackageName() {
         try {
             return mPM.getSystemCaptionsServicePackageName();
