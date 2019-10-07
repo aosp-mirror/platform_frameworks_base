@@ -5875,6 +5875,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static float getFloat(@NonNull String, @NonNull String, float);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static int getInt(@NonNull String, @NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static long getLong(@NonNull String, @NonNull String, long);
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static android.provider.DeviceConfig.Properties getProperties(@NonNull String, @NonNull java.lang.String...);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getProperty(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public static String getString(@NonNull String, @NonNull String, @Nullable String);
     method public static void removeOnPropertiesChangedListener(@NonNull android.provider.DeviceConfig.OnPropertiesChangedListener);

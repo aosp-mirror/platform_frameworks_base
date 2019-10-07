@@ -439,10 +439,8 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_LIST_CONFIG: {
                 String prefix = getSettingPrefix(args);
-                Bundle result = new Bundle();
-                result.putSerializable(
-                        Settings.NameValueTable.VALUE, (HashMap) getAllConfigFlags(prefix));
-                return result;
+                return packageValuesForCallResult(getAllConfigFlags(prefix),
+                        isTrackingGeneration(args));
             }
 
             case Settings.CALL_METHOD_LIST_GLOBAL: {
@@ -1076,7 +1074,7 @@ public class SettingsProvider extends ContentProvider {
         return false;
     }
 
-    private Map<String, String> getAllConfigFlags(@Nullable String prefix) {
+    private HashMap<String, String> getAllConfigFlags(@Nullable String prefix) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
         }
@@ -1085,12 +1083,11 @@ public class SettingsProvider extends ContentProvider {
             // Get the settings.
             SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
-
             List<String> names = getSettingsNamesLocked(SETTINGS_TYPE_CONFIG,
                     UserHandle.USER_SYSTEM);
 
             final int nameCount = names.size();
-            Map<String, String> flagsToValues = new HashMap<>(names.size());
+            HashMap<String, String> flagsToValues = new HashMap<>(names.size());
 
             for (int i = 0; i < nameCount; i++) {
                 String name = names.get(i);
@@ -2057,8 +2054,7 @@ public class SettingsProvider extends ContentProvider {
                 "get/set setting for user", null);
     }
 
-    private Bundle packageValueForCallResult(Setting setting,
-            boolean trackingGeneration) {
+    private Bundle packageValueForCallResult(Setting setting, boolean trackingGeneration) {
         if (!trackingGeneration) {
             if (setting == null || setting.isNull()) {
                 return NULL_SETTING_BUNDLE;
@@ -2070,6 +2066,21 @@ public class SettingsProvider extends ContentProvider {
                 !setting.isNull() ? setting.getValue() : null);
 
         mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey());
+        return result;
+    }
+
+    private Bundle packageValuesForCallResult(HashMap<String, String> keyValues,
+            boolean trackingGeneration) {
+        Bundle result = new Bundle();
+        result.putSerializable(Settings.NameValueTable.VALUE, keyValues);
+        if (trackingGeneration) {
+            synchronized (mLock) {
+                mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
+                        mSettingsRegistry.getSettingsLocked(
+                                SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM).mKey);
+            }
+        }
+
         return result;
     }
 
