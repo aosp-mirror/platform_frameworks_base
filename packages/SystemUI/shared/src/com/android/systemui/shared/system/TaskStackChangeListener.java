@@ -17,6 +17,7 @@
 package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ITaskStackListener;
 import android.content.ComponentName;
 import android.os.IBinder;
 import android.os.UserHandle;
@@ -105,6 +106,9 @@ public abstract class TaskStackChangeListener {
      * Called when any additions or deletions to the recent tasks list have been made.
      */
     public void onRecentTaskListUpdated() { }
+
+    /** @see ITaskStackListener#onRecentTaskListFrozenChanged(boolean) */
+    public void onRecentTaskListFrozenChanged(boolean frozen) { }
 
     /**
      * Checks that the current user matches the process. Since

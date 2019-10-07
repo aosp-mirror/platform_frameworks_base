@@ -190,4 +190,8 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @Override
     public void onRecentTaskListUpdated() throws RemoteException {
     }
+
+    @Override
+    public void onRecentTaskListFrozenChanged(boolean frozen) {
+    }
 }
