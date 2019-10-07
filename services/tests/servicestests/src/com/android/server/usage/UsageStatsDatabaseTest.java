@@ -74,6 +74,7 @@ public class UsageStatsDatabaseTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mTestDir = new File(mContext.getFilesDir(), "UsageStatsDatabaseTest");
         mUsageStatsDatabase = new UsageStatsDatabase(mTestDir);
+        mUsageStatsDatabase.readMappingsLocked();
         mUsageStatsDatabase.init(1);
         populateIntervalStats();
         clearUsageStatsFiles();
@@ -388,6 +389,7 @@ public class UsageStatsDatabaseTest {
     void runVersionChangeTest(int oldVersion, int newVersion, int interval) throws IOException {
         // Write IntervalStats to disk in old version format
         UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir, oldVersion);
+        prevDB.readMappingsLocked();
         prevDB.init(1);
         prevDB.putUsageStats(interval, mIntervalStats);
         if (oldVersion >= 5) {
@@ -396,6 +398,7 @@ public class UsageStatsDatabaseTest {
 
         // Simulate an upgrade to a new version and read from the disk
         UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir, newVersion);
+        newDB.readMappingsLocked();
         newDB.init(mEndTime);
         List<IntervalStats> stats = newDB.queryUsageStats(interval, 0, mEndTime,
                 mIntervalStatsVerifier);
@@ -415,6 +418,7 @@ public class UsageStatsDatabaseTest {
      */
     void runBackupRestoreTest(int version) throws IOException {
         UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir);
+        prevDB.readMappingsLocked();
         prevDB.init(1);
         prevDB.putUsageStats(UsageStatsManager.INTERVAL_DAILY, mIntervalStats);
         // Create a backup with a specific version
@@ -423,6 +427,7 @@ public class UsageStatsDatabaseTest {
         clearUsageStatsFiles();
 
         UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir);
+        newDB.readMappingsLocked();
         newDB.init(1);
         // Attempt to restore the usage stats from the backup
         newDB.applyRestoredPayload(KEY_USAGE_STATS, blob);
@@ -539,12 +544,14 @@ public class UsageStatsDatabaseTest {
     private void compareObfuscatedData(int interval) throws IOException {
         // Write IntervalStats to disk
         UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir, 5);
+        prevDB.readMappingsLocked();
         prevDB.init(1);
         prevDB.putUsageStats(interval, mIntervalStats);
         prevDB.writeMappingsLocked();
 
         // Read IntervalStats from disk into a new db
         UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir, 5);
+        newDB.readMappingsLocked();
         newDB.init(mEndTime);
         List<IntervalStats> stats = newDB.queryUsageStats(interval, 0, mEndTime,
                 mIntervalStatsVerifier);
@@ -560,5 +567,41 @@ public class UsageStatsDatabaseTest {
         compareObfuscatedData(UsageStatsManager.INTERVAL_WEEKLY);
         compareObfuscatedData(UsageStatsManager.INTERVAL_MONTHLY);
         compareObfuscatedData(UsageStatsManager.INTERVAL_YEARLY);
+    }
+
+    private void verifyPackageNotRetained(int interval) throws IOException {
+        UsageStatsDatabase db = new UsageStatsDatabase(mTestDir, 5);
+        db.readMappingsLocked();
+        db.init(1);
+        db.putUsageStats(interval, mIntervalStats);
+
+        final String removedPackage = "fake.package.name0";
+        // invoke handler call directly from test to remove package
+        db.onPackageRemoved(removedPackage, System.currentTimeMillis());
+
+        List<IntervalStats> stats = db.queryUsageStats(interval, 0, mEndTime,
+                mIntervalStatsVerifier);
+        for (int i = 0; i < stats.size(); i++) {
+            final IntervalStats stat = stats.get(i);
+            if (stat.packageStats.containsKey(removedPackage)) {
+                fail("Found removed package " + removedPackage + " in package stats.");
+                return;
+            }
+            for (int j = 0; j < stat.events.size(); j++) {
+                final Event event = stat.events.get(j);
+                if (removedPackage.equals(event.mPackage)) {
+                    fail("Found an event from removed package " + removedPackage);
+                    return;
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testPackageRetention() throws IOException {
+        verifyPackageNotRetained(UsageStatsManager.INTERVAL_DAILY);
+        verifyPackageNotRetained(UsageStatsManager.INTERVAL_WEEKLY);
+        verifyPackageNotRetained(UsageStatsManager.INTERVAL_MONTHLY);
+        verifyPackageNotRetained(UsageStatsManager.INTERVAL_YEARLY);
     }
 }

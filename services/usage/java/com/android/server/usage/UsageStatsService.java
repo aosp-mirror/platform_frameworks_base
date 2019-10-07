@@ -141,6 +141,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_UID_STATE_CHANGED = 3;
     static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
     static final int MSG_UNLOCKED_USER = 5;
+    static final int MSG_PACKAGE_REMOVED = 6;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -148,7 +149,6 @@ public class UsageStatsService extends SystemService implements
     UserManager mUserManager;
     PackageManager mPackageManager;
     PackageManagerInternal mPackageManagerInternal;
-    PackageMonitor mPackageMonitor;
     IDeviceIdleController mDeviceIdleController;
     // Do not use directly. Call getDpmInternal() instead
     DevicePolicyManagerInternal mDpmInternal;
@@ -163,6 +163,8 @@ public class UsageStatsService extends SystemService implements
 
     /** Manages app time limit observers */
     AppTimeLimitController mAppTimeLimit;
+
+    private final PackageMonitor mPackageMonitor = new MyPackageMonitor();
 
     // A map maintaining a queue of events to be reported per user.
     private final SparseArray<LinkedList<Event>> mReportedEvents = new SparseArray<>();
@@ -245,6 +247,8 @@ public class UsageStatsService extends SystemService implements
                 }, mHandler.getLooper());
 
         mAppStandby.addListener(mStandbyChangeListener);
+
+        mPackageMonitor.register(getContext(), null, UserHandle.ALL, true);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
@@ -846,6 +850,26 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
+     * Called by the Handler for message MSG_PACKAGE_REMOVED.
+     */
+    private void onPackageRemoved(int userId, String packageName) {
+        synchronized (mLock) {
+            final long timeRemoved = System.currentTimeMillis();
+            if (!mUserUnlockedStates.get(userId, false)) {
+                // If user is not unlocked and a package is removed for them, we will handle it
+                // when the user service is initialized and package manager is queried.
+                return;
+            }
+            final UserUsageStatsService userService = mUserState.get(userId);
+            if (userService == null) {
+                return;
+            }
+
+            userService.onPackageRemoved(packageName, timeRemoved);
+        }
+    }
+
+    /**
      * Called by the Binder stub.
      */
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime,
@@ -1162,7 +1186,9 @@ public class UsageStatsService extends SystemService implements
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
                     break;
-
+                case MSG_PACKAGE_REMOVED:
+                    onPackageRemoved(msg.arg1, (String) msg.obj);
+                    break;
                 case MSG_UID_STATE_CHANGED: {
                     final int uid = msg.arg1;
                     final int procState = msg.arg2;
@@ -2110,6 +2136,15 @@ public class UsageStatsService extends SystemService implements
         @Override
         public AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user) {
             return mAppTimeLimit.getAppUsageLimit(packageName, user);
+        }
+    }
+
+    private class MyPackageMonitor extends PackageMonitor {
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            mHandler.obtainMessage(MSG_PACKAGE_REMOVED, getChangingUserId(), 0, packageName)
+                    .sendToTarget();
+            super.onPackageRemoved(packageName, uid);
         }
     }
 }

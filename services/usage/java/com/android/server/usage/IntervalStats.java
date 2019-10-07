@@ -454,8 +454,7 @@ public class IntervalStats {
         for (int statsIndex = 0; statsIndex < usageStatsSize; statsIndex++) {
             final int packageToken = packageStatsObfuscated.keyAt(statsIndex);
             final UsageStats usageStats = packageStatsObfuscated.valueAt(statsIndex);
-            usageStats.mPackageName = packagesTokenData.getString(packageToken,
-                    PackagesTokenData.PACKAGE_NAME_INDEX);
+            usageStats.mPackageName = packagesTokenData.getPackageString(packageToken);
             if (usageStats.mPackageName == null) {
                 Slog.e(TAG, "Unable to parse usage stats package " + packageToken);
                 continue;
@@ -501,8 +500,7 @@ public class IntervalStats {
         for (int i = this.events.size() - 1; i >= 0; i--) {
             final Event event = this.events.get(i);
             final int packageToken = event.mPackageToken;
-            event.mPackage = packagesTokenData.getString(packageToken,
-                    PackagesTokenData.PACKAGE_NAME_INDEX);
+            event.mPackage = packagesTokenData.getPackageString(packageToken);
             if (event.mPackage == null) {
                 Slog.e(TAG, "Unable to parse event package " + packageToken);
                 this.events.remove(i);
@@ -586,7 +584,12 @@ public class IntervalStats {
                 continue;
             }
 
-            final int packageToken = packagesTokenData.getPackageTokenOrAdd(packageName);
+            final int packageToken = packagesTokenData.getPackageTokenOrAdd(
+                    packageName, usageStats.mEndTimeStamp);
+            // don't obfuscate stats whose packages have been removed
+            if (packageToken == PackagesTokenData.UNASSIGNED_TOKEN) {
+                continue;
+            }
             usageStats.mPackageToken = packageToken;
             // Update chooser counts.
             final int chooserActionsSize = usageStats.mChooserCounts.size();
@@ -619,14 +622,19 @@ public class IntervalStats {
      * task root package and class names, and shortcut and notification channel ids.
      */
     private void obfuscateEventsData(PackagesTokenData packagesTokenData) {
-        final int eventSize = events.size();
-        for (int i = 0; i < eventSize; i++) {
+        for (int i = events.size() - 1; i >= 0; i--) {
             final Event event = events.get(i);
             if (event == null) {
                 continue;
             }
 
-            final int packageToken = packagesTokenData.getPackageTokenOrAdd(event.mPackage);
+            final int packageToken = packagesTokenData.getPackageTokenOrAdd(
+                    event.mPackage, event.mTimeStamp);
+            // don't obfuscate events from packages that have been removed
+            if (packageToken == PackagesTokenData.UNASSIGNED_TOKEN) {
+                events.remove(i);
+                continue;
+            }
             event.mPackageToken = packageToken;
             if (!TextUtils.isEmpty(event.mClass)) {
                 event.mClassToken = packagesTokenData.getTokenOrAdd(packageToken,

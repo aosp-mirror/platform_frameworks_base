@@ -29,14 +29,14 @@ import java.util.ArrayList;
  */
 public final class PackagesTokenData {
     /**
+     * The package name is always stored at index 0 in {@code tokensToPackagesMap}.
+     */
+    private static final int PACKAGE_NAME_INDEX = 0;
+
+    /**
      * The default token for any string that hasn't been tokenized yet.
      */
     public static final int UNASSIGNED_TOKEN = -1;
-
-    /**
-     * The package name is always stored at index 0 in {@code tokensToPackagesMap}.
-     */
-    public static final int PACKAGE_NAME_INDEX = 0;
 
     /**
      * The main token counter for each package.
@@ -52,6 +52,10 @@ public final class PackagesTokenData {
      * map of the {@code tokenToPackagesMap} in this class, mainly for an O(1) access to the tokens.
      */
     public final ArrayMap<String, ArrayMap<String, Integer>> packagesToTokensMap = new ArrayMap<>();
+    /**
+     * Stores a map of packages that were removed and when they were removed.
+     */
+    public final ArrayMap<String, Long> removedPackagesMap = new ArrayMap<>();
 
     public PackagesTokenData() {
     }
@@ -61,9 +65,26 @@ public final class PackagesTokenData {
      * created and the relevant mappings are updated.
      *
      * @param packageName the package name whose token is being fetched
+     * @param timeStamp the time stamp of the event or end time of the usage stats; used to verify
+     *                  the package hasn't been removed
      * @return the mapped token
      */
-    public int getPackageTokenOrAdd(String packageName) {
+    public int getPackageTokenOrAdd(String packageName, long timeStamp) {
+        final Long timeRemoved = removedPackagesMap.get(packageName);
+        if (timeRemoved != null && timeRemoved > timeStamp) {
+            return UNASSIGNED_TOKEN; // package was removed
+            /*
+             Note: instead of querying Package Manager each time for a list of packages to verify
+             if this package is still installed, it's more efficient to check the internal list of
+             removed packages and verify with the incoming time stamp. Although rare, it is possible
+             that some asynchronous function is triggered after a package is removed and the
+             time stamp passed into this function is not accurate. We'll have to keep the respective
+             event/usage stat until the next time the device reboots and the mappings are cleaned.
+             Additionally, this is a data class with some helper methods - it doesn't make sense to
+             overload it with references to other services.
+             */
+        }
+
         ArrayMap<String, Integer> packageTokensMap = packagesToTokensMap.get(packageName);
         if (packageTokensMap == null) {
             packageTokensMap = new ArrayMap<>();
@@ -104,6 +125,20 @@ public final class PackagesTokenData {
     }
 
     /**
+     * Fetches the package name for the given token.
+     *
+     * @param packageToken the package token representing the package name
+     * @return the string representing the given token or {@code null} if not found
+     */
+    public String getPackageString(int packageToken) {
+        final ArrayList<String> packageStrings = tokensToPackagesMap.get(packageToken);
+        if (packageStrings == null) {
+            return null;
+        }
+        return packageStrings.get(PACKAGE_NAME_INDEX);
+    }
+
+    /**
      * Fetches the string represented by the given token.
      *
      * @param packageToken the package token for which this token belongs to
@@ -120,5 +155,22 @@ public final class PackagesTokenData {
         } catch (IndexOutOfBoundsException e) {
             return null;
         }
+    }
+
+    /**
+     * Removes the package from all known mappings.
+     *
+     * @param packageName the package to be removed
+     * @param timeRemoved the time stamp of when the package was removed
+     */
+    public void removePackage(String packageName, long timeRemoved) {
+        removedPackagesMap.put(packageName, timeRemoved);
+
+        if (!packagesToTokensMap.containsKey(packageName)) {
+            return;
+        }
+        final int packageToken = packagesToTokensMap.get(packageName).get(packageName);
+        packagesToTokensMap.remove(packageName);
+        tokensToPackagesMap.delete(packageToken);
     }
 }

@@ -17,6 +17,7 @@
 package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.Build;
@@ -125,7 +126,7 @@ public class UsageStatsDatabase {
     // The obfuscated packages to tokens mappings file
     private final File mPackageMappingsFile;
     // Holds all of the data related to the obfuscated packages and their token mappings.
-    private final PackagesTokenData mPackagesTokenData = new PackagesTokenData();
+    final PackagesTokenData mPackagesTokenData = new PackagesTokenData();
 
     /**
      * UsageStatsDatabase constructor that allows setting the version number.
@@ -159,8 +160,6 @@ public class UsageStatsDatabase {
      */
     public void init(long currentTimeMillis) {
         synchronized (mLock) {
-            readMappingsLocked();
-
             for (File f : mIntervalDirs) {
                 f.mkdirs();
                 if (!f.exists()) {
@@ -538,6 +537,12 @@ public class UsageStatsDatabase {
         }
     }
 
+    void onPackageRemoved(String packageName, long timeRemoved) {
+        synchronized (mLock) {
+            mPackagesTokenData.removePackage(packageName, timeRemoved);
+        }
+    }
+
     public void onTimeChanged(long timeDiffMillis) {
         synchronized (mLock) {
             StringBuilder logBuilder = new StringBuilder();
@@ -609,6 +614,37 @@ public class UsageStatsDatabase {
             }
         }
         return null;
+    }
+
+    /**
+     * Filter out those stats from the given stats that belong to removed packages. Filtering out
+     * all of the stats at once has an amortized cost for future calls.
+     */
+    void filterStats(IntervalStats stats) {
+        if (mPackagesTokenData.removedPackagesMap.isEmpty()) {
+            return;
+        }
+        final ArrayMap<String, Long> removedPackagesMap = mPackagesTokenData.removedPackagesMap;
+
+        // filter out package usage stats
+        final int removedPackagesSize = removedPackagesMap.size();
+        for (int i = 0; i < removedPackagesSize; i++) {
+            final String removedPackage = removedPackagesMap.keyAt(i);
+            final UsageStats usageStats = stats.packageStats.get(removedPackage);
+            if (usageStats != null && usageStats.mEndTimeStamp < removedPackagesMap.valueAt(i)) {
+                stats.packageStats.remove(removedPackage);
+            }
+        }
+
+        // filter out events
+        final int eventsSize = stats.events.size();
+        for (int i = stats.events.size() - 1; i >= 0; i--) {
+            final UsageEvents.Event event = stats.events.get(i);
+            final Long timeRemoved = removedPackagesMap.get(event.mPackage);
+            if (timeRemoved != null && timeRemoved > event.mTimeStamp) {
+                stats.events.remove(i);
+            }
+        }
     }
 
     /**
@@ -954,7 +990,7 @@ public class UsageStatsDatabase {
      * Reads the obfuscated data file from disk containing the tokens to packages mappings and
      * rebuilds the packages to tokens mappings based on that data.
      */
-    private void readMappingsLocked() {
+    public void readMappingsLocked() {
         if (!mPackageMappingsFile.exists()) {
             return; // package mappings file is missing - recreate mappings on next write.
         }
