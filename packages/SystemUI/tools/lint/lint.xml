@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+
+    <!-- Translations are done in separate CLs from source changes, so typically it's not actionable
+         by CL authors -->
+    <issue id="MissingTranslation" severity="ignore" />
+    <issue id="ExtraTranslation" severity="ignore" />
+
+    <!-- SystemUI is a priviledged app -->
+    <issue id="ProtectedPermissions" severity="ignore" />
+
+    <!-- SystemUI doesn't have launcher presence -->
+    <issue id="MissingApplicationIcon" severity="ignore" />
+
+    <!-- Make system inserts these attributes -->
+    <issue id="UsesMinSdkAttributes" severity="ignore" />
+    <issue id="MissingVersion" severity="ignore" />
+
+    <!-- Translation import automatically generates all of them -->
+    <issue id="UnusedQuantity" severity="ignore" />
+    <!-- This lint check misses the format used in TextUtils.expandTemplate (^1),
+         so it's not very useful (b/37128132) -->
+    <issue id="ImpliedQuantity" severity="ignore" />
+    <!-- SystemUI's SDK version is always latest so these are not relevant -->
+    <issue id="UnusedAttribute" severity="ignore" />
+    <issue id="NewApi" severity="ignore" />
+
+    <!-- We don't care about WebP for now (having a lint for optiPNG will be great though) -->
+    <issue id="ConvertToWebp" severity="ignore" />
+
+    <!-- b/37129369: MissingRegistered doesn't take libraries into account -->
+    <issue id="MissingRegistered" severity="ignore" />
+
+
+    <!-- We don't care about app indexing -->
+    <issue id="GoogleAppIndexingWarning" severity="ignore" />
+    <issue id="GoogleAppIndexingUrlError" severity="ignore" />
+
+    <!-- Issues under out/ typically comes from libraries -->
+    <issue id="ClickableViewAccessibility" severity="error">
+        <ignore regexp=".*/out/soong/.intermediates/frameworks/base/packages/SystemUI/SystemUI-core/android_common/combined/.*" />
+    </issue>
+
+    <!-- Turn on stop ship check -->
+    <issue id="StopShip" severity="warning" />
+
+
+    <issue id="UnusedResources" severity="error">
+        <!-- Nested script references are not picked up by lint -->
+        <ignore regexp="res/xml/wizard_script.*\.xml" />
+        <!-- Ignore translation files -->
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/strings.xml" />
+        <!-- Ignore translations arrays that are no longer used-->
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/arrays.xml" />
+    </issue>
+
+    <!-- Ignore translations when linting strings -->
+    <issue id="TypographyQuotes" severity="error">
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/strings.xml" />
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/arrays.xml" />
+    </issue>
+    <issue id="TypographyEllipsis" severity="error">
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/strings.xml" />
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/arrays.xml" />
+    </issue>
+    <issue id="TypographyDashes" severity="error">
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/strings.xml" />
+        <ignore regexp="res/values(-[a-zA-Z0-9]+)*-(\w\w|b+[a-zA-Z0-9+]+)(-[a-zA-Z0-9]+)*/arrays.xml" />
+    </issue>
+
+    <issue id="Wakelock" severity="error">
+        <ignore regexp=".*/out/soong/.intermediates/frameworks/base/packages/SystemUI/SystemUI-core/android_common/classes/android/support" />
+    </issue>
+
+    <issue id="InconsistentArrays" severity="ignore" />
+    <issue id="StringFormatCount" severity="ignore" />
+</lint>

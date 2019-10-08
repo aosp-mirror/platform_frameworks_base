@@ -17,11 +17,12 @@
 package android.widget.listview.focus;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.listview.ListHorizontalFocusWithinItemWins;
+
+import androidx.test.filters.MediumTest;
 
 public class ListHorizontalFocusWithinItemWinsTest extends ActivityInstrumentationTestCase<ListHorizontalFocusWithinItemWins> {
 

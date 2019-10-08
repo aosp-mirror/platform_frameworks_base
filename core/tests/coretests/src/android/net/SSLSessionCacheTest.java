@@ -19,9 +19,9 @@ package android.net;
 import com.android.org.conscrypt.ClientSessionContext;
 import com.android.org.conscrypt.SSLClientSessionCache;
 
-import org.mockito.Mockito;
-
 import junit.framework.TestCase;
+
+import org.mockito.Mockito;
 
 import java.security.KeyManagementException;
 import java.security.SecureRandom;

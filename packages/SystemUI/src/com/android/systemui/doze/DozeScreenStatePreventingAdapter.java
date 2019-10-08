@@ -16,8 +16,9 @@
 
 package com.android.systemui.doze;
 
-import androidx.annotation.VisibleForTesting;
 import android.view.Display;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
 

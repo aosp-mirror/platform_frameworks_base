@@ -20,52 +20,60 @@
 #include <android_runtime/AndroidRuntime.h>
 
 namespace android {
-    
-/**
- * Given an nio.Buffer, return a pointer to it, beginning at its current
- * position. The returned pointer is only valid for the current JNI stack-frame.
- * For performance, it does not create any global references, so the getPointer
- * (and releasePointer if array is returned non-null) must be done in the
- * same JNI stack-frame.
- *
- * @param env   The current JNI env
- * @param buffer    The nio.Buffer object
- * @param array     REQUIRED. Output. If on return it is set to non-null, then
- *                  nio_releasePointer must be called with the array
- *                  and the returned pointer when the caller is through with it.
- *                  If on return it is set to null, do not call
- *                  nio_releasePointer.
- * @return The pointer to the memory in the buffer object
- */
-void* nio_getPointer(JNIEnv *env, jobject buffer, jarray *array);
 
 /**
- * Call this if android_nio_getPointer returned non-null in its array parameter.
- * Pass that array and the returned pointer when you are done accessing the
- * pointer. If called (i.e. array is non-null), it must be called in the same
- * JNI stack-frame as getPointer
+ * Class providing scoped access to the memory backing a java.nio.Buffer instance.
  *
- * @param env   The current JNI env
- * @param buffer    The array returned from android_nio_getPointer (!= null)
- * @param pointer   The pointer returned by android_nio_getPointer
- * @param commit    JNI_FALSE if the pointer was just read, and JNI_TRUE if
- *                  the pointer was written to.
+ * Instances of this class should only be allocated on the stack as heap allocation is not
+ * supported.
+ *
+ * Instances of this class do not create any global references for performance reasons.
  */
-void nio_releasePointer(JNIEnv *env, jarray array, void *pointer,
-                                jboolean commit);
-
-class AutoBufferPointer {
+class AutoBufferPointer final {
 public:
+    /** Constructor for an AutoBufferPointer instance.
+     *
+     * @param env          The current JNI env
+     * @param nioBuffer    Instance of a java.nio.Buffer whose memory will be accessed.
+     * @param commit       JNI_TRUE if the underlying memory will be updated and should be
+     *                     copied back to the managed heap. JNI_FALSE if the data will
+     *                     not be modified or the modifications may be discarded.
+     *
+     * The commit parameter is only applicable if the buffer is backed by a managed heap
+     * array and the runtime had to provide a copy of the data rather than the original data.
+     */
     AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit);
+
+    /** Destructor for an AutoBufferPointer instance.
+     *
+     * Releases critical managed heap array pointer if acquired.
+     */
     ~AutoBufferPointer();
 
+    /**
+     * Returns a pointer to the current position of the buffer provided to the constructor.  This
+     * pointer is only valid whilst the AutoBufferPointer instance remains in scope.
+     */
     void* pointer() const { return fPointer; }
 
 private:
-    JNIEnv* fEnv;
-    void*   fPointer;
-    jarray  fArray;
-    jboolean fCommit;
+    JNIEnv* const fEnv;
+    void* fPointer;   // Pointer to current buffer position when constructed.
+    void* fElements;  // Pointer to array element 0 (null if buffer is direct, may be
+                      // within fArray or point to a copy of the array).
+    jarray fArray;    // Pointer to array on managed heap.
+    const jboolean fCommit;  // Flag to commit data to source (when fElements is a copy of fArray).
+
+    // Unsupported constructors and operators.
+    AutoBufferPointer() = delete;
+    AutoBufferPointer(AutoBufferPointer&) = delete;
+    AutoBufferPointer& operator=(AutoBufferPointer&) = delete;
+    static void* operator new(std::size_t);
+    static void* operator new[](std::size_t);
+    static void* operator new(std::size_t, void*);
+    static void* operator new[](std::size_t, void*);
+    static void operator delete(void*, std::size_t);
+    static void operator delete[](void*, std::size_t);
 };
 
 }   /* namespace android */

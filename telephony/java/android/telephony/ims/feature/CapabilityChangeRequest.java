@@ -16,6 +16,7 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -98,6 +99,7 @@ public final class CapabilityChangeRequest implements Parcelable {
             return radioTech;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "CapabilityPair{"
@@ -187,7 +189,7 @@ public final class CapabilityChangeRequest implements Parcelable {
         }
     }
 
-    public static final Creator<CapabilityChangeRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<CapabilityChangeRequest> CREATOR =
             new Creator<CapabilityChangeRequest>() {
                 @Override
                 public CapabilityChangeRequest createFromParcel(Parcel in) {
@@ -219,6 +221,7 @@ public final class CapabilityChangeRequest implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "CapabilityChangeRequest{"

@@ -44,8 +44,9 @@ public final class WifiBatteryStats implements Parcelable {
   private long[] mTimeInStateMs;
   private long[] mTimeInSupplicantStateMs;
   private long[] mTimeInRxSignalStrengthLevelMs;
+  private long mMonitoredRailChargeConsumedMaMs;
 
-  public static final Parcelable.Creator<WifiBatteryStats> CREATOR = new
+  public static final @android.annotation.NonNull Parcelable.Creator<WifiBatteryStats> CREATOR = new
       Parcelable.Creator<WifiBatteryStats>() {
         public WifiBatteryStats createFromParcel(Parcel in) {
           return new WifiBatteryStats(in);
@@ -77,6 +78,7 @@ public final class WifiBatteryStats implements Parcelable {
     out.writeLongArray(mTimeInStateMs);
     out.writeLongArray(mTimeInRxSignalStrengthLevelMs);
     out.writeLongArray(mTimeInSupplicantStateMs);
+    out.writeLong(mMonitoredRailChargeConsumedMaMs);
   }
 
   public void readFromParcel(Parcel in) {
@@ -96,6 +98,7 @@ public final class WifiBatteryStats implements Parcelable {
     in.readLongArray(mTimeInStateMs);
     in.readLongArray(mTimeInRxSignalStrengthLevelMs);
     in.readLongArray(mTimeInSupplicantStateMs);
+    mMonitoredRailChargeConsumedMaMs = in.readLong();
   }
 
   public long getLoggingDurationMs() {
@@ -160,6 +163,10 @@ public final class WifiBatteryStats implements Parcelable {
 
   public long[] getTimeInSupplicantStateMs() {
     return mTimeInSupplicantStateMs;
+  }
+
+  public long getMonitoredRailChargeConsumedMaMs() {
+    return mMonitoredRailChargeConsumedMaMs;
   }
 
   public void setLoggingDurationMs(long t) {
@@ -245,6 +252,11 @@ public final class WifiBatteryStats implements Parcelable {
     return;
   }
 
+  public void setMonitoredRailChargeConsumedMaMs(long monitoredRailEnergyConsumedMaMs) {
+    mMonitoredRailChargeConsumedMaMs = monitoredRailEnergyConsumedMaMs;
+    return;
+  }
+
   public int describeContents() {
     return 0;
   }
@@ -274,6 +286,7 @@ public final class WifiBatteryStats implements Parcelable {
     Arrays.fill(mTimeInRxSignalStrengthLevelMs, 0);
     mTimeInSupplicantStateMs = new long[BatteryStats.NUM_WIFI_SUPPL_STATES];
     Arrays.fill(mTimeInSupplicantStateMs, 0);
+    mMonitoredRailChargeConsumedMaMs = 0;
     return;
   }
 }

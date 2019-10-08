@@ -19,10 +19,14 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -77,6 +81,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_UNINSTALL_APPS,
             UserManager.DISALLOW_SHARE_LOCATION,
             UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
             UserManager.DISALLOW_CONFIG_BLUETOOTH,
             UserManager.DISALLOW_BLUETOOTH,
             UserManager.DISALLOW_BLUETOOTH_SHARING,
@@ -118,6 +123,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_OEM_UNLOCK,
             UserManager.DISALLOW_UNMUTE_DEVICE,
             UserManager.DISALLOW_AUTOFILL,
+            UserManager.DISALLOW_CONTENT_CAPTURE,
+            UserManager.DISALLOW_CONTENT_SUGGESTIONS,
             UserManager.DISALLOW_USER_SWITCH,
             UserManager.DISALLOW_UNIFIED_PASSWORD,
             UserManager.DISALLOW_CONFIG_LOCATION,
@@ -126,7 +133,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
             UserManager.DISALLOW_AMBIENT_DISPLAY,
             UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT,
-            UserManager.DISALLOW_PRINTING
+            UserManager.DISALLOW_PRINTING,
+            UserManager.DISALLOW_CONFIG_PRIVATE_DNS
     });
 
     /**
@@ -162,7 +170,8 @@ public class UserRestrictionsUtils {
      * User restrictions that cannot be set by profile owners. Applied to all users.
      */
     private static final Set<String> DEVICE_OWNER_ONLY_RESTRICTIONS = Sets.newArraySet(
-            UserManager.DISALLOW_USER_SWITCH
+            UserManager.DISALLOW_USER_SWITCH,
+            UserManager.DISALLOW_CONFIG_PRIVATE_DNS
     );
 
     /**
@@ -211,18 +220,69 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> PROFILE_GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.ENSURE_VERIFY_APPS,
-            UserManager.DISALLOW_AIRPLANE_MODE
+            UserManager.DISALLOW_AIRPLANE_MODE,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
     );
 
     /**
-     * Throws {@link IllegalArgumentException} if the given restriction name is invalid.
+     * Returns whether the given restriction name is valid (and logs it if it isn't).
      */
     public static boolean isValidRestriction(@NonNull String restriction) {
         if (!USER_RESTRICTIONS.contains(restriction)) {
-            Slog.e(TAG, "Unknown restriction: " + restriction);
+            // Log this, with severity depending on the source.
+            final int uid = Binder.getCallingUid();
+            String[] pkgs = null;
+            try {
+                pkgs = AppGlobals.getPackageManager().getPackagesForUid(uid);
+            } catch (RemoteException e) {
+                // Ignore
+            }
+            StringBuilder msg = new StringBuilder("Unknown restriction queried by uid ");
+            msg.append(uid);
+            if (pkgs != null && pkgs.length > 0) {
+                msg.append(" (");
+                msg.append(pkgs[0]);
+                if (pkgs.length > 1) {
+                    msg.append(" et al");
+                }
+                msg.append(")");
+            }
+            msg.append(": ");
+            msg.append(restriction);
+            if (restriction != null && isSystemApp(uid, pkgs)) {
+                Slog.wtf(TAG, msg.toString());
+            } else {
+                Slog.e(TAG, msg.toString());
+            }
             return false;
         }
         return true;
+    }
+
+    /** Returns whether the given uid (or corresponding packageList) is for a System app. */
+    private static boolean isSystemApp(int uid, String[] packageList) {
+        if (UserHandle.isCore(uid)) {
+            return true;
+        }
+        if (packageList == null) {
+            return false;
+        }
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        for (int i = 0; i < packageList.length; i++) {
+            try {
+                final int flags = PackageManager.MATCH_UNINSTALLED_PACKAGES
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+                final ApplicationInfo appInfo =
+                        pm.getApplicationInfo(packageList[i], flags, UserHandle.getUserId(uid));
+                if (appInfo != null && appInfo.isSystemApp()) {
+                    return true;
+                }
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
+        return false;
     }
 
     public static void writeRestrictions(@NonNull XmlSerializer serializer,
@@ -517,13 +577,18 @@ public class UserRestrictionsUtils {
                                 userId);
                     }
                     break;
+                case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY:
+                    setInstallMarketAppsRestriction(cr, userId, getNewUserRestrictionSetting(
+                            context, userId, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                            newValue));
+                    break;
                 case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES:
                     // Since Android O, the secure setting is not available to be changed by the
                     // user. Hence, when the restriction is cleared, we need to reset the state of
                     // the setting to its default value which is now 1.
-                    android.provider.Settings.Secure.putIntForUser(cr,
-                            android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
-                            newValue ? 0 : 1, userId);
+                    setInstallMarketAppsRestriction(cr, userId, getNewUserRestrictionSetting(
+                            context, userId, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
+                            newValue));
                     break;
                 case UserManager.DISALLOW_RUN_IN_BACKGROUND:
                     if (newValue) {
@@ -574,13 +639,13 @@ public class UserRestrictionsUtils {
                                 Settings.Secure.DOZE_ALWAYS_ON, 0, userId);
                         android.provider.Settings.Secure.putIntForUser(
                                 context.getContentResolver(),
-                                Settings.Secure.DOZE_PULSE_ON_PICK_UP, 0, userId);
+                                Settings.Secure.DOZE_PICK_UP_GESTURE, 0, userId);
                         android.provider.Settings.Secure.putIntForUser(
                                 context.getContentResolver(),
                                 Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, 0, userId);
                         android.provider.Settings.Secure.putIntForUser(
                                 context.getContentResolver(),
-                                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, 0, userId);
+                                Settings.Secure.DOZE_DOUBLE_TAP_GESTURE, 0, userId);
                     }
                     break;
                 case UserManager.DISALLOW_CONFIG_LOCATION:
@@ -611,9 +676,6 @@ public class UserRestrictionsUtils {
                         && callingUid != Process.SYSTEM_UID) {
                     return true;
                 } else if (String.valueOf(Settings.Secure.LOCATION_MODE_OFF).equals(value)) {
-                    // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
-                    // in android.provider.Settings.Secure.putStringForUser(), so we shouldn't come
-                    // here normally, but we still protect it here from a direct provider write.
                     return false;
                 }
                 restriction = UserManager.DISALLOW_SHARE_LOCATION;
@@ -685,9 +747,9 @@ public class UserRestrictionsUtils {
 
             case android.provider.Settings.Secure.DOZE_ENABLED:
             case android.provider.Settings.Secure.DOZE_ALWAYS_ON:
-            case android.provider.Settings.Secure.DOZE_PULSE_ON_PICK_UP:
+            case android.provider.Settings.Secure.DOZE_PICK_UP_GESTURE:
             case android.provider.Settings.Secure.DOZE_PULSE_ON_LONG_PRESS:
-            case android.provider.Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP:
+            case android.provider.Settings.Secure.DOZE_DOUBLE_TAP_GESTURE:
                 if ("0".equals(value)) {
                     return false;
                 }
@@ -735,6 +797,13 @@ public class UserRestrictionsUtils {
                 restriction = UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT;
                 break;
 
+            case android.provider.Settings.Global.PRIVATE_DNS_MODE:
+            case android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_PRIVATE_DNS;
+                break;
             default:
                 if (setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) {
@@ -813,5 +882,17 @@ public class UserRestrictionsUtils {
             }
         }
         return false;
+    }
+
+    private static void setInstallMarketAppsRestriction(ContentResolver cr, int userId,
+            int settingValue) {
+        android.provider.Settings.Secure.putIntForUser(
+                cr, android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS, settingValue, userId);
+    }
+
+    private static int getNewUserRestrictionSetting(Context context, int userId,
+                String userRestriction, boolean newValue) {
+        return (newValue || UserManager.get(context).hasUserRestriction(userRestriction,
+                UserHandle.of(userId))) ? 0 : 1;
     }
 }

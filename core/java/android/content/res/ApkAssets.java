@@ -16,6 +16,7 @@
 package android.content.res;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -35,7 +36,9 @@ import java.io.IOException;
  */
 public final class ApkAssets {
     @GuardedBy("this") private final long mNativePtr;
-    @GuardedBy("this") private StringBlock mStringBlock;
+    @GuardedBy("this") private final StringBlock mStringBlock;
+
+    @GuardedBy("this") private boolean mOpen = true;
 
     /**
      * Creates a new ApkAssets instance from the given path on disk.
@@ -125,6 +128,7 @@ public final class ApkAssets {
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
     }
 
+    @UnsupportedAppUsage
     public @NonNull String getAssetPath() {
         synchronized (this) {
             return nativeGetAssetPath(mNativePtr);
@@ -178,7 +182,20 @@ public final class ApkAssets {
 
     @Override
     protected void finalize() throws Throwable {
-        nativeDestroy(mNativePtr);
+        close();
+    }
+
+    /**
+     * Closes this class and the contained {@link #mStringBlock}.
+     */
+    public void close() throws Throwable {
+        synchronized (this) {
+            if (mOpen) {
+                mOpen = false;
+                mStringBlock.close();
+                nativeDestroy(mNativePtr);
+            }
+        }
     }
 
     private static native long nativeLoad(

@@ -256,9 +256,20 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     styleable_attr.field_name =
         TransformNestedAttr(attr.name.value(), array_field_name, package_name_to_generate);
 
+    Reference ref = attr;
+    if (attr.name.value().package.empty()) {
+
+      // If the resource does not have a package name, set the package to the unmangled package name
+      // of the styleable declaration because attributes without package names would have been
+      // declared in the same package as the styleable.
+      ref.name = ResourceName(package_name_to_generate, ref.name.value().type,
+                              ref.name.value().entry);
+    }
+
     // Look up the symbol so that we can write out in the comments what are possible legal values
     // for this attribute.
-    const SymbolTable::Symbol* symbol = context_->GetExternalSymbols()->FindByReference(attr);
+    const SymbolTable::Symbol* symbol = context_->GetExternalSymbols()->FindByReference(ref);
+
     if (symbol && symbol->attribute) {
       // Copy the symbol data structure because the returned instance can be destroyed.
       styleable_attr.symbol = *symbol;
@@ -287,38 +298,37 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
                          "<colgroup align=\"left\" />\n"
                          "<tr><th>Attribute</th><th>Description</th></tr>\n";
 
-    // Build the table of attributes with their links and names.
-    for (const StyleableAttr& entry : sorted_attributes) {
-      if (SkipSymbol(entry.symbol)) {
-        continue;
-      }
-
+    // Removed and hidden attributes are public but hidden from the documentation, so don't emit
+    // them as part of the class documentation.
+    std::vector<StyleableAttr> documentation_attrs = sorted_attributes;
+    auto documentation_remove_iter = std::remove_if(documentation_attrs.begin(),
+                                                    documentation_attrs.end(),
+                                                    [&](StyleableAttr entry) -> bool {
       StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
-      if (attr_comment_line.contains("@removed")) {
-        // Removed attributes are public but hidden from the documentation, so
-        // don't emit them as part of the class documentation.
-        continue;
-      }
+      return SkipSymbol(entry.symbol) || attr_comment_line.contains("@removed")
+                                      || attr_comment_line.contains("@hide");
+    });
+    documentation_attrs.erase(documentation_remove_iter, documentation_attrs.end());
 
+    // Build the table of attributes with their links and names.
+    for (const StyleableAttr& entry : documentation_attrs) {
       const ResourceName& attr_name = entry.attr_ref->name.value();
       styleable_comment << "<tr><td><code>{@link #" << entry.field_name << " "
                         << (!attr_name.package.empty() ? attr_name.package
-                                                       : context_->GetCompilationPackage())
+                                                       : package_name_to_generate)
                         << ":" << attr_name.entry << "}</code></td>";
 
       // Only use the comment up until the first '.'. This is to stay compatible with
       // the way old AAPT did it (presumably to keep it short and to avoid including
       // annotations like @hide which would affect this Styleable).
+      StringPiece attr_comment_line = entry.symbol.value().attribute->GetComment();
       styleable_comment << "<td>" << AnnotationProcessor::ExtractFirstSentence(attr_comment_line)
                         << "</td></tr>\n";
     }
     styleable_comment << "</table>\n";
 
     // Generate the @see lines for each attribute.
-    for (const StyleableAttr& entry : sorted_attributes) {
-      if (SkipSymbol(entry.symbol)) {
-        continue;
-      }
+    for (const StyleableAttr& entry : documentation_attrs) {
       styleable_comment << "@see #" << entry.field_name << "\n";
     }
 
@@ -347,7 +357,9 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
   }
 
   // Add the Styleable array to the Styleable class.
-  out_class_def->AddMember(std::move(array_def));
+  if (out_class_def != nullptr) {
+    out_class_def->AddMember(std::move(array_def));
+  }
 
   // Now we emit the indices into the array.
   for (size_t i = 0; i < attr_count; i++) {
@@ -372,7 +384,7 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
 
       StringPiece package_name = attr_name.package;
       if (package_name.empty()) {
-        package_name = context_->GetCompilationPackage();
+        package_name = package_name_to_generate;
       }
 
       std::unique_ptr<IntMember> index_member =
@@ -578,7 +590,6 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
   if (out_r_txt != nullptr) {
     r_txt_printer = util::make_unique<Printer>(out_r_txt);
   }
-
   // Generate an onResourcesLoaded() callback if requested.
   if (out != nullptr && options_.rewrite_callback_options) {
     rewrite_method =

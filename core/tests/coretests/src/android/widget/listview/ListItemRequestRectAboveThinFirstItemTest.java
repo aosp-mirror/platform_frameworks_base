@@ -18,13 +18,13 @@ package android.widget.listview;
 
 import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
-import android.view.View;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.ListView;
-import android.widget.listview.ListOfThinItems;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 public class ListItemRequestRectAboveThinFirstItemTest
         extends ActivityInstrumentationTestCase<ListOfThinItems> {

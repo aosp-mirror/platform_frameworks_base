@@ -28,3 +28,13 @@ enum DeviceIdleModeEnum {
     // Device idle mode - active in full mode.
     DEVICE_IDLE_MODE_DEEP = 2;
 }
+
+enum ErrorSource {
+    ERROR_SOURCE_UNKNOWN = 0;
+    // Data app
+    DATA_APP = 1;
+    // System app
+    SYSTEM_APP = 2;
+    // System server.
+    SYSTEM_SERVER = 3;
+}

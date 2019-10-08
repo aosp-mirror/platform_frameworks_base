@@ -430,7 +430,8 @@ public class SliceManager {
      */
     public @PermissionResult int checkSlicePermission(@NonNull Uri uri, int pid, int uid) {
         try {
-            return mService.checkSlicePermission(uri, null, pid, uid, null);
+            return mService.checkSlicePermission(uri, mContext.getPackageName(), null, pid, uid,
+                    null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -487,7 +488,8 @@ public class SliceManager {
             if (pkg == null) {
                 throw new SecurityException("No pkg specified");
             }
-            int result = mService.checkSlicePermission(uri, pkg, pid, uid, autoGrantPermissions);
+            int result = mService.checkSlicePermission(uri, mContext.getPackageName(), pkg, pid,
+                    uid, autoGrantPermissions);
             if (result == PERMISSION_DENIED) {
                 throw new SecurityException("User " + uid + " does not have slice permission for "
                         + uri + ".");

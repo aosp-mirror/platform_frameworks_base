@@ -443,8 +443,8 @@ public final class BluetoothLeScanner {
                 if (status == BluetoothGatt.GATT_SUCCESS) {
                     try {
                         if (mScannerId == -1) {
-                            // Registration succeeds after timeout, unregister client.
-                            mBluetoothGatt.unregisterClient(scannerId);
+                            // Registration succeeds after timeout, unregister scanner.
+                            mBluetoothGatt.unregisterScanner(scannerId);
                         } else {
                             mScannerId = scannerId;
                             mBluetoothGatt.startScan(mScannerId, mSettings, mFilters,

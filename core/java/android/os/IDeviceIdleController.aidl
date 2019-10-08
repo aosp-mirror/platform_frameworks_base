@@ -46,4 +46,6 @@ interface IDeviceIdleController {
     void exitIdle(String reason);
     boolean registerMaintenanceActivityListener(IMaintenanceActivityListener listener);
     void unregisterMaintenanceActivityListener(IMaintenanceActivityListener listener);
+    int setPreIdleTimeoutMode(int Mode);
+    void resetPreIdleTimeoutMode();
 }

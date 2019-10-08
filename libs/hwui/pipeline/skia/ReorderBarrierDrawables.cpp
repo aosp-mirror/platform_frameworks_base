@@ -19,10 +19,7 @@
 #include "SkiaDisplayList.h"
 #include "SkiaPipeline.h"
 
-#include <SkBlurMask.h>
-#include <SkBlurMaskFilter.h>
 #include <SkPathOps.h>
-#include <SkRRectsGaussianEdgeMaskFilter.h>
 #include <SkShadowUtils.h>
 
 namespace android {
@@ -58,6 +55,11 @@ void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
         if (casterZ >= -NON_ZERO_EPSILON) {  // draw only children with negative Z
             return;
         }
+        SkAutoCanvasRestore acr(canvas, true);
+        // Since we're drawing out of recording order, the child's matrix needs to be applied to the
+        // canvas. In in-order drawing, the canvas already has the child's matrix applied.
+        canvas->setMatrix(mDisplayList->mParentMatrix);
+        canvas->concat(childNode->getRecordedMatrix());
         childNode->forceDraw(canvas);
         drawIndex++;
     }
@@ -105,6 +107,11 @@ void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
 
         RenderNodeDrawable* childNode = zChildren[drawIndex];
         SkASSERT(childNode);
+        SkAutoCanvasRestore acr(canvas, true);
+        // Since we're drawing out of recording order, the child's matrix needs to be applied to the
+        // canvas. In in-order drawing, the canvas already has the child's matrix applied.
+        canvas->setMatrix(mStartBarrier->mDisplayList->mParentMatrix);
+        canvas->concat(childNode->getRecordedMatrix());
         childNode->forceDraw(canvas);
 
         drawIndex++;
@@ -156,10 +163,15 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     }
 
     SkAutoCanvasRestore acr(canvas, true);
+    // Since we're drawing out of recording order, the child's matrix needs to be applied to the
+    // canvas. In in-order drawing, the canvas already has the child's matrix applied.
+    canvas->setMatrix(mStartBarrier->mDisplayList->mParentMatrix);
 
     SkMatrix shadowMatrix;
-    mat4 hwuiMatrix;
+    mat4 hwuiMatrix(caster->getRecordedMatrix());
     // TODO we don't pass the optional boolean to treat it as a 4x4 matrix
+    // applyViewPropertyTransforms gets the same matrix, which render nodes apply with
+    // RenderNodeDrawable::setViewProperties as a part if their draw.
     caster->getRenderNode()->applyViewPropertyTransforms(hwuiMatrix);
     hwuiMatrix.copyTo(shadowMatrix);
     canvas->concat(shadowMatrix);
@@ -199,6 +211,6 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
             casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

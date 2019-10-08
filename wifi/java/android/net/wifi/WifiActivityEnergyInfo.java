@@ -100,7 +100,7 @@ public final class WifiActivityEnergyInfo implements Parcelable {
             + " }";
     }
 
-    public static final Parcelable.Creator<WifiActivityEnergyInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WifiActivityEnergyInfo> CREATOR =
             new Parcelable.Creator<WifiActivityEnergyInfo>() {
         public WifiActivityEnergyInfo createFromParcel(Parcel in) {
             long timestamp = in.readLong();

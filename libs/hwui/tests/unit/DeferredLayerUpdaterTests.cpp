@@ -15,11 +15,12 @@
  */
 
 #include "DeferredLayerUpdater.h"
-#include "GlLayer.h"
 #include "Properties.h"
 
 #include "tests/common/TestUtils.h"
 
+#include <SkBitmap.h>
+#include <SkImage.h>
 #include <gtest/gtest.h>
 
 using namespace android;
@@ -31,10 +32,6 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     layerUpdater->setBlend(true);
 
     // updates are deferred so the backing layer should still be in its default state
-    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
-        GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
-        EXPECT_EQ((uint32_t)GL_NONE, glLayer->getRenderTarget());
-    }
     EXPECT_EQ(0u, layerUpdater->backingLayer()->getWidth());
     EXPECT_EQ(0u, layerUpdater->backingLayer()->getHeight());
     EXPECT_FALSE(layerUpdater->backingLayer()->getForceFilter());
@@ -42,19 +39,13 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     EXPECT_EQ(Matrix4::identity(), layerUpdater->backingLayer()->getTexTransform());
 
     // push the deferred updates to the layer
-    Matrix4 scaledMatrix;
-    scaledMatrix.loadScale(0.5, 0.5, 0.0);
-    layerUpdater->updateLayer(true, scaledMatrix.data, HAL_DATASPACE_UNKNOWN);
-    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
-        GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
-        glLayer->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
-    }
+    SkMatrix scaledMatrix = SkMatrix::MakeScale(0.5, 0.5);
+    SkBitmap bitmap;
+    bitmap.allocN32Pixels(16, 16);
+    sk_sp<SkImage> layerImage = SkImage::MakeFromBitmap(bitmap);
+    layerUpdater->updateLayer(true, scaledMatrix, layerImage);
 
     // the backing layer should now have all the properties applied.
-    if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
-        GlLayer* glLayer = static_cast<GlLayer*>(layerUpdater->backingLayer());
-        EXPECT_EQ((uint32_t)GL_TEXTURE_EXTERNAL_OES, glLayer->getRenderTarget());
-    }
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getWidth());
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getHeight());
     EXPECT_TRUE(layerUpdater->backingLayer()->getForceFilter());

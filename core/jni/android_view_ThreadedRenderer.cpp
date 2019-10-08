@@ -31,11 +31,8 @@
 #include <gui/BufferQueue.h>
 #include <gui/Surface.h>
 
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
 #include <private/EGL/cache.h>
 
-#include <utils/Looper.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
 #include <utils/Timers.h>
@@ -50,6 +47,7 @@
 #include <FrameInfo.h>
 #include <FrameMetricsObserver.h>
 #include <IContextFactory.h>
+#include <Picture.h>
 #include <Properties.h>
 #include <PropertyValuesAnimatorSet.h>
 #include <RenderNode.h>
@@ -58,6 +56,7 @@
 #include <renderthread/RenderTask.h>
 #include <renderthread/RenderThread.h>
 #include <pipeline/skia/ShaderCache.h>
+#include <utils/Color.h>
 
 namespace android {
 
@@ -70,6 +69,11 @@ struct {
     jfieldID messageQueue;
     jmethodID callback;
 } gFrameMetricsObserverClassInfo;
+
+struct {
+    jclass clazz;
+    jmethodID invokePictureCapturedCallback;
+} gHardwareRenderer;
 
 struct {
     jmethodID onFrameDraw;
@@ -139,52 +143,22 @@ private:
     uint32_t mRequestId;
 };
 
-class RenderingException : public MessageHandler {
+class FrameCompleteWrapper : public LightRefBase<FrameCompleteWrapper> {
 public:
-    RenderingException(JavaVM* vm, const std::string& message)
-            : mVm(vm)
-            , mMessage(message) {
-    }
-
-    virtual void handleMessage(const Message&) {
-        throwException(mVm, mMessage);
-    }
-
-    static void throwException(JavaVM* vm, const std::string& message) {
-        JNIEnv* env = getenv(vm);
-        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
-    }
-
-private:
-    JavaVM* mVm;
-    std::string mMessage;
-};
-
-class FrameCompleteWrapper : public MessageHandler {
-public:
-    FrameCompleteWrapper(JNIEnv* env, jobject jobject) {
-        mLooper = Looper::getForThread();
-        LOG_ALWAYS_FATAL_IF(!mLooper.get(), "Must create runnable on a Looper thread!");
+    explicit FrameCompleteWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
         mObject = env->NewGlobalRef(jobject);
         LOG_ALWAYS_FATAL_IF(!mObject, "Failed to make global ref");
     }
 
-    virtual ~FrameCompleteWrapper() {
+    ~FrameCompleteWrapper() {
         releaseObject();
     }
 
-    void postFrameComplete(int64_t frameNr) {
+    void onFrameComplete(int64_t frameNr) {
         if (mObject) {
-            mFrameNr = frameNr;
-            mLooper->sendMessage(this, 0);
-        }
-    }
-
-    virtual void handleMessage(const Message&) {
-        if (mObject) {
-            ATRACE_FORMAT("frameComplete %" PRId64, mFrameNr);
-            getenv(mVm)->CallVoidMethod(mObject, gFrameCompleteCallback.onFrameComplete, mFrameNr);
+            ATRACE_FORMAT("frameComplete %" PRId64, frameNr);
+            getenv(mVm)->CallVoidMethod(mObject, gFrameCompleteCallback.onFrameComplete, frameNr);
             releaseObject();
         }
     }
@@ -192,8 +166,6 @@ public:
 private:
     JavaVM* mVm;
     jobject mObject;
-    sp<Looper> mLooper;
-    int64_t mFrameNr = -1;
 
     void releaseObject() {
         if (mObject) {
@@ -206,16 +178,14 @@ private:
 class RootRenderNode : public RenderNode, ErrorHandler {
 public:
     explicit RootRenderNode(JNIEnv* env) : RenderNode() {
-        mLooper = Looper::getForThread();
-        LOG_ALWAYS_FATAL_IF(!mLooper.get(),
-                "Must create RootRenderNode on a thread with a looper!");
         env->GetJavaVM(&mVm);
     }
 
     virtual ~RootRenderNode() {}
 
     virtual void onError(const std::string& message) override {
-        mLooper->sendMessage(new RenderingException(mVm, message), 0);
+        JNIEnv* env = getenv(mVm);
+        jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
     }
 
     virtual void prepareTree(TreeInfo& info) override {
@@ -242,14 +212,6 @@ public:
         RenderNode::prepareTree(info);
         info.updateWindowPositions = false;
         info.errorHandler = nullptr;
-    }
-
-    void sendMessage(const sp<MessageHandler>& handler) {
-        mLooper->sendMessage(handler, 0);
-    }
-
-    void sendMessageDelayed(const sp<MessageHandler>& handler, nsecs_t delayInMs) {
-        mLooper->sendMessageDelayed(ms2ns(delayInMs), handler, 0);
     }
 
     void attachAnimatingNode(RenderNode* animatingNode) {
@@ -399,7 +361,6 @@ public:
     }
 
 private:
-    sp<Looper> mLooper;
     JavaVM* mVm;
     std::vector< sp<RenderNode> > mPendingAnimatingRenderNodes;
     std::set< sp<PropertyValuesAnimatorSet> > mPendingVectorDrawableAnimators;
@@ -430,7 +391,9 @@ private:
             // the onFinished callback will then be ignored.
             sp<FinishAndInvokeListener> message
                     = new FinishAndInvokeListener(anim);
-            sendMessageDelayed(message, remainingTimeInMs);
+            auto looper = Looper::getForThread();
+            LOG_ALWAYS_FATAL_IF(looper == nullptr, "Not on a looper thread?");
+            looper->sendMessageDelayed(ms2ns(remainingTimeInMs), message, 0);
             anim->clearOneShotListener();
         }
     }
@@ -458,7 +421,6 @@ public:
     virtual void runRemainingAnimations(TreeInfo& info) {
         AnimationContext::runRemainingAnimations(info);
         mRootNode->runVectorDrawableAnimators(this, info);
-        postOnFinishedEvents();
     }
 
     virtual void pauseAnimators() override {
@@ -466,27 +428,16 @@ public:
     }
 
     virtual void callOnFinished(BaseRenderNodeAnimator* animator, AnimationListener* listener) {
-        OnFinishedEvent event(animator, listener);
-        mOnFinishedEvents.push_back(event);
+        listener->onAnimationFinished(animator);
     }
 
     virtual void destroy() {
         AnimationContext::destroy();
         mRootNode->detachAnimators();
-        postOnFinishedEvents();
     }
 
 private:
     sp<RootRenderNode> mRootNode;
-    std::vector<OnFinishedEvent> mOnFinishedEvents;
-
-    void postOnFinishedEvents() {
-        if (mOnFinishedEvents.size()) {
-            sp<InvokeAnimationListeners> message
-                    = new InvokeAnimationListeners(mOnFinishedEvents);
-            mRootNode->sendMessage(message);
-        }
-    }
 };
 
 class ContextFactoryImpl : public IContextFactory {
@@ -686,31 +637,20 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
     env->ReleaseStringUTFChars(jname, name);
 }
 
-static void android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
-    proxy->initialize(surface);
-}
-
-static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject clazz,
+static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<Surface> surface;
     if (jsurface) {
         surface = android_view_Surface_getSurface(env, jsurface);
     }
-    proxy->updateSurface(surface);
+    proxy->setSurface(surface);
 }
 
-static jboolean android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
+static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface;
-    if (jsurface) {
-        surface = android_view_Surface_getSurface(env, jsurface);
-    }
-    return proxy->pauseSurface(surface);
+    return proxy->pause();
 }
 
 static void android_view_ThreadedRenderer_setStopped(JNIEnv* env, jobject clazz,
@@ -719,16 +659,16 @@ static void android_view_ThreadedRenderer_setStopped(JNIEnv* env, jobject clazz,
     proxy->setStopped(stopped);
 }
 
-static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,
-        jfloat lightRadius, jint ambientShadowAlpha, jint spotShadowAlpha) {
+static void android_view_ThreadedRenderer_setLightAlpha(JNIEnv* env, jobject clazz, jlong proxyPtr,
+        jfloat ambientShadowAlpha, jfloat spotShadowAlpha) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setup(lightRadius, ambientShadowAlpha, spotShadowAlpha);
+    proxy->setLightAlpha((uint8_t) (255 * ambientShadowAlpha), (uint8_t) (255 * spotShadowAlpha));
 }
 
-static void android_view_ThreadedRenderer_setLightCenter(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jfloat lightX, jfloat lightY, jfloat lightZ) {
+static void android_view_ThreadedRenderer_setLightGeometry(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jfloat lightX, jfloat lightY, jfloat lightZ, jfloat lightRadius) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setLightCenter((Vector3){lightX, lightY, lightZ});
+    proxy->setLightGeometry((Vector3){lightX, lightY, lightZ}, lightRadius);
 }
 
 static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
@@ -796,11 +736,11 @@ static void android_view_ThreadedRenderer_buildLayer(JNIEnv* env, jobject clazz,
 }
 
 static jboolean android_view_ThreadedRenderer_copyLayerInto(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong layerPtr, jobject jbitmap) {
+        jlong proxyPtr, jlong layerPtr, jlong bitmapPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     return proxy->copyLayerInto(layer, bitmap);
 }
 
@@ -863,12 +803,6 @@ static void android_view_ThreadedRenderer_notifyFramePending(JNIEnv* env, jobjec
     proxy->notifyFramePending();
 }
 
-static void android_view_ThreadedRenderer_serializeDisplayListTree(JNIEnv* env, jobject clazz,
-        jlong proxyPtr) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->serializeDisplayListTree();
-}
-
 static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject javaFileDescriptor, jint dumpFlags) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -923,6 +857,27 @@ private:
     jobject mObject;
 };
 
+static void android_view_ThreadedRenderer_setPictureCapturedCallbackJNI(JNIEnv* env,
+        jobject clazz, jlong proxyPtr, jobject pictureCallback) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    if (!pictureCallback) {
+        proxy->setPictureCapturedCallback(nullptr);
+    } else {
+        JavaVM* vm = nullptr;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&vm) != JNI_OK, "Unable to get Java VM");
+        auto globalCallbackRef = std::make_shared<JGlobalRefHolder>(vm,
+                env->NewGlobalRef(pictureCallback));
+        proxy->setPictureCapturedCallback([globalCallbackRef](sk_sp<SkPicture>&& picture) {
+            JNIEnv* env = getenv(globalCallbackRef->vm());
+            Picture* wrapper = new Picture{std::move(picture)};
+            env->CallStaticVoidMethod(gHardwareRenderer.clazz,
+                    gHardwareRenderer.invokePictureCapturedCallback,
+                    static_cast<jlong>(reinterpret_cast<intptr_t>(wrapper)),
+                    globalCallbackRef->object());
+        });
+    }
+}
+
 static void android_view_ThreadedRenderer_setFrameCallback(JNIEnv* env,
         jobject clazz, jlong proxyPtr, jobject frameCallback) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
@@ -949,16 +904,16 @@ static void android_view_ThreadedRenderer_setFrameCompleteCallback(JNIEnv* env,
     } else {
         sp<FrameCompleteWrapper> wrapper = new FrameCompleteWrapper{env, callback};
         proxy->setFrameCompleteCallback([wrapper](int64_t frameNr) {
-            wrapper->postFrameComplete(frameNr);
+            wrapper->onFrameComplete(frameNr);
         });
     }
 }
 
 static jint android_view_ThreadedRenderer_copySurfaceInto(JNIEnv* env,
         jobject clazz, jobject jsurface, jint left, jint top,
-        jint right, jint bottom, jobject jbitmap) {
+        jint right, jint bottom, jlong bitmapPtr) {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
     return RenderProxy::copySurfaceInto(surface, left, top, right, bottom, &bitmap);
 }
@@ -996,13 +951,12 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     {
         ContextFactory factory;
         RenderProxy proxy{true, renderNode, &factory};
-        proxy.loadSystemProperties();
         proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-        proxy.initialize(surface);
+        proxy.setSurface(surface);
         // Shadows can't be used via this interface, so just set the light source
         // to all 0s.
-        proxy.setup(0, 0, 0);
-        proxy.setLightCenter((Vector3){0, 0, 0});
+        proxy.setLightAlpha(0, 0);
+        proxy.setLightGeometry((Vector3){0, 0, 0}, 0);
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
         UiFrameInfoBuilder(proxy.frameInfo())
                 .setVsync(vsync, vsync)
@@ -1029,7 +983,15 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
                 buffer->getWidth(), buffer->getHeight(), width, height);
         // Continue I guess?
     }
-    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer);
+
+    SkColorType ct = uirenderer::PixelFormatToColorType(buffer->getPixelFormat());
+    sk_sp<SkColorSpace> cs = uirenderer::DataSpaceToColorSpace(bufferItem.mDataSpace);
+    if (cs == nullptr) {
+        // nullptr is treated as SRGB in Skia, thus explicitly use SRGB in order to make sure
+        // the returned bitmap has a color space.
+        cs = SkColorSpace::MakeSRGB();
+    }
+    sk_sp<Bitmap> bitmap = Bitmap::createFrom(buffer, ct, cs);
     return bitmap::createBitmap(env, bitmap.release(),
             android::bitmap::kBitmapCreateFlag_Premultiplied);
 }
@@ -1061,10 +1023,19 @@ static void android_view_ThreadedRenderer_setContextPriority(JNIEnv*, jclass,
 }
 
 static void android_view_ThreadedRenderer_allocateBuffers(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
+        jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
-    proxy->allocateBuffers(surface);
+    proxy->allocateBuffers();
+}
+
+static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jboolean enable) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    proxy->setForceDark(enable);
+}
+
+static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
+    RenderProxy::preload();
 }
 
 // ----------------------------------------------------------------------------
@@ -1115,7 +1086,7 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/ThreadedRenderer";
+const char* const kClassPathName = "android/graphics/HardwareRenderer";
 
 static const JNINativeMethod gMethods[] = {
     { "nRotateProcessStatsBuffer", "()V", (void*) android_view_ThreadedRenderer_rotateProcessStatsBuffer },
@@ -1126,12 +1097,11 @@ static const JNINativeMethod gMethods[] = {
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nSetName", "(JLjava/lang/String;)V", (void*) android_view_ThreadedRenderer_setName },
-    { "nInitialize", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_initialize },
-    { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
-    { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
+    { "nSetSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_setSurface },
+    { "nPause", "(J)Z", (void*) android_view_ThreadedRenderer_pause },
     { "nSetStopped", "(JZ)V", (void*) android_view_ThreadedRenderer_setStopped },
-    { "nSetup", "(JFII)V", (void*) android_view_ThreadedRenderer_setup },
-    { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
+    { "nSetLightAlpha", "(JFF)V", (void*) android_view_ThreadedRenderer_setLightAlpha },
+    { "nSetLightGeometry", "(JFFFF)V", (void*) android_view_ThreadedRenderer_setLightGeometry },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSetWideGamut", "(JZ)V", (void*) android_view_ThreadedRenderer_setWideGamut },
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
@@ -1141,7 +1111,7 @@ static const JNINativeMethod gMethods[] = {
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
     { "nBuildLayer", "(JJ)V", (void*) android_view_ThreadedRenderer_buildLayer },
-    { "nCopyLayerInto", "(JJLandroid/graphics/Bitmap;)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
+    { "nCopyLayerInto", "(JJJ)Z", (void*) android_view_ThreadedRenderer_copyLayerInto },
     { "nPushLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_pushLayerUpdate },
     { "nCancelLayerUpdate", "(JJ)V", (void*) android_view_ThreadedRenderer_cancelLayerUpdate },
     { "nDetachSurfaceTexture", "(JJ)V", (void*) android_view_ThreadedRenderer_detachSurfaceTexture },
@@ -1151,7 +1121,6 @@ static const JNINativeMethod gMethods[] = {
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nStopDrawing", "(J)V", (void*) android_view_ThreadedRenderer_stopDrawing },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
-    { "nSerializeDisplayListTree", "(J)V", (void*) android_view_ThreadedRenderer_serializeDisplayListTree },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
     { "setupShadersDiskCache", "(Ljava/lang/String;Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
@@ -1159,9 +1128,11 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
     { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
-    { "nSetFrameCallback", "(JLandroid/view/ThreadedRenderer$FrameDrawingCallback;)V",
+    { "nSetPictureCaptureCallback", "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V",
+            (void*) android_view_ThreadedRenderer_setPictureCapturedCallbackJNI },
+    { "nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCallback},
-    { "nSetFrameCompleteCallback", "(JLandroid/view/ThreadedRenderer$FrameCompleteCallback;)V",
+    { "nSetFrameCompleteCallback", "(JLandroid/graphics/HardwareRenderer$FrameCompleteCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCompleteCallback },
     { "nAddFrameMetricsObserver",
             "(JLandroid/view/FrameMetricsObserver;)J",
@@ -1169,7 +1140,7 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveFrameMetricsObserver",
             "(JJ)V",
             (void*)android_view_ThreadedRenderer_removeFrameMetricsObserver },
-    { "nCopySurfaceInto", "(Landroid/view/Surface;IIIILandroid/graphics/Bitmap;)I",
+    { "nCopySurfaceInto", "(Landroid/view/Surface;IIIIJ)I",
                 (void*)android_view_ThreadedRenderer_copySurfaceInto },
     { "nCreateHardwareBitmap", "(JII)Landroid/graphics/Bitmap;",
             (void*)android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode },
@@ -1180,17 +1151,19 @@ static const JNINativeMethod gMethods[] = {
     { "nSetDebuggingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDebuggingEnabled },
     { "nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess },
     { "nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority },
-    { "nAllocateBuffers", "(JLandroid/view/Surface;)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
+    { "nAllocateBuffers", "(J)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
+    { "nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark },
+    { "preload", "()V", (void*)android_view_ThreadedRenderer_preload },
 };
 
 static JavaVM* mJvm = nullptr;
 
-static void attachRenderThreadToJvm() {
+static void attachRenderThreadToJvm(const char* name) {
     LOG_ALWAYS_FATAL_IF(!mJvm, "No jvm but we set the hook??");
 
     JavaVMAttachArgs args;
     args.version = JNI_VERSION_1_4;
-    args.name = (char*) "RenderThread";
+    args.name = name;
     args.group = NULL;
     JNIEnv* env;
     mJvm->AttachCurrentThreadAsDaemon(&env, (void*) &args);
@@ -1211,13 +1184,20 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
     gFrameMetricsObserverClassInfo.timingDataBuffer = GetFieldIDOrDie(
             env, metricsClass, "mTimingData", "[J");
 
+    jclass hardwareRenderer = FindClassOrDie(env,
+            "android/graphics/HardwareRenderer");
+    gHardwareRenderer.clazz = reinterpret_cast<jclass>(env->NewGlobalRef(hardwareRenderer));
+    gHardwareRenderer.invokePictureCapturedCallback = GetStaticMethodIDOrDie(env, hardwareRenderer,
+            "invokePictureCapturedCallback",
+            "(JLandroid/graphics/HardwareRenderer$PictureCapturedCallback;)V");
+
     jclass frameCallbackClass = FindClassOrDie(env,
-            "android/view/ThreadedRenderer$FrameDrawingCallback");
+            "android/graphics/HardwareRenderer$FrameDrawingCallback");
     gFrameDrawingCallback.onFrameDraw = GetMethodIDOrDie(env, frameCallbackClass,
             "onFrameDraw", "(J)V");
 
     jclass frameCompleteClass = FindClassOrDie(env,
-            "android/view/ThreadedRenderer$FrameCompleteCallback");
+            "android/graphics/HardwareRenderer$FrameCompleteCallback");
     gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
             "onFrameComplete", "(J)V");
 

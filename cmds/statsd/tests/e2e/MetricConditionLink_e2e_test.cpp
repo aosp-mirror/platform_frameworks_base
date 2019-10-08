@@ -99,7 +99,6 @@ StatsdConfig CreateStatsdConfig() {
 
 // If we want to test multiple dump data, we must do it in separate tests, because in the e2e tests,
 // we should use the real API which will clear the data after dump data is called.
-// TODO: better refactor the code so that the tests are not so verbose.
 TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
     auto config = CreateStatsdConfig();
     uint64_t bucketStartTimeNs = 10000000000;
@@ -200,8 +199,8 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
     }
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, false, ADB_DUMP,
-                            &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, false, true,
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);
@@ -319,8 +318,8 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
 
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, ADB_DUMP,
-                            &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, true,
+                            ADB_DUMP, FAST, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     backfillDimensionPath(&reports);

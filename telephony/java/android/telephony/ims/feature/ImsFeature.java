@@ -33,12 +33,8 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 /**
  * Base class for all IMS features that are supported by the framework. Use a concrete subclass
@@ -50,35 +46,6 @@ import java.util.WeakHashMap;
 public abstract class ImsFeature {
 
     private static final String LOG_TAG = "ImsFeature";
-
-    /**
-     * Action to broadcast when ImsService is up.
-     * Internal use only.
-     * Only defined here separately for compatibility purposes with the old ImsService.
-     *
-     * @hide
-     */
-    public static final String ACTION_IMS_SERVICE_UP =
-            "com.android.ims.IMS_SERVICE_UP";
-
-    /**
-     * Action to broadcast when ImsService is down.
-     * Internal use only.
-     * Only defined here separately for compatibility purposes with the old ImsService.
-     *
-     * @hide
-     */
-    public static final String ACTION_IMS_SERVICE_DOWN =
-            "com.android.ims.IMS_SERVICE_DOWN";
-
-    /**
-     * Part of the ACTION_IMS_SERVICE_UP or _DOWN intents.
-     * A long value; the phone ID corresponding to the IMS service coming up or down.
-     * Only defined here separately for compatibility purposes with the old ImsService.
-     *
-     * @hide
-     */
-    public static final String EXTRA_PHONE_ID = "android:phone_id";
 
     /**
      * Invalid feature value
@@ -234,15 +201,20 @@ public abstract class ImsFeature {
     }
 
     /**
-     * Contains the capabilities defined and supported by an ImsFeature in the form of a bit mask.
-     * <p>
-     * Typically this class is not used directly, but rather extended in subclasses of
+     * Contains the IMS capabilities defined and supported by an ImsFeature in the form of a
+     * bit-mask.
+     *
+     * @deprecated This class is not used directly, but rather extended in subclasses of
      * {@link ImsFeature} to provide service specific capabilities.
+     * @see MmTelFeature.MmTelCapabilities
      * @hide
      */
-    @SystemApi
+    // Not Actually deprecated, but we need to remove it from the @SystemApi surface.
+    @Deprecated
+    @SystemApi // SystemApi only because it was leaked through type usage in a previous release.
     public static class Capabilities {
         /** @deprecated Use getters and accessors instead. */
+        // Not actually deprecated, but we need to remove it from the @SystemApi surface eventually.
         protected int mCapabilities = 0;
 
         /**
@@ -335,8 +307,8 @@ public abstract class ImsFeature {
     /** @hide */
     protected final Object mLock = new Object();
 
-    private final Set<IImsFeatureStatusCallback> mStatusCallbacks =
-            Collections.newSetFromMap(new WeakHashMap<>());
+    private final RemoteCallbackList<IImsFeatureStatusCallback> mStatusCallbacks =
+            new RemoteCallbackList<>();
     private @ImsState int mState = STATE_UNAVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
     private final RemoteCallbackList<IImsCapabilityCallback> mCapabilityCallbacks =
@@ -397,9 +369,7 @@ public abstract class ImsFeature {
             // If we have just connected, send queued status.
             c.notifyImsFeatureStatus(getFeatureState());
             // Add the callback if the callback completes successfully without a RemoteException.
-            synchronized (mLock) {
-                mStatusCallbacks.add(c);
-            }
+            mStatusCallbacks.register(c);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Couldn't notify feature state: " + e.getMessage());
         }
@@ -411,29 +381,21 @@ public abstract class ImsFeature {
      */
     @VisibleForTesting
     public void removeImsFeatureStatusCallback(@NonNull IImsFeatureStatusCallback c) {
-        synchronized (mLock) {
-            mStatusCallbacks.remove(c);
-        }
+        mStatusCallbacks.unregister(c);
     }
 
     /**
      * Internal method called by ImsFeature when setFeatureState has changed.
      */
     private void notifyFeatureState(@ImsState int state) {
-        synchronized (mLock) {
-            for (Iterator<IImsFeatureStatusCallback> iter = mStatusCallbacks.iterator();
-                    iter.hasNext(); ) {
-                IImsFeatureStatusCallback callback = iter.next();
-                try {
-                    Log.i(LOG_TAG, "notifying ImsFeatureState=" + state);
-                    callback.notifyImsFeatureStatus(state);
-                } catch (RemoteException e) {
-                    // remove if the callback is no longer alive.
-                    iter.remove();
-                    Log.w(LOG_TAG, "Couldn't notify feature state: " + e.getMessage());
-                }
+        mStatusCallbacks.broadcast((c) -> {
+            try {
+                c.notifyImsFeatureStatus(state);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, e + " notifyFeatureState() - Skipping "
+                        + "callback.");
             }
-        }
+        });
     }
 
     /**
@@ -452,8 +414,21 @@ public abstract class ImsFeature {
     /**
      * @hide
      */
-    public final void removeCapabilityCallback(IImsCapabilityCallback c) {
+    final void removeCapabilityCallback(IImsCapabilityCallback c) {
         mCapabilityCallbacks.unregister(c);
+    }
+
+    /**@hide*/
+    final void queryCapabilityConfigurationInternal(int capability, int radioTech,
+            IImsCapabilityCallback c) {
+        boolean enabled = queryCapabilityConfiguration(capability, radioTech);
+        try {
+            if (c != null) {
+                c.onQueryCapabilityConfiguration(capability, radioTech, enabled);
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "queryCapabilityConfigurationInternal called on dead binder!");
+        }
     }
 
     /**
@@ -484,29 +459,34 @@ public abstract class ImsFeature {
     /**
      * Called by the ImsFeature when the capabilities status has changed.
      *
-     * @param c A {@link Capabilities} containing the new Capabilities status.
+     * @param caps the new {@link Capabilities} status of the {@link ImsFeature}.
      *
      * @hide
      */
-    protected final void notifyCapabilitiesStatusChanged(Capabilities c) {
+    protected final void notifyCapabilitiesStatusChanged(Capabilities caps) {
         synchronized (mLock) {
-            mCapabilityStatus = c.copy();
+            mCapabilityStatus = caps.copy();
         }
-        int count = mCapabilityCallbacks.beginBroadcast();
-        try {
-            for (int i = 0; i < count; i++) {
-                try {
-                    mCapabilityCallbacks.getBroadcastItem(i).onCapabilitiesStatusChanged(
-                            c.mCapabilities);
-                } catch (RemoteException e) {
-                    Log.w(LOG_TAG, e + " " + "notifyCapabilitiesStatusChanged() - Skipping " +
-                            "callback.");
-                }
+        mCapabilityCallbacks.broadcast((callback) -> {
+            try {
+                callback.onCapabilitiesStatusChanged(caps.mCapabilities);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, e + " notifyCapabilitiesStatusChanged() - Skipping "
+                        + "callback.");
             }
-        } finally {
-            mCapabilityCallbacks.finishBroadcast();
-        }
+        });
     }
+
+    /**
+     * Provides the ImsFeature with the ability to return the framework Capability Configuration
+     * for a provided Capability. If the framework calls {@link #changeEnabledCapabilities} and
+     * includes a capability A to enable or disable, this method should return the correct enabled
+     * status for capability A.
+     * @param capability The capability that we are querying the configuration for.
+     * @return true if the capability is enabled, false otherwise.
+     * @hide
+     */
+    public abstract boolean queryCapabilityConfiguration(int capability, int radioTech);
 
     /**
      * Features should override this method to receive Capability preference change requests from

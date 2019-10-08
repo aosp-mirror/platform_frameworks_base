@@ -23,4 +23,4 @@ TARGET_ARCH=$($ANDROID_BUILD_TOP/build/soong/soong_ui.bash --dumpvar-mode TARGET
 adb install -r -g "$OUT/testcases/FrameworksWifiApiTests/$TARGET_ARCH/FrameworksWifiApiTests.apk"
 
 adb shell am instrument --no-hidden-api-checks -w "$@" \
-  'android.net.wifi.test/android.support.test.runner.AndroidJUnitRunner'
+  'android.net.wifi.test/androidx.test.runner.AndroidJUnitRunner'

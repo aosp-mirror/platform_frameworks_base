@@ -56,6 +56,26 @@ public abstract class HdmiClient {
     }
 
     /**
+     * Sends a volume key event to the primary audio receiver in the system. This method should only
+     * be called when the volume key is not handled by the local device. HDMI framework handles the
+     * logic of finding the address of the receiver.
+     *
+     * @param keyCode key code to send. Defined in {@link android.view.KeyEvent}.
+     * @param isPressed true if this is key press event
+     *
+     * @hide
+     * TODO(b/110094868): unhide for Q
+     */
+    public void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
+        try {
+            mService.sendVolumeKeyEvent(getDeviceType(), keyCode, isPressed);
+        } catch (RemoteException e) {
+            Log.e(TAG, "sendVolumeKeyEvent threw exception ", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sends vendor-specific command.
      *
      * @param targetAddress address of the target device

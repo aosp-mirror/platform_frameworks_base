@@ -7,7 +7,7 @@ android_test {
     ],
     static_libs: [
         "mockito-target-minus-junit4",
-        "android-support-test",
+        "androidx.test.rules",
         "android-ex-camera2",
     ],
     platform_apis: true,

@@ -34,8 +34,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
-
 import com.android.systemui.qs.AlphaControlledSignalTileView.AlphaControlledSlashImageView;
+
 import java.util.Objects;
 
 public class QSIconViewImpl extends QSIconView {
@@ -44,17 +44,16 @@ public class QSIconViewImpl extends QSIconView {
 
     protected final View mIcon;
     protected final int mIconSizePx;
-    protected final int mTilePaddingBelowIconPx;
     private boolean mAnimationEnabled = true;
     private int mState = -1;
     private int mTint;
+    private QSTile.Icon mLastIcon;
 
     public QSIconViewImpl(Context context) {
         super(context);
 
         final Resources res = context.getResources();
         mIconSizePx = res.getDimensionPixelSize(R.dimen.qs_tile_icon_size);
-        mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
 
         mIcon = createIcon();
         addView(mIcon);
@@ -73,7 +72,17 @@ public class QSIconViewImpl extends QSIconView {
         final int w = MeasureSpec.getSize(widthMeasureSpec);
         final int iconSpec = exactly(mIconSizePx);
         mIcon.measure(MeasureSpec.makeMeasureSpec(w, getIconMeasureMode()), iconSpec);
-        setMeasuredDimension(w, mIcon.getMeasuredHeight() + mTilePaddingBelowIconPx);
+        setMeasuredDimension(w, mIcon.getMeasuredHeight());
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
+        sb.append("state=" + mState);
+        sb.append(", tint=" + mTint);
+        if (mLastIcon != null) sb.append(", lastIcon=" + mLastIcon.toString());
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override
@@ -84,16 +93,16 @@ public class QSIconViewImpl extends QSIconView {
         layout(mIcon, iconLeft, top);
     }
 
-    public void setIcon(QSTile.State state) {
-        setIcon((ImageView) mIcon, state);
+    public void setIcon(State state, boolean allowAnimations) {
+        setIcon((ImageView) mIcon, state, allowAnimations);
     }
 
-    protected void updateIcon(ImageView iv, State state) {
+    protected void updateIcon(ImageView iv, State state, boolean allowAnimations) {
         final QSTile.Icon icon = state.iconSupplier != null ? state.iconSupplier.get() : state.icon;
         if (!Objects.equals(icon, iv.getTag(R.id.qs_icon_tag))
                 || !Objects.equals(state.slash, iv.getTag(R.id.qs_slash_tag))) {
-            boolean shouldAnimate = iv.isShown() && mAnimationEnabled
-                    && iv.getDrawable() != null;
+            boolean shouldAnimate = allowAnimations && shouldAnimate(iv);
+            mLastIcon = icon;
             Drawable d = icon != null
                     ? shouldAnimate ? icon.getDrawable(mContext)
                     : icon.getInvisibleDrawable(mContext) : null;
@@ -128,7 +137,11 @@ public class QSIconViewImpl extends QSIconView {
         }
     }
 
-    protected void setIcon(ImageView iv, QSTile.State state) {
+    private boolean shouldAnimate(ImageView iv) {
+        return mAnimationEnabled && iv.isShown() && iv.getDrawable() != null;
+    }
+
+    protected void setIcon(ImageView iv, QSTile.State state, boolean allowAnimations) {
         if (state.disabledByPolicy) {
             iv.setColorFilter(getContext().getColor(R.color.qs_tile_disabled_color));
         } else {
@@ -137,8 +150,8 @@ public class QSIconViewImpl extends QSIconView {
         if (state.state != mState) {
             int color = getColor(state.state);
             mState = state.state;
-            if (iv.isShown() && mTint != 0) {
-                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state));
+            if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
+                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
                 mTint = color;
             } else {
                 if (iv instanceof AlphaControlledSlashImageView) {
@@ -148,10 +161,10 @@ public class QSIconViewImpl extends QSIconView {
                     setTint(iv, color);
                 }
                 mTint = color;
-                updateIcon(iv, state);
+                updateIcon(iv, state, allowAnimations);
             }
         } else {
-            updateIcon(iv, state);
+            updateIcon(iv, state, allowAnimations);
         }
     }
 

@@ -1,0 +1,79 @@
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<com.android.systemui.statusbar.notification.row.ChannelRow
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/half_shelf_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:orientation="horizontal" >
+
+    <!-- This is where an icon would go *if we wanted one* **wink** -->
+    <Space
+        android:id="@+id/icon"
+        android:layout_height="48dp"
+        android:layout_width="48dp"
+        android:layout_gravity="center_vertical"
+        android:padding="8dp"
+    />
+
+    <RelativeLayout
+        android:id="@+id/description_container"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:gravity="left|center_vertical"
+        android:orientation="vertical"
+    >
+        <TextView
+            android:id="@+id/channel_name"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingBottom="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:gravity="center_vertical|start"
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            style="@style/TextAppearance.NotificationInfo.Title"
+        />
+
+        <TextView
+            android:id="@+id/channel_description"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:gravity="center_vertical|start"
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:layout_below="@id/channel_name"
+            style="@style/TextAppearance.NotificationInfo.Secondary"
+        />
+    </RelativeLayout>
+
+    <Switch
+        android:id="@+id/toggle"
+        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="8dp"
+    />
+</com.android.systemui.statusbar.notification.row.ChannelRow>

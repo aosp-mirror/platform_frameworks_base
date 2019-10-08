@@ -16,6 +16,8 @@
 
 package android.hardware.hdmi;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -116,7 +118,7 @@ public class HdmiDeviceInfo implements Parcelable {
     /**
      * A helper class to deserialize {@link HdmiDeviceInfo} for a parcel.
      */
-    public static final Parcelable.Creator<HdmiDeviceInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<HdmiDeviceInfo> CREATOR =
             new Parcelable.Creator<HdmiDeviceInfo>() {
                 @Override
                 public HdmiDeviceInfo createFromParcel(Parcel source) {
@@ -458,6 +460,7 @@ public class HdmiDeviceInfo implements Parcelable {
         }
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuffer s = new StringBuffer();
@@ -493,7 +496,7 @@ public class HdmiDeviceInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof HdmiDeviceInfo)) {
             return false;
         }

@@ -448,7 +448,7 @@ public class RadioManager {
             mVendorInfo = Utils.readStringMap(in);
         }
 
-        public static final Parcelable.Creator<ModuleProperties> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<ModuleProperties> CREATOR
                 = new Parcelable.Creator<ModuleProperties>() {
             public ModuleProperties createFromParcel(Parcel in) {
                 return new ModuleProperties(in);
@@ -485,6 +485,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "ModuleProperties [mId=" + mId
@@ -507,7 +508,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof ModuleProperties)) return false;
             ModuleProperties other = (ModuleProperties) obj;
@@ -625,7 +626,7 @@ public class RadioManager {
             return type;
         }
 
-        public static final Parcelable.Creator<BandDescriptor> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<BandDescriptor> CREATOR
                 = new Parcelable.Creator<BandDescriptor>() {
             public BandDescriptor createFromParcel(Parcel in) {
                 int type = lookupTypeFromParcel(in);
@@ -660,6 +661,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "BandDescriptor [mRegion=" + mRegion + ", mType=" + mType + ", mLowerLimit="
@@ -679,7 +681,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!(obj instanceof BandDescriptor))
@@ -762,7 +764,7 @@ public class RadioManager {
             mEa = in.readByte() == 1;
         }
 
-        public static final Parcelable.Creator<FmBandDescriptor> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<FmBandDescriptor> CREATOR
                 = new Parcelable.Creator<FmBandDescriptor>() {
             public FmBandDescriptor createFromParcel(Parcel in) {
                 return new FmBandDescriptor(in);
@@ -788,6 +790,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "FmBandDescriptor [ "+ super.toString() + " mStereo=" + mStereo
@@ -808,7 +811,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -855,7 +858,7 @@ public class RadioManager {
             mStereo = in.readByte() == 1;
         }
 
-        public static final Parcelable.Creator<AmBandDescriptor> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<AmBandDescriptor> CREATOR
                 = new Parcelable.Creator<AmBandDescriptor>() {
             public AmBandDescriptor createFromParcel(Parcel in) {
                 return new AmBandDescriptor(in);
@@ -877,6 +880,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "AmBandDescriptor [ "+ super.toString() + " mStereo=" + mStereo + "]";
@@ -891,7 +895,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -966,7 +970,7 @@ public class RadioManager {
         }
 
 
-        public static final Parcelable.Creator<BandConfig> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<BandConfig> CREATOR
                 = new Parcelable.Creator<BandConfig>() {
             public BandConfig createFromParcel(Parcel in) {
                 int type = BandDescriptor.lookupTypeFromParcel(in);
@@ -997,6 +1001,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "BandConfig [ " + mDescriptor.toString() + "]";
@@ -1011,7 +1016,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!(obj instanceof BandConfig))
@@ -1099,7 +1104,7 @@ public class RadioManager {
             mEa = in.readByte() == 1;
         }
 
-        public static final Parcelable.Creator<FmBandConfig> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<FmBandConfig> CREATOR
                 = new Parcelable.Creator<FmBandConfig>() {
             public FmBandConfig createFromParcel(Parcel in) {
                 return new FmBandConfig(in);
@@ -1125,6 +1130,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "FmBandConfig [" + super.toString()
@@ -1145,7 +1151,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -1295,7 +1301,7 @@ public class RadioManager {
             mStereo = in.readByte() == 1;
         }
 
-        public static final Parcelable.Creator<AmBandConfig> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<AmBandConfig> CREATOR
                 = new Parcelable.Creator<AmBandConfig>() {
             public AmBandConfig createFromParcel(Parcel in) {
                 return new AmBandConfig(in);
@@ -1317,6 +1323,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "AmBandConfig [" + super.toString()
@@ -1332,7 +1339,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj)
                 return true;
             if (!super.equals(obj))
@@ -1628,7 +1635,7 @@ public class RadioManager {
             mVendorInfo = Utils.readStringMap(in);
         }
 
-        public static final Parcelable.Creator<ProgramInfo> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<ProgramInfo> CREATOR
                 = new Parcelable.Creator<ProgramInfo>() {
             public ProgramInfo createFromParcel(Parcel in) {
                 return new ProgramInfo(in);
@@ -1656,6 +1663,7 @@ public class RadioManager {
             return 0;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return "ProgramInfo"
@@ -1676,7 +1684,7 @@ public class RadioManager {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) return true;
             if (!(obj instanceof ProgramInfo)) return false;
             ProgramInfo other = (ProgramInfo) obj;
@@ -1761,7 +1769,7 @@ public class RadioManager {
         TunerCallbackAdapter halCallback = new TunerCallbackAdapter(callback, handler);
         try {
             tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
-        } catch (RemoteException | IllegalArgumentException ex) {
+        } catch (RemoteException | IllegalArgumentException | IllegalStateException ex) {
             Log.e(TAG, "Failed to open tuner", ex);
             return null;
         }

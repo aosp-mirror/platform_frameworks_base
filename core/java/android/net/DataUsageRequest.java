@@ -69,7 +69,7 @@ public final class DataUsageRequest implements Parcelable {
         dest.writeLong(thresholdInBytes);
     }
 
-    public static final Creator<DataUsageRequest> CREATOR =
+    public static final @android.annotation.NonNull Creator<DataUsageRequest> CREATOR =
             new Creator<DataUsageRequest>() {
                 @Override
                 public DataUsageRequest createFromParcel(Parcel in) {

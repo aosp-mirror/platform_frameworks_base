@@ -16,12 +16,15 @@
 
 package com.android.location.provider;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.location.LocationRequest;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.android.internal.location.ProviderRequest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class is an interface to Provider Requests for unbundled applications.
@@ -46,11 +49,16 @@ public final class ProviderRequestUnbundled {
         return mRequest.interval;
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    public boolean isLocationSettingsIgnored() {
+        return mRequest.locationSettingsIgnored;
+    }
+
     /**
      * Never null.
      */
     public List<LocationRequestUnbundled> getLocationRequests() {
-        List<LocationRequestUnbundled> result = new ArrayList<LocationRequestUnbundled>(
+        List<LocationRequestUnbundled> result = new ArrayList<>(
                 mRequest.locationRequests.size());
         for (LocationRequest r : mRequest.locationRequests) {
           result.add(new LocationRequestUnbundled(r));

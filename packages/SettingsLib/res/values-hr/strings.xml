@@ -38,11 +38,22 @@
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Automatski povezan putem %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Automatski povezan putem ocjenjivača mreže"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Povezano putem %1$s"</string>
+    <string name="connected_via_app" msgid="5571999941988929520">"Povezan putem mreže <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Dostupno putem %1$s"</string>
+    <string name="tap_to_sign_up" msgid="6449724763052579434">"Dodirnite da biste se registrirali"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Povezano, bez interneta"</string>
+    <!-- no translation found for wifi_limited_connection (7717855024753201527) -->
+    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nema interneta"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Obavezna prijava"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Pristupna je točka privremeno puna"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Povezano putem mreže %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Dostupno putem mreže %1$s"</string>
+    <string name="osu_opening_provider" msgid="5488997661548640424">"Otvaranje aplikacije <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
+    <string name="osu_connect_failed" msgid="2187750899158158934">"Povezivanje nije uspjelo"</string>
+    <string name="osu_completing_sign_up" msgid="9037638564719197082">"Dovršavanje registracije…"</string>
+    <string name="osu_sign_up_failed" msgid="7296159750352873260">"Nije moguće dovršiti registraciju. Dodirnite za ponovni pokušaj."</string>
+    <string name="osu_sign_up_complete" msgid="8207626049093289203">"Registracija je dovršena. Povezivanje…"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Vrlo sporo"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Sporo"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"U redu"</string>
@@ -63,6 +74,13 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Povezano (bez telefona), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Povezano (bez medija), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Povezano (bez telefona i medija), baterija <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktivan, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
+    <!-- no translation found for bluetooth_active_battery_level_untethered (6662649951391456747) -->
+    <skip />
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
+    <!-- no translation found for bluetooth_battery_level_untethered (5974406100211667177) -->
+    <skip />
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktivan"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medijski zvuk"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonski pozivi"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prijenos datoteke"</string>
@@ -75,8 +93,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Pristup SIM-u"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD audio"</string>
-    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Slušni aparat"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Povezano sa slušnim aparatom"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="6680721080542444257">"Slušni aparati"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="3051944447369418317">"Povezano sa Slušnim aparatima"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Povezano s medijskim zvukom"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Povezano sa telefonskim zvukom"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Povezano s poslužiteljem za prijenos datoteka"</string>
@@ -93,7 +111,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Koristi za telefonski zvuk"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Koristi za prijenos datoteke"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Upotrijebi za ulaz"</string>
-    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Upotrebljavaj za slušni aparat"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="8843499209204010224">"Upotrijebi za Slušne aparate"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Upari"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"UPARI"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Odustani"</string>
@@ -109,6 +127,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Slušalice"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Periferni uređaj za unos"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Uparivanje lijevog slušnog aparata…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Uparivanje desnog slušnog aparata…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Lijeva strana – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Desna strana – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi je isključen."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi je isključen."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi signal ima jedan stupac."</string>
@@ -120,6 +142,7 @@
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Uklonjene aplikacije"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Uklonjene aplikacije i korisnici"</string>
+    <string name="data_usage_ota" msgid="5377889154805560860">"Ažuriranja sustava"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB dijeljenje veze"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prijen. pristupna točka"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Dijeljenje Bluetoothom veze"</string>
@@ -188,18 +211,17 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Ne pokreći mirovanje"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Zaslon nikad neće prijeći u mirovanje tijekom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Zapisi za Bluetooth HCI"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Snimi sve Bluetooth HCI pakete u datoteci"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="8857606786588106495">"Dohvati Bluetooth pakete. (Uključi Bluetooth nakon promjene ove postavke)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM otključavanje"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Neka kôd za pokretanje sustava bude otključan"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite li dopustiti OEM otključavanje?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORENJE: značajke za zaštitu uređaja neće funkcionirati na ovom uređaju dok je ta postavka uključena."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Odaberite aplikaciju za lažnu lokaciju"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Odabir aplikacije za lažnu lokaciju"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Aplikacija za lažnu lokaciju nije postavljena"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacija za lažnu lokaciju: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikacija bežičnog prikaza"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući opširnu prijavu na Wi-Fi"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Nasumični odabir MAC-a pri povezivanju"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilni podaci uvijek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzanje za modemsko povezivanje"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -207,26 +229,27 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verzija AVRCP-a za Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Odaberite verziju AVRCP-a za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodek za Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Odaberi kodek za Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Pokreni odabir kodeka za Bluetooth\nAudio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Brzina uzorka za Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Odaberi kodek za Bluetooth Audio:\nbrzina uzorkovanja"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Pokreni odabir kodeka za Bluetooth\nAudio: brzina uzorkovanja"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bitovi po uzorku za Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Odaberi kodek za Bluetooth Audio:\nbitovi po uzorku"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Pokreni odabir kodeka za Bluetooth\nAudio: bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Način kanala za Bluetooth Audio"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Odaberi kodek za Bluetooth Audio:\nnačin kanala"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Pokreni odabir kodeka za Bluetooth\nAudio: način kanala"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodek za Bluetooth Audio LDAC: kvaliteta reprodukcije"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Odaberi kodek za Bluetooth Audio LDAC:\nkvaliteta reprodukcije"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Pokreni odabir kodeka za Bluetooth Audio\nLDAC: kvaliteta reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strujanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Odaberite način privatnog DNS-a"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Isključeno"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatski"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Naziv hosta davatelja usluge privatnog DNS-a"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Unesite naziv hosta davatelja usluge DNS-a"</string>
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Povezivanje nije moguće"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaži opcije za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećana razina prijave na Wi‑Fi, prikaz po SSID RSSI-ju u Biraču Wi‑Fi-ja"</string>
-    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Nasumično odaberi MAC adresu pri povezivanju s Wi-Fi mrežama"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"S ograničenim prometom"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Bez ograničenja prometa"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine međuspremnika zapisnika"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličinu međuspremnika zapisnika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li izbrisati trajnu pohranu zapisivača?"</string>
@@ -274,8 +297,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Prikaži vizualne povratne informacije za dodire"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Prikaži ažur. površine"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Površina prozora bljeska pri ažuriranju."</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Prikaži ažur. GPU prikaza"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Bljeskanje prikaza u prozorima pri crtanju GPU-om"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Pokaži ažuriranja prikaza"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Bljeskanje prikaza u prozorima pri crtanju"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Prikaži ažuriranja hardverskih slojeva"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardverski slojevi bljeskaju zeleno pri ažuriranju."</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Rješavanje GPU preklapanja"</string>
@@ -289,12 +312,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Prikazuju se obrubi, margine itd. isječaka."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Nametni zdesna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Nametni smjer zdesna ulijevo za sve zemlje/jezike"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Nametni GPU renderiranje"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Nametni upotrebu GPU-a za 2D crteže"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Nametni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Omogući 4x MSAA u aplikacijama OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Otkloni pogreške operacija nepravokutnog isječka"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Profil GPU prikazivanja"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Profil HWUI generiranja"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Omogući slojeve za otklanjanje pogrešaka GPU-a"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Omogući učitavanje slojeva za otklanjanje pogrešaka GPU-a za aplikacije za otklanjanje pogrešaka"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Brzina animacije prozora"</string>
@@ -305,8 +326,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Uklanjanje aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Aktivnost se prekida čim je korisnik napusti."</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ograničenje pozadinskog procesa"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"Prikaži sve ANR-ove"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"Prikaz dijaloga o pozad. aplik. koja ne odgovara"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Pokaži pozadinske ANR-ove"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Dijalog o pozadinskim aplikacijama koje ne reagiraju"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Prikaži upozorenja kanala obavijesti"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Prikazuje upozorenje na zaslonu kada aplikacija objavi obavijest bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Prisilno dopusti aplikacije u vanjskoj pohrani"</string>
@@ -321,6 +342,7 @@
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nova zaporka za sigurnosnu kopiju postavljena"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nova zaporka i potvrda ne odgovaraju"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Nije uspjelo postavljanje zaporke za sigurnosnu kopiju"</string>
+    <string name="loading_injected_setting_summary" msgid="4095178591461231376">"Učitavanje…"</string>
   <string-array name="color_mode_names">
     <item msgid="2425514299220523812">"Živopisno (zadano)"</item>
     <item msgid="8446070607501413455">"Prirodno"</item>
@@ -356,40 +378,30 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Korekcija boje"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Ova je značajka eksperimentalna i može utjecati na performanse."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Premošćeno postavkom <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Još otprilike <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <string name="power_remaining_settings_home_page" msgid="4845022416859002011">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="6123167166221295462">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_discharging_duration" msgid="8848256785736335185">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g> na temelju vaše upotrebe"</string>
+    <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Još otprilike <xliff:g id="TIME_REMAINING">%1$s</xliff:g> na temelju vaše upotrebe (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <!-- no translation found for power_remaining_duration_only_short (9183070574408359726) -->
     <skip />
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Još otprilike <xliff:g id="TIME">%1$s</xliff:g> na temelju vaše upotrebe"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Još <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g> na temelju vaše upotrebe (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g> na temelju vaše upotrebe"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Otprilike bi trebalo trajati do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_short" msgid="1372817269546888804">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_suggestion_extend_battery (4401408879069551485) -->
     <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Preostalo je manje od <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Preostalo je manje od <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Preostalo je više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Preostalo je više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Telefon bi se uskoro mogao isključiti"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Tablet bi se uskoro mogao isključiti"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Uređaj bi se uskoro mogao isključiti"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Telefon bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Tablet bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Uređaj bi se uskoro mogao isključiti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Još <xliff:g id="TIME">%1$s</xliff:g> do potpune napunjenosti"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> do potpune napunjenosti"</string>
@@ -400,8 +412,6 @@
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Uključen, trenutačno se ne može puniti"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolira administrator"</string>
-    <string name="enabled_by_admin" msgid="5302986023578399263">"Omogućio administrator"</string>
-    <string name="disabled_by_admin" msgid="8505398946020816620">"Onemogućio administrator"</string>
     <string name="disabled" msgid="9206776641295849915">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Dopušteno"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Nije dopušteno"</string>
@@ -420,7 +430,6 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Veće"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Najveće"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Prilagođeno (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"Pomoć i povratne informacije"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Izbornik"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Unesite zaporku za resetiranje u demo načinu"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Dalje"</string>
@@ -434,6 +443,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrirano"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nije registrirano"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Nije dostupno"</string>
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC adresa određena je nasumično"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="one">Povezan je %1$d uređaj</item>
       <item quantity="few">Povezana su %1$d uređaja</item>
@@ -441,8 +451,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Manje vremena."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Uključi"</string>
     <string name="cancel" msgid="6859253417269739139">"Odustani"</string>
+    <string name="okay" msgid="1997666393121016642">"U redu"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Uključite opciju Ne uznemiravaj."</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Nikada"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Samo prioritetno"</string>
@@ -451,4 +462,10 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Nećete čuti sljedeći alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Trajanje"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Pitaj svaki put"</string>
+    <string name="zen_mode_forever" msgid="2704305038191592967">"Dok ne isključite"</string>
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Upravo sad"</string>
+    <!-- no translation found for media_transfer_this_device_name (1636276898262571213) -->
+    <skip />
 </resources>

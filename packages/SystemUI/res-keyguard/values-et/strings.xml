@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Puudut. parooli sisestamiseks"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Avamiseks sisestage parool"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Avamiseks sisestage PIN-kood"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Sisestage PIN-kood"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Sisestage muster"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Sisestage parool"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Vale PIN-kood."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Kehtetu kaart."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Laetud"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Laadimine"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Kiiresti laadimine"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Aeglaselt laadimine"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Täielikult laetud"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Juhtmeta laadimine"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kiirlaadimine"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Aeglane laadimine"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Ühendage laadija."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Vajutage avamiseks menüüklahvi."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Võrk on lukus"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM-kaart on PUK-koodiga lukus."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM-kaardi avamine …"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN-koodi ala"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Seadme parool"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM-kaardi PIN-koodi ala"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM-kaardi PUK-koodi ala"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Järgmine alarm on määratud ajaks <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Vea tõttu ei saa eSIM-kaarte keelata."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Sisesta"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Unustasin mustri"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Vale muster"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Vale parool"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Vale muster"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Vale PIN-kood"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast.</item>
@@ -136,8 +141,9 @@
       <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage parool.</item>
       <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage parool.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ei tuvastatud"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Ei tuvastatud"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Ei tuvastatud"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Sisestage SIM-kaardi PIN-kood. Jäänud on <xliff:g id="NUMBER_1">%d</xliff:g> katset.</item>
       <item quantity="one">Sisestage SIM-kaardi PIN-kood. Jäänud on <xliff:g id="NUMBER_0">%d</xliff:g> katse enne, kui peate seadme avamiseks ühendust võtma operaatoriga.</item>
     </plurals>
@@ -145,4 +151,84 @@
       <item quantity="other">SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Teil on jäänud veel <xliff:g id="_NUMBER_1">%d</xliff:g> katset enne, kui SIM-kaart püsivalt lukustatakse. Lisateavet küsige operaatorilt.</item>
       <item quantity="one">SIM-kaart on nüüd keelatud. Jätkamiseks sisestage PUK-kood. Teil on jäänud veel <xliff:g id="_NUMBER_0">%d</xliff:g> katse enne, kui SIM-kaart püsivalt lukustatakse. Lisateavet küsige operaatorilt.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"Kell on"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Kell on"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Kaksteist"</item>
+    <item msgid="7389464214252023751">"Üks"</item>
+    <item msgid="8803180377002008046">"Kaks"</item>
+    <item msgid="8614897059944644719">"Kolm"</item>
+    <item msgid="2293058674782619556">"Neli"</item>
+    <item msgid="4815402358455041664">"Viis"</item>
+    <item msgid="3325754778509665687">"Kuus"</item>
+    <item msgid="5805551341866280575">"Seitse"</item>
+    <item msgid="203334816668238610">"Kaheksa"</item>
+    <item msgid="4828052671464488923">"Üheksa"</item>
+    <item msgid="2233497913571137419">"Kümme"</item>
+    <item msgid="5621554266768657830">"Üksteist"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"null üks"</item>
+    <item msgid="8837126587669001578">"null üks"</item>
+    <item msgid="4294343372940455660">"null kaks"</item>
+    <item msgid="7129166637707421536">"null kolm"</item>
+    <item msgid="7579404865008788673">"null neli"</item>
+    <item msgid="3873924689207380586">"null viis"</item>
+    <item msgid="4849565597850069377">"null kuus"</item>
+    <item msgid="4404219424523572364">"null seitse"</item>
+    <item msgid="8740481214764087329">"null kaheksa"</item>
+    <item msgid="1713216865806811237">"null üheksa"</item>
+    <item msgid="3508406095411245038">"Kümme"</item>
+    <item msgid="7161996337755311711">"Üksteist"</item>
+    <item msgid="4044549963329624197">"Kaksteist"</item>
+    <item msgid="333373157917379088">"Kolmteist"</item>
+    <item msgid="2631202907124819385">"Neliteist"</item>
+    <item msgid="6472396076858033453">"Viisteist"</item>
+    <item msgid="8656981856181581643">"Kuusteist"</item>
+    <item msgid="7289026608562030619">"Seitseteist"</item>
+    <item msgid="3881477602692646573">"Kaheksateist"</item>
+    <item msgid="3358129827772984226">"Üheksateist"</item>
+    <item msgid="3308575407402865807">"Kakskümmend"</item>
+    <item msgid="5346560955382229629">"Kakskümmend\nüks"</item>
+    <item msgid="226750304761473436">"Kakskümmend\nkaks"</item>
+    <item msgid="616811325336838734">"Kakskümmend\nkolm"</item>
+    <item msgid="616346116869053440">"Kakskümmend\nneli"</item>
+    <item msgid="4642996410384042830">"Kakskümmend\nviis"</item>
+    <item msgid="7506092849993571465">"Kakskümmend\nkuus"</item>
+    <item msgid="1915078191101042031">"Kakskümmend\nseitse"</item>
+    <item msgid="4292378641900520252">"Kakskümmend\nkaheksa"</item>
+    <item msgid="5339513901773103696">"Kakskümmend\nüheksa"</item>
+    <item msgid="3574673250891657607">"Kolmkümmend"</item>
+    <item msgid="5796923836589110940">"Kolmkümmend\nüks"</item>
+    <item msgid="5859323597571702052">"Kolmkümmend\nkaks"</item>
+    <item msgid="5133326723148876507">"Kolmkümmend\nkolm"</item>
+    <item msgid="2693999494655663096">"Kolmkümmend\nneli"</item>
+    <item msgid="3316754944962836197">"Kolmkümmend\nviis"</item>
+    <item msgid="816891008836796723">"Kolmkümmend\nkuus"</item>
+    <item msgid="9158890488666520078">"Kolmkümmend\nseitse"</item>
+    <item msgid="1894769703213894011">"Kolmkümmend\nkaheksa"</item>
+    <item msgid="5638820345598572399">"Kolmkümmend\nüheksa"</item>
+    <item msgid="8838304023017895439">"Nelikümmend"</item>
+    <item msgid="1834742948932559597">"Nelikümmend\nüks"</item>
+    <item msgid="6573707308847773944">"Nelikümmend\nkaks"</item>
+    <item msgid="2450149950652678001">"Nelikümmend\nkolm"</item>
+    <item msgid="2874667401318178036">"Nelikümmend\nneli"</item>
+    <item msgid="3391101532763048862">"Nelikümmend\nviis"</item>
+    <item msgid="1671489330863254362">"Nelikümmend\nkuus"</item>
+    <item msgid="5916017359554531038">"Nelikümmend\nseitse"</item>
+    <item msgid="8205413177993059967">"Nelikümmend\nkaheksa"</item>
+    <item msgid="6607867415142171302">"Nelikümmend\nüheksa"</item>
+    <item msgid="8358850748472089162">"Viiskümmend"</item>
+    <item msgid="3551313125255080234">"Viiskümmend\nüks"</item>
+    <item msgid="1559678130725716542">"Viiskümmend\nkaks"</item>
+    <item msgid="431441994725492377">"Viiskümmend\nkolm"</item>
+    <item msgid="6345774640539623024">"Viiskümmend\nneli"</item>
+    <item msgid="8018192990793931120">"Viiskümmend\nviis"</item>
+    <item msgid="6187650843754604534">"Viiskümmend\nkuus"</item>
+    <item msgid="8727240174015993259">"Viiskümmend\nseitse"</item>
+    <item msgid="848339003778952950">"Viiskümmend\nkaheksa"</item>
+    <item msgid="5798985802835423618">"Viiskümmend\nüheksa"</item>
+  </string-array>
 </resources>

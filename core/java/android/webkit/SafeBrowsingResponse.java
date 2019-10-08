@@ -27,6 +27,12 @@ package android.webkit;
  * {@link android.webkit.WebView#getSafeBrowsingPrivacyPolicyUrl()}.
  */
 public abstract class SafeBrowsingResponse {
+    /**
+     * @deprecated This class should not be constructed by applications.
+     */
+    // TODO(ntfschr): mark this as @SystemApi after a year.
+    @Deprecated
+    public SafeBrowsingResponse() {}
 
     /**
      * Display the default interstitial.

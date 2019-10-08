@@ -36,8 +36,8 @@ enum StateField {
 // exclusive state field, and any number of primary key fields.
 // For example,
 // message UidProcessStateChanged {
-//    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY];
-//    optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
+//    optional int32 uid = 1 [(state_field_option).option = PRIMARY];
+//    optional android.app.ProcessStateEnum state = 2 [(state_field_option).option = EXCLUSIVE];
 //  }
 // Each of this UidProcessStateChanged atom represents a state change for a specific uid.
 // A new state automatically overrides the previous state.
@@ -46,16 +46,16 @@ enum StateField {
 // the primary key.
 // For example:
 // message ThreadStateChanged {
-//    optional int32 pid = 1  [(stateFieldOption).option = PRIMARY];
-//    optional int32 tid = 2  [(stateFieldOption).option = PRIMARY];
-//    optional int32 state = 3 [(stateFieldOption).option = EXCLUSIVE];
+//    optional int32 pid = 1  [(state_field_option).option = PRIMARY];
+//    optional int32 tid = 2  [(state_field_option).option = PRIMARY];
+//    optional int32 state = 3 [(state_field_option).option = EXCLUSIVE];
 // }
 //
 // Sometimes, there is no primary key field, when the state is GLOBAL.
 // For example,
 //
 // message ScreenStateChanged {
-//    optional android.view.DisplayStateEnum state = 1 [(stateFieldOption).option = EXCLUSIVE];
+//    optional android.view.DisplayStateEnum state = 1 [(state_field_option).option = EXCLUSIVE];
 // }
 //
 // Only fields of primary types can be annotated. AttributionNode cannot be primary keys (and they
@@ -76,12 +76,14 @@ enum LogMode {
 
 extend google.protobuf.FieldOptions {
     // Flags to decorate an atom that presents a state change.
-    optional StateAtomFieldOption stateFieldOption = 50000;
+    optional StateAtomFieldOption state_field_option = 50000;
 
     // Flags to decorate the uid fields in an atom.
     optional bool is_uid = 50001 [default = false];
 
     optional LogMode log_mode = 50002 [default = MODE_AUTOMATIC];
+
+    optional bool allow_from_any_uid = 50003 [default = false];
 
     optional string log_from_module = 50004;
 }

@@ -105,7 +105,7 @@ public final class AssociationRequest implements Parcelable {
         return 0;
     }
 
-    public static final Creator<AssociationRequest> CREATOR = new Creator<AssociationRequest>() {
+    public static final @android.annotation.NonNull Creator<AssociationRequest> CREATOR = new Creator<AssociationRequest>() {
         @Override
         public AssociationRequest createFromParcel(Parcel in) {
             return new AssociationRequest(in);

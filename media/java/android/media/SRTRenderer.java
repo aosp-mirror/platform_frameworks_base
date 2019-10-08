@@ -125,6 +125,7 @@ class SRTTrack extends WebVttTrack {
                 String[] startEnd = header.split("-->");
                 cue.mStartTimeMs = parseMs(startEnd[0]);
                 cue.mEndTimeMs = parseMs(startEnd[1]);
+                cue.mRunID = runID;
 
                 String s;
                 List<String> paragraph = new ArrayList<String>();

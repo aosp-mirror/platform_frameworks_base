@@ -15,34 +15,39 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:gravity="center"
     android:orientation="vertical">
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dip"
-        android:src="@drawable/ic_grayedout_printer"
-        android:contentDescription="@null">
-    </ImageView>
-
-    <ProgressBar
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        style="?android:attr/progressBarStyleHorizontal">
-    </ProgressBar>
+        android:layout_width="120dp"
+        android:layout_height="110dp"
+        android:layout_marginBottom="12dp"
+        android:src="@*android:drawable/ic_print"
+        android:scaleType="fitEnd"
+        android:alpha="0.1"
+        android:tint="?android:colorForeground"
+        android:importantForAccessibility="no" />
 
     <TextView
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLargeInverse"
-        android:text="@string/print_preparing_preview">
-    </TextView>
+        android:layout_marginBottom="16dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="?android:attr/textColorSecondary"
+        android:text="@string/print_preparing_preview" />
+
+    <ProgressBar
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:importantForAccessibility="no"
+        style="?android:attr/progressBarStyleHorizontal" />
 
 </LinearLayout>
 

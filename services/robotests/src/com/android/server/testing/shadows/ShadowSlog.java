@@ -21,12 +21,91 @@ import android.util.Slog;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.shadows.ShadowLog;
 
 @Implements(Slog.class)
 public class ShadowSlog {
     @Implementation
-    public static int println(int priority, String tag, String msg) {
+    protected static int v(String tag, String msg) {
+        return Log.v(tag, msg);
+    }
+
+    @Implementation
+    protected static int v(String tag, String msg, Throwable tr) {
+        return Log.v(tag, msg, tr);
+    }
+
+    @Implementation
+    protected static int d(String tag, String msg) {
+        return Log.d(tag, msg);
+    }
+
+    @Implementation
+    protected static int d(String tag, String msg, Throwable tr) {
+        return Log.d(tag, msg, tr);
+    }
+
+    @Implementation
+    protected static int i(String tag, String msg) {
+        return Log.i(tag, msg);
+    }
+
+    @Implementation
+    protected static int i(String tag, String msg, Throwable tr) {
+        return Log.i(tag, msg, tr);
+    }
+
+    @Implementation
+    protected static int w(String tag, String msg) {
+        return Log.w(tag, msg);
+    }
+
+    @Implementation
+    protected static int w(String tag, String msg, Throwable tr) {
+        return Log.w(tag, msg, tr);
+    }
+
+    @Implementation
+    protected static int w(String tag, Throwable tr) {
+        return Log.w(tag, tr);
+    }
+
+    @Implementation
+    protected static int e(String tag, String msg) {
+        return Log.e(tag, msg);
+    }
+
+    @Implementation
+    protected static int e(String tag, String msg, Throwable tr) {
+        return Log.e(tag, msg, tr);
+    }
+
+    @Implementation
+    protected static int wtf(String tag, String msg) {
+        return Log.wtf(tag, msg);
+    }
+
+    @Implementation
+    protected static void wtfQuiet(String tag, String msg) {
+        Log.wtf(tag, msg);
+    }
+
+    @Implementation
+    protected static int wtfStack(String tag, String msg) {
+        return Log.wtf(tag, msg);
+    }
+
+    @Implementation
+    protected static int wtf(String tag, Throwable tr) {
+        return Log.wtf(tag, tr);
+    }
+
+    @Implementation
+    protected static int wtf(String tag, String msg, Throwable tr) {
+        return Log.wtf(tag, msg, tr);
+    }
+
+    @Implementation
+    protected static int println(int priority, String tag, String msg) {
         return Log.println(priority, tag, msg);
     }
 }

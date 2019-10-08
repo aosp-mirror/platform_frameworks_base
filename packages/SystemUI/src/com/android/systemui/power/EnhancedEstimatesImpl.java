@@ -1,6 +1,6 @@
 package com.android.systemui.power;
 
-import android.util.Log;
+import com.android.settingslib.fuelgauge.Estimate;
 
 public class EnhancedEstimatesImpl implements EnhancedEstimates {
 
@@ -22,5 +22,10 @@ public class EnhancedEstimatesImpl implements EnhancedEstimates {
     @Override
     public long getSevereWarningThreshold() {
         return 0;
+    }
+
+    @Override
+    public boolean getLowWarningEnabled() {
+        return true;
     }
 }

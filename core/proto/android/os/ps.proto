@@ -20,7 +20,7 @@ package android.os;
 
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message PsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -52,7 +52,7 @@ message PsProto {
         // and ps is not displaying threads.
         optional string wchan = 8;
         // Memory address of the process.
-        optional string addr = 9;
+        optional string addr = 9 [ (android.privacy).dest = DEST_LOCAL ];
 
         enum ProcessStateCode {
             STATE_UNKNOWN = 0;

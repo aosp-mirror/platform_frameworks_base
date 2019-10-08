@@ -122,7 +122,7 @@ public class AppTimeTracker {
         }
     }
 
-    void writeToProto(ProtoOutputStream proto, long fieldId, boolean details) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean details) {
         final long token = proto.start(fieldId);
         proto.write(AppTimeTrackerProto.RECEIVER, mReceiver.toString());
         proto.write(AppTimeTrackerProto.TOTAL_DURATION_MS, mTotalTime);

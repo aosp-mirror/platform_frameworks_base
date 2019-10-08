@@ -22,9 +22,7 @@ key 307   BUTTON_X
 key 308   BUTTON_Y
 key 310   BUTTON_L1
 key 311   BUTTON_R1
-key 314   BACK
-key 315   BUTTON_START
-key 316   HOME
+
 key 317   BUTTON_THUMBL
 key 318   BUTTON_THUMBR
 
@@ -44,3 +42,14 @@ axis 0x05 RTRIGGER
 # Hat.
 axis 0x10 HAT_X
 axis 0x11 HAT_Y
+
+# Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
+
+# Button labeled as "BACK" (left-pointing triangle)
+key 314   BUTTON_SELECT
+
+# The branded "X" button in the center of the controller
+key 316   BUTTON_MODE
+
+# Button labeled as "START" (right-pointing triangle)
+key 315   BUTTON_START

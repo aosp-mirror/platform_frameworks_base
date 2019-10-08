@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.internal.os;
 
 import org.junit.runner.RunWith;
@@ -26,6 +27,7 @@ import org.junit.runners.Suite;
         BatteryStatsDualTimerTest.class,
         BatteryStatsDurationTimerTest.class,
         BatteryStatsHelperTest.class,
+        BatteryStatsHistoryTest.class,
         BatteryStatsImplTest.class,
         BatteryStatsNoteTest.class,
         BatteryStatsSamplingTimerTest.class,
@@ -36,12 +38,13 @@ import org.junit.runners.Suite;
         BatteryStatsTimerTest.class,
         BatteryStatsUidTest.class,
         BatteryStatsUserLifecycleTests.class,
-        KernelCpuProcReaderTest.class,
+        KernelCpuProcStringReaderTest.class,
+        KernelCpuUidActiveTimeReaderTest.class,
+        KernelCpuUidClusterTimeReaderTest.class,
+        KernelCpuUidFreqTimeReaderTest.class,
+        KernelCpuUidUserSysTimeReaderTest.class,
         KernelMemoryBandwidthStatsTest.class,
         KernelSingleUidTimeReaderTest.class,
-        KernelUidCpuFreqTimeReaderTest.class,
-        KernelUidCpuActiveTimeReaderTest.class,
-        KernelUidCpuClusterTimeReaderTest.class,
         KernelWakelockReaderTest.class,
         LongSamplingCounterTest.class,
         LongSamplingCounterArrayTest.class,

@@ -33,9 +33,27 @@ import java.util.List;
  * This class provides information for a shared library. There are
  * three types of shared libraries: builtin - non-updatable part of
  * the OS; dynamic - updatable backwards-compatible dynamically linked;
- * static - updatable non backwards-compatible emulating static linking.
+ * static - non backwards-compatible emulating static linking.
  */
 public final class SharedLibraryInfo implements Parcelable {
+
+    /** @hide */
+    public static SharedLibraryInfo createForStatic(PackageParser.Package pkg) {
+        return new SharedLibraryInfo(null, pkg.packageName, pkg.getAllCodePaths(),
+                pkg.staticSharedLibName,
+                pkg.staticSharedLibVersion,
+                TYPE_STATIC,
+                new VersionedPackage(pkg.manifestPackageName, pkg.getLongVersionCode()),
+                null, null);
+    }
+
+    /** @hide */
+    public static SharedLibraryInfo createForDynamic(PackageParser.Package pkg, String name) {
+        return new SharedLibraryInfo(null, pkg.packageName, pkg.getAllCodePaths(), name,
+                (long) VERSION_UNDEFINED,
+                TYPE_DYNAMIC, new VersionedPackage(pkg.packageName, pkg.getLongVersionCode()),
+                null, null);
+    }
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
@@ -324,7 +342,7 @@ public final class SharedLibraryInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<SharedLibraryInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SharedLibraryInfo> CREATOR =
             new Parcelable.Creator<SharedLibraryInfo>() {
         public SharedLibraryInfo createFromParcel(Parcel source) {
             return new SharedLibraryInfo(source);

@@ -135,7 +135,7 @@ public final class InputBinding implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<InputBinding> CREATOR = new Parcelable.Creator<InputBinding>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<InputBinding> CREATOR = new Parcelable.Creator<InputBinding>() {
         public InputBinding createFromParcel(Parcel source) {
             return new InputBinding(source);
         }

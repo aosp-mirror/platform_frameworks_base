@@ -58,6 +58,11 @@
     <item msgid="3878793616631049349">"Gunakan pemeriksaan HDCP untuk konten DRM saja"</item>
     <item msgid="45075631231212732">"Selalu gunakan pemeriksaan HDCP"</item>
   </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"Nonaktif"</item>
+    <item msgid="1969681323976948639">"Diaktifkan Difilter"</item>
+    <item msgid="8719029132154020716">"Diaktifkan"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (Default)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
@@ -137,6 +142,12 @@
     <item msgid="4327143584633311908">"Kualitas Audio dan Sambungan Seimbang"</item>
     <item msgid="4681409244565426925">"Dioptimalkan untuk Kualitas Sambungan"</item>
     <item msgid="364670732877872677">"Best Effort (Kecepatan Bit Adaptif)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", aktif"</item>
+    <item msgid="8962366465966010158">", aktif (media)"</item>
+    <item msgid="4046665544396189228">", aktif (ponsel)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Nonaktif"</item>

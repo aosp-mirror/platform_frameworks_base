@@ -17,7 +17,7 @@ package com.google.android.startop.iorap
 import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.test.filters.SmallTest
+import androidx.test.filters.SmallTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import com.google.common.truth.Truth.assertThat
@@ -29,7 +29,7 @@ import org.junit.runners.Parameterized
  */
 @SmallTest
 @RunWith(Parameterized::class)
-class ParcelablesTest<T : Parcelable>(private val inputData : InputData<T>) {
+class ParcelablesTest<T : Parcelable>(private val inputData: InputData<T>) {
     companion object {
         private val initialRequestId = RequestId.nextValueForSequence()!!
 
@@ -73,19 +73,19 @@ class ParcelablesTest<T : Parcelable>(private val inputData : InputData<T>) {
                         TaskResult(TaskResult.STATE_ONGOING))
         )
 
-        private fun newActivityInfo() : ActivityInfo {
+        private fun newActivityInfo(): ActivityInfo {
             return ActivityInfo("some package", "some activity")
         }
 
-        private fun newActivityInfoOther() : ActivityInfo {
+        private fun newActivityInfoOther(): ActivityInfo {
             return ActivityInfo("some package 2", "some activity 2")
         }
 
-        private fun newUri() : Uri {
+        private fun newUri(): Uri {
             return Uri.parse("https://www.google.com")
         }
 
-        private fun cloneRequestId(requestId: RequestId) : RequestId {
+        private fun cloneRequestId(requestId: RequestId): RequestId {
             val constructor = requestId::class.java.declaredConstructors[0]
             constructor.isAccessible = true
             return constructor.newInstance(requestId.requestId) as RequestId
@@ -108,7 +108,7 @@ class ParcelablesTest<T : Parcelable>(private val inputData : InputData<T>) {
     @Test
     fun testParcelRoundTrip() {
         // calling writeToParcel and then T::CREATOR.createFromParcel would return the same data.
-        val assertParcels = { it : T, data : InputData<T> ->
+        val assertParcels = { it: T, data: InputData<T> ->
             val parcel = Parcel.obtain()
             it.writeToParcel(parcel, 0)
             parcel.setDataPosition(0) // future reads will see all previous writes.
@@ -121,7 +121,7 @@ class ParcelablesTest<T : Parcelable>(private val inputData : InputData<T>) {
         assertParcels(inputData.validOther, inputData)
     }
 
-    data class InputData<T : Parcelable>(val valid : T, val validCopy : T, val validOther : T) {
+    data class InputData<T : Parcelable>(val valid: T, val validCopy: T, val validOther: T) {
         val kls = valid.javaClass
         init {
             assertThat(valid).isNotSameAs(validCopy)
@@ -130,8 +130,8 @@ class ParcelablesTest<T : Parcelable>(private val inputData : InputData<T>) {
             assertThat(validOther.javaClass).isEqualTo(valid.javaClass)
         }
 
-        fun createFromParcel(parcel : Parcel) : T {
-            val field  = kls.getDeclaredField("CREATOR")
+        fun createFromParcel(parcel: Parcel): T {
+            val field = kls.getDeclaredField("CREATOR")
             val creator = field.get(null) as Parcelable.Creator<T>
 
             return creator.createFromParcel(parcel)

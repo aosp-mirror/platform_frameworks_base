@@ -17,8 +17,10 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.HdmiConfig.IRT_MS;
 
+import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.util.Slog;
 import android.view.KeyEvent;
+import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
  * Feature action that transmits remote control key command (User Control Press/
@@ -146,8 +148,26 @@ final class SendKeyAction extends HdmiCecFeatureAction {
         if (cecKeycodeAndParams == null) {
             return;
         }
-        sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
-                mTargetAddress, cecKeycodeAndParams));
+        // Devices that are not directly connected with audio system device can't detect if the
+        // audio system device is still plugged in. Framework checks if the volume key forwarding is
+        // successful or not every time to make sure the System Audio Mode status is still updated.
+        if (mTargetAddress == Constants.ADDR_AUDIO_SYSTEM
+            && localDevice().mAddress != Constants.ADDR_TV) {
+            sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
+                mTargetAddress, cecKeycodeAndParams), new SendMessageCallback() {
+                @Override
+                public void onSendCompleted(int error) {
+                    if (error != SendMessageResult.SUCCESS) {
+                        HdmiLogger.debug(
+                            "AVR did not respond to <User Control Pressed>");
+                        localDevice().mService.setSystemAudioActivated(false);
+                    }
+                }
+            });
+        } else {
+            sendCommand(HdmiCecMessageBuilder.buildUserControlPressed(getSourceAddress(),
+                    mTargetAddress, cecKeycodeAndParams));
+        }
     }
 
     private void sendKeyUp() {

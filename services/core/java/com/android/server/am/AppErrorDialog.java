@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -63,7 +65,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         mService = service;
         mProc = data.proc;
         mResult = data.result;
-        mIsRestartable = (data.task != null || data.isRestartableForService)
+        mIsRestartable = (data.taskId != INVALID_TASK_ID || data.isRestartableForService)
                 && Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG, 0) != 0;
         BidiFormatter bidi = BidiFormatter.getInstance();
@@ -92,7 +94,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR
                 | WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
-        if (mProc.persistent) {
+        if (mProc.isPersistent()) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         }
 
@@ -209,7 +211,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
 
     static class Data {
         AppErrorResult result;
-        TaskRecord task;
+        int taskId;
         boolean repeating;
         ProcessRecord proc;
         boolean isRestartableForService;

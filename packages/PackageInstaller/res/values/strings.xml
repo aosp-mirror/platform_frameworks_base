@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- [CHAR LIMIT=25] -->
+    <string name="app_name">Package installer</string>
+
+    <!-- [CHAR LIMIT=15] -->
+    <string name="install">Install</string>
+    <!-- [CHAR LIMIT=15] -->
+    <string name="done">Done</string>
+    <!-- [CHAR LIMIT=15] -->
+    <string name="cancel">Cancel</string>
+    <!-- [CHAR LIMIT=50] -->
+    <string name="installing">Installing\u2026</string>
+    <!-- [CHAR LIMIT=50] -->
+    <string name="installing_app">Installing <xliff:g id="package_label">%1$s</xliff:g>\u2026</string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="install_done">App installed.</string>
+    <!-- Message for installing a new app that requires some permissions [CHAR LIMIT=NONE] -->
+    <!-- Message for installing a new app that does not require permissions [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question">Do you want to install this application?</string>
+    <!-- Message for updating an existing app [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update">Do you want to install an update
+            to this existing application?  Your existing data will not
+            be lost.</string>
+    <!-- Message for updating an existing system app [CHAR LIMIT=NONE] -->
+    <string name="install_confirm_question_update_system">Do you want to install an update
+            to this built-in application?  Your existing data will not
+            be lost.</string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="install_failed">App not installed.</string>
+    <!-- Reason displayed when installation fails because the package was blocked
+        from being installed (e.g., device policy, verification, ...) [CHAR LIMIT=100] -->
+    <string name="install_failed_blocked">The package was blocked from being installed.</string>
+    <!-- Reason displayed when installation fails because the package conflicts with
+        an existing application (e.g., incompatible certificates) [CHAR LIMIT=100] -->
+    <string name="install_failed_conflict">App not installed as package conflicts with an existing package.</string>
+    <!-- Reason displayed when installation fails because the package is incompatible with
+       the current tablet (e.g., missing native code for the current ABI, newer SDK, ...) [CHAR LIMIT=100] -->
+    <string name="install_failed_incompatible" product="tablet">App not installed as app isn\'t
+        compatible with your tablet.</string>
+    <!-- Reason displayed when installation fails because the package is incompatible with
+       the current TV (e.g., missing native code for the current ABI, newer SDK, ...) [CHAR LIMIT=100] -->
+    <string name="install_failed_incompatible" product="tv">This app isn\'t
+        compatible with your TV.</string>
+    <!-- Reason displayed when installation fails because the package is incompatible with
+       the current phone (e.g., missing native code for the current ABI, newer SDK, ...) [CHAR LIMIT=100] -->
+    <string name="install_failed_incompatible" product="default">App not installed as app isn\'t
+        compatible with your phone.</string>
+    <!-- Reason displayed when installation fails because the installation package itself is invalid
+        in some way (e.g., corrupt) [CHAR LIMIT=100] -->
+    <string name="install_failed_invalid_apk">App not installed as package appears to be invalid.</string>
+    <!-- Message presented when an application could not be installed on the tablet for some reason. [CHAR LIMIT=100] -->
+    <string name="install_failed_msg" product="tablet"><xliff:g id="app_name">%1$s</xliff:g> couldn\'t be installed on your tablet.</string>
+    <!-- Message presented when an application could not be installed on the TV for some reason. [CHAR LIMIT=100] -->
+    <string name="install_failed_msg" product="tv"><xliff:g id="app_name">%1$s</xliff:g> couldn\'t be installed on your TV.</string>
+    <!-- Message presented when an application could not be installed on the phone for some reason. [CHAR LIMIT=100] -->
+    <string name="install_failed_msg" product="default"><xliff:g id="app_name">%1$s</xliff:g> couldn\'t be installed on your phone.</string>
+    <string name="launch">Open</string>
+
+    <!-- Message presented in a dialog box when the device administrator restricts the installation of apps from unknown sources. [CHAR LIMIT=none] -->
+    <string name="unknown_apps_admin_dlg_text">Your admin doesn\'t allow installation of apps
+        obtained from unknown sources</string>
+    <!-- Message presented in a dialog box when the user restriction set by the system restricts the installation of apps from unknown sources. [CHAR LIMIT=none] -->
+    <string name="unknown_apps_user_restriction_dlg_text">Unknown apps can\'t be installed by this
+        user</string>
+    <!-- Message presented in a dialog box when the user restriction set by the system restricts the installation of apps. [CHAR LIMIT=none] -->
+    <string name="install_apps_user_restriction_dlg_text">This user is not allowed to install apps</string>
+
+    <!-- [CHAR LIMIT=15] -->
+    <string name="ok">OK</string>
+    <!-- [CHAR LIMIT=15] -->
+    <string name="manage_applications">Manage apps</string>
+    <!-- [CHAR LIMIT=30] -->
+    <string name="out_of_space_dlg_title">Out of space</string>
+    <!-- [CHAR LIMIT=none] -->
+    <string name="out_of_space_dlg_text"><xliff:g id="app_name">%1$s</xliff:g> couldn\'t be installed. Free up some space and try again.</string>
+    <!-- strings related to uninstall activity -->
+    <!--  [CHAR LIMIT=30] -->
+    <string name="app_not_found_dlg_title">App not found</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="app_not_found_dlg_text"> The app wasn\'t found in the list of installed apps.</string>
+    <!--  [CHAR LIMIT=30] -->
+    <string name="user_is_not_allowed_dlg_title">Not allowed</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="user_is_not_allowed_dlg_text">The current user is not allowed to perform this uninstallation.</string>
+    <!--  [CHAR LIMIT=30] -->
+    <string name="generic_error_dlg_title">Error</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="generic_error_dlg_text">App could not be uninstalled.</string>
+    <!--  [CHAR LIMIT=30] -->
+    <string name="uninstall_application_title">Uninstall app</string>
+    <!--  [CHAR LIMIT=30] -->
+    <string name="uninstall_update_title">Uninstall update</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_activity_text"><xliff:g id="activity_name">%1$s</xliff:g> is part of the following app:</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text">Do you want to uninstall this app?</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text_all_users">Do you want to uninstall this app for <b>all</b>
+        users?  The application and its data will be removed from <b>all</b> users on the device.</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_application_text_user">Do you want to uninstall this app for the user <xliff:g id="username">%1$s</xliff:g>?</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_update_text">Replace this app with the factory version? All data will be removed.</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="uninstall_update_text_multiuser">Replace this app with the factory version? All data will be removed. This affects all users of this device, including those with work profiles.</string>
+    <!-- Label of a checkbox that allows to keep the data (e.g. files, settings) of the app on uninstall [CHAR LIMIT=none] -->
+    <string name="uninstall_keep_data">Keep <xliff:g id="size" example="1.5MB">%1$s</xliff:g> of app data.</string>
+
+    <!-- Label for the notification channel containing notifications for current uninstall operations [CHAR LIMIT=40] -->
+    <string name="uninstalling_notification_channel">Running uninstalls</string>
+    <!-- Label for the notification channel containing notifications for failed uninstall operations [CHAR LIMIT=40] -->
+    <string name="uninstall_failure_notification_channel">Failed uninstalls</string>
+
+    <!-- [CHAR LIMIT=50] -->
+    <string name="uninstalling">Uninstalling\u2026</string>
+    <!-- [CHAR LIMIT=50] -->
+    <string name="uninstalling_app">Uninstalling <xliff:g id="package_label">%1$s</xliff:g>\u2026</string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="uninstall_done">Uninstall finished.</string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="uninstall_done_app">Uninstalled <xliff:g id="package_label">%1$s</xliff:g></string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="uninstall_failed">Uninstall unsuccessful.</string>
+    <!-- [CHAR LIMIT=100] -->
+    <string name="uninstall_failed_app">Uninstalling <xliff:g id="package_label">%1$s</xliff:g> unsuccessful.</string>
+    <!-- String presented to the user when uninstalling a package failed because the target package
+        is a current device administrator [CHAR LIMIT=80] -->
+    <string name="uninstall_failed_device_policy_manager">Can\'t uninstall active device admin
+        app</string>
+    <!-- String presented to the user when uninstalling a package failed because the target package
+        is a current device administrator for some user [CHAR LIMIT=100] -->
+    <string name="uninstall_failed_device_policy_manager_of_user">Can\'t uninstall active device
+        admin app for <xliff:g id="username">%1$s</xliff:g></string>
+    <!-- String presented to the admin user when uninstalling a package for all users failed
+    because a profile owner has marked the target package as not able to be uninstalled
+    [CHAR LIMIT=120] -->
+    <string name="uninstall_all_blocked_profile_owner">This app is required for some users or
+        profiles and was uninstalled for others</string>
+    <!-- String presented to the user when uninstalling a package failed because a profile owner
+         has marked the target package as not able to be uninstalled [CHAR LIMIT=120] -->
+    <string name="uninstall_blocked_profile_owner">This app is needed for
+        your profile and can\'t be uninstalled.</string>
+    <!-- String presented to the user when uninstalling a package failed because a device owner
+         has marked the the target package as not able to be uninstalled [CHAR LIMIT=80] -->
+    <string name="uninstall_blocked_device_owner">This app is required
+        by your device administrator and can\'t be uninstalled.</string>
+    <!-- String on a button that leads to the "device admin apps" configuration setting where a
+        user will be able to disable the device admin app in order to uninstall
+        it. [CHAR LIMIT=50] -->
+    <string name="manage_device_administrators">Manage device admin apps</string>
+    <!-- String on a button that leads to the "Users" page in Settings where a
+        user will be able to remove the secondary user(s) in order to uninstall
+        the app. [CHAR LIMIT=50] -->
+    <string name="manage_users">Manage users</string>
+    <!-- [CHAR LIMIT=none] -->
+    <string name="uninstall_failed_msg"><xliff:g id="app_name">%1$s</xliff:g> couldn\'t be uninstalled.</string>
+
+    <!-- Dialog attributes to indicate parse errors -->
+    <string name="Parse_error_dlg_text">There was a problem parsing the package.</string>
+
+    <!-- Title of dialog telling users that Install/Uninstall action is not supported on Android Wear. [CHAR LIMIT=30] -->
+    <string name="wear_not_allowed_dlg_title">Android Wear</string>
+    <!-- Title of dialog telling users that Install/Uninstall action is not supported on Android Wear. [CHAR LIMIT=none] -->
+    <string name="wear_not_allowed_dlg_text">Install/Uninstall actions not supported on Wear.</string>
+
+    <!-- Message that the app to be installed is being staged [CHAR LIMIT=50] -->
+    <string name="message_staging">Staging app&#8230;</string>
+
+    <!-- Placeholder for an app name when it is unknown [CHAR LIMIT=50] -->
+    <string name="app_name_unknown">Unknown</string>
+
+    <!-- Help URL, application permissions [DO NOT TRANSLATE] -->
+    <string name="help_app_permissions" translatable="false"></string>
+
+    <!-- Text to show in warning dialog on the tablet when the app source is not trusted [CHAR LIMIT=NONE] -->
+    <string name="untrusted_external_source_warning" product="tablet">For your security, your tablet is not allowed to install unknown apps from this source.</string>
+
+    <!-- Text to show in warning dialog on the tv when the app source is not trusted [CHAR LIMIT=NONE] -->
+    <string name="untrusted_external_source_warning" product="tv">For your security, your TV is not allowed to install unknown apps from this source.</string>
+
+    <!-- Text to show in warning dialog on the phone when the app source is not trusted [CHAR LIMIT=NONE] -->
+    <string name="untrusted_external_source_warning" product="default">For your security, your phone is not allowed to install unknown apps from this source.</string>
+
+    <!-- Text to show in warning dialog on the phone when the app source cannot be identified [CHAR LIMIT=NONE] -->
+    <string name="anonymous_source_warning" product="default">
+        Your phone and personal data are more vulnerable
+        to attack by unknown apps. By installing this app, you
+        agree that you are responsible for any damage to your
+        phone or loss of data that may result from its use.
+    </string>
+
+    <!-- Text to show in warning dialog on the tablet when the app source cannot be identified [CHAR LIMIT=NONE] -->
+    <string name="anonymous_source_warning" product="tablet">
+        Your tablet and personal data are more vulnerable
+        to attack by unknown apps. By installing this app, you
+        agree that you are responsible for any damage to your
+        tablet or loss of data that may result from its use.
+    </string>
+
+    <!-- Text to show in warning dialog on the tv when the app source cannot be identified [CHAR LIMIT=NONE] -->
+    <string name="anonymous_source_warning" product="tv">
+        Your TV and personal data are more vulnerable
+        to attack by unknown apps. By installing this app, you
+        agree that you are responsible for any damage to your
+        TV or loss of data that may result from its use.
+    </string>
+
+    <!-- Label for button to continue install of an app whose source cannot be identified [CHAR LIMIT=40] -->
+    <string name="anonymous_source_continue">Continue</string>
+
+    <!-- Label for button to open manage external sources settings [CHAR LIMIT=45] -->
+    <string name="external_sources_settings">Settings</string>
+
+    <!-- Label for the notification channel containing notifications for embedded app operations [CHAR LIMIT=40] -->
+    <string name="wear_app_channel">Installing/uninstalling wear apps</string>
+
+    <!-- Description for the app installer notification channel [CHAR LIMIT=40] -->
+    <string name="app_installed_notification_channel_description">App installed notification</string>
+
+    <!-- Notification message shown in status bar when an application is successfully installed.
+         [CHAR LIMIT=30] -->
+    <string name="notification_installation_success_message">Successfully installed</string>
+
+    <!-- Notification shown in status bar when an application is successfully installed.
+         [CHAR LIMIT=50] -->
+    <string name="notification_installation_success_status">Successfully installed \u201c<xliff:g id="appname" example="Package Installer">%1$s</xliff:g>\u201d</string>
+</resources>

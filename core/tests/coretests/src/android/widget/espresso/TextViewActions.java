@@ -16,22 +16,23 @@
 
 package android.widget.espresso;
 
-import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
+import static androidx.test.espresso.action.ViewActions.actionWithAssertions;
 
 import android.graphics.Rect;
-import android.support.test.espresso.PerformException;
-import android.support.test.espresso.ViewAction;
-import android.support.test.espresso.action.CoordinatesProvider;
-import android.support.test.espresso.action.GeneralLocation;
-import android.support.test.espresso.action.Press;
-import android.support.test.espresso.action.Tap;
-import android.support.test.espresso.util.HumanReadables;
 import android.text.Layout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Editor;
 import android.widget.Editor.HandleView;
 import android.widget.TextView;
+
+import androidx.test.espresso.PerformException;
+import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.action.CoordinatesProvider;
+import androidx.test.espresso.action.GeneralLocation;
+import androidx.test.espresso.action.Press;
+import androidx.test.espresso.action.Tap;
+import androidx.test.espresso.util.HumanReadables;
 
 /**
  * A collection of actions on a {@link android.widget.TextView}.

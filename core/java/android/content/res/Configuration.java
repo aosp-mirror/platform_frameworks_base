@@ -46,6 +46,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
+import android.content.LocaleProto;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.os.Build;
@@ -54,7 +55,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Slog;
+import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.WireTypeMismatchException;
 import android.view.View;
 
 import com.android.internal.util.XmlUtils;
@@ -67,6 +71,8 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.IllformedLocaleException;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -82,6 +88,8 @@ import java.util.Locale;
 public final class Configuration implements Parcelable, Comparable<Configuration> {
     /** @hide */
     public static final Configuration EMPTY = new Configuration();
+
+    private static final String TAG = "Configuration";
 
     /**
      * Current user preference for the scaling factor for fonts, relative
@@ -790,6 +798,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link ActivityInfo#CONFIG_ASSETS_PATHS}.
      * @hide
      */
+    @TestApi
     public int assetsSeq;
 
     /**
@@ -1086,37 +1095,196 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Write to a protocol buffer output stream.
      * Protocol buffer message definition at {@link android.content.ConfigurationProto}
+     * Has the option to ignore fields that don't need to be persisted to disk.
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @param persisted         Note if this proto will be persisted to disk
+     * @param critical          If true, reduce amount of data written.
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean persisted,
+            boolean critical) {
+        final long token = protoOutputStream.start(fieldId);
+        if (!critical) {
+            protoOutputStream.write(FONT_SCALE, fontScale);
+            protoOutputStream.write(MCC, mcc);
+            protoOutputStream.write(MNC, mnc);
+            if (mLocaleList != null) {
+                mLocaleList.writeToProto(protoOutputStream, LOCALES);
+            }
+            protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
+            protoOutputStream.write(COLOR_MODE, colorMode);
+            protoOutputStream.write(TOUCHSCREEN, touchscreen);
+            protoOutputStream.write(KEYBOARD, keyboard);
+            protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
+            protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
+            protoOutputStream.write(NAVIGATION, navigation);
+            protoOutputStream.write(NAVIGATION_HIDDEN, navigationHidden);
+            protoOutputStream.write(UI_MODE, uiMode);
+            protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
+            protoOutputStream.write(DENSITY_DPI, densityDpi);
+            // For persistence, we do not care about window configuration
+            if (!persisted && windowConfiguration != null) {
+                windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
+            }
+        }
+        protoOutputStream.write(ORIENTATION, orientation);
+        protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
+        protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
+        protoOutputStream.end(token);
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.content.ConfigurationProto}
      *
      * @param protoOutputStream Stream to write the Configuration object to.
      * @param fieldId           Field Id of the Configuration as defined in the parent message
      * @hide
      */
     public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
-        final long token = protoOutputStream.start(fieldId);
-        protoOutputStream.write(FONT_SCALE, fontScale);
-        protoOutputStream.write(MCC, mcc);
-        protoOutputStream.write(MNC, mnc);
-        if (mLocaleList != null) {
-            mLocaleList.writeToProto(protoOutputStream, LOCALES);
+        writeToProto(protoOutputStream, fieldId, false /* persisted */, false /* critical */);
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.content.ConfigurationProto}
+     *
+     * @param protoOutputStream Stream to write the Configuration object to.
+     * @param fieldId           Field Id of the Configuration as defined in the parent message
+     * @param critical          If true, reduce amount of data written.
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId, boolean critical) {
+        writeToProto(protoOutputStream, fieldId, false /* persisted */, critical);
+    }
+
+    /**
+     * Read from a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.content.ConfigurationProto}
+     *
+     * @param protoInputStream Stream to read the Configuration object from.
+     * @param fieldId          Field Id of the Configuration as defined in the parent message
+     * @hide
+     */
+    public void readFromProto(ProtoInputStream protoInputStream, long fieldId) throws IOException {
+        final long token = protoInputStream.start(fieldId);
+        final List<Locale> list = new ArrayList();
+        try {
+            while (protoInputStream.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                switch (protoInputStream.getFieldNumber()) {
+                    case (int) FONT_SCALE:
+                        fontScale = protoInputStream.readFloat(FONT_SCALE);
+                        break;
+                    case (int) MCC:
+                        mcc = protoInputStream.readInt(MCC);
+                        break;
+                    case (int) MNC:
+                        mnc = protoInputStream.readInt(MNC);
+                        break;
+                    case (int) LOCALES:
+                        // Parse the Locale here to handle all the repeated Locales
+                        // The LocaleList will be created when the message is completed
+                        final long localeToken = protoInputStream.start(LOCALES);
+                        String language = "";
+                        String country = "";
+                        String variant = "";
+                        String script = "";
+                        try {
+                            while (protoInputStream.nextField()
+                                    != ProtoInputStream.NO_MORE_FIELDS) {
+                                switch (protoInputStream.getFieldNumber()) {
+                                    case (int) LocaleProto.LANGUAGE:
+                                        language = protoInputStream.readString(
+                                                LocaleProto.LANGUAGE);
+                                        break;
+                                    case (int) LocaleProto.COUNTRY:
+                                        country = protoInputStream.readString(LocaleProto.COUNTRY);
+                                        break;
+                                    case (int) LocaleProto.VARIANT:
+                                        variant = protoInputStream.readString(LocaleProto.VARIANT);
+                                        break;
+                                    case (int) LocaleProto.SCRIPT:
+                                        script = protoInputStream.readString(LocaleProto.SCRIPT);
+                                        break;
+                                }
+                            }
+                        } catch (WireTypeMismatchException wtme) {
+                            // rethrow for caller deal with
+                            throw wtme;
+                        } finally {
+                            protoInputStream.end(localeToken);
+                            try {
+                                final Locale locale = new Locale.Builder()
+                                                        .setLanguage(language)
+                                                        .setRegion(country)
+                                                        .setVariant(variant)
+                                                        .setScript(script)
+                                                        .build();
+                                list.add(locale);
+                            } catch (IllformedLocaleException e) {
+                                Slog.e(TAG, "readFromProto error building locale with: "
+                                        + "language-" + language + ";country-" + country
+                                        + ";variant-" + variant + ";script-" + script);
+                            }
+                        }
+                        break;
+                    case (int) SCREEN_LAYOUT:
+                        screenLayout = protoInputStream.readInt(SCREEN_LAYOUT);
+                        break;
+                    case (int) COLOR_MODE:
+                        colorMode = protoInputStream.readInt(COLOR_MODE);
+                        break;
+                    case (int) TOUCHSCREEN:
+                        touchscreen = protoInputStream.readInt(TOUCHSCREEN);
+                        break;
+                    case (int) KEYBOARD:
+                        keyboard = protoInputStream.readInt(KEYBOARD);
+                        break;
+                    case (int) KEYBOARD_HIDDEN:
+                        keyboardHidden = protoInputStream.readInt(KEYBOARD_HIDDEN);
+                        break;
+                    case (int) HARD_KEYBOARD_HIDDEN:
+                        hardKeyboardHidden = protoInputStream.readInt(HARD_KEYBOARD_HIDDEN);
+                        break;
+                    case (int) NAVIGATION:
+                        navigation = protoInputStream.readInt(NAVIGATION);
+                        break;
+                    case (int) NAVIGATION_HIDDEN:
+                        navigationHidden = protoInputStream.readInt(NAVIGATION_HIDDEN);
+                        break;
+                    case (int) ORIENTATION:
+                        orientation = protoInputStream.readInt(ORIENTATION);
+                        break;
+                    case (int) UI_MODE:
+                        uiMode = protoInputStream.readInt(UI_MODE);
+                        break;
+                    case (int) SCREEN_WIDTH_DP:
+                        screenWidthDp = protoInputStream.readInt(SCREEN_WIDTH_DP);
+                        break;
+                    case (int) SCREEN_HEIGHT_DP:
+                        screenHeightDp = protoInputStream.readInt(SCREEN_HEIGHT_DP);
+                        break;
+                    case (int) SMALLEST_SCREEN_WIDTH_DP:
+                        smallestScreenWidthDp = protoInputStream.readInt(SMALLEST_SCREEN_WIDTH_DP);
+                        break;
+                    case (int) DENSITY_DPI:
+                        densityDpi = protoInputStream.readInt(DENSITY_DPI);
+                        break;
+                    case (int) WINDOW_CONFIGURATION:
+                        windowConfiguration.readFromProto(protoInputStream, WINDOW_CONFIGURATION);
+                        break;
+                }
+            }
+        } finally {
+            // Let caller handle any exceptions
+            if (list.size() > 0) {
+                //Create the LocaleList from the collected Locales
+                setLocales(new LocaleList(list.toArray(new Locale[list.size()])));
+            }
+            protoInputStream.end(token);
         }
-        protoOutputStream.write(SCREEN_LAYOUT, screenLayout);
-        protoOutputStream.write(COLOR_MODE, colorMode);
-        protoOutputStream.write(TOUCHSCREEN, touchscreen);
-        protoOutputStream.write(KEYBOARD, keyboard);
-        protoOutputStream.write(KEYBOARD_HIDDEN, keyboardHidden);
-        protoOutputStream.write(HARD_KEYBOARD_HIDDEN, hardKeyboardHidden);
-        protoOutputStream.write(NAVIGATION, navigation);
-        protoOutputStream.write(NAVIGATION_HIDDEN, navigationHidden);
-        protoOutputStream.write(ORIENTATION, orientation);
-        protoOutputStream.write(UI_MODE, uiMode);
-        protoOutputStream.write(SCREEN_WIDTH_DP, screenWidthDp);
-        protoOutputStream.write(SCREEN_HEIGHT_DP, screenHeightDp);
-        protoOutputStream.write(SMALLEST_SCREEN_WIDTH_DP, smallestScreenWidthDp);
-        protoOutputStream.write(DENSITY_DPI, densityDpi);
-        if (windowConfiguration != null) {
-            windowConfiguration.writeToProto(protoOutputStream, WINDOW_CONFIGURATION);
-        }
-        protoOutputStream.end(token);
     }
 
     /**
@@ -1681,7 +1849,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         seq = source.readInt();
     }
 
-    public static final Parcelable.Creator<Configuration> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<Configuration> CREATOR
             = new Parcelable.Creator<Configuration>() {
         public Configuration createFromParcel(Parcel source) {
             return new Configuration(source);
@@ -2076,23 +2244,23 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 break;
         }
 
-        switch (config.colorMode & Configuration.COLOR_MODE_HDR_MASK) {
-            case Configuration.COLOR_MODE_HDR_YES:
-                parts.add("highdr");
-                break;
-            case Configuration.COLOR_MODE_HDR_NO:
-                parts.add("lowdr");
-                break;
-            default:
-                break;
-        }
-
         switch (config.colorMode & Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_MASK) {
             case Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_YES:
                 parts.add("widecg");
                 break;
             case Configuration.COLOR_MODE_WIDE_COLOR_GAMUT_NO:
                 parts.add("nowidecg");
+                break;
+            default:
+                break;
+        }
+
+        switch (config.colorMode & Configuration.COLOR_MODE_HDR_MASK) {
+            case Configuration.COLOR_MODE_HDR_YES:
+                parts.add("highdr");
+                break;
+            case Configuration.COLOR_MODE_HDR_NO:
+                parts.add("lowdr");
                 break;
             default:
                 break;

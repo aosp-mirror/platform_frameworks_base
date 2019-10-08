@@ -38,6 +38,7 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:padding="0dp"
+        android:fitsSystemWindows="true"
         android:layout_gravity="center">
         <com.android.keyguard.KeyguardSecurityViewFlipper
             android:id="@+id/view_flipper"

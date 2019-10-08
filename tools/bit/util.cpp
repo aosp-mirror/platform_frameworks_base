@@ -254,4 +254,42 @@ read_file(const string& filename)
     return result;
 }
 
+bool
+is_executable(const string& filename)
+{
+    int err;
+    struct stat st;
 
+    err = stat(filename.c_str(), &st);
+    if (err != 0) {
+        return false;
+    }
+
+    return (st.st_mode & S_IXUSR) != 0;
+}
+
+string
+dirname(const string& filename)
+{
+    size_t slash = filename.rfind('/');
+    if (slash == string::npos) {
+        return "";
+    } else if (slash == 0) {
+        return "/";
+    } else {
+        return string(filename, 0, slash);
+    }
+}
+
+string
+leafname(const string& filename)
+{
+    size_t slash = filename.rfind('/');
+    if (slash == string::npos) {
+        return filename;
+    } else if (slash == filename.length() - 1) {
+        return "";
+    } else {
+        return string(filename, slash + 1);
+    }
+}

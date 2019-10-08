@@ -17,8 +17,9 @@
 package android.app.activity;
 
 import android.content.ComponentName;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.Suppress;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.Suppress;
 
 @Suppress  // Flaky.
 public class LaunchTest extends ActivityTestsBase {

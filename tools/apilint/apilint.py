@@ -707,6 +707,7 @@ def _yield_until_matching_class(classes, needle):
 
 class Failure():
     def __init__(self, sig, clazz, detail, error, rule, msg):
+        self.clazz = clazz
         self.sig = sig
         self.error = error
         self.rule = rule
@@ -2126,12 +2127,25 @@ def verify_compat(cur, prev):
     return failures
 
 
+def match_filter(filters, fullname):
+    for f in filters:
+        if fullname == f:
+            return True
+        if fullname.startswith(f + '.'):
+            return True
+    return False
+
+
 def show_deprecations_at_birth(cur, prev):
     """Show API deprecations at birth."""
     global failures
 
     # Remove all existing things so we're left with new
     for prev_clazz in prev.values():
+        if prev_clazz.fullname not in cur:
+            # The class was removed this release; we can safely ignore it.
+            continue
+
         cur_clazz = cur[prev_clazz.fullname]
         if not is_interesting(cur_clazz): continue
 
@@ -2147,6 +2161,8 @@ def show_deprecations_at_birth(cur, prev):
             del cur[prev_clazz.fullname]
 
     for clazz in cur.values():
+        if not is_interesting(clazz): continue
+
         if "deprecated" in clazz.split and not clazz.fullname in prev:
             error(clazz, None, None, "Found API deprecation at birth")
 
@@ -2193,12 +2209,9 @@ def show_stats(cur, prev):
     print " ", "".join([ str(stats[k]).ljust(20) for k in sorted(stats.keys()) ])
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Enforces common Android public API design \
             patterns. It ignores lint messages from a previous API level, if provided.")
-    parser.add_argument("current.txt", type=argparse.FileType('r'), help="current.txt")
-    parser.add_argument("previous.txt", nargs='?', type=argparse.FileType('r'), default=None,
-            help="previous.txt")
     parser.add_argument("--base-current", nargs='?', type=argparse.FileType('r'), default=None,
             help="The base current.txt to use when examining system-current.txt or"
                  " test-current.txt")
@@ -2207,6 +2220,8 @@ if __name__ == "__main__":
                  " test-previous.txt")
     parser.add_argument("--no-color", action='store_const', const=True,
             help="Disable terminal colors")
+    parser.add_argument("--color", action='store_const', const=True,
+            help="Use terminal colors")
     parser.add_argument("--allow-google", action='store_const', const=True,
             help="Allow references to Google")
     parser.add_argument("--show-noticed", action='store_const', const=True,
@@ -2215,10 +2230,21 @@ if __name__ == "__main__":
             help="Show API deprecations at birth")
     parser.add_argument("--show-stats", action='store_const', const=True,
             help="Show API stats")
+    parser.add_argument("--title", action='store', default=None,
+            help="Title to put in for display purposes")
+    parser.add_argument("--filter", action="append",
+            help="If provided, only show lint for the given packages or classes.")
+    parser.add_argument("current.txt", type=argparse.FileType('r'), help="current.txt")
+    parser.add_argument("previous.txt", nargs='?', type=argparse.FileType('r'), default=None,
+            help="previous.txt")
     args = vars(parser.parse_args())
 
     if args['no_color']:
         USE_COLOR = False
+    elif args['color']:
+        USE_COLOR = True
+    else:
+        USE_COLOR = sys.stdout.isatty()
 
     if args['allow_google']:
         ALLOW_GOOGLE = True
@@ -2227,6 +2253,12 @@ if __name__ == "__main__":
     base_current_file = args['base_current']
     previous_file = args['previous.txt']
     base_previous_file = args['base_previous']
+    filters = args['filter']
+    if not filters:
+        filters = []
+    title = args['title']
+    if not title:
+        title = current_file.name
 
     if args['show_deprecations_at_birth']:
         with current_file as f:
@@ -2284,6 +2316,11 @@ if __name__ == "__main__":
             print
         """
 
+    # ignore everything but the given filters, if provided
+    if filters:
+        cur_fail = dict([(key, failure) for key, failure in cur_fail.iteritems()
+                if match_filter(filters, failure.clazz.fullname)])
+
     if args['show_noticed'] and len(cur_noticed) != 0:
         print "%s API changes noticed %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
         for f in sorted(cur_noticed.keys()):
@@ -2291,8 +2328,20 @@ if __name__ == "__main__":
         print
 
     if len(cur_fail) != 0:
-        print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+        print "%s API style issues: %s %s" % ((format(fg=WHITE, bg=BLUE, bold=True),
+                    title, format(reset=True)))
+        for f in filters:
+            print "%s   filter: %s %s" % ((format(fg=WHITE, bg=BLUE, bold=True),
+                        f, format(reset=True)))
+        print
         for f in sorted(cur_fail):
             print cur_fail[f]
             print
+        print "%d errors" % len(cur_fail)
         sys.exit(77)
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(1)

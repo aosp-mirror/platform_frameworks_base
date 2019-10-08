@@ -16,8 +16,12 @@
 
 package com.android.systemui.classifier;
 
+import android.annotation.IntDef;
 import android.hardware.SensorEvent;
 import android.view.MotionEvent;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * An abstract class for classifiers for touch and sensor events.
@@ -32,6 +36,22 @@ public abstract class Classifier {
     public static final int RIGHT_AFFORDANCE = 6;
     public static final int GENERIC = 7;
     public static final int BOUNCER_UNLOCK = 8;
+    public static final int PULSE_EXPAND = 9;
+
+    @IntDef({
+            QUICK_SETTINGS,
+            NOTIFICATION_DISMISS,
+            NOTIFICATION_DRAG_DOWN,
+            NOTIFICATION_DOUBLE_TAP,
+            UNLOCK,
+            LEFT_AFFORDANCE,
+            RIGHT_AFFORDANCE,
+            GENERIC,
+            BOUNCER_UNLOCK,
+            PULSE_EXPAND
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InteractionType {}
 
     /**
      * Contains all the information about touch events from which the classifier can query

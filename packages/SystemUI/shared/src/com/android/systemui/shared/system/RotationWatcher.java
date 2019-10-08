@@ -48,7 +48,7 @@ public abstract class RotationWatcher {
         if (!mIsWatching) {
             try {
                 WindowManagerGlobal.getWindowManagerService().watchRotation(mWatcher,
-                        mContext.getDisplay().getDisplayId());
+                        mContext.getDisplayId());
                 mIsWatching = true;
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to set rotation watcher", e);

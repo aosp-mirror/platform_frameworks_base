@@ -15,14 +15,14 @@
     limitations under the License.
 -->
 
-<com.android.systemui.statusbar.NotificationSnooze
+<com.android.systemui.statusbar.notification.row.NotificationSnooze
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:clickable="true"
     android:background="@color/notification_guts_bg_color"
-    android:theme="@*android:style/Theme.DeviceDefault.Light">
+    android:theme="@style/Theme.SystemUI">
 
     <RelativeLayout
         android:id="@+id/notification_snooze"
@@ -36,7 +36,7 @@
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:paddingStart="@*android:dimen/notification_content_margin_start"
-            android:textColor="#DD000000"
+            android:textColor="?android:attr/textColorPrimary"
             android:paddingEnd="4dp"/>
 
         <ImageView
@@ -72,4 +72,4 @@
         android:paddingBottom="8dp"
         android:orientation="vertical" />
 
-</com.android.systemui.statusbar.NotificationSnooze>
+</com.android.systemui.statusbar.notification.row.NotificationSnooze>

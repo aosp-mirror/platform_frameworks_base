@@ -15,15 +15,14 @@
  */
 package com.android.systemui.qs.external;
 
-import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -34,10 +33,10 @@ import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
-import androidx.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
-import com.android.systemui.qs.external.PackageManagerAdapter;
+
+import androidx.annotation.VisibleForTesting;
 
 import java.util.Objects;
 import java.util.Set;
@@ -160,8 +159,8 @@ public class TileLifecycleManager extends BroadcastReceiver implements
             mBindTryCount++;
             try {
                 mIsBound = mContext.bindServiceAsUser(mIntent, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                        mUser);
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                        | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS, mUser);
             } catch (SecurityException e) {
                 Log.e(TAG, "Failed to bind to service", e);
                 mIsBound = false;

@@ -152,7 +152,7 @@ public class TestHandler extends Handler {
 
         @Override
         public int compareTo(MsgInfo o) {
-            return (int) (sendTime - o.sendTime);
+            return Long.compare(sendTime, o.sendTime);
         }
 
         @Override

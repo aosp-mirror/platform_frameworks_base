@@ -26,17 +26,17 @@
         android:id="@+id/autofill_save"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:paddingTop="16dp"
-        android:elevation="32dp"
+        android:layout_marginTop="@dimen/autofill_save_outer_top_margin"
+        android:paddingTop="@dimen/autofill_save_outer_top_padding"
+        android:elevation="@dimen/autofill_elevation"
         android:background="?android:attr/colorBackground"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="@dimen/autofill_save_inner_padding"
+            android:paddingEnd="@dimen/autofill_save_inner_padding"
             android:orientation="vertical">
 
             <LinearLayout
@@ -47,17 +47,16 @@
                 <ImageView
                     android:id="@+id/autofill_save_icon"
                     android:scaleType="fitStart"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"/>
+                    android:layout_width="@dimen/autofill_save_icon_size"
+                    android:layout_height="@dimen/autofill_save_icon_size"/>
 
                 <TextView
                     android:id="@+id/autofill_save_title"
-                    android:paddingStart="8dp"
+                    android:paddingStart="@dimen/autofill_save_title_start_padding"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/autofill_save_title"
-                    android:textSize="16sp"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:textAppearance="@style/TextAppearance.DeviceDefault.Subhead"
                     android:layout_weight="1">
                 </TextView>
 
@@ -67,7 +66,7 @@
                 android:id="@+id/autofill_save_custom_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/autofill_save_scroll_view_top_margin"
                 android:visibility="gone"/>
 
         </LinearLayout>
@@ -76,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:padding="16dp"
+            android:padding="@dimen/autofill_save_button_bar_padding"
             android:clipToPadding="false"
             android:layout_weight="1"
             android:orientation="horizontal">

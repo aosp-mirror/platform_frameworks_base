@@ -574,6 +574,10 @@ bool Attribute::Equals(const Value* value) const {
 }
 
 bool Attribute::IsCompatibleWith(const Attribute& attr) const {
+  if (Equals(&attr)) {
+    return true;
+  }
+
   // If the high bits are set on any of these attribute type masks, then they are incompatible.
   // We don't check that flags and enums are identical.
   if ((type_mask & ~android::ResTable_map::TYPE_ANY) != 0 ||

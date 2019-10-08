@@ -82,6 +82,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -406,6 +407,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
+                StatsLog.write_non_chained(StatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null,
+                        powerState);
             }
         }
 
@@ -416,6 +419,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
+                StatsLog.write_non_chained(StatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null,
+                        powerState);
             }
         }
 
@@ -1003,11 +1008,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public void startTethering(String[] dhcpRange) {
+        startTetheringWithConfiguration(true, dhcpRange);
+    }
+
+    @Override
+    public void startTetheringWithConfiguration(boolean usingLegacyDnsProxy, String[] dhcpRange) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         // an odd number of addrs will fail
-
         try {
-            mNetdService.tetherStart(dhcpRange);
+            mNetdService.tetherStartWithConfiguration(usingLegacyDnsProxy, dhcpRange);
         } catch (RemoteException | ServiceSpecificException e) {
             throw new IllegalStateException(e);
         }
@@ -1853,6 +1862,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         return ruleName;
     }
 
+    @GuardedBy("mRulesLock")
     private @NonNull SparseIntArray getUidFirewallRulesLR(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:

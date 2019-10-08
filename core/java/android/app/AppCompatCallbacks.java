@@ -18,7 +18,9 @@ package android.app;
 
 import android.compat.Compatibility;
 import android.os.Process;
-import android.util.Log;
+import android.util.StatsLog;
+
+import com.android.internal.compat.ChangeReporter;
 
 import java.util.Arrays;
 
@@ -28,10 +30,8 @@ import java.util.Arrays;
  * @hide
  */
 public final class AppCompatCallbacks extends Compatibility.Callbacks {
-
-    private static final String TAG = "Compatibility";
-
     private final long[] mDisabledChanges;
+    private final ChangeReporter mChangeReporter;
 
     /**
      * Install this class into the current process.
@@ -45,20 +45,27 @@ public final class AppCompatCallbacks extends Compatibility.Callbacks {
     private AppCompatCallbacks(long[] disabledChanges) {
         mDisabledChanges = Arrays.copyOf(disabledChanges, disabledChanges.length);
         Arrays.sort(mDisabledChanges);
+        mChangeReporter = new ChangeReporter(
+                StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__SOURCE__APP_PROCESS);
     }
 
     protected void reportChange(long changeId) {
-        Log.d(TAG, "Compat change reported: " + changeId + "; UID " + Process.myUid());
-        // TODO log via StatsLog
+        reportChange(changeId, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__LOGGED);
     }
 
     protected boolean isChangeEnabled(long changeId) {
         if (Arrays.binarySearch(mDisabledChanges, changeId) < 0) {
             // Not present in the disabled array
-            reportChange(changeId);
+            reportChange(changeId, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__ENABLED);
             return true;
         }
+        reportChange(changeId, StatsLog.APP_COMPATIBILITY_CHANGE_REPORTED__STATE__DISABLED);
         return false;
+    }
+
+    private void reportChange(long changeId, int state) {
+        int uid = Process.myUid();
+        mChangeReporter.reportChange(uid, changeId, state);
     }
 
 }

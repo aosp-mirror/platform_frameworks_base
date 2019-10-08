@@ -501,7 +501,7 @@ public final class VolumeShaper implements AutoCloseable {
             }
         }
 
-        public static final Parcelable.Creator<VolumeShaper.Configuration> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.Configuration> CREATOR
                 = new Parcelable.Creator<VolumeShaper.Configuration>() {
             @Override
             public VolumeShaper.Configuration createFromParcel(Parcel p) {
@@ -1178,7 +1178,7 @@ public final class VolumeShaper implements AutoCloseable {
             dest.writeFloat(mXOffset);
         }
 
-        public static final Parcelable.Creator<VolumeShaper.Operation> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.Operation> CREATOR
                 = new Parcelable.Creator<VolumeShaper.Operation>() {
             @Override
             public VolumeShaper.Operation createFromParcel(Parcel p) {
@@ -1397,7 +1397,7 @@ public final class VolumeShaper implements AutoCloseable {
             dest.writeFloat(mXOffset);
         }
 
-        public static final Parcelable.Creator<VolumeShaper.State> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<VolumeShaper.State> CREATOR
                 = new Parcelable.Creator<VolumeShaper.State>() {
             @Override
             public VolumeShaper.State createFromParcel(Parcel p) {

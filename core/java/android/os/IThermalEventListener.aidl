@@ -27,6 +27,5 @@ oneway interface IThermalEventListener {
      * Called when a thermal throttling start/stop event is received.
      * @param temperature the temperature at which the event was generated.
      */
-    void notifyThrottling(
-        in boolean isThrottling, in Temperature temperature);
+    void notifyThrottling(in Temperature temperature);
 }

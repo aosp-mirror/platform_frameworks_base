@@ -32,7 +32,7 @@ package android.app {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
-    field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
     field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
   }
 
@@ -238,6 +238,11 @@ package android.graphics {
     method @Deprecated public android.graphics.Rasterizer setRasterizer(android.graphics.Rasterizer);
   }
 
+  public class Picture {
+    method @Deprecated public static android.graphics.Picture createFromStream(@NonNull java.io.InputStream);
+    method @Deprecated public void writeToStream(@NonNull java.io.OutputStream);
+  }
+
   @Deprecated public class PixelXorXfermode extends android.graphics.Xfermode {
     ctor public PixelXorXfermode(int);
   }
@@ -289,6 +294,11 @@ package android.location {
     method @Deprecated public void removeBearingAccuracy();
     method @Deprecated public void removeSpeedAccuracy();
     method @Deprecated public void removeVerticalAccuracy();
+  }
+
+  public class LocationManager {
+    method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean addNmeaListener(android.location.GpsStatus.NmeaListener);
+    method @Deprecated public void removeNmeaListener(android.location.GpsStatus.NmeaListener);
   }
 
 }
@@ -347,7 +357,7 @@ package android.os {
   public final class PowerManager {
     method public void goToSleep(long);
     method @Deprecated public void userActivity(long, boolean);
-    method public void wakeUp(long);
+    method @Deprecated public void wakeUp(long);
   }
 
   public class RecoverySystem {
@@ -355,11 +365,11 @@ package android.os {
   }
 
   public static final class StrictMode.ThreadPolicy.Builder {
-    method public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.os.StrictMode.ThreadPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnThreadViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public static final class StrictMode.VmPolicy.Builder {
-    method public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull android.os.StrictMode.OnVmViolationListener, @NonNull java.util.concurrent.Executor);
   }
 
   public final class SystemClock {
@@ -510,6 +520,65 @@ package android.provider {
     field @Deprecated public static final String TIMESTAMP = "timestamp";
   }
 
+  public final class MediaStore {
+    method @Deprecated @NonNull public static android.net.Uri createPending(@NonNull android.content.Context, @NonNull android.provider.MediaStore.PendingParams);
+    method @Deprecated @NonNull public static java.util.Set<java.lang.String> getAllVolumeNames(@NonNull android.content.Context);
+    method @Deprecated @NonNull public static android.provider.MediaStore.PendingSession openPending(@NonNull android.content.Context, @NonNull android.net.Uri);
+    method @Deprecated @NonNull public static android.net.Uri setIncludeTrashed(@NonNull android.net.Uri);
+    method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri);
+    method @Deprecated public static void trash(@NonNull android.content.Context, @NonNull android.net.Uri, long);
+    method @Deprecated public static void untrash(@NonNull android.content.Context, @NonNull android.net.Uri);
+  }
+
+  public static interface MediaStore.Audio.AudioColumns extends android.provider.MediaStore.MediaColumns {
+    field public static final String DURATION = "duration";
+  }
+
+  public static interface MediaStore.DownloadColumns extends android.provider.MediaStore.MediaColumns {
+    field @Deprecated public static final String DESCRIPTION = "description";
+  }
+
+  public static interface MediaStore.Images.ImageColumns extends android.provider.MediaStore.MediaColumns {
+    field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+    field public static final String BUCKET_ID = "bucket_id";
+    field public static final String DATE_TAKEN = "datetaken";
+    field public static final String GROUP_ID = "group_id";
+    field public static final String ORIENTATION = "orientation";
+  }
+
+  public static interface MediaStore.MediaColumns extends android.provider.BaseColumns {
+    field @Deprecated public static final String GROUP_ID = "group_id";
+    field @Deprecated public static final String HASH = "_hash";
+    field @Deprecated public static final String IS_TRASHED = "is_trashed";
+    field @Deprecated public static final String PRIMARY_DIRECTORY = "primary_directory";
+    field @Deprecated public static final String SECONDARY_DIRECTORY = "secondary_directory";
+  }
+
+  @Deprecated public static class MediaStore.PendingParams {
+    ctor public MediaStore.PendingParams(@NonNull android.net.Uri, @NonNull String, @NonNull String);
+    method public void setDownloadUri(@Nullable android.net.Uri);
+    method public void setPrimaryDirectory(@Nullable String);
+    method public void setRefererUri(@Nullable android.net.Uri);
+    method public void setSecondaryDirectory(@Nullable String);
+  }
+
+  @Deprecated public static class MediaStore.PendingSession implements java.lang.AutoCloseable {
+    method public void abandon();
+    method public void close();
+    method public void notifyProgress(@IntRange(from=0, to=100) int);
+    method @NonNull public android.os.ParcelFileDescriptor open() throws java.io.FileNotFoundException;
+    method @NonNull public java.io.OutputStream openOutputStream() throws java.io.FileNotFoundException;
+    method @NonNull public android.net.Uri publish();
+  }
+
+  public static interface MediaStore.Video.VideoColumns extends android.provider.MediaStore.MediaColumns {
+    field public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+    field public static final String BUCKET_ID = "bucket_id";
+    field public static final String DATE_TAKEN = "datetaken";
+    field public static final String DURATION = "duration";
+    field public static final String GROUP_ID = "group_id";
+  }
+
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field @Deprecated public static final String CONTACT_METADATA_SYNC = "contact_metadata_sync";
   }
@@ -628,6 +697,13 @@ package android.widget {
   @android.widget.RemoteViews.RemoteView public class ListView extends android.widget.AbsListView {
     method protected <T extends android.view.View> T findViewTraversal(@IdRes int);
     method protected <T extends android.view.View> T findViewWithTagTraversal(Object);
+  }
+
+  public class PopupWindow {
+    method @Deprecated public boolean isClipToScreenEnabled();
+    method @Deprecated public boolean isLayoutInScreenEnabled();
+    method @Deprecated public void setClipToScreenEnabled(boolean);
+    method @Deprecated public void setLayoutInScreenEnabled(boolean);
   }
 
   @android.widget.RemoteViews.RemoteView public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {

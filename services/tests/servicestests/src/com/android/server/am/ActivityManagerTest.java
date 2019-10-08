@@ -16,38 +16,59 @@
 
 package com.android.server.am;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.assertEquals;
+
 import android.app.ActivityManager;
+import android.app.ActivityManager.RecentTaskInfo;
 import android.app.IActivityManager;
-import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.os.RemoteException;
-import android.test.AndroidTestCase;
+import android.os.UserHandle;
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.filters.FlakyTest;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
-public class ActivityManagerTest extends AndroidTestCase {
+/**
+ * Tests for {@link ActivityManager}.
+ *
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:ActivityManagerTest
+ */
+@FlakyTest(detail = "Promote to presubmit if stable")
+@Presubmit
+public class ActivityManagerTest {
 
-    IActivityManager service;
-    @Override
+    private IActivityManager mService;
+
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-        service = ActivityManager.getService();
+        mService = ActivityManager.getService();
     }
 
+    @Test
     public void testTaskIdsForRunningUsers() throws RemoteException {
-        for(int userId : service.getRunningUserIds()) {
+        int[] runningUserIds = mService.getRunningUserIds();
+        assertThat(runningUserIds).isNotEmpty();
+        for (int userId : runningUserIds) {
             testTaskIdsForUser(userId);
         }
     }
 
     private void testTaskIdsForUser(int userId) throws RemoteException {
-        List<ActivityManager.RecentTaskInfo> recentTasks = service.getRecentTasks(
-                100, 0, userId).getList();
-        if(recentTasks != null) {
-            for(ActivityManager.RecentTaskInfo recentTask : recentTasks) {
-                int taskId = recentTask.persistentId;
+        List<?> recentTasks = mService.getRecentTasks(100, 0, userId).getList();
+        if (recentTasks != null) {
+            for (Object elem : recentTasks) {
+                assertThat(elem).isInstanceOf(RecentTaskInfo.class);
+                RecentTaskInfo recentTask = (RecentTaskInfo) elem;
+                int taskId = recentTask.taskId;
                 assertEquals("The task id " + taskId + " should not belong to user " + userId,
-                        taskId / UserHandle.PER_USER_RANGE, userId);
+                             taskId / UserHandle.PER_USER_RANGE, userId);
             }
         }
     }

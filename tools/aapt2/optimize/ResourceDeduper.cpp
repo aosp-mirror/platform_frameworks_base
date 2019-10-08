@@ -20,6 +20,7 @@
 
 #include "DominatorTree.h"
 #include "ResourceTable.h"
+#include "trace/TraceBuffer.h"
 
 using android::ConfigDescription;
 
@@ -110,6 +111,7 @@ static void DedupeEntry(IAaptContext* context, ResourceEntry* entry) {
 }  // namespace
 
 bool ResourceDeduper::Consume(IAaptContext* context, ResourceTable* table) {
+  TRACE_CALL();
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {

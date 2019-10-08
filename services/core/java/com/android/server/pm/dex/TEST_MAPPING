@@ -9,7 +9,7 @@
       ]
     },
     {
-      "name": "DexLoggerIntegrationTests"
+      "name": "DynamicCodeLoggerIntegrationTests"
     }
   ]
 }

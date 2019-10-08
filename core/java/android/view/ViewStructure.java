@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.LocaleList;
 import android.util.Pair;
 import android.view.View.AutofillImportance;
-import android.view.ViewStructure.HtmlInfo;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 

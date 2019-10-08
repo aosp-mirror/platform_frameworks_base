@@ -21,6 +21,8 @@ import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
+import java.util.Objects;
+
 /**
  * Defines a rectangle shape.
  * <p>
@@ -62,5 +64,25 @@ public class RectShape extends Shape {
         final RectShape shape = (RectShape) super.clone();
         shape.mRect = new RectF(mRect);
         return shape;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        RectShape rectShape = (RectShape) o;
+        return Objects.equals(mRect, rectShape.mRect);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), mRect);
     }
 }

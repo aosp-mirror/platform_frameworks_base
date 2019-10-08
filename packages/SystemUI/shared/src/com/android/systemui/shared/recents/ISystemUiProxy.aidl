@@ -17,7 +17,8 @@
 package com.android.systemui.shared.recents;
 
 import android.graphics.Rect;
-import com.android.systemui.shared.system.GraphicBufferCompat;
+import android.os.Bundle;
+import android.view.MotionEvent;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -26,19 +27,15 @@ interface ISystemUiProxy {
 
     /**
      * Proxies SurfaceControl.screenshotToBuffer().
+     * @Removed
+     * GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
+     *             int maxLayer, boolean useIdentityTransform, int rotation) = 0;
      */
-    GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
-            int maxLayer, boolean useIdentityTransform, int rotation) = 0;
 
     /**
      * Begins screen pinning on the provided {@param taskId}.
      */
     void startScreenPinning(int taskId) = 1;
-
-    /**
-     * Enables/disables launcher/overview interaction features {@link InteractionType}.
-     */
-    void setInteractionState(int flags) = 4;
 
     /**
      * Notifies SystemUI that split screen has been invoked.
@@ -58,6 +55,58 @@ interface ISystemUiProxy {
     /**
      * Control the {@param alpha} of the back button in the navigation bar and {@param animate} if
      * needed from current value
+     * @deprecated
      */
     void setBackButtonAlpha(float alpha, boolean animate) = 8;
+
+    /**
+     * Control the {@param alpha} of the option nav bar button (back-button in 2 button mode
+     * and home bar in no-button mode) and {@param animate} if needed from current value
+     */
+    void setNavBarButtonAlpha(float alpha, boolean animate) = 19;
+
+    /**
+     * Proxies motion events from the homescreen UI to the status bar. Only called when
+     * swipe down is detected on WORKSPACE. The sender guarantees the following order of events on
+     * the tracking pointer.
+     *
+     * Normal gesture: DOWN, MOVE/POINTER_DOWN/POINTER_UP)*, UP or CANCLE
+     */
+    void onStatusBarMotionEvent(in MotionEvent event) = 9;
+
+    /**
+     * Proxies the assistant gesture's progress started from navigation bar.
+     */
+    void onAssistantProgress(float progress) = 12;
+
+    /**
+    * Proxies the assistant gesture fling velocity (in pixels per millisecond) upon completion.
+    * Velocity is 0 for drag gestures.
+    */
+    void onAssistantGestureCompletion(float velocity) = 18;
+
+    /**
+     * Start the assistant.
+     */
+    void startAssistant(in Bundle bundle) = 13;
+
+    /**
+     * Creates a new gesture monitor
+     */
+    Bundle monitorGestureInput(String name, int displayId) = 14;
+
+    /**
+     * Notifies that the accessibility button in the system's navigation area has been clicked
+     */
+    void notifyAccessibilityButtonClicked(int displayId) = 15;
+
+    /**
+     * Notifies that the accessibility button in the system's navigation area has been long clicked
+     */
+    void notifyAccessibilityButtonLongClicked() = 16;
+
+    /**
+     * Ends the system screen pinning.
+     */
+    void stopScreenPinning() = 17;
 }

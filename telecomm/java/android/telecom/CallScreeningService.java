@@ -16,9 +16,10 @@
 
 package android.telecom;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -32,9 +33,6 @@ import android.os.RemoteException;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.ICallScreeningAdapter;
 import com.android.internal.telecom.ICallScreeningService;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * This service can be implemented by the default dialer (see
@@ -75,7 +73,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * public void requestRole() {
  *     RoleManager roleManager = (RoleManager) getSystemService(ROLE_SERVICE);
- *     Intent intent = roleManager.createRequestRoleIntent("android.app.role.CALL_SCREENING_APP");
+ *     Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
  *     startActivityForResult(intent, REQUEST_ID);
  * }
  *
@@ -140,15 +138,21 @@ public abstract class CallScreeningService extends Service {
         private final boolean mShouldSilenceCall;
         private final boolean mShouldSkipCallLog;
         private final boolean mShouldSkipNotification;
+        private final boolean mShouldScreenCallFurther;
 
         private CallResponse(
                 boolean shouldDisallowCall,
                 boolean shouldRejectCall,
                 boolean shouldSilenceCall,
                 boolean shouldSkipCallLog,
-                boolean shouldSkipNotification) {
+                boolean shouldSkipNotification,
+                boolean shouldScreenCallFurther) {
             if (!shouldDisallowCall
                     && (shouldRejectCall || shouldSkipCallLog || shouldSkipNotification)) {
+                throw new IllegalStateException("Invalid response state for allowed call.");
+            }
+
+            if (shouldDisallowCall && shouldScreenCallFurther) {
                 throw new IllegalStateException("Invalid response state for allowed call.");
             }
 
@@ -157,6 +161,7 @@ public abstract class CallScreeningService extends Service {
             mShouldSkipCallLog = shouldSkipCallLog;
             mShouldSkipNotification = shouldSkipNotification;
             mShouldSilenceCall = shouldSilenceCall;
+            mShouldScreenCallFurther = shouldScreenCallFurther;
         }
 
         /*
@@ -195,12 +200,22 @@ public abstract class CallScreeningService extends Service {
             return mShouldSkipNotification;
         }
 
+        /**
+         * @return Whether we should enter the {@link Call#STATE_AUDIO_PROCESSING} state to allow
+         * for further screening of the call.
+         * @hide
+         */
+        public boolean getShouldScreenCallFurther() {
+            return mShouldScreenCallFurther;
+        }
+
         public static class Builder {
             private boolean mShouldDisallowCall;
             private boolean mShouldRejectCall;
             private boolean mShouldSilenceCall;
             private boolean mShouldSkipCallLog;
             private boolean mShouldSkipNotification;
+            private boolean mShouldScreenCallFurther;
 
             /**
              * Sets whether the incoming call should be blocked.
@@ -256,13 +271,32 @@ public abstract class CallScreeningService extends Service {
                 return this;
             }
 
+            /**
+             * Sets whether to request background audio processing so that the in-call service can
+             * screen the call further. If set to {@code true}, {@link #setDisallowCall} should be
+             * called with {@code false}, and all other parameters in this builder will be ignored.
+             *
+             * This request will only be honored if the {@link CallScreeningService} shares the same
+             * uid as the default dialer app. Otherwise, the call will go through as usual.
+             *
+             * @param shouldScreenCallFurther Whether to request further call screening.
+             * @hide
+             */
+            @SystemApi
+            @TestApi
+            public Builder setShouldScreenCallFurther(boolean shouldScreenCallFurther) {
+                mShouldScreenCallFurther = shouldScreenCallFurther;
+                return this;
+            }
+
             public CallResponse build() {
                 return new CallResponse(
                         mShouldDisallowCall,
                         mShouldRejectCall,
                         mShouldSilenceCall,
                         mShouldSkipCallLog,
-                        mShouldSkipNotification);
+                        mShouldSkipNotification,
+                        mShouldScreenCallFurther);
             }
        }
     }

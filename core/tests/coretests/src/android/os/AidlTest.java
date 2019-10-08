@@ -16,11 +16,10 @@
 
 package android.os;
 
-import android.os.IInterface;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.test.suitebuilder.annotation.SmallTest;
+import androidx.test.filters.SmallTest;
+
 import com.google.android.collect.Lists;
+
 import junit.framework.TestCase;
 
 import java.util.List;

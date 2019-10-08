@@ -37,7 +37,6 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
-import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
@@ -154,17 +153,13 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public void changeCapabilitiesConfiguration(CapabilityChangeRequest request,
                 IImsCapabilityCallback c) {
-            synchronized (mLock) {
-                MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
-            }
+            MmTelFeature.this.requestChangeEnabledCapabilities(request, c);
         }
 
         @Override
         public void queryCapabilityConfiguration(int capability, int radioTech,
                 IImsCapabilityCallback c) {
-            synchronized (mLock) {
-                queryCapabilityConfigurationInternal(capability, radioTech, c);
-            }
+            queryCapabilityConfigurationInternal(capability, radioTech, c);
         }
 
         @Override
@@ -247,8 +242,8 @@ public class MmTelFeature extends ImsFeature {
          * @param capabilities The capabilities that are supported for MmTel in the form of a
          *                     bitfield.
          */
-        public MmTelCapabilities(int capabilities) {
-            mCapabilities = capabilities;
+        public MmTelCapabilities(@MmTelCapability int capabilities) {
+            super(capabilities);
         }
 
         @IntDef(flag = true,
@@ -296,6 +291,7 @@ public class MmTelFeature extends ImsFeature {
             return super.isCapable(capabilities);
         }
 
+        @NonNull
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder("MmTel Capabilities - [");
@@ -378,18 +374,6 @@ public class MmTelFeature extends ImsFeature {
             if (mListener != null) {
                 onFeatureReady();
             }
-        }
-    }
-
-    private void queryCapabilityConfigurationInternal(int capability, int radioTech,
-            IImsCapabilityCallback c) {
-        boolean enabled = queryCapabilityConfiguration(capability, radioTech);
-        try {
-            if (c != null) {
-                c.onQueryCapabilityConfiguration(capability, radioTech, enabled);
-            }
-        } catch (RemoteException e) {
-            Log.e(LOG_TAG, "queryCapabilityConfigurationInternal called on dead binder!");
         }
     }
 
@@ -512,6 +496,7 @@ public class MmTelFeature extends ImsFeature {
      * @param capability The capability that we are querying the configuration for.
      * @return true if the capability is enabled, false otherwise.
      */
+    @Override
     public boolean queryCapabilityConfiguration(@MmTelCapabilities.MmTelCapability int capability,
             @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
         // Base implementation - Override to provide functionality

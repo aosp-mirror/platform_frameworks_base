@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Binder;
 import android.os.Build;
@@ -32,6 +33,8 @@ import android.telephony.ims.ImsReasonInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
+
+import dalvik.system.VMRuntime;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -360,6 +363,32 @@ public class PhoneStateListener {
     @SystemApi
     public static final int LISTEN_IMS_CALL_DISCONNECT_CAUSES              = 0x08000000;
 
+    /**
+     * Listen for the emergency number placed from an outgoing call.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
+     *
+     * @see #onOutgoingEmergencyCall
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+    public static final int LISTEN_OUTGOING_EMERGENCY_CALL                  = 0x10000000;
+
+    /**
+     * Listen for the emergency number placed from an outgoing SMS.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
+     *
+     * @see #onOutgoingEmergencySms
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+    public static final int LISTEN_OUTGOING_EMERGENCY_SMS                   = 0x20000000;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -402,8 +431,12 @@ public class PhoneStateListener {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId) {
         this(subId, Looper.myLooper());
+        if (subId != null && VMRuntime.getRuntime().getTargetSdkVersion()
+                >= Build.VERSION_CODES.Q) {
+            throw new IllegalArgumentException("PhoneStateListener with subId: "
+                    + subId + " is not supported, use default constructor");
+        }
     }
-
     /**
      * Create a PhoneStateListener for the Phone using the specified subscription
      * and non-null Looper.
@@ -412,6 +445,11 @@ public class PhoneStateListener {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public PhoneStateListener(Integer subId, Looper looper) {
         this(subId, new HandlerExecutor(new Handler(looper)));
+        if (subId != null && VMRuntime.getRuntime().getTargetSdkVersion()
+                >= Build.VERSION_CODES.Q) {
+            throw new IllegalArgumentException("PhoneStateListener with subId: "
+                    + subId + " is not supported, use default constructor");
+        }
     }
 
     /**
@@ -833,6 +871,31 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when an outgoing call is placed to an emergency number.
+     *
+     * @param placedEmergencyNumber the emergency number {@link EmergencyNumber} the call is placed
+     *                              to.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when an outgoing SMS is placed to an emergency number.
+     *
+     * @param sentEmergencyNumber the emergency number {@link EmergencyNumber} the SMS is sent to.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when OEM hook raw event is received on the registered subscription.
      * Note, the registration subId comes from {@link TelephonyManager} object which registers
      * PhoneStateListener by {@link TelephonyManager#listen(PhoneStateListener, int)}.
@@ -1140,7 +1203,6 @@ public class PhoneStateListener {
                             () -> psl.onPhysicalChannelConfigurationChanged(configs)));
         }
 
-        @Override
         public void onEmergencyNumberListChanged(Map emergencyNumberList) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
@@ -1148,6 +1210,24 @@ public class PhoneStateListener {
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
                             () -> psl.onEmergencyNumberListChanged(emergencyNumberList)));
+        }
+
+        public void onOutgoingEmergencyCall(@NonNull EmergencyNumber placedEmergencyNumber) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onOutgoingEmergencyCall(placedEmergencyNumber)));
+        }
+
+        public void onOutgoingEmergencySms(@NonNull EmergencyNumber sentEmergencyNumber) {
+            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
+            if (psl == null) return;
+
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(
+                            () -> psl.onOutgoingEmergencySms(sentEmergencyNumber)));
         }
 
         public void onPhoneCapabilityChanged(PhoneCapability capability) {

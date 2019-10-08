@@ -19,6 +19,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="unknown_user_label" msgid="4323896111737677955">"Неизвестный пользователь"</string>
-    <string name="start_driving" msgid="864023351402918991">"Запустить навигацию"</string>
+    <string name="car_guest" msgid="3738772168718508650">"Гость"</string>
+    <string name="start_guest_session" msgid="7055742120180595689">"Гость"</string>
+    <string name="car_add_user" msgid="5245196248349230898">"Добавить пользователя"</string>
+    <string name="car_new_user" msgid="8142927244990323906">"Новый пользователь"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"Когда вы добавите пользователя, ему потребуется настроить профиль."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"Любой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
 </resources>

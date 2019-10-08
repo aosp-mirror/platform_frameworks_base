@@ -29,8 +29,9 @@ import android.net.WifiKey;
 import android.net.wifi.WifiNetworkScoreCache.CacheListener;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.google.common.collect.ImmutableList;
 
@@ -43,7 +44,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
 
 /** Unit tests for {@link WifiNetworkScoreCache}. */
 @RunWith(AndroidJUnit4.class)

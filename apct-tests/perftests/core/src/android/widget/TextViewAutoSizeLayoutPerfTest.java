@@ -16,33 +16,27 @@
 
 package android.widget;
 
+import static org.junit.Assert.assertTrue;
+
 import android.app.Activity;
 import android.os.Looper;
-import android.os.Bundle;
-import android.perftests.utils.PerfStatusReporter;
-import android.util.Log;
-import android.view.View;
-
 import android.perftests.utils.BenchmarkState;
+import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.StubActivity;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.InstrumentationRegistry;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.rule.ActivityTestRule;
 
 import com.android.perftests.core.R;
 
-import java.util.Locale;
-import java.util.Collection;
-import java.util.Arrays;
-
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertTrue;
+import java.util.Arrays;
+import java.util.Collection;
 
 @LargeTest
 @RunWith(Parameterized.class)

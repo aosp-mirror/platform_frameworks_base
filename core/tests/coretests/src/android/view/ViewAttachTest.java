@@ -16,16 +16,13 @@
 
 package android.view;
 
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.PixelFormat;
 import android.os.SystemClock;
-import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.LargeTest;
 
 import com.android.frameworks.coretests.R;
 

@@ -24,8 +24,6 @@
 #include <vector>
 
 #include "pipeline/skia/VectorDrawableAtlas.h"
-#include "thread/TaskManager.h"
-#include "thread/TaskProcessor.h"
 
 namespace android {
 
@@ -44,7 +42,7 @@ class CacheManager {
 public:
     enum class TrimMemoryMode { Complete, UiHidden };
 
-    void configureContext(GrContextOptions* context);
+    void configureContext(GrContextOptions* context, const void* identity, ssize_t size);
     void trimMemory(TrimMemoryMode mode);
     void trimStaleResources();
     void dumpMemoryUsage(String8& log, const RenderState* renderState = nullptr);
@@ -54,8 +52,6 @@ public:
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
 
-    TaskManager* getTaskManager() { return &mTaskManager; }
-
 private:
     friend class RenderThread;
 
@@ -63,14 +59,17 @@ private:
 
     void reset(sk_sp<GrContext> grContext);
     void destroy();
-    void updateContextCacheSizes();
 
     const size_t mMaxSurfaceArea;
     sk_sp<GrContext> mGrContext;
 
     int mMaxResources = 0;
-    size_t mMaxResourceBytes = 0;
-    size_t mBackgroundResourceBytes = 0;
+    const size_t mMaxResourceBytes;
+    const size_t mBackgroundResourceBytes;
+
+    const size_t mMaxGpuFontAtlasBytes;
+    const size_t mMaxCpuFontCacheBytes;
+    const size_t mBackgroundCpuFontCacheBytes;
 
     struct PipelineProps {
         const void* pipelineKey = nullptr;
@@ -78,10 +77,6 @@ private:
     };
 
     sp<skiapipeline::VectorDrawableAtlas> mVectorDrawableAtlas;
-
-    class SkiaTaskProcessor;
-    sp<SkiaTaskProcessor> mTaskProcessor;
-    TaskManager mTaskManager;
 };
 
 } /* namespace renderthread */

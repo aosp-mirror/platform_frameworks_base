@@ -16,6 +16,7 @@
 
 package android.app.backup;
 
+import android.annotation.Nullable;
 import android.app.IBackupAgent;
 import android.app.QueuedWork;
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
@@ -29,6 +30,7 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -43,7 +45,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -127,6 +128,11 @@ public abstract class BackupAgent extends ContextWrapper {
     private static final boolean DEBUG = false;
 
     /** @hide */
+    public static final int RESULT_SUCCESS = 0;
+    /** @hide */
+    public static final int RESULT_ERROR = -1;
+
+    /** @hide */
     public static final int TYPE_EOF = 0;
 
     /**
@@ -176,6 +182,8 @@ public abstract class BackupAgent extends ContextWrapper {
 
     Handler mHandler = null;
 
+    @Nullable private UserHandle mUser;
+
     Handler getHandler() {
         if (mHandler == null) {
             mHandler = new Handler(Looper.getMainLooper());
@@ -215,6 +223,20 @@ public abstract class BackupAgent extends ContextWrapper {
      * <p>
      */
     public void onCreate() {
+    }
+
+    /**
+     * Provided as a convenience for agent implementations that need an opportunity
+     * to do one-time initialization before the actual backup or restore operation
+     * is begun with information about the calling user.
+     * <p>
+     *
+     * @hide
+     */
+    public void onCreate(UserHandle user) {
+        onCreate();
+
+        mUser = user;
     }
 
     /**
@@ -334,7 +356,6 @@ public abstract class BackupAgent extends ContextWrapper {
      * @throws IOException
      *
      * @see Context#getNoBackupFilesDir()
-     * @see ApplicationInfo#fullBackupContent
      * @see #fullBackupFile(File, FullBackupDataOutput)
      * @see #onRestoreFile(ParcelFileDescriptor, long, File, int, long, long)
      */
@@ -510,6 +531,10 @@ public abstract class BackupAgent extends ContextWrapper {
      *    this application to store as a backup.
      */
     public void onQuotaExceeded(long backupDataBytes, long quotaBytes) {
+    }
+
+    private int getBackupUserId() {
+        return mUser == null ? super.getUserId() : mUser.getIdentifier();
     }
 
     /**
@@ -834,7 +859,7 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         if (excludes != null &&
-                isFileSpecifiedInPathList(destination, excludes)) {
+                BackupUtils.isFileSpecifiedInPathList(destination, excludes)) {
             if (Log.isLoggable(FullBackup.TAG_XML_PARSER, Log.VERBOSE)) {
                 Log.v(FullBackup.TAG_XML_PARSER,
                         "onRestoreFile: \"" + destinationCanonicalPath + "\": listed in"
@@ -848,7 +873,8 @@ public abstract class BackupAgent extends ContextWrapper {
             // it's a small list), we'll go through and look for it.
             boolean explicitlyIncluded = false;
             for (Set<PathWithRequiredFlags> domainIncludes : includes.values()) {
-                explicitlyIncluded |= isFileSpecifiedInPathList(destination, domainIncludes);
+                explicitlyIncluded |=
+                        BackupUtils.isFileSpecifiedInPathList(destination, domainIncludes);
                 if (explicitlyIncluded) {
                     break;
                 }
@@ -864,33 +890,6 @@ public abstract class BackupAgent extends ContextWrapper {
             }
         }
         return true;
-    }
-
-    /**
-     * @return True if the provided file is either directly in the provided list, or the provided
-     * file is within a directory in the list.
-     */
-    private boolean isFileSpecifiedInPathList(File file,
-            Collection<PathWithRequiredFlags> canonicalPathList) throws IOException {
-        for (PathWithRequiredFlags canonical : canonicalPathList) {
-            String canonicalPath = canonical.getPath();
-            File fileFromList = new File(canonicalPath);
-            if (fileFromList.isDirectory()) {
-                if (file.isDirectory()) {
-                    // If they are both directories check exact equals.
-                    return file.equals(fileFromList);
-                } else {
-                    // O/w we have to check if the file is within the directory from the list.
-                    return file.getCanonicalPath().startsWith(canonicalPath);
-                }
-            } else {
-                if (file.equals(fileFromList)) {
-                    // Need to check the explicit "equals" so we don't end up with substrings.
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     /**
@@ -969,11 +968,13 @@ public abstract class BackupAgent extends ContextWrapper {
         private static final String TAG = "BackupServiceBinder";
 
         @Override
-        public void doBackup(ParcelFileDescriptor oldState,
+        public void doBackup(
+                ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState,
-                long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags)
-                throws RemoteException {
+                long quotaBytes,
+                IBackupCallback callbackBinder,
+                int transportFlags) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
@@ -981,8 +982,10 @@ public abstract class BackupAgent extends ContextWrapper {
             BackupDataOutput output = new BackupDataOutput(
                     data.getFileDescriptor(), quotaBytes, transportFlags);
 
+            long result = RESULT_ERROR;
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
+                result = RESULT_SUCCESS;
             } catch (IOException ex) {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);
@@ -997,9 +1000,9 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.operationComplete(result);
                 } catch (RemoteException e) {
-                    // we'll time out anyway, so we're safe
+                    // We will time out anyway.
                 }
 
                 // Don't close the fd out from under the system service if this was local
@@ -1039,7 +1042,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1088,7 +1091,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1118,7 +1121,8 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, measureOutput.getSize());
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token,
+                            measureOutput.getSize());
                 } catch (RemoteException e) {
                     // timeout, so we're safe
                 }
@@ -1143,7 +1147,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1168,7 +1172,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.opCompleteForUser(getBackupUserId(), token, 0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }
@@ -1181,10 +1185,16 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         @Override
-        public void doQuotaExceeded(long backupDataBytes, long quotaBytes) {
+        public void doQuotaExceeded(
+                long backupDataBytes,
+                long quotaBytes,
+                IBackupCallback callbackBinder) {
             long ident = Binder.clearCallingIdentity();
+
+            long result = RESULT_ERROR;
             try {
                 BackupAgent.this.onQuotaExceeded(backupDataBytes, quotaBytes);
+                result = RESULT_SUCCESS;
             } catch (Exception e) {
                 Log.d(TAG, "onQuotaExceeded(" + BackupAgent.this.getClass().getName() + ") threw",
                         e);
@@ -1192,6 +1202,12 @@ public abstract class BackupAgent extends ContextWrapper {
             } finally {
                 waitForSharedPrefs();
                 Binder.restoreCallingIdentity(ident);
+
+                try {
+                    callbackBinder.operationComplete(result);
+                } catch (RemoteException e) {
+                    // We will time out anyway.
+                }
             }
         }
     }

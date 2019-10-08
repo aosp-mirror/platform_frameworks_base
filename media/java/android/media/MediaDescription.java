@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.media;
 
 import android.annotation.Nullable;
@@ -7,6 +23,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * A simple set of metadata for a media item suitable for display. This can be
@@ -122,9 +139,9 @@ public class MediaDescription implements Parcelable {
 
     private MediaDescription(Parcel in) {
         mMediaId = in.readString();
-        mTitle = in.readCharSequence();
-        mSubtitle = in.readCharSequence();
-        mDescription = in.readCharSequence();
+        mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mIcon = in.readParcelable(null);
         mIconUri = in.readParcelable(null);
         mExtras = in.readBundle();
@@ -210,9 +227,9 @@ public class MediaDescription implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mMediaId);
-        dest.writeCharSequence(mTitle);
-        dest.writeCharSequence(mSubtitle);
-        dest.writeCharSequence(mDescription);
+        TextUtils.writeToParcel(mTitle, dest, 0);
+        TextUtils.writeToParcel(mSubtitle, dest, 0);
+        TextUtils.writeToParcel(mDescription, dest, 0);
         dest.writeParcelable(mIcon, flags);
         dest.writeParcelable(mIconUri, flags);
         dest.writeBundle(mExtras);
@@ -225,7 +242,7 @@ public class MediaDescription implements Parcelable {
             return false;
         }
 
-        if (!(o instanceof MediaDescription)){
+        if (!(o instanceof MediaDescription)) {
             return false;
         }
 
@@ -251,7 +268,7 @@ public class MediaDescription implements Parcelable {
         return mTitle + ", " + mSubtitle + ", " + mDescription;
     }
 
-    public static final Parcelable.Creator<MediaDescription> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<MediaDescription> CREATOR =
             new Parcelable.Creator<MediaDescription>() {
                 @Override
                 public MediaDescription createFromParcel(Parcel in) {
@@ -374,6 +391,11 @@ public class MediaDescription implements Parcelable {
             return this;
         }
 
+        /**
+         * Build {@link MediaDescription}.
+         *
+         * @return a new media description.
+         */
         public MediaDescription build() {
             return new MediaDescription(mMediaId, mTitle, mSubtitle, mDescription, mIcon, mIconUri,
                     mExtras, mMediaUri);

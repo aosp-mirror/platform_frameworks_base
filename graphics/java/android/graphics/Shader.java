@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -31,15 +33,41 @@ import libcore.util.NativeAllocationRegistry;
 public class Shader {
 
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Shader.class.getClassLoader(), nativeGetFinalizer(), 50);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Shader.class.getClassLoader(), nativeGetFinalizer());
     }
 
     /**
      * @deprecated Use subclass constructors directly instead.
      */
     @Deprecated
-    public Shader() {}
+    public Shader() {
+        mColorSpace = null;
+    }
+
+    /**
+     * @hide
+     */
+    public Shader(ColorSpace colorSpace) {
+        mColorSpace = colorSpace;
+        if (colorSpace == null) {
+            throw new IllegalArgumentException(
+                    "Use Shader() to create a Shader with no ColorSpace");
+        }
+
+        // This just ensures that if the ColorSpace is invalid, the Exception will be thrown now.
+        mColorSpace.getNativeInstance();
+    }
+
+    private final ColorSpace mColorSpace;
+
+    /**
+     * @hide
+     */
+    protected ColorSpace colorSpace() {
+        return mColorSpace;
+    }
 
     /**
      * Current native shader instance. Created and updated lazily when {@link #getNativeInstance()}
@@ -135,21 +163,6 @@ public class Shader {
     protected void verifyNativeInstance() {
     }
 
-    /**
-     * @hide
-     */
-    protected Shader copy() {
-        final Shader copy = new Shader();
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
-    /**
-     * @hide
-     */
-    protected void copyLocalMatrix(Shader dest) {
-        dest.mLocalMatrix.set(mLocalMatrix);
-    }
 
     /**
      * @hide
@@ -167,6 +180,43 @@ public class Shader {
             }
         }
         return mNativeInstance;
+    }
+
+    /**
+     * @hide
+     */
+    public static @ColorLong long[] convertColors(@NonNull @ColorInt int[] colors) {
+        if (colors.length < 2) {
+            throw new IllegalArgumentException("needs >= 2 number of colors");
+        }
+
+        long[] colorLongs = new long[colors.length];
+        for (int i = 0; i < colors.length; ++i) {
+            colorLongs[i] = Color.pack(colors[i]);
+        }
+
+        return colorLongs;
+    }
+
+    /**
+     * Detect the ColorSpace that the {@code colors} share.
+     *
+     * @throws IllegalArgumentException if the colors do not all share the same,
+     *      valid ColorSpace, or if there are less than 2 colors.
+     *
+     * @hide
+     */
+    public static ColorSpace detectColorSpace(@NonNull @ColorLong long[] colors) {
+        if (colors.length < 2) {
+            throw new IllegalArgumentException("needs >= 2 number of colors");
+        }
+        final ColorSpace colorSpace = Color.colorSpace(colors[0]);
+        for (int i = 1; i < colors.length; ++i) {
+            if (Color.colorSpace(colors[i]) != colorSpace) {
+                throw new IllegalArgumentException("All colors must be in the same ColorSpace!");
+            }
+        }
+        return colorSpace;
     }
 
     private static native long nativeGetFinalizer();

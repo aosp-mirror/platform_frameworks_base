@@ -163,7 +163,7 @@ public abstract class RemoteViewsService extends Service {
             try {
                 rv = mFactory.getViewAt(position);
                 if (rv != null) {
-                    rv.setIsWidgetCollectionChild(true);
+                    rv.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
                 }
             } catch (Exception ex) {
                 Thread t = Thread.currentThread();

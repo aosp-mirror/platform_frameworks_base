@@ -35,10 +35,6 @@
             android:tint="@color/background_protected"
             android:src="@drawable/ic_lockscreen_sim"/>
 
-    <include layout="@layout/keyguard_message_area"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-            />
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -70,24 +66,6 @@
                     androidprv:scaledTextSize="@integer/scaled_password_text_size"
                     android:textColor="?attr/wallpaperTextColor"
                     android:contentDescription="@string/keyguard_accessibility_sim_pin_area"
-                    />
-            <ImageButton
-                    android:id="@+id/delete_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:src="@drawable/ic_backspace_black_24dp"
-                    android:clickable="true"
-                    android:paddingTop="8dip"
-                    android:paddingBottom="8dip"
-                    android:paddingRight="0dp"
-                    android:paddingLeft="0dp"
-                    android:background="@drawable/ripple_drawable"
-                    android:contentDescription="@string/keyboardview_keycode_delete"
-                    android:layout_alignEnd="@+id/pinEntry"
-                    android:layout_alignParentRight="true"
-                    android:tint="@color/pin_delete_color"
-                    android:tintMode="src_in"
                     />
             <View
                     android:id="@+id/divider"
@@ -196,10 +174,14 @@
                 android:layout_weight="1"
                 android:orientation="horizontal"
                 >
-            <Space
+            <com.android.keyguard.AlphaOptimizedImageButton
+                    android:id="@+id/delete_button"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="@drawable/ripple_drawable_pin"
+                    android:contentDescription="@string/keyboardview_keycode_delete"
+                    style="@style/Keyguard.ImageButton.NumPadDelete"
                     />
             <com.android.keyguard.NumPadKey
                     android:id="@+id/key0"
@@ -209,15 +191,13 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="0"
                     />
-            <ImageButton
+            <com.android.keyguard.AlphaOptimizedImageButton
                     android:id="@+id/key_enter"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:paddingBottom="11sp"
-                    android:src="@drawable/ic_done_black_24dp"
                     style="@style/Keyguard.ImageButton.NumPadEnter"
-                    android:background="@drawable/ripple_drawable"
+                    android:background="@drawable/ripple_drawable_pin"
                     android:contentDescription="@string/keyboardview_keycode_enter"
                     />
         </LinearLayout>

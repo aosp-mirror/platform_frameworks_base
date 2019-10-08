@@ -21,7 +21,7 @@ import "frameworks/base/core/proto/android/app/pendingintent.proto";
 import "frameworks/base/core/proto/android/internal/locallog.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server;
 
@@ -228,6 +228,8 @@ message ConstantsProto {
 message FilterStatsProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Tag given to AlarmManager by the app or component scheduling the alarm.
+    // As some of them are app-supplied, some tags may contain PII.
     optional string tag = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
     // The last time this filter when in flight, in terms of elapsed realtime.
     optional int64 last_flight_time_realtime = 2;
@@ -248,6 +250,8 @@ message IdleDispatchEntryProto {
 
     optional int32 uid = 1;
     optional string pkg = 2;
+    // Tag given to AlarmManager by the app or component scheduling the alarm.
+    // As some of them are app-supplied, some tags may contain PII.
     optional string tag = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string op = 4;
     // Time when this entry was created, in terms of elapsed realtime.
@@ -263,6 +267,8 @@ message InFlightProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 uid = 1;
+    // Tag given to AlarmManager by the app or component scheduling the alarm.
+    // As some of them are app-supplied, some tags may contain PII.
     optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional int64 when_elapsed_ms = 3;
     optional .android.app.AlarmManagerProto.AlarmType alarm_type = 4;
@@ -277,6 +283,8 @@ message WakeupEventProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 uid = 1;
+    // The operation that caused the wakeup. May be an Intent action or a
+    // listener tag.
     optional string action = 2;
     optional int64 when = 3;
 }

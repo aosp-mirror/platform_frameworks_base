@@ -14,36 +14,63 @@
 
 package com.android.systemui.fragments;
 
-import android.content.Context;
+import android.app.Fragment;
 import android.content.res.Configuration;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dumpable;
-import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIApplication;
+import com.android.systemui.SystemUIFactory;
+import com.android.systemui.qs.QSFragment;
+import com.android.systemui.statusbar.phone.NavigationBarFragment;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.Subcomponent;
 
 /**
  * Holds a map of root views to FragmentHostStates and generates them as needed.
  * Also dispatches the configuration changes to all current FragmentHostStates.
  */
+@Singleton
 public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
 
     private static final String TAG = "FragmentService";
 
     private final ArrayMap<View, FragmentHostState> mHosts = new ArrayMap<>();
+    private final ArrayMap<String, Method> mInjectionMap = new ArrayMap<>();
     private final Handler mHandler = new Handler();
-    private final Context mContext;
+    private final FragmentCreator mFragmentCreator;
 
-    public FragmentService(Context context) {
-        mContext = context;
+    @Inject
+    public FragmentService(SystemUIFactory.SystemUIRootComponent rootComponent) {
+        mFragmentCreator = rootComponent.createFragmentCreator();
+        initInjectionMap();
+    }
+
+    ArrayMap<String, Method> getInjectionMap() {
+        return mInjectionMap;
+    }
+
+    FragmentCreator getFragmentCreator() {
+        return mFragmentCreator;
+    }
+
+    private void initInjectionMap() {
+        for (Method method : FragmentCreator.class.getDeclaredMethods()) {
+            if (Fragment.class.isAssignableFrom(method.getReturnType())
+                    && (method.getModifiers() & Modifier.PUBLIC) != 0) {
+                mInjectionMap.put(method.getReturnType().getName(), method);
+            }
+        }
     }
 
     public FragmentHostManager getFragmentHostManager(View view) {
@@ -54,6 +81,13 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
             mHosts.put(root, state);
         }
         return state.getFragmentHostManager();
+    }
+
+    public void removeAndDestroy(View view) {
+        final FragmentHostState state = mHosts.remove(view.getRootView());
+        if (state != null) {
+            state.mFragmentHostManager.destroy();
+        }
     }
 
     public void destroyAll() {
@@ -77,6 +111,21 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
         }
     }
 
+    /**
+     * The subcomponent of dagger that holds all fragments that need injection.
+     */
+    @Subcomponent
+    public interface FragmentCreator {
+        /**
+         * Inject a NavigationBarFragment.
+         */
+        NavigationBarFragment createNavigationBarFragment();
+        /**
+         * Inject a QSFragment.
+         */
+        QSFragment createQSFragment();
+    }
+
     private class FragmentHostState {
         private final View mView;
 
@@ -84,7 +133,7 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
 
         public FragmentHostState(View view) {
             mView = view;
-            mFragmentHostManager = new FragmentHostManager(mContext, FragmentService.this, mView);
+            mFragmentHostManager = new FragmentHostManager(FragmentService.this, mView);
         }
 
         public void sendConfigurationChange(Configuration newConfig) {

@@ -14,6 +14,6 @@
      limitations under the License.
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
-    <solid android:color="#10000000"/>
+    <solid android:color="@color/chooser_gradient_background"/>
     <size android:width="36dp" android:height="36dp"/>
 </shape>

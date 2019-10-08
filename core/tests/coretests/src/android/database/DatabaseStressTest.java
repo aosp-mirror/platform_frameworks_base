@@ -17,11 +17,11 @@
 package android.database;
 
 import android.content.Context;
-import android.database.sqlite.*;
+import android.database.sqlite.SQLiteDatabase;
+import android.test.AndroidTestCase;
 import android.util.Log;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.Suppress;
+import androidx.test.filters.Suppress;
 
 import java.io.File;
 

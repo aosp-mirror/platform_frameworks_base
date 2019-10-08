@@ -16,65 +16,33 @@
 
 package com.android.systemui.statusbar;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import androidx.core.graphics.ColorUtils;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.Interpolator;
+
+import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.internal.colorextraction.drawable.GradientDrawable;
-import com.android.settingslib.Utils;
-import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.internal.colorextraction.drawable.ScrimDrawable;
 
 /**
  * A view which can draw a scrim
  */
-public class ScrimView extends View implements ConfigurationController.ConfigurationListener {
-    private static final String TAG = "ScrimView";
+public class ScrimView extends View {
     private final ColorExtractor.GradientColors mColors;
-    private int mDensity;
-    private boolean mDrawAsSrc;
     private float mViewAlpha = 1.0f;
-    private ValueAnimator mAlphaAnimator;
-    private Rect mExcludedRect = new Rect();
-    private boolean mHasExcludedArea;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
     private int mTintColor;
-    private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener = animation -> {
-        if (mDrawable == null) {
-            Log.w(TAG, "Trying to animate null drawable");
-            return;
-        }
-        mDrawable.setAlpha((int) (255 * (float) animation.getAnimatedValue()));
-    };
-    private AnimatorListenerAdapter mClearAnimatorListener = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mAlphaAnimator = null;
-        }
-    };
     private Runnable mChangeRunnable;
-    private int mCornerRadius;
 
     public ScrimView(Context context) {
         this(context, null);
@@ -91,104 +59,16 @@ public class ScrimView extends View implements ConfigurationController.Configura
     public ScrimView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mDrawable = new GradientDrawable(context);
+        mDrawable = new ScrimDrawable();
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();
-        updateScreenSize();
         updateColorWithTint(false);
-        initView();
-        final Configuration currentConfig = mContext.getResources().getConfiguration();
-        mDensity = currentConfig.densityDpi;
-    }
-
-    private void initView() {
-        mCornerRadius = getResources().getDimensionPixelSize(
-                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        int densityDpi = newConfig.densityDpi;
-        if (mDensity != densityDpi) {
-            mDensity = densityDpi;
-            initView();
-        }
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        // We need to know about configuration changes to update the gradient size
-        // since it's independent from view bounds.
-        ConfigurationController config = Dependency.get(ConfigurationController.class);
-        config.addCallback(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        ConfigurationController config = Dependency.get(ConfigurationController.class);
-        config.removeCallback(this);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mDrawAsSrc || mDrawable.getAlpha() > 0) {
-            if (!mHasExcludedArea) {
-                mDrawable.draw(canvas);
-            } else {
-                if (mExcludedRect.top > 0) {
-                    canvas.save();
-                    canvas.clipRect(0, 0, getWidth(), mExcludedRect.top);
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                if (mExcludedRect.left > 0) {
-                    canvas.save();
-                    canvas.clipRect(0, mExcludedRect.top, mExcludedRect.left,
-                            mExcludedRect.bottom);
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                if (mExcludedRect.right < getWidth()) {
-                    canvas.save();
-                    canvas.clipRect(mExcludedRect.right, mExcludedRect.top, getWidth(),
-                            mExcludedRect.bottom);
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                if (mExcludedRect.bottom < getHeight()) {
-                    canvas.save();
-                    canvas.clipRect(0, mExcludedRect.bottom, getWidth(), getHeight());
-                    mDrawable.draw(canvas);
-                    canvas.restore();
-                }
-                // We also need to draw the rounded corners of the background
-                canvas.save();
-                canvas.clipRect(mExcludedRect.left, mExcludedRect.top,
-                        mExcludedRect.left + mCornerRadius, mExcludedRect.top + mCornerRadius);
-                mDrawable.draw(canvas);
-                canvas.restore();
-                canvas.save();
-                canvas.clipRect(mExcludedRect.right - mCornerRadius, mExcludedRect.top,
-                        mExcludedRect.right, mExcludedRect.top + mCornerRadius);
-                mDrawable.draw(canvas);
-                canvas.restore();
-                canvas.save();
-                canvas.clipRect(mExcludedRect.left, mExcludedRect.bottom - mCornerRadius,
-                        mExcludedRect.left + mCornerRadius, mExcludedRect.bottom);
-                mDrawable.draw(canvas);
-                canvas.restore();
-                canvas.save();
-                canvas.clipRect(mExcludedRect.right - mCornerRadius,
-                        mExcludedRect.bottom - mCornerRadius,
-                        mExcludedRect.right, mExcludedRect.bottom);
-                mDrawable.draw(canvas);
-                canvas.restore();
-            }
+        if (mDrawable.getAlpha() > 0) {
+            mDrawable.draw(canvas);
         }
     }
 
@@ -197,8 +77,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         mDrawable.setCallback(this);
         mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
         mDrawable.setAlpha((int) (255 * mViewAlpha));
-        setDrawAsSrc(mDrawAsSrc);
-        updateScreenSize();
         invalidate();
     }
 
@@ -208,12 +86,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         if (drawable == mDrawable) {
             invalidate();
         }
-    }
-
-    public void setDrawAsSrc(boolean asSrc) {
-        mDrawAsSrc = asSrc;
-        PorterDuff.Mode mode = asSrc ? PorterDuff.Mode.SRC : PorterDuff.Mode.SRC_OVER;
-        mDrawable.setXfermode(new PorterDuffXfermode(mode));
     }
 
     @Override
@@ -262,22 +134,26 @@ public class ScrimView extends View implements ConfigurationController.Configura
     }
 
     private void updateColorWithTint(boolean animated) {
-        if (mDrawable instanceof GradientDrawable) {
+        if (mDrawable instanceof ScrimDrawable) {
             // Optimization to blend colors and avoid a color filter
-            GradientDrawable drawable = (GradientDrawable) mDrawable;
+            ScrimDrawable drawable = (ScrimDrawable) mDrawable;
             float tintAmount = Color.alpha(mTintColor) / 255f;
             int mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor,
                     tintAmount);
-            int secondaryTinted = ColorUtils.blendARGB(mColors.getSecondaryColor(), mTintColor,
-                    tintAmount);
-            drawable.setColors(mainTinted, secondaryTinted, animated);
+            drawable.setColor(mainTinted, animated);
         } else {
-            if (mColorFilter == null) {
-                mColorFilter = new PorterDuffColorFilter(mTintColor, PorterDuff.Mode.SRC_OVER);
+            boolean hasAlpha = Color.alpha(mTintColor) != 0;
+            if (hasAlpha) {
+                PorterDuff.Mode targetMode = mColorFilter == null ? Mode.SRC_OVER :
+                    mColorFilter.getMode();
+                if (mColorFilter == null || mColorFilter.getColor() != mTintColor) {
+                    mColorFilter = new PorterDuffColorFilter(mTintColor, targetMode);
+                }
             } else {
-                mColorFilter.setColor(mTintColor);
+                mColorFilter = null;
             }
-            mDrawable.setColorFilter(Color.alpha(mTintColor) == 0 ? null : mColorFilter);
+
+            mDrawable.setColorFilter(mColorFilter);
             mDrawable.invalidateSelf();
         }
 
@@ -306,10 +182,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
         if (alpha != mViewAlpha) {
             mViewAlpha = alpha;
 
-            if (mAlphaAnimator != null) {
-                mAlphaAnimator.cancel();
-            }
-
             mDrawable.setAlpha((int) (255 * alpha));
             if (mChangeRunnable != null) {
                 mChangeRunnable.run();
@@ -321,44 +193,12 @@ public class ScrimView extends View implements ConfigurationController.Configura
         return mViewAlpha;
     }
 
-    public void setExcludedArea(Rect area) {
-        if (area == null) {
-            mHasExcludedArea = false;
-            invalidate();
-            return;
-        }
-
-        int left = Math.max(area.left, 0);
-        int top = Math.max(area.top, 0);
-        int right = Math.min(area.right, getWidth());
-        int bottom = Math.min(area.bottom, getHeight());
-        mExcludedRect.set(left, top, right, bottom);
-        mHasExcludedArea = left < right && top < bottom;
-        invalidate();
-    }
-
     public void setChangeRunnable(Runnable changeRunnable) {
         mChangeRunnable = changeRunnable;
     }
 
     @Override
-    public void onConfigChanged(Configuration newConfig) {
-        updateScreenSize();
-    }
-
-    private void updateScreenSize() {
-        if (mDrawable instanceof GradientDrawable) {
-            WindowManager wm = mContext.getSystemService(WindowManager.class);
-            if (wm == null) {
-                Log.w(TAG, "Can't resize gradient drawable to fit the screen");
-                return;
-            }
-            Display display = wm.getDefaultDisplay();
-            if (display != null) {
-                Point size = new Point();
-                display.getRealSize(size);
-                ((GradientDrawable) mDrawable).setScreenSize(size.x, size.y);
-            }
-        }
+    protected boolean canReceivePointerEvents() {
+        return false;
     }
 }

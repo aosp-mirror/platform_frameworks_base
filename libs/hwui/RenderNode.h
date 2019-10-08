@@ -28,6 +28,7 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "AnimatorManager.h"
+#include "CanvasTransform.h"
 #include "Debug.h"
 #include "DisplayList.h"
 #include "Matrix.h"
@@ -48,9 +49,6 @@ namespace android {
 namespace uirenderer {
 
 class CanvasState;
-class DisplayListOp;
-class FrameBuilder;
-class OffscreenBuffer;
 class Rect;
 class SkiaShader;
 struct RenderNodeOp;
@@ -76,7 +74,6 @@ class RenderNode;
  */
 class RenderNode : public VirtualLightRefBase {
     friend class TestUtils;  // allow TestUtils to access syncDisplayList / syncProperties
-    friend class FrameBuilder;
 
 public:
     enum DirtyPropertyMask {
@@ -104,16 +101,13 @@ public:
 
     ANDROID_API void setStagingDisplayList(DisplayList* newData);
 
-    void computeOrdering();
-
     ANDROID_API void output();
     ANDROID_API int getDebugSize();
-    void copyTo(proto::RenderNode* node);
 
     bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
 
     bool hasProjectionReceiver() const {
-        return mDisplayList && mDisplayList->projectionReceiveIndex >= 0;
+        return mDisplayList && mDisplayList->containsProjectionReceiver();
     }
 
     const char* getName() const { return mName.string(); }
@@ -178,9 +172,6 @@ public:
     }
 
     const DisplayList* getDisplayList() const { return mDisplayList; }
-    OffscreenBuffer* getLayer() const { return mLayer; }
-    OffscreenBuffer** getLayerHandle() { return &mLayer; }  // ugh...
-    void setLayer(OffscreenBuffer* layer) { mLayer = layer; }
 
     // Note: The position callbacks are relying on the listener using
     // the frameNumber to appropriately batch/synchronize these transactions.
@@ -197,11 +188,9 @@ public:
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) = 0;
     };
 
-    // Note this is not thread safe, this needs to be called
-    // before the RenderNode is used for drawing.
-    // RenderNode takes ownership of the pointer
     ANDROID_API void setPositionListener(PositionListener* listener) {
-        mPositionListener = listener;
+        mStagingPositionListener = listener;
+        mPositionListenerDirty = true;
     }
 
     // This is only modified in MODE_FULL, so it can be safely accessed
@@ -218,6 +207,15 @@ public:
 
     void output(std::ostream& output, uint32_t level);
 
+    void setUsageHint(UsageHint usageHint) { mUsageHint = usageHint; }
+
+    UsageHint usageHint() const { return mUsageHint; }
+
+    int64_t uniqueId() const { return mUniqueId; }
+
+    void markDrawStart(SkCanvas& canvas);
+    void markDrawEnd(SkCanvas& canvas);
+
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
                              std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
@@ -225,6 +223,7 @@ private:
 
     void syncProperties();
     void syncDisplayList(TreeObserver& observer, TreeInfo* info);
+    void handleForceDark(TreeInfo* info);
 
     void prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
@@ -237,6 +236,7 @@ private:
     void incParentRefCount() { mParentCount++; }
     void decParentRefCount(TreeObserver& observer, TreeInfo* info = nullptr);
 
+    const int64_t mUniqueId;
     String8 mName;
     sp<VirtualLightRefBase> mUserContext;
 
@@ -253,12 +253,10 @@ private:
     DisplayList* mDisplayList;
     DisplayList* mStagingDisplayList;
 
+    int64_t mDamageGenerationId;
+
     friend class AnimatorManager;
     AnimatorManager mAnimatorManager;
-
-    // Owned by RT. Lifecycle is managed by prepareTree(), with the exception
-    // being in ~RenderNode() which may happen on any thread.
-    OffscreenBuffer* mLayer = nullptr;
 
     /**
      * Draw time state - these properties are only set and used during rendering
@@ -275,7 +273,11 @@ private:
     // mDisplayList, not mStagingDisplayList.
     uint32_t mParentCount;
 
+    bool mPositionListenerDirty = false;
+    sp<PositionListener> mStagingPositionListener;
     sp<PositionListener> mPositionListener;
+
+    UsageHint mUsageHint = UsageHint::Unknown;
 
     // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:
@@ -298,7 +300,7 @@ public:
      * Returns true if an offscreen layer from any renderPipeline is attached
      * to this node.
      */
-    bool hasLayer() const { return mLayer || mSkiaLayer.get(); }
+    bool hasLayer() const { return mSkiaLayer.get(); }
 
     /**
      * Used by the RenderPipeline to attach an offscreen surface to the RenderNode.

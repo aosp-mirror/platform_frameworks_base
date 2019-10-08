@@ -21,13 +21,10 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.net.wifi.WifiManager;
-import android.view.View;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -92,36 +89,6 @@ public class NetworkBadging {
                 return com.android.internal.R.drawable.ic_wifi_signal_3;
             case 4:
                 return com.android.internal.R.drawable.ic_wifi_signal_4;
-            default:
-                throw new IllegalArgumentException("Invalid signal level: " + signalLevel);
-        }
-    }
-
-    /**
-     * Returns the badged wifi signal resource id for the given signal level.
-     *
-     * <p>This badged wifi signal resource should be displayed with the quality badge retrieved
-     * from {@link #getWifiBadgeResource(int)}. If there is no badge,
-     * {@link #getWifiBadgeResource(int)} should be used instead of this method.
-     *
-     * @param signalLevel The level returned by {@link WifiManager#calculateSignalLevel(int, int)}
-     *                    for a network. Must be between 0 and {@link WifiManager#RSSI_LEVELS}-1.
-     * @return the @DrawableRes for the icon
-     * @throws IllegalArgumentException for an invalid signal level
-     * @hide
-     */
-    @DrawableRes private static int getBadgedWifiSignalResource(int signalLevel) {
-        switch (signalLevel) {
-            case 0:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars;
-            case 1:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar;
-            case 2:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars;
-            case 3:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars;
-            case 4:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars;
             default:
                 throw new IllegalArgumentException("Invalid signal level: " + signalLevel);
         }

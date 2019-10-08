@@ -21,36 +21,35 @@ import android.graphics.Region;
 import android.util.SparseArray;
 
 /**
- * A holder that contains a collection of rectangular areas identified by int id. Each individual
- * region can be updated separately.
+ * A holder that contains a collection of regions identified by int id. Each individual region can
+ * be updated separately.
  */
 class TapExcludeRegionHolder {
-    private SparseArray<Rect> mTapExcludeRects = new SparseArray<>();
+    private SparseArray<Region> mTapExcludeRegions = new SparseArray<>();
 
     /** Update the specified region with provided position and size. */
-    void updateRegion(int regionId, int left, int top, int width, int height) {
-        if (width <= 0 || height <= 0) {
-            // A region became empty - remove it.
-            mTapExcludeRects.remove(regionId);
+    void updateRegion(int regionId, Region region) {
+        // Remove the previous one because there is a new one incoming.
+        mTapExcludeRegions.remove(regionId);
+
+        if (region == null || region.isEmpty()) {
+            // The incoming region is invalid. Don't use it.
             return;
         }
 
-        Rect region = mTapExcludeRects.get(regionId);
-        if (region == null) {
-            region = new Rect();
-        }
-        region.set(left, top, left + width, top + height);
-        mTapExcludeRects.put(regionId, region);
+        mTapExcludeRegions.put(regionId, region);
     }
 
     /**
      * Union the provided region with current region formed by this container.
      */
-    void amendRegion(Region region, Rect boundingRegion) {
-        for (int i = mTapExcludeRects.size() - 1; i>= 0 ; --i) {
-            final Rect rect = mTapExcludeRects.valueAt(i);
-            rect.intersect(boundingRegion);
-            region.union(rect);
+    void amendRegion(Region region, Rect bounds) {
+        for (int i = mTapExcludeRegions.size() - 1; i >= 0; --i) {
+            final Region r = mTapExcludeRegions.valueAt(i);
+            if (bounds != null) {
+                r.op(bounds, Region.Op.INTERSECT);
+            }
+            region.op(r, Region.Op.UNION);
         }
     }
 }

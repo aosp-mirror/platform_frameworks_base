@@ -16,15 +16,119 @@
 
 package android.text.style;
 
+import android.annotation.ColorInt;
+import android.annotation.NonNull;
+import android.annotation.Px;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Parcel;
+import android.text.ParcelableSpan;
+import android.text.TextUtils;
 
-public interface LineBackgroundSpan
-extends ParagraphStyle
+/**
+ * Used to change the background of lines where the span is attached to.
+ */
+public interface LineBackgroundSpan extends ParagraphStyle
 {
-    public void drawBackground(Canvas c, Paint p,
-                               int left, int right,
-                               int top, int baseline, int bottom,
-                               CharSequence text, int start, int end,
-                               int lnum);
+    /**
+     * Draw the background on the canvas.
+     *
+     * @param canvas      canvas on which the span should be rendered
+     * @param paint       paint used to draw text, which should be left unchanged on exit
+     * @param left        left position of the line relative to input canvas, in pixels
+     * @param right       right position of the line relative to input canvas, in pixels
+     * @param top         top position of the line relative to input canvas, in pixels
+     * @param baseline    baseline of the text relative to input canvas, in pixels
+     * @param bottom      bottom position of the line relative to input canvas, in pixels
+     * @param text        current text
+     * @param start       start character index of the line
+     * @param end         end character index of the line
+     * @param lineNumber  line number in the current text layout
+     */
+    void drawBackground(@NonNull Canvas canvas, @NonNull Paint paint,
+                               @Px int left, @Px int right,
+                               @Px int top, @Px int baseline, @Px int bottom,
+                               @NonNull CharSequence text, int start, int end,
+                               int lineNumber);
+    /**
+     * Default implementation of the {@link LineBackgroundSpan}, which changes the background
+     * color of the lines to which the span is attached.
+     * <p>
+     * For example, an <code>LineBackgroundSpan</code> can be used like this:
+     * <pre>
+     * String text = "This is a multiline text. LineBackgroundSpan is applied here. This is a multiline text.";
+     * SpannableString string = new SpannableString(text);
+     * string.setSpan(new LineBackgroundSpan.Standard(Color.YELLOW), 26, 61, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+     * </pre>
+     * <img src="{@docRoot}reference/android/images/text/style/linebackgroundspan.png" />
+     * <figcaption>Text with <code>LineBackgroundSpan</code></figcaption>
+     */
+    class Standard implements LineBackgroundSpan, ParcelableSpan {
+
+        private final int mColor;
+
+        /**
+         * Constructor taking a color integer.
+         *
+         * @param color Color integer that defines the background color.
+         */
+        public Standard(@ColorInt int color) {
+            mColor = color;
+        }
+
+        /**
+         * Creates a {@link LineBackgroundSpan.Standard} from a parcel
+         */
+        public Standard(@NonNull Parcel src) {
+            mColor = src.readInt();
+        }
+
+        @Override
+        public int getSpanTypeId() {
+            return getSpanTypeIdInternal();
+        }
+
+        /** @hide */
+        @Override
+        public int getSpanTypeIdInternal() {
+            return TextUtils.LINE_BACKGROUND_SPAN;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            writeToParcelInternal(dest, flags);
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mColor);
+        }
+
+        /**
+         * @return the color of this span.
+         * @see Standard#Standard(int)
+         */
+        @ColorInt
+        public final int getColor() {
+            return mColor;
+        }
+
+        @Override
+        public void drawBackground(@NonNull Canvas canvas, @NonNull Paint paint,
+                @Px int left, @Px int right,
+                @Px int top, @Px int baseline, @Px int bottom,
+                @NonNull CharSequence text, int start, int end,
+                int lineNumber) {
+            final int originColor = paint.getColor();
+            paint.setColor(mColor);
+            canvas.drawRect(left, top, right, bottom, paint);
+            paint.setColor(originColor);
+        }
+    }
 }

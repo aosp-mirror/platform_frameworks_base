@@ -14,10 +14,16 @@ android_test {
 
     static_libs: [
         "frameworks-base-testutils",
+        "services.core",
         "androidx.test.runner",
-        "mockito-target-minus-junit4",
+        "androidx.test.rules",
+        "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "servicestests-utils",
+        "truth-prebuilt",
+        "testables",
+        "ub-uiautomator",
+        "hamcrest-library",
     ],
 
     libs: [
@@ -26,13 +32,16 @@ android_test {
         "android.test.runner",
     ],
 
+    // These are not normally accessible from apps so they must be explicitly included.
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+
     platform_apis: true,
     test_suites: ["device-tests"],
 
     certificate: "platform",
-
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_JACK_FLAGS
-    // LOCAL_JACK_FLAGS := --multi-dex native
 
     dxflags: ["--multi-dex"],
 

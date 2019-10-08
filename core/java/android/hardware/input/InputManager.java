@@ -21,7 +21,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
-import android.app.IInputForwarder;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.os.Binder;
@@ -42,6 +41,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputMonitor;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
 
@@ -520,6 +520,22 @@ public final class InputManager {
     }
 
     /**
+     * Queries whether the device's microphone is muted
+     *
+     * @return The mic mute switch state which is one of {@link #SWITCH_STATE_UNKNOWN},
+     * {@link #SWITCH_STATE_OFF} or {@link #SWITCH_STATE_ON}.
+     * @hide
+     */
+    @SwitchState
+    public int isMicMuted() {
+        try {
+            return mIm.isMicMuted();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets information about all supported keyboard layouts.
      * <p>
      * The input manager consults the built-in keyboard layouts as well
@@ -934,21 +950,14 @@ public final class InputManager {
         }
     }
 
-
     /**
-     * Create an {@link IInputForwarder} targeted to provided display.
-     * {@link android.Manifest.permission.INJECT_EVENTS} permission is required to call this method.
-     *
-     * @param displayId Id of the target display where input events should be forwarded.
-     *                  Display must exist and must be owned by the caller.
-     * @return The forwarder instance.
+     * Monitor input on the specified display for gestures.
      *
      * @hide
      */
-    @UnsupportedAppUsage
-    public IInputForwarder createInputForwarder(int displayId) {
+    public InputMonitor monitorGestureInput(String name, int displayId) {
         try {
-            return mIm.createInputForwarder(displayId);
+            return mIm.monitorGestureInput(name, displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -1199,8 +1208,8 @@ public final class InputManager {
          * @hide
          */
         @Override
-        public void vibrate(int uid, String opPkg,
-                VibrationEffect effect, AudioAttributes attributes) {
+        public void vibrate(int uid, String opPkg, VibrationEffect effect,
+                String reason, AudioAttributes attributes) {
             long[] pattern;
             int repeat;
             if (effect instanceof VibrationEffect.OneShot) {

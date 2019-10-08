@@ -152,7 +152,7 @@ public final class RemoteAction implements Parcelable {
         pw.println();
     }
 
-    public static final Parcelable.Creator<RemoteAction> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RemoteAction> CREATOR =
             new Parcelable.Creator<RemoteAction>() {
                 public RemoteAction createFromParcel(Parcel in) {
                     return new RemoteAction(in);

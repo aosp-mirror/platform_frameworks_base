@@ -16,16 +16,16 @@
 
 package com.android.systemui.analytics;
 
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.SensorEvent;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.TouchEvent;
+
 import android.os.Build;
 import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
-
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.SensorEvent;
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.TouchEvent;
 
 /**
  * Collects touch, sensor and phone events and converts the data to
@@ -104,6 +104,7 @@ public class SensorLoggerSession {
         proto.startTimestampMillis = mStartTimestampMillis;
         proto.durationMillis = mEndTimestampMillis - mStartTimestampMillis;
         proto.build = Build.FINGERPRINT;
+        proto.deviceId = Build.DEVICE;
         proto.result = mResult;
         proto.type = mType;
         proto.sensorEvents = mSensorEvents.toArray(proto.sensorEvents);

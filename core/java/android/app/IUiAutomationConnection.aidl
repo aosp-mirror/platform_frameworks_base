@@ -37,6 +37,7 @@ interface IUiAutomationConnection {
     void connect(IAccessibilityServiceClient client, int flags);
     void disconnect();
     boolean injectInputEvent(in InputEvent event, boolean sync);
+    void syncInputTransactions();
     boolean setRotation(int rotation);
     Bitmap takeScreenshot(in Rect crop, int rotation);
     boolean clearWindowContentFrameStats(int windowId);
@@ -47,7 +48,7 @@ interface IUiAutomationConnection {
             in ParcelFileDescriptor source);
     void grantRuntimePermission(String packageName, String permission, int userId);
     void revokeRuntimePermission(String packageName, String permission, int userId);
-    void adoptShellPermissionIdentity(int uid);
+    void adoptShellPermissionIdentity(int uid, in String[] permissions);
     void dropShellPermissionIdentity();
     // Called from the system process.
     oneway void shutdown();

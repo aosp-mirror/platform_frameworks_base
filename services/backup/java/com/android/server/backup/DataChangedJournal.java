@@ -25,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * A journal of packages that have indicated that their data has changed (and therefore should be
@@ -64,12 +66,12 @@ public class DataChangedJournal {
     }
 
     /**
-     * Invokes {@link Consumer#accept(String)} with every package name in the journal file.
+     * Invokes {@link Consumer#accept(Object)} with every package name in the journal file.
      *
      * @param consumer The callback.
      * @throws IOException If there is an IO error reading from the file.
      */
-    public void forEach(Consumer consumer) throws IOException {
+    public void forEach(Consumer<String> consumer) throws IOException {
         try (
             BufferedInputStream bufferedInputStream = new BufferedInputStream(
                     new FileInputStream(mFile), BUFFER_SIZE_BYTES);
@@ -80,6 +82,17 @@ public class DataChangedJournal {
                 consumer.accept(packageName);
             }
         }
+    }
+
+    /**
+     * Returns a list with the packages in this journal.
+     *
+     * @throws IOException If there is an IO error reading from the file.
+     */
+    public List<String> getPackages() throws IOException {
+        List<String> packages = new ArrayList<>();
+        forEach(packages::add);
+        return packages;
     }
 
     /**
@@ -107,14 +120,6 @@ public class DataChangedJournal {
     @Override
     public String toString() {
         return mFile.toString();
-    }
-
-    /**
-     * Consumer for iterating over package names in the journal.
-     */
-    @FunctionalInterface
-    public interface Consumer {
-        void accept(String packageName);
     }
 
     /**

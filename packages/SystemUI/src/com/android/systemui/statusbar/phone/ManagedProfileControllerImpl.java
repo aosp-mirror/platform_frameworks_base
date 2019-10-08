@@ -28,6 +28,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ */
+@Singleton
 public class ManagedProfileControllerImpl implements ManagedProfileController {
 
     private final List<Callback> mCallbacks = new ArrayList<>();
@@ -38,6 +44,9 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     private boolean mListening;
     private int mCurrentUser;
 
+    /**
+     */
+    @Inject
     public ManagedProfileControllerImpl(Context context) {
         mContext = context;
         mUserManager = UserManager.get(mContext);

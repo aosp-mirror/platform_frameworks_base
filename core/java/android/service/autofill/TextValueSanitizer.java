@@ -116,7 +116,7 @@ public final class TextValueSanitizer extends InternalSanitizer implements
         parcel.writeString(mSubst);
     }
 
-    public static final Parcelable.Creator<TextValueSanitizer> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TextValueSanitizer> CREATOR =
             new Parcelable.Creator<TextValueSanitizer>() {
         @Override
         public TextValueSanitizer createFromParcel(Parcel parcel) {

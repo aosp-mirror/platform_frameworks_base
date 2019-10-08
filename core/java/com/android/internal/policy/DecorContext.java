@@ -16,12 +16,17 @@
 
 package com.android.internal.policy;
 
+import android.content.AutofillOptions;
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
+import android.view.contentcapture.ContentCaptureManager;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
 
@@ -32,15 +37,18 @@ import java.lang.ref.WeakReference;
  *
  * @hide
  */
-class DecorContext extends ContextThemeWrapper {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class DecorContext extends ContextThemeWrapper {
     private PhoneWindow mPhoneWindow;
     private WindowManager mWindowManager;
     private Resources mActivityResources;
+    private ContentCaptureManager mContentCaptureManager;
 
     private WeakReference<Context> mActivityContext;
 
+    @VisibleForTesting
     public DecorContext(Context context, Context activityContext) {
-        super(context, null);
+        super(context.createDisplayContext(activityContext.getDisplay()), null);
         mActivityContext = new WeakReference<>(activityContext);
         mActivityResources = activityContext.getResources();
     }
@@ -60,6 +68,16 @@ class DecorContext extends ContextThemeWrapper {
             }
             return mWindowManager;
         }
+        if (Context.CONTENT_CAPTURE_MANAGER_SERVICE.equals(name)) {
+            if (mContentCaptureManager == null) {
+                Context activityContext = mActivityContext.get();
+                if (activityContext != null) {
+                    mContentCaptureManager = (ContentCaptureManager) activityContext
+                            .getSystemService(name);
+                }
+            }
+            return mContentCaptureManager;
+        }
         return super.getSystemService(name);
     }
 
@@ -78,5 +96,23 @@ class DecorContext extends ContextThemeWrapper {
     @Override
     public AssetManager getAssets() {
         return mActivityResources.getAssets();
+    }
+
+    @Override
+    public AutofillOptions getAutofillOptions() {
+        Context activityContext = mActivityContext.get();
+        if (activityContext != null) {
+            return activityContext.getAutofillOptions();
+        }
+        return null;
+    }
+
+    @Override
+    public ContentCaptureOptions getContentCaptureOptions() {
+        Context activityContext = mActivityContext.get();
+        if (activityContext != null) {
+            return activityContext.getContentCaptureOptions();
+        }
+        return null;
     }
 }

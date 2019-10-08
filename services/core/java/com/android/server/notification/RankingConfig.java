@@ -29,6 +29,8 @@ public interface RankingConfig {
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
+    boolean areBubblesAllowed(String packageName, int uid);
+    boolean bubblesEnabled(UserHandle userHandle);
     boolean isGroupBlocked(String packageName, int uid, String groupId);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
@@ -37,7 +39,7 @@ public interface RankingConfig {
             boolean fromTargetApp);
     ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty);
-    void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
+    boolean createNotificationChannel(String pkg, int uid, NotificationChannel channel,
             boolean fromTargetApp, boolean hasDndAccess);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel, boolean fromUser);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);

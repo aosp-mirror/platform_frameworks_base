@@ -81,19 +81,17 @@ public class ApkSignatureVerifier {
             Certificate[][] signerCerts = new Certificate[][] { vSigner.certs };
             Signature[] signerSigs = convertToSignatures(signerCerts);
             Signature[] pastSignerSigs = null;
-            int[] pastSignerSigsFlags = null;
             if (vSigner.por != null) {
                 // populate proof-of-rotation information
                 pastSignerSigs = new Signature[vSigner.por.certs.size()];
-                pastSignerSigsFlags = new int[vSigner.por.flagsList.size()];
                 for (int i = 0; i < pastSignerSigs.length; i++) {
                     pastSignerSigs[i] = new Signature(vSigner.por.certs.get(i).getEncoded());
-                    pastSignerSigsFlags[i] = vSigner.por.flagsList.get(i);
+                    pastSignerSigs[i].setFlags(vSigner.por.flagsList.get(i));
                 }
             }
             return new PackageParser.SigningDetails(
                     signerSigs, SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                    pastSignerSigs, pastSignerSigsFlags);
+                    pastSignerSigs);
         } catch (SignatureNotFoundException e) {
             // not signed with v3, try older if allowed
             if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V3) {
@@ -304,7 +302,7 @@ public class ApkSignatureVerifier {
      * @throws PackageParserException if the APK's signature failed to verify.
      * or greater is not found, except in the case of no JAR signature.
      */
-    public static PackageParser.SigningDetails plsCertsNoVerifyOnlyCerts(
+    public static PackageParser.SigningDetails unsafeGetCertsWithoutVerification(
             String apkPath, int minSignatureSchemeVersion)
             throws PackageParserException {
 
@@ -319,23 +317,21 @@ public class ApkSignatureVerifier {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "certsOnlyV3");
         try {
             ApkSignatureSchemeV3Verifier.VerifiedSigner vSigner =
-                    ApkSignatureSchemeV3Verifier.plsCertsNoVerifyOnlyCerts(apkPath);
+                    ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
             Certificate[][] signerCerts = new Certificate[][] { vSigner.certs };
             Signature[] signerSigs = convertToSignatures(signerCerts);
             Signature[] pastSignerSigs = null;
-            int[] pastSignerSigsFlags = null;
             if (vSigner.por != null) {
                 // populate proof-of-rotation information
                 pastSignerSigs = new Signature[vSigner.por.certs.size()];
-                pastSignerSigsFlags = new int[vSigner.por.flagsList.size()];
                 for (int i = 0; i < pastSignerSigs.length; i++) {
                     pastSignerSigs[i] = new Signature(vSigner.por.certs.get(i).getEncoded());
-                    pastSignerSigsFlags[i] = vSigner.por.flagsList.get(i);
+                    pastSignerSigs[i].setFlags(vSigner.por.flagsList.get(i));
                 }
             }
             return new PackageParser.SigningDetails(
                     signerSigs, SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                    pastSignerSigs, pastSignerSigsFlags);
+                    pastSignerSigs);
         } catch (SignatureNotFoundException e) {
             // not signed with v3, try older if allowed
             if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V3) {
@@ -363,7 +359,7 @@ public class ApkSignatureVerifier {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "certsOnlyV2");
         try {
             Certificate[][] signerCerts =
-                    ApkSignatureSchemeV2Verifier.plsCertsNoVerifyOnlyCerts(apkPath);
+                    ApkSignatureSchemeV2Verifier.unsafeGetCertsWithoutVerification(apkPath);
             Signature[] signerSigs = convertToSignatures(signerCerts);
             return new PackageParser.SigningDetails(signerSigs,
                     SignatureSchemeVersion.SIGNING_BLOCK_V2);
@@ -435,16 +431,16 @@ public class ApkSignatureVerifier {
      *
      * @return FSverity root hash
      */
-    public static byte[] generateFsverityRootHash(String apkPath)
+    public static byte[] generateApkVerityRootHash(String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException {
         // first try v3
         try {
-            return ApkSignatureSchemeV3Verifier.generateFsverityRootHash(apkPath);
+            return ApkSignatureSchemeV3Verifier.generateApkVerityRootHash(apkPath);
         } catch (SignatureNotFoundException e) {
             // try older version
         }
         try {
-            return ApkSignatureSchemeV2Verifier.generateFsverityRootHash(apkPath);
+            return ApkSignatureSchemeV2Verifier.generateApkVerityRootHash(apkPath);
         } catch (SignatureNotFoundException e) {
             return null;
         }

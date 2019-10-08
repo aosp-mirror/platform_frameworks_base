@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/global_actions_grid_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
+>
+
+    <FrameLayout
+        android:id="@+id/global_actions_panel_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/global_actions_view"
+    />
+
+    <com.android.systemui.globalactions.GlobalActionsGridLayout
+        android:id="@id/global_actions_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:theme="@style/qs_theme"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:gravity="bottom | center_horizontal"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/global_actions_grid_container_shadow_offset"
+        android:layout_marginBottom="@dimen/global_actions_grid_container_negative_shadow_offset"
+    >
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layoutDirection="ltr"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:layout_marginBottom="@dimen/global_actions_grid_container_bottom_margin"
+        >
+            <!-- For separated items-->
+            <LinearLayout
+                android:id="@+id/separated_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/global_actions_grid_side_margin"
+                android:layout_marginRight="@dimen/global_actions_grid_side_margin"
+                android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
+                android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
+                android:paddingTop="@dimen/global_actions_grid_vertical_padding"
+                android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:translationZ="@dimen/global_actions_translate"
+            />
+            <!-- Grid of action items -->
+            <com.android.systemui.globalactions.ListGridLayout
+                android:id="@android:id/list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="right"
+                android:layout_marginRight="@dimen/global_actions_grid_side_margin"
+                android:translationZ="@dimen/global_actions_translate"
+                android:paddingLeft="@dimen/global_actions_grid_horizontal_padding"
+                android:paddingRight="@dimen/global_actions_grid_horizontal_padding"
+                android:paddingTop="@dimen/global_actions_grid_vertical_padding"
+                android:paddingBottom="@dimen/global_actions_grid_vertical_padding"
+            >
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layoutDirection="locale"
+                />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layoutDirection="locale"
+                />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layoutDirection="locale"
+                />
+            </com.android.systemui.globalactions.ListGridLayout>
+        </LinearLayout>
+
+    </com.android.systemui.globalactions.GlobalActionsGridLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

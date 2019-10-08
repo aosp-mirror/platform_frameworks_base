@@ -22,15 +22,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
 import android.os.LocaleList;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
 import android.text.method.EditorState;
 import android.text.style.LocaleSpan;
 import android.util.Log;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -798,11 +800,13 @@ public class StaticLayoutTest {
     @Test
     public void testLayoutDoesntModifyPaint() {
         final TextPaint paint = new TextPaint();
-        paint.setHyphenEdit(31);
+        paint.setStartHyphenEdit(Paint.START_HYPHEN_EDIT_INSERT_HYPHEN);
+        paint.setEndHyphenEdit(Paint.END_HYPHEN_EDIT_INSERT_HYPHEN);
         final StaticLayout layout = StaticLayout.Builder.obtain("", 0, 0, paint, 100).build();
         final Canvas canvas = new Canvas();
         layout.drawText(canvas, 0, 0);
-        assertEquals(31, paint.getHyphenEdit());
+        assertEquals(Paint.START_HYPHEN_EDIT_INSERT_HYPHEN, paint.getStartHyphenEdit());
+        assertEquals(Paint.END_HYPHEN_EDIT_INSERT_HYPHEN, paint.getEndHyphenEdit());
     }
 
     @Test

@@ -472,7 +472,7 @@ public class Address implements Parcelable {
         return sb.toString();
     }
 
-    public static final Parcelable.Creator<Address> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Address> CREATOR =
         new Parcelable.Creator<Address>() {
         public Address createFromParcel(Parcel in) {
             String language = in.readString();

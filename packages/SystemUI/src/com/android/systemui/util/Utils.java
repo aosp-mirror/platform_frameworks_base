@@ -14,6 +14,9 @@
 
 package com.android.systemui.util;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.view.View;
 
 import com.android.systemui.SysUiServiceProvider;
@@ -57,22 +60,25 @@ public class Utils {
         public void onViewAttachedToWindow(View v) {
             mView = v;
             SysUiServiceProvider.getComponent(v.getContext(), CommandQueue.class)
-                    .addCallbacks(this);
+                    .addCallback(this);
         }
 
         @Override
         public void onViewDetachedFromWindow(View v) {
             SysUiServiceProvider.getComponent(mView.getContext(), CommandQueue.class)
-                    .removeCallbacks(this);
+                    .removeCallback(this);
             mView = null;
         }
 
         /**
          * Sets visibility of this {@link View} given the states passed from
-         * {@link com.android.systemui.statusbar.CommandQueue.Callbacks#disable(int, int)}.
+         * {@link com.android.systemui.statusbar.CommandQueue.Callbacks#disable(int, int, int)}.
          */
         @Override
-        public void disable(int state1, int state2, boolean animate) {
+        public void disable(int displayId, int state1, int state2, boolean animate) {
+            if (displayId != mView.getDisplay().getDisplayId()) {
+                return;
+            }
             final boolean disabled = ((state1 & mMask1) != 0) || ((state2 & mMask2) != 0);
             if (disabled == mDisabled) return;
             mDisabled = disabled;
@@ -84,4 +90,24 @@ public class Utils {
             return mDisabled;
         }
     }
+
+
+    /**
+     * Returns {@code true} iff the package {@code packageName} is a headless remote display
+     * provider, i.e, that the package holds the privileged {@code REMOTE_DISPLAY_PROVIDER}
+     * permission and that it doesn't host a launcher icon.
+     */
+    public static boolean isHeadlessRemoteDisplayProvider(PackageManager pm, String packageName) {
+        if (pm.checkPermission(Manifest.permission.REMOTE_DISPLAY_PROVIDER, packageName)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
+
+        Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+        homeIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        homeIntent.setPackage(packageName);
+
+        return pm.queryIntentActivities(homeIntent, 0).isEmpty();
+    }
+
 }

@@ -45,7 +45,7 @@ public class CameraInfo implements Parcelable {
         info.orientation = in.readInt();
     }
 
-    public static final Parcelable.Creator<CameraInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CameraInfo> CREATOR =
             new Parcelable.Creator<CameraInfo>() {
         @Override
         public CameraInfo createFromParcel(Parcel in) {

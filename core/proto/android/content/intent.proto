@@ -17,14 +17,13 @@
 syntax = "proto2";
 package android.content;
 
-option java_package = "android.content";
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/os/patternmatcher.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
-// Next Tag: 13
+// Next Tag: 14
 message IntentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -58,10 +57,12 @@ message IntentProto {
     optional string package = 6;
     optional ComponentNameProto component = 7;
     optional string source_bounds = 8;
-    optional string clip_data = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string clip_data = 9 [ (.android.privacy).dest = DEST_LOCAL ];
     optional string extras = 10 [ (.android.privacy).dest = DEST_LOCAL ];
+    // UserHandle value (similar to user_id in other protos).
     optional int32 content_user_hint = 11;
     optional string selector = 12;
+    optional string identifier = 13 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 // Next Tag: 11
@@ -70,6 +71,13 @@ message IntentFilterProto {
 
     repeated string actions = 1;
     repeated string categories = 2;
+    // https://developer.android.com/guide/topics/manifest/data-element#scheme:
+    // The scheme part of a URI. This is the minimal essential attribute for
+    // specifying a URI; at least one scheme attribute must be set for the filter,
+    // or none of the other URI attributes are meaningful. A scheme is specified
+    // without the trailing colon (for example, http, rather than http:). If the
+    // filter has a data type set (the mimeType attribute) but no scheme, the
+    // content: and file: schemes are assumed.
     repeated string data_schemes = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
     repeated android.os.PatternMatcherProto data_scheme_specs = 4;
     repeated AuthorityEntryProto data_authorities = 5;

@@ -17,77 +17,65 @@
 */
 -->
 <com.android.internal.widget.ResolverDrawerLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:maxWidth="@dimen/resolver_max_width"
-        android:maxCollapsedHeight="288dp"
-        android:maxCollapsedHeightSmall="56dp"
-        android:id="@id/contentPanel">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:maxCollapsedHeight="0dp"
+    android:maxCollapsedHeightSmall="56dp"
+    android:id="@id/contentPanel">
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alwaysShow="true"
-            android:elevation="8dp"
-            android:paddingStart="16dp"
-            android:background="@color/white" >
-        <TextView android:id="@+id/profile_button"
-                  android:layout_width="wrap_content"
-                  android:layout_height="48dp"
-                  android:layout_marginEnd="8dp"
-                  android:paddingStart="8dp"
-                  android:paddingEnd="8dp"
-                  android:visibility="gone"
-                  style="?attr/borderlessButtonStyle"
-                  android:textAppearance="?attr/textAppearanceButton"
-                  android:textColor="?attr/colorAccent"
-                  android:gravity="center_vertical"
-                  android:layout_alignParentTop="true"
-                  android:layout_alignParentRight="true"
-                  android:singleLine="true"/>
-        <ImageView android:id="@+id/title_icon"
-                   android:layout_width="24dp"
-                   android:layout_height="24dp"
-                   android:layout_marginEnd="16dp"
-                   android:visibility="gone"
-                   android:scaleType="fitCenter"
-                   android:layout_below="@id/profile_button"
-                   android:layout_alignParentLeft="true"/>
+        android:id="@+id/chooser_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alwaysShow="true"
+        android:elevation="1dp"
+        android:background="@drawable/bottomsheet_background">
+
+        <ImageView
+            android:id="@+id/drag"
+            android:layout_width="24dp"
+            android:layout_height="4dp"
+            android:src="@drawable/ic_drag_handle"
+            android:layout_marginTop="@dimen/chooser_edge_margin_thin"
+            android:layout_marginBottom="@dimen/chooser_edge_margin_thin"
+            android:tint="@color/lighter_gray"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="true" />
+
         <TextView android:id="@+id/title"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textAppearance="?attr/textAppearanceMedium"
-                  android:textSize="14sp"
-                  android:gravity="start|center_vertical"
-                  android:paddingEnd="?attr/dialogPreferredPadding"
-                  android:paddingTop="12dp"
-                  android:paddingBottom="12dp"
-                  android:layout_below="@id/profile_button"
-                  android:layout_toRightOf="@id/title_icon"/>
+                  android:textAppearance="@style/TextAppearance.DeviceDefault.WindowTitle"
+                  android:gravity="center"
+                  android:paddingBottom="@dimen/chooser_view_spacing"
+                  android:paddingLeft="24dp"
+                  android:paddingRight="24dp"
+                  android:layout_below="@id/drag"
+                  android:layout_centerHorizontal="true"/>
     </RelativeLayout>
 
     <ListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/resolver_list"
-            android:clipToPadding="false"
-            android:scrollbarStyle="outsideOverlay"
-            android:background="@color/white"
-            android:elevation="8dp"
-            android:listSelector="@color/transparent"
-            android:divider="@null"
-            android:scrollIndicators="top"
-            android:nestedScrollingEnabled="true" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/resolver_list"
+        android:clipToPadding="false"
+        android:background="?attr/colorBackgroundFloating"
+        android:scrollbars="none"
+        android:listSelector="@color/transparent"
+        android:divider="@null"
+        android:elevation="1dp"
+        android:nestedScrollingEnabled="true"/>
 
     <TextView android:id="@+id/empty"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_alwaysShow="true"
-              android:background="@color/white"
+              android:background="?attr/colorBackgroundFloating"
               android:text="@string/noApplications"
-              android:padding="32dp"
+              android:padding="@dimen/chooser_edge_margin_normal"
               android:gravity="center"
-              android:visibility="gone" />
+              android:elevation="1dp"
+              android:visibility="gone"/>
 
 </com.android.internal.widget.ResolverDrawerLayout>

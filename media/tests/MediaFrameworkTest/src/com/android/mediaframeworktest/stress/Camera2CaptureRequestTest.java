@@ -16,8 +16,13 @@
 
 package com.android.mediaframeworktest.stress;
 
-import com.android.mediaframeworktest.Camera2SurfaceViewTestCase;
-import com.android.mediaframeworktest.helpers.CameraTestUtils.SimpleCaptureCallback;
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_OFF;
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON;
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON_ALWAYS_FLASH;
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH;
+import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE;
+
+import static com.android.mediaframeworktest.helpers.CameraTestUtils.getValueNotNull;
 
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -26,14 +31,10 @@ import android.hardware.camera2.CaptureResult;
 import android.util.Log;
 import android.util.Size;
 
-import java.util.Arrays;
+import com.android.mediaframeworktest.Camera2SurfaceViewTestCase;
+import com.android.mediaframeworktest.helpers.CameraTestUtils.SimpleCaptureCallback;
 
-import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_OFF;
-import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON;
-import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON_ALWAYS_FLASH;
-import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH;
-import static android.hardware.camera2.CameraCharacteristics.CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE;
-import static com.android.mediaframeworktest.helpers.CameraTestUtils.getValueNotNull;
+import java.util.Arrays;
 
 /**
  * <p>
@@ -49,7 +50,7 @@ import static com.android.mediaframeworktest.helpers.CameraTestUtils.getValueNot
  *    -e iterations 10 \
  *    -e waitIntervalMs 1000 \
  *    -e resultToFile false \
- *    -r -w com.android.mediaframeworktest/.Camera2InstrumentationTestRunner
+ *    -r -w com.android.mediaframeworktest/androidx.test.runner.AndroidJUnitRunner
  */
 public class Camera2CaptureRequestTest extends Camera2SurfaceViewTestCase {
     private static final String TAG = "CaptureRequestTest";

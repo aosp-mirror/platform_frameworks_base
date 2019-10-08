@@ -23,14 +23,10 @@ import static junit.framework.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.filters.MediumTest;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
 import android.text.GetChars;
 import android.text.Layout;
 import android.text.PrecomputedText;
@@ -39,11 +35,18 @@ import android.text.Spannable;
 import android.view.View;
 import android.widget.TextView.BufferType;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Field;
 import java.util.Locale;
 
 /**
@@ -206,7 +209,8 @@ public class TextViewTest {
         int lineCount = layout.getLineCount();
         boolean hyphenationHappend = false;
         for (int i = 0; i < lineCount; ++i) {
-            if (layout.getHyphen(i) == 0) {
+            if (layout.getStartHyphenEdit(i) == Paint.START_HYPHEN_EDIT_NO_EDIT
+                    && layout.getEndHyphenEdit(i) == Paint.END_HYPHEN_EDIT_NO_EDIT) {
                 continue;  // Hyphantion does not happen.
             }
             hyphenationHappend = true;
@@ -320,6 +324,15 @@ public class TextViewTest {
         assertTrue(mTextView.useDynamicLayout());
     }
 
+    @Test
+    @UiThreadTest
+    public void testConstructor_doesNotLeaveTextNull() {
+        mTextView = new NullSetTextTextView(mActivity);
+        // Check that mText and mTransformed are empty string instead of null.
+        assertEquals("", mTextView.getText().toString());
+        assertEquals("", mTextView.getTransformed().toString());
+    }
+
     private String createLongText() {
         int size = 600 * 1000;
         final StringBuilder builder = new StringBuilder(size);
@@ -327,5 +340,27 @@ public class TextViewTest {
             builder.append('a');
         }
         return builder.toString();
+    }
+
+    private class NullSetTextTextView extends TextView {
+        NullSetTextTextView(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void setText(CharSequence text, BufferType type) {
+            // #setText will be called from the TextView constructor. Here we reproduce
+            // the situation when the method sets mText and mTransformed to null.
+            try {
+                final Field textField = TextView.class.getDeclaredField("mText");
+                textField.setAccessible(true);
+                textField.set(this, null);
+                final Field transformedField = TextView.class.getDeclaredField("mTransformed");
+                transformedField.setAccessible(true);
+                transformedField.set(this, null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                // Empty.
+            }
+        }
     }
 }

@@ -23,11 +23,9 @@ import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.provider.Settings.Secure;
 import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.util.ArrayMap;
@@ -38,7 +36,6 @@ import com.android.internal.util.NotificationMessagingUtil;
 
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.Objects;
 
 public class ZenModeFiltering {
     private static final String TAG = ZenModeHelper.TAG;
@@ -88,20 +85,21 @@ public class ZenModeFiltering {
      * @param timeoutAffinity affinity to return when the timeout specified via
      *                        <code>contactsTimeoutMs</code> is hit
      */
-    public static boolean matchesCallFilter(Context context, int zen, ZenModeConfig config,
-            UserHandle userHandle, Bundle extras, ValidateNotificationPeople validator,
-            int contactsTimeoutMs, float timeoutAffinity) {
+    public static boolean matchesCallFilter(Context context, int zen, NotificationManager.Policy
+            consolidatedPolicy, UserHandle userHandle, Bundle extras,
+            ValidateNotificationPeople validator, int contactsTimeoutMs, float timeoutAffinity) {
         if (zen == Global.ZEN_MODE_NO_INTERRUPTIONS) return false; // nothing gets through
         if (zen == Global.ZEN_MODE_ALARMS) return false; // not an alarm
         if (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-            if (config.allowRepeatCallers && REPEAT_CALLERS.isRepeat(context, extras)) {
+            if (consolidatedPolicy.allowRepeatCallers()
+                    && REPEAT_CALLERS.isRepeat(context, extras)) {
                 return true;
             }
-            if (!config.allowCalls) return false; // no other calls get through
+            if (!consolidatedPolicy.allowCalls()) return false; // no other calls get through
             if (validator != null) {
                 final float contactAffinity = validator.getContactAffinity(userHandle, extras,
                         contactsTimeoutMs, timeoutAffinity);
-                return audienceMatches(config.allowCallsFrom, contactAffinity);
+                return audienceMatches(consolidatedPolicy.allowCallsFrom(), contactAffinity);
             }
         }
         return true;
@@ -116,12 +114,17 @@ public class ZenModeFiltering {
         REPEAT_CALLERS.recordCall(mContext, extras(record));
     }
 
-    public boolean shouldIntercept(int zen, ZenModeConfig config, NotificationRecord record) {
-        if (zen == ZEN_MODE_OFF) {
+    /**
+     * Whether to intercept the notification based on the policy
+     */
+    public boolean shouldIntercept(int zen, NotificationManager.Policy policy,
+            NotificationRecord record) {
+        // Zen mode is ignored for critical notifications.
+        if (zen == ZEN_MODE_OFF || isCritical(record)) {
             return false;
         }
         // Make an exception to policy for the notification saying that policy has changed
-        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(config.suppressedVisualEffects)
+        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(policy.suppressedVisualEffects)
                 && "android".equals(record.sbn.getPackageName())
                 && SystemMessageProto.SystemMessage.NOTE_ZEN_UPGRADE == record.sbn.getId()) {
             ZenLog.traceNotIntercepted(record, "systemDndChangedNotification");
@@ -147,54 +150,54 @@ public class ZenModeFiltering {
                 }
 
                 if (isAlarm(record)) {
-                    if (!config.allowAlarms) {
+                    if (!policy.allowAlarms()) {
                         ZenLog.traceIntercepted(record, "!allowAlarms");
                         return true;
                     }
                     return false;
                 }
                 if (isCall(record)) {
-                    if (config.allowRepeatCallers
+                    if (policy.allowRepeatCallers()
                             && REPEAT_CALLERS.isRepeat(mContext, extras(record))) {
                         ZenLog.traceNotIntercepted(record, "repeatCaller");
                         return false;
                     }
-                    if (!config.allowCalls) {
+                    if (!policy.allowCalls()) {
                         ZenLog.traceIntercepted(record, "!allowCalls");
                         return true;
                     }
-                    return shouldInterceptAudience(config.allowCallsFrom, record);
+                    return shouldInterceptAudience(policy.allowCallsFrom(), record);
                 }
                 if (isMessage(record)) {
-                    if (!config.allowMessages) {
+                    if (!policy.allowMessages()) {
                         ZenLog.traceIntercepted(record, "!allowMessages");
                         return true;
                     }
-                    return shouldInterceptAudience(config.allowMessagesFrom, record);
+                    return shouldInterceptAudience(policy.allowMessagesFrom(), record);
                 }
                 if (isEvent(record)) {
-                    if (!config.allowEvents) {
+                    if (!policy.allowEvents()) {
                         ZenLog.traceIntercepted(record, "!allowEvents");
                         return true;
                     }
                     return false;
                 }
                 if (isReminder(record)) {
-                    if (!config.allowReminders) {
+                    if (!policy.allowReminders()) {
                         ZenLog.traceIntercepted(record, "!allowReminders");
                         return true;
                     }
                     return false;
                 }
                 if (isMedia(record)) {
-                    if (!config.allowMedia) {
+                    if (!policy.allowMedia()) {
                         ZenLog.traceIntercepted(record, "!allowMedia");
                         return true;
                     }
                     return false;
                 }
                 if (isSystem(record)) {
-                    if (!config.allowSystem) {
+                    if (!policy.allowSystem()) {
                         ZenLog.traceIntercepted(record, "!allowSystem");
                         return true;
                     }
@@ -205,6 +208,19 @@ public class ZenModeFiltering {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Check if the notification is too critical to be suppressed.
+     *
+     * @param record the record to test for criticality
+     * @return {@code true} if notification is considered critical
+     *
+     * @see CriticalNotificationExtractor for criteria
+     */
+    private boolean isCritical(NotificationRecord record) {
+        // 0 is the most critical
+        return record.getCriticality() < CriticalNotificationExtractor.NORMAL;
     }
 
     private static boolean shouldInterceptAudience(int source, NotificationRecord record) {

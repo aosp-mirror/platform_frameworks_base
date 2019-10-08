@@ -43,6 +43,8 @@ import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.LocalServices;
+import com.android.server.UiModeManagerInternal;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
 
@@ -69,6 +71,7 @@ public final class AutoFillUI {
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
     private final @NonNull OverlayControl mOverlayControl;
+    private final @NonNull UiModeManagerInternal mUiModeMgr;
 
     public interface AutoFillUiCallback {
         void authenticate(int requestId, int datasetIndex, @NonNull IntentSender intent,
@@ -86,6 +89,7 @@ public final class AutoFillUI {
     public AutoFillUI(@NonNull Context context) {
         mContext = context;
         mOverlayControl = new OverlayControl(context);
+        mUiModeMgr = LocalServices.getService(UiModeManagerInternal.class);
     }
 
     public void setCallback(@NonNull AutoFillUiCallback callback) {
@@ -193,7 +197,9 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mFillUi = new FillUi(mContext, response, focusedId,
-                    filterText, mOverlayControl, serviceLabel, serviceIcon, new FillUi.Callback() {
+                    filterText, mOverlayControl, serviceLabel, serviceIcon,
+                    mUiModeMgr.isNightMode(),
+                    new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsEvent.TYPE_DETAIL);
@@ -268,9 +274,10 @@ public final class AutoFillUI {
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
             @NonNull AutoFillUiCallback callback, @NonNull PendingUi pendingSaveUi,
-            boolean compatMode) {
+            boolean isUpdate, boolean compatMode) {
         if (sVerbose) {
-            Slog.v(TAG, "showSaveUi() for " + componentName.toShortString() + ": " + info);
+            Slog.v(TAG, "showSaveUi(update=" + isUpdate + ") for " + componentName.toShortString()
+                    + ": " + info);
         }
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
@@ -280,6 +287,9 @@ public final class AutoFillUI {
                 .newLogMaker(MetricsEvent.AUTOFILL_SAVE_UI, componentName, servicePackageName,
                         pendingSaveUi.sessionId, compatMode)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_IDS, numIds);
+        if (isUpdate) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_UPDATE, 1);
+        }
 
         mHandler.post(() -> {
             if (callback != mCallback) {
@@ -328,7 +338,7 @@ public final class AutoFillUI {
                     }
                     mMetricsLogger.write(log);
                 }
-            }, compatMode);
+            }, mUiModeMgr.isNightMode(), isUpdate, compatMode);
         });
     }
 
@@ -364,6 +374,7 @@ public final class AutoFillUI {
         pw.println("Autofill UI");
         final String prefix = "  ";
         final String prefix2 = "    ";
+        pw.print(prefix); pw.print("Night mode: "); pw.println(mUiModeMgr.isNightMode());
         if (mFillUi != null) {
             pw.print(prefix); pw.println("showsFillUi: true");
             mFillUi.dump(pw, prefix2);

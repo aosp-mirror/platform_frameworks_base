@@ -20,7 +20,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
 import android.os.UserHandle;
-import android.util.Base64;
 import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
@@ -29,7 +28,6 @@ import android.webkit.WebViewProviderResponse;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -140,13 +138,17 @@ class WebViewUpdater {
         try {
             synchronized(mLock) {
                 mCurrentWebViewPackage = findPreferredWebViewPackage();
-                // Don't persist the user-chosen setting across boots if the package being
-                // chosen is not used (could be disabled or uninstalled) so that the user won't
-                // be surprised by the device switching to using a certain webview package,
-                // that was uninstalled/disabled a long time ago, if it is installed/enabled
-                // again.
-                mSystemInterface.updateUserSetting(mContext,
-                        mCurrentWebViewPackage.packageName);
+                String userSetting = mSystemInterface.getUserChosenWebViewProvider(mContext);
+                if (userSetting != null
+                        && !userSetting.equals(mCurrentWebViewPackage.packageName)) {
+                    // Don't persist the user-chosen setting across boots if the package being
+                    // chosen is not used (could be disabled or uninstalled) so that the user won't
+                    // be surprised by the device switching to using a certain webview package,
+                    // that was uninstalled/disabled a long time ago, if it is installed/enabled
+                    // again.
+                    mSystemInterface.updateUserSetting(mContext,
+                            mCurrentWebViewPackage.packageName);
+                }
                 onWebViewProviderChanged(mCurrentWebViewPackage);
             }
         } catch (Throwable t) {
@@ -470,9 +472,9 @@ class WebViewUpdater {
 
     /**
      * Gets the minimum version code allowed for a valid provider. It is the minimum versionCode
-     * of all available-by-default and non-fallback WebView provider packages. If there is no
-     * such WebView provider package on the system, then return -1, which means all positive
-     * versionCode WebView packages are accepted.
+     * of all available-by-default WebView provider packages. If there is no such WebView provider
+     * package on the system, then return -1, which means all positive versionCode WebView packages
+     * are accepted.
      *
      * Note that this is a private method in WebViewUpdater that handles a variable
      * (mMinimumVersionCode) which is shared between threads. Furthermore, this method does not
@@ -485,7 +487,7 @@ class WebViewUpdater {
 
         long minimumVersionCode = -1;
         for (WebViewProviderInfo provider : mSystemInterface.getWebViewPackages()) {
-            if (provider.availableByDefault && !provider.isFallback) {
+            if (provider.availableByDefault) {
                 try {
                     long versionCode =
                         mSystemInterface.getFactoryPackageVersion(provider.packageName);
@@ -504,20 +506,20 @@ class WebViewUpdater {
 
     private static boolean providerHasValidSignature(WebViewProviderInfo provider,
             PackageInfo packageInfo, SystemInterface systemInterface) {
-        if (systemInterface.systemIsDebuggable()) {
-            return true;
-        }
-        // If no signature is declared, instead check whether the package is included in the
-        // system.
-        if (provider.signatures == null || provider.signatures.length == 0) {
-            return packageInfo.applicationInfo.isSystemApp();
-        }
+        // Skip checking signatures on debuggable builds, for development purposes.
+        if (systemInterface.systemIsDebuggable()) return true;
+
+        // Allow system apps to be valid providers regardless of signature.
+        if (packageInfo.applicationInfo.isSystemApp()) return true;
+
+        // We don't support packages with multiple signatures.
         if (packageInfo.signatures.length != 1) return false;
 
-        // Return whether the package signature matches any of the valid signatures
+        // If any of the declared signatures match the package signature, it's valid.
         for (Signature signature : provider.signatures) {
             if (signature.equals(packageInfo.signatures[0])) return true;
         }
+
         return false;
     }
 
@@ -530,6 +532,8 @@ class WebViewUpdater {
                         mCurrentWebViewPackage.packageName,
                         mCurrentWebViewPackage.versionName));
             }
+            pw.println(String.format("  Minimum targetSdkVersion: %d",
+                    UserPackage.MINIMUM_SUPPORTED_SDK));
             pw.println(String.format("  Minimum WebView version code: %d",
                   mMinimumVersionCode));
             pw.println(String.format("  Number of relros started: %d",

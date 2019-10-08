@@ -15,10 +15,9 @@
  */
 
 syntax = "proto2";
-option java_package = "android.app";
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package android.app;
 
@@ -28,10 +27,12 @@ package android.app;
 message ProfilerInfoProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Name of profile output file.
     optional string profile_file = 1;
     optional int32 profile_fd = 2;
     optional int32 sampling_interval = 3;
     optional bool auto_stop_profiler = 4;
     optional bool streaming_output = 5;
+    // Denotes an agent (and its parameters) to attach for profiling.
     optional string agent = 6;
 }

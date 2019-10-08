@@ -72,8 +72,11 @@ static volatile int32_t gCount = 0;
 
 const char* AssetManager::RESOURCES_FILENAME = "resources.arsc";
 const char* AssetManager::IDMAP_BIN = "/system/bin/idmap";
-const char* AssetManager::OVERLAY_DIR = "/vendor/overlay";
+const char* AssetManager::VENDOR_OVERLAY_DIR = "/vendor/overlay";
 const char* AssetManager::PRODUCT_OVERLAY_DIR = "/product/overlay";
+const char* AssetManager::SYSTEM_EXT_OVERLAY_DIR = "/system_ext/overlay";
+const char* AssetManager::ODM_OVERLAY_DIR = "/odm/overlay";
+const char* AssetManager::OEM_OVERLAY_DIR = "/oem/overlay";
 const char* AssetManager::OVERLAY_THEME_DIR_PROPERTY = "ro.boot.vendor.overlay.theme";
 const char* AssetManager::TARGET_PACKAGE_NAME = "android";
 const char* AssetManager::TARGET_APK_PATH = "/system/framework/framework-res.apk";
@@ -348,7 +351,7 @@ bool AssetManager::createIdmap(const char* targetApkPath, const char* overlayApk
                 goto exit;
             }
         }
-        ret = tables[0].createIdmap(tables[1], targetCrc, overlayCrc,
+        ret = tables[1].createIdmap(tables[0], targetCrc, overlayCrc,
                 targetApkPath, overlayApkPath, (void**)outData, outSize) == NO_ERROR;
     }
 
@@ -572,7 +575,7 @@ bool AssetManager::appendPathToResTable(asset_path& ap, bool appAsLib) const {
                         mZipSet.setZipResourceTableAsset(ap.path, ass);
                 }
             }
-            
+
             if (nextEntryIdx == 0 && ass != NULL) {
                 // If this is the first resource table in the asset
                 // manager, then we are going to cache it so that we

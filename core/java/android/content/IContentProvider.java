@@ -60,13 +60,28 @@ public interface IContentProvider extends IInterface {
     public AssetFileDescriptor openAssetFile(
             String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
-    public ContentProviderResult[] applyBatch(String callingPkg,
+
+    @Deprecated
+    public default ContentProviderResult[] applyBatch(String callingPkg,
             ArrayList<ContentProviderOperation> operations)
-                    throws RemoteException, OperationApplicationException;
+                    throws RemoteException, OperationApplicationException {
+        return applyBatch(callingPkg, "unknown", operations);
+    }
+
+    public ContentProviderResult[] applyBatch(String callingPkg, String authority,
+            ArrayList<ContentProviderOperation> operations)
+            throws RemoteException, OperationApplicationException;
+
+    @Deprecated
     @UnsupportedAppUsage
-    public Bundle call(
-            String callingPkg, String method, @Nullable String arg, @Nullable Bundle extras)
-            throws RemoteException;
+    public default Bundle call(String callingPkg, String method,
+            @Nullable String arg, @Nullable Bundle extras) throws RemoteException {
+        return call(callingPkg, "unknown", method, arg, extras);
+    }
+
+    public Bundle call(String callingPkg, String authority, String method,
+            @Nullable String arg, @Nullable Bundle extras) throws RemoteException;
+
     public ICancellationSignal createCancellationSignal() throws RemoteException;
 
     public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException;

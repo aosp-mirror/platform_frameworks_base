@@ -18,12 +18,13 @@ package android.text;
 import static android.text.Layout.Alignment.ALIGN_NORMAL;
 
 import android.graphics.Canvas;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-import android.support.test.filters.LargeTest;
 import android.text.NonEditableTextGenerator.TextType;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
+
+import androidx.test.filters.LargeTest;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class StaticLayoutCreateDrawPerfTest {
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(name = "cached={3},{1}chars,{0}")
+    @Parameterized.Parameters(name = "cached {3} {1}chars {0}")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
         for (int length : new int[]{128}) {
@@ -119,7 +120,7 @@ public class StaticLayoutCreateDrawPerfTest {
         while (state.keepRunning()) {
 
             state.pauseTiming();
-            final DisplayListCanvas canvas = node.start(1200, 200);
+            final RecordingCanvas canvas = node.start(1200, 200);
             int save = canvas.save();
             if (!mCached) Canvas.freeTextLayoutCaches();
             state.resumeTiming();

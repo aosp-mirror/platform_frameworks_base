@@ -20,14 +20,19 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.ServiceManager;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.service.textclassifier.TextClassifierService;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
@@ -39,6 +44,9 @@ import java.lang.ref.WeakReference;
 public final class TextClassificationManager {
 
     private static final String LOG_TAG = "TextClassificationManager";
+
+    private static final TextClassificationConstants sDefaultSettings =
+            new TextClassificationConstants(() ->  null);
 
     private final Object mLock = new Object();
     private final TextClassificationSessionFactory mDefaultSessionFactory =
@@ -72,7 +80,10 @@ public final class TextClassificationManager {
     /**
      * Returns the text classifier that was set via {@link #setTextClassifier(TextClassifier)}.
      * If this is null, this method returns a default text classifier (i.e. either the system text
-     * classifier if one exists, or a local text classifier running in this app.)
+     * classifier if one exists, or a local text classifier running in this process.)
+     * <p>
+     * Note that requests to the TextClassifier may be handled in an OEM-provided process rather
+     * than in the calling app's process.
      *
      * @see #setTextClassifier(TextClassifier)
      */
@@ -121,9 +132,10 @@ public final class TextClassificationManager {
     private TextClassificationConstants getSettings() {
         synchronized (mLock) {
             if (mSettings == null) {
-                mSettings = TextClassificationConstants.loadFromString(Settings.Global.getString(
-                        getApplicationContext().getContentResolver(),
-                        Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+                mSettings = new TextClassificationConstants(
+                        () ->  Settings.Global.getString(
+                                getApplicationContext().getContentResolver(),
+                                Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
             }
             return mSettings;
         }
@@ -191,6 +203,9 @@ public final class TextClassificationManager {
             if (mSettingsObserver != null) {
                 getApplicationContext().getContentResolver()
                         .unregisterContentObserver(mSettingsObserver);
+                if (ConfigParser.ENABLE_DEVICE_CONFIG) {
+                    DeviceConfig.removeOnPropertiesChangedListener(mSettingsObserver);
+                }
             }
         } finally {
             super.finalize();
@@ -214,6 +229,10 @@ public final class TextClassificationManager {
         return TextClassifier.NO_OP;
     }
 
+    /**
+     * Returns a local textclassifier, which is running in this process.
+     */
+    @NonNull
     private TextClassifier getLocalTextClassifier() {
         synchronized (mLock) {
             if (mLocalTextClassifier == null) {
@@ -234,6 +253,12 @@ public final class TextClassificationManager {
                 && TextClassifierService.getServiceComponentName(mContext) != null;
     }
 
+    /** @hide */
+    @VisibleForTesting
+    public void invalidateForTesting() {
+        invalidate();
+    }
+
     private void invalidate() {
         synchronized (mLock) {
             mSettings = null;
@@ -248,6 +273,13 @@ public final class TextClassificationManager {
                 : mContext;
     }
 
+    /** @hide **/
+    public void dump(IndentingPrintWriter pw) {
+        getLocalTextClassifier().dump(pw);
+        getSystemTextClassifier().dump(pw);
+        getSettings().dump(pw);
+    }
+
     /** @hide */
     public static TextClassificationConstants getSettings(Context context) {
         Preconditions.checkNotNull(context);
@@ -256,13 +288,13 @@ public final class TextClassificationManager {
         if (tcm != null) {
             return tcm.getSettings();
         } else {
-            return TextClassificationConstants.loadFromString(Settings.Global.getString(
-                    context.getApplicationContext().getContentResolver(),
-                    Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+            // Use default settings if there is no tcm.
+            return sDefaultSettings;
         }
     }
 
-    private static final class SettingsObserver extends ContentObserver {
+    private static final class SettingsObserver extends ContentObserver
+            implements DeviceConfig.OnPropertiesChangedListener {
 
         private final WeakReference<TextClassificationManager> mTcm;
 
@@ -273,10 +305,25 @@ public final class TextClassificationManager {
                     Settings.Global.getUriFor(Settings.Global.TEXT_CLASSIFIER_CONSTANTS),
                     false /* notifyForDescendants */,
                     this);
+            if (ConfigParser.ENABLE_DEVICE_CONFIG) {
+                DeviceConfig.addOnPropertiesChangedListener(
+                        DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
+                        ActivityThread.currentApplication().getMainExecutor(),
+                        this);
+            }
         }
 
         @Override
         public void onChange(boolean selfChange) {
+            invalidateSettings();
+        }
+
+        @Override
+        public void onPropertiesChanged(Properties properties) {
+            invalidateSettings();
+        }
+
+        private void invalidateSettings() {
             final TextClassificationManager tcm = mTcm.get();
             if (tcm != null) {
                 tcm.invalidate();

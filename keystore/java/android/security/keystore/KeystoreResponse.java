@@ -30,7 +30,7 @@ public class KeystoreResponse implements Parcelable {
     public final int error_code_;
     public final String error_msg_;
 
-    public static final Parcelable.Creator<KeystoreResponse> CREATOR = new
+    public static final @android.annotation.NonNull Parcelable.Creator<KeystoreResponse> CREATOR = new
             Parcelable.Creator<KeystoreResponse>() {
                 @Override
                 public KeystoreResponse createFromParcel(Parcel in) {

@@ -29,7 +29,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.ClipData;
-import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Binder;
@@ -38,32 +37,29 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
-import android.view.Surface;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
 import com.android.internal.os.logging.MetricsLoggerWrapper;
-import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethodClient;
-import com.android.internal.view.IInputMethodManager;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * This class represents an active client session.  There is generally one
@@ -72,7 +68,6 @@ import java.util.Set;
 class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final WindowManagerService mService;
     final IWindowSessionCallback mCallback;
-    final IInputMethodClient mClient;
     final int mUid;
     final int mPid;
     private final String mStringName;
@@ -93,11 +88,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private String mPackageName;
     private String mRelayoutTag;
 
-    public Session(WindowManagerService service, IWindowSessionCallback callback,
-            IInputMethodClient client, IInputContext inputContext) {
+    public Session(WindowManagerService service, IWindowSessionCallback callback) {
         mService = service;
         mCallback = callback;
-        mClient = client;
         mUid = Binder.getCallingUid();
         mPid = Binder.getCallingPid();
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
@@ -126,34 +119,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         sb.append("}");
         mStringName = sb.toString();
 
-        synchronized (mService.mWindowMap) {
-            if (mService.mInputMethodManager == null && mService.mHaveInputMethods) {
-                IBinder b = ServiceManager.getService(
-                        Context.INPUT_METHOD_SERVICE);
-                mService.mInputMethodManager = IInputMethodManager.Stub.asInterface(b);
-            }
-        }
-        long ident = Binder.clearCallingIdentity();
         try {
-            // Note: it is safe to call in to the input method manager
-            // here because we are not holding our lock.
-            if (mService.mInputMethodManager != null) {
-                mService.mInputMethodManager.addClient(client, inputContext,
-                        mUid, mPid);
-            } else {
-                client.setUsingInputMethod(false);
-            }
-            client.asBinder().linkToDeath(this, 0);
+            mCallback.asBinder().linkToDeath(this, 0);
         } catch (RemoteException e) {
             // The caller has died, so we can just forget about this.
-            try {
-                if (mService.mInputMethodManager != null) {
-                    mService.mInputMethodManager.removeClient(client);
-                }
-            } catch (RemoteException ee) {
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+            // Hmmm, should we call killSessionLocked()??
         }
     }
 
@@ -173,52 +143,32 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void binderDied() {
-        // Note: it is safe to call in to the input method manager
-        // here because we are not holding our lock.
-        try {
-            if (mService.mInputMethodManager != null) {
-                mService.mInputMethodManager.removeClient(mClient);
-            }
-        } catch (RemoteException e) {
-        }
-        synchronized(mService.mWindowMap) {
-            mClient.asBinder().unlinkToDeath(this, 0);
+        synchronized (mService.mGlobalLock) {
+            mCallback.asBinder().unlinkToDeath(this, 0);
             mClientDead = true;
             killSessionLocked();
         }
     }
 
     @Override
-    public int add(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, Rect outContentInsets, Rect outStableInsets,
-            InputChannel outInputChannel) {
-        return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
-                new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                new DisplayCutout.ParcelableWrapper()  /* cutout */, outInputChannel);
-    }
-
-    @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
             Rect outStableInsets, Rect outOutsets,
-            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel,
+            InsetsState outInsetsState) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId, outFrame,
-                outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel);
-    }
-
-    @Override
-    public int addWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, Rect outContentInsets, Rect outStableInsets) {
-        return addToDisplayWithoutInputChannel(window, seq, attrs, viewVisibility,
-                Display.DEFAULT_DISPLAY, outContentInsets, outStableInsets);
+                outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel,
+                outInsetsState);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
+            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
+            InsetsState outInsetsState) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */);
+                new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */,
+                outInsetsState);
     }
 
     @Override
@@ -237,7 +187,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
             Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
-            Surface outSurface) {
+            SurfaceControl outSurfaceControl, InsetsState outInsetsState) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
@@ -245,7 +195,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
                 outStableInsets, outsets, outBackdropFrame, cutout,
-                mergedConfiguration, outSurface);
+                mergedConfiguration, outSurfaceControl, outInsetsState);
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         if (false) Slog.d(TAG_WM, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
@@ -283,30 +233,26 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void setInTouchMode(boolean mode) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mService.mInTouchMode = mode;
         }
     }
 
     @Override
     public boolean getInTouchMode() {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             return mService.mInTouchMode;
         }
     }
 
     @Override
-    public boolean performHapticFeedback(IWindow window, int effectId,
-            boolean always) {
-        synchronized(mService.mWindowMap) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                return mService.mPolicy.performHapticFeedbackLw(
-                        mService.windowForClientLocked(this, window, true),
-                        effectId, always);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+    public boolean performHapticFeedback(int effectId, boolean always) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            return mService.mPolicy.performHapticFeedback(mUid, mPackageName,
+                        effectId, always, null);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -337,10 +283,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void cancelDragAndDrop(IBinder dragToken) {
+    public void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation) {
         final long ident = Binder.clearCallingIdentity();
         try {
-            mDragDropController.cancelDragAndDrop(dragToken);
+            mDragDropController.cancelDragAndDrop(dragToken, skipAnimation);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -370,13 +316,40 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void finishMovingTask(IWindow window) {
+        if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishMovingTask");
+
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mService.mTaskPositioningController.finishTaskPositioning(window);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void reportSystemGestureExclusionChanged(IWindow window, List<Rect> exclusionRects) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mService.reportSystemGestureExclusionChanged(this, window, exclusionRects);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void actionOnWallpaper(IBinder window,
+            BiConsumer<WallpaperController, WindowState> action) {
+        final WindowState windowState = mService.windowForClientLocked(this, window, true);
+        action.accept(windowState.getDisplayContent().mWallpaperController, windowState);
+    }
+
+    @Override
     public void setWallpaperPosition(IBinder window, float x, float y, float xStep, float yStep) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mRoot.mWallpaperController.setWindowWallpaperPosition(
-                        mService.windowForClientLocked(this, window, true),
-                        x, y, xStep, yStep);
+                actionOnWallpaper(window, (wpController, windowState) ->
+                        wpController.setWindowWallpaperPosition(windowState, x, y, xStep, yStep));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -385,18 +358,19 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void wallpaperOffsetsComplete(IBinder window) {
-        synchronized (mService.mWindowMap) {
-            mService.mRoot.mWallpaperController.wallpaperOffsetsComplete(window);
+        synchronized (mService.mGlobalLock) {
+            actionOnWallpaper(window, (wpController, windowState) ->
+                    wpController.wallpaperOffsetsComplete(window));
         }
     }
 
     @Override
     public void setWallpaperDisplayOffset(IBinder window, int x, int y) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mService.mRoot.mWallpaperController.setWindowWallpaperDisplayOffset(
-                        mService.windowForClientLocked(this, window, true), x, y);
+                actionOnWallpaper(window, (wpController, windowState) ->
+                        wpController.setWindowWallpaperDisplayOffset(windowState, x, y));
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -406,12 +380,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
-                return mService.mRoot.mWallpaperController.sendWindowWallpaperCommand(
-                        mService.windowForClientLocked(this, window, true),
-                        action, x, y, z, extras, sync);
+                final WindowState windowState = mService.windowForClientLocked(this, window, true);
+                return windowState.getDisplayContent().mWallpaperController
+                        .sendWindowWallpaperCommand(windowState, action, x, y, z, extras, sync);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -420,14 +394,15 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
-        synchronized (mService.mWindowMap) {
-            mService.mRoot.mWallpaperController.wallpaperCommandComplete(window);
+        synchronized (mService.mGlobalLock) {
+            actionOnWallpaper(window, (wpController, windowState) ->
+                    wpController.wallpaperCommandComplete(window));
         }
     }
 
     @Override
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mService.onRectangleOnScreenRequested(token, rectangle);
@@ -463,13 +438,34 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
-            int height) {
+    public void reparentDisplayContent(IWindow window, SurfaceControl sc, int displayId) {
+        mService.reparentDisplayContent(window, sc, displayId);
+    }
+
+    @Override
+    public void updateDisplayContentLocation(IWindow window, int x, int y, int displayId) {
+        mService.updateDisplayContentLocation(window, x, y, displayId);
+    }
+
+    @Override
+    public void updateTapExcludeRegion(IWindow window, int regionId, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            mService.updateTapExcludeRegion(window, regionId, left, top, width, height);
+            mService.updateTapExcludeRegion(window, regionId, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void insetsModified(IWindow window, InsetsState state) {
+        synchronized (mService.mGlobalLock) {
+            final WindowState windowState = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (windowState != null) {
+                windowState.getDisplayContent().getInsetsStateController().onInsetsModified(
+                        windowState, state);
+            }
         }
     }
 

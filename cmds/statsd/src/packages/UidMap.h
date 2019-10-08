@@ -44,12 +44,16 @@ namespace statsd {
 
 struct AppData {
     int64_t versionCode;
+    string versionString;
+    string installer;
     bool deleted;
 
     // Empty constructor needed for unordered map.
     AppData() {
     }
-    AppData(const int64_t v) : versionCode(v), deleted(false){};
+
+    AppData(const int64_t v, const string& versionString, const string& installer)
+        : versionCode(v), versionString(versionString), installer(installer), deleted(false){};
 };
 
 // When calling appendUidMap, we retrieve all the ChangeRecords since the last
@@ -61,15 +65,20 @@ struct ChangeRecord {
     const int32_t uid;
     const int64_t version;
     const int64_t prevVersion;
+    const string versionString;
+    const string prevVersionString;
 
     ChangeRecord(const bool isDeletion, const int64_t timestampNs, const string& package,
-                 const int32_t uid, const int64_t version, const int64_t prevVersion)
+                 const int32_t uid, const int64_t version, const string versionString,
+                 const int64_t prevVersion, const string prevVersionString)
         : deletion(isDeletion),
           timestampNs(timestampNs),
           package(package),
           uid(uid),
           version(version),
-          prevVersion(prevVersion) {
+          prevVersion(prevVersion),
+          versionString(versionString),
+          prevVersionString(prevVersionString) {
     }
 };
 
@@ -82,15 +91,19 @@ public:
     UidMap();
     ~UidMap();
     static const std::map<std::string, uint32_t> sAidToUidMapping;
+
+    static sp<UidMap> getInstance();
     /*
      * All three inputs must be the same size, and the jth element in each array refers to the same
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].
      */
     void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
-                   const vector<int64_t>& versionCode, const vector<String16>& packageName);
+                   const vector<int64_t>& versionCode, const vector<String16>& versionString,
+                   const vector<String16>& packageName, const vector<String16>& installer);
 
     void updateApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid,
-                   const int64_t& versionCode);
+                   const int64_t& versionCode, const String16& versionString,
+                   const String16& installer);
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
     // Returns true if the given uid contains the specified app (eg. com.google.android.gms).
@@ -103,7 +116,7 @@ public:
 
     // Helper for debugging contents of this uid map. Can be triggered with:
     // adb shell cmd stats print-uid-map
-    void printUidMap(FILE* out) const;
+    void printUidMap(int outFd) const;
 
     // Commands for indicating to the map that a producer should be notified if an app is updated.
     // This allows the metric producer to distinguish when the same uid or app represents a
@@ -119,7 +132,7 @@ public:
     void OnConfigRemoved(const ConfigKey& key);
 
     void assignIsolatedUid(int isolatedUid, int parentUid);
-    void removeIsolatedUid(int isolatedUid, int parentUid);
+    void removeIsolatedUid(int isolatedUid);
 
     // Returns the host uid if it exists. Otherwise, returns the same uid that was passed-in.
     virtual int getHostUidOrSelf(int uid) const;
@@ -127,8 +140,9 @@ public:
     // Gets all snapshots and changes that have occurred since the last output.
     // If every config key has received a change or snapshot record, then this
     // record is deleted.
-    void appendUidMap(const int64_t& timestamp, const ConfigKey& key,
-                      std::set<string> *str_set, util::ProtoOutputStream* proto);
+    void appendUidMap(const int64_t& timestamp, const ConfigKey& key, std::set<string>* str_set,
+                      bool includeVersionStrings, bool includeInstaller,
+                      util::ProtoOutputStream* proto);
 
     // Forces the output to be cleared. We still generate a snapshot based on the current state.
     // This results in extra data uploaded but helps us reconstruct the uid mapping on the server
@@ -140,13 +154,25 @@ public:
 
     std::set<int32_t> getAppUid(const string& package) const;
 
+    // Write current PackageInfoSnapshot to ProtoOutputStream.
+    // interestingUids: If not empty, only write the package info for these uids. If empty, write
+    //                  package info for all uids.
+    // str_set: if not null, add new string to the set and write str_hash to proto
+    //          if null, write string to proto.
+    void writeUidMapSnapshot(int64_t timestamp, bool includeVersionStrings, bool includeInstaller,
+                             const std::set<int32_t>& interestingUids, std::set<string>* str_set,
+                             ProtoOutputStream* proto);
+
 private:
     std::set<string> getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const;
     string normalizeAppName(const string& appName) const;
 
     void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
 
-    // TODO: Use shared_mutex for improved read-locking if a library can be found in Android.
+    void writeUidMapSnapshotLocked(int64_t timestamp, bool includeVersionStrings,
+                                   bool includeInstaller, const std::set<int32_t>& interestingUids,
+                                   std::set<string>* str_set, ProtoOutputStream* proto);
+
     mutable mutex mMutex;
     mutable mutex mIsolatedMutex;
 

@@ -35,15 +35,19 @@ public class DozeLog {
     private static final int SIZE = Build.IS_DEBUGGABLE ? 400 : 50;
     static final SimpleDateFormat FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
-    private static final int PULSE_REASONS = 6;
+    public static final int REASONS = 10;
 
     public static final int PULSE_REASON_NONE = -1;
     public static final int PULSE_REASON_INTENT = 0;
     public static final int PULSE_REASON_NOTIFICATION = 1;
     public static final int PULSE_REASON_SENSOR_SIGMOTION = 2;
-    public static final int PULSE_REASON_SENSOR_PICKUP = 3;
-    public static final int PULSE_REASON_SENSOR_DOUBLE_TAP = 4;
+    public static final int REASON_SENSOR_PICKUP = 3;
+    public static final int REASON_SENSOR_DOUBLE_TAP = 4;
     public static final int PULSE_REASON_SENSOR_LONG_PRESS = 5;
+    public static final int PULSE_REASON_DOCKING = 6;
+    public static final int REASON_SENSOR_WAKE_UP = 7;
+    public static final int PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN = 8;
+    public static final int REASON_SENSOR_TAP = 9;
 
     private static boolean sRegisterKeyguardCallback = true;
 
@@ -62,10 +66,10 @@ public class DozeLog {
     private static SummaryStats sEmergencyCallStats;
     private static SummaryStats[][] sProxStats; // [reason][near/far]
 
-    public static void tracePickupPulse(Context context, boolean withinVibrationThreshold) {
+    public static void tracePickupWakeUp(Context context, boolean withinVibrationThreshold) {
         if (!ENABLED) return;
         init(context);
-        log("pickupPulse withinVibrationThreshold=" + withinVibrationThreshold);
+        log("pickupWakeUp withinVibrationThreshold=" + withinVibrationThreshold);
         (withinVibrationThreshold ? sPickupPulseNearVibrationStats
                 : sPickupPulseNotNearVibrationStats).append();
     }
@@ -73,7 +77,7 @@ public class DozeLog {
     public static void tracePulseStart(int reason) {
         if (!ENABLED) return;
         sPulsing = true;
-        log("pulseStart reason=" + pulseReasonToString(reason));
+        log("pulseStart reason=" + reasonToString(reason));
     }
 
     public static void tracePulseFinish() {
@@ -101,8 +105,8 @@ public class DozeLog {
                 sScreenOnPulsingStats = new SummaryStats();
                 sScreenOnNotPulsingStats = new SummaryStats();
                 sEmergencyCallStats = new SummaryStats();
-                sProxStats = new SummaryStats[PULSE_REASONS][2];
-                for (int i = 0; i < PULSE_REASONS; i++) {
+                sProxStats = new SummaryStats[REASONS][2];
+                for (int i = 0; i < REASONS; i++) {
                     sProxStats[i][0] = new SummaryStats();
                     sProxStats[i][1] = new SummaryStats();
                 }
@@ -156,6 +160,12 @@ public class DozeLog {
         log("missedTick by=" + delay);
     }
 
+    public static void traceTimeTickScheduled(long when, long triggerAt) {
+        if (!ENABLED) return;
+        log("timeTickScheduled at=" + FORMAT.format(new Date(when)) + " triggerAt="
+                + FORMAT.format(new Date(triggerAt)));
+    }
+
     public static void traceKeyguard(boolean showing) {
         if (!ENABLED) return;
         log("keyguard " + showing);
@@ -169,23 +179,36 @@ public class DozeLog {
         log("state " + state);
     }
 
-    public static void traceProximityResult(Context context, boolean near, long millis,
-            int pulseReason) {
+    /**
+     * Appends wake-display event to the logs.
+     * @param wake if we're waking up or sleeping.
+     */
+    public static void traceWakeDisplay(boolean wake) {
         if (!ENABLED) return;
-        init(context);
-        log("proximityResult reason=" + pulseReasonToString(pulseReason) + " near=" + near
-                + " millis=" + millis);
-        sProxStats[pulseReason][near ? 0 : 1].append();
+        log("wakeDisplay " + wake);
     }
 
-    public static String pulseReasonToString(int pulseReason) {
+    public static void traceProximityResult(Context context, boolean near, long millis,
+            int reason) {
+        if (!ENABLED) return;
+        init(context);
+        log("proximityResult reason=" + reasonToString(reason) + " near=" + near
+                + " millis=" + millis);
+        sProxStats[reason][near ? 0 : 1].append();
+    }
+
+    public static String reasonToString(int pulseReason) {
         switch (pulseReason) {
             case PULSE_REASON_INTENT: return "intent";
             case PULSE_REASON_NOTIFICATION: return "notification";
             case PULSE_REASON_SENSOR_SIGMOTION: return "sigmotion";
-            case PULSE_REASON_SENSOR_PICKUP: return "pickup";
-            case PULSE_REASON_SENSOR_DOUBLE_TAP: return "doubletap";
+            case REASON_SENSOR_PICKUP: return "pickup";
+            case REASON_SENSOR_DOUBLE_TAP: return "doubletap";
             case PULSE_REASON_SENSOR_LONG_PRESS: return "longpress";
+            case PULSE_REASON_DOCKING: return "docking";
+            case PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN: return "wakelockscreen";
+            case REASON_SENSOR_WAKE_UP: return "wakeup";
+            case REASON_SENSOR_TAP: return "tap";
             default: throw new IllegalArgumentException("bad reason: " + pulseReason);
         }
     }
@@ -211,8 +234,8 @@ public class DozeLog {
             sScreenOnPulsingStats.dump(pw, "Screen on (pulsing)");
             sScreenOnNotPulsingStats.dump(pw, "Screen on (not pulsing)");
             sEmergencyCallStats.dump(pw, "Emergency call");
-            for (int i = 0; i < PULSE_REASONS; i++) {
-                final String reason = pulseReasonToString(i);
+            for (int i = 0; i < REASONS; i++) {
+                final String reason = reasonToString(i);
                 sProxStats[i][0].dump(pw, "Proximity near (" + reason + ")");
                 sProxStats[i][1].dump(pw, "Proximity far (" + reason + ")");
             }
@@ -255,10 +278,10 @@ public class DozeLog {
         }
     }
 
-    public static void traceSensor(Context context, int pulseReason) {
+    public static void traceSensor(Context context, int reason) {
         if (!ENABLED) return;
         init(context);
-        log("sensor type=" + pulseReasonToString(pulseReason));
+        log("sensor type=" + reasonToString(reason));
     }
 
     private static class SummaryStats {

@@ -158,7 +158,7 @@ public class PatternMatcher implements Parcelable {
         mParsedPattern = src.createIntArray();
     }
     
-    public static final Parcelable.Creator<PatternMatcher> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PatternMatcher> CREATOR
             = new Parcelable.Creator<PatternMatcher>() {
         public PatternMatcher createFromParcel(Parcel source) {
             return new PatternMatcher(source);

@@ -24,12 +24,12 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Slog;
 
+import com.android.internal.os.BinderInternal;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-
-import com.android.internal.os.BinderInternal;
-import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.PluginManagerImpl;
 
 public class SystemUIService extends Service {
 
@@ -77,9 +77,9 @@ public class SystemUIService extends Service {
                 ((PluginManagerImpl) Dependency.get(PluginManager.class)).dump(fd, pw, args);
             }
         } else {
-            String svc = args[0];
+            String svc = args[0].toLowerCase();
             for (SystemUI ui: services) {
-                String name = ui.getClass().getName();
+                String name = ui.getClass().getName().toLowerCase();
                 if (name.endsWith(svc)) {
                     ui.dump(fd, pw, args);
                 }

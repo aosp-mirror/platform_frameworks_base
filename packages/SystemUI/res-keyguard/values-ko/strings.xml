@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"터치하여 비밀번호 입력"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"잠금 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"잠금 해제하려면 PIN 입력"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"PIN을 입력해 주세요."</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"패턴 입력"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"비밀번호 입력"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"잘못된 PIN 코드입니다."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"유효하지 않은 카드"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"충전됨"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"충전 중"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"고속 충전 중"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"저속 충전 중"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"충전 완료"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 무선 충전 중"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 중"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"충전기를 연결하세요."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"잠금 해제하려면 메뉴를 누르세요."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"네트워크 잠김"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM 카드가 PUK로 잠겨 있습니다."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"SIM 카드 잠금 해제 중..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN 영역"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"기기 비밀번호"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN 영역"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK 영역"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g>에 다음 알람이 설정됨"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"오류로 인해 eSIM을 사용 중지할 수 없습니다."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter 키"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"패턴을 잊음"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"잘못된 패턴"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"잘못된 비밀번호"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"잘못된 패턴"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"잘못된 비밀번호"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"잘못된 PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요.</item>
@@ -136,13 +141,94 @@
       <item quantity="other">기기가 <xliff:g id="NUMBER_1">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 비밀번호를 입력하세요.</item>
       <item quantity="one">기기가 <xliff:g id="NUMBER_0">%d</xliff:g>시간 동안 잠금 해제되지 않았습니다. 비밀번호를 입력하세요.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"인식할 수 없음"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="other">SIM PIN을 입력하세요. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>
-      <item quantity="one">SIM PIN을 입력하세요. <xliff:g id="NUMBER_0">%d</xliff:g>번 더 실패하면 이동통신사에 문의하여 기기를 잠금 해제해야 합니다.</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"인식할 수 없음"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"인식할 수 없음"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="other">SIM PIN을 입력하세요. 입력은 <xliff:g id="NUMBER_1">%d</xliff:g>번 더 시도할 수 있습니다.</item>
+      <item quantity="one">SIM PIN을 입력하세요. 입력에 <xliff:g id="NUMBER_0">%d</xliff:g>번 더 실패하면 이동통신사에 문의하여 기기를 잠금 해제해야 합니다.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_1">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
       <item quantity="one">SIM이 사용 중지되었습니다. 계속하려면 PUK 코드를 입력하세요. <xliff:g id="_NUMBER_0">%d</xliff:g>번 더 실패하면 SIM을 완전히 사용할 수 없게 됩니다. 자세한 내용은 이동통신사에 문의하세요.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"현재 시각:"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"현재 시각:"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"열두 시"</item>
+    <item msgid="7389464214252023751">"한 시"</item>
+    <item msgid="8803180377002008046">"두 시"</item>
+    <item msgid="8614897059944644719">"세 시"</item>
+    <item msgid="2293058674782619556">"네 시"</item>
+    <item msgid="4815402358455041664">"다섯 시"</item>
+    <item msgid="3325754778509665687">"여섯 시"</item>
+    <item msgid="5805551341866280575">"일곱 시"</item>
+    <item msgid="203334816668238610">"여덟 시"</item>
+    <item msgid="4828052671464488923">"아홉 시"</item>
+    <item msgid="2233497913571137419">"열 시"</item>
+    <item msgid="5621554266768657830">"열한 시"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"정각"</item>
+    <item msgid="8837126587669001578">"일 분"</item>
+    <item msgid="4294343372940455660">"이 분"</item>
+    <item msgid="7129166637707421536">"삼 분"</item>
+    <item msgid="7579404865008788673">"사 분"</item>
+    <item msgid="3873924689207380586">"오 분"</item>
+    <item msgid="4849565597850069377">"육 분"</item>
+    <item msgid="4404219424523572364">"칠 분"</item>
+    <item msgid="8740481214764087329">"팔 분"</item>
+    <item msgid="1713216865806811237">"구 분"</item>
+    <item msgid="3508406095411245038">"십 분"</item>
+    <item msgid="7161996337755311711">"십일 분"</item>
+    <item msgid="4044549963329624197">"십이 분"</item>
+    <item msgid="333373157917379088">"십삼 분"</item>
+    <item msgid="2631202907124819385">"십사 분"</item>
+    <item msgid="6472396076858033453">"십오 분"</item>
+    <item msgid="8656981856181581643">"십육 분"</item>
+    <item msgid="7289026608562030619">"십칠 분"</item>
+    <item msgid="3881477602692646573">"십팔 분"</item>
+    <item msgid="3358129827772984226">"십구 분"</item>
+    <item msgid="3308575407402865807">"이십 분"</item>
+    <item msgid="5346560955382229629">"이십\n일 분"</item>
+    <item msgid="226750304761473436">"이십\n이 분"</item>
+    <item msgid="616811325336838734">"이십\n삼 분"</item>
+    <item msgid="616346116869053440">"이십\n사 분"</item>
+    <item msgid="4642996410384042830">"이십\n오 분"</item>
+    <item msgid="7506092849993571465">"이십\n육 분"</item>
+    <item msgid="1915078191101042031">"이십\n칠 분"</item>
+    <item msgid="4292378641900520252">"이십\n팔 분"</item>
+    <item msgid="5339513901773103696">"이십\n구 분"</item>
+    <item msgid="3574673250891657607">"삼십 분"</item>
+    <item msgid="5796923836589110940">"삼십\n일 분"</item>
+    <item msgid="5859323597571702052">"삼십\n이 분"</item>
+    <item msgid="5133326723148876507">"삼십\n삼 분"</item>
+    <item msgid="2693999494655663096">"삼십\n사분"</item>
+    <item msgid="3316754944962836197">"삼십\n오 분"</item>
+    <item msgid="816891008836796723">"삼십\n육 분"</item>
+    <item msgid="9158890488666520078">"삼십\n칠 분"</item>
+    <item msgid="1894769703213894011">"삼십\n팔 분"</item>
+    <item msgid="5638820345598572399">"삼십\n구 분"</item>
+    <item msgid="8838304023017895439">"사십 분"</item>
+    <item msgid="1834742948932559597">"사십\n일 분"</item>
+    <item msgid="6573707308847773944">"사십\n이 분"</item>
+    <item msgid="2450149950652678001">"사십\n삼 분"</item>
+    <item msgid="2874667401318178036">"사십\n사 분"</item>
+    <item msgid="3391101532763048862">"사십\n오 분"</item>
+    <item msgid="1671489330863254362">"사십\n육분"</item>
+    <item msgid="5916017359554531038">"사십\n칠 분"</item>
+    <item msgid="8205413177993059967">"사십\n팔 분"</item>
+    <item msgid="6607867415142171302">"사십\n구 분"</item>
+    <item msgid="8358850748472089162">"오십 분"</item>
+    <item msgid="3551313125255080234">"오십\n일 분"</item>
+    <item msgid="1559678130725716542">"오십\n이 분"</item>
+    <item msgid="431441994725492377">"오십\n삼 분"</item>
+    <item msgid="6345774640539623024">"사십\n사 분"</item>
+    <item msgid="8018192990793931120">"오십\n오 분"</item>
+    <item msgid="6187650843754604534">"오십\n육 분"</item>
+    <item msgid="8727240174015993259">"오십\n칠 분"</item>
+    <item msgid="848339003778952950">"사십\n팔 분"</item>
+    <item msgid="5798985802835423618">"오십\n구 분"</item>
+  </string-array>
 </resources>

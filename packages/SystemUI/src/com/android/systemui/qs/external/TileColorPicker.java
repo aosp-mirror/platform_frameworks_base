@@ -18,7 +18,9 @@ package com.android.systemui.qs.external;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.service.quicksettings.Tile;
+
 import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.R;
 
 public class TileColorPicker {

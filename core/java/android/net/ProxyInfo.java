@@ -342,7 +342,7 @@ public class ProxyInfo implements Parcelable {
         dest.writeStringArray(mParsedExclusionList);
     }
 
-    public static final Creator<ProxyInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ProxyInfo> CREATOR =
         new Creator<ProxyInfo>() {
             public ProxyInfo createFromParcel(Parcel in) {
                 String host = null;

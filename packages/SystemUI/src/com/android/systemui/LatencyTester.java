@@ -20,13 +20,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.SystemClock;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.internal.util.LatencyTracker;
-import com.android.systemui.statusbar.phone.FingerprintUnlockController;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
@@ -72,10 +73,10 @@ public class LatencyTester extends SystemUI {
     }
 
     private void fakeWakeAndUnlock() {
-        FingerprintUnlockController fingerprintUnlockController = getComponent(StatusBar.class)
-                .getFingerprintUnlockController();
-        fingerprintUnlockController.onFingerprintAcquired();
-        fingerprintUnlockController.onFingerprintAuthenticated(
-                KeyguardUpdateMonitor.getCurrentUser());
+        BiometricUnlockController biometricUnlockController = getComponent(StatusBar.class)
+                .getBiometricUnlockController();
+        biometricUnlockController.onBiometricAcquired(BiometricSourceType.FINGERPRINT);
+        biometricUnlockController.onBiometricAuthenticated(
+                KeyguardUpdateMonitor.getCurrentUser(), BiometricSourceType.FINGERPRINT);
     }
 }

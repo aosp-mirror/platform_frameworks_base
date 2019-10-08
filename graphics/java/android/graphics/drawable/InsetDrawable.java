@@ -16,11 +16,6 @@
 
 package android.graphics.drawable;
 
-import com.android.internal.R;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
@@ -35,6 +30,11 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
@@ -242,7 +242,6 @@ public class InsetDrawable extends DrawableWrapper {
                 | mTmpInsetRect.top | mTmpInsetRect.bottom) != 0;
     }
 
-    /** @hide */
     @Override
     public Insets getOpticalInsets() {
         final Insets contentInsets = super.getOpticalInsets();

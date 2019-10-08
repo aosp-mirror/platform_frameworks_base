@@ -16,6 +16,22 @@
 
 package com.android.server;
 
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.FastImmutableArraySet;
+import android.util.Log;
+import android.util.LogPrinter;
+import android.util.MutableInt;
+import android.util.PrintWriterPrinter;
+import android.util.Printer;
+import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.util.FastPrintWriter;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,23 +40,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import android.net.Uri;
-import android.util.FastImmutableArraySet;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.Log;
-import android.util.MutableInt;
-import android.util.PrintWriterPrinter;
-import android.util.Slog;
-import android.util.LogPrinter;
-import android.util.Printer;
-
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.util.proto.ProtoOutputStream;
-
-import com.android.internal.util.FastPrintWriter;
 
 /**
  * {@hide}
@@ -788,6 +787,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
                         + filter.hasCategory(Intent.CATEGORY_DEFAULT));
                 if (!defaultOnly || filter.hasCategory(Intent.CATEGORY_DEFAULT)) {
                     final R oneResult = newResult(filter, match, userId);
+                    if (debug) Slog.v(TAG, "    Created result: " + oneResult);
                     if (oneResult != null) {
                         dest.add(oneResult);
                         if (debug) {

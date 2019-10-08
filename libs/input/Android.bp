@@ -14,7 +14,6 @@
 
 cc_library_shared {
     name: "libinputservice",
-
     srcs: [
         "PointerController.cpp",
         "SpriteController.cpp",
@@ -28,17 +27,19 @@ cc_library_shared {
         "libgui",
         "libui",
         "libinput",
-        "libinputflinger",
         "libnativewindow",
+    ],
+
+    header_libs: [
+        "libinputflinger_headers",
     ],
 
     include_dirs: ["frameworks/native/services"],
 
     cflags: [
         "-Wall",
+        "-Wextra",
         "-Werror",
-        "-Wunused",
-        "-Wunreachable-code",
     ],
 
 }

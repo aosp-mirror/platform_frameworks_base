@@ -18,17 +18,8 @@
 <com.android.systemui.qs.PagedTileLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="0dp"
+    android:layout_weight="1"
     android:clipChildren="true"
-    android:clipToPadding="false"
     android:paddingBottom="@dimen/qs_paged_tile_layout_padding_bottom">
-
-    <FrameLayout
-        android:id="@+id/page_decor"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_gravity="bottom">
-
-    </FrameLayout>
-
 </com.android.systemui.qs.PagedTileLayout>

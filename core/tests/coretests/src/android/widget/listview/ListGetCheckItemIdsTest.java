@@ -17,9 +17,10 @@
 package android.widget.listview;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.ListView;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
 
 import java.util.Arrays;
 

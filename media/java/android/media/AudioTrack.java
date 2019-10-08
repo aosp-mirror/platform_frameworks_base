@@ -16,35 +16,33 @@
 
 package android.media;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
-import java.lang.Math;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.NioUtils;
-import java.util.Collection;
-import java.util.concurrent.Executor;
-
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
-import android.app.ActivityThread;
-import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
-import android.os.IBinder;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.NioUtils;
+import java.util.LinkedList;
+import java.util.concurrent.Executor;
 
 /**
  * The AudioTrack class manages and plays a single audio resource for Java applications.
@@ -97,17 +95,26 @@ public class AudioTrack extends PlayerBase
      */
     private static final float GAIN_MAX = 1.0f;
 
-    /** Maximum value for AudioTrack channel count
-     * @hide public for MediaCode only, do not un-hide or change to a numeric literal
-     */
-    public static final int CHANNEL_COUNT_MAX = native_get_FCC_8();
-
     /** indicates AudioTrack state is stopped */
     public static final int PLAYSTATE_STOPPED = 1;  // matches SL_PLAYSTATE_STOPPED
     /** indicates AudioTrack state is paused */
     public static final int PLAYSTATE_PAUSED  = 2;  // matches SL_PLAYSTATE_PAUSED
     /** indicates AudioTrack state is playing */
     public static final int PLAYSTATE_PLAYING = 3;  // matches SL_PLAYSTATE_PLAYING
+    /**
+      * @hide
+      * indicates AudioTrack state is stopping waiting for NATIVE_EVENT_STREAM_END to
+      * transition to PLAYSTATE_STOPPED.
+      * Only valid for offload mode.
+      */
+    private static final int PLAYSTATE_STOPPING = 4;
+    /**
+      * @hide
+      * indicates AudioTrack state is paused from stopping state. Will transition to
+      * PLAYSTATE_STOPPING if play() is called.
+      * Only valid for offload mode.
+      */
+    private static final int PLAYSTATE_PAUSED_STOPPING = 5;
 
     // keep these values in sync with android_media_AudioTrack.cpp
     /**
@@ -191,9 +198,8 @@ public class AudioTrack extends PlayerBase
     private static final int NATIVE_EVENT_NEW_POS = 4;
     /**
      * Callback for more data
-     * TODO only for offload
      */
-    private static final int NATIVE_EVENT_MORE_DATA = 0;
+    private static final int NATIVE_EVENT_CAN_WRITE_MORE_DATA = 9;
     /**
      * IAudioTrack tear down for offloaded tracks
      * TODO: when received, java AudioTrack must be released
@@ -202,7 +208,6 @@ public class AudioTrack extends PlayerBase
     /**
      * Event id denotes when all the buffers queued in AF and HW are played
      * back (after stop is called) for an offloaded track.
-     * TODO: not just for offload
      */
     private static final int NATIVE_EVENT_STREAM_END = 7;
 
@@ -312,6 +317,14 @@ public class AudioTrack extends PlayerBase
      * One of PLAYSTATE_STOPPED, PLAYSTATE_PAUSED, or PLAYSTATE_PLAYING.
      */
     private int mPlayState = PLAYSTATE_STOPPED;
+
+    /**
+     * Indicates that we are expecting an end of stream callback following a call
+     * to setOffloadEndOfStream() in a gapless track transition context. The native track
+     * will be restarted automatically.
+     */
+    private boolean mOffloadEosPending = false;
+
     /**
      * Lock to ensure mPlayState updates reflect the actual state of the object.
      */
@@ -377,6 +390,10 @@ public class AudioTrack extends PlayerBase
      */
     private int mAudioFormat;   // initialized by all constructors via audioParamCheck()
     /**
+     * The AudioAttributes used in configuration.
+     */
+    private AudioAttributes mConfiguredAudioAttributes;
+    /**
      * Audio session ID
      */
     private int mSessionId = AudioManager.AUDIO_SESSION_ID_GENERATE;
@@ -392,6 +409,18 @@ public class AudioTrack extends PlayerBase
      * Offset of the first sample of the audio in byte from start of HW_AV_SYNC track AV header.
      */
     private int mOffset = 0;
+    /**
+     * Indicates whether the track is intended to play in offload mode.
+     */
+    private boolean mOffloaded = false;
+    /**
+     * When offloaded track: delay for decoder in frames
+     */
+    private int mOffloadDelayFrames = 0;
+    /**
+     * When offloaded track: padding for decoder in frames
+     */
+    private int mOffloadPaddingFrames = 0;
 
     //--------------------------------
     // Used exclusively by native code
@@ -572,6 +601,8 @@ public class AudioTrack extends PlayerBase
         super(attributes, AudioPlaybackConfiguration.PLAYER_TYPE_JAM_AUDIOTRACK);
         // mState already == STATE_UNINITIALIZED
 
+        mConfiguredAudioAttributes = attributes; // object copy not needed, immutable.
+
         if (format == null) {
             throw new IllegalArgumentException("Illegal null AudioFormat");
         }
@@ -614,6 +645,7 @@ public class AudioTrack extends PlayerBase
             encoding = format.getEncoding();
         }
         audioParamCheck(rate, channelMask, channelIndexMask, encoding, mode);
+        mOffloaded = offload;
         mStreamType = AudioSystem.STREAM_DEFAULT;
 
         audioBuffSizeCheck(bufferSizeInBytes);
@@ -827,7 +859,7 @@ public class AudioTrack extends PlayerBase
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public @NonNull Builder setBufferSizeInBytes(int bufferSizeInBytes)
+        public @NonNull Builder setBufferSizeInBytes(@IntRange(from = 0) int bufferSizeInBytes)
                 throws IllegalArgumentException {
             if (bufferSizeInBytes <= 0) {
                 throw new IllegalArgumentException("Invalid buffer size " + bufferSizeInBytes);
@@ -865,7 +897,7 @@ public class AudioTrack extends PlayerBase
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public @NonNull Builder setSessionId(int sessionId)
+        public @NonNull Builder setSessionId(@IntRange(from = 1) int sessionId)
                 throws IllegalArgumentException {
             if ((sessionId != AudioManager.AUDIO_SESSION_ID_GENERATE) && (sessionId < 1)) {
                 throw new IllegalArgumentException("Invalid audio session ID " + sessionId);
@@ -901,11 +933,11 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
-         * @hide
          * Sets whether this track will play through the offloaded audio path.
          * When set to true, at build time, the audio format will be checked against
-         * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat)} to verify the audio format
-         * used by this track is supported on the device's offload path (if any).
+         * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat,AudioAttributes)}
+         * to verify the audio format used by this track is supported on the device's offload
+         * path (if any).
          * <br>Offload is only supported for media audio streams, and therefore requires that
          * the usage be {@link AudioAttributes#USAGE_MEDIA}.
          * @param offload true to require the offload path for playback.
@@ -960,15 +992,14 @@ public class AudioTrack extends PlayerBase
                         .build();
             }
 
-            //TODO tie offload to PERFORMANCE_MODE_POWER_SAVING?    
             if (mOffload) {
-                if (mAttributes.getUsage() != AudioAttributes.USAGE_MEDIA) {
+                if (mPerformanceMode == PERFORMANCE_MODE_LOW_LATENCY) {
                     throw new UnsupportedOperationException(
-                            "Cannot create AudioTrack, offload requires USAGE_MEDIA");
+                            "Offload and low latency modes are incompatible");
                 }
-                if (!AudioSystem.isOffloadSupported(mFormat)) {
+                if (!AudioSystem.isOffloadSupported(mFormat, mAttributes)) {
                     throw new UnsupportedOperationException(
-                            "Cannot create AudioTrack, offload format not supported");
+                            "Cannot create AudioTrack, offload format / attributes not supported");
                 }
             }
 
@@ -993,8 +1024,147 @@ public class AudioTrack extends PlayerBase
         }
     }
 
+    /**
+     * Configures the delay and padding values for the current compressed stream playing
+     * in offload mode.
+     * This can only be used on a track successfully initialized with
+     * {@link AudioTrack.Builder#setOffloadedPlayback(boolean)}. The unit is frames, where a
+     * frame indicates the number of samples per channel, e.g. 100 frames for a stereo compressed
+     * stream corresponds to 200 decoded interleaved PCM samples.
+     * @param delayInFrames number of frames to be ignored at the beginning of the stream. A value
+     *     of 0 indicates no delay is to be applied.
+     * @param paddingInFrames number of frames to be ignored at the end of the stream. A value of 0
+     *     of 0 indicates no padding is to be applied.
+     */
+    public void setOffloadDelayPadding(@IntRange(from = 0) int delayInFrames,
+            @IntRange(from = 0) int paddingInFrames) {
+        if (paddingInFrames < 0) {
+            throw new IllegalArgumentException("Illegal negative padding");
+        }
+        if (delayInFrames < 0) {
+            throw new IllegalArgumentException("Illegal negative delay");
+        }
+        if (!mOffloaded) {
+            throw new IllegalStateException("Illegal use of delay/padding on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Uninitialized track");
+        }
+        mOffloadDelayFrames = delayInFrames;
+        mOffloadPaddingFrames = paddingInFrames;
+        native_set_delay_padding(delayInFrames, paddingInFrames);
+    }
+
+    /**
+     * Return the decoder delay of an offloaded track, expressed in frames, previously set with
+     * {@link #setOffloadDelayPadding(int, int)}, or 0 if it was never modified.
+     * <p>This delay indicates the number of frames to be ignored at the beginning of the stream.
+     * This value can only be queried on a track successfully initialized with
+     * {@link AudioTrack.Builder#setOffloadedPlayback(boolean)}.
+     * @return decoder delay expressed in frames.
+     */
+    public @IntRange(from = 0) int getOffloadDelay() {
+        if (!mOffloaded) {
+            throw new IllegalStateException("Illegal query of delay on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Illegal query of delay on uninitialized track");
+        }
+        return mOffloadDelayFrames;
+    }
+
+    /**
+     * Return the decoder padding of an offloaded track, expressed in frames, previously set with
+     * {@link #setOffloadDelayPadding(int, int)}, or 0 if it was never modified.
+     * <p>This padding indicates the number of frames to be ignored at the end of the stream.
+     * This value can only be queried on a track successfully initialized with
+     * {@link AudioTrack.Builder#setOffloadedPlayback(boolean)}.
+     * @return decoder padding expressed in frames.
+     */
+    public @IntRange(from = 0) int getOffloadPadding() {
+        if (!mOffloaded) {
+            throw new IllegalStateException("Illegal query of padding on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Illegal query of padding on uninitialized track");
+        }
+        return mOffloadPaddingFrames;
+    }
+
+    /**
+     * Declares that the last write() operation on this track provided the last buffer of this
+     * stream.
+     * After the end of stream, previously set padding and delay values are ignored.
+     * Can only be called only if the AudioTrack is opened in offload mode
+     * {@see Builder#setOffloadedPlayback(boolean)}.
+     * Can only be called only if the AudioTrack is in state {@link #PLAYSTATE_PLAYING}
+     * {@see #getPlaystate()}.
+     * Use this method in the same thread as any write() operation.
+     */
+    public void setOffloadEndOfStream() {
+        if (!mOffloaded) {
+            throw new IllegalStateException("EOS not supported on non-offloaded track");
+        }
+        if (mState == STATE_UNINITIALIZED) {
+            throw new IllegalStateException("Uninitialized track");
+        }
+        if (mPlayState != PLAYSTATE_PLAYING) {
+            throw new IllegalStateException("EOS not supported if not playing");
+        }
+        synchronized (mStreamEventCbLock) {
+            if (mStreamEventCbInfoList.size() == 0) {
+                throw new IllegalStateException("EOS not supported without StreamEventCallback");
+            }
+        }
+
+        synchronized (mPlayStateLock) {
+            native_stop();
+            mOffloadEosPending = true;
+            mPlayState = PLAYSTATE_STOPPING;
+        }
+    }
+
+    /**
+     * Returns whether the track was built with {@link Builder#setOffloadedPlayback(boolean)} set
+     * to {@code true}.
+     * @return true if the track is using offloaded playback.
+     */
+    public boolean isOffloadedPlayback() {
+        return mOffloaded;
+    }
+
+    /**
+     * Returns whether direct playback of an audio format with the provided attributes is
+     * currently supported on the system.
+     * <p>Direct playback means that the audio stream is not resampled or downmixed
+     * by the framework. Checking for direct support can help the app select the representation
+     * of audio content that most closely matches the capabilities of the device and peripherials
+     * (e.g. A/V receiver) connected to it. Note that the provided stream can still be re-encoded
+     * or mixed with other streams, if needed.
+     * <p>Also note that this query only provides information about the support of an audio format.
+     * It does not indicate whether the resources necessary for the playback are available
+     * at that instant.
+     * @param format a non-null {@link AudioFormat} instance describing the format of
+     *   the audio data.
+     * @param attributes a non-null {@link AudioAttributes} instance.
+     * @return true if the given audio format can be played directly.
+     */
+    public static boolean isDirectPlaybackSupported(@NonNull AudioFormat format,
+            @NonNull AudioAttributes attributes) {
+        if (format == null) {
+            throw new IllegalArgumentException("Illegal null AudioFormat argument");
+        }
+        if (attributes == null) {
+            throw new IllegalArgumentException("Illegal null AudioAttributes argument");
+        }
+        return native_is_direct_output_supported(format.getEncoding(), format.getSampleRate(),
+                format.getChannelMask(), format.getChannelIndexMask(),
+                attributes.getContentType(), attributes.getUsage(), attributes.getFlags());
+    }
+
     // mask of all the positional channels supported, however the allowed combinations
-    // are further restricted by the matching left/right rule and CHANNEL_COUNT_MAX
+    // are further restricted by the matching left/right rule and
+    // AudioSystem.OUT_CHANNEL_COUNT_MAX
     private static final int SUPPORTED_OUT_CHANNELS =
             AudioFormat.CHANNEL_OUT_FRONT_LEFT |
             AudioFormat.CHANNEL_OUT_FRONT_RIGHT |
@@ -1117,7 +1287,7 @@ public class AudioTrack extends PlayerBase
         mChannelIndexMask = channelIndexMask;
         if (mChannelIndexMask != 0) {
             // restrictive: indexMask could allow up to AUDIO_CHANNEL_BITS_LOG2
-            final int indexMask = (1 << CHANNEL_COUNT_MAX) - 1;
+            final int indexMask = (1 << AudioSystem.OUT_CHANNEL_COUNT_MAX) - 1;
             if ((channelIndexMask & ~indexMask) != 0) {
                 throw new IllegalArgumentException("Unsupported channel index configuration "
                         + channelIndexMask);
@@ -1162,9 +1332,9 @@ public class AudioTrack extends PlayerBase
             return false;
         }
         final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
-        if (channelCount > CHANNEL_COUNT_MAX) {
+        if (channelCount > AudioSystem.OUT_CHANNEL_COUNT_MAX) {
             loge("Channel configuration contains too many channels " +
-                    channelCount + ">" + CHANNEL_COUNT_MAX);
+                    channelCount + ">" + AudioSystem.OUT_CHANNEL_COUNT_MAX);
             return false;
         }
         // check for unsupported multichannel combinations:
@@ -1223,6 +1393,9 @@ public class AudioTrack extends PlayerBase
      * Releases the native AudioTrack resources.
      */
     public void release() {
+        synchronized (mStreamEventCbLock){
+            endStreamEventHandling();
+        }
         // even though native_release() stops the native AudioTrack, we need to stop
         // AudioTrack subclasses too.
         try {
@@ -1232,7 +1405,11 @@ public class AudioTrack extends PlayerBase
         }
         baseRelease();
         native_release();
-        mState = STATE_UNINITIALIZED;
+        synchronized (mPlayStateLock) {
+            mState = STATE_UNINITIALIZED;
+            mPlayState = PLAYSTATE_STOPPED;
+            mPlayStateLock.notify();
+        }
     }
 
     @Override
@@ -1294,6 +1471,23 @@ public class AudioTrack extends PlayerBase
      */
     public @NonNull PlaybackParams getPlaybackParams() {
         return native_get_playback_params();
+    }
+
+    /**
+     * Returns the {@link AudioAttributes} used in configuration.
+     * If a {@code streamType} is used instead of an {@code AudioAttributes}
+     * to configure the AudioTrack
+     * (the use of {@code streamType} for configuration is deprecated),
+     * then the {@code AudioAttributes}
+     * equivalent to the {@code streamType} is returned.
+     * @return The {@code AudioAttributes} used to configure the AudioTrack.
+     * @throws IllegalStateException If the track is not initialized.
+     */
+    public @NonNull AudioAttributes getAudioAttributes() {
+        if (mState == STATE_UNINITIALIZED || mConfiguredAudioAttributes == null) {
+            throw new IllegalStateException("track not initialized");
+        }
+        return mConfiguredAudioAttributes;
     }
 
     /**
@@ -1374,7 +1568,14 @@ public class AudioTrack extends PlayerBase
      */
     public int getPlayState() {
         synchronized (mPlayStateLock) {
-            return mPlayState;
+            switch (mPlayState) {
+                case PLAYSTATE_STOPPING:
+                    return PLAYSTATE_PLAYING;
+                case PLAYSTATE_PAUSED_STOPPING:
+                    return PLAYSTATE_PAUSED;
+                default:
+                    return mPlayState;
+            }
         }
     }
 
@@ -1395,7 +1596,7 @@ public class AudioTrack extends PlayerBase
      * @return current size in frames of the <code>AudioTrack</code> buffer.
      * @throws IllegalStateException if track is not initialized.
      */
-    public int getBufferSizeInFrames() {
+    public @IntRange (from = 0) int getBufferSizeInFrames() {
         return native_get_buffer_size_frames();
     }
 
@@ -1422,7 +1623,7 @@ public class AudioTrack extends PlayerBase
      *    {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
      * @throws IllegalStateException if track is not initialized.
      */
-    public int setBufferSizeInFrames(int bufferSizeInFrames) {
+    public int setBufferSizeInFrames(@IntRange (from = 0) int bufferSizeInFrames) {
         if (mDataLoadMode == MODE_STATIC || mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
@@ -1451,7 +1652,7 @@ public class AudioTrack extends PlayerBase
      *  @return maximum size in frames of the <code>AudioTrack</code> buffer.
      *  @throws IllegalStateException if track is not initialized.
      */
-    public int getBufferCapacityInFrames() {
+    public @IntRange (from = 0) int getBufferCapacityInFrames() {
         return native_get_buffer_capacity_frames();
     }
 
@@ -1506,7 +1707,7 @@ public class AudioTrack extends PlayerBase
      * a better solution.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 130237544)
     public int getLatency() {
         return native_get_latency();
     }
@@ -1958,7 +2159,7 @@ public class AudioTrack extends PlayerBase
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
-    public int setPlaybackHeadPosition(int positionInFrames) {
+    public int setPlaybackHeadPosition(@IntRange (from = 0) int positionInFrames) {
         if (mDataLoadMode == MODE_STREAM || mState == STATE_UNINITIALIZED ||
                 getPlayState() == PLAYSTATE_PLAYING) {
             return ERROR_INVALID_OPERATION;
@@ -2000,7 +2201,8 @@ public class AudioTrack extends PlayerBase
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
-    public int setLoopPoints(int startInFrames, int endInFrames, int loopCount) {
+    public int setLoopPoints(@IntRange (from = 0) int startInFrames,
+            @IntRange (from = 0) int endInFrames, @IntRange (from = -1) int loopCount) {
         if (mDataLoadMode == MODE_STREAM || mState == STATE_UNINITIALIZED ||
                 getPlayState() == PLAYSTATE_PLAYING) {
             return ERROR_INVALID_OPERATION;
@@ -2108,7 +2310,12 @@ public class AudioTrack extends PlayerBase
         synchronized(mPlayStateLock) {
             baseStart();
             native_start();
-            mPlayState = PLAYSTATE_PLAYING;
+            if (mPlayState == PLAYSTATE_PAUSED_STOPPING) {
+                mPlayState = PLAYSTATE_STOPPING;
+            } else {
+                mPlayState = PLAYSTATE_PLAYING;
+                mOffloadEosPending = false;
+            }
         }
     }
 
@@ -2130,9 +2337,15 @@ public class AudioTrack extends PlayerBase
         synchronized(mPlayStateLock) {
             native_stop();
             baseStop();
-            mPlayState = PLAYSTATE_STOPPED;
-            mAvSyncHeader = null;
-            mAvSyncBytesRemaining = 0;
+            if (mOffloaded && mPlayState != PLAYSTATE_PAUSED_STOPPING) {
+                mPlayState = PLAYSTATE_STOPPING;
+            } else {
+                mPlayState = PLAYSTATE_STOPPED;
+                mOffloadEosPending = false;
+                mAvSyncHeader = null;
+                mAvSyncBytesRemaining = 0;
+                mPlayStateLock.notify();
+            }
         }
     }
 
@@ -2153,7 +2366,11 @@ public class AudioTrack extends PlayerBase
         synchronized(mPlayStateLock) {
             native_pause();
             basePause();
-            mPlayState = PLAYSTATE_PAUSED;
+            if (mPlayState == PLAYSTATE_STOPPING) {
+                mPlayState = PLAYSTATE_PAUSED_STOPPING;
+            } else {
+                mPlayState = PLAYSTATE_PAUSED;
+            }
         }
     }
 
@@ -2282,7 +2499,11 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
-        int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat,
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
+        final int ret = native_write_byte(audioData, offsetInBytes, sizeInBytes, mAudioFormat,
                 writeMode == WRITE_BLOCKING);
 
         if ((mDataLoadMode == MODE_STATIC)
@@ -2391,7 +2612,11 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
-        int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat,
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
+        final int ret = native_write_short(audioData, offsetInShorts, sizeInShorts, mAudioFormat,
                 writeMode == WRITE_BLOCKING);
 
         if ((mDataLoadMode == MODE_STATIC)
@@ -2479,7 +2704,11 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
-        int ret = native_write_float(audioData, offsetInFloats, sizeInFloats, mAudioFormat,
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
+        final int ret = native_write_float(audioData, offsetInFloats, sizeInFloats, mAudioFormat,
                 writeMode == WRITE_BLOCKING);
 
         if ((mDataLoadMode == MODE_STATIC)
@@ -2553,6 +2782,10 @@ public class AudioTrack extends PlayerBase
             return ERROR_BAD_VALUE;
         }
 
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
+        }
+
         int ret = 0;
         if (audioData.isDirect()) {
             ret = native_write_native_bytes(audioData,
@@ -2596,7 +2829,8 @@ public class AudioTrack extends PlayerBase
      *         to the audio sink.
      *     <BR>With {@link #WRITE_NON_BLOCKING}, the write will return immediately after
      *     queuing as much audio data for playback as possible without blocking.
-     * @param timestamp The timestamp of the first decodable audio frame in the provided audioData.
+     * @param timestamp The timestamp, in nanoseconds, of the first decodable audio frame in the
+     *     provided audioData.
      * @return zero or the positive number of bytes that were written, or one of the following
      *    error codes.
      * <ul>
@@ -2634,6 +2868,10 @@ public class AudioTrack extends PlayerBase
         if ((audioData == null) || (sizeInBytes < 0) || (sizeInBytes > audioData.remaining())) {
             Log.e(TAG, "AudioTrack.write() called with invalid size (" + sizeInBytes + ") value");
             return ERROR_BAD_VALUE;
+        }
+
+        if (!blockUntilOffloadDrain(writeMode)) {
+            return 0;
         }
 
         // create timestamp header if none exists
@@ -2705,6 +2943,25 @@ public class AudioTrack extends PlayerBase
         return native_reload_static();
     }
 
+    /**
+     * When an AudioTrack in offload mode is in STOPPING play state, wait until event STREAM_END is
+     * received if blocking write or return with 0 frames written if non blocking mode.
+     */
+    private boolean blockUntilOffloadDrain(int writeMode) {
+        synchronized (mPlayStateLock) {
+            while (mPlayState == PLAYSTATE_STOPPING || mPlayState == PLAYSTATE_PAUSED_STOPPING) {
+                if (writeMode == WRITE_NON_BLOCKING) {
+                    return false;
+                }
+                try {
+                    mPlayStateLock.wait();
+                } catch (InterruptedException e) {
+                }
+            }
+            return true;
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Audio effects management
     //--------------------
@@ -2751,7 +3008,7 @@ public class AudioTrack extends PlayerBase
      * @return error code or success, see {@link #SUCCESS},
      *    {@link #ERROR_INVALID_OPERATION}, {@link #ERROR}
      */
-    public int setAuxEffectSendLevel(float level) {
+    public int setAuxEffectSendLevel(@FloatRange(from = 0.0) float level) {
         if (mState == STATE_UNINITIALIZED) {
             return ERROR_INVALID_OPERATION;
         }
@@ -2986,68 +3243,223 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
-     * @hide
-     * Abstract class to receive event notification about the stream playback.
-     * See {@link AudioTrack#setStreamEventCallback(Executor, StreamEventCallback)} to register
+     * Abstract class to receive event notifications about the stream playback in offloaded mode.
+     * See {@link AudioTrack#registerStreamEventCallback(Executor, StreamEventCallback)} to register
      * the callback on the given {@link AudioTrack} instance.
      */
     public abstract static class StreamEventCallback {
-        /** @hide */ // add hidden empty constructor so it doesn't show in SDK
-        public StreamEventCallback() { }
         /**
          * Called when an offloaded track is no longer valid and has been discarded by the system.
          * An example of this happening is when an offloaded track has been paused too long, and
          * gets invalidated by the system to prevent any other offload.
-         * @param track the {@link AudioTrack} on which the event happened
+         * @param track the {@link AudioTrack} on which the event happened.
          */
-        public void onTearDown(AudioTrack track) { }
+        public void onTearDown(@NonNull AudioTrack track) { }
         /**
          * Called when all the buffers of an offloaded track that were queued in the audio system
          * (e.g. the combination of the Android audio framework and the device's audio hardware)
          * have been played after {@link AudioTrack#stop()} has been called.
-         * @param track the {@link AudioTrack} on which the event happened
+         * @param track the {@link AudioTrack} on which the event happened.
          */
-        public void onStreamPresentationEnd(AudioTrack track) { }
+        public void onPresentationEnded(@NonNull AudioTrack track) { }
         /**
          * Called when more audio data can be written without blocking on an offloaded track.
-         * @param track the {@link AudioTrack} on which the event happened
+         * @param track the {@link AudioTrack} on which the event happened.
+         * @param sizeInFrames the number of frames available to write without blocking.
+         *   Note that the frame size of a compressed stream is 1 byte.
          */
-        public void onStreamDataRequest(AudioTrack track) { }
+        public void onDataRequest(@NonNull AudioTrack track, @IntRange(from = 0) int sizeInFrames) {
+        }
     }
 
-    private Executor mStreamEventExec;
-    private StreamEventCallback mStreamEventCb;
-    private final Object mStreamEventCbLock = new Object();
-
     /**
-     * @hide
-     * Sets the callback for the notification of stream events.
-     * @param executor {@link Executor} to handle the callbacks
-     * @param eventCallback the callback to receive the stream event notifications
+     * Registers a callback for the notification of stream events.
+     * This callback can only be registered for instances operating in offloaded mode
+     * (see {@link AudioTrack.Builder#setOffloadedPlayback(boolean)} and
+     * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat,AudioAttributes)} for
+     * more details).
+     * @param executor {@link Executor} to handle the callbacks.
+     * @param eventCallback the callback to receive the stream event notifications.
      */
-    public void setStreamEventCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerStreamEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull StreamEventCallback eventCallback) {
         if (eventCallback == null) {
             throw new IllegalArgumentException("Illegal null StreamEventCallback");
+        }
+        if (!mOffloaded) {
+            throw new IllegalStateException(
+                    "Cannot register StreamEventCallback on non-offloaded AudioTrack");
         }
         if (executor == null) {
             throw new IllegalArgumentException("Illegal null Executor for the StreamEventCallback");
         }
         synchronized (mStreamEventCbLock) {
-            mStreamEventExec = executor;
-            mStreamEventCb = eventCallback;
+            // check if eventCallback already in list
+            for (StreamEventCbInfo seci : mStreamEventCbInfoList) {
+                if (seci.mStreamEventCb == eventCallback) {
+                    throw new IllegalArgumentException(
+                            "StreamEventCallback already registered");
+                }
+            }
+            beginStreamEventHandling();
+            mStreamEventCbInfoList.add(new StreamEventCbInfo(executor, eventCallback));
         }
     }
 
     /**
-     * @hide
-     * Unregisters the callback for notification of stream events, previously set
-     * by {@link #setStreamEventCallback(Executor, StreamEventCallback)}.
+     * Unregisters the callback for notification of stream events, previously registered
+     * with {@link #registerStreamEventCallback(Executor, StreamEventCallback)}.
+     * @param eventCallback the callback to unregister.
      */
-    public void removeStreamEventCallback() {
+    public void unregisterStreamEventCallback(@NonNull StreamEventCallback eventCallback) {
+        if (eventCallback == null) {
+            throw new IllegalArgumentException("Illegal null StreamEventCallback");
+        }
+        if (!mOffloaded) {
+            throw new IllegalStateException("No StreamEventCallback on non-offloaded AudioTrack");
+        }
         synchronized (mStreamEventCbLock) {
-            mStreamEventExec = null;
-            mStreamEventCb = null;
+            StreamEventCbInfo seciToRemove = null;
+            for (StreamEventCbInfo seci : mStreamEventCbInfoList) {
+                if (seci.mStreamEventCb == eventCallback) {
+                    // ok to remove while iterating over list as we exit iteration
+                    mStreamEventCbInfoList.remove(seci);
+                    if (mStreamEventCbInfoList.size() == 0) {
+                        endStreamEventHandling();
+                    }
+                    return;
+                }
+            }
+            throw new IllegalArgumentException("StreamEventCallback was not registered");
+        }
+    }
+
+    //---------------------------------------------------------
+    // Offload
+    //--------------------
+    private static class StreamEventCbInfo {
+        final Executor mStreamEventExec;
+        final StreamEventCallback mStreamEventCb;
+
+        StreamEventCbInfo(Executor e, StreamEventCallback cb) {
+            mStreamEventExec = e;
+            mStreamEventCb = cb;
+        }
+    }
+
+    private final Object mStreamEventCbLock = new Object();
+    @GuardedBy("mStreamEventCbLock")
+    @NonNull private LinkedList<StreamEventCbInfo> mStreamEventCbInfoList =
+            new LinkedList<StreamEventCbInfo>();
+    /**
+     * Dedicated thread for handling the StreamEvent callbacks
+     */
+    private @Nullable HandlerThread mStreamEventHandlerThread;
+    private @Nullable volatile StreamEventHandler mStreamEventHandler;
+
+    /**
+     * Called from native AudioTrack callback thread, filter messages if necessary
+     * and repost event on AudioTrack message loop to prevent blocking native thread.
+     * @param what event code received from native
+     * @param arg optional argument for event
+     */
+    void handleStreamEventFromNative(int what, int arg) {
+        if (mStreamEventHandler == null) {
+            return;
+        }
+        switch (what) {
+            case NATIVE_EVENT_CAN_WRITE_MORE_DATA:
+                // replace previous CAN_WRITE_MORE_DATA messages with the latest value
+                mStreamEventHandler.removeMessages(NATIVE_EVENT_CAN_WRITE_MORE_DATA);
+                mStreamEventHandler.sendMessage(
+                        mStreamEventHandler.obtainMessage(
+                                NATIVE_EVENT_CAN_WRITE_MORE_DATA, arg, 0/*ignored*/));
+                break;
+            case NATIVE_EVENT_NEW_IAUDIOTRACK:
+                mStreamEventHandler.sendMessage(
+                        mStreamEventHandler.obtainMessage(NATIVE_EVENT_NEW_IAUDIOTRACK));
+                break;
+            case NATIVE_EVENT_STREAM_END:
+                mStreamEventHandler.sendMessage(
+                        mStreamEventHandler.obtainMessage(NATIVE_EVENT_STREAM_END));
+                break;
+        }
+    }
+
+    private class StreamEventHandler extends Handler {
+
+        StreamEventHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            final LinkedList<StreamEventCbInfo> cbInfoList;
+            synchronized (mStreamEventCbLock) {
+                if (msg.what == NATIVE_EVENT_STREAM_END) {
+                    synchronized (mPlayStateLock) {
+                        if (mPlayState == PLAYSTATE_STOPPING) {
+                            if (mOffloadEosPending) {
+                                native_start();
+                                mPlayState = PLAYSTATE_PLAYING;
+                            } else {
+                                mAvSyncHeader = null;
+                                mAvSyncBytesRemaining = 0;
+                                mPlayState = PLAYSTATE_STOPPED;
+                            }
+                            mOffloadEosPending = false;
+                            mPlayStateLock.notify();
+                        }
+                    }
+                }
+                if (mStreamEventCbInfoList.size() == 0) {
+                    return;
+                }
+                cbInfoList = new LinkedList<StreamEventCbInfo>(mStreamEventCbInfoList);
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                for (StreamEventCbInfo cbi : cbInfoList) {
+                    switch (msg.what) {
+                        case NATIVE_EVENT_CAN_WRITE_MORE_DATA:
+                            cbi.mStreamEventExec.execute(() ->
+                                    cbi.mStreamEventCb.onDataRequest(AudioTrack.this, msg.arg1));
+                            break;
+                        case NATIVE_EVENT_NEW_IAUDIOTRACK:
+                            // TODO also release track as it's not longer usable
+                            cbi.mStreamEventExec.execute(() ->
+                                    cbi.mStreamEventCb.onTearDown(AudioTrack.this));
+                            break;
+                        case NATIVE_EVENT_STREAM_END:
+                            cbi.mStreamEventExec.execute(() ->
+                                    cbi.mStreamEventCb.onPresentationEnded(AudioTrack.this));
+                            break;
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    @GuardedBy("mStreamEventCbLock")
+    private void beginStreamEventHandling() {
+        if (mStreamEventHandlerThread == null) {
+            mStreamEventHandlerThread = new HandlerThread(TAG + ".StreamEvent");
+            mStreamEventHandlerThread.start();
+            final Looper looper = mStreamEventHandlerThread.getLooper();
+            if (looper != null) {
+                mStreamEventHandler = new StreamEventHandler(looper);
+            }
+        }
+    }
+
+    @GuardedBy("mStreamEventCbLock")
+    private void endStreamEventHandling() {
+        if (mStreamEventHandlerThread != null) {
+            mStreamEventHandlerThread.quit();
+            mStreamEventHandlerThread = null;
         }
     }
 
@@ -3135,7 +3547,7 @@ public class AudioTrack extends PlayerBase
     private static void postEventFromNative(Object audiotrack_ref,
             int what, int arg1, int arg2, Object obj) {
         //logd("Event posted from the native side: event="+ what + " args="+ arg1+" "+arg2);
-        final AudioTrack track = (AudioTrack)((WeakReference)audiotrack_ref).get();
+        final AudioTrack track = (AudioTrack) ((WeakReference) audiotrack_ref).get();
         if (track == null) {
             return;
         }
@@ -3145,29 +3557,11 @@ public class AudioTrack extends PlayerBase
             return;
         }
 
-        if (what == NATIVE_EVENT_MORE_DATA || what == NATIVE_EVENT_NEW_IAUDIOTRACK
+        if (what == NATIVE_EVENT_CAN_WRITE_MORE_DATA
+                || what == NATIVE_EVENT_NEW_IAUDIOTRACK
                 || what == NATIVE_EVENT_STREAM_END) {
-            final Executor exec;
-            final StreamEventCallback cb;
-            synchronized (track.mStreamEventCbLock) {
-                exec = track.mStreamEventExec;
-                cb = track.mStreamEventCb;
-            }
-            if ((exec == null) || (cb == null)) {
-                return;
-            }
-            switch (what) {
-                case NATIVE_EVENT_MORE_DATA:
-                    exec.execute(() -> cb.onStreamDataRequest(track));
-                    return;
-                case NATIVE_EVENT_NEW_IAUDIOTRACK:
-                    // TODO also release track as it's not longer usable
-                    exec.execute(() -> cb.onTearDown(track));
-                    return;
-                case NATIVE_EVENT_STREAM_END:
-                    exec.execute(() -> cb.onStreamPresentationEnd(track));
-                    return;
-            }
+            track.handleStreamEventFromNative(what, arg1);
+            return;
         }
 
         NativePositionEventHandlerDelegate delegate = track.mEventHandlerDelegate;
@@ -3180,10 +3574,12 @@ public class AudioTrack extends PlayerBase
         }
     }
 
-
     //---------------------------------------------------------
     // Native methods called from the Java side
     //--------------------
+
+    private static native boolean native_is_direct_output_supported(int encoding, int sampleRate,
+            int channelMask, int channelIndexMask, int contentType, int usage, int flags);
 
     // post-condition: mStreamType is overwritten with a value
     //     that reflects the audio attributes (e.g. an AudioAttributes object with a usage of
@@ -3272,7 +3668,6 @@ public class AudioTrack extends PlayerBase
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
-    static private native int native_get_FCC_8();
 
     private native int native_applyVolumeShaper(
             @NonNull VolumeShaper.Configuration configuration,
@@ -3280,6 +3675,10 @@ public class AudioTrack extends PlayerBase
 
     private native @Nullable VolumeShaper.State native_getVolumeShaperState(int id);
     private native final int native_setPresentation(int presentationId, int programId);
+
+    private native int native_getPortId();
+
+    private native void native_set_delay_padding(int delayInFrames, int paddingInFrames);
 
     //---------------------------------------------------------
     // Utility methods
@@ -3297,41 +3696,103 @@ public class AudioTrack extends PlayerBase
     {
         private MetricsConstants() {}
 
-        /**
-         * Key to extract the Stream Type for this track
-         * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
-         */
-        public static final String STREAMTYPE = "android.media.audiotrack.streamtype";
+        // MM_PREFIX is slightly different than TAG, used to avoid cut-n-paste errors.
+        private static final String MM_PREFIX = "android.media.audiotrack.";
 
         /**
-         * Key to extract the Content Type for this track
+         * Key to extract the stream type for this track
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
+         * This value may not exist in API level {@link android.os.Build.VERSION_CODES#P}.
+         * The value is a {@code String}.
          */
-        public static final String CONTENTTYPE = "android.media.audiotrack.type";
+        public static final String STREAMTYPE = MM_PREFIX + "streamtype";
 
         /**
-         * Key to extract the Content Type for this track
+         * Key to extract the attribute content type for this track
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is a String.
+         * The value is a {@code String}.
          */
-        public static final String USAGE = "android.media.audiotrack.usage";
+        public static final String CONTENTTYPE = MM_PREFIX + "type";
+
+        /**
+         * Key to extract the attribute usage for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is a {@code String}.
+         */
+        public static final String USAGE = MM_PREFIX + "usage";
 
         /**
          * Key to extract the sample rate for this track in Hz
          * from the {@link AudioTrack#getMetrics} return value.
-         * The value is an integer.
+         * The value is an {@code int}.
+         * @deprecated This does not work. Use {@link AudioTrack#getSampleRate()} instead.
          */
+        @Deprecated
         public static final String SAMPLERATE = "android.media.audiorecord.samplerate";
 
         /**
-         * Key to extract the channel mask information for this track
+         * Key to extract the native channel mask information for this track
          * from the {@link AudioTrack#getMetrics} return value.
          *
-         * The value is a Long integer.
+         * The value is a {@code long}.
+         * @deprecated This does not work. Use {@link AudioTrack#getFormat()} and read from
+         * the returned format instead.
          */
+        @Deprecated
         public static final String CHANNELMASK = "android.media.audiorecord.channelmask";
 
+        /**
+         * Use for testing only. Do not expose.
+         * The current sample rate.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String SAMPLE_RATE = MM_PREFIX + "sampleRate";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The native channel mask.
+         * The value is a {@code long}.
+         * @hide
+         */
+        @TestApi
+        public static final String CHANNEL_MASK = MM_PREFIX + "channelMask";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The output audio data encoding.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ENCODING = MM_PREFIX + "encoding";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The port id of this track port in audioserver.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String PORT_ID = MM_PREFIX + "portId";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The buffer frameCount.
+         * The value is an {@code int}.
+         * @hide
+         */
+        @TestApi
+        public static final String FRAME_COUNT = MM_PREFIX + "frameCount";
+
+        /**
+         * Use for testing only. Do not expose.
+         * The actual track attributes used.
+         * The value is a {@code String}.
+         * @hide
+         */
+        @TestApi
+        public static final String ATTRIBUTES = MM_PREFIX + "attributes";
     }
 }

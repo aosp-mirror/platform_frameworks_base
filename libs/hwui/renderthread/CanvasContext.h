@@ -16,30 +16,29 @@
 
 #pragma once
 
-#include "BakedOpDispatcher.h"
-#include "BakedOpRenderer.h"
 #include "DamageAccumulator.h"
-#include "FrameBuilder.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
 #include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
 #include "IRenderPipeline.h"
 #include "LayerUpdateQueue.h"
+#include "Lighting.h"
+#include "ReliableSurface.h"
 #include "RenderNode.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
-#include "thread/Task.h"
-#include "thread/TaskProcessor.h"
 
 #include <EGL/egl.h>
 #include <SkBitmap.h>
 #include <SkRect.h>
+#include <SkSize.h>
 #include <cutils/compiler.h>
 #include <gui/Surface.h>
 #include <utils/Functor.h>
 
 #include <functional>
+#include <future>
 #include <set>
 #include <string>
 #include <vector>
@@ -77,8 +76,7 @@ public:
      */
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator,
                              ErrorHandler* errorHandler) {
-        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut,
-                errorHandler);
+        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, errorHandler);
     }
 
     /**
@@ -99,12 +97,6 @@ public:
      */
     void unpinImages() { mRenderPipeline->unpinImages(); }
 
-    /**
-     * Destroy any layers that have been attached to the provided RenderNode removing
-     * any state that may have been set during createOrUpdateLayer().
-     */
-    static void destroyLayer(RenderNode* node);
-
     static void invokeFunctor(const RenderThread& thread, Functor* functor);
 
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
@@ -121,10 +113,11 @@ public:
     void setSurface(sp<Surface>&& surface);
     bool pauseSurface();
     void setStopped(bool stopped);
-    bool hasSurface() { return mNativeSurface.get(); }
+    bool hasSurface() const { return mNativeSurface.get(); }
+    void allocateBuffers();
 
-    void setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
-    void setLightCenter(const Vector3& lightCenter);
+    void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
     void setWideGamut(bool wideGamut);
     bool makeCurrent();
@@ -137,7 +130,6 @@ public:
     void prepareAndDraw(RenderNode* node);
 
     void buildLayer(RenderNode* node);
-    bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
     void markLayerInUse(RenderNode* node);
 
     void destroyHardwareResources();
@@ -154,8 +146,6 @@ public:
     void resetFrameStats();
 
     void setName(const std::string&& name);
-
-    void serializeDisplayListTree();
 
     void addRenderNode(RenderNode* node, bool placeFront);
     void removeRenderNode(RenderNode* node);
@@ -194,6 +184,21 @@ public:
         mFrameCompleteCallbacks.push_back(std::move(func));
     }
 
+    void setPictureCapturedCallback(const std::function<void(sk_sp<SkPicture>&&)>& callback) {
+        mRenderPipeline->setPictureCapturedCallback(callback);
+    }
+
+    void setForceDark(bool enable) { mUseForceDark = enable; }
+
+    bool useForceDark() {
+        return mUseForceDark;
+    }
+
+    // Must be called before setSurface
+    void setRenderAheadDepth(int renderAhead);
+
+    SkISize getNextFrameSize() const;
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
@@ -206,6 +211,8 @@ private:
     void freePrefetchedLayers();
 
     bool isSwapChainStuffed();
+    bool surfaceRequiresRedraw();
+    void setPresentTime();
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
@@ -213,7 +220,7 @@ private:
     EGLint mLastFrameHeight = 0;
 
     RenderThread& mRenderThread;
-    sp<Surface> mNativeSurface;
+    sp<ReliableSurface> mNativeSurface;
     // stopped indicates the CanvasContext will reject actual redraw operations,
     // and defer repaint until it is un-stopped
     bool mStopped = false;
@@ -224,6 +231,9 @@ private:
     // painted onto its surface.
     bool mIsDirty = false;
     SwapBehavior mSwapBehavior = SwapBehavior::kSwap_default;
+    bool mFixedRenderAhead = false;
+    uint32_t mRenderAheadDepth = 0;
+    uint32_t mRenderAheadCapacity = 0;
     struct SwapHistory {
         SkRect damage;
         nsecs_t vsyncTime;
@@ -240,8 +250,9 @@ private:
 
     bool mOpaque;
     bool mWideColorGamut = false;
-    BakedOpRenderer::LightInfo mLightInfo;
-    FrameBuilder::LightGeometry mLightGeometry = {{0, 0, 0}, 0};
+    bool mUseForceDark = false;
+    LightInfo mLightInfo;
+    LightGeometry mLightGeometry = {{0, 0, 0}, 0};
 
     bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
@@ -261,15 +272,7 @@ private:
     // Stores the bounds of the main content.
     Rect mContentDrawBounds;
 
-    // TODO: This is really a Task<void> but that doesn't really work
-    // when Future<> expects to be able to get/set a value
-    struct FuncTask : public Task<bool> {
-        std::function<void()> func;
-    };
-    class FuncTaskProcessor;
-
-    std::vector<sp<FuncTask>> mFrameFences;
-    sp<TaskProcessor<bool>> mFrameWorkProcessor;
+    std::vector<std::future<void>> mFrameFences;
     std::unique_ptr<IRenderPipeline> mRenderPipeline;
 
     std::vector<std::function<void(int64_t)>> mFrameCompleteCallbacks;

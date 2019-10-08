@@ -27,7 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"Obojstranné"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientácia"</string>
     <string name="label_pages" msgid="7768589729282182230">"Strany"</string>
-    <string name="destination_default_text" msgid="5422708056807065710">"Výber tlačiarne"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"Vyberte tlačiareň"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Všetky: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="template_page_range" msgid="428638530038286328">"Rozsah: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"napr. 1–5, 8, 11–13"</string>
@@ -107,7 +107,7 @@
     <item msgid="3199660090246166812">"Na šírku"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Do súboru nie je možné zapisovať"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Je nám to ľúto, nefungovalo to. Skúste to znova."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Ľutujeme, nepodarilo sa. Skúste to znova."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Opakovať"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Táto tlačiareň nie je momentálne k dispozícii."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Ukážka sa nedá zobraziť"</string>

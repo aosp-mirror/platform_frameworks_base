@@ -111,7 +111,7 @@ public final class UidRange implements Parcelable {
         dest.writeInt(stop);
     }
 
-    public static final Creator<UidRange> CREATOR =
+    public static final @android.annotation.NonNull Creator<UidRange> CREATOR =
         new Creator<UidRange>() {
             @Override
             public UidRange createFromParcel(Parcel in) {

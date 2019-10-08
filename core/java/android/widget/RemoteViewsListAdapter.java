@@ -85,7 +85,7 @@ public class RemoteViewsListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         if (position < getCount()) {
             RemoteViews rv = mRemoteViewsList.get(position);
-            rv.setIsWidgetCollectionChild(true);
+            rv.addFlags(RemoteViews.FLAG_WIDGET_IS_COLLECTION_CHILD);
             View v;
             if (convertView != null && rv != null &&
                     convertView.getId() == rv.getLayoutId()) {

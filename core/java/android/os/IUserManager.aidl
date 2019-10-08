@@ -101,6 +101,7 @@ interface IUserManager {
     boolean isUserNameSet(int userHandle);
     boolean hasRestrictedProfiles();
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userHandle, in IntentSender target);
+    String getUserName();
     long getUserStartRealtime();
     long getUserUnlockRealtime();
 }

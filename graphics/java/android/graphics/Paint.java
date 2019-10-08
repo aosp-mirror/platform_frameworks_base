@@ -17,10 +17,14 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
+import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
-import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.Build;
 import android.os.LocaleList;
@@ -36,6 +40,8 @@ import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -52,35 +58,34 @@ public class Paint {
     private long mNativeShader;
     private long mNativeColorFilter;
 
-    // The approximate size of a native paint object.
-    private static final long NATIVE_PAINT_SIZE = 98;
-
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
-        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                Paint.class.getClassLoader(), nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
+        public static final NativeAllocationRegistry sRegistry =
+                NativeAllocationRegistry.createMalloced(
+                Paint.class.getClassLoader(), nGetNativeFinalizer());
     }
 
-    private ColorFilter mColorFilter;
-    private MaskFilter  mMaskFilter;
-    private PathEffect  mPathEffect;
-    private Shader      mShader;
+    @ColorLong private long mColor;
+    private ColorFilter     mColorFilter;
+    private MaskFilter      mMaskFilter;
+    private PathEffect      mPathEffect;
+    private Shader          mShader;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private Typeface    mTypeface;
-    private Xfermode    mXfermode;
+    private Typeface        mTypeface;
+    private Xfermode        mXfermode;
 
-    private boolean     mHasCompatScaling;
-    private float       mCompatScaling;
-    private float       mInvCompatScaling;
+    private boolean         mHasCompatScaling;
+    private float           mCompatScaling;
+    private float           mInvCompatScaling;
 
-    private LocaleList  mLocales;
-    private String      mFontFeatureSettings;
-    private String      mFontVariationSettings;
+    private LocaleList      mLocales;
+    private String          mFontFeatureSettings;
+    private String          mFontVariationSettings;
 
-    private float mShadowLayerRadius;
-    private float mShadowLayerDx;
-    private float mShadowLayerDy;
-    private int mShadowLayerColor;
+    private float           mShadowLayerRadius;
+    private float           mShadowLayerDx;
+    private float           mShadowLayerDy;
+    @ColorLong private long mShadowLayerColor;
 
     private static final Object sCacheLock = new Object();
 
@@ -224,7 +229,8 @@ public class Paint {
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
     // These flags are always set on a new/reset paint, even if flags 0 is passed.
-    static final int HIDDEN_DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
+    static final int HIDDEN_DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG
+            | FILTER_BITMAP_FLAG;
 
     /**
      * Font hinter option that disables font hinting.
@@ -308,38 +314,47 @@ public class Paint {
      */
     public static final int DIRECTION_RTL = 1;
 
+    /** @hide */
+    @IntDef(prefix = { "CURSOR_" }, value = {
+        CURSOR_AFTER, CURSOR_AT_OR_AFTER, CURSOR_BEFORE, CURSOR_AT_OR_BEFORE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CursorOption {}
+
     /**
-     * Option for getTextRunCursor to compute the valid cursor after
-     * offset or the limit of the context, whichever is less.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor after offset or the limit of the context, whichever is less.
      */
     public static final int CURSOR_AFTER = 0;
 
     /**
-     * Option for getTextRunCursor to compute the valid cursor at or after
-     * the offset or the limit of the context, whichever is less.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor at or after the offset or the limit of the context, whichever is
+     * less.
      */
     public static final int CURSOR_AT_OR_AFTER = 1;
 
      /**
-     * Option for getTextRunCursor to compute the valid cursor before
-     * offset or the start of the context, whichever is greater.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor before offset or the start of the context, whichever is greater.
      */
     public static final int CURSOR_BEFORE = 2;
 
    /**
-     * Option for getTextRunCursor to compute the valid cursor at or before
-     * offset or the start of the context, whichever is greater.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Compute the valid cursor at or before offset or the start of the context, whichever is
+     * greater.
      */
     public static final int CURSOR_AT_OR_BEFORE = 3;
 
     /**
-     * Option for getTextRunCursor to return offset if the cursor at offset
-     * is valid, or -1 if it isn't.
-     * @hide
+     * Option for getTextRunCursor.
+     *
+     * Return offset if the cursor at offset is valid, or -1 if it isn't.
      */
     public static final int CURSOR_AT = 4;
 
@@ -348,19 +363,79 @@ public class Paint {
      */
     private static final int CURSOR_OPT_MAX_VALUE = CURSOR_AT;
 
-    /**
-     * Mask for hyphen edits that happen at the end of a line. Keep in sync with the definition in
-     * Minikin's Hyphenator.h.
-     * @hide
-     */
-    public static final int HYPHENEDIT_MASK_END_OF_LINE = 0x07;
+    /** @hide */
+    @IntDef(prefix = { "START_HYPHEN_EDIT_" }, value = {
+        START_HYPHEN_EDIT_NO_EDIT,
+        START_HYPHEN_EDIT_INSERT_HYPHEN,
+        START_HYPHEN_EDIT_INSERT_ZWJ
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StartHyphenEdit {}
 
     /**
-     * Mask for hyphen edits that happen at the start of a line. Keep in sync with the definition in
-     * Minikin's Hyphenator.h.
-     * @hide
+     * An integer representing the starting of the line has no modification for hyphenation.
      */
-    public static final int HYPHENEDIT_MASK_START_OF_LINE = 0x03 << 3;
+    public static final int START_HYPHEN_EDIT_NO_EDIT = 0x00;
+
+    /**
+     * An integer representing the starting of the line has normal hyphen character (U+002D).
+     */
+    public static final int START_HYPHEN_EDIT_INSERT_HYPHEN = 0x01;
+
+    /**
+     * An integer representing the starting of the line has Zero-Width-Joiner (U+200D).
+     */
+    public static final int START_HYPHEN_EDIT_INSERT_ZWJ = 0x02;
+
+    /** @hide */
+    @IntDef(prefix = { "END_HYPHEN_EDIT_" }, value = {
+        END_HYPHEN_EDIT_NO_EDIT,
+        END_HYPHEN_EDIT_REPLACE_WITH_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_ARMENIAN_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_MAQAF,
+        END_HYPHEN_EDIT_INSERT_UCAS_HYPHEN,
+        END_HYPHEN_EDIT_INSERT_ZWJ_AND_HYPHEN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EndHyphenEdit {}
+
+    /**
+     * An integer representing the end of the line has no modification for hyphenation.
+     */
+    public static final int END_HYPHEN_EDIT_NO_EDIT = 0x00;
+
+    /**
+     * An integer representing the character at the end of the line is replaced with hyphen
+     * character (U+002D).
+     */
+    public static final int END_HYPHEN_EDIT_REPLACE_WITH_HYPHEN = 0x01;
+
+    /**
+     * An integer representing the end of the line has normal hyphen character (U+002D).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_HYPHEN = 0x02;
+
+    /**
+     * An integer representing the end of the line has Armentian hyphen (U+058A).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_ARMENIAN_HYPHEN = 0x03;
+
+    /**
+     * An integer representing the end of the line has maqaf (Hebrew hyphen, U+05BE).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_MAQAF = 0x04;
+
+    /**
+     * An integer representing the end of the line has Canadian Syllabics hyphen (U+1400).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_UCAS_HYPHEN = 0x05;
+
+    /**
+     * An integer representing the end of the line has Zero-Width-Joiner (U+200D) followed by normal
+     * hyphen character (U+002D).
+     */
+    public static final int END_HYPHEN_EDIT_INSERT_ZWJ_AND_HYPHEN = 0x06;
 
     /**
      * The Style specifies if the primitive being drawn is filled, stroked, or
@@ -489,6 +564,7 @@ public class Paint {
         //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
         setTextLocales(LocaleList.getAdjustedDefault());
+        mColor = Color.pack(Color.BLACK);
     }
 
     /**
@@ -514,6 +590,7 @@ public class Paint {
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
 
+        mColor = Color.pack(Color.BLACK);
         mColorFilter = null;
         mMaskFilter = null;
         mPathEffect = null;
@@ -535,7 +612,7 @@ public class Paint {
         mShadowLayerRadius = 0.0f;
         mShadowLayerDx = 0.0f;
         mShadowLayerDy = 0.0f;
-        mShadowLayerColor = 0;
+        mShadowLayerColor = Color.pack(0);
     }
 
     /**
@@ -556,6 +633,7 @@ public class Paint {
      * {@link Paint}.
      */
     private void setClassVariablesFrom(Paint paint) {
+        mColor = paint.mColor;
         mColorFilter = paint.mColorFilter;
         mMaskFilter = paint.mMaskFilter;
         mPathEffect = paint.mPathEffect;
@@ -577,49 +655,6 @@ public class Paint {
         mShadowLayerDx = paint.mShadowLayerDx;
         mShadowLayerDy = paint.mShadowLayerDy;
         mShadowLayerColor = paint.mShadowLayerColor;
-    }
-
-    /**
-     * Returns true if all attributes are equal.
-     *
-     * The caller is expected to have checked the trivial cases, like the pointers being equal,
-     * the objects having different classes, or the parameter being null.
-     * @hide
-     */
-    public boolean hasEqualAttributes(@NonNull Paint other) {
-        return mColorFilter == other.mColorFilter
-                && mMaskFilter == other.mMaskFilter
-                && mPathEffect == other.mPathEffect
-                && mShader == other.mShader
-                && mTypeface == other.mTypeface
-                && mXfermode == other.mXfermode
-                && mHasCompatScaling == other.mHasCompatScaling
-                && mCompatScaling == other.mCompatScaling
-                && mInvCompatScaling == other.mInvCompatScaling
-                && mBidiFlags == other.mBidiFlags
-                && mLocales.equals(other.mLocales)
-                && TextUtils.equals(mFontFeatureSettings, other.mFontFeatureSettings)
-                && TextUtils.equals(mFontVariationSettings, other.mFontVariationSettings)
-                && mShadowLayerRadius == other.mShadowLayerRadius
-                && mShadowLayerDx == other.mShadowLayerDx
-                && mShadowLayerDy == other.mShadowLayerDy
-                && mShadowLayerColor == other.mShadowLayerColor
-                && getFlags() == other.getFlags()
-                && getHinting() == other.getHinting()
-                && getStyle() == other.getStyle()
-                && getColor() == other.getColor()
-                && getStrokeWidth() == other.getStrokeWidth()
-                && getStrokeMiter() == other.getStrokeMiter()
-                && getStrokeCap() == other.getStrokeCap()
-                && getStrokeJoin() == other.getStrokeJoin()
-                && getTextAlign() == other.getTextAlign()
-                && isElegantTextHeight() == other.isElegantTextHeight()
-                && getTextSize() == other.getTextSize()
-                && getTextScaleX() == other.getTextScaleX()
-                && getTextSkewX() == other.getTextSkewX()
-                && getLetterSpacing() == other.getLetterSpacing()
-                && getWordSpacing() == other.getWordSpacing()
-                && getHyphenEdit() == other.getHyphenEdit();
     }
 
     /** @hide */
@@ -807,25 +842,39 @@ public class Paint {
      * Helper for getFlags(), returning true if UNDERLINE_TEXT_FLAG bit is set
      *
      * @return true if the underlineText bit is set in the paint's flags.
+     * @see #getUnderlinePosition()
+     * @see #getUnderlineThickness()
+     * @see #setUnderlineText(boolean)
      */
     public final boolean isUnderlineText() {
         return (getFlags() & UNDERLINE_TEXT_FLAG) != 0;
     }
 
     /**
-     * Distance from top of the underline to the baseline. Positive values mean below the baseline.
-     * This method returns where the underline should be drawn independent of if the underlineText
-     * bit is set at the moment.
-     * @hide
+     * Returns the distance from top of the underline to the baseline in pixels.
+     *
+     * The result is positive for positions that are below the baseline.
+     * This method returns where the underline should be drawn independent of if the {@link
+     * #UNDERLINE_TEXT_FLAG} bit is set.
+     *
+     * @return the position of the underline in pixels
+     * @see #isUnderlineText()
+     * @see #getUnderlineThickness()
+     * @see #setUnderlineText(boolean)
      */
-    public float getUnderlinePosition() {
+    public @Px float getUnderlinePosition() {
         return nGetUnderlinePosition(mNativePaint);
     }
 
     /**
-     * @hide
+     * Returns the thickness of the underline in pixels.
+     *
+     * @return the thickness of the underline in pixels
+     * @see #isUnderlineText()
+     * @see #getUnderlinePosition()
+     * @see #setUnderlineText(boolean)
      */
-    public float getUnderlineThickness() {
+    public @Px float getUnderlineThickness() {
         return nGetUnderlineThickness(mNativePaint);
     }
 
@@ -834,6 +883,9 @@ public class Paint {
      *
      * @param underlineText true to set the underlineText bit in the paint's
      *                      flags, false to clear it.
+     * @see #isUnderlineText()
+     * @see #getUnderlinePosition()
+     * @see #getUnderlineThickness()
      */
     public void setUnderlineText(boolean underlineText) {
         nSetUnderlineText(mNativePaint, underlineText);
@@ -842,26 +894,40 @@ public class Paint {
     /**
      * Helper for getFlags(), returning true if STRIKE_THRU_TEXT_FLAG bit is set
      *
-     * @return true if the strikeThruText bit is set in the paint's flags.
+     * @return true if the {@link #STRIKE_THRU_TEXT_FLAG} bit is set in the paint's flags.
+     * @see #getStrikeThruPosition()
+     * @see #getStrikeThruThickness()
+     * @see #setStrikeThruText(boolean)
      */
     public final boolean isStrikeThruText() {
         return (getFlags() & STRIKE_THRU_TEXT_FLAG) != 0;
     }
 
     /**
-     * Distance from top of the strike-through line to the baseline. Negative values mean above the
-     * baseline. This method returns where the strike-through line should be drawn independent of if
-     * the strikeThruText bit is set at the moment.
-     * @hide
+     * Distance from top of the strike-through line to the baseline in pixels.
+     *
+     * The result is negative for positions that are above the baseline.
+     * This method returns where the strike-through line should be drawn independent of if the
+     * {@link #STRIKE_THRU_TEXT_FLAG} bit is set.
+     *
+     * @return the position of the strike-through line in pixels
+     * @see #getStrikeThruThickness()
+     * @see #setStrikeThruText(boolean)
+     * @see #isStrikeThruText()
      */
-    public float getStrikeThruPosition() {
+    public @Px float getStrikeThruPosition() {
         return nGetStrikeThruPosition(mNativePaint);
     }
 
     /**
-     * @hide
+     * Returns the thickness of the strike-through line in pixels.
+     *
+     * @return the position of the strike-through line in pixels
+     * @see #getStrikeThruPosition()
+     * @see #setStrikeThruText(boolean)
+     * @see #isStrikeThruText()
      */
-    public float getStrikeThruThickness() {
+    public @Px float getStrikeThruThickness() {
         return nGetStrikeThruThickness(mNativePaint);
     }
 
@@ -870,6 +936,9 @@ public class Paint {
      *
      * @param strikeThruText true to set the strikeThruText bit in the paint's
      *                       flags, false to clear it.
+     * @see #getStrikeThruPosition()
+     * @see #getStrikeThruThickness()
+     * @see #isStrikeThruText()
      */
     public void setStrikeThruText(boolean strikeThruText) {
         nSetStrikeThruText(mNativePaint, strikeThruText);
@@ -942,7 +1011,7 @@ public class Paint {
     }
 
     /**
-     * Return the paint's color. Note that the color is a 32bit value
+     * Return the paint's color in sRGB. Note that the color is a 32bit value
      * containing alpha as well as r,g,b. This 32bit value is not premultiplied,
      * meaning that its alpha can be any value, regardless of the values of
      * r,g,b. See the Color class for more details.
@@ -951,7 +1020,21 @@ public class Paint {
      */
     @ColorInt
     public int getColor() {
-        return nGetColor(mNativePaint);
+        return Color.toArgb(mColor);
+    }
+
+    /**
+     * Return the paint's color. Note that the color is a long with an encoded
+     * {@link ColorSpace} as well as alpha and r,g,b. These values are not
+     * premultiplied, meaning that alpha can be any value, regardless of the
+     * values of r,g,b. See the {@link Color} class for more details.
+     *
+     * @return the paint's color, alpha, and {@code ColorSpace} encoded as a
+     *      {@code ColorLong}
+     */
+    @ColorLong
+    public long getColorLong() {
+        return mColor;
     }
 
     /**
@@ -964,6 +1047,26 @@ public class Paint {
      */
     public void setColor(@ColorInt int color) {
         nSetColor(mNativePaint, color);
+        mColor = Color.pack(color);
+    }
+
+    /**
+     * Set the paint's color with a {@code ColorLong}. Note that the color is
+     * a long with an encoded {@link ColorSpace} as well as alpha and r,g,b.
+     * These values are not premultiplied, meaning that alpha can be any value,
+     * regardless of the values of r,g,b. See the {@link Color} class for more
+     * details.
+     *
+     * @param color The new color (including alpha and {@link ColorSpace})
+     *      to set in the paint.
+     * @throws IllegalArgumentException if the color space encoded in the
+     *      {@code ColorLong} is invalid or unknown.
+     */
+    public void setColor(@ColorLong long color) {
+        ColorSpace cs = Color.colorSpace(color);
+
+        nSetColor(mNativePaint, cs.getNativeInstance(), color);
+        mColor = color;
     }
 
     /**
@@ -974,7 +1077,7 @@ public class Paint {
      * @return the alpha component of the paint's color.
      */
     public int getAlpha() {
-        return nGetAlpha(mNativePaint);
+        return Math.round(Color.alpha(mColor) * 255.0f);
     }
 
     /**
@@ -985,6 +1088,13 @@ public class Paint {
      * @param a set the alpha component [0..255] of the paint's color.
      */
     public void setAlpha(int a) {
+        // FIXME: No need to unpack this. Instead, just update the alpha bits.
+        // b/122959599
+        ColorSpace cs = Color.colorSpace(mColor);
+        float r = Color.red(mColor);
+        float g = Color.green(mColor);
+        float b = Color.blue(mColor);
+        mColor = Color.pack(r, g, b, a * (1.0f / 255), cs);
         nSetAlpha(mNativePaint, a);
     }
 
@@ -1170,6 +1280,20 @@ public class Paint {
     }
 
     /**
+     * Get the paint's blend mode object.
+     *
+     * @return the paint's blend mode (or null)
+     */
+    @Nullable
+    public BlendMode getBlendMode() {
+        if (mXfermode == null) {
+            return null;
+        } else {
+            return BlendMode.fromValue(mXfermode.porterDuffMode);
+        }
+    }
+
+    /**
      * Set or clear the transfer mode object. A transfer mode defines how
      * source pixels (generate by a drawing command) are composited with
      * the destination pixels (content of the render target).
@@ -1183,6 +1307,11 @@ public class Paint {
      * @return         xfermode
      */
     public Xfermode setXfermode(Xfermode xfermode) {
+        return installXfermode(xfermode);
+    }
+
+    @Nullable
+    private Xfermode installXfermode(Xfermode xfermode) {
         int newMode = xfermode != null ? xfermode.porterDuffMode : Xfermode.DEFAULT;
         int curMode = mXfermode != null ? mXfermode.porterDuffMode : Xfermode.DEFAULT;
         if (newMode != curMode) {
@@ -1190,6 +1319,22 @@ public class Paint {
         }
         mXfermode = xfermode;
         return xfermode;
+    }
+
+    /**
+     * Set or clear the blend mode. A blend mode defines how source pixels
+     * (generated by a drawing command) are composited with the destination pixels
+     * (content of the render target).
+     * <p />
+     * Pass null to clear any previous blend mode.
+     * <p />
+     *
+     * @see BlendMode
+     *
+     * @param blendmode May be null. The blend mode to be installed in the paint
+     */
+    public void setBlendMode(@Nullable BlendMode blendmode) {
+        installXfermode(blendmode != null ? blendmode.getXfermode() : null);
     }
 
     /**
@@ -1322,12 +1467,33 @@ public class Paint {
      * The alpha of the shadow will be the paint's alpha if the shadow color is
      * opaque, or the alpha from the shadow color if not.
      */
-    public void setShadowLayer(float radius, float dx, float dy, int shadowColor) {
-      mShadowLayerRadius = radius;
-      mShadowLayerDx = dx;
-      mShadowLayerDy = dy;
-      mShadowLayerColor = shadowColor;
-      nSetShadowLayer(mNativePaint, radius, dx, dy, shadowColor);
+    public void setShadowLayer(float radius, float dx, float dy, @ColorInt int shadowColor) {
+        setShadowLayer(radius, dx, dy, Color.pack(shadowColor));
+    }
+
+    /**
+     * This draws a shadow layer below the main layer, with the specified
+     * offset and color, and blur radius. If radius is 0, then the shadow
+     * layer is removed.
+     * <p>
+     * Can be used to create a blurred shadow underneath text. Support for use
+     * with other drawing operations is constrained to the software rendering
+     * pipeline.
+     * <p>
+     * The alpha of the shadow will be the paint's alpha if the shadow color is
+     * opaque, or the alpha from the shadow color if not.
+     *
+     * @throws IllegalArgumentException if the color space encoded in the
+     *      {@code ColorLong} is invalid or unknown.
+     */
+    public void setShadowLayer(float radius, float dx, float dy, @ColorLong long shadowColor) {
+        ColorSpace cs = Color.colorSpace(shadowColor);
+        nSetShadowLayer(mNativePaint, radius, dx, dy, cs.getNativeInstance(), shadowColor);
+
+        mShadowLayerRadius = radius;
+        mShadowLayerDx = dx;
+        mShadowLayerDy = dy;
+        mShadowLayerColor = shadowColor;
     }
 
     /**
@@ -1345,6 +1511,54 @@ public class Paint {
      */
     public boolean hasShadowLayer() {
         return nHasShadowLayer(mNativePaint);
+    }
+
+    /**
+     * Returns the blur radius of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
+     */
+    public float getShadowLayerRadius() {
+        return mShadowLayerRadius;
+    }
+
+    /**
+     * Returns the x offset of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
+     */
+    public float getShadowLayerDx() {
+        return mShadowLayerDx;
+    }
+
+    /**
+     * Returns the y offset of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
+     */
+    public float getShadowLayerDy() {
+        return mShadowLayerDy;
+    }
+
+    /**
+     * Returns the color of the shadow layer.
+     * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
+     */
+    public @ColorInt int getShadowLayerColor() {
+        return Color.toArgb(mShadowLayerColor);
+    }
+
+    /**
+     * Returns the color of the shadow layer.
+     *
+     * @return the shadow layer's color encoded as a {@link ColorLong}.
+     * @see #setShadowLayer(float,float,float,int)
+     * @see #setShadowLayer(float,float,float,long)
+     * @see Color
+     */
+    public @ColorLong long getShadowLayerColorLong() {
+        return mShadowLayerColor;
     }
 
     /**
@@ -1562,24 +1776,27 @@ public class Paint {
     }
 
     /**
-     * Return the paint's word-spacing for text. The default value is 0.
+     * Return the paint's extra word-spacing for text.
      *
-     * @return the paint's word-spacing for drawing text.
-     * @hide
+     * The default value is 0.
+     *
+     * @return the paint's extra word-spacing for drawing text in pixels.
+     * @see #setWordSpacing(float)
      */
-    public float getWordSpacing() {
+    public @Px float getWordSpacing() {
         return nGetWordSpacing(mNativePaint);
     }
 
     /**
-     * Set the paint's word-spacing for text. The default value is 0.
-     * The value is in pixels (note the units are not the same as for
-     * letter-spacing).
+     * Set the paint's extra word-spacing for text.
      *
-     * @param wordSpacing set the paint's word-spacing for drawing text.
-     * @hide
+     * Increases the white space width between words with the given amount of pixels.
+     * The default value is 0.
+     *
+     * @param wordSpacing set the paint's extra word-spacing for drawing text in pixels.
+     * @see #getWordSpacing()
      */
-    public void setWordSpacing(float wordSpacing) {
+    public void setWordSpacing(@Px float wordSpacing) {
         nSetWordSpacing(mNativePaint, wordSpacing);
     }
 
@@ -1706,28 +1923,80 @@ public class Paint {
     }
 
     /**
-     * Get the current value of hyphen edit.
+     * Get the current value of start hyphen edit.
      *
-     * @return the current hyphen edit value
+     * The default value is 0 which is equivalent to {@link #START_HYPHEN_EDIT_NO_EDIT}.
      *
-     * @hide
+     * @return the current starting hyphen edit value
+     * @see #setStartHyphenEdit(int)
      */
-    public int getHyphenEdit() {
-        return nGetHyphenEdit(mNativePaint);
+    public @StartHyphenEdit int getStartHyphenEdit() {
+        return nGetStartHyphenEdit(mNativePaint);
     }
 
     /**
-     * Set a hyphen edit on the paint (causes a hyphen to be added to text when
-     * measured or drawn).
+     * Get the current value of end hyphen edit.
      *
-     * @param hyphen 0 for no edit, 1 for adding a hyphen at the end, etc.
-     *        Definition of various values are in the HyphenEdit class in Minikin's Hyphenator.h.
+     * The default value is 0 which is equivalent to {@link #END_HYPHEN_EDIT_NO_EDIT}.
      *
-     * @hide
+     * @return the current starting hyphen edit value
+     * @see #setStartHyphenEdit(int)
      */
-    @UnsupportedAppUsage
-    public void setHyphenEdit(int hyphen) {
-        nSetHyphenEdit(mNativePaint, hyphen);
+    public @EndHyphenEdit int getEndHyphenEdit() {
+        return nGetEndHyphenEdit(mNativePaint);
+    }
+
+    /**
+     * Set a start hyphen edit on the paint.
+     *
+     * By setting start hyphen edit, the measurement and drawing is performed with modifying
+     * hyphenation at the start of line. For example, by passing
+     * {@link #START_HYPHEN_EDIT_INSERT_HYPHEN} like as follows, HYPHEN(U+2010)
+     * character is appended at the start of line.
+     *
+     * <pre>
+     * <code>
+     *   Paint paint = new Paint();
+     *   paint.setStartHyphenEdit(Paint.START_HYPHEN_EDIT_INSERT_HYPHEN);
+     *   paint.measureText("abc", 0, 3);  // Returns the width of "‐abc"
+     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "‐abc"
+     * </code>
+     * </pre>
+     *
+     * The default value is 0 which is equivalent to
+     * {@link #START_HYPHEN_EDIT_NO_EDIT}.
+     *
+     * @param startHyphen a start hyphen edit value.
+     * @see #getStartHyphenEdit()
+     */
+    public void setStartHyphenEdit(@StartHyphenEdit int startHyphen) {
+        nSetStartHyphenEdit(mNativePaint, startHyphen);
+    }
+
+    /**
+     * Set a end hyphen edit on the paint.
+     *
+     * By setting end hyphen edit, the measurement and drawing is performed with modifying
+     * hyphenation at the end of line. For example, by passing
+     * {@link #END_HYPHEN_EDIT_INSERT_HYPHEN} like as follows, HYPHEN(U+2010)
+     * character is appended at the end of line.
+     *
+     * <pre>
+     * <code>
+     *   Paint paint = new Paint();
+     *   paint.setEndHyphenEdit(Paint.END_HYPHEN_EDIT_INSERT_HYPHEN);
+     *   paint.measureText("abc", 0, 3);  // Returns the width of "abc‐"
+     *   Canvas.drawText("abc", 0, 3, 0f, 0f, paint);  // Draws "abc‐"
+     * </code>
+     * </pre>
+     *
+     * The default value is 0 which is equivalent to {@link #END_HYPHEN_EDIT_NO_EDIT}.
+     *
+     * @param endHyphen a end hyphen edit value.
+     * @see #getEndHyphenEdit()
+     */
+    public void setEndHyphenEdit(@EndHyphenEdit int endHyphen) {
+        nSetEndHyphenEdit(mNativePaint, endHyphen);
     }
 
     /**
@@ -2263,17 +2532,53 @@ public class Paint {
     }
 
     /**
-     * Convenience overload that takes a char array instead of a
-     * String.
+     * Retrieve the character advances of the text.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
-     * @hide
+     * Returns the total advance width for the characters in the run from {@code index} for
+     * {@code count} of chars, and if {@code advances} is not null, the advance assigned to each of
+     * these characters (java chars).
+     *
+     * <p>
+     * The trailing surrogate in a valid surrogate pair is assigned an advance of 0.  Thus the
+     * number of returned advances is always equal to count, not to the number of unicode codepoints
+     * represented by the run.
+     * </p>
+     *
+     * <p>
+     * In the case of conjuncts or combining marks, the total advance is assigned to the first
+     * logical character, and the following characters are assigned an advance of 0.
+     * </p>
+     *
+     * <p>
+     * This generates the sum of the advances of glyphs for characters in a reordered cluster as the
+     * width of the first logical character in the cluster, and 0 for the widths of all other
+     * characters in the cluster.  In effect, such clusters are treated like conjuncts.
+     * </p>
+     *
+     * <p>
+     * The shaping bounds limit the amount of context available outside start and end that can be
+     * used for shaping analysis.  These bounds typically reflect changes in bidi level or font
+     * metrics across which shaping does not occur.
+     * </p>
+     *
+     * @param chars the text to measure.
+     * @param index the index of the first character to measure
+     * @param count the number of characters to measure
+     * @param contextIndex the index of the first character to use for shaping context.
+     *                     Context must cover the measureing target.
+     * @param contextCount the number of character to use for shaping context.
+     *                     Context must cover the measureing target.
+     * @param isRtl whether the run is in RTL direction
+     * @param advances array to receive the advances, must have room for all advances.
+     *                 This can be null if only total advance is needed
+     * @param advancesIndex the position in advances at which to put the advance corresponding to
+     *                      the character at start
+     * @return the total advance in pixels
      */
-    @UnsupportedAppUsage
-    public float getTextRunAdvances(char[] chars, int index, int count,
-            int contextIndex, int contextCount, boolean isRtl, float[] advances,
-            int advancesIndex) {
-
+    public float getTextRunAdvances(@NonNull char[] chars, @IntRange(from = 0) int index,
+            @IntRange(from = 0) int count, @IntRange(from = 0) int contextIndex,
+            @IntRange(from = 0) int contextCount, boolean isRtl, @Nullable float[] advances,
+            @IntRange(from = 0) int advancesIndex) {
         if (chars == null) {
             throw new IllegalArgumentException("text cannot be null");
         }
@@ -2310,159 +2615,32 @@ public class Paint {
     }
 
     /**
-     * Convenience overload that takes a CharSequence instead of a
-     * String.
+     * Returns the next cursor position in the run.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
-     * @hide
-     */
-    public float getTextRunAdvances(CharSequence text, int start, int end,
-            int contextStart, int contextEnd, boolean isRtl, float[] advances,
-            int advancesIndex) {
-        if (text == null) {
-            throw new IllegalArgumentException("text cannot be null");
-        }
-        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
-                | (start - contextStart) | (contextEnd - end)
-                | (text.length() - contextEnd)
-                | (advances == null ? 0 :
-                    (advances.length - advancesIndex - (end - start)))) < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        if (text instanceof String) {
-            return getTextRunAdvances((String) text, start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex);
-        }
-        if (text instanceof SpannedString ||
-            text instanceof SpannableString) {
-            return getTextRunAdvances(text.toString(), start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex);
-        }
-        if (text instanceof GraphicsOperations) {
-            return ((GraphicsOperations) text).getTextRunAdvances(start, end,
-                    contextStart, contextEnd, isRtl, advances, advancesIndex, this);
-        }
-        if (text.length() == 0 || end == start) {
-            return 0f;
-        }
-
-        int contextLen = contextEnd - contextStart;
-        int len = end - start;
-        char[] buf = TemporaryBuffer.obtain(contextLen);
-        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        float result = getTextRunAdvances(buf, start - contextStart, len,
-                0, contextLen, isRtl, advances, advancesIndex);
-        TemporaryBuffer.recycle(buf);
-        return result;
-    }
-
-    /**
-     * Returns the total advance width for the characters in the run
-     * between start and end, and if advances is not null, the advance
-     * assigned to each of these characters (java chars).
+     * This avoids placing the cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering cluster.
      *
-     * <p>The trailing surrogate in a valid surrogate pair is assigned
-     * an advance of 0.  Thus the number of returned advances is
-     * always equal to count, not to the number of unicode codepoints
-     * represented by the run.
+     * <p>
+     * ContextStart and offset are relative to the start of text.
+     * The context is the shaping context for cursor movement, generally the bounds of the metric
+     * span enclosing the cursor in the direction of movement.
      *
-     * <p>In the case of conjuncts or combining marks, the total
-     * advance is assigned to the first logical character, and the
-     * following characters are assigned an advance of 0.
-     *
-     * <p>This generates the sum of the advances of glyphs for
-     * characters in a reordered cluster as the width of the first
-     * logical character in the cluster, and 0 for the widths of all
-     * other characters in the cluster.  In effect, such clusters are
-     * treated like conjuncts.
-     *
-     * <p>The shaping bounds limit the amount of context available
-     * outside start and end that can be used for shaping analysis.
-     * These bounds typically reflect changes in bidi level or font
-     * metrics across which shaping does not occur.
-     *
-     * @param text the text to measure. Cannot be null.
-     * @param start the index of the first character to measure
-     * @param end the index past the last character to measure
-     * @param contextStart the index of the first character to use for shaping context,
-     * must be <= start
-     * @param contextEnd the index past the last character to use for shaping context,
-     * must be >= end
-     * @param isRtl whether the run is in RTL direction
-     * @param advances array to receive the advances, must have room for all advances,
-     * can be null if only total advance is needed
-     * @param advancesIndex the position in advances at which to put the
-     * advance corresponding to the character at start
-     * @return the total advance
-     *
-     * @hide
-     */
-    public float getTextRunAdvances(String text, int start, int end, int contextStart,
-            int contextEnd, boolean isRtl, float[] advances, int advancesIndex) {
-        if (text == null) {
-            throw new IllegalArgumentException("text cannot be null");
-        }
-        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
-                | (start - contextStart) | (contextEnd - end)
-                | (text.length() - contextEnd)
-                | (advances == null ? 0 :
-                    (advances.length - advancesIndex - (end - start)))) < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        if (text.length() == 0 || start == end) {
-            return 0f;
-        }
-
-        if (!mHasCompatScaling) {
-            return nGetTextAdvances(mNativePaint, text, start, end, contextStart, contextEnd,
-                    isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances, advancesIndex);
-        }
-
-        final float oldSize = getTextSize();
-        setTextSize(oldSize * mCompatScaling);
-        final float totalAdvance = nGetTextAdvances(mNativePaint, text, start, end, contextStart,
-                contextEnd, isRtl ? BIDI_FORCE_RTL : BIDI_FORCE_LTR, advances, advancesIndex);
-        setTextSize(oldSize);
-
-        if (advances != null) {
-            for (int i = advancesIndex, e = i + (end - start); i < e; i++) {
-                advances[i] *= mInvCompatScaling;
-            }
-        }
-        return totalAdvance * mInvCompatScaling; // assume errors are insignificant
-    }
-
-    /**
-     * Returns the next cursor position in the run.  This avoids placing the
-     * cursor between surrogates, between characters that form conjuncts,
-     * between base characters and combining marks, or within a reordering
-     * cluster.
-     *
-     * <p>ContextStart and offset are relative to the start of text.
-     * The context is the shaping context for cursor movement, generally
-     * the bounds of the metric span enclosing the cursor in the direction of
-     * movement.
-     *
-     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
-     * cursor position, this returns -1.  Otherwise this will never return a
-     * value before contextStart or after contextStart + contextLength.
+     * <p>
+     * If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid cursor position, this
+     * returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextStart + contextLength.
      *
      * @param text the text
      * @param contextStart the start of the context
      * @param contextLength the length of the context
-     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param isRtl true if the paragraph context is RTL, otherwise false
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
-     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
-     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @param cursorOpt how to move the cursor
      * @return the offset of the next position, or -1
-     * @hide
      */
-    @UnsupportedAppUsage
-    public int getTextRunCursor(char[] text, int contextStart, int contextLength,
-            int dir, int offset, int cursorOpt) {
+    public int getTextRunCursor(@NonNull char[] text, @IntRange(from = 0) int contextStart,
+            @IntRange(from = 0) int contextLength, boolean isRtl, @IntRange(from = 0) int offset,
+            @CursorOption int cursorOpt) {
         int contextEnd = contextStart + contextLength;
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
@@ -2471,85 +2649,87 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
 
-        return nGetTextRunCursor(mNativePaint, text, contextStart, contextLength, dir, offset,
-                cursorOpt);
+        return nGetTextRunCursor(mNativePaint, text, contextStart, contextLength,
+                isRtl ? DIRECTION_RTL : DIRECTION_LTR, offset, cursorOpt);
     }
 
     /**
-     * Returns the next cursor position in the run.  This avoids placing the
-     * cursor between surrogates, between characters that form conjuncts,
-     * between base characters and combining marks, or within a reordering
-     * cluster.
+     * Returns the next cursor position in the run.
      *
-     * <p>ContextStart, contextEnd, and offset are relative to the start of
+     * This avoids placing the cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering cluster.
+     *
+     * <p>
+     * ContextStart, contextEnd, and offset are relative to the start of
      * text.  The context is the shaping context for cursor movement, generally
      * the bounds of the metric span enclosing the cursor in the direction of
      * movement.
      *
-     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
-     * cursor position, this returns -1.  Otherwise this will never return a
-     * value before contextStart or after contextEnd.
+     * <p>
+     * If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid cursor position, this
+     * returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextEnd.
      *
      * @param text the text
      * @param contextStart the start of the context
      * @param contextEnd the end of the context
-     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param isRtl true if the paragraph context is RTL, otherwise false
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
-     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
-     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @param cursorOpt how to move the cursor
      * @return the offset of the next position, or -1
-     * @hide
      */
-    public int getTextRunCursor(CharSequence text, int contextStart,
-           int contextEnd, int dir, int offset, int cursorOpt) {
+    public int getTextRunCursor(@NonNull CharSequence text, @IntRange(from = 0) int contextStart,
+            @IntRange(from = 0) int contextEnd, boolean isRtl, @IntRange(from = 0) int offset,
+            @CursorOption int cursorOpt) {
 
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             return getTextRunCursor(text.toString(), contextStart, contextEnd,
-                    dir, offset, cursorOpt);
+                    isRtl, offset, cursorOpt);
         }
         if (text instanceof GraphicsOperations) {
             return ((GraphicsOperations) text).getTextRunCursor(
-                    contextStart, contextEnd, dir, offset, cursorOpt, this);
+                    contextStart, contextEnd, isRtl, offset, cursorOpt, this);
         }
 
         int contextLen = contextEnd - contextStart;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        int relPos = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
+        int relPos = getTextRunCursor(buf, 0, contextLen, isRtl, offset - contextStart, cursorOpt);
         TemporaryBuffer.recycle(buf);
         return (relPos == -1) ? -1 : relPos + contextStart;
     }
 
     /**
-     * Returns the next cursor position in the run.  This avoids placing the
-     * cursor between surrogates, between characters that form conjuncts,
-     * between base characters and combining marks, or within a reordering
-     * cluster.
+     * Returns the next cursor position in the run.
      *
-     * <p>ContextStart, contextEnd, and offset are relative to the start of
-     * text.  The context is the shaping context for cursor movement, generally
-     * the bounds of the metric span enclosing the cursor in the direction of
-     * movement.
+     * This avoids placing the cursor between surrogates, between characters that form conjuncts,
+     * between base characters and combining marks, or within a reordering cluster.
      *
-     * <p>If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid
-     * cursor position, this returns -1.  Otherwise this will never return a
-     * value before contextStart or after contextEnd.
+     * <p>
+     * ContextStart, contextEnd, and offset are relative to the start of text.  The context is the
+     * shaping context for cursor movement, generally the bounds of the metric span enclosing the
+     * cursor in the direction of movement.
+     * </p>
+     *
+     * <p>
+     * If cursorOpt is {@link #CURSOR_AT} and the offset is not a valid cursor position, this
+     * returns -1.  Otherwise this will never return a value before contextStart or after
+     * contextEnd.
+     * </p>
      *
      * @param text the text
      * @param contextStart the start of the context
      * @param contextEnd the end of the context
-     * @param dir either {@link #DIRECTION_RTL} or {@link #DIRECTION_LTR}
+     * @param isRtl true if the paragraph context is RTL, otherwise false.
      * @param offset the cursor position to move from
-     * @param cursorOpt how to move the cursor, one of {@link #CURSOR_AFTER},
-     * {@link #CURSOR_AT_OR_AFTER}, {@link #CURSOR_BEFORE},
-     * {@link #CURSOR_AT_OR_BEFORE}, or {@link #CURSOR_AT}
+     * @param cursorOpt how to move the cursor
      * @return the offset of the next position, or -1
      * @hide
      */
-    public int getTextRunCursor(String text, int contextStart, int contextEnd,
-            int dir, int offset, int cursorOpt) {
+    public int getTextRunCursor(@NonNull String text, @IntRange(from = 0) int contextStart,
+            @IntRange(from = 0) int contextEnd, boolean isRtl, @IntRange(from = 0) int offset,
+            @CursorOption int cursorOpt) {
         if (((contextStart | contextEnd | offset | (contextEnd - contextStart)
                 | (offset - contextStart) | (contextEnd - offset)
                 | (text.length() - contextEnd) | cursorOpt) < 0)
@@ -2557,8 +2737,8 @@ public class Paint {
             throw new IndexOutOfBoundsException();
         }
 
-        return nGetTextRunCursor(mNativePaint, text, contextStart, contextEnd, dir, offset,
-                cursorOpt);
+        return nGetTextRunCursor(mNativePaint, text, contextStart, contextEnd,
+                isRtl ? DIRECTION_RTL : DIRECTION_LTR, offset, cursorOpt);
     }
 
     /**
@@ -2602,6 +2782,8 @@ public class Paint {
     }
 
     /**
+     * Retrieve the text boundary box and store to bounds.
+     *
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
      *
@@ -2621,16 +2803,21 @@ public class Paint {
     }
 
     /**
+     * Retrieve the text boundary box and store to bounds.
+     *
      * Return in bounds (allocated by the caller) the smallest rectangle that
      * encloses all of the characters, with an implied origin at (0,0).
+     *
+     * Note that styles are ignored even if you pass {@link android.text.Spanned} instance.
+     * Use {@link android.text.StaticLayout} for measuring bounds of {@link android.text.Spanned}.
      *
      * @param text text to measure and return its bounds
      * @param start index of the first char in the text to measure
      * @param end 1 past the last char in the text to measure
      * @param bounds returns the unioned bounds of all the text. Must be allocated by the caller
-     * @hide
      */
-    public void getTextBounds(CharSequence text, int start, int end, Rect bounds) {
+    public void getTextBounds(@NonNull CharSequence text, int start, int end,
+            @NonNull Rect bounds) {
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -2939,7 +3126,8 @@ public class Paint {
             int mMinikinLocaleListId);
     @CriticalNative
     private static native void nSetShadowLayer(long paintPtr,
-            float radius, float dx, float dy, int color);
+            float radius, float dx, float dy, long colorSpaceHandle,
+            @ColorLong long shadowColor);
     @CriticalNative
     private static native boolean nHasShadowLayer(long paintPtr);
     @CriticalNative
@@ -2951,9 +3139,13 @@ public class Paint {
     @CriticalNative
     private static native void nSetWordSpacing(long paintPtr, float wordSpacing);
     @CriticalNative
-    private static native int nGetHyphenEdit(long paintPtr);
+    private static native int nGetStartHyphenEdit(long paintPtr);
     @CriticalNative
-    private static native void nSetHyphenEdit(long paintPtr, int hyphen);
+    private static native int nGetEndHyphenEdit(long paintPtr);
+    @CriticalNative
+    private static native void nSetStartHyphenEdit(long paintPtr, int hyphen);
+    @CriticalNative
+    private static native void nSetEndHyphenEdit(long paintPtr, int hyphen);
     @CriticalNative
     private static native void nSetStrokeMiter(long paintPtr, float miter);
     @CriticalNative
@@ -2987,11 +3179,10 @@ public class Paint {
     @CriticalNative
     private static native void nSetFilterBitmap(long paintPtr, boolean filter);
     @CriticalNative
-    private static native int nGetColor(long paintPtr);
+    private static native void nSetColor(long paintPtr, long colorSpaceHandle,
+            @ColorLong long color);
     @CriticalNative
     private static native void nSetColor(long paintPtr, @ColorInt int color);
-    @CriticalNative
-    private static native int nGetAlpha(long paintPtr);
     @CriticalNative
     private static native void nSetStrikeThruText(long paintPtr, boolean strikeThruText);
     @CriticalNative

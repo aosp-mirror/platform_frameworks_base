@@ -49,6 +49,7 @@ public class WindowInfo implements Parcelable {
     public CharSequence title;
     public long accessibilityIdOfAnchor = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
     public boolean inPictureInPicture;
+    public boolean hasFlagWatchOutsideTouch;
 
     private WindowInfo() {
         /* do nothing - hide constructor */
@@ -74,6 +75,7 @@ public class WindowInfo implements Parcelable {
         window.title = other.title;
         window.accessibilityIdOfAnchor = other.accessibilityIdOfAnchor;
         window.inPictureInPicture = other.inPictureInPicture;
+        window.hasFlagWatchOutsideTouch = other.hasFlagWatchOutsideTouch;
 
         if (other.childTokens != null && !other.childTokens.isEmpty()) {
             if (window.childTokens == null) {
@@ -108,6 +110,7 @@ public class WindowInfo implements Parcelable {
         parcel.writeCharSequence(title);
         parcel.writeLong(accessibilityIdOfAnchor);
         parcel.writeInt(inPictureInPicture ? 1 : 0);
+        parcel.writeInt(hasFlagWatchOutsideTouch ? 1 : 0);
 
         if (childTokens != null && !childTokens.isEmpty()) {
             parcel.writeInt(1);
@@ -130,6 +133,8 @@ public class WindowInfo implements Parcelable {
         builder.append(", focused=").append(focused);
         builder.append(", children=").append(childTokens);
         builder.append(", accessibility anchor=").append(accessibilityIdOfAnchor);
+        builder.append(", pictureInPicture=").append(inPictureInPicture);
+        builder.append(", watchOutsideTouch=").append(hasFlagWatchOutsideTouch);
         builder.append(']');
         return builder.toString();
     }
@@ -145,6 +150,7 @@ public class WindowInfo implements Parcelable {
         title = parcel.readCharSequence();
         accessibilityIdOfAnchor = parcel.readLong();
         inPictureInPicture = (parcel.readInt() == 1);
+        hasFlagWatchOutsideTouch = (parcel.readInt() == 1);
 
         final boolean hasChildren = (parcel.readInt() == 1);
         if (hasChildren) {
@@ -167,9 +173,10 @@ public class WindowInfo implements Parcelable {
             childTokens.clear();
         }
         inPictureInPicture = false;
+        hasFlagWatchOutsideTouch = false;
     }
 
-    public static final Parcelable.Creator<WindowInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WindowInfo> CREATOR =
             new Creator<WindowInfo>() {
         @Override
         public WindowInfo createFromParcel(Parcel parcel) {

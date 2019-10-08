@@ -71,8 +71,8 @@ interface IRestoreSession {
      *   applications mentioned in this list will have their data restored.
      * @param monitor If non null the binder will send important events to this monitor.
      */
-    int restoreSome(long token, IRestoreObserver observer, IBackupManagerMonitor monitor,
-            in String[] packages);
+    int restorePackages(long token, IRestoreObserver observer, in String[] packages,
+            IBackupManagerMonitor monitor);
 
     /**
      * Restore a single application from backup.  The data will be restored from the

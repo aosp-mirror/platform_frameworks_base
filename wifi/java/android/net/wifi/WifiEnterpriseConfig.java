@@ -23,17 +23,9 @@ import android.security.Credentials;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -147,6 +139,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     private X509Certificate[] mClientCertificateChain;
     private int mEapMethod = Eap.NONE;
     private int mPhase2Method = Phase2.NONE;
+    private boolean mIsAppInstalledDeviceKeyAndCert = false;
+    private boolean mIsAppInstalledCaCert = false;
 
     private static final String TAG = "WifiEnterpriseConfig";
 
@@ -189,6 +183,8 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
         mEapMethod = source.mEapMethod;
         mPhase2Method = source.mPhase2Method;
+        mIsAppInstalledDeviceKeyAndCert = source.mIsAppInstalledDeviceKeyAndCert;
+        mIsAppInstalledCaCert = source.mIsAppInstalledCaCert;
     }
 
     /**
@@ -232,9 +228,11 @@ public class WifiEnterpriseConfig implements Parcelable {
         ParcelUtil.writeCertificates(dest, mCaCerts);
         ParcelUtil.writePrivateKey(dest, mClientPrivateKey);
         ParcelUtil.writeCertificates(dest, mClientCertificateChain);
+        dest.writeBoolean(mIsAppInstalledDeviceKeyAndCert);
+        dest.writeBoolean(mIsAppInstalledCaCert);
     }
 
-    public static final Creator<WifiEnterpriseConfig> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiEnterpriseConfig> CREATOR =
             new Creator<WifiEnterpriseConfig>() {
                 @Override
                 public WifiEnterpriseConfig createFromParcel(Parcel in) {
@@ -251,6 +249,8 @@ public class WifiEnterpriseConfig implements Parcelable {
                     enterpriseConfig.mCaCerts = ParcelUtil.readCertificates(in);
                     enterpriseConfig.mClientPrivateKey = ParcelUtil.readPrivateKey(in);
                     enterpriseConfig.mClientCertificateChain = ParcelUtil.readCertificates(in);
+                    enterpriseConfig.mIsAppInstalledDeviceKeyAndCert = in.readBoolean();
+                    enterpriseConfig.mIsAppInstalledCaCert = in.readBoolean();
                     return enterpriseConfig;
                 }
 
@@ -660,8 +660,10 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setCaCertificate(@Nullable X509Certificate cert) {
         if (cert != null) {
             if (cert.getBasicConstraints() >= 0) {
+                mIsAppInstalledCaCert = true;
                 mCaCerts = new X509Certificate[] {cert};
             } else {
+                mCaCerts = null;
                 throw new IllegalArgumentException("Not a CA certificate");
             }
         } else {
@@ -702,10 +704,12 @@ public class WifiEnterpriseConfig implements Parcelable {
                 if (certs[i].getBasicConstraints() >= 0) {
                     newCerts[i] = certs[i];
                 } else {
+                    mCaCerts = null;
                     throw new IllegalArgumentException("Not a CA certificate");
                 }
             }
             mCaCerts = newCerts;
+            mIsAppInstalledCaCert = true;
         } else {
             mCaCerts = null;
         }
@@ -861,6 +865,7 @@ public class WifiEnterpriseConfig implements Parcelable {
 
         mClientPrivateKey = privateKey;
         mClientCertificateChain = newCerts;
+        mIsAppInstalledDeviceKeyAndCert = true;
     }
 
     /**
@@ -962,6 +967,10 @@ public class WifiEnterpriseConfig implements Parcelable {
      * from the top-level domain and all the labels in domain_suffix_match shall be included in the
      * certificate. The certificate may include additional sub-level labels in addition to the
      * required labels.
+     * <p>More than one match string can be provided by using semicolons to separate the strings
+     * (e.g., example.org;example.com). When multiple strings are specified, a match with any one of
+     * the values is considered a sufficient match for the certificate, i.e., the conditions are
+     * ORed ogether.
      * <p>For example, domain_suffix_match=example.com would match test.example.com but would not
      * match test-example.com.
      * @param domain The domain value
@@ -1126,6 +1135,12 @@ public class WifiEnterpriseConfig implements Parcelable {
             String value = PASSWORD_KEY.equals(key) ? "<removed>" : mFields.get(key);
             sb.append(key).append(" ").append(value).append("\n");
         }
+        if (mEapMethod >= 0 && mEapMethod < Eap.strings.length) {
+            sb.append("eap_method: ").append(Eap.strings[mEapMethod]).append("\n");
+        }
+        if (mPhase2Method > 0 && mPhase2Method < Phase2.strings.length) {
+            sb.append("phase2_method: ").append(Phase2.strings[mPhase2Method]).append("\n");
+        }
         return sb.toString();
     }
 
@@ -1148,5 +1163,31 @@ public class WifiEnterpriseConfig implements Parcelable {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Check if certificate was installed by an app, or manually (not by an app). If true,
+     * certificate and keys will be removed from key storage when this network is removed. If not,
+     * then certificates and keys remain persistent until the user manually removes them.
+     *
+     * @return true if certificate was installed by an app, false if certificate was installed
+     * manually by the user.
+     * @hide
+     */
+    public boolean isAppInstalledDeviceKeyAndCert() {
+        return mIsAppInstalledDeviceKeyAndCert;
+    }
+
+    /**
+     * Check if CA certificate was installed by an app, or manually (not by an app). If true,
+     * CA certificate will be removed from key storage when this network is removed. If not,
+     * then certificates and keys remain persistent until the user manually removes them.
+     *
+     * @return true if CA certificate was installed by an app, false if CA certificate was installed
+     * manually by the user.
+     * @hide
+     */
+    public boolean isAppInstalledCaCert() {
+        return mIsAppInstalledCaCert;
     }
 }

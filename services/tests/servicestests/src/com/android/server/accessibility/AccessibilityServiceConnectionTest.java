@@ -23,31 +23,32 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 
@@ -74,13 +75,6 @@ public class AccessibilityServiceConnectionTest {
 
     MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
-    @BeforeClass
-    public static void oneTimeInitialization() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-    }
-
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -98,12 +92,18 @@ public class AccessibilityServiceConnectionTest {
                 mMockGlobalActionPerformer);
     }
 
+    @After
+    public void tearDown() {
+        mHandler.removeAllMessages();
+    }
+
+
     @Test
     public void bind_requestsContextToBindService() {
         mConnection.bindLocked();
         verify(mMockContext).bindServiceAsUser(any(Intent.class), eq(mConnection),
-                eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE),
-                any(UserHandle.class));
+                eq(Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
+                | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS), any(UserHandle.class));
     }
 
     @Test
@@ -140,5 +140,33 @@ public class AccessibilityServiceConnectionTest {
     private void setServiceBinding(ComponentName componentName) {
         when(mMockUserState.getBindingServicesLocked())
                 .thenReturn(new HashSet<>(Arrays.asList(componentName)));
+    }
+
+    @Test
+    public void binderDied_keysGetFlushed() {
+        IBinder mockBinder = mock(IBinder.class);
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mConnection.binderDied();
+        assertTrue(mConnection.getServiceInfo().crashed);
+        verify(mMockKeyEventDispatcher).flush(mConnection);
+    }
+
+    @Test
+    public void connectedService_notInEnabledServiceList_doNotInitClient()
+            throws RemoteException {
+        IBinder mockBinder = mock(IBinder.class);
+        IAccessibilityServiceClient mockClient = mock(IAccessibilityServiceClient.class);
+        when(mockBinder.queryLocalInterface(any())).thenReturn(mockClient);
+        when(mMockUserState.getEnabledServicesLocked())
+                .thenReturn(Collections.emptySet());
+        setServiceBinding(COMPONENT_NAME);
+
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mHandler.sendAllMessages();
+        verify(mMockSystemSupport, times(2)).onClientChangeLocked(false);
+        verify(mockClient, times(0)).init(any(), anyInt(), any());
     }
 }

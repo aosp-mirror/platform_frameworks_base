@@ -16,7 +16,7 @@
 
 package android.util;
 
-import android.support.test.filters.LargeTest;
+import androidx.test.filters.LargeTest;
 
 import junit.framework.TestCase;
 

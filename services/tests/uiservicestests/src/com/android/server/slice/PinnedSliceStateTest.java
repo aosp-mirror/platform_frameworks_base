@@ -68,7 +68,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
     private IBinder mToken = new Binder();
 
     @Before
-    public void setup() {
+    public void setUp() {
         mSliceService = mock(SliceManagerService.class);
         when(mSliceService.getContext()).thenReturn(mContext);
         when(mSliceService.getLock()).thenReturn(new Object());
@@ -107,8 +107,8 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         mPinnedSliceManager.pin("pkg", FIRST_SPECS, mToken);
         TestableLooper.get(this).processAllMessages();
 
-        verify(mIContentProvider).call(anyString(), eq(SliceProvider.METHOD_PIN), eq(null),
-                argThat(b -> {
+        verify(mIContentProvider).call(anyString(), anyString(), eq(SliceProvider.METHOD_PIN),
+                eq(null), argThat(b -> {
                     assertEquals(TEST_URI, b.getParcelable(SliceProvider.EXTRA_BIND_URI));
                     return true;
                 }));

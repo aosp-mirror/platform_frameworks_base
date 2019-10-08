@@ -19,9 +19,7 @@ package com.android.internal.widget;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.Spanned;
 import android.text.method.KeyListener;
-import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
@@ -175,12 +173,6 @@ public class EditableInputConnection extends BaseInputConnection {
         if (mTextView == null) {
             return super.commitText(text, newCursorPosition);
         }
-        if (text instanceof Spanned) {
-            Spanned spanned = ((Spanned) text);
-            SuggestionSpan[] spans = spanned.getSpans(0, text.length(), SuggestionSpan.class);
-            mIMM.registerSuggestionSpansForNotification(spans);
-        }
-
         mTextView.resetErrorChangedFlag();
         boolean success = super.commitText(text, newCursorPosition);
         mTextView.hideErrorIfUnchanged();

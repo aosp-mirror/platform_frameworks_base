@@ -165,7 +165,7 @@ public final class KeyChainProtectionParams implements Parcelable {
          * @param userSecretType The secret type
          * @return This builder.
          */
-        public Builder setUserSecretType(@UserSecretType int userSecretType) {
+        public @NonNull Builder setUserSecretType(@UserSecretType int userSecretType) {
             mInstance.mUserSecretType = userSecretType;
             return this;
         }
@@ -179,7 +179,7 @@ public final class KeyChainProtectionParams implements Parcelable {
          * @param lockScreenUiFormat The UI format
          * @return This builder.
          */
-        public Builder setLockScreenUiFormat(@LockScreenUiFormat int lockScreenUiFormat) {
+        public @NonNull Builder setLockScreenUiFormat(@LockScreenUiFormat int lockScreenUiFormat) {
             mInstance.mLockScreenUiFormat = lockScreenUiFormat;
             return this;
         }
@@ -190,7 +190,7 @@ public final class KeyChainProtectionParams implements Parcelable {
          * @param keyDerivationParams Key derivation parameters
          * @return This builder.
          */
-        public Builder setKeyDerivationParams(@NonNull KeyDerivationParams
+        public @NonNull Builder setKeyDerivationParams(@NonNull KeyDerivationParams
                 keyDerivationParams) {
             mInstance.mKeyDerivationParams = keyDerivationParams;
             return this;
@@ -202,7 +202,7 @@ public final class KeyChainProtectionParams implements Parcelable {
          * @param secret The secret.
          * @return This builder.
          */
-        public Builder setSecret(@NonNull byte[] secret) {
+        public @NonNull Builder setSecret(@NonNull byte[] secret) {
             mInstance.mSecret = secret;
             return this;
         }
@@ -216,7 +216,7 @@ public final class KeyChainProtectionParams implements Parcelable {
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        @NonNull public KeyChainProtectionParams build() {
+        public @NonNull KeyChainProtectionParams build() {
             if (mInstance.mUserSecretType == null) {
                 mInstance.mUserSecretType = TYPE_LOCKSCREEN;
             }
@@ -236,7 +236,7 @@ public final class KeyChainProtectionParams implements Parcelable {
         Arrays.fill(mSecret, (byte) 0);
     }
 
-    public static final Parcelable.Creator<KeyChainProtectionParams> CREATOR =
+    public static final @NonNull Parcelable.Creator<KeyChainProtectionParams> CREATOR =
             new Parcelable.Creator<KeyChainProtectionParams>() {
         public KeyChainProtectionParams createFromParcel(Parcel in) {
             return new KeyChainProtectionParams(in);

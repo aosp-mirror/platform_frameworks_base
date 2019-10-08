@@ -254,6 +254,7 @@ public final class ImsSsInfo implements Parcelable {
         out.writeInt(mClirOutgoingState);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return super.toString() + ", Status: " + ((mStatus == 0) ? "disabled" : "enabled")
@@ -279,7 +280,7 @@ public final class ImsSsInfo implements Parcelable {
         mClirOutgoingState = in.readInt();
     }
 
-    public static final Creator<ImsSsInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsSsInfo> CREATOR =
             new Creator<ImsSsInfo>() {
         @Override
         public ImsSsInfo createFromParcel(Parcel in) {

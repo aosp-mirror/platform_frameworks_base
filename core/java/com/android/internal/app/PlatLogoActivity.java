@@ -16,252 +16,167 @@
 
 package com.android.internal.app;
 
+import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
 import android.view.View;
-import android.widget.FrameLayout;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.android.internal.R;
 
 import org.json.JSONObject;
 
+/**
+ * @hide
+ */
 public class PlatLogoActivity extends Activity {
-    FrameLayout layout;
-    TimeAnimator anim;
-    PBackground bg;
+    ImageView mZeroView, mOneView;
+    BackslashDrawable mBackslash;
+    int mClicks;
 
-    private class PBackground extends Drawable {
-        private float maxRadius, radius, x, y, dp;
-        private int[] palette;
-        private int darkest;
-        private float offset;
+    static final Paint sPaint = new Paint();
+    static {
+        sPaint.setStyle(Paint.Style.STROKE);
+        sPaint.setStrokeWidth(4f);
+        sPaint.setStrokeCap(Paint.Cap.SQUARE);
+    }
 
-        public PBackground() {
-            randomizePalette();
+    @Override
+    protected void onPause() {
+        if (mBackslash != null) {
+            mBackslash.stopAnimating();
         }
-
-        /**
-         * set inner radius of "p" logo
-         */
-        public void setRadius(float r) {
-            this.radius = Math.max(48*dp, r);
-        }
-
-        /**
-         * move the "p"
-         */
-        public void setPosition(float x, float y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        /**
-         * for animating the "p"
-         */
-        public void setOffset(float o) {
-            this.offset = o;
-        }
-
-        /**
-         * rough luminance calculation
-         * https://www.w3.org/TR/AERT/#color-contrast
-         */
-        public float lum(int rgb) {
-            return ((Color.red(rgb) * 299f) + (Color.green(rgb) * 587f) + (Color.blue(rgb) * 114f)) / 1000f;
-        }
-
-        /**
-         * create a random evenly-spaced color palette
-         * guaranteed to contrast!
-         */
-        public void randomizePalette() {
-            final int slots = 2 + (int)(Math.random() * 2);
-            float[] color = new float[] { (float) Math.random() * 360f, 1f, 1f };
-            palette = new int[slots];
-            darkest = 0;
-            for (int i=0; i<slots; i++) {
-                palette[i] = Color.HSVToColor(color);
-                color[0] = (color[0] + 360f/slots) % 360f;
-                if (lum(palette[i]) < lum(palette[darkest])) darkest = i;
-            }
-
-            final StringBuilder str = new StringBuilder();
-            for (int c : palette) {
-                str.append(String.format("#%08x ", c));
-            }
-            Log.v("PlatLogoActivity", "color palette: " + str);
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            if (dp == 0) dp = getResources().getDisplayMetrics().density;
-            final float width = canvas.getWidth();
-            final float height = canvas.getHeight();
-            if (radius == 0) {
-                setPosition(width / 2, height / 2);
-                setRadius(width / 6);
-            }
-            final float inner_w = radius * 0.667f;
-
-            final Paint paint = new Paint();
-            paint.setStrokeCap(Paint.Cap.BUTT);
-            canvas.translate(x, y);
-
-            Path p = new Path();
-            p.moveTo(-radius, height);
-            p.lineTo(-radius, 0);
-            p.arcTo(-radius, -radius, radius, radius, -180, 270, false);
-            p.lineTo(-radius, radius);
-
-            float w = Math.max(canvas.getWidth(), canvas.getHeight())  * 1.414f;
-            paint.setStyle(Paint.Style.FILL);
-
-            int i=0;
-            while (w > radius*2 + inner_w*2) {
-                paint.setColor(0xFF000000 | palette[i % palette.length]);
-                // for a slower but more complete version:
-                // paint.setStrokeWidth(w);
-                // canvas.drawPath(p, paint);
-                canvas.drawOval(-w/2, -w/2, w/2, w/2, paint);
-                w -= inner_w * (1.1f + Math.sin((i/20f + offset) * 3.14159f));
-                i++;
-            }
-
-            // the innermost circle needs to be a constant color to avoid rapid flashing
-            paint.setColor(0xFF000000 | palette[(darkest+1) % palette.length]);
-            canvas.drawOval(-radius, -radius, radius, radius, paint);
-
-            p.reset();
-            p.moveTo(-radius, height);
-            p.lineTo(-radius, 0);
-            p.arcTo(-radius, -radius, radius, radius, -180, 270, false);
-            p.lineTo(-radius + inner_w, radius);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(inner_w*2);
-            paint.setColor(palette[darkest]);
-            canvas.drawPath(p, paint);
-            paint.setStrokeWidth(inner_w);
-            paint.setColor(0xFFFFFFFF);
-            canvas.drawPath(p, paint);
-        }
-
-        @Override
-        public void setAlpha(int alpha) {
-
-        }
-
-        @Override
-        public void setColorFilter(ColorFilter colorFilter) {
-
-        }
-
-        @Override
-        public int getOpacity() {
-            return 0;
-        }
+        mClicks = 0;
+        super.onPause();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final float dp = getResources().getDisplayMetrics().density;
 
-        layout = new FrameLayout(this);
-        setContentView(layout);
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        getWindow().setNavigationBarColor(0);
+        getWindow().setStatusBarColor(0);
 
-        bg = new PBackground();
-        layout.setBackground(bg);
+        getActionBar().hide();
 
-        final ContentResolver cr = getContentResolver();
+        setContentView(R.layout.platlogo_layout);
 
-        layout.setOnTouchListener(new View.OnTouchListener() {
-            final String TOUCH_STATS = "touch.stats";
+        mBackslash = new BackslashDrawable((int) (50 * dp));
 
-            final PointerCoords pc0 = new PointerCoords();
-            final PointerCoords pc1 = new PointerCoords();
+        mOneView = findViewById(R.id.one);
+        mOneView.setImageDrawable(new OneDrawable());
+        mZeroView = findViewById(R.id.zero);
+        mZeroView.setImageDrawable(new ZeroDrawable());
 
-            double pressure_min, pressure_max;
-            int maxPointers;
-            int tapCount;
+        final ViewGroup root = (ViewGroup) mOneView.getParent();
+        root.setClipChildren(false);
+        root.setBackground(mBackslash);
+        root.getBackground().setAlpha(0x20);
 
+        View.OnTouchListener tl = new View.OnTouchListener() {
+            float mOffsetX, mOffsetY;
+            long mClickTime;
+            ObjectAnimator mRotAnim;
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                final float pressure = event.getPressure();
+                measureTouchPressure(event);
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        pressure_min = pressure_max = pressure;
-                        // fall through
-                    case MotionEvent.ACTION_MOVE:
-                        if (pressure < pressure_min) pressure_min = pressure;
-                        if (pressure > pressure_max) pressure_max = pressure;
-                        final int pc = event.getPointerCount();
-                        if (pc > maxPointers) maxPointers = pc;
-                        if (pc > 1) {
-                            event.getPointerCoords(0, pc0);
-                            event.getPointerCoords(1, pc1);
-                            bg.setRadius((float) Math.hypot(pc0.x - pc1.x, pc0.y - pc1.y) / 2f);
+                        v.animate().scaleX(1.1f).scaleY(1.1f);
+                        v.getParent().bringChildToFront(v);
+                        mOffsetX = event.getRawX() - v.getX();
+                        mOffsetY = event.getRawY() - v.getY();
+                        long now = System.currentTimeMillis();
+                        if (now - mClickTime < 350) {
+                            mRotAnim = ObjectAnimator.ofFloat(v, View.ROTATION,
+                                    v.getRotation(), v.getRotation() + 3600);
+                            mRotAnim.setDuration(10000);
+                            mRotAnim.start();
+                            mClickTime = 0;
+                        } else {
+                            mClickTime = now;
                         }
                         break;
-                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_MOVE:
+                        v.setX(event.getRawX() - mOffsetX);
+                        v.setY(event.getRawY() - mOffsetY);
+                        v.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE);
+                        break;
                     case MotionEvent.ACTION_UP:
-                        try {
-                            final String touchDataJson = Settings.System.getString(cr, TOUCH_STATS);
-                            final JSONObject touchData = new JSONObject(
-                                    touchDataJson != null ? touchDataJson : "{}");
-                            if (touchData.has("min")) {
-                                pressure_min = Math.min(pressure_min, touchData.getDouble("min"));
-                            }
-                            if (touchData.has("max")) {
-                                pressure_max = Math.max(pressure_max, touchData.getDouble("max"));
-                            }
-                            touchData.put("min", pressure_min);
-                            touchData.put("max", pressure_max);
-                            Settings.System.putString(cr, TOUCH_STATS, touchData.toString());
-                        } catch (Exception e) {
-                            Log.e("PlatLogoActivity", "Can't write touch settings", e);
-                        }
-
-                        if (maxPointers == 1) {
-                            tapCount ++;
-                            if (tapCount < 7) {
-                                bg.randomizePalette();
-                            } else {
-                                launchNextStage();
-                            }
-                        } else {
-                            tapCount = 0;
-                        }
-                        maxPointers = 0;
+                        v.performClick();
+                        // fall through
+                    case MotionEvent.ACTION_CANCEL:
+                        v.animate().scaleX(1f).scaleY(1f);
+                        if (mRotAnim != null) mRotAnim.cancel();
+                        testOverlap();
                         break;
                 }
                 return true;
             }
-        });
+        };
+
+        findViewById(R.id.one).setOnTouchListener(tl);
+        findViewById(R.id.zero).setOnTouchListener(tl);
+        findViewById(R.id.text).setOnTouchListener(tl);
+    }
+
+    private void testOverlap() {
+        final float width = mZeroView.getWidth();
+        final float targetX = mZeroView.getX() + width * .2f;
+        final float targetY = mZeroView.getY() + width * .3f;
+        if (Math.hypot(targetX - mOneView.getX(), targetY - mOneView.getY()) < width * .2f
+                && Math.abs(mOneView.getRotation() % 360 - 315) < 15) {
+            mOneView.animate().x(mZeroView.getX() + width * .2f);
+            mOneView.animate().y(mZeroView.getY() + width * .3f);
+            mOneView.setRotation(mOneView.getRotation() % 360);
+            mOneView.animate().rotation(315);
+            mOneView.performHapticFeedback(HapticFeedbackConstants.CONFIRM);
+
+            mBackslash.startAnimating();
+
+            mClicks++;
+            if (mClicks >= 7) {
+                launchNextStage();
+            }
+        } else {
+            mBackslash.stopAnimating();
+        }
     }
 
     private void launchNextStage() {
         final ContentResolver cr = getContentResolver();
 
-        if (Settings.System.getLong(cr, Settings.System.EGG_MODE, 0) == 0) {
+        if (Settings.System.getLong(cr, "egg_mode" /* Settings.System.EGG_MODE */, 0) == 0) {
             // For posterity: the moment this user unlocked the easter egg
             try {
                 Settings.System.putLong(cr,
-                        Settings.System.EGG_MODE,
+                        "egg_mode", // Settings.System.EGG_MODE,
                         System.currentTimeMillis());
             } catch (RuntimeException e) {
-                Log.e("PlatLogoActivity", "Can't write settings", e);
+                Log.e("com.android.internal.app.PlatLogoActivity", "Can't write settings", e);
             }
         }
         try {
@@ -270,36 +185,206 @@ public class PlatLogoActivity extends Activity {
                         | Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .addCategory("com.android.internal.category.PLATLOGO"));
         } catch (ActivityNotFoundException ex) {
-            Log.e("PlatLogoActivity", "No more eggs.");
+            Log.e("com.android.internal.app.PlatLogoActivity", "No more eggs.");
         }
         finish();
+    }
+
+    static final String TOUCH_STATS = "touch.stats";
+    double mPressureMin = 0, mPressureMax = -1;
+
+    private void measureTouchPressure(MotionEvent event) {
+        final float pressure = event.getPressure();
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                if (mPressureMax < 0) {
+                    mPressureMin = mPressureMax = pressure;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (pressure < mPressureMin) mPressureMin = pressure;
+                if (pressure > mPressureMax) mPressureMax = pressure;
+                break;
+        }
+    }
+
+    private void syncTouchPressure() {
+        try {
+            final String touchDataJson = Settings.System.getString(
+                    getContentResolver(), TOUCH_STATS);
+            final JSONObject touchData = new JSONObject(
+                    touchDataJson != null ? touchDataJson : "{}");
+            if (touchData.has("min")) {
+                mPressureMin = Math.min(mPressureMin, touchData.getDouble("min"));
+            }
+            if (touchData.has("max")) {
+                mPressureMax = Math.max(mPressureMax, touchData.getDouble("max"));
+            }
+            if (mPressureMax >= 0) {
+                touchData.put("min", mPressureMin);
+                touchData.put("max", mPressureMax);
+                Settings.System.putString(getContentResolver(), TOUCH_STATS, touchData.toString());
+            }
+        } catch (Exception e) {
+            Log.e("com.android.internal.app.PlatLogoActivity", "Can't write touch settings", e);
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        bg.randomizePalette();
-
-        anim = new TimeAnimator();
-        anim.setTimeListener(
-                new TimeAnimator.TimeListener() {
-                    @Override
-                    public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-                        bg.setOffset((float) totalTime / 60000f);
-                        bg.invalidateSelf();
-                    }
-                });
-
-        anim.start();
+        syncTouchPressure();
     }
 
     @Override
     public void onStop() {
-        if (anim != null) {
-            anim.cancel();
-            anim = null;
-        }
+        syncTouchPressure();
         super.onStop();
     }
+
+    static class ZeroDrawable extends Drawable {
+        int mTintColor;
+
+        @Override
+        public void draw(Canvas canvas) {
+            sPaint.setColor(mTintColor | 0xFF000000);
+
+            canvas.save();
+            canvas.scale(canvas.getWidth() / 24f, canvas.getHeight() / 24f);
+
+            canvas.drawCircle(12f, 12f, 10f, sPaint);
+            canvas.restore();
+        }
+
+        @Override
+        public void setAlpha(int alpha) { }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) { }
+
+        @Override
+        public void setTintList(ColorStateList tint) {
+            mTintColor = tint.getDefaultColor();
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+    }
+
+    static class OneDrawable extends Drawable {
+        int mTintColor;
+
+        @Override
+        public void draw(Canvas canvas) {
+            sPaint.setColor(mTintColor | 0xFF000000);
+
+            canvas.save();
+            canvas.scale(canvas.getWidth() / 24f, canvas.getHeight() / 24f);
+
+            final Path p = new Path();
+            p.moveTo(12f, 21.83f);
+            p.rLineTo(0f, -19.67f);
+            p.rLineTo(-5f, 0f);
+            canvas.drawPath(p, sPaint);
+            canvas.restore();
+        }
+
+        @Override
+        public void setAlpha(int alpha) { }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) { }
+
+        @Override
+        public void setTintList(ColorStateList tint) {
+            mTintColor = tint.getDefaultColor();
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+    }
+
+    private static class BackslashDrawable extends Drawable implements TimeAnimator.TimeListener {
+        Bitmap mTile;
+        Paint mPaint = new Paint();
+        BitmapShader mShader;
+        TimeAnimator mAnimator = new TimeAnimator();
+        Matrix mMatrix = new Matrix();
+
+        public void draw(Canvas canvas) {
+            canvas.drawPaint(mPaint);
+        }
+
+        BackslashDrawable(int width) {
+            mTile = Bitmap.createBitmap(width, width, Bitmap.Config.ALPHA_8);
+            mAnimator.setTimeListener(this);
+
+            final Canvas tileCanvas = new Canvas(mTile);
+            final float w = tileCanvas.getWidth();
+            final float h = tileCanvas.getHeight();
+
+            final Path path = new Path();
+            path.moveTo(0, 0);
+            path.lineTo(w / 2, 0);
+            path.lineTo(w, h / 2);
+            path.lineTo(w, h);
+            path.close();
+
+            path.moveTo(0, h / 2);
+            path.lineTo(w / 2, h);
+            path.lineTo(0, h);
+            path.close();
+
+            final Paint slashPaint = new Paint();
+            slashPaint.setAntiAlias(true);
+            slashPaint.setStyle(Paint.Style.FILL);
+            slashPaint.setColor(0xFF000000);
+            tileCanvas.drawPath(path, slashPaint);
+
+            //mPaint.setColor(0xFF0000FF);
+            mShader = new BitmapShader(mTile, Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+            mPaint.setShader(mShader);
+        }
+
+        public void startAnimating() {
+            if (!mAnimator.isStarted()) {
+                mAnimator.start();
+            }
+        }
+
+        public void stopAnimating() {
+            if (mAnimator.isStarted()) {
+                mAnimator.cancel();
+            }
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+            mPaint.setAlpha(alpha);
+        }
+
+        @Override
+        public void setColorFilter(ColorFilter colorFilter) {
+            mPaint.setColorFilter(colorFilter);
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+
+        @Override
+        public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
+            if (mShader != null) {
+                mMatrix.postTranslate(deltaTime / 4f, 0);
+                mShader.setLocalMatrix(mMatrix);
+                invalidateSelf();
+            }
+        }
+    }
 }
+

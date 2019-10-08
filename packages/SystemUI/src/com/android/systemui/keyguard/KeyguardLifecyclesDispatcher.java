@@ -19,8 +19,6 @@ package com.android.systemui.keyguard;
 import android.os.Handler;
 import android.os.Message;
 
-import com.android.internal.policy.IKeyguardDrawnCallback;
-
 /**
  * Dispatches the lifecycles keyguard gets from WindowManager on the main thread.
  */

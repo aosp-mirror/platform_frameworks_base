@@ -82,6 +82,8 @@ class DayPickerView extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.CalendarView, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.CalendarView,
+                attrs, a, defStyleAttr, defStyleRes);
 
         final int firstDayOfWeek = a.getInt(R.styleable.CalendarView_firstDayOfWeek,
                 LocaleData.get(Locale.getDefault()).firstDayOfWeek);

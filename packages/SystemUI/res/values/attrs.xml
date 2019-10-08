@@ -18,8 +18,6 @@
     <declare-styleable name="KeyButtonView">
         <!-- key code to send when pressed; if absent or 0, no key is sent -->
         <attr name="keyCode" format="integer" />
-        <!-- does this button generate longpress / repeat events? -->
-        <attr name="keyRepeat" format="boolean" />
         <!-- Should this button play sound effects, default true -->
         <attr name="playSound" format="boolean" />
         <attr name="android:contentDescription" />
@@ -29,12 +27,6 @@
     </declare-styleable>
     <declare-styleable name="NotificationLinearLayout">
         <attr name="insetLeft" format="dimension" />
-    </declare-styleable>
-    <declare-styleable name="RecentsPanelView">
-        <attr name="recentItemLayout" format="reference" />
-        <!-- Style for the "Clear all" button. -->
-        <attr name="clearAllStyle" format="reference" />
-        <attr name="clearAllBackgroundColor" format="reference" />
     </declare-styleable>
     <declare-styleable name="DeadZone">
         <attr name="minSize" format="dimension" />
@@ -46,6 +38,7 @@
     <attr name="frameColor" format="color" />
     <declare-styleable name="BatteryMeterView">
         <attr name="frameColor" />
+        <attr name="textAppearance" format="reference"/>
     </declare-styleable>
     <declare-styleable name="Clock">
         <attr name="amPmStyle" format="enum">
@@ -130,6 +123,7 @@
     <attr name="darkIconTheme" format="reference" />
     <attr name="wallpaperTextColor" format="reference|color" />
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
+    <attr name="backgroundProtectedStyle" format="reference" />
 
     <declare-styleable name="SmartReplyView">
         <attr name="spacing" format="dimension" />
@@ -143,11 +137,28 @@
     <attr name="rotateButtonEndAngle" format="float" />
     <attr name="rotateButtonScaleX" format="float" />
 
+    <!-- Used to style charging animation AVD animation -->
+    <attr name="chargingAnimColor" format="color" />
+
+    <!-- Size of shadows/elevations on keyguard -->
+    <attr name="shadowRadius" format="float" />
+
     <!-- Used display CarrierText in Keyguard or QS Footer -->
     <declare-styleable name="CarrierText">
         <attr name="allCaps" format="boolean" />
         <attr name="showMissingSim" format="boolean" />
         <attr name="showAirplaneMode" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="CaptionsToggleImageButton">
+        <attr name="optedOut" format="boolean" />
+    </declare-styleable>
+
+    <!-- Theme attributes used to style the appearance of expanded Bubbles -->
+    <declare-styleable name="BubbleExpandedView">
+        <attr name="android:colorBackgroundFloating" />
+        <attr name="android:dialogCornerRadius" />
+    </declare-styleable>
+
 </resources>
 

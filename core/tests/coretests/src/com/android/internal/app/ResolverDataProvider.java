@@ -17,15 +17,17 @@
 package com.android.internal.app;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.os.UserHandle;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import android.test.mock.MockContext;
+import android.test.mock.MockPackageManager;
+import android.test.mock.MockResources;
 
 /**
  * Utility class used by resolver tests to create mock data
@@ -73,6 +75,86 @@ class ResolverDataProvider {
         ai.packageName = "foo.bar";
         ai.enabled = true;
         return ai;
+    }
+
+    static class PackageManagerMockedInfo {
+        public Context ctx;
+        public ApplicationInfo appInfo;
+        public ActivityInfo activityInfo;
+        public ResolveInfo resolveInfo;
+        public String setAppLabel;
+        public String setActivityLabel;
+        public String setResolveInfoLabel;
+    }
+
+    static PackageManagerMockedInfo createPackageManagerMockedInfo(boolean hasOverridePermission) {
+        final String appLabel = "app_label";
+        final String activityLabel = "activity_label";
+        final String resolveInfoLabel = "resolve_info_label";
+
+        MockContext ctx = new MockContext() {
+            @Override
+            public PackageManager getPackageManager() {
+                return new MockPackageManager() {
+                    @Override
+                    public int checkPermission(String permName, String pkgName) {
+                        if (hasOverridePermission) return PERMISSION_GRANTED;
+                        return PERMISSION_DENIED;
+                    }
+                };
+            }
+
+            @Override
+            public Resources getResources() {
+                return new MockResources() {
+                    @Override
+                    public String getString(int id) throws NotFoundException {
+                        if (id == 1) return appLabel;
+                        if (id == 2) return activityLabel;
+                        if (id == 3) return resolveInfoLabel;
+                        return null;
+                    }
+                };
+            }
+        };
+
+        ApplicationInfo appInfo = new ApplicationInfo() {
+            @Override
+            public CharSequence loadLabel(PackageManager pm) {
+                return appLabel;
+            }
+        };
+        appInfo.labelRes = 1;
+
+        ActivityInfo activityInfo = new ActivityInfo() {
+            @Override
+            public CharSequence loadLabel(PackageManager pm) {
+                return activityLabel;
+            }
+        };
+        activityInfo.labelRes = 2;
+        activityInfo.applicationInfo = appInfo;
+
+        ResolveInfo resolveInfo = new ResolveInfo() {
+            @Override
+            public CharSequence loadLabel(PackageManager pm) {
+                return resolveInfoLabel;
+            }
+        };
+        resolveInfo.activityInfo = activityInfo;
+        resolveInfo.resolvePackageName = "super.fake.packagename";
+        resolveInfo.labelRes = 3;
+
+        PackageManagerMockedInfo mockedInfo = new PackageManagerMockedInfo();
+        mockedInfo.activityInfo = activityInfo;
+        mockedInfo.appInfo = appInfo;
+        mockedInfo.ctx = ctx;
+        mockedInfo.resolveInfo = resolveInfo;
+        mockedInfo.setAppLabel = appLabel;
+        mockedInfo.setActivityLabel = activityLabel;
+        mockedInfo.setResolveInfoLabel = resolveInfoLabel;
+
+        return mockedInfo;
     }
 
     static Intent createResolverIntent(int i) {

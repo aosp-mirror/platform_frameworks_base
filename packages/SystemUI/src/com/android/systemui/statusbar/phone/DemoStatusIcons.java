@@ -24,20 +24,20 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.DemoMode;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
+import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+
 import java.util.ArrayList;
 
 public class DemoStatusIcons extends StatusIconContainer implements DemoMode, DarkReceiver {
@@ -108,16 +108,13 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
             }
             String zen = args.getString("zen");
             if (zen != null) {
-                int iconId = zen.equals("important") ? R.drawable.stat_sys_zen_important
-                        : zen.equals("none") ? R.drawable.stat_sys_zen_none
-                        : 0;
+                int iconId = zen.equals("dnd") ? R.drawable.stat_sys_dnd : 0;
                 updateSlot("zen", null, iconId);
             }
             String bt = args.getString("bluetooth");
             if (bt != null) {
-                int iconId = bt.equals("disconnected") ? R.drawable.stat_sys_data_bluetooth
-                        : bt.equals("connected") ? R.drawable.stat_sys_data_bluetooth_connected
-                        : 0;
+                int iconId = bt.equals("connected")
+                        ? R.drawable.stat_sys_data_bluetooth_connected : 0;
                 updateSlot("bluetooth", null, iconId);
             }
             String location = args.getString("location");
@@ -203,7 +200,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         v.set(icon);
         v.setStaticDrawableColor(mColor);
         v.setDecorColor(mColor);
-        addView(v, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+        addView(v, 0, createLayoutParams());
     }
 
     public void addDemoWifiView(WifiIconState state) {
@@ -223,7 +220,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mWifiView = view;
         mWifiView.applyWifiState(state);
         mWifiView.setStaticDrawableColor(mColor);
-        addView(view, viewIndex);
+        addView(view, viewIndex, createLayoutParams());
     }
 
     public void updateWifiState(WifiIconState state) {
@@ -244,7 +241,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
         // mobile always goes at the end
         mMobileViews.add(view);
-        addView(view, getChildCount());
+        addView(view, getChildCount(), createLayoutParams());
     }
 
     public void updateMobileState(MobileIconState state) {
@@ -288,6 +285,10 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         }
 
         return null;
+    }
+
+    private LayoutParams createLayoutParams() {
+        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
     }
 
     @Override

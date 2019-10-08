@@ -623,7 +623,7 @@ final class FragmentManagerState implements Parcelable {
         dest.writeInt(mNextFragmentIndex);
     }
     
-    public static final Parcelable.Creator<FragmentManagerState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<FragmentManagerState> CREATOR
             = new Parcelable.Creator<FragmentManagerState>() {
         public FragmentManagerState createFromParcel(Parcel in) {
             return new FragmentManagerState(in);

@@ -83,7 +83,7 @@ public final class HdmiHotplugEvent implements Parcelable {
         dest.writeByte((byte) (mConnected ? 1 : 0));
     }
 
-    public static final Parcelable.Creator<HdmiHotplugEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<HdmiHotplugEvent> CREATOR
             = new Parcelable.Creator<HdmiHotplugEvent>() {
         /**
          * Rebuilds a {@link HdmiHotplugEvent} previously stored with

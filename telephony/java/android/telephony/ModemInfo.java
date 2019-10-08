@@ -97,7 +97,7 @@ public class ModemInfo implements Parcelable {
         dest.writeBoolean(isDataSupported);
     }
 
-    public static final Parcelable.Creator<ModemInfo> CREATOR = new Parcelable.Creator() {
+    public static final @android.annotation.NonNull Parcelable.Creator<ModemInfo> CREATOR = new Parcelable.Creator() {
         public ModemInfo createFromParcel(Parcel in) {
             return new ModemInfo(in);
         }

@@ -15,8 +15,11 @@
  */
 package android.app;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager.Importance;
 import android.content.ContentResolver;
@@ -39,7 +42,9 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A representation of settings that apply to a collection of similarly themed notifications.
@@ -80,6 +85,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
+    private static final String ATT_ALLOW_BUBBLE = "can_bubble";
     private static final String DELIMITER = ",";
 
     /**
@@ -115,6 +121,11 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public static final int USER_LOCKED_ALLOW_BUBBLE = 0x00000100;
+
+    /**
+     * @hide
+     */
     public static final int[] LOCKABLE_FIELDS = new int[] {
             USER_LOCKED_PRIORITY,
             USER_LOCKED_VISIBILITY,
@@ -123,6 +134,7 @@ public final class NotificationChannel implements Parcelable {
             USER_LOCKED_VIBRATION,
             USER_LOCKED_SOUND,
             USER_LOCKED_SHOW_BADGE,
+            USER_LOCKED_ALLOW_BUBBLE
     };
 
     private static final int DEFAULT_LIGHT_COLOR = 0;
@@ -132,6 +144,7 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
+    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
 
     @UnsupportedAppUsage
     private final String mId;
@@ -155,6 +168,9 @@ public final class NotificationChannel implements Parcelable {
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
     // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
+    private boolean mAllowBubbles = DEFAULT_ALLOW_BUBBLE;
+    private boolean mImportanceLockedByOEM;
+    private boolean mImportanceLockedDefaultApp;
 
     /**
      * Creates a notification channel.
@@ -216,6 +232,8 @@ public final class NotificationChannel implements Parcelable {
         mAudioAttributes = in.readInt() > 0 ? AudioAttributes.CREATOR.createFromParcel(in) : null;
         mLightColor = in.readInt();
         mBlockableSystem = in.readBoolean();
+        mAllowBubbles = in.readBoolean();
+        mImportanceLockedByOEM = in.readBoolean();
     }
 
     @Override
@@ -268,6 +286,8 @@ public final class NotificationChannel implements Parcelable {
         }
         dest.writeInt(mLightColor);
         dest.writeBoolean(mBlockableSystem);
+        dest.writeBoolean(mAllowBubbles);
+        dest.writeBoolean(mImportanceLockedByOEM);
     }
 
     /**
@@ -460,6 +480,22 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Sets whether notifications posted to this channel can appear outside of the notification
+     * shade, floating over other apps' content as a bubble.
+     *
+     * <p>This value will be ignored for channels that aren't allowed to pop on screen (that is,
+     * channels whose {@link #getImportance() importance} is <
+     * {@link NotificationManager#IMPORTANCE_HIGH}.</p>
+     *
+     * <p>Only modifiable before the channel is submitted to
+     *      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.</p>
+     * @see Notification#getBubbleMetadata()
+     */
+    public void setAllowBubbles(boolean allowBubbles) {
+        mAllowBubbles = allowBubbles;
+    }
+
+    /**
      * Returns the id of this channel.
      */
     public String getId() {
@@ -572,6 +608,14 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
+     * Returns whether notifications posted to this channel can display outside of the notification
+     * shade, in a floating window on top of other apps.
+     */
+    public boolean canBubble() {
+        return mAllowBubbles;
+    }
+
+    /**
      * @hide
      */
     @SystemApi
@@ -599,6 +643,47 @@ public final class NotificationChannel implements Parcelable {
      */
     public boolean isBlockableSystem() {
         return mBlockableSystem;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setImportanceLockedByOEM(boolean locked) {
+        mImportanceLockedByOEM = locked;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setImportanceLockedByCriticalDeviceFunction(boolean locked) {
+        mImportanceLockedDefaultApp = locked;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isImportanceLockedByOEM() {
+        return mImportanceLockedByOEM;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public boolean isImportanceLockedByCriticalDeviceFunction() {
+        return mImportanceLockedDefaultApp;
+    }
+
+    /**
+     * Returns whether the user has chosen the importance of this channel, either to affirm the
+     * initial selection from the app, or changed it to be higher or lower.
+     * @see #getImportance()
+     */
+    public boolean hasUserSetImportance() {
+        return (mUserLockedFields & USER_LOCKED_IMPORTANCE) != 0;
     }
 
     /**
@@ -643,11 +728,12 @@ public final class NotificationChannel implements Parcelable {
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
+        setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
     }
 
     @Nullable
     private Uri restoreSoundUri(Context context, @Nullable Uri uri) {
-        if (uri == null) {
+        if (uri == null || Uri.EMPTY.equals(uri)) {
             return null;
         }
         ContentResolver contentResolver = context.getContentResolver();
@@ -683,7 +769,7 @@ public final class NotificationChannel implements Parcelable {
 
     private Uri getSoundForBackup(Context context) {
         Uri sound = getSound();
-        if (sound == null) {
+        if (sound == null || Uri.EMPTY.equals(sound)) {
             return null;
         }
         Uri canonicalSound = context.getContentResolver().canonicalize(sound);
@@ -761,6 +847,12 @@ public final class NotificationChannel implements Parcelable {
         if (isBlockableSystem()) {
             out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockableSystem()));
         }
+        if (canBubble() != DEFAULT_ALLOW_BUBBLE) {
+            out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(canBubble()));
+        }
+
+        // mImportanceLockedDefaultApp and mImportanceLockedByOEM have a different source of
+        // truth and so aren't written to this xml file
 
         out.endTag(null, TAG_CHANNEL);
     }
@@ -803,6 +895,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
         record.put(ATT_BLOCKABLE_SYSTEM, isBlockableSystem());
+        record.put(ATT_ALLOW_BUBBLE, canBubble());
         return record;
     }
 
@@ -869,7 +962,8 @@ public final class NotificationChannel implements Parcelable {
         return sb.toString();
     }
 
-    public static final Creator<NotificationChannel> CREATOR = new Creator<NotificationChannel>() {
+    public static final @android.annotation.NonNull Creator<NotificationChannel> CREATOR =
+            new Creator<NotificationChannel>() {
         @Override
         public NotificationChannel createFromParcel(Parcel in) {
             return new NotificationChannel(in);
@@ -890,59 +984,69 @@ public final class NotificationChannel implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         NotificationChannel that = (NotificationChannel) o;
-
-        if (getImportance() != that.getImportance()) return false;
-        if (mBypassDnd != that.mBypassDnd) return false;
-        if (getLockscreenVisibility() != that.getLockscreenVisibility()) return false;
-        if (mLights != that.mLights) return false;
-        if (getLightColor() != that.getLightColor()) return false;
-        if (getUserLockedFields() != that.getUserLockedFields()) return false;
-        if (mVibrationEnabled != that.mVibrationEnabled) return false;
-        if (mShowBadge != that.mShowBadge) return false;
-        if (isDeleted() != that.isDeleted()) return false;
-        if (isBlockableSystem() != that.isBlockableSystem()) return false;
-        if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
-        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) {
-            return false;
-        }
-        if (getDescription() != null ? !getDescription().equals(that.getDescription())
-                : that.getDescription() != null) {
-            return false;
-        }
-        if (getSound() != null ? !getSound().equals(that.getSound()) : that.getSound() != null) {
-            return false;
-        }
-        if (!Arrays.equals(mVibration, that.mVibration)) return false;
-        if (getGroup() != null ? !getGroup().equals(that.getGroup()) : that.getGroup() != null) {
-            return false;
-        }
-        return getAudioAttributes() != null ? getAudioAttributes().equals(that.getAudioAttributes())
-                : that.getAudioAttributes() == null;
-
+        return getImportance() == that.getImportance()
+                && mBypassDnd == that.mBypassDnd
+                && getLockscreenVisibility() == that.getLockscreenVisibility()
+                && mLights == that.mLights
+                && getLightColor() == that.getLightColor()
+                && getUserLockedFields() == that.getUserLockedFields()
+                && isFgServiceShown() == that.isFgServiceShown()
+                && mVibrationEnabled == that.mVibrationEnabled
+                && mShowBadge == that.mShowBadge
+                && isDeleted() == that.isDeleted()
+                && isBlockableSystem() == that.isBlockableSystem()
+                && mAllowBubbles == that.mAllowBubbles
+                && Objects.equals(getId(), that.getId())
+                && Objects.equals(getName(), that.getName())
+                && Objects.equals(mDesc, that.mDesc)
+                && Objects.equals(getSound(), that.getSound())
+                && Arrays.equals(mVibration, that.mVibration)
+                && Objects.equals(getGroup(), that.getGroup())
+                && Objects.equals(getAudioAttributes(), that.getAudioAttributes())
+                && mImportanceLockedByOEM == that.mImportanceLockedByOEM
+                && mImportanceLockedDefaultApp == that.mImportanceLockedDefaultApp;
     }
 
     @Override
     public int hashCode() {
-        int result = getId() != null ? getId().hashCode() : 0;
-        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
-        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
-        result = 31 * result + getImportance();
-        result = 31 * result + (mBypassDnd ? 1 : 0);
-        result = 31 * result + getLockscreenVisibility();
-        result = 31 * result + (getSound() != null ? getSound().hashCode() : 0);
-        result = 31 * result + (mLights ? 1 : 0);
-        result = 31 * result + getLightColor();
+        int result = Objects.hash(getId(), getName(), mDesc, getImportance(), mBypassDnd,
+                getLockscreenVisibility(), getSound(), mLights, getLightColor(),
+                getUserLockedFields(),
+                isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
+                getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
+                mImportanceLockedByOEM, mImportanceLockedDefaultApp);
         result = 31 * result + Arrays.hashCode(mVibration);
-        result = 31 * result + getUserLockedFields();
-        result = 31 * result + (mVibrationEnabled ? 1 : 0);
-        result = 31 * result + (mShowBadge ? 1 : 0);
-        result = 31 * result + (isDeleted() ? 1 : 0);
-        result = 31 * result + (getGroup() != null ? getGroup().hashCode() : 0);
-        result = 31 * result + (getAudioAttributes() != null ? getAudioAttributes().hashCode() : 0);
-        result = 31 * result + (isBlockableSystem() ? 1 : 0);
         return result;
+    }
+
+    /** @hide */
+    public void dump(PrintWriter pw, String prefix, boolean redacted) {
+        String redactedName = redacted ? TextUtils.trimToLengthWithEllipsis(mName, 3) : mName;
+        String output = "NotificationChannel{"
+                + "mId='" + mId + '\''
+                + ", mName=" + redactedName
+                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
+                + ", mImportance=" + mImportance
+                + ", mBypassDnd=" + mBypassDnd
+                + ", mLockscreenVisibility=" + mLockscreenVisibility
+                + ", mSound=" + mSound
+                + ", mLights=" + mLights
+                + ", mLightColor=" + mLightColor
+                + ", mVibration=" + Arrays.toString(mVibration)
+                + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
+                + ", mFgServiceShown=" + mFgServiceShown
+                + ", mVibrationEnabled=" + mVibrationEnabled
+                + ", mShowBadge=" + mShowBadge
+                + ", mDeleted=" + mDeleted
+                + ", mGroup='" + mGroup + '\''
+                + ", mAudioAttributes=" + mAudioAttributes
+                + ", mBlockableSystem=" + mBlockableSystem
+                + ", mAllowBubbles=" + mAllowBubbles
+                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
+                + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
+                + '}';
+        pw.println(prefix + output);
     }
 
     @Override
@@ -966,6 +1070,9 @@ public final class NotificationChannel implements Parcelable {
                 + ", mGroup='" + mGroup + '\''
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
+                + ", mAllowBubbles=" + mAllowBubbles
+                + ", mImportanceLockedByOEM=" + mImportanceLockedByOEM
+                + ", mImportanceLockedDefaultApp=" + mImportanceLockedDefaultApp
                 + '}';
     }
 
@@ -999,6 +1106,7 @@ public final class NotificationChannel implements Parcelable {
             mAudioAttributes.writeToProto(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
         }
         proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
+        proto.write(NotificationChannelProto.ALLOW_APP_OVERLAY, mAllowBubbles);
 
         proto.end(token);
     }

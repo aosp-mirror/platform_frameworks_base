@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.DisplayCutout.NO_CUTOUT;
+import static android.view.DisplayCutout.extractBoundsFromList;
 import static android.view.DisplayCutout.fromSpec;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -28,17 +29,20 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayCutout.ParcelableWrapper;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Tests for {@link DisplayCutout}.
@@ -54,12 +58,72 @@ import java.util.Arrays;
 @Presubmit
 public class DisplayCutoutTest {
 
+    private static final Rect ZERO_RECT = new Rect();
+
     /** This is not a consistent cutout. Useful for verifying insets in one go though. */
     final DisplayCutout mCutoutNumbers = new DisplayCutout(
-            new Rect(1, 2, 3, 4),
-            Arrays.asList(new Rect(5, 6, 7, 8)));
+            Insets.of(5, 6, 7, 8) /* safeInsets */,
+            null /* boundLeft */,
+            new Rect(9, 0, 10, 1) /* boundTop */,
+            null /* boundRight */,
+            null /* boundBottom */);
 
     final DisplayCutout mCutoutTop = createCutoutTop();
+
+    @Test
+    public void testExtractBoundsFromList_left() {
+        Rect safeInsets = new Rect(10, 0, 0, 0);
+        Rect bound = new Rect(0, 80, 10, 120);
+        assertThat(extractBoundsFromList(safeInsets, Collections.singletonList(bound)),
+                equalTo(new Rect[]{bound, ZERO_RECT, ZERO_RECT, ZERO_RECT}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_top() {
+        Rect safeInsets = new Rect(0, 10, 0, 0);
+        Rect bound = new Rect(80, 0, 120, 10);
+        assertThat(extractBoundsFromList(safeInsets, Collections.singletonList(bound)),
+                equalTo(new Rect[]{ZERO_RECT, bound, ZERO_RECT, ZERO_RECT}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_right() {
+        Rect safeInsets = new Rect(0, 0, 10, 0);
+        Rect bound = new Rect(190, 80, 200, 120);
+        assertThat(extractBoundsFromList(safeInsets, Collections.singletonList(bound)),
+                equalTo(new Rect[]{ZERO_RECT, ZERO_RECT, bound, ZERO_RECT}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_bottom() {
+        Rect safeInsets = new Rect(0, 0, 0, 10);
+        Rect bound = new Rect(80, 190, 120, 200);
+        assertThat(extractBoundsFromList(safeInsets, Collections.singletonList(bound)),
+                equalTo(new Rect[]{ZERO_RECT, ZERO_RECT, ZERO_RECT, bound}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_top_and_bottom() {
+        Rect safeInsets = new Rect(0, 1, 0, 10);
+        Rect boundTop = new Rect(80, 0, 120, 10);
+        Rect boundBottom = new Rect(80, 190, 120, 200);
+        assertThat(extractBoundsFromList(safeInsets,
+                Arrays.asList(new Rect[]{boundTop, boundBottom})),
+                equalTo(new Rect[]{ZERO_RECT, boundTop, ZERO_RECT, boundBottom}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_nullBoundingRects() {
+        Rect safeInsets = new Rect(0, 0, 0, 0);
+        assertThat(extractBoundsFromList(safeInsets, null /* boundingRects */),
+                equalTo(new Rect[]{ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_nullSafeInsets() {
+        assertThat(extractBoundsFromList(null /* safeInsets */, Collections.emptyList()),
+                equalTo(new Rect[]{ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT}));
+    }
 
     @Test
     public void hasCutout() throws Exception {
@@ -68,18 +132,13 @@ public class DisplayCutoutTest {
     }
 
     @Test
-    public void getSafeInsets() throws Exception {
-        assertEquals(1, mCutoutNumbers.getSafeInsetLeft());
-        assertEquals(2, mCutoutNumbers.getSafeInsetTop());
-        assertEquals(3, mCutoutNumbers.getSafeInsetRight());
-        assertEquals(4, mCutoutNumbers.getSafeInsetBottom());
+    public void testGetSafeInsets() throws Exception {
+        assertEquals(5, mCutoutNumbers.getSafeInsetLeft());
+        assertEquals(6, mCutoutNumbers.getSafeInsetTop());
+        assertEquals(7, mCutoutNumbers.getSafeInsetRight());
+        assertEquals(8, mCutoutNumbers.getSafeInsetBottom());
 
-        assertEquals(new Rect(1, 2, 3, 4), mCutoutNumbers.getSafeInsets());
-    }
-
-    @Test
-    public void getBoundingRect() throws Exception {
-        assertEquals(new Rect(50, 0, 75, 100), mCutoutTop.getBounds().getBounds());
+        assertEquals(new Rect(5, 6, 7, 8), mCutoutNumbers.getSafeInsets());
     }
 
     @Test
@@ -111,30 +170,30 @@ public class DisplayCutoutTest {
     public void inset_insets_withLeftCutout() throws Exception {
         DisplayCutout cutout = createCutoutWithInsets(100, 0, 0, 0).inset(1, 2, 3, 4);
 
-        assertEquals(cutout.getSafeInsetLeft(), 99);
-        assertEquals(cutout.getSafeInsetTop(), 0);
-        assertEquals(cutout.getSafeInsetRight(), 0);
-        assertEquals(cutout.getSafeInsetBottom(), 0);
+        assertEquals(99, cutout.getSafeInsetLeft());
+        assertEquals(0, cutout.getSafeInsetTop());
+        assertEquals(0, cutout.getSafeInsetRight());
+        assertEquals(0, cutout.getSafeInsetBottom());
     }
 
     @Test
     public void inset_insets_withTopCutout() throws Exception {
         DisplayCutout cutout = mCutoutTop.inset(1, 2, 3, 4);
 
-        assertEquals(cutout.getSafeInsetLeft(), 0);
-        assertEquals(cutout.getSafeInsetTop(), 98);
-        assertEquals(cutout.getSafeInsetRight(), 0);
-        assertEquals(cutout.getSafeInsetBottom(), 0);
+        assertEquals(0, cutout.getSafeInsetLeft());
+        assertEquals(98, cutout.getSafeInsetTop());
+        assertEquals(0, cutout.getSafeInsetRight());
+        assertEquals(0, cutout.getSafeInsetBottom());
     }
 
     @Test
     public void inset_insets_withRightCutout() throws Exception {
         DisplayCutout cutout = createCutoutWithInsets(0, 0, 100, 0).inset(1, 2, 3, 4);
 
-        assertEquals(cutout.getSafeInsetLeft(), 0);
-        assertEquals(cutout.getSafeInsetTop(), 0);
-        assertEquals(cutout.getSafeInsetRight(), 97);
-        assertEquals(cutout.getSafeInsetBottom(), 0);
+        assertEquals(0, cutout.getSafeInsetLeft());
+        assertEquals(0, cutout.getSafeInsetTop());
+        assertEquals(97, cutout.getSafeInsetRight());
+        assertEquals(0, cutout.getSafeInsetBottom());
     }
 
     @Test
@@ -162,16 +221,20 @@ public class DisplayCutoutTest {
     @Test
     public void inset_bounds() throws Exception {
         DisplayCutout cutout = mCutoutTop.inset(1, 2, 3, 4);
-
-        assertEquals(new Rect(49, -2, 74, 98), cutout.getBounds().getBounds());
+        assertThat(cutout.getBoundingRectsAll(), equalTo(
+                new Rect[]{ ZERO_RECT, new Rect(49, -2, 74, 98), ZERO_RECT, ZERO_RECT }));
     }
 
+
+    // TODO: Deprecate fromBoundingRect.
+    /*
     @Test
     public void fromBoundingPolygon() throws Exception {
         assertEquals(
                 new Rect(50, 0, 75, 100),
                 DisplayCutout.fromBoundingRect(50, 0, 75, 100).getBounds().getBounds());
     }
+    */
 
     @Test
     public void parcel_unparcel_regular() {
@@ -240,6 +303,10 @@ public class DisplayCutoutTest {
         DisplayCutout cutout = fromSpec("M -50,0 v 20 h 100 v -20 z"
                 + "@bottom M -50,0 v -10,0 h 100 v 20 z", 200, 400, 2f);
         assertThat(cutout.getSafeInsets(), equalTo(new Rect(0, 20, 0, 10)));
+        assertThat(cutout.getBoundingRectsAll(), equalTo(new Rect[]{
+                ZERO_RECT, new Rect(50, 0, 150, 20),
+                ZERO_RECT, new Rect(50, 390, 150, 410)
+        }));
     }
 
     @Test
@@ -290,8 +357,10 @@ public class DisplayCutoutTest {
     }
 
     private static DisplayCutout createCutoutWithInsets(int left, int top, int right, int bottom) {
+        Insets safeInset = Insets.of(left, top, right, bottom);
+        Rect boundTop = new Rect(50, 0, 75, 100);
         return new DisplayCutout(
-                new Rect(left, top, right, bottom),
-                Arrays.asList(new Rect(50, 0, 75, 100)));
+                safeInset, null /* boundLeft */, boundTop, null /* boundRight */,
+                null /* boundBottom */);
     }
 }

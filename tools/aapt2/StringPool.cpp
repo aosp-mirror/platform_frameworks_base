@@ -367,7 +367,7 @@ const std::string kStringTooLarge = "STRING_TOO_LARGE";
 static bool EncodeString(const std::string& str, const bool utf8, BigBuffer* out,
                          IDiagnostics* diag) {
   if (utf8) {
-    const std::string& encoded = str;
+    const std::string& encoded = util::Utf8ToModifiedUtf8(str);
     const ssize_t utf16_length = utf8_to_utf16_length(
         reinterpret_cast<const uint8_t*>(encoded.data()), encoded.size());
     CHECK(utf16_length >= 0);

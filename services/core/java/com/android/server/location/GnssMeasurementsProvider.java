@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.location;
@@ -27,18 +27,16 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * An base implementation for GPS measurements provider.
- * It abstracts out the responsibility of handling listeners, while still allowing technology
- * specific implementations to be built.
+ * An base implementation for GPS measurements provider. It abstracts out the responsibility of
+ * handling listeners, while still allowing technology specific implementations to be built.
  *
  * @hide
  */
-public abstract class GnssMeasurementsProvider extends
-        RemoteListenerHelper<IGnssMeasurementsListener> {
+public abstract class GnssMeasurementsProvider
+        extends RemoteListenerHelper<IGnssMeasurementsListener> {
     private static final String TAG = "GnssMeasurementsProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Context mContext;
     private final GnssMeasurementProviderNative mNative;
 
     private boolean mIsCollectionStarted;
@@ -49,14 +47,12 @@ public abstract class GnssMeasurementsProvider extends
     }
 
     @VisibleForTesting
-    GnssMeasurementsProvider(Context context, Handler handler,
-            GnssMeasurementProviderNative aNative) {
-        super(handler, TAG);
-        mContext = context;
+    GnssMeasurementsProvider(
+            Context context, Handler handler, GnssMeasurementProviderNative aNative) {
+        super(context, handler, TAG);
         mNative = aNative;
     }
 
-    // TODO(b/37460011): Use this with death recovery logic.
     void resumeIfStarted() {
         if (DEBUG) {
             Log.d(TAG, "resumeIfStarted");
@@ -98,11 +94,17 @@ public abstract class GnssMeasurementsProvider extends
     }
 
     public void onMeasurementsAvailable(final GnssMeasurementsEvent event) {
-        ListenerOperation<IGnssMeasurementsListener> operation =
-                listener -> listener.onGnssMeasurementsReceived(event);
-        foreach(operation);
+        foreach((IGnssMeasurementsListener listener, CallerIdentity callerIdentity) -> {
+            if (!hasPermission(mContext, callerIdentity)) {
+                logPermissionDisabledEventNotReported(
+                        TAG, callerIdentity.mPackageName, "GNSS measurements");
+                return;
+            }
+            listener.onGnssMeasurementsReceived(event);
+        });
     }
 
+    /** Handle GNSS capabilities update from the GNSS HAL implementation. */
     public void onCapabilitiesUpdated(boolean isGnssMeasurementsSupported) {
         setSupported(isGnssMeasurementsSupported);
         updateResult();
@@ -149,7 +151,8 @@ public abstract class GnssMeasurementsProvider extends
         }
 
         @Override
-        public void execute(IGnssMeasurementsListener listener) throws RemoteException {
+        public void execute(IGnssMeasurementsListener listener,
+                CallerIdentity callerIdentity) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }

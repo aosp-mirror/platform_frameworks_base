@@ -16,8 +16,8 @@ android_test {
     name: "MultiUserPerfTests",
     srcs: ["src/**/*.java"],
     static_libs: [
-        "android-support-test",
-        "ub-uiautomator",
+        "androidx.test.rules",
+        "apct-perftests-utils",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],

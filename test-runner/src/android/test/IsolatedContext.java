@@ -17,13 +17,13 @@
 package android.test;
 
 import android.accounts.AccountManager;
-import android.content.ContextWrapper;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.content.Context;
-import android.content.ServiceConnection;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.test.mock.MockAccountManager;
@@ -31,6 +31,7 @@ import android.test.mock.MockAccountManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -71,6 +72,18 @@ public class IsolatedContext extends ContextWrapper {
 
     @Override
     public boolean bindService(Intent service, ServiceConnection conn, int flags) {
+        return false;
+    }
+
+    @Override
+    public boolean bindService(Intent service, int flags, Executor executor,
+            ServiceConnection conn) {
+        return false;
+    }
+
+    @Override
+    public boolean bindIsolatedService(Intent service, int flags, String instanceName,
+            Executor executor, ServiceConnection conn) {
         return false;
     }
 

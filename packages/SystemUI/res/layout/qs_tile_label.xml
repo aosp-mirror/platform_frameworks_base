@@ -44,8 +44,7 @@
             android:padding="0dp"
             android:gravity="center"
             android:ellipsize="marquee"
-            android:textAppearance="@style/TextAppearance.QS.TileLabel"
-            android:textColor="?android:attr/textColorPrimary"/>
+            android:textAppearance="@style/TextAppearance.QS.TileLabel"/>
 
         <ImageView android:id="@+id/restricted_padlock"
             android:layout_width="@dimen/qs_tile_text_size"
@@ -79,7 +78,7 @@
         android:padding="0dp"
         android:visibility="gone"
         android:gravity="center"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
+        android:textAppearance="@style/TextAppearance.QS.TileLabel.Secondary"
         android:textColor="?android:attr/textColorSecondary"/>
 
     <View

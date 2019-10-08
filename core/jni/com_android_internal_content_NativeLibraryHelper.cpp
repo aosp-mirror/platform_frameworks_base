@@ -187,20 +187,20 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     off64_t offset;
 
     if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, NULL, &offset, &when, &crc)) {
-        ALOGD("Couldn't read zip entry info\n");
+        ALOGE("Couldn't read zip entry info\n");
         return INSTALL_FAILED_INVALID_APK;
     }
 
     if (!extractNativeLibs) {
         // check if library is uncompressed and page-aligned
         if (method != ZipFileRO::kCompressStored) {
-            ALOGD("Library '%s' is compressed - will not be able to open it directly from apk.\n",
+            ALOGE("Library '%s' is compressed - will not be able to open it directly from apk.\n",
                 fileName);
             return INSTALL_FAILED_INVALID_APK;
         }
 
         if (offset % PAGE_SIZE != 0) {
-            ALOGD("Library '%s' is not page-aligned - will not be able to open it directly from"
+            ALOGE("Library '%s' is not page-aligned - will not be able to open it directly from"
                 " apk.\n", fileName);
             return INSTALL_FAILED_INVALID_APK;
         }
@@ -213,7 +213,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     char localFileName[nativeLibPath.size() + fileNameLen + 2];
 
     if (strlcpy(localFileName, nativeLibPath.c_str(), sizeof(localFileName)) != nativeLibPath.size()) {
-        ALOGD("Couldn't allocate local file name for library");
+        ALOGE("Couldn't allocate local file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
@@ -221,7 +221,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
 
     if (strlcpy(localFileName + nativeLibPath.size() + 1, fileName, sizeof(localFileName)
                     - nativeLibPath.size() - 1) != fileNameLen) {
-        ALOGD("Couldn't allocate local file name for library");
+        ALOGE("Couldn't allocate local file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
@@ -237,24 +237,24 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     char localTmpFileName[nativeLibPath.size() + TMP_FILE_PATTERN_LEN + 1];
     if (strlcpy(localTmpFileName, nativeLibPath.c_str(), sizeof(localTmpFileName))
             != nativeLibPath.size()) {
-        ALOGD("Couldn't allocate local file name for library");
+        ALOGE("Couldn't allocate local file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     if (strlcpy(localTmpFileName + nativeLibPath.size(), TMP_FILE_PATTERN,
                     TMP_FILE_PATTERN_LEN + 1) != TMP_FILE_PATTERN_LEN) {
-        ALOGI("Couldn't allocate temporary file name for library");
+        ALOGE("Couldn't allocate temporary file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     int fd = mkstemp(localTmpFileName);
     if (fd < 0) {
-        ALOGI("Couldn't open temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
+        ALOGE("Couldn't open temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     if (!zipFile->uncompressEntry(zipEntry, fd)) {
-        ALOGI("Failed uncompressing %s to %s\n", fileName, localTmpFileName);
+        ALOGE("Failed uncompressing %s to %s\n", fileName, localTmpFileName);
         close(fd);
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
@@ -268,7 +268,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     times[1].tv_sec = modTime;
     times[0].tv_usec = times[1].tv_usec = 0;
     if (utimes(localTmpFileName, times) < 0) {
-        ALOGI("Couldn't change modification time on %s: %s\n", localTmpFileName, strerror(errno));
+        ALOGE("Couldn't change modification time on %s: %s\n", localTmpFileName, strerror(errno));
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
@@ -276,14 +276,14 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     // Set the mode to 755
     static const mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP |  S_IXGRP | S_IROTH | S_IXOTH;
     if (chmod(localTmpFileName, mode) < 0) {
-        ALOGI("Couldn't change permissions on %s: %s\n", localTmpFileName, strerror(errno));
+        ALOGE("Couldn't change permissions on %s: %s\n", localTmpFileName, strerror(errno));
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     // Finally, rename it to the final name.
     if (rename(localTmpFileName, localFileName) < 0) {
-        ALOGI("Couldn't rename %s to %s: %s\n", localTmpFileName, localFileName, strerror(errno));
+        ALOGE("Couldn't rename %s to %s: %s\n", localTmpFileName, localFileName, strerror(errno));
         unlink(localTmpFileName);
         return INSTALL_FAILED_CONTAINER_ERROR;
     }

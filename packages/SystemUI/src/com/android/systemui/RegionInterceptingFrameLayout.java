@@ -21,7 +21,6 @@ import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.widget.FrameLayout;
@@ -76,7 +75,7 @@ public class RegionInterceptingFrameLayout extends FrameLayout {
                 continue;
             }
 
-            internalInsetsInfo.touchableRegion.op(riv.getInterceptRegion(), Op.UNION);
+            internalInsetsInfo.touchableRegion.op(unionRegion, Op.UNION);
         }
     };
 

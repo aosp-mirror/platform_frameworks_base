@@ -16,32 +16,18 @@
 
 package android.text;
 
-import static android.text.TextDirectionHeuristics.LTR;
-
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
-
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-import android.content.res.ColorStateList;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.text.Layout;
-import android.text.style.TextAppearanceSpan;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.nio.CharBuffer;
-import java.util.Random;
+import java.util.Locale;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -49,9 +35,7 @@ public class PrecomputedTextMemoryUsageTest {
     private static final int WORD_LENGTH = 9;  // Random word has 9 characters.
     private static final boolean NO_STYLE_TEXT = false;
 
-    private static TextPaint PAINT = new TextPaint();
-
-    private static int TRIAL_COUNT = 100;
+    private static int TRIAL_COUNT = 10;
 
     public PrecomputedTextMemoryUsageTest() {}
 
@@ -75,9 +59,10 @@ public class PrecomputedTextMemoryUsageTest {
     }
 
     @Test
-    public void testMemoryUsage_NoHyphenation() {
+    public void testMemoryUsage_Latin_NoHyphenation() {
+        TextPaint paint = new TextPaint();
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                 .build();
@@ -88,13 +73,14 @@ public class PrecomputedTextMemoryUsageTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), param)
                 .getMemoryUsage();
         }
-        reportMemoryUsage(median(memories), "MemoryUsage_NoHyphenation");
+        reportMemoryUsage(median(memories), "MemoryUsage_Latin_NoHyphenation");
     }
 
     @Test
-    public void testMemoryUsage_Hyphenation() {
+    public void testMemoryUsage_Latin_Hyphenation() {
+        TextPaint paint = new TextPaint();
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
                 .build();
@@ -105,48 +91,97 @@ public class PrecomputedTextMemoryUsageTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), param)
                 .getMemoryUsage();
         }
-        reportMemoryUsage(median(memories), "MemoryUsage_Hyphenation");
+        reportMemoryUsage(median(memories), "MemoryUsage_Latin_Hyphenation");
     }
 
     @Test
-    public void testMemoryUsage_NoHyphenation_WidthOnly() {
+    public void testMemoryUsage_CJK_NoHyphenation() {
+        TextPaint paint = new TextPaint();
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                 .build();
 
         // Report median of randomly generated PrecomputedText.
         for (int i = 0; i < TRIAL_COUNT; ++i) {
-            CharSequence cs = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
-            PrecomputedText.ParagraphInfo[] paragraphInfo =
-                    PrecomputedText.createMeasuredParagraphs(cs, param, 0, cs.length(), false);
-            memories[i] = 0;
-            for (PrecomputedText.ParagraphInfo info : paragraphInfo) {
-                memories[i] += info.measured.getMemoryUsage();
-            }
+            memories[i] = PrecomputedText.create(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT, "[\\u4E00-\\u9FA0]"),
+                    param).getMemoryUsage();
         }
-        reportMemoryUsage(median(memories), "MemoryUsage_NoHyphenation_WidthOnly");
+        reportMemoryUsage(median(memories), "MemoryUsage_CJK_NoHyphenation");
     }
 
     @Test
-    public void testMemoryUsage_Hyphenatation_WidthOnly() {
+    public void testMemoryUsage_CJK_Hyphenation() {
+        TextPaint paint = new TextPaint();
         int[] memories = new int[TRIAL_COUNT];
-        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(PAINT)
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
                 .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
                 .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
                 .build();
 
         // Report median of randomly generated PrecomputedText.
         for (int i = 0; i < TRIAL_COUNT; ++i) {
-            CharSequence cs = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
-            PrecomputedText.ParagraphInfo[] paragraphInfo =
-                    PrecomputedText.createMeasuredParagraphs(cs, param, 0, cs.length(), false);
-            memories[i] = 0;
-            for (PrecomputedText.ParagraphInfo info : paragraphInfo) {
-                memories[i] += info.measured.getMemoryUsage();
-            }
+            memories[i] = PrecomputedText.create(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT, "[\\u4E00-\\u9FA0]"),
+                    param).getMemoryUsage();
         }
-        reportMemoryUsage(median(memories), "MemoryUsage_Hyphenation_WidthOnly");
+        reportMemoryUsage(median(memories), "MemoryUsage_CJK_Hyphenation");
+    }
+
+    @Test
+    public void testMemoryUsage_Arabic_NoHyphenation() {
+        TextPaint paint = new TextPaint();
+        paint.setTextLocale(Locale.forLanguageTag("ar"));
+        int[] memories = new int[TRIAL_COUNT];
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build();
+
+        // Report median of randomly generated PrecomputedText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = PrecomputedText.create(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT, "[\\u0600-\\u06FF]"),
+                    param).getMemoryUsage();
+        }
+        reportMemoryUsage(median(memories), "MemoryUsage_Arabic_NoHyphenation");
+    }
+
+    @Test
+    public void testMemoryUsage_Arabic_Hyphenation() {
+        TextPaint paint = new TextPaint();
+        paint.setTextLocale(Locale.forLanguageTag("ar"));
+        int[] memories = new int[TRIAL_COUNT];
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                .build();
+
+        // Report median of randomly generated PrecomputedText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = PrecomputedText.create(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT, "[\\u0600-\\u06FF]"),
+                    param).getMemoryUsage();
+        }
+        reportMemoryUsage(median(memories), "MemoryUsage_Arabic_Hyphenation");
+    }
+    @Test
+    public void testMemoryUsage_Emoji() {
+        TextPaint paint = new TextPaint();
+        int[] memories = new int[TRIAL_COUNT];
+        final PrecomputedText.Params param = new PrecomputedText.Params.Builder(paint)
+                .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                .build();
+
+        // Report median of randomly generated PrecomputedText.
+        for (int i = 0; i < TRIAL_COUNT; ++i) {
+            memories[i] = PrecomputedText.create(
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT, "[:emoji:]"),
+                    param).getMemoryUsage();
+        }
+        reportMemoryUsage(median(memories), "MemoryUsage_Emoji_NoHyphenation");
     }
 }

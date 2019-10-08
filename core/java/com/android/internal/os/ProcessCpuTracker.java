@@ -19,20 +19,17 @@ package com.android.internal.os;
 import static android.os.Process.*;
 
 import android.annotation.UnsupportedAppUsage;
-import android.os.FileUtils;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -41,7 +38,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class ProcessCpuTracker {
     private static final String TAG = "ProcessCpuTracker";
@@ -177,8 +173,6 @@ public class ProcessCpuTracker {
 
     private boolean mFirst = true;
 
-    private byte[] mBuffer = new byte[4096];
-
     public interface FilterStats {
         /** Which stats to pick when filtering */
         boolean needed(Stats stats);
@@ -253,6 +247,7 @@ public class ProcessCpuTracker {
             pid = _pid;
             if (parentPid < 0) {
                 final File procDir = new File("/proc", Integer.toString(pid));
+                uid = getUid(procDir.toString());
                 statFile = new File(procDir, "stat").toString();
                 cmdlineFile = new File(procDir, "cmdline").toString();
                 threadsDir = (new File(procDir, "task")).toString();
@@ -268,13 +263,22 @@ public class ProcessCpuTracker {
                         parentPid));
                 final File taskDir = new File(
                         new File(procDir, "task"), Integer.toString(pid));
+                uid = getUid(taskDir.toString());
                 statFile = new File(taskDir, "stat").toString();
                 cmdlineFile = null;
                 threadsDir = null;
                 threadStats = null;
                 workingThreads = null;
             }
-            uid = FileUtils.getUid(statFile.toString());
+        }
+
+        private static int getUid(String path) {
+            try {
+                return Os.stat(path).st_uid;
+            } catch (ErrnoException e) {
+                Slog.w(TAG, "Failed to stat(" + path + "): " + e);
+                return -1;
+            }
         }
     }
 
@@ -872,40 +876,11 @@ public class ProcessCpuTracker {
         pw.println();
     }
 
-    private String readFile(String file, char endChar) {
-        // Permit disk reads here, as /proc/meminfo isn't really "on
-        // disk" and should be fast.  TODO: make BlockGuard ignore
-        // /proc/ and /sys/ files perhaps?
-        StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(file);
-            int len = is.read(mBuffer);
-            is.close();
-
-            if (len > 0) {
-                int i;
-                for (i=0; i<len; i++) {
-                    if (mBuffer[i] == endChar) {
-                        break;
-                    }
-                }
-                return new String(mBuffer, 0, i);
-            }
-        } catch (java.io.FileNotFoundException e) {
-        } catch (java.io.IOException e) {
-        } finally {
-            IoUtils.closeQuietly(is);
-            StrictMode.setThreadPolicy(savedPolicy);
-        }
-        return null;
-    }
-
     private void getName(Stats st, String cmdlineFile) {
         String newName = st.name;
         if (st.name == null || st.name.equals("app_process")
                 || st.name.equals("<pre-initialized>")) {
-            String cmdName = readFile(cmdlineFile, '\0');
+            String cmdName = ProcStatsUtil.readTerminatedProcFile(cmdlineFile, (byte) '\0');
             if (cmdName != null && cmdName.length() > 1) {
                 newName = cmdName;
                 int i = newName.lastIndexOf("/");

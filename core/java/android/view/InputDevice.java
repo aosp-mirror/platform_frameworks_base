@@ -22,6 +22,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.os.Build;
 import android.os.NullVibrator;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -54,7 +55,7 @@ public final class InputDevice implements Parcelable {
     private final int mProductId;
     private final String mDescriptor;
     private final InputDeviceIdentifier mIdentifier;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final boolean mIsExternal;
     private final int mSources;
     private final int mKeyboardType;
@@ -396,7 +397,7 @@ public final class InputDevice implements Parcelable {
 
     private static final int MAX_RANGES = 1000;
 
-    public static final Parcelable.Creator<InputDevice> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<InputDevice> CREATOR =
             new Parcelable.Creator<InputDevice>() {
         public InputDevice createFromParcel(Parcel in) {
             return new InputDevice(in);
@@ -608,10 +609,7 @@ public final class InputDevice implements Parcelable {
      * peripheral bus), otherwise it is built-in.
      *
      * @return True if the device is external.
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
     public boolean isExternal() {
         return mIsExternal;
     }

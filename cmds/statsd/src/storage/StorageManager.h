@@ -31,10 +31,34 @@ using android::util::ProtoOutputStream;
 
 class StorageManager : public virtual RefBase {
 public:
+    struct FileInfo {
+        FileInfo(std::string name, bool isHistory, int fileSize, long fileAge)
+            : mFileName(name),
+              mIsHistory(isHistory),
+              mFileSizeBytes(fileSize),
+              mFileAgeSec(fileAge) {
+        }
+        std::string mFileName;
+        bool mIsHistory;
+        int mFileSizeBytes;
+        long mFileAgeSec;
+    };
+
     /**
      * Writes a given byte array as a file to the specified file path.
      */
     static void writeFile(const char* file, const void* buffer, int numBytes);
+
+    /**
+     * Writes train info.
+     */
+    static bool writeTrainInfo(int64_t trainVersionCode, const std::string& trainName,
+                               int32_t status, const std::vector<int64_t>& experimentIds);
+
+    /**
+     * Reads train info.
+     */
+    static bool readTrainInfo(InstallTrainInfo& trainInfo);
 
     /**
      * Reads the file content to the buffer.
@@ -68,10 +92,21 @@ public:
     static bool hasConfigMetricsReport(const ConfigKey& key);
 
     /**
-     * Appends ConfigMetricsReport found on disk to the specific proto and
-     * delete it.
+     * Appends the ConfigMetricsReport found on disk to the specifid proto
+     * and, if erase_data, deletes it from disk.
+     *
+     * [isAdb]: if the caller is adb dump. This includes local adb dump or dumpsys by
+     * bugreport or incidentd. When true, we will append any local history data too.
+     *
+     * When
+     * erase_data=true, isAdb=true:   append history data to output, remove all data after read
+     * erase_data=false, isAdb=true:  append history data to output, keep data after read
+     * erase_data=true, isAdb=false:  do not append history data, and remove data after read
+     * erase_data=false, isAdb=false: do not append history data and *rename* all data files to
+     *                                history files.
      */
-    static void appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto);
+    static void appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto,
+                                          bool erase_data, bool isAdb);
 
     /**
      * Call to load the saved configs from disk.
@@ -100,13 +135,21 @@ public:
     /**
      * Prints disk usage statistics related to statsd.
      */
-    static void printStats(FILE* out);
+    static void printStats(int out);
+
+    static string getDataFileName(long wallClockSec, int uid, int64_t id);
+
+    static string getDataHistoryFileName(long wallClockSec, int uid, int64_t id);
+
+    static void sortFiles(vector<FileInfo>* fileNames);
 
 private:
     /**
      * Prints disk usage statistics about a directory related to statsd.
      */
-    static void printDirStats(FILE* out, const char* path);
+    static void printDirStats(int out, const char* path);
+
+    static std::mutex sTrainInfoMutex;
 };
 
 }  // namespace statsd

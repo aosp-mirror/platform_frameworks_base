@@ -29,7 +29,7 @@ bool usingRGBAToJpegOverride(int32_t imageFormat, int32_t containerFormat);
 
 int32_t applyFormatOverrides(int32_t imageFormat, int32_t containerFormat);
 
-uint32_t Image_getJpegSize(LockedImage* buffer, bool usingRGBAOverride);
+uint32_t Image_getBlobSize(LockedImage* buffer, bool usingRGBAOverride);
 
 bool isFormatOpaque(int format);
 

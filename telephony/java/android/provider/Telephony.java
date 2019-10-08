@@ -282,6 +282,70 @@ public final class Telephony {
     }
 
     /**
+     * Columns in sms_changes table.
+     * @hide
+     */
+    public interface TextBasedSmsChangesColumns {
+        /**
+         * The {@code content://} style URL for this table.
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://sms-changes");
+
+        /**
+         * Primary key.
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        public static final String ID = "_id";
+
+        /**
+         * Triggers on sms table create a row in this table for each update/delete.
+         * This column is the "_id" of the row from sms table that was updated/deleted.
+         * <P>Type: INTEGER (long)</P>
+         * @hide
+         */
+        public static final String ORIG_ROW_ID = "orig_rowid";
+
+        /**
+         * Triggers on sms table create a row in this table for each update/delete.
+         * This column is the "sub_id" of the row from sms table that was updated/deleted.
+         * @hide
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String SUB_ID = "sub_id";
+
+        /**
+         * The type of operation that created this row.
+         *    {@link #TYPE_UPDATE} = update op
+         *    {@link #TYPE_DELETE} = delete op
+         * @hide
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String TYPE = "type";
+
+        /**
+         * One of the possible values for the above column "type". Indicates it is an update op.
+         * @hide
+         */
+        public static final int TYPE_UPDATE = 0;
+
+        /**
+         * One of the possible values for the above column "type". Indicates it is a delete op.
+         * @hide
+         */
+        public static final int TYPE_DELETE = 1;
+
+        /**
+         * This column contains a non-null value only if the operation on sms table is an update op
+         * and the column "read" is changed by the update op.
+         * <P>Type: INTEGER (boolean)</P>
+         * @hide
+         */
+        public static final String NEW_READ_STATUS = "new_read_status";
+    }
+
+    /**
      * Contains all text-based SMS messages.
      */
     public static final class Sms implements BaseColumns, TextBasedSmsColumns {
@@ -629,7 +693,7 @@ public final class Telephony {
         }
 
         /**
-         * Contains all sent text-based SMS messages in the SMS app.
+         * Contains all draft text-based SMS messages in the SMS app.
          */
         public static final class Draft implements BaseColumns, TextBasedSmsColumns {
 
@@ -745,7 +809,15 @@ public final class Telephony {
         }
 
         /**
-         * Contains all sent text-based SMS messages in the SMS app.
+         * Contains a view of SMS conversations (also referred to as threads). This is similar to
+         * {@link Threads}, but only includes SMS messages and columns relevant to SMS
+         * conversations.
+         * <p>
+         * Note that this view ignores any information about MMS messages, it is a
+         * view of conversations as if MMS messages did not exist at all. This means that all
+         * relevant information, such as snippets and message count, will ignore any MMS messages
+         * that might be in the same thread through other views and present only data based on the
+         * SMS messages in that thread.
          */
         public static final class Conversations
                 implements BaseColumns, TextBasedSmsColumns {
@@ -828,6 +900,10 @@ public final class Telephony {
              * user whether they want to replace the current default
              * SMS application with the one specified in
              * {@link #EXTRA_PACKAGE_NAME}.
+             * <p>
+             * This is no longer supported since Q, please use
+             * {@link android.app.role.RoleManager#createRequestRoleIntent(String)} with
+             * {@link android.app.role.RoleManager#ROLE_SMS} instead.
              */
             @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
             public static final String ACTION_CHANGE_DEFAULT =
@@ -838,6 +914,10 @@ public final class Telephony {
              * extra for {@link #ACTION_CHANGE_DEFAULT}
              *
              * @see #ACTION_CHANGE_DEFAULT
+             * <p>
+             * This is no longer supported since Q, please use
+             * {@link android.app.role.RoleManager#createRequestRoleIntent(String)} with
+             * {@link android.app.role.RoleManager#ROLE_SMS} instead.
              */
             public static final String EXTRA_PACKAGE_NAME = "package";
 
@@ -2954,6 +3034,20 @@ public final class Telephony {
              * <P>Type: INTEGER</P>
              */
             public static final String CHARSET = "charset";
+
+            /**
+             * Generates a Addr {@link Uri} for message, used to perform Addr table operation
+             * for mms.
+             *
+             * @param messageId the messageId used to generate Addr {@link Uri} dynamically
+             * @return the addrUri used to perform Addr table operation for mms
+             */
+            @NonNull
+            public static Uri getAddrUriForMessage(@NonNull String messageId) {
+                Uri addrUri = Mms.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(messageId)).appendPath("addr").build();
+                return addrUri;
+            }
         }
 
         /**
@@ -2972,11 +3066,16 @@ public final class Telephony {
             }
 
             /**
+             * The name of part table.
+             */
+            private static final String TABLE_PART = "part";
+
+            /**
              * The {@code content://} style URL for this table. Can be appended with a part ID to
              * address individual parts.
              */
             @NonNull
-            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, "part");
+            public static final Uri CONTENT_URI = Uri.withAppendedPath(Mms.CONTENT_URI, TABLE_PART);
 
             /**
              * The identifier of the message which this part belongs to.
@@ -3055,6 +3154,21 @@ public final class Telephony {
              * <P>Type: TEXT</P>
              */
             public static final String TEXT = "text";
+
+            /**
+             * Generates a Part {@link Uri} for message, used to perform Part table operation
+             * for mms.
+             *
+             * @param messageId the messageId used to generate Part {@link Uri} dynamically
+             * @return the partUri used to perform Part table operation for mms
+             */
+            @NonNull
+            public static Uri getPartUriForMessage(@NonNull String messageId) {
+                Uri partUri = Mms.CONTENT_URI.buildUpon()
+                        .appendPath(String.valueOf(messageId)).appendPath(
+                                TABLE_PART).build();
+                return partUri;
+            }
         }
 
         /**
@@ -3830,9 +3944,10 @@ public final class Telephony {
     }
 
     /**
-     * Contains received SMS cell broadcast messages.
+     * Contains received SMS cell broadcast messages. More details are available in 3GPP TS 23.041.
      * @hide
      */
+    @SystemApi
     public static final class CellBroadcasts implements BaseColumns {
 
         /**
@@ -3844,30 +3959,59 @@ public final class Telephony {
         /**
          * The {@code content://} URI for this table.
          */
+        @NonNull
         public static final Uri CONTENT_URI = Uri.parse("content://cellbroadcasts");
 
         /**
-         * Message geographical scope.
+         * The id of the subscription which received this cell broadcast message.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String SUB_ID = "sub_id";
+
+        /**
+         * Message geographical scope. Valid values are:
+         * <ul>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_CELL_WIDE}. meaning the
+         * message is for the radio service cell</li>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE},
+         * meaning the message is for the radio service cell and immediately displayed</li>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_PLMN_WIDE}, meaning the
+         * message is for the PLMN (i.e. MCC/MNC)</li>
+         * <li>{@link android.telephony.SmsCbMessage#GEOGRAPHICAL_SCOPE_LOCATION_AREA_WIDE},
+         * meaning the message is for the location area (in GSM) or service area (in UMTS)</li>
+         * </ul>
+         *
+         * <p>A message meant for a particular scope is automatically dismissed when the device
+         * exits that scope.</p>
          * <P>Type: INTEGER</P>
          */
         public static final String GEOGRAPHICAL_SCOPE = "geo_scope";
 
         /**
          * Message serial number.
+         * <p>
+         * A 16-bit integer which identifies a particular CBS (cell
+         * broadcast short message service) message. The core network is responsible for
+         * allocating this value, and the value may be managed cyclically (3GPP TS 23.041 section
+         * 9.2.1) once the serial message has been incremented a sufficient number of times.
+         * </p>
          * <P>Type: INTEGER</P>
          */
         public static final String SERIAL_NUMBER = "serial_number";
 
         /**
-         * PLMN of broadcast sender. {@code SERIAL_NUMBER + PLMN + LAC + CID} uniquely identifies
-         * a broadcast for duplicate detection purposes.
+         * PLMN (i.e. MCC/MNC) of broadcast sender. {@code SERIAL_NUMBER + PLMN + LAC + CID}
+         * uniquely identifies a broadcast for duplicate detection purposes.
          * <P>Type: TEXT</P>
          */
         public static final String PLMN = "plmn";
 
         /**
-         * Location Area (GSM) or Service Area (UMTS) of broadcast sender. Unused for CDMA.
-         * Only included if Geographical Scope of message is not PLMN wide (01).
+         * Location area code (LAC).
+         * <p>Code representing location area (GSM) or service area (UMTS) of broadcast sender.
+         * Unused for CDMA. Only included if Geographical Scope of message is not PLMN wide (01).
+         * This value is sent by the network based on the cell tower.
          * <P>Type: INTEGER</P>
          */
         public static final String LAC = "lac";
@@ -3882,23 +4026,29 @@ public final class Telephony {
         /**
          * Message code. <em>OBSOLETE: merged into SERIAL_NUMBER.</em>
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String V1_MESSAGE_CODE = "message_code";
 
         /**
          * Message identifier. <em>OBSOLETE: renamed to SERVICE_CATEGORY.</em>
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String V1_MESSAGE_IDENTIFIER = "message_id";
 
         /**
-         * Service category (GSM/UMTS: message identifier; CDMA: service category).
+         * Service category which represents the general topic of the message.
+         * <p>
+         * For GSM/UMTS: message identifier (see 3GPP TS 23.041 section 9.4.1.2.2)
+         * For CDMA: a 16-bit CDMA service category (see 3GPP2 C.R1001-D section 9.3)
+         * </p>
          * <P>Type: INTEGER</P>
          */
         public static final String SERVICE_CATEGORY = "service_category";
 
         /**
-         * Message language code.
+         * Message language code. (See 3GPP TS 23.041 section 9.4.1.2.3 for details).
          * <P>Type: TEXT</P>
          */
         public static final String LANGUAGE_CODE = "language";
@@ -3911,6 +4061,7 @@ public final class Telephony {
 
         /**
          * Message delivery time.
+         * <p>This value is a system timestamp using {@link System#currentTimeMillis}</p>
          * <P>Type: INTEGER (long)</P>
          */
         public static final String DELIVERY_TIME = "date";
@@ -3922,25 +4073,36 @@ public final class Telephony {
         public static final String MESSAGE_READ = "read";
 
         /**
-         * Message format (3GPP or 3GPP2).
+         * Message format ({@link android.telephony.SmsCbMessage#MESSAGE_FORMAT_3GPP} or
+         * {@link android.telephony.SmsCbMessage#MESSAGE_FORMAT_3GPP2}).
          * <P>Type: INTEGER</P>
          */
         public static final String MESSAGE_FORMAT = "format";
 
         /**
-         * Message priority (including emergency).
+         * Message priority.
+         * <p>This includes
+         * <ul>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_NORMAL}</li>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_INTERACTIVE}</li>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_URGENT}</li>
+         * <li>{@link android.telephony.SmsCbMessage#MESSAGE_PRIORITY_EMERGENCY}</li>
+         * </p>
+         * </ul>
          * <P>Type: INTEGER</P>
          */
         public static final String MESSAGE_PRIORITY = "priority";
 
         /**
-         * ETWS warning type (ETWS alerts only).
+         * ETWS (Earthquake and Tsunami Warning System) warning type (ETWS alerts only).
+         * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
          * <P>Type: INTEGER</P>
          */
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
-         * CMAS message class (CMAS alerts only).
+         * CMAS (Commercial Mobile Alert System) message class (CMAS alerts only).
+         * <p>See {@link android.telephony.SmsCbCmasInfo}</p>
          * <P>Type: INTEGER</P>
          */
         public static final String CMAS_MESSAGE_CLASS = "cmas_message_class";
@@ -3979,8 +4141,72 @@ public final class Telephony {
         public static final String DEFAULT_SORT_ORDER = DELIVERY_TIME + " DESC";
 
         /**
-         * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
+         * The timestamp in millisecond of when the device received the message.
+         * <P>Type: BIGINT</P>
+         * @hide
          */
+        public static final String RECEIVED_TIME = "received_time";
+
+        /**
+         * Indicates that whether the message has been broadcasted to the application.
+         * <P>Type: BOOLEAN</P>
+         * @hide
+         */
+        public static final String MESSAGE_BROADCASTED = "message_broadcasted";
+
+        /**
+         * The Warning Area Coordinates Elements. This element is used for geo-fencing purpose.
+         *
+         * The geometry and its coordinates are separated vertical bar, the first item is the
+         * geometry type and the remaining items are the parameter of this geometry.
+         *
+         * Only circle and polygon are supported. The coordinates are represented in Horizontal
+         * coordinates format.
+         *
+         * Coordinate encoding:
+         * "latitude, longitude"
+         * where -90.00000 <= latitude <= 90.00000 and -180.00000 <= longitude <= 180.00000
+         *
+         * Polygon encoding:
+         * "polygon|lat1,lng1|lat2,lng2|...|latn,lngn"
+         * lat1,lng1 ... latn,lngn are the vertices coordinate of the polygon.
+         *
+         * Circle encoding:
+         * "circle|lat,lng|radius".
+         * lat,lng is the center of the circle. The unit of circle's radius is meter.
+         *
+         * Example:
+         * "circle|0,0|100" mean a circle which center located at (0,0) and its radius is 100 meter.
+         * "polygon|0,1.5|0,1|1,1|1,0" mean a polygon has vertices (0,1.5),(0,1),(1,1),(1,0).
+         *
+         * There could be more than one geometry store in this field, they are separated by a
+         * semicolon.
+         *
+         * Example:
+         * "circle|0,0|100;polygon|0,0|0,1.5|1,1|1,0;circle|100.123,100|200.123"
+         *
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String GEOMETRIES = "geometries";
+
+        /**
+         * Geo-Fencing Maximum Wait Time in second. The range of the time is [0, 255]. A device
+         * shall allow to determine its position meeting operator policy. If the device is unable to
+         * determine its position meeting operator policy within the GeoFencing Maximum Wait Time,
+         * it shall present the alert to the user and discontinue further positioning determination
+         * for the alert.
+         *
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
+
+        /**
+         * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
+         * @hide
+         */
+        @NonNull
         public static final String[] QUERY_COLUMNS = {
                 _ID,
                 GEOGRAPHICAL_SCOPE,
@@ -4002,6 +4228,35 @@ public final class Telephony {
                 CMAS_SEVERITY,
                 CMAS_URGENCY,
                 CMAS_CERTAINTY
+        };
+
+        /**
+         * Query columns for instantiating {@link android.telephony.SmsCbMessage} objects.
+         * @hide
+         */
+        public static final String[] QUERY_COLUMNS_FWK = {
+                _ID,
+                GEOGRAPHICAL_SCOPE,
+                PLMN,
+                LAC,
+                CID,
+                SERIAL_NUMBER,
+                SERVICE_CATEGORY,
+                LANGUAGE_CODE,
+                MESSAGE_BODY,
+                MESSAGE_FORMAT,
+                MESSAGE_PRIORITY,
+                ETWS_WARNING_TYPE,
+                CMAS_MESSAGE_CLASS,
+                CMAS_CATEGORY,
+                CMAS_RESPONSE_TYPE,
+                CMAS_SEVERITY,
+                CMAS_URGENCY,
+                CMAS_CERTAINTY,
+                RECEIVED_TIME,
+                MESSAGE_BROADCASTED,
+                GEOMETRIES,
+                MAXIMUM_WAIT_TIME
         };
     }
 
@@ -4282,7 +4537,6 @@ public final class Telephony {
 
     /**
      * Contains carrier identification information for the current subscriptions.
-     * @see SubscriptionManager#getActiveSubscriptionIdList()
      */
     public static final class CarrierId implements BaseColumns {
         /**

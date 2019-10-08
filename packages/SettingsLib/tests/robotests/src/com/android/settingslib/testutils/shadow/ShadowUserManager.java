@@ -16,59 +16,50 @@
 
 package com.android.settingslib.testutils.shadow;
 
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
 
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.annotation.Resetter;
-import org.robolectric.shadow.api.Shadow;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Implements(value = UserManager.class, inheritImplementationMethods = true)
+@Implements(value = UserManager.class)
 public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager {
-
-    private boolean mAdminUser;
-
-    public void setIsAdminUser(boolean isAdminUser) {
-        mAdminUser = isAdminUser;
-    }
-
-    @Resetter
-    public void reset() {
-        mAdminUser = false;
-    }
+    private List<UserInfo> mUserInfos = addProfile(0, "Owner");
 
     @Implementation
-    public boolean isAdminUser() {
-        return mAdminUser;
-    }
-
-    @Implementation
-    public static UserManager get(Context context) {
+    protected static UserManager get(Context context) {
         return (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     @Implementation
-    public int[] getProfileIdsWithDisabled(int userId) {
-        return new int[] { 0 };
+    protected int[] getProfileIdsWithDisabled(int userId) {
+        return mUserInfos.stream().mapToInt(s -> s.id).toArray();
     }
 
     @Implementation
-    public List<UserInfo> getProfiles() {
-        UserInfo userInfo = new UserInfo();
-        userInfo.id = 0;
-        List<UserInfo> userInfos = new ArrayList<>();
-        userInfos.add(userInfo);
-        return userInfos;
+    protected List<UserInfo> getProfiles() {
+        return mUserInfos;
     }
 
-    public static ShadowUserManager getShadow() {
-        return (ShadowUserManager) Shadow.extract(
-                RuntimeEnvironment.application.getSystemService(UserManager.class));
+    public List<UserInfo> addProfile(int id, String name) {
+        List<UserInfo> userInfoList = mUserInfos;
+        if (userInfoList == null) {
+            userInfoList = new ArrayList<>();
+        }
+        final UserInfo userInfo = new UserInfo();
+        userInfo.id = id;
+        userInfo.name = name;
+        userInfoList.add(userInfo);
+        return userInfoList;
+    }
+
+    @Implementation
+    protected List<UserInfo> getProfiles(@UserIdInt int userHandle) {
+        return getProfiles();
     }
 }

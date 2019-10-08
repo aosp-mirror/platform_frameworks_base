@@ -84,7 +84,7 @@ public class DhcpInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Creator<DhcpInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<DhcpInfo> CREATOR =
         new Creator<DhcpInfo>() {
             public DhcpInfo createFromParcel(Parcel in) {
                 DhcpInfo info = new DhcpInfo();

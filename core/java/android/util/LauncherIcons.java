@@ -15,6 +15,7 @@
  */
 package android.util;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -102,16 +103,17 @@ public final class LauncherIcons {
     }
 
     public Drawable getBadgedDrawable(Drawable base, int foregroundRes, int backgroundColor) {
-        Resources sysRes = Resources.getSystem();
+        Resources overlayableRes =
+                ActivityThread.currentActivityThread().getApplication().getResources();
 
-        Drawable badgeShadow = sysRes.getDrawable(
+        Drawable badgeShadow = overlayableRes.getDrawable(
                 com.android.internal.R.drawable.ic_corp_icon_badge_shadow);
 
-        Drawable badgeColor = sysRes.getDrawable(
+        Drawable badgeColor = overlayableRes.getDrawable(
                 com.android.internal.R.drawable.ic_corp_icon_badge_color)
                 .getConstantState().newDrawable().mutate();
 
-        Drawable badgeForeground = sysRes.getDrawable(foregroundRes);
+        Drawable badgeForeground = overlayableRes.getDrawable(foregroundRes);
         badgeForeground.setTint(backgroundColor);
 
         Drawable[] drawables = base == null

@@ -36,8 +36,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const int kLogMsgHeaderSize = 28;
-
 // The reading and parsing are implemented in Java. It is not difficult to port over. But for now
 // let StatsCompanionService handle that and send the data back.
 StatsCompanionServicePuller::StatsCompanionServicePuller(int tagId) : StatsPuller(tagId) {
@@ -56,20 +54,16 @@ bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* da
         vector<StatsLogEventWrapper> returned_value;
         Status status = statsCompanionServiceCopy->pullData(mTagId, &returned_value);
         if (!status.isOk()) {
-            ALOGW("error pulling for %d", mTagId);
+            ALOGW("StatsCompanionServicePuller::pull failed for %d", mTagId);
+            StatsdStats::getInstance().noteStatsCompanionPullFailed(mTagId);
+            if (status.exceptionCode() == Status::Exception::EX_TRANSACTION_FAILED) {
+                StatsdStats::getInstance().noteStatsCompanionPullBinderTransactionFailed(mTagId);
+            }
             return false;
         }
         data->clear();
-        int32_t timestampSec = getWallClockSec();
         for (const StatsLogEventWrapper& it : returned_value) {
-            log_msg tmp;
-            tmp.entry_v1.len = it.bytes.size();
-            // Manually set the header size to 28 bytes to match the pushed log events.
-            tmp.entry.hdr_size = kLogMsgHeaderSize;
-            tmp.entry_v1.sec = timestampSec;
-            // And set the received bytes starting after the 28 bytes reserved for header.
-            std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
-            data->push_back(make_shared<LogEvent>(tmp));
+            LogEvent::createLogEvents(it, *data);
         }
         VLOG("StatsCompanionServicePuller::pull succeeded for %d", mTagId);
         return true;

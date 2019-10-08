@@ -29,8 +29,9 @@ import java.util.List;
 
 /**
  * HdmiTvClient represents HDMI-CEC logical device of type TV in the Android system
- * which acts as TV/Display. It provides with methods that manage, interact with other
- * devices on the CEC bus.
+ * which acts as TV/Display.
+ *
+ * <p>HdmiTvClient provides methods that manage, interact with other devices on the CEC bus.
  *
  * @hide
  */

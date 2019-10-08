@@ -15,13 +15,12 @@
  */
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Parcelable class to store Telephony histogram.
@@ -238,6 +237,8 @@ public final class TelephonyHistogram implements Parcelable {
         }
     }
 
+    @NonNull
+    @Override
     public String toString() {
         String basic = " Histogram id = " + mId + " Time(ms): min = " + mMinTimeMs + " max = "
                 + mMaxTimeMs + " avg = " + mAverageTimeMs + " Count = " + mSampleCount;
@@ -256,7 +257,7 @@ public final class TelephonyHistogram implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<TelephonyHistogram> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TelephonyHistogram> CREATOR =
             new Parcelable.Creator<TelephonyHistogram> () {
 
                 @Override

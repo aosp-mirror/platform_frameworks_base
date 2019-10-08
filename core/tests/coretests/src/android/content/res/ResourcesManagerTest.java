@@ -13,17 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package android.content.res;
 
 import android.annotation.NonNull;
 import android.app.ResourcesManager;
 import android.os.Binder;
 import android.os.LocaleList;
-import android.support.test.filters.SmallTest;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
 

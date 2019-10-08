@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
@@ -30,6 +31,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration.ActivityType;
@@ -53,7 +55,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
-
 import android.view.RemoteAnimationTarget;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -63,6 +64,7 @@ import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 public class ActivityManagerWrapper {
@@ -113,7 +115,7 @@ public class ActivityManagerWrapper {
         // Note: The set of running tasks from the system is ordered by recency
         try {
             List<ActivityManager.RunningTaskInfo> tasks =
-                    ActivityManager.getService().getFilteredTasks(1, ignoreActivityType,
+                    ActivityTaskManager.getService().getFilteredTasks(1, ignoreActivityType,
                             WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
             if (tasks.isEmpty()) {
                 return null;
@@ -129,7 +131,7 @@ public class ActivityManagerWrapper {
      */
     public List<RecentTaskInfo> getRecentTasks(int numTasks, int userId) {
         try {
-            return ActivityManager.getService().getRecentTasks(numTasks,
+            return ActivityTaskManager.getService().getRecentTasks(numTasks,
                             RECENT_IGNORE_UNAVAILABLE, userId).getList();
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get recent tasks", e);
@@ -143,7 +145,7 @@ public class ActivityManagerWrapper {
     public @NonNull ThumbnailData getTaskThumbnail(int taskId, boolean reducedResolution) {
         ActivityManager.TaskSnapshot snapshot = null;
         try {
-            snapshot = ActivityManager.getService().getTaskSnapshot(taskId, reducedResolution);
+            snapshot = ActivityTaskManager.getService().getTaskSnapshot(taskId, reducedResolution);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to retrieve task snapshot", e);
         }
@@ -200,8 +202,8 @@ public class ActivityManagerWrapper {
     /**
      * Starts the recents activity. The caller should manage the thread on which this is called.
      */
-    public void startRecentsActivity(Intent intent, AssistDataReceiver assistDataReceiver,
-            RecentsAnimationListener animationHandler, Consumer<Boolean> resultCallback,
+    public void startRecentsActivity(Intent intent, final AssistDataReceiver assistDataReceiver,
+            final RecentsAnimationListener animationHandler, final Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
         try {
             IAssistDataReceiver receiver = null;
@@ -218,6 +220,7 @@ public class ActivityManagerWrapper {
             IRecentsAnimationRunner runner = null;
             if (animationHandler != null) {
                 runner = new IRecentsAnimationRunner.Stub() {
+                    @Override
                     public void onAnimationStart(IRecentsAnimationController controller,
                             RemoteAnimationTarget[] apps, Rect homeContentInsets,
                             Rect minimizedHomeBounds) {
@@ -229,12 +232,13 @@ public class ActivityManagerWrapper {
                                 homeContentInsets, minimizedHomeBounds);
                     }
 
-                    public void onAnimationCanceled() {
-                        animationHandler.onAnimationCanceled();
+                    @Override
+                    public void onAnimationCanceled(boolean deferredWithScreenshot) {
+                        animationHandler.onAnimationCanceled(deferredWithScreenshot);
                     }
                 };
             }
-            ActivityManager.getService().startRecentsActivity(intent, receiver, runner);
+            ActivityTaskManager.getService().startRecentsActivity(intent, receiver, runner);
             if (resultCallback != null) {
                 resultCallbackHandler.post(new Runnable() {
                     @Override
@@ -260,7 +264,7 @@ public class ActivityManagerWrapper {
      */
     public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
         try {
-            ActivityManager.getService().cancelRecentsAnimation(restoreHomeStackPosition);
+            ActivityTaskManager.getService().cancelRecentsAnimation(restoreHomeStackPosition);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to cancel recents animation", e);
         }
@@ -283,9 +287,9 @@ public class ActivityManagerWrapper {
      * @param resultCallback The result success callback
      * @param resultCallbackHandler The handler to receive the result callback
      */
-    public void startActivityFromRecentsAsync(Task.TaskKey taskKey, ActivityOptions options,
-            int windowingMode, int activityType, Consumer<Boolean> resultCallback,
-            Handler resultCallbackHandler) {
+    public void startActivityFromRecentsAsync(final Task.TaskKey taskKey, ActivityOptions options,
+            int windowingMode, int activityType, final Consumer<Boolean> resultCallback,
+            final Handler resultCallbackHandler) {
         if (taskKey.windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             // We show non-visible docked tasks in Recents, but we always want to launch
             // them in the fullscreen stack.
@@ -333,9 +337,23 @@ public class ActivityManagerWrapper {
     public boolean startActivityFromRecents(int taskId, ActivityOptions options) {
         try {
             Bundle optsBundle = options == null ? null : options.toBundle();
-            ActivityManager.getService().startActivityFromRecents(taskId, optsBundle);
+            ActivityTaskManager.getService().startActivityFromRecents(taskId, optsBundle);
             return true;
         } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Moves an already resumed task to the side of the screen to initiate split screen.
+     */
+    public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode,
+            Rect initialBounds) {
+        try {
+            return ActivityTaskManager.getService().setTaskWindowingModeSplitScreenPrimary(taskId,
+                    createMode, true /* onTop */, false /* animate */, initialBounds,
+                    true /* showRecents */);
+        } catch (RemoteException e) {
             return false;
         }
     }
@@ -363,8 +381,8 @@ public class ActivityManagerWrapper {
     /**
      * Requests that the system close any open system windows (including other SystemUI).
      */
-    public void closeSystemWindows(String reason) {
-        mBackgroundExecutor.submit(new Runnable() {
+    public Future<?> closeSystemWindows(final String reason) {
+        return mBackgroundExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -379,14 +397,30 @@ public class ActivityManagerWrapper {
     /**
      * Removes a task by id.
      */
-    public void removeTask(int taskId) {
+    public void removeTask(final int taskId) {
         mBackgroundExecutor.submit(new Runnable() {
             @Override
             public void run() {
                 try {
-                    ActivityManager.getService().removeTask(taskId);
+                    ActivityTaskManager.getService().removeTask(taskId);
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to remove task=" + taskId, e);
+                }
+            }
+        });
+    }
+
+    /**
+     * Removes all the recent tasks.
+     */
+    public void removeAllRecentTasks() {
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityTaskManager.getService().removeAllVisibleRecentTasks();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to remove all tasks", e);
                 }
             }
         });
@@ -397,7 +431,7 @@ public class ActivityManagerWrapper {
      */
     public void cancelWindowTransition(int taskId) {
         try {
-            ActivityManager.getService().cancelTaskWindowTransition(taskId);
+            ActivityTaskManager.getService().cancelTaskWindowTransition(taskId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
         }
@@ -408,7 +442,7 @@ public class ActivityManagerWrapper {
      */
     public boolean isScreenPinningActive() {
         try {
-            return ActivityManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
+            return ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED;
         } catch (RemoteException e) {
             return false;
         }
@@ -427,7 +461,18 @@ public class ActivityManagerWrapper {
      */
     public boolean isLockToAppActive() {
         try {
-            return ActivityManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+            return ActivityTaskManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @return whether lock task mode is active in kiosk-mode (not screen pinning).
+     */
+    public boolean isLockTaskKioskModeActive() {
+        try {
+            return ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_LOCKED;
         } catch (RemoteException e) {
             return false;
         }
@@ -448,5 +493,17 @@ public class ActivityManagerWrapper {
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /**
+     * Returns true if the system supports freeform multi-window.
+     */
+    public boolean supportsFreeformMultiWindow(Context context) {
+        final boolean freeformDevOption = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+        return ActivityTaskManager.supportsMultiWindow(context)
+                && (context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT)
+                || freeformDevOption);
     }
 }
