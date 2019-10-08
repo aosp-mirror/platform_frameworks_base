@@ -16,6 +16,9 @@
 
 package com.android.mediaroutertest;
 
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
+import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +64,12 @@ public class MediaRouterManagerTest {
     public static final String ROUTE_ID_SPECIAL_CATEGORY = "route_special_category";
     public static final String ROUTE_NAME_SPECIAL_CATEGORY = "Special Category Route";
 
+    public static final int VOLUME_MAX = 100;
+    public static final String ROUTE_ID_FIXED_VOLUME = "route_fixed_volume";
+    public static final String ROUTE_NAME_FIXED_VOLUME = "Fixed Volume Route";
+    public static final String ROUTE_ID_VARIABLE_VOLUME = "route_variable_volume";
+    public static final String ROUTE_NAME_VARIABLE_VOLUME = "Variable Volume Route";
+
     public static final String ACTION_REMOVE_ROUTE =
             "com.android.mediarouteprovider.action_remove_route";
 
@@ -98,7 +107,7 @@ public class MediaRouterManagerTest {
         mPackageName = mContext.getPackageName();
     }
 
-    //TODO: Move to a seperate file
+    //TODO: Move to a separate file
     @Test
     public void testMediaRoute2Info() {
         MediaRoute2Info routeInfo1 = new MediaRoute2Info.Builder("id", "name")
@@ -279,6 +288,26 @@ public class MediaRouterManagerTest {
 
         mRouter2.unregisterCallback(routerCallback);
         mManager.unregisterCallback(managerCallback);
+    }
+
+    @Test
+    public void testVolumeHandling() {
+        MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
+
+        mRouter2.setControlCategories(CONTROL_CATEGORIES_ALL);
+        mRouter2.registerCallback(mExecutor, mockCallback);
+        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+                .onRoutesChanged(argThat(routes -> routes.size() > 0));
+        Map<String, MediaRoute2Info> routes = createRouteMap(mRouter2.getRoutes());
+
+        MediaRoute2Info fixedVolumeRoute = routes.get(ROUTE_ID_FIXED_VOLUME);
+        MediaRoute2Info variableVolumeRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
+
+        assertEquals(PLAYBACK_VOLUME_FIXED, fixedVolumeRoute.getVolumeHandling());
+        assertEquals(PLAYBACK_VOLUME_VARIABLE, variableVolumeRoute.getVolumeHandling());
+        assertEquals(VOLUME_MAX, variableVolumeRoute.getVolumeMax());
+
+        mRouter2.unregisterCallback(mockCallback);
     }
 
     // Helper for getting routes easily
