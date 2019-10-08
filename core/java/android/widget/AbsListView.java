@@ -2569,7 +2569,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (isItemClickable(view)) {
             addAccessibilityActionIfEnabled(info, isItemEnabled, AccessibilityAction.ACTION_CLICK);
-            info.setClickable(true);
+            // A disabled item is a separator which should not be clickable.
+            info.setClickable(isItemEnabled);
         }
 
         if (isLongClickable()) {
