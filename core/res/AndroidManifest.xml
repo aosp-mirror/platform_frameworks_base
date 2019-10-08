@@ -776,7 +776,7 @@
          broadcast module. This is required in order to bind to the cell broadcast service, and
          ensures that only the system can forward messages to it.
 
-         <p>Protection level: signature|privileged
+         <p>Protection level: signature
 
          @hide -->
     <permission android:name="android.permission.BIND_CELL_BROADCAST_SERVICE"
