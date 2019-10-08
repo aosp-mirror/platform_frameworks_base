@@ -349,10 +349,10 @@
          will be given a single shared user ID, so they can for example run
          in the same process.  Note that for them to actually get the same
          user ID, they must also be signed with the same signature.
-         @deprecated Shared user id's cause non-deterministic behaviour within the
-         package manager. As such, it's use is discouraged, deprecated, and will
-         be removed altogether in a future version of Android. Instead, proper
-         communication mechanisms such as services and providers should be used
+         @deprecated Shared user IDs cause non-deterministic behavior within the
+         package manager. As such, its use is strongly discouraged and may be
+         removed in a future version of Android. Instead, apps should use proper
+         communication mechanisms, such as services and content providers,
          to facilitate interoperability between shared components. -->
     <attr name="sharedUserId" format="string" />
 
