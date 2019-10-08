@@ -99,6 +99,7 @@ public class LinkPropertiesTest {
         assertFalse(lp.isIpv4Provisioned());
         assertFalse(lp.isIpv6Provisioned());
         assertFalse(lp.isPrivateDnsActive());
+        assertFalse(lp.isWakeOnLanSupported());
     }
 
     private LinkProperties makeTestObject() {
@@ -120,6 +121,7 @@ public class LinkPropertiesTest {
         lp.setMtu(MTU);
         lp.setTcpBufferSizes(TCP_BUFFER_SIZES);
         lp.setNat64Prefix(new IpPrefix("2001:db8:0:64::/96"));
+        lp.setWakeOnLanSupported(true);
         return lp;
     }
 
@@ -157,6 +159,9 @@ public class LinkPropertiesTest {
 
         assertTrue(source.isIdenticalTcpBufferSizes(target));
         assertTrue(target.isIdenticalTcpBufferSizes(source));
+
+        assertTrue(source.isIdenticalWakeOnLan(target));
+        assertTrue(target.isIdenticalWakeOnLan(source));
 
         // Check result of equals().
         assertTrue(source.equals(target));
@@ -1056,5 +1061,14 @@ public class LinkPropertiesTest {
 
         lp.clear();
         assertFalse(lp.isPrivateDnsActive());
+    }
+
+    @Test
+    public void testWakeOnLanSupported() {
+        final LinkProperties lp = makeTestObject();
+        assertTrue(lp.isWakeOnLanSupported());
+
+        lp.clear();
+        assertFalse(lp.isWakeOnLanSupported());
     }
 }
