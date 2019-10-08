@@ -426,7 +426,7 @@ java_library {
 
 java_library {
     name: "framework-annotation-proc",
-    defaults: ["framework-defaults"],
+    defaults: ["framework-aidl-export-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
     plugins: [
