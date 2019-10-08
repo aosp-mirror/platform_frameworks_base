@@ -513,6 +513,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = (int) (mDisplayInfo.density * 160 + 0.5f);
                 mInfo.xDpi = config.xDpi;
                 mInfo.yDpi = config.yDpi;
+                mInfo.deviceProductInfo = mDisplayInfo.deviceProductInfo;
 
                 // Assume that all built-in displays that have secure output (eg. HDCP) also
                 // support compositing from gralloc protected buffers.
@@ -891,8 +892,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mBacklight=" + mBacklight);
             pw.println("mAllmSupported=" + mAllmSupported);
             pw.println("mAllmRequested=" + mAllmRequested);
-            pw.println("mGameContentTypeSupported" + mGameContentTypeSupported);
-            pw.println("mGameContentTypeRequested" + mGameContentTypeRequested);
+            pw.println("mGameContentTypeSupported=" + mGameContentTypeSupported);
+            pw.println("mGameContentTypeRequested=" + mGameContentTypeRequested);
             pw.println("mDisplayInfo=" + mDisplayInfo);
             pw.println("mDisplayConfigs=");
             for (int i = 0; i < mDisplayConfigs.length; i++) {
@@ -902,14 +903,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             for (int i = 0; i < mSupportedModes.size(); i++) {
                 pw.println("  " + mSupportedModes.valueAt(i));
             }
-            pw.print("mSupportedColorModes=[");
-            for (int i = 0; i < mSupportedColorModes.size(); i++) {
-                if (i != 0) {
-                    pw.print(", ");
-                }
-                pw.print(mSupportedColorModes.get(i));
-            }
-            pw.println("]");
+            pw.print("mSupportedColorModes=" + mSupportedColorModes.toString());
         }
 
         private int findDisplayConfigIdLocked(int modeId) {

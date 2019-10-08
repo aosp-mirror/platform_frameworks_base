@@ -28,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DeviceProductInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -68,6 +69,13 @@ public final class DisplayInfo implements Parcelable {
      * Interpretation varies by display type.
      */
     public DisplayAddress address;
+
+    /**
+     * Product-specific information about the display or the directly connected device on the
+     * display chain. For example, if the display is transitively connected, this field may contain
+     * product information about the intermediate device.
+     */
+    public DeviceProductInfo deviceProductInfo;
 
     /**
      * The human-readable name of the display.
@@ -297,6 +305,7 @@ public final class DisplayInfo implements Parcelable {
                 && type == other.type
                 && displayId == other.displayId
                 && Objects.equals(address, other.address)
+                && Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 && Objects.equals(uniqueId, other.uniqueId)
                 && appWidth == other.appWidth
                 && appHeight == other.appHeight
@@ -336,6 +345,7 @@ public final class DisplayInfo implements Parcelable {
         type = other.type;
         displayId = other.displayId;
         address = other.address;
+        deviceProductInfo = other.deviceProductInfo;
         name = other.name;
         uniqueId = other.uniqueId;
         appWidth = other.appWidth;
@@ -373,6 +383,7 @@ public final class DisplayInfo implements Parcelable {
         type = source.readInt();
         displayId = source.readInt();
         address = source.readParcelable(null);
+        deviceProductInfo = source.readParcelable(null);
         name = source.readString();
         appWidth = source.readInt();
         appHeight = source.readInt();
@@ -418,6 +429,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(type);
         dest.writeInt(displayId);
         dest.writeParcelable(address, flags);
+        dest.writeParcelable(deviceProductInfo, flags);
         dest.writeString(name);
         dest.writeInt(appWidth);
         dest.writeInt(appHeight);
@@ -645,6 +657,8 @@ public final class DisplayInfo implements Parcelable {
         if (address != null) {
             sb.append(", address ").append(address);
         }
+        sb.append(", deviceProductInfo ");
+        sb.append(deviceProductInfo);
         sb.append(", state ");
         sb.append(Display.stateToString(state));
         if (ownerUid != 0 || ownerPackageName != null) {

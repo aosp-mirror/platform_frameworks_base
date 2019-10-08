@@ -37,6 +37,7 @@
 #include <stdio.h>
 #include <system/graphics.h>
 #include <ui/ConfigStoreTypes.h>
+#include <ui/DeviceProductInfo.h>
 #include <ui/DisplayConfig.h>
 #include <ui/DisplayInfo.h>
 #include <ui/DisplayedFrameStats.h>
@@ -65,9 +66,19 @@ static const char* const OutOfResourcesException =
 static struct {
     jclass clazz;
     jmethodID ctor;
+} gIntegerClassInfo;
+
+static jobject toInteger(JNIEnv* env, int32_t i) {
+    return env->NewObject(gIntegerClassInfo.clazz, gIntegerClassInfo.ctor, i);
+}
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
     jfieldID isInternal;
     jfieldID density;
     jfieldID secure;
+    jfieldID deviceProductInfo;
 } gDisplayInfoClassInfo;
 
 static struct {
@@ -108,6 +119,16 @@ static struct {
     jclass clazz;
     jmethodID ctor;
 } gHdrCapabilitiesClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gDeviceProductInfoClassInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gDeviceProductInfoManufactureDateClassInfo;
 
 static struct {
     jclass clazz;
@@ -774,6 +795,41 @@ static void nativeSetDisplaySize(JNIEnv* env, jclass clazz,
     }
 }
 
+static jobject convertDeviceProductInfoToJavaObject(
+        JNIEnv* env, const std::optional<DeviceProductInfo>& info) {
+    using ModelYear = android::DeviceProductInfo::ModelYear;
+    using ManufactureYear = android::DeviceProductInfo::ManufactureYear;
+    using ManufactureWeekAndYear = android::DeviceProductInfo::ManufactureWeekAndYear;
+
+    if (!info) return nullptr;
+    jstring name = env->NewStringUTF(info->name.data());
+    jstring manufacturerPnpId = env->NewStringUTF(info->manufacturerPnpId.data());
+    jobject productId = env->NewStringUTF(info->productId.data());
+    const auto& date = info->manufactureOrModelDate;
+    jobject modelYear, manufactureDate;
+    if (const auto* model = std::get_if<ModelYear>(&date)) {
+        modelYear = toInteger(env, model->year);
+        manufactureDate = nullptr;
+    } else if (const auto* manufactureWeekAndYear = std::get_if<ManufactureWeekAndYear>(&date)) {
+        modelYear = nullptr;
+        manufactureDate = env->NewObject(gDeviceProductInfoManufactureDateClassInfo.clazz,
+                                               gDeviceProductInfoManufactureDateClassInfo.ctor,
+                                               toInteger(env, manufactureWeekAndYear->week),
+                                               toInteger(env, manufactureWeekAndYear->year));
+    } else if (const auto* manufactureYear = std::get_if<ManufactureYear>(&date)) {
+        modelYear = nullptr;
+        manufactureDate = env->NewObject(gDeviceProductInfoManufactureDateClassInfo.clazz,
+                                       gDeviceProductInfoManufactureDateClassInfo.ctor,
+                                       nullptr,
+                                       toInteger(env, manufactureYear->year));
+    } else {
+        LOG_FATAL("Unknown alternative for variant DeviceProductInfo::ManufactureOrModelDate");
+    }
+
+    return env->NewObject(gDeviceProductInfoClassInfo.clazz, gDeviceProductInfoClassInfo.ctor, name,
+                          manufacturerPnpId, productId, modelYear, manufactureDate);
+}
+
 static jobject nativeGetDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj) {
     DisplayInfo info;
     if (const auto token = ibinderForJavaObject(env, tokenObj);
@@ -786,6 +842,8 @@ static jobject nativeGetDisplayInfo(JNIEnv* env, jclass clazz, jobject tokenObj)
                          info.connectionType == DisplayConnectionType::Internal);
     env->SetFloatField(object, gDisplayInfoClassInfo.density, info.density);
     env->SetBooleanField(object, gDisplayInfoClassInfo.secure, info.secure);
+    env->SetObjectField(object, gDisplayInfoClassInfo.deviceProductInfo,
+                        convertDeviceProductInfoToJavaObject(env, info.deviceProductInfo));
     return object;
 }
 
@@ -1528,12 +1586,19 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     int err = RegisterMethodsOrDie(env, "android/view/SurfaceControl",
             sSurfaceControlMethods, NELEM(sSurfaceControlMethods));
 
+    jclass integerClass = FindClassOrDie(env, "java/lang/Integer");
+    gIntegerClassInfo.clazz = MakeGlobalRefOrDie(env, integerClass);
+    gIntegerClassInfo.ctor = GetMethodIDOrDie(env, gIntegerClassInfo.clazz, "<init>", "(I)V");
+
     jclass infoClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayInfo");
     gDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, infoClazz);
     gDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env, infoClazz, "<init>", "()V");
     gDisplayInfoClassInfo.isInternal = GetFieldIDOrDie(env, infoClazz, "isInternal", "Z");
     gDisplayInfoClassInfo.density = GetFieldIDOrDie(env, infoClazz, "density", "F");
     gDisplayInfoClassInfo.secure = GetFieldIDOrDie(env, infoClazz, "secure", "Z");
+    gDisplayInfoClassInfo.deviceProductInfo =
+            GetFieldIDOrDie(env, infoClazz, "deviceProductInfo",
+                            "Landroid/hardware/display/DeviceProductInfo;");
 
     jclass configClazz = FindClassOrDie(env, "android/view/SurfaceControl$DisplayConfig");
     gDisplayConfigClassInfo.clazz = MakeGlobalRefOrDie(env, configClazz);
@@ -1573,6 +1638,25 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gHdrCapabilitiesClassInfo.clazz = MakeGlobalRefOrDie(env, hdrCapabilitiesClazz);
     gHdrCapabilitiesClassInfo.ctor = GetMethodIDOrDie(env, hdrCapabilitiesClazz, "<init>",
             "([IFFF)V");
+
+    jclass deviceProductInfoClazz =
+            FindClassOrDie(env, "android/hardware/display/DeviceProductInfo");
+    gDeviceProductInfoClassInfo.clazz = MakeGlobalRefOrDie(env, deviceProductInfoClazz);
+    gDeviceProductInfoClassInfo.ctor =
+            GetMethodIDOrDie(env, deviceProductInfoClazz, "<init>",
+                             "(Ljava/lang/String;"
+                             "Ljava/lang/String;"
+                             "Ljava/lang/String;"
+                             "Ljava/lang/Integer;"
+                             "Landroid/hardware/display/DeviceProductInfo$ManufactureDate;)V");
+
+    jclass deviceProductInfoManufactureDateClazz =
+            FindClassOrDie(env, "android/hardware/display/DeviceProductInfo$ManufactureDate");
+    gDeviceProductInfoManufactureDateClassInfo.clazz =
+            MakeGlobalRefOrDie(env, deviceProductInfoManufactureDateClazz);
+    gDeviceProductInfoManufactureDateClassInfo.ctor =
+            GetMethodIDOrDie(env, deviceProductInfoManufactureDateClazz, "<init>",
+                             "(Ljava/lang/Integer;Ljava/lang/Integer;)V");
 
     jclass graphicsBufferClazz = FindClassOrDie(env, "android/graphics/GraphicBuffer");
     gGraphicBufferClassInfo.clazz = MakeGlobalRefOrDie(env, graphicsBufferClazz);
