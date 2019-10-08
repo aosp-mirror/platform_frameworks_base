@@ -60,6 +60,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Provider;
 
@@ -190,8 +191,7 @@ public class QSTileHostTest extends SysuiTestCase {
             // changed
             String newSetting = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                     TILES_SETTING, ActivityManager.getCurrentUser());
-            // newSetting is not null, as it has just been set.
-            if (!newSetting.equals(previousSetting)) {
+            if (!Objects.equals(newSetting, previousSetting)) {
                 onTuningChanged(TILES_SETTING, newSetting);
             }
         }
