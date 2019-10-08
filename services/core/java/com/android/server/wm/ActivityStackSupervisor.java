@@ -44,7 +44,7 @@ import static android.graphics.Rect.copyOrNull;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
@@ -690,7 +690,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags,
             int filterCallingUid) {
         try {
-            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resolveIntent");
             int modifiedFlags = flags
                     | PackageManager.MATCH_DEFAULT_ONLY | ActivityManagerService.STOCK_PM_FLAGS;
             if (intent.isWebIntent()
@@ -711,7 +711,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 Binder.restoreCallingIdentity(token);
             }
         } finally {
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -1629,7 +1629,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             mPendingTempOtherTaskInsetBounds = copyOrNull(tempOtherTaskInsetBounds);
         }
 
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeDockedStack");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizeDockedStack");
         mService.deferWindowLayout();
         try {
             // Don't allow re-entry while resizing. E.g. due to docked stack detaching.
@@ -1695,7 +1695,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         } finally {
             mAllowDockedStackResize = true;
             mService.continueWindowLayout();
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -1717,7 +1717,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizePinnedStack");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizePinnedStack");
         mService.deferWindowLayout();
         try {
             Rect insetBounds = null;
@@ -1739,7 +1739,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     !DEFER_RESUME);
         } finally {
             mService.continueWindowLayout();
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 

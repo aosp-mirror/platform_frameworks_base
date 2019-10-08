@@ -112,7 +112,7 @@ final class InputMonitor {
         }
     }
 
-    private final Runnable mUpdateInputWindows = new Runnable() {
+    private class UpdateInputWindows implements Runnable {
         @Override
         public void run() {
             synchronized (mService.mGlobalLock) {
@@ -148,7 +148,9 @@ final class InputMonitor {
                 mUpdateInputForAllWindowsConsumer.updateInputWindows(inDrag);
             }
         }
-    };
+    }
+
+    private final UpdateInputWindows mUpdateInputWindows = new UpdateInputWindows();
 
     public InputMonitor(WindowManagerService service, int displayId) {
         mService = service;

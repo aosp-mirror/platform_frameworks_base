@@ -52,7 +52,7 @@ import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.SYSTEM_UID;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
@@ -1606,6 +1606,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
 
             final long origId = Binder.clearCallingIdentity();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "finishActivity");
             try {
                 boolean res;
                 final boolean finishWithRootActivity =
@@ -1633,6 +1634,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 return res;
             } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -1667,6 +1669,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             WindowProcessController proc = null;
             synchronized (mGlobalLock) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityIdle");
                 ActivityStack stack = ActivityRecord.getStackLocked(token);
                 if (stack == null) {
                     return;
@@ -1681,6 +1684,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
             }
         } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -1707,10 +1711,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public final void activityPaused(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityPaused");
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
                 stack.activityPausedLocked(token, false);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
         Binder.restoreCallingIdentity(origId);
     }
@@ -1731,6 +1737,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int restartingUid = 0;
         final ActivityRecord r;
         synchronized (mGlobalLock) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityStopped");
             r = ActivityRecord.isInStackLocked(token);
             if (r != null) {
                 if (r.attachedToProcess()
@@ -1742,6 +1749,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 r.activityStoppedLocked(icicle, persistentState, description);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
         if (restartingName != null) {
@@ -1763,12 +1771,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "ACTIVITY DESTROYED: " + token);
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "activityDestroyed");
             try {
                 final ActivityRecord activity = ActivityRecord.forTokenLocked(token);
                 if (activity != null) {
                     activity.destroyed("activityDestroyed");
                 }
             } finally {
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -5506,8 +5516,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
             String hostingType) {
         try {
-            if (Trace.isTagEnabled(TRACE_TAG_ACTIVITY_MANAGER)) {
-                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dispatchingStartProcess:"
+            if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "dispatchingStartProcess:"
                         + activity.processName);
             }
             // Post message to start process to avoid possible deadlock of calling into AMS with the
@@ -5517,7 +5527,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     isTop, hostingType, activity.intent.getComponent());
             mH.sendMessage(m);
         } finally {
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -5670,11 +5680,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private void updateResumedAppTrace(@Nullable ActivityRecord resumed) {
         if (mTracedResumedActivity != null) {
-            Trace.asyncTraceEnd(TRACE_TAG_ACTIVITY_MANAGER,
+            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER,
                     constructResumedTraceName(mTracedResumedActivity.packageName), 0);
         }
         if (resumed != null) {
-            Trace.asyncTraceBegin(TRACE_TAG_ACTIVITY_MANAGER,
+            Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER,
                     constructResumedTraceName(resumed.packageName), 0);
         }
         mTracedResumedActivity = resumed;
@@ -6773,7 +6783,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean attachApplication(WindowProcessController wpc) throws RemoteException {
             synchronized (mGlobalLockWithoutBoost) {
-                return mRootActivityContainer.attachApplication(wpc);
+                if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "attachApplication:" + wpc.mName);
+                }
+                try {
+                    return mRootActivityContainer.attachApplication(wpc);
+                } finally {
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                }
             }
         }
 

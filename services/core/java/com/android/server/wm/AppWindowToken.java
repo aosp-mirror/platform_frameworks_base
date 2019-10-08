@@ -2283,7 +2283,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
     }
 
-    private final Runnable mAddStartingWindow = new Runnable() {
+    private class AddStartingWindow implements Runnable {
 
         @Override
         public void run() {
@@ -2343,7 +2343,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                         AppWindowToken.this);
             }
         }
-    };
+    }
+
+    private final AddStartingWindow mAddStartingWindow = new AddStartingWindow();
 
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents,
