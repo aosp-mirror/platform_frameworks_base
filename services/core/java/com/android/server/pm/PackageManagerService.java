@@ -15080,19 +15080,6 @@ public class PackageManagerService extends IPackageManager.Stub
         return disabled;
     }
 
-    @GuardedBy("mLock")
-    private void setInstallerPackageNameLPw(PackageParser.Package pkg,
-            String installerPackageName) {
-        // Enable the parent package
-        mSettings.setInstallerPackageName(pkg.packageName, installerPackageName);
-        // Enable the child packages
-        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-        for (int i = 0; i < childCount; i++) {
-            PackageParser.Package childPkg = pkg.childPackages.get(i);
-            mSettings.setInstallerPackageName(childPkg.packageName, installerPackageName);
-        }
-    }
-
     private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
             int[] allUsers, PackageInstalledInfo res, UserHandle user, int installReason) {
         // Update the parent package setting
