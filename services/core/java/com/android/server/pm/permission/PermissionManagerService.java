@@ -53,7 +53,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -793,13 +792,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final CheckPermissionDelegate checkPermissionDelegate;
         synchronized (mLock) {
-            if (mCheckPermissionDelegate == null)  {
-                return checkPermissionImpl(permName, pkgName, userId);
-            }
             checkPermissionDelegate = mCheckPermissionDelegate;
         }
+        if (checkPermissionDelegate == null) {
+            return checkPermissionImpl(permName, pkgName, userId);
+        }
         return checkPermissionDelegate.checkPermission(permName, pkgName, userId,
-                PermissionManagerService.this::checkPermissionImpl);
+                this::checkPermissionImpl);
     }
 
     private int checkPermissionImpl(String permName, String pkgName, int userId) {
@@ -845,23 +844,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     private boolean checkSinglePermissionInternal(int uid,
             @NonNull PermissionsState permissionsState, @NonNull String permissionName) {
-        boolean hasPermission = permissionsState.hasPermission(permissionName,
-                UserHandle.getUserId(uid));
-
-        if (!hasPermission && mSettings.isPermissionRuntime(permissionName)) {
-            final String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
-            final int packageNamesSize = packageNames != null ? packageNames.length : 0;
-            for (int i = 0; i < packageNamesSize; i++) {
-                final PackageParser.Package pkg = mPackageManagerInt.getPackage(packageNames[i]);
-                if (pkg != null && pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M
-                        && pkg.requestedPermissions.contains(permissionName)) {
-                    hasPermission = true;
-                    break;
-                }
-            }
-        }
-
-        if (!hasPermission) {
+        if (!permissionsState.hasPermission(permissionName, UserHandle.getUserId(uid))) {
             return false;
         }
 
@@ -885,13 +868,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final CheckPermissionDelegate checkPermissionDelegate;
         synchronized (mLock) {
-            if (mCheckPermissionDelegate == null)  {
-                return checkUidPermissionImpl(permName, uid);
-            }
             checkPermissionDelegate = mCheckPermissionDelegate;
         }
+        if (checkPermissionDelegate == null)  {
+            return checkUidPermissionImpl(permName, uid);
+        }
         return checkPermissionDelegate.checkUidPermission(permName, uid,
-                PermissionManagerService.this::checkUidPermissionImpl);
+                this::checkUidPermissionImpl);
     }
 
     private int checkUidPermissionImpl(String permName, int uid) {
