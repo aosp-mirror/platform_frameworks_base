@@ -277,6 +277,10 @@ public final class ImageDecoder implements AutoCloseable {
                     assetFd = mResolver.openAssetFileDescriptor(mUri, "r");
                 }
             } catch (FileNotFoundException e) {
+                // Handled below, along with the case where assetFd was set to null.
+            }
+
+            if (assetFd == null) {
                 // Some images cannot be opened as AssetFileDescriptors (e.g.
                 // bmp, ico). Open them as InputStreams.
                 InputStream is = mResolver.openInputStream(mUri);
@@ -286,9 +290,7 @@ public final class ImageDecoder implements AutoCloseable {
 
                 return createFromStream(is, true, preferAnimation, this);
             }
-            if (assetFd == null) {
-                throw new FileNotFoundException(mUri.toString());
-            }
+
             return createFromAssetFileDescriptor(assetFd, preferAnimation, this);
         }
     }
