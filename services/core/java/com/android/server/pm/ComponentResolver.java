@@ -23,6 +23,7 @@ import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING
 import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.fixProcessName;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -219,12 +220,14 @@ public class ComponentResolver {
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mActivities.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryActivities(Intent intent, String resolvedType, int flags,
             List<PackageParser.Activity> activities, int userId) {
         synchronized (mLock) {
@@ -233,12 +236,14 @@ public class ComponentResolver {
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryProviders(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mProviders.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryProviders(Intent intent, String resolvedType, int flags,
             List<PackageParser.Provider> providers, int userId) {
         synchronized (mLock) {
@@ -246,6 +251,7 @@ public class ComponentResolver {
         }
     }
 
+    @Nullable
     List<ProviderInfo> queryProviders(String processName, String metaDataKey, int uid, int flags,
             int userId) {
         if (!sUserManager.exists(userId)) {
@@ -285,6 +291,7 @@ public class ComponentResolver {
         return providerList;
     }
 
+    @Nullable
     ProviderInfo queryProvider(String authority, int flags, int userId) {
         synchronized (mLock) {
             final PackageParser.Provider p = mProvidersByAuthority.get(authority);
@@ -326,12 +333,14 @@ public class ComponentResolver {
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mReceivers.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryReceivers(Intent intent, String resolvedType, int flags,
             List<PackageParser.Activity> receivers, int userId) {
         synchronized (mLock) {
@@ -339,12 +348,14 @@ public class ComponentResolver {
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryServices(Intent intent, String resolvedType, int flags, int userId) {
         synchronized (mLock) {
             return mServices.queryIntent(intent, resolvedType, flags, userId);
         }
     }
 
+    @Nullable
     List<ResolveInfo> queryServices(Intent intent, String resolvedType, int flags,
             List<PackageParser.Service> services, int userId) {
         synchronized (mLock) {
@@ -1355,6 +1366,7 @@ public class ComponentResolver {
             return super.queryIntent(intent, resolvedType, defaultOnly, userId);
         }
 
+        @Nullable
         List<ResolveInfo> queryIntent(Intent intent, String resolvedType, int flags,
                 int userId) {
             if (!sUserManager.exists(userId)) {
@@ -1366,6 +1378,7 @@ public class ComponentResolver {
                     userId);
         }
 
+        @Nullable
         List<ResolveInfo> queryIntentForPackage(Intent intent, String resolvedType,
                 int flags, List<PackageParser.Provider> packageProviders, int userId) {
             if (!sUserManager.exists(userId)) {
