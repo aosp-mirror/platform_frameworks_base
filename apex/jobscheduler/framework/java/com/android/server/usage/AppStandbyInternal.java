@@ -35,8 +35,6 @@ public interface AppStandbyInternal {
 
     void onBootPhase(int phase);
 
-    boolean isParoledOrCharging();
-
     void postCheckIdleStates(int userId);
 
     /**
@@ -59,13 +57,15 @@ public interface AppStandbyInternal {
 
     int getAppId(String packageName);
 
-    boolean isAppIdleFilteredOrParoled(String packageName, int userId, long elapsedRealtime,
+    /**
+     * @see #isAppIdleFiltered(String, int, int, long)
+     */
+    boolean isAppIdleFiltered(String packageName, int userId, long elapsedRealtime,
             boolean shouldObfuscateInstantApps);
 
     /**
      * Checks if an app has been idle for a while and filters out apps that are excluded.
      * It returns false if the current system state allows all apps to be considered active.
-     * This happens if the device is plugged in or temporarily allowed to make exceptions.
      * Called by interface impls.
      */
     boolean isAppIdleFiltered(String packageName, int appId, int userId,

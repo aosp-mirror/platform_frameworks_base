@@ -71,8 +71,7 @@ import java.util.List;
  * - Temporary power save whitelist
  * - Global "force all apps standby" mode enforced by battery saver.
  *
- * Test:
-  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AppStateTrackerTest.java
+ * Test: atest com.android.server.AppStateTrackerTest
  */
 public class AppStateTracker {
     private static final String TAG = "AppStateTracker";
@@ -709,10 +708,6 @@ public class AppStateTracker {
             if (changed) {
                 mHandler.notifyExemptChanged();
             }
-        }
-
-        @Override
-        public void onParoleStateChanged(boolean isParoleOn) {
         }
     }
 

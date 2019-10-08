@@ -97,8 +97,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -190,11 +188,6 @@ public class UsageStatsService extends SystemService implements
                     event.mBucketAndReason = (bucket << 16) | (reason & 0xFFFF);
                     event.mPackage = packageName;
                     reportEventOrAddToQueue(userId, event);
-                }
-
-                @Override
-                public void onParoleStateChanged(boolean isParoleOn) {
-
                 }
             };
 
@@ -1426,7 +1419,7 @@ public class UsageStatsService extends SystemService implements
                     Binder.getCallingUid(), userId);
             final long token = Binder.clearCallingIdentity();
             try {
-                return mAppStandby.isAppIdleFilteredOrParoled(
+                return mAppStandby.isAppIdleFiltered(
                         packageName, userId,
                         SystemClock.elapsedRealtime(), obfuscateInstantApps);
             } finally {
@@ -1995,11 +1988,6 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
-        public boolean isAppIdleParoleOn() {
-            return mAppStandby.isParoledOrCharging();
-        }
-
-        @Override
         public void prepareShutdown() {
             // This method *WILL* do IO work, but we must block until it is finished or else
             // we might not shutdown cleanly. This is ok to do with the 'am' lock held, because
@@ -2015,7 +2003,6 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void addAppIdleStateChangeListener(AppIdleStateChangeListener listener) {
             mAppStandby.addListener(listener);
-            listener.onParoleStateChanged(isAppIdleParoleOn());
         }
 
         @Override

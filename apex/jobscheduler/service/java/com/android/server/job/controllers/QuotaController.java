@@ -414,8 +414,6 @@ public final class QuotaController extends StateController {
     private final Handler mHandler;
     private final QcConstants mQcConstants;
 
-    private volatile boolean mInParole;
-
     /** How much time each app will have to run jobs within their standby bucket window. */
     private long mAllowedTimePerPeriodMs = QcConstants.DEFAULT_ALLOWED_TIME_PER_PERIOD_MS;
 
@@ -711,7 +709,6 @@ public final class QuotaController extends StateController {
     public long getMaxJobExecutionTimeMsLocked(@NonNull final JobStatus jobStatus) {
         // If quota is currently "free", then the job can run for the full amount of time.
         if (mChargeTracker.isCharging()
-                || mInParole
                 || isTopStartedJobLocked(jobStatus)
                 || isUidInForeground(jobStatus.getSourceUid())) {
             return JobServiceContext.EXECUTING_TIMESLICE_MILLIS;
@@ -737,8 +734,8 @@ public final class QuotaController extends StateController {
             final int standbyBucket) {
         if (standbyBucket == NEVER_INDEX) return false;
 
-        // Quota constraint is not enforced while charging or when parole is on.
-        if (mChargeTracker.isCharging() || mInParole) {
+        // Quota constraint is not enforced while charging.
+        if (mChargeTracker.isCharging()) {
             return true;
         }
 
@@ -1780,20 +1777,6 @@ public final class QuotaController extends StateController {
                 }
             });
         }
-
-        @Override
-        public void onParoleStateChanged(final boolean isParoleOn) {
-            mInParole = isParoleOn;
-            if (DEBUG) {
-                Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
-            }
-            // Update job bookkeeping out of band.
-            BackgroundThread.getHandler().post(() -> {
-                synchronized (mLock) {
-                    maybeUpdateAllConstraintsLocked();
-                }
-            });
-        }
     }
 
     private final class DeleteTimingSessionsFunctor implements Consumer<List<TimingSession>> {
@@ -2515,7 +2498,6 @@ public final class QuotaController extends StateController {
     public void dumpControllerStateLocked(final IndentingPrintWriter pw,
             final Predicate<JobStatus> predicate) {
         pw.println("Is charging: " + mChargeTracker.isCharging());
-        pw.println("In parole: " + mInParole);
         pw.println("Current elapsed time: " + sElapsedRealtimeClock.millis());
         pw.println();
 
@@ -2639,7 +2621,6 @@ public final class QuotaController extends StateController {
         final long mToken = proto.start(StateControllerProto.QUOTA);
 
         proto.write(StateControllerProto.QuotaController.IS_CHARGING, mChargeTracker.isCharging());
-        proto.write(StateControllerProto.QuotaController.IS_IN_PAROLE, mInParole);
         proto.write(StateControllerProto.QuotaController.ELAPSED_REALTIME,
                 sElapsedRealtimeClock.millis());
 
