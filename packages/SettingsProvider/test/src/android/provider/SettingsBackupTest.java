@@ -720,6 +720,11 @@ public class SettingsBackupTest {
                  Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
                  Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED,
                  Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED,
+                 Settings.Secure.AWARE_ENABLED,
+                 Settings.Secure.SKIP_GESTURE,
+                 Settings.Secure.SILENCE_GESTURE,
+                 Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
+                 Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL);
 
     @Test

@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -135,7 +134,7 @@ public class KeyguardStatusView extends GridLayout implements
         super(context, attrs, defStyle);
         mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
-        mHandler = new Handler(Looper.myLooper());
+        mHandler = new Handler();
         onDensityOrFontScaleChanged();
     }
 

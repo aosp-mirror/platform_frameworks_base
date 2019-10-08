@@ -141,5 +141,8 @@
 
     <!-- Global Actions Menu -->
     <item type="id" name="global_actions_view" />
+
+    <!-- NotificationPanelView -->
+    <item type="id" name="notification_panel" />
 </resources>
 

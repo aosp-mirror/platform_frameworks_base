@@ -646,11 +646,11 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     ATRACE_CALL();
     if (!thread.getGrContext()) return;
     ATRACE_CALL();
-    if (level >= TRIM_MEMORY_COMPLETE) {
+    if (level >= TRIM_MEMORY_UI_HIDDEN) {
         thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+    }
+    if (level >= TRIM_MEMORY_COMPLETE) {
         thread.destroyRenderingContext();
-    } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
-        thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
     }
 }
 

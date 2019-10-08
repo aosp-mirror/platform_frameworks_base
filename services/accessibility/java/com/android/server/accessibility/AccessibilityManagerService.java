@@ -30,6 +30,7 @@ import android.Manifest;
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1208,6 +1209,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return false;
     }
 
+    private boolean readInstalledAccessibilityShortcutLocked(UserState userState) {
+        final List<AccessibilityShortcutInfo> shortcutInfos = AccessibilityManager
+                .getInstance(mContext).getInstalledAccessibilityShortcutListAsUser(
+                        mContext, mCurrentUserId);
+        if (!shortcutInfos.equals(userState.mInstalledShortcuts)) {
+            userState.mInstalledShortcuts.clear();
+            userState.mInstalledShortcuts.addAll(shortcutInfos);
+            return true;
+        }
+        return false;
+    }
+
     private boolean readEnabledAccessibilityServicesLocked(UserState userState) {
         mTempComponentNameSet.clear();
         readComponentNamesFromSettingLocked(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
@@ -1741,6 +1754,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private boolean readConfigurationForUserStateLocked(UserState userState) {
         boolean somethingChanged = readInstalledAccessibilityServiceLocked(userState);
+        somethingChanged |= readInstalledAccessibilityShortcutLocked(userState);
         somethingChanged |= readEnabledAccessibilityServicesLocked(userState);
         somethingChanged |= readTouchExplorationGrantedAccessibilityServicesLocked(userState);
         somethingChanged |= readTouchExplorationEnabledSettingLocked(userState);
@@ -2671,6 +2685,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public final List<AccessibilityServiceInfo> mInstalledServices =
                 new ArrayList<>();
 
+        public final List<AccessibilityShortcutInfo> mInstalledShortcuts = new ArrayList<>();
+
         private final Set<ComponentName> mBindingServices = new HashSet<>();
 
         public final Set<ComponentName> mEnabledServices = new HashSet<>();
@@ -3083,6 +3099,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         || mUserInteractiveUiTimeoutUri.equals(uri)) {
                     readUserRecommendedUiTimeoutSettingsLocked(userState);
                 }
+                // TODO(a11y shortcut): Monitor new setting keys, when user adds shortcut, and
+                //  remove from the list of enabled targets anything that's been uninstalled.
             }
         }
     }

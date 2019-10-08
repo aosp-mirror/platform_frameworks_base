@@ -522,7 +522,6 @@ public class NotificationManagerService extends SystemService {
 
     }
 
-
     void loadDefaultApprovedServices(int userId) {
         String defaultListenerAccess = getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultListenerAccessPackages);
@@ -530,6 +529,9 @@ public class NotificationManagerService extends SystemService {
             String[] listeners =
                     defaultListenerAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
             for (int i = 0; i < listeners.length; i++) {
+                if (TextUtils.isEmpty(listeners[i])) {
+                    continue;
+                }
                 ArraySet<ComponentName> approvedListeners =
                         mListeners.queryPackageForServices(listeners[i],
                                 MATCH_DIRECT_BOOT_AWARE
@@ -546,6 +548,9 @@ public class NotificationManagerService extends SystemService {
         if (defaultDndAccess != null) {
             String[] dnds = defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR);
             for (int i = 0; i < dnds.length; i++) {
+                if (TextUtils.isEmpty(dnds[i])) {
+                    continue;
+                }
                 mConditionProviders.addDefaultComponentOrPackage(dnds[i]);
             }
         }
@@ -564,12 +569,14 @@ public class NotificationManagerService extends SystemService {
                 .split(ManagedServices.ENABLED_SERVICES_SEPARATOR)));
         for (int i = 0; i < assistants.size(); i++) {
             String cnString = assistants.valueAt(i);
+            if (TextUtils.isEmpty(cnString)) {
+                continue;
+            }
             mAssistants.addDefaultComponentOrPackage(cnString);
         }
     }
 
     protected void allowDefaultApprovedServices(int userId) {
-
         ArraySet<ComponentName> defaultListeners = mListeners.getDefaultComponents();
         for (int i = 0; i < defaultListeners.size(); i++) {
             ComponentName cn = defaultListeners.valueAt(i);
@@ -5007,12 +5014,13 @@ public class NotificationManagerService extends SystemService {
         final int contentViewSize = contentView.estimateMemoryUsage();
         if (contentViewSize > mWarnRemoteViewsSizeBytes
                 && contentViewSize < mStripRemoteViewsSizeBytes) {
-            Slog.w(TAG, "RemoteViews too large on tag: " + tag + " id: " + id
+            Slog.w(TAG, "RemoteViews too large on pkg: " + pkg + " tag: " + tag + " id: " + id
                     + " this might be stripped in a future release");
         }
         if (contentViewSize >= mStripRemoteViewsSizeBytes) {
             mUsageStats.registerImageRemoved(pkg);
-            Slog.w(TAG, "Removed too large RemoteViews on tag: " + tag + " id: " + id);
+            Slog.w(TAG,
+                    "Removed too large RemoteViews on pkg: " + pkg + " tag: " + tag + " id: " + id);
             return true;
         }
         return false;

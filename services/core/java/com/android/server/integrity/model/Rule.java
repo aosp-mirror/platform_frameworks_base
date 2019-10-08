@@ -18,8 +18,6 @@ package com.android.server.integrity.model;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.Nullable;
-
 /**
  * Represent rules to be used in the rule evaluation engine to match against app installs.
  *
@@ -27,35 +25,12 @@ import android.annotation.Nullable;
  */
 public final class Rule {
 
-    // Holds an empty rule instance.
-    public static final Rule EMPTY = new Rule();
-
-    enum Key {
-        PACKAGE_NAME,
-        APP_CERTIFICATE,
-        INSTALLER_NAME,
-        INSTALLER_CERTIFICATE,
-        VERSION_CODE,
-        PRE_INSTALLED
-    }
-
     enum Effect {
         DENY
     }
 
-    enum Operator {
-        EQ,
-        LT,
-        LE,
-        GT,
-        GE
-    }
-
-    enum Connector {
-        AND,
-        OR,
-        NOT
-    }
+    // Holds an empty rule instance.
+    public static final Rule EMPTY = new Rule();
 
     private final Formula mFormula;
     private final Effect mEffect;
@@ -85,76 +60,5 @@ public final class Rule {
 
     public Effect getEffect() {
         return mEffect;
-    }
-
-    // TODO: Consider moving the sub-components to their respective model class.
-
-    /**
-     * Represents a rule logic/content.
-     */
-    abstract static class Formula {
-
-    }
-
-    /**
-     * Represents a simple formula consisting of an app install metadata field and a value.
-     */
-    public static final class AtomicFormula extends Formula {
-
-        final Key mKey;
-        final Operator mOperator;
-
-        // The value of a key can take either 1 of 3 forms: String, Integer, or Boolean.
-        // It cannot have multiple values.
-        @Nullable
-        final String mStringValue;
-        @Nullable
-        final Integer mIntValue;
-        @Nullable
-        final Boolean mBoolValue;
-
-        public AtomicFormula(Key key, Operator operator, String stringValue) {
-            // TODO: Add validators
-            this.mKey = key;
-            this.mOperator = operator;
-            this.mStringValue = stringValue;
-            this.mIntValue = null;
-            this.mBoolValue = null;
-        }
-
-        public AtomicFormula(Key key, Operator operator, Integer intValue) {
-            // TODO: Add validators
-            this.mKey = key;
-            this.mOperator = operator;
-            this.mStringValue = null;
-            this.mIntValue = intValue;
-            this.mBoolValue = null;
-        }
-
-        public AtomicFormula(Key key, Operator operator, Boolean boolValue) {
-            // TODO: Add validators
-            this.mKey = key;
-            this.mOperator = operator;
-            this.mStringValue = null;
-            this.mIntValue = null;
-            this.mBoolValue = boolValue;
-        }
-    }
-
-    /**
-     * Represents a complex formula consisting of other simple and complex formulas.
-     */
-    public static final class OpenFormula extends Formula {
-
-        final Connector mConnector;
-        final Formula mMainFormula;
-        final Formula mAuxiliaryFormula;
-
-        public OpenFormula(Connector connector, Formula mainFormula,
-                @Nullable Formula auxiliaryFormula) {
-            this.mConnector = checkNotNull(connector);
-            this.mMainFormula = checkNotNull(mainFormula);
-            this.mAuxiliaryFormula = auxiliaryFormula;
-        }
     }
 }

@@ -1357,6 +1357,7 @@ public class ExifInterface {
     private AssetManager.AssetInputStream mAssetInputStream;
     private boolean mIsInputStream;
     private int mMimeType;
+    private boolean mIsStandalone;
     @UnsupportedAppUsage
     private final HashMap[] mAttributes = new HashMap[EXIF_TAGS.length];
     private Set<Integer> mHandledIfdOffsets = new HashSet<>(EXIF_TAGS.length);
@@ -1411,6 +1412,7 @@ public class ExifInterface {
         if (fileDescriptor == null) {
             throw new NullPointerException("fileDescriptor cannot be null");
         }
+
         mAssetInputStream = null;
         mFilename = null;
         // When FileDescriptor is duplicated and set to FileInputStream, ownership needs to be
@@ -1442,26 +1444,61 @@ public class ExifInterface {
 
     /**
      * Reads Exif tags from the specified image input stream. Attribute mutation is not supported
-     * for input streams. The given input stream will proceed its current position. Developers
+     * for input streams. The given input stream will proceed from its current position. Developers
      * should close the input stream after use.
      */
     public ExifInterface(@NonNull InputStream inputStream) throws IOException {
+        this(inputStream, false);
+    }
+
+    /**
+     * Reads Exif tags from the specified standalone input stream. Standalone data refers to Exif
+     * data that exists by itself and is not contained in a file format such as jpeg or png.
+     * The format of the standalone data must follow the below structure:
+     *     Exif Identifier Code ("Exif\0\0") + TIFF header + IFD data
+     * See JEITA CP-3451C Section 4.5.2 and 4.5.4 specifications for more details.
+     * <p>
+     * Attribute mutation is not supported for this constructor. The given input stream will proceed
+     * from its current position. Developers should close the input stream after use. This
+     * constructor is not intended to be used with an input stream that performs any networking
+     * operations.
+     *
+     * @throws IOException if the data does not follow the aforementioned structure.
+     */
+    @NonNull
+    public static ExifInterface fromStandalone(@NonNull InputStream inputStream)
+            throws IOException {
+        if (isStandalone(inputStream)) {
+            return new ExifInterface(inputStream, true);
+        }
+        throw new IOException("Given data does not follow the structure of a standalone exif "
+                + "data.");
+    }
+
+    private ExifInterface(@NonNull InputStream inputStream, boolean isFromStandalone)
+            throws IOException {
         if (inputStream == null) {
             throw new NullPointerException("inputStream cannot be null");
         }
         mFilename = null;
-        if (inputStream instanceof AssetManager.AssetInputStream) {
-            mAssetInputStream = (AssetManager.AssetInputStream) inputStream;
-            mSeekableFileDescriptor = null;
-        } else if (inputStream instanceof FileInputStream
-                && isSeekableFD(((FileInputStream) inputStream).getFD())) {
+
+        if (isFromStandalone) {
+            mIsStandalone = true;
             mAssetInputStream = null;
-            mSeekableFileDescriptor = ((FileInputStream) inputStream).getFD();
+            mSeekableFileDescriptor = null;
         } else {
-            mAssetInputStream = null;
-            mSeekableFileDescriptor = null;
+            if (inputStream instanceof AssetManager.AssetInputStream) {
+                mAssetInputStream = (AssetManager.AssetInputStream) inputStream;
+                mSeekableFileDescriptor = null;
+            } else if (inputStream instanceof FileInputStream
+                    && (isSeekableFD(((FileInputStream) inputStream).getFD()))) {
+                mAssetInputStream = null;
+                mSeekableFileDescriptor = ((FileInputStream) inputStream).getFD();
+            } else {
+                mAssetInputStream = null;
+                mSeekableFileDescriptor = null;
+            }
         }
-        mIsInputStream = true;
         loadAttributes(inputStream);
     }
 
@@ -1798,51 +1835,57 @@ public class ExifInterface {
             }
 
             // Check file type
-            in = new BufferedInputStream(in, SIGNATURE_CHECK_SIZE);
-            mMimeType = getMimeType((BufferedInputStream) in);
+            if (!mIsStandalone) {
+                in = new BufferedInputStream(in, SIGNATURE_CHECK_SIZE);
+                mMimeType = getMimeType((BufferedInputStream) in);
+            }
 
             // Create byte-ordered input stream
             ByteOrderedDataInputStream inputStream = new ByteOrderedDataInputStream(in);
 
-            switch (mMimeType) {
-                case IMAGE_TYPE_JPEG: {
-                    getJpegAttributes(inputStream, 0, IFD_TYPE_PRIMARY); // 0 is offset
-                    break;
+            if (!mIsStandalone) {
+                switch (mMimeType) {
+                    case IMAGE_TYPE_JPEG: {
+                        getJpegAttributes(inputStream, 0, IFD_TYPE_PRIMARY); // 0 is offset
+                        break;
+                    }
+                    case IMAGE_TYPE_RAF: {
+                        getRafAttributes(inputStream);
+                        break;
+                    }
+                    case IMAGE_TYPE_HEIF: {
+                        getHeifAttributes(inputStream);
+                        break;
+                    }
+                    case IMAGE_TYPE_ORF: {
+                        getOrfAttributes(inputStream);
+                        break;
+                    }
+                    case IMAGE_TYPE_RW2: {
+                        getRw2Attributes(inputStream);
+                        break;
+                    }
+                    case IMAGE_TYPE_PNG: {
+                        getPngAttributes(inputStream);
+                        break;
+                    }
+                    case IMAGE_TYPE_ARW:
+                    case IMAGE_TYPE_CR2:
+                    case IMAGE_TYPE_DNG:
+                    case IMAGE_TYPE_NEF:
+                    case IMAGE_TYPE_NRW:
+                    case IMAGE_TYPE_PEF:
+                    case IMAGE_TYPE_SRW:
+                    case IMAGE_TYPE_UNKNOWN: {
+                        getRawAttributes(inputStream);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
                 }
-                case IMAGE_TYPE_RAF: {
-                    getRafAttributes(inputStream);
-                    break;
-                }
-                case IMAGE_TYPE_HEIF: {
-                    getHeifAttributes(inputStream);
-                    break;
-                }
-                case IMAGE_TYPE_ORF: {
-                    getOrfAttributes(inputStream);
-                    break;
-                }
-                case IMAGE_TYPE_RW2: {
-                    getRw2Attributes(inputStream);
-                    break;
-                }
-                case IMAGE_TYPE_PNG: {
-                    getPngAttributes(inputStream);
-                    break;
-                }
-                case IMAGE_TYPE_ARW:
-                case IMAGE_TYPE_CR2:
-                case IMAGE_TYPE_DNG:
-                case IMAGE_TYPE_NEF:
-                case IMAGE_TYPE_NRW:
-                case IMAGE_TYPE_PEF:
-                case IMAGE_TYPE_SRW:
-                case IMAGE_TYPE_UNKNOWN: {
-                    getRawAttributes(inputStream);
-                    break;
-                }
-                default: {
-                    break;
-                }
+            } else {
+                getStandaloneAttributes(inputStream);
             }
             // Set thumbnail image offset and length
             setThumbnailData(inputStream);
@@ -2124,6 +2167,9 @@ public class ExifInterface {
         }
 
         if (mHasThumbnail) {
+            if (mIsStandalone) {
+                return new long[] { mThumbnailOffset + mExifOffset, mThumbnailLength };
+            }
             return new long[] { mThumbnailOffset, mThumbnailLength };
         } else {
             return null;
@@ -2368,6 +2414,7 @@ public class ExifInterface {
 
     // Checks the type of image file
     private int getMimeType(BufferedInputStream in) throws IOException {
+        // TODO (b/142218289): Need to handle case where input stream does not support mark
         in.mark(SIGNATURE_CHECK_SIZE);
         byte[] signatureCheckBytes = new byte[SIGNATURE_CHECK_SIZE];
         in.read(signatureCheckBytes);
@@ -2562,6 +2609,18 @@ public class ExifInterface {
         return true;
     }
 
+    private static boolean isStandalone(InputStream inputStream) throws IOException {
+        byte[] signatureCheckBytes = new byte[IDENTIFIER_EXIF_APP1.length];
+        inputStream.read(signatureCheckBytes);
+
+        for (int i = 0; i < IDENTIFIER_EXIF_APP1.length; i++) {
+            if (signatureCheckBytes[i] != IDENTIFIER_EXIF_APP1[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Loads EXIF attributes from a JPEG input stream.
      *
@@ -2633,7 +2692,6 @@ public class ExifInterface {
                         final long offset = start + IDENTIFIER_EXIF_APP1.length;
                         final byte[] value = Arrays.copyOfRange(bytes,
                                 IDENTIFIER_EXIF_APP1.length, bytes.length);
-
                         readExifSegment(value, imageType);
 
                         // Save offset values for handleThumbnailFromJfif() function
@@ -2951,6 +3009,16 @@ public class ExifInterface {
         } finally {
             retriever.release();
         }
+    }
+
+    private void getStandaloneAttributes(ByteOrderedDataInputStream in) throws IOException {
+        // TODO: Need to handle potential OutOfMemoryError
+        byte[] data = new byte[in.available()];
+        in.readFully(data);
+        readExifSegment(data, IFD_TYPE_PRIMARY);
+
+        // Save offset values for handleThumbnailFromJfif() function
+        mExifOffset = IDENTIFIER_EXIF_APP1.length;
     }
 
     /**
@@ -3606,8 +3674,6 @@ public class ExifInterface {
             int thumbnailOffset = jpegInterchangeFormatAttribute.getIntValue(mExifByteOrder);
             int thumbnailLength = jpegInterchangeFormatLengthAttribute.getIntValue(mExifByteOrder);
 
-            // The following code limits the size of thumbnail size not to overflow EXIF data area.
-            thumbnailLength = Math.min(thumbnailLength, in.getLength() - thumbnailOffset);
             if (mMimeType == IMAGE_TYPE_JPEG || mMimeType == IMAGE_TYPE_RAF
                     || mMimeType == IMAGE_TYPE_RW2) {
                 thumbnailOffset += mExifOffset;
@@ -3615,6 +3681,9 @@ public class ExifInterface {
                 // Update offset value since RAF files have IFD data preceding MakerNote data.
                 thumbnailOffset += mOrfMakerNoteOffset;
             }
+            // The following code limits the size of thumbnail size not to overflow EXIF data area.
+            thumbnailLength = Math.min(thumbnailLength, in.getLength() - thumbnailOffset);
+
             if (DEBUG) {
                 Log.d(TAG, "Setting thumbnail attributes with offset: " + thumbnailOffset
                         + ", length: " + thumbnailLength);
@@ -4123,6 +4192,7 @@ public class ExifInterface {
             mDataInputStream = new DataInputStream(in);
             mLength = mDataInputStream.available();
             mPosition = 0;
+            // TODO (b/142218289): Need to handle case where input stream does not support mark
             mDataInputStream.mark(mLength);
         }
 
@@ -4138,6 +4208,7 @@ public class ExifInterface {
             if (mPosition > byteCount) {
                 mPosition = 0;
                 mDataInputStream.reset();
+                // TODO (b/142218289): Need to handle case where input stream does not support mark
                 mDataInputStream.mark(mLength);
             } else {
                 byteCount -= mPosition;

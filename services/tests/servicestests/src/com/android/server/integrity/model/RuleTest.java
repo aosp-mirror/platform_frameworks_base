@@ -29,8 +29,9 @@ import org.junit.runners.JUnit4;
 public class RuleTest {
 
     private static final Rule.Effect DENY_EFFECT = Rule.Effect.DENY;
-    private static final Rule.Formula SIMPLE_FORMULA =
-            new Rule.AtomicFormula(Rule.Key.PACKAGE_NAME, Rule.Operator.EQ, "com.test.app");
+    private static final Formula SIMPLE_FORMULA =
+            new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
+                    "com.test.app");
 
     @Test
     public void testEmptyRule() {

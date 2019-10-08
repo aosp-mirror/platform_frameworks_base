@@ -63,6 +63,10 @@ public class DelegatedAdminReceiver extends BroadcastReceiver {
      * Allows this receiver to select the alias for a private key and certificate pair for
      * authentication.  If this method returns null, the default {@link android.app.Activity} will
      * be shown that lets the user pick a private key and certificate pair.
+     * If this method returns {@link KeyChain#KEY_ALIAS_SELECTION_DENIED},
+     * the default {@link android.app.Activity} will not be shown and the user will not be allowed
+     * to pick anything. And the app, that called {@link KeyChain#choosePrivateKeyAlias}, will
+     * receive {@code null} back.
      *
      * <p> This callback is only applicable if the delegated app has
      * {@link DevicePolicyManager#DELEGATION_CERT_SELECTION} capability. Additionally, it must

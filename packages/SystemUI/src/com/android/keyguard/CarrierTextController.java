@@ -35,6 +35,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -66,6 +67,7 @@ public class CarrierTextController {
     private WifiManager mWifiManager;
     private boolean[] mSimErrorState;
     private final int mSimSlotsNumber;
+    @Nullable // Check for nullability before dispatching
     private CarrierTextCallback mCarrierTextCallback;
     private Context mContext;
     private CharSequence mSeparator;
@@ -74,12 +76,12 @@ public class CarrierTextController {
             new WakefulnessLifecycle.Observer() {
                 @Override
                 public void onFinishedWakingUp() {
-                    mCarrierTextCallback.finishedWakingUp();
+                    if (mCarrierTextCallback != null) mCarrierTextCallback.finishedWakingUp();
                 }
 
                 @Override
                 public void onStartedGoingToSleep() {
-                    mCarrierTextCallback.startedGoingToSleep();
+                    if (mCarrierTextCallback != null) mCarrierTextCallback.startedGoingToSleep();
                 }
             };
 

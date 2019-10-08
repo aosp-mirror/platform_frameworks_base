@@ -16,29 +16,154 @@
 
 package com.android.server.integrity.model;
 
+import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.annotation.Nullable;
+
 /**
  * The app install metadata.
  *
  * <p>The integrity component retrieves metadata for app installs from package manager, passing it
  * to the rule evaluation engine to evaluate the metadata against the rules.
+ *
+ * <p>Instances of this class are immutable.
  */
 public final class AppInstallMetadata {
-    final String mPackageName;
+    private final String mPackageName;
     // Raw string encoding for the SHA-256 hash of the certificate of the app.
-    final String mAppCertificate;
-    final String mInstallerName;
+    private final String mAppCertificate;
+    private final String mInstallerName;
     // Raw string encoding for the SHA-256 hash of the certificate of the installer.
-    final String mInstallerCertificate;
-    final int mVersionCode;
-    final boolean mIsPreInstalled;
+    private final String mInstallerCertificate;
+    private final int mVersionCode;
+    private final boolean mIsPreInstalled;
 
-    public AppInstallMetadata(String packageName, String appCertificate, String installerName,
-            String installerCertificate, int versionCode, boolean isPreInstalled) {
-        this.mPackageName = packageName;
-        this.mAppCertificate = appCertificate;
-        this.mInstallerName = installerName;
-        this.mInstallerCertificate = installerCertificate;
-        this.mVersionCode = versionCode;
-        this.mIsPreInstalled = isPreInstalled;
+    private AppInstallMetadata(Builder builder) {
+        this.mPackageName = builder.mPackageName;
+        this.mAppCertificate = builder.mAppCertificate;
+        this.mInstallerName = builder.mInstallerName;
+        this.mInstallerCertificate = builder.mInstallerCertificate;
+        this.mVersionCode = builder.mVersionCode;
+        this.mIsPreInstalled = builder.mIsPreInstalled;
+    }
+
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    public String getAppCertificate() {
+        return mAppCertificate;
+    }
+
+    @Nullable
+    public String getInstallerName() {
+        return mInstallerName;
+    }
+
+    @Nullable
+    public String getInstallerCertificate() {
+        return mInstallerCertificate;
+    }
+
+    /**
+     * @see AppInstallMetadata.Builder#setVersionCode(int)
+     */
+    public int getVersionCode() {
+        return mVersionCode;
+    }
+
+    /**
+     * @see AppInstallMetadata.Builder#setIsPreInstalled(boolean)
+     */
+    public boolean isPreInstalled() {
+        return mIsPreInstalled;
+    }
+
+    /**
+     * Builder class for constructing {@link AppInstallMetadata} objects.
+     */
+    public static final class Builder {
+        private String mPackageName;
+        private String mAppCertificate;
+        private String mInstallerName;
+        private String mInstallerCertificate;
+        private int mVersionCode;
+        private boolean mIsPreInstalled;
+
+        /**
+         * Set package name of the app to be installed.
+         *
+         * @see AppInstallMetadata#getPackageName()
+         */
+        public Builder setPackageName(String packageName) {
+            this.mPackageName = checkNotNull(packageName);
+            return this;
+        }
+
+        /**
+         * Set certificate of the app to be installed.
+         *
+         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
+         * of the app.
+         *
+         * @see AppInstallMetadata#getAppCertificate()
+         */
+        public Builder setAppCertificate(String appCertificate) {
+            this.mAppCertificate = checkNotNull(appCertificate);
+            return this;
+        }
+
+        /**
+         * Set name of the installer installing the app.
+         *
+         * @see AppInstallMetadata#getInstallerName()
+         */
+        public Builder setInstallerName(String installerName) {
+            this.mInstallerName = checkNotNull(installerName);
+            return this;
+        }
+
+        /**
+         * Set certificate of the installer installing the app.
+         *
+         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
+         * of the installer.
+         *
+         * @see AppInstallMetadata#getInstallerCertificate()
+         */
+        public Builder setInstallerCertificate(String installerCertificate) {
+            this.mInstallerCertificate = checkNotNull(installerCertificate);
+            return this;
+        }
+
+        /**
+         * Set version code of the app to be installed.
+         *
+         * @see AppInstallMetadata#getVersionCode()
+         */
+        public Builder setVersionCode(int versionCode) {
+            this.mVersionCode = versionCode;
+            return this;
+        }
+
+        /**
+         * Set whether the app is pre-installed on the device or not.
+         *
+         * @see AppInstallMetadata#isPreInstalled()
+         */
+        public Builder setIsPreInstalled(boolean isPreInstalled) {
+            this.mIsPreInstalled = isPreInstalled;
+            return this;
+        }
+
+        /**
+         * Build {@link AppInstallMetadata}.
+         */
+        public AppInstallMetadata build() {
+            checkArgument(mPackageName != null);
+            checkArgument(mAppCertificate != null);
+            return new AppInstallMetadata(this);
+        }
     }
 }

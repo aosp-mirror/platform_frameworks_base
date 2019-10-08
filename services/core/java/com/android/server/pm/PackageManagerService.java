@@ -13212,9 +13212,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * @return verification timeout in milliseconds
      */
     private long getVerificationTimeout() {
-        return android.provider.Settings.Global.getLong(mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
-                DEFAULT_VERIFICATION_TIMEOUT);
+        long timeout = Global.getLong(mContext.getContentResolver(),
+                Global.PACKAGE_VERIFIER_TIMEOUT, DEFAULT_VERIFICATION_TIMEOUT);
+        // The setting can be used to increase the timeout but not decrease it, since that is
+        // equivalent to disabling the verifier.
+        return Math.max(timeout, DEFAULT_VERIFICATION_TIMEOUT);
     }
 
     /**

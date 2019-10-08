@@ -375,15 +375,16 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    private static String getFileName(BugreportInfo info, String suffix) {
+        return String.format("%s-%s%s", info.baseName, info.name, suffix);
+    }
+
     private final class BugreportCallbackImpl extends BugreportCallback {
 
         private final BugreportInfo mInfo;
 
-        BugreportCallbackImpl(String name, @Nullable String title, @Nullable String description,
-                @BugreportParams.BugreportMode int type) {
-            // pid not used in this workflow, so setting default = 0
-            mInfo = new BugreportInfo(mContext, 0 /* pid */, name,
-                    100 /* max progress*/, title, description, type);
+        BugreportCallbackImpl(BugreportInfo info) {
+            mInfo = info;
         }
 
         @Override
@@ -409,7 +410,8 @@ public class BugreportProgressService extends Service {
         @Override
         public void onFinished() {
             // TODO: Make all callback functions lock protected.
-            trackInfoWithId();
+            mInfo.renameBugreportFile();
+            mInfo.renameScreenshots(mScreenshotsDir);
             sendBugreportFinishedBroadcast();
         }
 
@@ -429,16 +431,15 @@ public class BugreportProgressService extends Service {
         }
 
         private void sendBugreportFinishedBroadcast() {
-            final String bugreportFileName = mInfo.name + ".zip";
-            final File bugreportFile = new File(BUGREPORT_DIR, bugreportFileName);
-            final String bugreportFilePath = bugreportFile.getAbsolutePath();
-            if (bugreportFile.length() == 0) {
+            final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
+            if (mInfo.bugreportFile.length() == 0) {
                 Log.e(TAG, "Bugreport file empty. File path = " + bugreportFilePath);
                 return;
             }
             if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
-                sendRemoteBugreportFinishedBroadcast(bugreportFilePath, bugreportFile);
+                sendRemoteBugreportFinishedBroadcast(bugreportFilePath, mInfo.bugreportFile);
             } else {
+                trackInfoWithId();
                 cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
                 intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
@@ -466,10 +467,10 @@ public class BugreportProgressService extends Service {
         }
 
         private void addScreenshotToIntent(Intent intent) {
-            final String screenshotFileName = mInfo.name + ".png";
-            final File screenshotFile = new File(BUGREPORT_DIR, screenshotFileName);
-            final String screenshotFilePath = screenshotFile.getAbsolutePath();
-            if (screenshotFile.length() > 0) {
+            final File screenshotFile = mInfo.screenshotFiles.isEmpty()
+                    ? null : mInfo.screenshotFiles.get(0);
+            if (screenshotFile != null && screenshotFile.length() > 0) {
+                final String screenshotFilePath = screenshotFile.getAbsolutePath();
                 intent.putExtra(EXTRA_SCREENSHOT, screenshotFilePath);
             }
             return;
@@ -670,34 +671,44 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private String getBugreportName() {
+    private String getBugreportBaseName(@BugreportParams.BugreportMode int type) {
         String buildId = SystemProperties.get("ro.build.id", "UNKNOWN_BUILD");
         String deviceName = SystemProperties.get("ro.product.name", "UNKNOWN_DEVICE");
-        String currentTimestamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
-        return String.format("bugreport-%s-%s-%s", deviceName, buildId, currentTimestamp);
+        String typeSuffix = null;
+        if (type == BugreportParams.BUGREPORT_MODE_WIFI) {
+            typeSuffix = "wifi";
+        } else if (type == BugreportParams.BUGREPORT_MODE_TELEPHONY) {
+            typeSuffix = "telephony";
+        } else {
+            return String.format("bugreport-%s-%s", deviceName, buildId);
+        }
+        return String.format("bugreport-%s-%s-%s", deviceName, buildId, typeSuffix);
     }
 
     private void startBugreportAPI(Intent intent) {
         mUsingBugreportApi = true;
-        String bugreportName = getBugreportName();
+        String shareTitle = intent.getStringExtra(EXTRA_TITLE);
+        String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
+        int bugreportType = intent.getIntExtra(EXTRA_BUGREPORT_TYPE,
+                BugreportParams.BUGREPORT_MODE_INTERACTIVE);
+        String baseName = getBugreportBaseName(bugreportType);
+        String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
 
-        ParcelFileDescriptor bugreportFd = createReadWriteFile(BUGREPORT_DIR,
-                bugreportName + ".zip");
+        // pid not used in this workflow, so setting default = 0
+        BugreportInfo info = new BugreportInfo(mContext, 0 /* pid */, baseName, name,
+                100 /* max progress*/, shareTitle, shareDescription, bugreportType,
+                mUsingBugreportApi);
+
+        ParcelFileDescriptor bugreportFd = info.createBugreportFd();
         if (bugreportFd == null) {
             Log.e(TAG, "Bugreport parcel file descriptor is null.");
             return;
         }
-        int bugreportType = intent.getIntExtra(EXTRA_BUGREPORT_TYPE,
-                BugreportParams.BUGREPORT_MODE_INTERACTIVE);
-        String shareTitle = intent.getStringExtra(EXTRA_TITLE);
-        String shareDescription = intent.getStringExtra(EXTRA_DESCRIPTION);
-
-        ParcelFileDescriptor screenshotFd = createReadWriteFile(BUGREPORT_DIR,
-                bugreportName + ".png");
+        ParcelFileDescriptor screenshotFd = info.createScreenshotFd();
         if (screenshotFd == null) {
             Log.e(TAG, "Screenshot parcel file descriptor is null. Deleting bugreport file");
             FileUtils.closeQuietly(bugreportFd);
-            new File(BUGREPORT_DIR, String.format("%s.zip", bugreportName)).delete();
+            info.bugreportFile.delete();
             return;
         }
         mBugreportManager = (BugreportManager) mContext.getSystemService(
@@ -708,8 +719,7 @@ public class BugreportProgressService extends Service {
                 + " bugreport file fd: " + bugreportFd
                 + " screenshot file fd: " + screenshotFd);
 
-        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(bugreportName,
-                shareTitle, shareDescription, bugreportType);
+        BugreportCallbackImpl bugreportCallback = new BugreportCallbackImpl(info);
         try {
             mBugreportManager.startBugreport(bugreportFd, screenshotFd,
                     new BugreportParams(bugreportType), executor, bugreportCallback);
@@ -722,14 +732,13 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private ParcelFileDescriptor createReadWriteFile(String dirName, String fileName) {
+    private static ParcelFileDescriptor createReadWriteFile(File file) {
         try {
-            File f = new File(dirName, fileName);
-            f.createNewFile();
-            f.setReadable(true, true);
-            f.setWritable(true, true);
+            file.createNewFile();
+            file.setReadable(true, true);
+            file.setWritable(true, true);
 
-            ParcelFileDescriptor fd = ParcelFileDescriptor.open(f,
+            ParcelFileDescriptor fd = ParcelFileDescriptor.open(file,
                     ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_APPEND);
             return fd;
         } catch (IOException e) {
@@ -1088,15 +1097,19 @@ public class BugreportProgressService extends Service {
      */
     private void onBugreportFinished(int id) {
         BugreportInfo info = getInfo(id);
-        final File bugreportFile = new File(BUGREPORT_DIR, info.name + ".zip");
+        final File bugreportFile = info.bugreportFile;
         final int max = -1; // this is to log metrics for dumpstate duration.
-        File screenshotFile = new File(BUGREPORT_DIR, info.name + ".png");
+        File screenshotFile = info.screenshotFiles.isEmpty()
+                ? null : info.screenshotFiles.get(0);
         // If the screenshot file did not get populated implies this type of bugreport does not
         // need the screenshot file; setting the file to null so that empty file doesnt get shared
-        if (screenshotFile.length() == 0) {
+        if (screenshotFile != null && screenshotFile.length() == 0) {
             if (screenshotFile.delete()) {
                 Log.d(TAG, "screenshot file deleted successfully.");
             }
+            info.screenshotFiles.remove(0);
+            // TODO(b/136066578): Will soon stop using the below variable as it is a no-op in
+            // API flow and the screenshotFile value is read from info.screenshotFiles
             screenshotFile = null;
         }
         // TODO: Since we are passing id to the function, it should be able to find the info linked
@@ -1120,10 +1133,18 @@ public class BugreportProgressService extends Service {
             DumpstateListener dumpstateListener = new DumpstateListener(info);
             mBugreportInfos.put(id, info);
         }
-        info.renameScreenshots(mScreenshotsDir);
-        info.bugreportFile = bugreportFile;
-        if (screenshotFile != null) {
-            info.addScreenshot(screenshotFile);
+        if (!mUsingBugreportApi) {
+            // Rename in API flow happens before sending the broadcast for remote bugreport (to
+            // handle renaming before sending broadcasts)
+            info.renameScreenshots(mScreenshotsDir);
+            // API workflow already has the bugreport file. This was required in legacy flow, when
+            // FINISHED broadcast would send the final bugreport files.
+            // TODO(b/136066578): Change function definition to not include bugreport/screenshot
+            // file in params
+            info.bugreportFile = bugreportFile;
+            if (screenshotFile != null) {
+                info.addScreenshot(screenshotFile);
+            }
         }
 
         if (max != -1) {
@@ -1784,7 +1805,7 @@ public class BugreportProgressService extends Service {
                         if (hasFocus) {
                             return;
                         }
-                        sanitizeName();
+                        sanitizeName(info);
                     }
                 });
 
@@ -1803,9 +1824,13 @@ public class BugreportProgressService extends Service {
                                         MetricsLogger.action(context,
                                                 MetricsEvent.ACTION_BUGREPORT_DETAILS_CANCELED);
                                         if (!mTempName.equals(mSavedName)) {
-                                            // Must restore dumpstate's name since it was changed
+                                            // Must restore bugreport's name since it was changed
                                             // before user clicked OK.
-                                            setBugreportNameProperty(mPid, mSavedName);
+                                            if (mUsingBugreportApi) {
+                                                info.name = mSavedName;
+                                            } else {
+                                                setBugreportNameProperty(mPid, mSavedName);
+                                            }
                                         }
                                     }
                                 })
@@ -1854,7 +1879,7 @@ public class BugreportProgressService extends Service {
                     @Override
                     public void onClick(View view) {
                         MetricsLogger.action(context, MetricsEvent.ACTION_BUGREPORT_DETAILS_SAVED);
-                        sanitizeName();
+                        sanitizeName(info);
                         final String name = mInfoName.getText().toString();
                         final String title = mInfoTitle.getText().toString();
                         final String description = mInfoDescription.getText().toString();
@@ -1870,7 +1895,7 @@ public class BugreportProgressService extends Service {
          * Sanitizes the user-provided value for the {@code name} field, automatically replacing
          * invalid characters if necessary.
          */
-        private void sanitizeName() {
+        private void sanitizeName(BugreportInfo info) {
             String name = mInfoName.getText().toString();
             if (name.equals(mTempName)) {
                 if (DEBUG) Log.v(TAG, "name didn't change, no need to sanitize: " + name);
@@ -1892,23 +1917,15 @@ public class BugreportProgressService extends Service {
                 name = safeName.toString();
                 mInfoName.setText(name);
             }
-            if (mUsingBugreportApi) {
-                File prevFile = new File(BUGREPORT_DIR, mTempName + ".zip");
-                File newFile = new File(BUGREPORT_DIR, name + ".zip");
-                if (!prevFile.renameTo(newFile)) {
-                    Log.e(TAG, "File rename from : " + mTempName
-                            + " to : " + name + " from the UI failed.");
-                } else {
-                    Log.d(TAG, "File rename from : " + mTempName
-                            + " to : " + name + " from the UI succeeded.");
-                }
-            }
             mTempName = name;
-
-            // Must update system property for the cases where dumpstate finishes
-            // while the user is still entering other fields (like title or
-            // description)
-            setBugreportNameProperty(mPid, name);
+            if (mUsingBugreportApi) {
+                info.name = name;
+            } else {
+                // Must update system property for the cases where dumpstate finishes
+                // while the user is still entering other fields (like title or
+                // description)
+                setBugreportNameProperty(mPid, name);
+            }
         }
 
        /**
@@ -1944,14 +1961,23 @@ public class BugreportProgressService extends Service {
 
         /**
          * {@code pid} of the {@code dumpstate} process generating the bugreport.
+         * pid is unused in the API flow
+         * TODO(b/136066578): Remove pid
          */
         final int pid;
 
         /**
-         * Name of the bugreport, will be used to rename the final files.
-         * <p>
-         * Initial value is the bugreport filename reported by {@code dumpstate}, but user can
-         * change it later to a more meaningful name.
+         * Prefix name of the bugreport, this is uneditable.
+         * The baseName consists of the string "bugreport" + deviceName + buildID
+         * This will end with the string "wifi"/"telephony" for wifi/telephony bugreports.
+         * Bugreport zip file name  = "<baseName>-<name>.zip"
+         * Bugreport png file name = "<baseName>-<name>.png"
+         */
+        String baseName;
+
+        /**
+         * Suffix name of the bugreport/screenshot, is set to timestamp initially. User can make
+         * modifications to this using interface.
          */
         String name;
 
@@ -2021,6 +2047,12 @@ public class BugreportProgressService extends Service {
         boolean finished;
 
         /**
+         * Whether this bugreport is using API workflow.
+         * TODO(b/136066578): Remove when legacy bugreport methods are removed
+         */
+        boolean usingApi;
+
+        /**
          * Whether the details entries have been added to the bugreport yet.
          */
         boolean addingDetailsToZip;
@@ -2051,15 +2083,17 @@ public class BugreportProgressService extends Service {
             // onFinished() callback method is the only function where type is used.
             // Set type to -1 as it is unused in this workflow.
             // This constructor will soon be removed.
-            this(context, pid, name, max, null, null, -1);
+            this(context, pid, "" /* dumpstate handles basename */, name, max, null, null, -1,
+                    false);
             this.id = id;
         }
 
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
          */
-        BugreportInfo(Context context, int pid, String name, int max, @Nullable String shareTitle,
-                @Nullable String shareDescription, int type) {
+        BugreportInfo(Context context, int pid, String baseName, String name, int max,
+                @Nullable String shareTitle, @Nullable String shareDescription,
+                @BugreportParams.BugreportMode int type, boolean usingApi) {
             this.context = context;
             this.pid = pid;
             this.name = name;
@@ -2067,6 +2101,8 @@ public class BugreportProgressService extends Service {
             this.shareTitle = shareTitle == null ? "" : shareTitle;
             this.shareDescription = shareDescription == null ? "" : shareDescription;
             this.type = type;
+            this.baseName = baseName;
+            this.usingApi = usingApi;
         }
 
         /**
@@ -2076,6 +2112,17 @@ public class BugreportProgressService extends Service {
         BugreportInfo(Context context, int id) {
             this(context, id, id, null, 0);
             this.finished = true;
+        }
+
+        ParcelFileDescriptor createBugreportFd() {
+            bugreportFile = new File(BUGREPORT_DIR, getFileName(this, ".zip"));
+            return createReadWriteFile(bugreportFile);
+        }
+
+        ParcelFileDescriptor createScreenshotFd() {
+            File screenshotFile = new File(BUGREPORT_DIR, getFileName(this, ".png"));
+            addScreenshot(screenshotFile);
+            return createReadWriteFile(screenshotFile);
         }
 
         /**
@@ -2103,7 +2150,12 @@ public class BugreportProgressService extends Service {
             final List<File> renamedFiles = new ArrayList<>(screenshotFiles.size());
             for (File oldFile : screenshotFiles) {
                 final String oldName = oldFile.getName();
-                final String newName = oldName.replaceFirst(Integer.toString(pid), name);
+                final String newName;
+                if (usingApi) {
+                    newName = getFileName(this, ".png");
+                } else {
+                    newName = oldName.replaceFirst(Integer.toString(pid), name);
+                }
                 final File newFile;
                 if (!newName.equals(oldName)) {
                     final File renamedFile = new File(screenshotDir, newName);
@@ -2116,6 +2168,18 @@ public class BugreportProgressService extends Service {
                 renamedFiles.add(newFile);
             }
             screenshotFiles = renamedFiles;
+        }
+
+        /**
+         * Rename bugreport file to include the name given by user via UI
+         */
+        void renameBugreportFile() {
+            File newBugreportFile = new File(BUGREPORT_DIR, getFileName(this, ".zip"));
+            if (!newBugreportFile.getPath().equals(bugreportFile.getPath())) {
+                if (bugreportFile.renameTo(newBugreportFile)) {
+                    bugreportFile = newBugreportFile;
+                }
+            }
         }
 
         String getFormattedLastUpdate() {
@@ -2136,8 +2200,10 @@ public class BugreportProgressService extends Service {
             final StringBuilder builder = new StringBuilder()
                     .append("\tid: ").append(id)
                     .append(", pid: ").append(pid)
+                    .append(", baseName: ").append(baseName)
                     .append(", name: ").append(name)
                     .append(", finished: ").append(finished)
+                    .append(", usingApi: ").append(usingApi)
                     .append("\n\ttitle: ").append(title)
                     .append("\n\tdescription: ");
             if (description == null) {
@@ -2169,6 +2235,7 @@ public class BugreportProgressService extends Service {
             context = null;
             id = in.readInt();
             pid = in.readInt();
+            baseName = in.readString();
             name = in.readString();
             title = in.readString();
             description = in.readString();
@@ -2186,6 +2253,7 @@ public class BugreportProgressService extends Service {
             }
 
             finished = in.readInt() == 1;
+            usingApi = in.readInt() == 1;
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
             shareTitle = in.readString();
@@ -2195,6 +2263,7 @@ public class BugreportProgressService extends Service {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(pid);
+            dest.writeString(baseName);
             dest.writeString(name);
             dest.writeString(title);
             dest.writeString(description);
@@ -2212,6 +2281,7 @@ public class BugreportProgressService extends Service {
             }
 
             dest.writeInt(finished ? 1 : 0);
+            dest.writeInt(usingApi ? 1 : 0);
             dest.writeInt(screenshotCounter);
             dest.writeString(shareDescription);
             dest.writeString(shareTitle);
