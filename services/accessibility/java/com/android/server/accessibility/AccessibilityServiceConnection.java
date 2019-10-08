@@ -71,9 +71,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer, AccessibilityWindowManager awm) {
+            SystemActionPerformer systemActionPerfomer, AccessibilityWindowManager awm) {
         super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
-                securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer, awm);
+                securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer, awm);
         mUserStateWeakReference = new WeakReference<UserState>(userState);
         mIntent = new Intent().setComponent(mComponentName);
         mMainHandler = mainHandler;
