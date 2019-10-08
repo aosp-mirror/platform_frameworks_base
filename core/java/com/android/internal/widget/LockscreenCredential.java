@@ -29,6 +29,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
@@ -187,6 +188,25 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         return mCredential;
     }
 
+    /**
+     *  Returns the credential type recognized by {@link StorageManager}. Can be one of
+     *  {@link StorageManager#CRYPT_TYPE_DEFAULT}, {@link StorageManager#CRYPT_TYPE_PATTERN},
+     *  {@link StorageManager#CRYPT_TYPE_PIN} or {@link StorageManager#CRYPT_TYPE_PASSWORD}.
+     */
+    public int getStorageCryptType() {
+        if (isNone()) {
+            return StorageManager.CRYPT_TYPE_DEFAULT;
+        }
+        if (isPattern()) {
+            return StorageManager.CRYPT_TYPE_PATTERN;
+        }
+        if (isPassword()) {
+            return mQuality == PASSWORD_QUALITY_NUMERIC
+                    ? StorageManager.CRYPT_TYPE_PIN : StorageManager.CRYPT_TYPE_PASSWORD;
+        }
+        throw new IllegalStateException("Unhandled credential type");
+    }
+
     /** Returns whether this is an empty credential */
     public boolean isNone() {
         ensureNotZeroized();
@@ -224,6 +244,31 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         if (mCredential != null) {
             Arrays.fill(mCredential, (byte) 0);
             mCredential = null;
+        }
+    }
+
+    /**
+     * Check if the credential meets minimal length requirement.
+     *
+     * @throws IllegalArgumentException if the credential is too short.
+     */
+    public void checkLength() {
+        if (isNone()) {
+            return;
+        }
+        if (isPattern()) {
+            if (size() < LockPatternUtils.MIN_LOCK_PATTERN_SIZE) {
+                throw new IllegalArgumentException("pattern must not be null and at least "
+                        + LockPatternUtils.MIN_LOCK_PATTERN_SIZE + " dots long.");
+            }
+            return;
+        }
+        if (isPassword()) {
+            if (size() < LockPatternUtils.MIN_LOCK_PASSWORD_SIZE) {
+                throw new IllegalArgumentException("password must not be null and at least "
+                        + "of length " + LockPatternUtils.MIN_LOCK_PASSWORD_SIZE);
+            }
+            return;
         }
     }
 

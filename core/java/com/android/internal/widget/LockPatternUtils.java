@@ -30,7 +30,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
@@ -599,44 +598,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Clear any lock pattern or password, with the option to ignore incorrect existing credential.
-     *
-     * <p> This method will fail (returning {@code false}) if the previously
-     * saved password provided is incorrect, or if the lockscreen verification
-     * is still being throttled.
-     *
-     * @param savedCredential The previously saved credential
-     * @param userHandle the user whose pattern is to be saved.
-     * @return whether this was successful or not.
-     * @throws RuntimeException if password change encountered an unrecoverable error.
-     */
-    private boolean clearLock(LockscreenCredential savedCredential, int userHandle,
-            boolean allowUntrustedChange) {
-        final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
-        setKeyguardStoredPasswordQuality(PASSWORD_QUALITY_UNSPECIFIED, userHandle);
-
-        try {
-            if (!getLockSettings().setLockCredential(null, CREDENTIAL_TYPE_NONE,
-                    savedCredential.getCredential(), PASSWORD_QUALITY_UNSPECIFIED, userHandle,
-                    allowUntrustedChange)) {
-                return false;
-            }
-        } catch (RemoteException | RuntimeException e) {
-            setKeyguardStoredPasswordQuality(currentQuality, userHandle);
-            throw new RuntimeException("Failed to clear lock", e);
-        }
-
-        if (userHandle == UserHandle.USER_SYSTEM) {
-            // Set the encryption password to default.
-            updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-            setCredentialRequiredToDecrypt(false);
-        }
-
-        onAfterChangingPassword(userHandle);
-        return true;
-    }
-
-    /**
      * Disable showing lock screen at all for a given user.
      * This is only meaningful if pattern, pin or password are not set.
      *
@@ -705,7 +666,7 @@ public class LockPatternUtils {
      * being throttled.
      * @param newCredential The new credential to save
      * @param savedCredential The current credential
-     * @param userId the user whose lockscreen credential is to be changed
+     * @param userHandle the user whose lockscreen credential is to be changed
      * @param allowUntrustedChange whether we want to allow saving a new pattern if the existing
      * credentialt being provided is incorrect.
      *
@@ -714,71 +675,41 @@ public class LockPatternUtils {
      * @throws RuntimeException if password change encountered an unrecoverable error.
      */
     public boolean setLockCredential(@NonNull LockscreenCredential newCredential,
-            @NonNull LockscreenCredential savedCredential, int userId,
+            @NonNull LockscreenCredential savedCredential, int userHandle,
             boolean allowUntrustedChange) {
-        if (newCredential.isNone()) {
-            return clearLock(savedCredential, userId, allowUntrustedChange);
-        } else if (newCredential.isPattern()) {
-            return saveLockPattern(newCredential, savedCredential, userId, allowUntrustedChange);
-        } else {
-            return saveLockPassword(newCredential, savedCredential, newCredential.getQuality(),
-                    userId, allowUntrustedChange);
-        }
-
-    }
-
-    /**
-     * Save a lock pattern.
-     *
-     * <p> This method will fail (returning {@code false}) if the previously saved pattern provided
-     * is incorrect, or if the lockscreen verification is still being throttled.
-     *
-     * @param pattern The new pattern to save.
-     * @param savedCredential The previously saved credential
-     * @param userId the user whose pattern is to be saved.
-     * @param allowUntrustedChange whether we want to allow saving a new pattern if the existing
-     * credentialt being provided is incorrect.
-     *
-     * @return whether this was successful or not.
-     * @throws RuntimeException if password change encountered an unrecoverable error.
-     */
-    private boolean saveLockPattern(LockscreenCredential pattern,
-            LockscreenCredential savedCredential, int userId, boolean allowUntrustedChange) {
         if (!hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
-        if (pattern == null || pattern.size() < MIN_LOCK_PATTERN_SIZE) {
-            throw new IllegalArgumentException("pattern must not be null and at least "
-                    + MIN_LOCK_PATTERN_SIZE + " dots long.");
-        }
+        newCredential.checkLength();
 
-        final int currentQuality = getKeyguardStoredPasswordQuality(userId);
-        setKeyguardStoredPasswordQuality(PASSWORD_QUALITY_SOMETHING, userId);
+        final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
+        setKeyguardStoredPasswordQuality(newCredential.getQuality(), userHandle);
+
         try {
-            if (!getLockSettings().setLockCredential(pattern.getCredential(), pattern.getType(),
-                    savedCredential.getCredential(), PASSWORD_QUALITY_SOMETHING, userId,
-                    allowUntrustedChange)) {
+            if (!getLockSettings().setLockCredential(
+                    newCredential.getCredential(), newCredential.getType(),
+                    savedCredential.getCredential(),
+                    newCredential.getQuality(), userHandle, allowUntrustedChange)) {
+                setKeyguardStoredPasswordQuality(currentQuality, userHandle);
                 return false;
             }
         } catch (RemoteException | RuntimeException e) {
-            setKeyguardStoredPasswordQuality(currentQuality, userId);
-            throw new RuntimeException("Couldn't save lock pattern", e);
-        }
-        // Update the device encryption password.
-        if (userId == UserHandle.USER_SYSTEM
-                && LockPatternUtils.isDeviceEncryptionEnabled()) {
-            if (!shouldEncryptWithCredentials(true)) {
-                clearEncryptionPassword();
-            } else {
-                updateEncryptionPassword(StorageManager.CRYPT_TYPE_PATTERN,
-                        pattern.getCredential());
-            }
+            setKeyguardStoredPasswordQuality(currentQuality, userHandle);
+            throw new RuntimeException("Unable to save lock password", e);
         }
 
-        reportPatternWasChosen(userId);
-        onAfterChangingPassword(userId);
+        onPostPasswordChanged(newCredential, userHandle);
         return true;
+    }
+
+    private void onPostPasswordChanged(LockscreenCredential newCredential, int userHandle) {
+        updateEncryptionPasswordIfNeeded(newCredential, userHandle);
+        if (newCredential.isPattern()) {
+            reportPatternWasChosen(userHandle);
+        }
+        updatePasswordHistory(newCredential, userHandle);
+        reportEnabledTrustAgentsChanged(userHandle);
     }
 
     private void updateCryptoUserInfo(int userId) {
@@ -879,92 +810,23 @@ public class LockPatternUtils {
     }
 
     /**
-     * Save a lock password.
-     *
-     * <p> This method will fail (returning {@code false}) if the previously saved password provided
-     * is incorrect and allowUntrustedChange is false, or if the lockscreen verification
-     * is still being throttled.
-     *
-     * @param password The password to save
-     * @param savedCredential The previously saved lock credential
-     * @param requestedQuality {@link DevicePolicyManager#getPasswordQuality(
-     * android.content.ComponentName)}
-     * @param userHandle The userId of the user to change the password for
-     * @param allowUntrustedChange whether we want to allow saving a new password if the existing
-     * password being provided is incorrect.
-     * @return whether this method saved the new password successfully or not. This flow will fail
-     * and return false if the given credential is wrong and allowUntrustedChange is false.
-     * @throws RuntimeException if password change encountered an unrecoverable error.
-     */
-    private boolean saveLockPassword(LockscreenCredential password,
-            LockscreenCredential savedCredential, int requestedQuality, int userHandle,
-            boolean allowUntrustedChange) {
-        if (!hasSecureLockScreen()) {
-            throw new UnsupportedOperationException(
-                    "This operation requires the lock screen feature.");
-        }
-        if (password.isNone() || password.size() < MIN_LOCK_PASSWORD_SIZE) {
-            throw new IllegalArgumentException("password must not be null and at least "
-                    + "of length " + MIN_LOCK_PASSWORD_SIZE);
-        }
-
-        if (requestedQuality < PASSWORD_QUALITY_NUMERIC) {
-            throw new IllegalArgumentException("quality must be at least NUMERIC, but was "
-                    + requestedQuality);
-        }
-
-        final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
-        final int passwordQuality =
-                PasswordMetrics.computeForPassword(password.getCredential()).quality;
-        final int newKeyguardQuality =
-                computeKeyguardQuality(CREDENTIAL_TYPE_PASSWORD, requestedQuality, passwordQuality);
-        setKeyguardStoredPasswordQuality(newKeyguardQuality, userHandle);
-        try {
-            getLockSettings().setLockCredential(password.getCredential(), password.getType(),
-                    savedCredential.getCredential(),
-                    requestedQuality, userHandle, allowUntrustedChange);
-        } catch (RemoteException | RuntimeException e) {
-            setKeyguardStoredPasswordQuality(currentQuality, userHandle);
-            throw new RuntimeException("Unable to save lock password", e);
-        }
-
-        updateEncryptionPasswordIfNeeded(password.getCredential(), passwordQuality, userHandle);
-        updatePasswordHistory(password, userHandle);
-        onAfterChangingPassword(userHandle);
-        return true;
-    }
-
-    /**
-     * Compute keyguard credential quality to store in PASSWORD_TYPE_KEY by computing max between
-     * them so that digit-only password is distinguished from PIN.
-     *
-     * TODO: remove this method and make CREDENTIAL_TYPE distinguish between PIN and password, so
-     * that this quality is no longer needs to be persisted.
-     */
-    private int computeKeyguardQuality(
-            @CredentialType int credentialType, int requestedQuality, int passwordQuality) {
-        return credentialType == CREDENTIAL_TYPE_PASSWORD
-                ? Math.max(passwordQuality, requestedQuality) : passwordQuality;
-    }
-
-    /**
      * Update device encryption password if calling user is USER_SYSTEM and device supports
      * encryption.
      */
-    private void updateEncryptionPasswordIfNeeded(byte[] password, int quality, int userHandle) {
+    private void updateEncryptionPasswordIfNeeded(LockscreenCredential credential, int userHandle) {
         // Update the device encryption password.
-        if (userHandle == UserHandle.USER_SYSTEM
-                && LockPatternUtils.isDeviceEncryptionEnabled()) {
-            if (!shouldEncryptWithCredentials(true)) {
-                clearEncryptionPassword();
-            } else {
-                boolean numeric = quality == PASSWORD_QUALITY_NUMERIC;
-                boolean numericComplex = quality == PASSWORD_QUALITY_NUMERIC_COMPLEX;
-                int type = numeric || numericComplex ? StorageManager.CRYPT_TYPE_PIN
-                        : StorageManager.CRYPT_TYPE_PASSWORD;
-                updateEncryptionPassword(type, password);
-            }
+        if (userHandle != UserHandle.USER_SYSTEM || !isDeviceEncryptionEnabled()) {
+            return;
         }
+        if (!shouldEncryptWithCredentials(true)) {
+            updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
+            return;
+        }
+        if (credential.isNone()) {
+            // Set the encryption password to default.
+            setCredentialRequiredToDecrypt(false);
+        }
+        updateEncryptionPassword(credential.getStorageCryptType(), credential.getCredential());
     }
 
     /**
@@ -973,7 +835,10 @@ public class LockPatternUtils {
      */
     private void updatePasswordHistory(LockscreenCredential password, int userHandle) {
         if (password.isNone()) {
-            Log.e(TAG, "checkPasswordHistory: empty password");
+            return;
+        }
+        if (password.isPattern()) {
+            // Do not keep track of historical patterns
             return;
         }
         // Add the password to the password history. We assume all
@@ -1065,7 +930,7 @@ public class LockPatternUtils {
         try {
             getLockSettings().setSeparateProfileChallengeEnabled(userHandle, enabled,
                     managedUserPassword.getCredential());
-            onAfterChangingPassword(userHandle);
+            reportEnabledTrustAgentsChanged(userHandle);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't update work profile challenge enabled");
         }
@@ -1506,7 +1371,7 @@ public class LockPatternUtils {
         }
     }
 
-    private void onAfterChangingPassword(int userHandle) {
+    private void reportEnabledTrustAgentsChanged(int userHandle) {
         getTrustManager().reportEnabledTrustAgentsChanged(userHandle);
     }
 
@@ -1674,48 +1539,34 @@ public class LockPatternUtils {
      * @param credential The new credential to be set
      * @param tokenHandle Handle of the escrow token
      * @param token Escrow token
-     * @param userId The user who's lock credential to be changed
+     * @param userHandle The user who's lock credential to be changed
      * @return {@code true} if the operation is successful.
      */
     public boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
-            byte[] token, int userId) {
+            byte[] token, int userHandle) {
         if (!hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
         }
+        credential.checkLength();
         LockSettingsInternal localService = getLockSettingsInternal();
-        if (!credential.isNone()) {
-            if (credential.size() < MIN_LOCK_PASSWORD_SIZE) {
-                throw new IllegalArgumentException("password must not be null and at least "
-                        + "of length " + MIN_LOCK_PASSWORD_SIZE);
-            }
-            final int type = credential.getType();
-            final int quality = PasswordMetrics.computeForCredential(credential).quality;
-            final int keyguardQuality = computeKeyguardQuality(type, quality,
-                    credential.getQuality());
-            if (!localService.setLockCredentialWithToken(credential.getCredential(), type,
-                    tokenHandle, token, keyguardQuality, userId)) {
+
+        final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
+        setKeyguardStoredPasswordQuality(credential.getQuality(), userHandle);
+
+        try {
+            if (!localService.setLockCredentialWithToken(credential.getCredential(),
+                    credential.getType(),
+                    tokenHandle, token, credential.getType(), userHandle)) {
+                setKeyguardStoredPasswordQuality(currentQuality, userHandle);
                 return false;
             }
-            setKeyguardStoredPasswordQuality(quality, userId);
-
-            updateEncryptionPasswordIfNeeded(credential.getCredential(), quality, userId);
-            updatePasswordHistory(credential, userId);
-            onAfterChangingPassword(userId);
-        } else {
-            if (!localService.setLockCredentialWithToken(null, CREDENTIAL_TYPE_NONE, tokenHandle,
-                    token, PASSWORD_QUALITY_UNSPECIFIED, userId)) {
-                return false;
-            }
-            setKeyguardStoredPasswordQuality(PASSWORD_QUALITY_UNSPECIFIED, userId);
-
-            if (userId == UserHandle.USER_SYSTEM) {
-                // Set the encryption password to default.
-                updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-                setCredentialRequiredToDecrypt(false);
-            }
+        } catch (RuntimeException e) {
+            setKeyguardStoredPasswordQuality(currentQuality, userHandle);
+            throw new RuntimeException("Unable to save lock credential", e);
         }
-        onAfterChangingPassword(userId);
+
+        onPostPasswordChanged(credential, userHandle);
         return true;
     }
 
