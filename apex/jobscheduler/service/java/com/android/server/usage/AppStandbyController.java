@@ -872,64 +872,66 @@ public class AppStandbyController implements AppStandbyInternal {
     public void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId) {
         if (!mAppIdleEnabled) return;
         synchronized (mAppIdleLock) {
+            final String pkg = event.getPackageName();
+            final int eventType = event.getEventType();
             // TODO: Ideally this should call isAppIdleFiltered() to avoid calling back
             // about apps that are on some kind of whitelist anyway.
             final boolean previouslyIdle = mAppIdleHistory.isIdle(
-                    event.mPackage, userId, elapsedRealtime);
+                    pkg, userId, elapsedRealtime);
             // Inform listeners if necessary
-            if ((event.mEventType == UsageEvents.Event.ACTIVITY_RESUMED
-                    || event.mEventType == UsageEvents.Event.ACTIVITY_PAUSED
-                    || event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION
-                    || event.mEventType == UsageEvents.Event.USER_INTERACTION
-                    || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
-                    || event.mEventType == UsageEvents.Event.SLICE_PINNED
-                    || event.mEventType == UsageEvents.Event.SLICE_PINNED_PRIV
-                    || event.mEventType == UsageEvents.Event.FOREGROUND_SERVICE_START)) {
+            if ((eventType == UsageEvents.Event.ACTIVITY_RESUMED
+                    || eventType == UsageEvents.Event.ACTIVITY_PAUSED
+                    || eventType == UsageEvents.Event.SYSTEM_INTERACTION
+                    || eventType == UsageEvents.Event.USER_INTERACTION
+                    || eventType == UsageEvents.Event.NOTIFICATION_SEEN
+                    || eventType == UsageEvents.Event.SLICE_PINNED
+                    || eventType == UsageEvents.Event.SLICE_PINNED_PRIV
+                    || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START)) {
 
                 final AppUsageHistory appHistory = mAppIdleHistory.getAppUsageHistory(
-                        event.mPackage, userId, elapsedRealtime);
+                        pkg, userId, elapsedRealtime);
                 final int prevBucket = appHistory.currentBucket;
                 final int prevBucketReason = appHistory.bucketingReason;
                 final long nextCheckTime;
-                final int subReason = usageEventToSubReason(event.mEventType);
+                final int subReason = usageEventToSubReason(eventType);
                 final int reason = REASON_MAIN_USAGE | subReason;
-                if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
-                        || event.mEventType == UsageEvents.Event.SLICE_PINNED) {
+                if (eventType == UsageEvents.Event.NOTIFICATION_SEEN
+                        || eventType == UsageEvents.Event.SLICE_PINNED) {
                     // Mild usage elevates to WORKING_SET but doesn't change usage time.
-                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
+                    mAppIdleHistory.reportUsage(appHistory, pkg,
                             STANDBY_BUCKET_WORKING_SET, subReason,
                             0, elapsedRealtime + mNotificationSeenTimeoutMillis);
                     nextCheckTime = mNotificationSeenTimeoutMillis;
-                } else if (event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION) {
-                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
+                } else if (eventType == UsageEvents.Event.SYSTEM_INTERACTION) {
+                    mAppIdleHistory.reportUsage(appHistory, pkg,
                             STANDBY_BUCKET_ACTIVE, subReason,
                             0, elapsedRealtime + mSystemInteractionTimeoutMillis);
                     nextCheckTime = mSystemInteractionTimeoutMillis;
-                } else if (event.mEventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
+                } else if (eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
                     // Only elevate bucket if this is the first usage of the app
                     if (prevBucket != STANDBY_BUCKET_NEVER) return;
-                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
+                    mAppIdleHistory.reportUsage(appHistory, pkg,
                             STANDBY_BUCKET_ACTIVE, subReason,
                             0, elapsedRealtime + mInitialForegroundServiceStartTimeoutMillis);
                     nextCheckTime = mInitialForegroundServiceStartTimeoutMillis;
                 } else {
-                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
+                    mAppIdleHistory.reportUsage(appHistory, pkg,
                             STANDBY_BUCKET_ACTIVE, subReason,
                             elapsedRealtime, elapsedRealtime + mStrongUsageTimeoutMillis);
                     nextCheckTime = mStrongUsageTimeoutMillis;
                 }
                 mHandler.sendMessageDelayed(mHandler.obtainMessage
-                        (MSG_CHECK_PACKAGE_IDLE_STATE, userId, -1, event.mPackage),
+                        (MSG_CHECK_PACKAGE_IDLE_STATE, userId, -1, pkg),
                         nextCheckTime);
                 final boolean userStartedInteracting =
                         appHistory.currentBucket == STANDBY_BUCKET_ACTIVE &&
                         prevBucket != appHistory.currentBucket &&
                         (prevBucketReason & REASON_MAIN_MASK) != REASON_MAIN_USAGE;
-                maybeInformListeners(event.mPackage, userId, elapsedRealtime,
+                maybeInformListeners(pkg, userId, elapsedRealtime,
                         appHistory.currentBucket, reason, userStartedInteracting);
 
                 if (previouslyIdle) {
-                    notifyBatteryStats(event.mPackage, userId, false);
+                    notifyBatteryStats(pkg, userId, false);
                 }
             }
         }
