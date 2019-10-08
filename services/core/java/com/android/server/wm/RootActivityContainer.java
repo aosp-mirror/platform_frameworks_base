@@ -652,9 +652,9 @@ class RootActivityContainer extends ConfigurationContainer
             starting.frozenBeforeDestroy = true;
         }
 
-        if (displayContent != null && displayContent.mAcitvityDisplay != null) {
+        if (displayContent != null && displayContent.mActivityDisplay != null) {
             // Update the configuration of the activities on the display.
-            return displayContent.mAcitvityDisplay.updateDisplayOverrideConfigurationLocked(config,
+            return displayContent.mActivityDisplay.updateDisplayOverrideConfigurationLocked(config,
                     starting, deferResume, null /* result */);
         } else {
             return true;

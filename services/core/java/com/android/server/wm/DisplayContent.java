@@ -240,7 +240,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final int mDisplayId;
 
     // TODO: Remove once unification is complete.
-    ActivityDisplay mAcitvityDisplay;
+    ActivityDisplay mActivityDisplay;
 
     /** The containers below are the only child containers the display can have. */
     // Contains all window containers that are related to apps (Activities)
@@ -852,7 +852,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     DisplayContent(Display display, WindowManagerService service,
             ActivityDisplay activityDisplay) {
         super(service);
-        mAcitvityDisplay = activityDisplay;
+        mActivityDisplay = activityDisplay;
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
@@ -1136,8 +1136,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * values from being replaced by the initializing {@link #ActivityDisplay}.
      */
     void initializeDisplayOverrideConfiguration() {
-        if (mAcitvityDisplay != null) {
-            mAcitvityDisplay.getRequestedOverrideConfiguration()
+        if (mActivityDisplay != null) {
+            mActivityDisplay.getRequestedOverrideConfiguration()
                     .updateFrom(getRequestedOverrideConfiguration());
         }
     }
@@ -1165,10 +1165,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void sendNewConfiguration() {
-        if (!isReady() || mAcitvityDisplay == null) {
+        if (!isReady() || mActivityDisplay == null) {
             return;
         }
-        final boolean configUpdated = mAcitvityDisplay.updateDisplayOverrideConfigurationLocked();
+        final boolean configUpdated = mActivityDisplay.updateDisplayOverrideConfigurationLocked();
         if (configUpdated) {
             return;
         }
@@ -1199,7 +1199,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (handled && requestingContainer instanceof ActivityRecord) {
             final ActivityRecord activityRecord = (ActivityRecord) requestingContainer;
-            final boolean kept = mAcitvityDisplay.updateDisplayOverrideConfigurationLocked(
+            final boolean kept = mActivityDisplay.updateDisplayOverrideConfigurationLocked(
                     config, activityRecord, false /* deferResume */, null /* result */);
             activityRecord.frozenBeforeDestroy = true;
             if (!kept) {
@@ -1208,7 +1208,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             // We have a new configuration to push so we need to update ATMS for now.
             // TODO: Clean up display configuration push between ATMS and WMS after unification.
-            mAcitvityDisplay.updateDisplayOverrideConfigurationLocked(
+            mActivityDisplay.updateDisplayOverrideConfigurationLocked(
                     config, null /* starting */, false /* deferResume */, null);
         }
         return handled;

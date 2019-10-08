@@ -7636,7 +7636,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // to do so because it seems possible to resume activities as part of a larger
             // transaction and it's too early to resume based on current order when performing
             // updateTopResumedActivityIfNeeded().
-            displayContent.mAcitvityDisplay.ensureActivitiesVisible(null /* starting */,
+            displayContent.mActivityDisplay.ensureActivitiesVisible(null /* starting */,
                     0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
     }
