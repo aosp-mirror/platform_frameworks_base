@@ -29,20 +29,17 @@ public abstract class UsbVCInterface extends UsbDescriptor {
     public static final byte VCI_UNDEFINED          = 0x00;
     public static final byte VCI_VEADER             = 0x01;
     public static final byte VCI_INPUT_TERMINAL     = 0x02;
-    public static final byte VCI_VOUTPUT_TERMINAL   = 0x03;
+    public static final byte VCI_OUTPUT_TERMINAL    = 0x03;
     public static final byte VCI_SELECTOR_UNIT      = 0x04;
-    public static final byte VCI_VROCESSING_UNIT    = 0x05;
-    public static final byte VCI_VEXTENSION_UNIT    = 0x06;
+    public static final byte VCI_PROCESSING_UNIT    = 0x05;
+    public static final byte VCI_EXTENSION_UNIT     = 0x06;
 
-   // See “Universal Serial Bus Device Class Definition for Video
+    // See “Universal Serial Bus Device Class Definition for Video
     protected final byte mSubtype;  // 2:1 HEADER descriptor subtype
-    protected final int mSubclass;  // from the mSubclass member of the
-    // "enclosing" Interface Descriptor
 
-    public UsbVCInterface(int length, byte type, byte subtype, int subclass) {
+    public UsbVCInterface(int length, byte type, byte subtype) {
         super(length, type);
         mSubtype = subtype;
-        mSubclass = subclass;
     }
 
     /**
@@ -52,12 +49,10 @@ public abstract class UsbVCInterface extends UsbDescriptor {
                                                 int length, byte type) {
         byte subtype = stream.getByte();
         UsbInterfaceDescriptor interfaceDesc = parser.getCurInterface();
-        int subClass = interfaceDesc.getUsbSubclass();
         if (UsbDescriptorParser.DEBUG) {
-            Log.d(TAG, "  Video Class-specific Interface subClass:0x"
-                    + Integer.toHexString(subClass));
+            Log.d(TAG, "  Video Class-specific Interface subtype: " + subtype);
         }
-        switch (subClass) {
+        switch (subtype) {
             // TODO - Create descriptor classes and parse these...
             case VCI_UNDEFINED:
                 if (UsbDescriptorParser.DEBUG) {
@@ -66,44 +61,51 @@ public abstract class UsbVCInterface extends UsbDescriptor {
                 break;
 
             case VCI_VEADER:
+            {
                 if (UsbDescriptorParser.DEBUG) {
                     Log.d(TAG, " ---> VCI_VEADER");
                 }
-                break;
+                int vcInterfaceSpec = stream.unpackUsbShort();
+                parser.setVCInterfaceSpec(vcInterfaceSpec);
+                if (UsbDescriptorParser.DEBUG) {
+                    Log.d(TAG, "  vcInterfaceSpec:0x" + Integer.toHexString(vcInterfaceSpec));
+                }
+                return new UsbVCHeader(length, type, subtype, vcInterfaceSpec);
+            }
 
             case VCI_INPUT_TERMINAL:
                 if (UsbDescriptorParser.DEBUG) {
                     Log.d(TAG, " ---> VCI_INPUT_TERMINAL");
                 }
-                break;
+                return new UsbVCInputTerminal(length, type, subtype);
 
-            case VCI_VOUTPUT_TERMINAL:
+            case VCI_OUTPUT_TERMINAL:
                 if (UsbDescriptorParser.DEBUG) {
-                    Log.d(TAG, " ---> VCI_VOUTPUT_TERMINAL");
+                    Log.d(TAG, " ---> VCI_OUTPUT_TERMINAL");
                 }
-                break;
+                return new UsbVCOutputTerminal(length, type, subtype);
 
             case VCI_SELECTOR_UNIT:
                 if (UsbDescriptorParser.DEBUG) {
                     Log.d(TAG, " ---> VCI_SELECTOR_UNIT");
                 }
-                break;
+                return new UsbVCSelectorUnit(length, type, subtype);
 
-            case VCI_VROCESSING_UNIT:
+            case VCI_PROCESSING_UNIT:
                 if (UsbDescriptorParser.DEBUG) {
-                    Log.d(TAG, " ---> VCI_VROCESSING_UNIT");
+                    Log.d(TAG, " ---> VCI_PROCESSING_UNIT");
                 }
-                break;
+                return new UsbVCProcessingUnit(length, type, subtype);
 
-            case VCI_VEXTENSION_UNIT:
+            case VCI_EXTENSION_UNIT:
                 if (UsbDescriptorParser.DEBUG) {
-                    Log.d(TAG, " ---> VCI_VEXTENSION_UNIT");
+                    Log.d(TAG, " ---> VCI_EXTENSION_UNIT");
                 }
                 break;
 
             default:
-                Log.w(TAG, "Unknown Video Class Interface Subclass: 0x"
-                        + Integer.toHexString(subClass));
+                Log.w(TAG, "Unknown Video Class Interface subtype: 0x"
+                        + Integer.toHexString(subtype));
                 return null;
         }
 

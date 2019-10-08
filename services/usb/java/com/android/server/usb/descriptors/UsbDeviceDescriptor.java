@@ -160,7 +160,8 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         return new UsbDevice.Builder(parser.getDeviceAddr(), mVendorID,
                 mProductID, mDevClass, mDevSubClass, mProtocol, mfgName, prodName, versionString,
                 configs, serialStr, parser.hasAudioPlayback(), parser.hasAudioCapture(),
-                parser.hasMIDIInterface());
+                parser.hasMIDIInterface(),
+                parser.hasVideoPlayback(), parser.hasVideoCapture());
     }
 
     @Override
