@@ -16,7 +16,12 @@
 
 package com.android.server.integrity.engine;
 
+import android.util.Slog;
+
 import com.android.server.integrity.model.AppInstallMetadata;
+import com.android.server.integrity.model.AtomicFormula;
+import com.android.server.integrity.model.Formula;
+import com.android.server.integrity.model.OpenFormula;
 import com.android.server.integrity.model.Rule;
 
 import java.util.List;
@@ -26,6 +31,8 @@ import java.util.List;
  * rules.
  */
 final class RuleEvaluator {
+
+    private static final String TAG = "RuleEvaluator";
 
     /**
      * Match the list of rules against an app install metadata.
@@ -45,8 +52,54 @@ final class RuleEvaluator {
         return Rule.EMPTY;
     }
 
+    /**
+     * Match a rule against app install metadata.
+     */
     private static boolean isMatch(Rule rule, AppInstallMetadata appInstallMetadata) {
-        // TODO: Add matching logic
+        return isMatch(rule.getFormula(), appInstallMetadata);
+    }
+
+    private static boolean isMatch(Formula formula, AppInstallMetadata appInstallMetadata) {
+        if (formula instanceof AtomicFormula) {
+            AtomicFormula atomicFormula = (AtomicFormula) formula;
+            switch (atomicFormula.getKey()) {
+                case PACKAGE_NAME:
+                    return atomicFormula.isMatch(appInstallMetadata.getPackageName());
+                case APP_CERTIFICATE:
+                    return atomicFormula.isMatch(appInstallMetadata.getAppCertificate());
+                case INSTALLER_NAME:
+                    return atomicFormula.isMatch(appInstallMetadata.getInstallerName());
+                case INSTALLER_CERTIFICATE:
+                    return atomicFormula.isMatch(appInstallMetadata.getInstallerCertificate());
+                case VERSION_CODE:
+                    return atomicFormula.isMatch(appInstallMetadata.getVersionCode());
+                case PRE_INSTALLED:
+                    return atomicFormula.isMatch(appInstallMetadata.isPreInstalled());
+                default:
+                    Slog.i(TAG, String.format("Returned no match for unknown key %s",
+                            atomicFormula.getKey()));
+                    return false;
+            }
+        } else if (formula instanceof OpenFormula) {
+            OpenFormula openFormula = (OpenFormula) formula;
+            // A rule is in disjunctive normal form, so there are no OR connectors.
+            switch (openFormula.getConnector()) {
+                case NOT:
+                    // NOT connector has only 1 formula attached.
+                    return !isMatch(openFormula.getFormulas().get(0), appInstallMetadata);
+                case AND:
+                    boolean result = true;
+                    for (Formula subFormula : openFormula.getFormulas()) {
+                        result &= isMatch(subFormula, appInstallMetadata);
+                    }
+                    return result;
+                default:
+                    Slog.i(TAG, String.format("Returned no match for unknown connector %s",
+                            openFormula.getConnector()));
+                    return false;
+            }
+        }
+
         return false;
     }
 }

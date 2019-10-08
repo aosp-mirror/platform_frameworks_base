@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
+import android.util.Slog;
 
 /**
  * Represents a simple formula consisting of an app install metadata field and a value.
@@ -28,7 +29,9 @@ import android.annotation.Nullable;
  */
 public final class AtomicFormula extends Formula {
 
-    enum Key {
+    private static final String TAG = "AtomicFormula";
+
+    public enum Key {
         PACKAGE_NAME,
         APP_CERTIFICATE,
         INSTALLER_NAME,
@@ -37,7 +40,7 @@ public final class AtomicFormula extends Formula {
         PRE_INSTALLED
     }
 
-    enum Operator {
+    public enum Operator {
         EQ,
         LT,
         LE,
@@ -132,6 +135,59 @@ public final class AtomicFormula extends Formula {
         return String.format("%s %s %s", mKey, mOperator, getValue());
     }
 
+    /**
+     * Check if the formula is true when substituting its {@link Key} with the string value.
+     *
+     * @param value String value to substitute the key with.
+     * @return {@code true} if the formula is true, and {@code false} otherwise.
+     */
+    public boolean isMatch(String value) {
+        switch (mOperator) {
+            case EQ:
+                return mStringValue.equals(value);
+        }
+        Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mStringValue));
+        return false;
+    }
+
+    /**
+     * Check if the formula is true when substituting its {@link Key} with the integer value.
+     *
+     * @param value Integer value to substitute the key with.
+     * @return {@code true} if the formula is true, and {@code false} otherwise.
+     */
+    public boolean isMatch(int value) {
+        switch (mOperator) {
+            case EQ:
+                return mIntValue == value;
+            case LE:
+                return mIntValue <= value;
+            case LT:
+                return mIntValue < value;
+            case GE:
+                return mIntValue >= value;
+            case GT:
+                return mIntValue > value;
+        }
+        Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mIntValue));
+        return false;
+    }
+
+    /**
+     * Check if the formula is true when substituting its {@link Key} with the boolean value.
+     *
+     * @param value Boolean value to substitute the key with.
+     * @return {@code true} if the formula is true, and {@code false} otherwise.
+     */
+    public boolean isMatch(boolean value) {
+        switch (mOperator) {
+            case EQ:
+                return mBoolValue == value;
+        }
+        Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mBoolValue));
+        return false;
+    }
+
     private void validateOperator(Key key, Operator operator) {
         boolean validOperator;
         switch (key) {
@@ -146,6 +202,7 @@ public final class AtomicFormula extends Formula {
                 validOperator = true;
                 break;
             default:
+                Slog.i(TAG, String.format("Found operator %s for key %s", operator, key));
                 validOperator = false;
         }
         if (!validOperator) {

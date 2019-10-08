@@ -19,6 +19,6 @@ package com.android.server.integrity.model;
 /**
  * Represents a rule logic/content.
  */
-abstract class Formula {
+public abstract class Formula {
 
 }

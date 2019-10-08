@@ -66,7 +66,7 @@ public final class RuleEvaluationEngine {
                 case DENY:
                     return IntegrityCheckResult.deny(matchedRule);
                 default:
-                    Slog.i(TAG, "Matched a non-DENY rule: " + matchedRule);
+                    Slog.e(TAG, "Matched a non-DENY rule: " + matchedRule);
                     return IntegrityCheckResult.allow();
             }
         }

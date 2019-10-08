@@ -29,7 +29,7 @@ import java.util.List;
  */
 public final class OpenFormula extends Formula {
 
-    enum Connector {
+    public enum Connector {
         AND,
         OR,
         NOT
