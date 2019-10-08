@@ -137,6 +137,8 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -235,6 +237,7 @@ import android.view.inputmethod.InputMethodInfo;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -495,6 +498,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String LOG_TAG_PROFILE_OWNER = "profile-owner";
     private static final String LOG_TAG_DEVICE_OWNER = "device-owner";
 
+    /**
+     * For admin apps targeting R+, throw when the app sets password requirement
+     * that is not taken into account at given quality. For example when quality is set
+     * to {@link DevicePolicyManager#PASSWORD_QUALITY_UNSPECIFIED}, it doesn't make sense to
+     * require certain password length. If the intent is to require a password of certain length
+     * having at least NUMERIC quality, the admin should first call
+     * {@link #setPasswordQuality(ComponentName, int, boolean)} and only then call
+     * {@link #setPasswordMinimumLength(ComponentName, int, boolean)}.
+     *
+     * <p>Conversely when an admin app targeting R+ lowers password quality, those
+     * requirements that stop making sense are reset to default values.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long ADMIN_APP_PASSWORD_COMPLEXITY = 123562444L;
+
     final Context mContext;
     final Injector mInjector;
     final IPackageManager mIPackageManager;
@@ -507,6 +526,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final LockSettingsInternal mLockSettingsInternal;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
     private final OverlayPackagesProvider mOverlayPackagesProvider;
+    private final IPlatformCompat mIPlatformCompat;
 
     private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
     private final DeviceStateCacheImpl mStateCache = new DeviceStateCacheImpl();
@@ -1985,6 +2005,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return LocalServices.getService(LockSettingsInternal.class);
         }
 
+        IPlatformCompat getIPlatformCompat() {
+            return IPlatformCompat.Stub.asInterface(
+                    ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+        }
+
         boolean hasUserSetupCompleted(DevicePolicyData userData) {
             return userData.mUserSetupComplete;
         }
@@ -2223,6 +2248,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mUsageStatsManagerInternal = Preconditions.checkNotNull(
                 injector.getUsageStatsManagerInternal());
         mIPackageManager = Preconditions.checkNotNull(injector.getIPackageManager());
+        mIPlatformCompat = Preconditions.checkNotNull(injector.getIPlatformCompat());
         mIPermissionManager = Preconditions.checkNotNull(injector.getIPermissionManager());
         mTelephonyManager = Preconditions.checkNotNull(injector.getTelephonyManager());
 
@@ -4157,12 +4183,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
     }
 
+    private boolean passwordQualityInvocationOrderCheckEnabled(String packageName, int userId) {
+        try {
+            return mIPlatformCompat.isChangeEnabledByPackageName(ADMIN_APP_PASSWORD_COMPLEXITY,
+                    packageName);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
+        }
+        return getTargetSdk(packageName, userId) > Build.VERSION_CODES.Q;
+    }
+
     /**
      * For admins targeting R+ reset various password constraints to default values when quality is
      * set to a value that makes those constraints that have no effect.
      */
     private void resetInactivePasswordRequirementsIfRPlus(int userId, ActiveAdmin admin) {
-        if (getTargetSdk(admin.info.getPackageName(), userId) > Build.VERSION_CODES.Q) {
+        if (passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(), userId)) {
             final PasswordMetrics metrics = admin.minimumPasswordMetrics;
             if (metrics.quality < PASSWORD_QUALITY_NUMERIC) {
                 metrics.length = ActiveAdmin.DEF_MINIMUM_PASSWORD_LENGTH;
@@ -4327,7 +4363,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void ensureMinimumQuality(
             int userId, ActiveAdmin admin, int minimumQuality, String operation) {
         if (admin.minimumPasswordMetrics.quality < minimumQuality
-                && getTargetSdk(admin.info.getPackageName(), userId) > Build.VERSION_CODES.Q) {
+                && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
+                userId)) {
             throw new IllegalStateException(String.format(
                     "password quality should be at least %d for %s", minimumQuality, operation));
         }
