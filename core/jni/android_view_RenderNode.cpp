@@ -31,6 +31,7 @@
 #include <renderthread/CanvasContext.h>
 #include <TreeInfo.h>
 #include <hwui/Paint.h>
+#include <utils/TraceUtils.h>
 
 #include "core_jni_helpers.h"
 
@@ -222,6 +223,11 @@ static jboolean android_view_RenderNode_setHasOverlappingRendering(jlong renderN
             RenderNode::GENERIC);
 }
 
+static void android_view_RenderNode_setUsageHint(jlong renderNodePtr, jint usageHint) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->setUsageHint(static_cast<UsageHint>(usageHint));
+}
+
 static jboolean android_view_RenderNode_setElevation(jlong renderNodePtr, float elevation) {
     return SET_AND_DIRTY(setElevation, elevation, RenderNode::Z);
 }
@@ -290,6 +296,22 @@ static jboolean android_view_RenderNode_setBottom(jlong renderNodePtr, int botto
     return SET_AND_DIRTY(setBottom, bottom, RenderNode::Y);
 }
 
+static jint android_view_RenderNode_getLeft(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getLeft();
+}
+
+static jint android_view_RenderNode_getTop(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getTop();
+}
+
+static jint android_view_RenderNode_getRight(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getRight();
+}
+
+static jint android_view_RenderNode_getBottom(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getBottom();
+}
+
 static jboolean android_view_RenderNode_setLeftTopRightBottom(jlong renderNodePtr,
         int left, int top, int right, int bottom) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -315,6 +337,24 @@ static jboolean android_view_RenderNode_offsetTopAndBottom(jlong renderNodePtr, 
 static jboolean android_view_RenderNode_hasOverlappingRendering(jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     return renderNode->stagingProperties().hasOverlappingRendering();
+}
+
+static jboolean android_view_RenderNode_getAnimationMatrix(jlong renderNodePtr, jlong outMatrixPtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    SkMatrix* outMatrix = reinterpret_cast<SkMatrix*>(outMatrixPtr);
+
+    const SkMatrix* animationMatrix = renderNode->stagingProperties().getAnimationMatrix();
+
+    if (animationMatrix) {
+        *outMatrix = *animationMatrix;
+        return JNI_TRUE;
+    }
+    return JNI_FALSE;
+}
+
+static jboolean android_view_RenderNode_getClipToBounds(jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->stagingProperties().getClipToBounds();
 }
 
 static jboolean android_view_RenderNode_getClipToOutline(jlong renderNodePtr) {
@@ -388,6 +428,11 @@ static jboolean android_view_RenderNode_hasIdentityMatrix(jlong renderNodePtr) {
     return !renderNode->stagingProperties().hasTransformMatrix();
 }
 
+static jint android_view_RenderNode_getLayerType(jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return static_cast<int>(renderNode->stagingProperties().layerProperties().type());
+}
+
 // ----------------------------------------------------------------------------
 // RenderProperties - computed getters
 // ----------------------------------------------------------------------------
@@ -431,6 +476,26 @@ static jfloat android_view_RenderNode_getPivotY(jlong renderNodePtr) {
     return renderNode->stagingProperties().getPivotY();
 }
 
+static jint android_view_RenderNode_getWidth(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getWidth();
+}
+
+static jint android_view_RenderNode_getHeight(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getHeight();
+}
+
+static jboolean android_view_RenderNode_setAllowForceDark(jlong renderNodePtr, jboolean allow) {
+    return SET_AND_DIRTY(setAllowForceDark, allow, RenderNode::GENERIC);
+}
+
+static jboolean android_view_RenderNode_getAllowForceDark(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getAllowForceDark();
+}
+
+static jlong android_view_RenderNode_getUniqueId(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->uniqueId();
+}
+
 // ----------------------------------------------------------------------------
 // RenderProperties - Animations
 // ----------------------------------------------------------------------------
@@ -452,19 +517,19 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 // SurfaceView position callback
 // ----------------------------------------------------------------------------
 
-jmethodID gSurfaceViewPositionUpdateMethod;
-jmethodID gSurfaceViewPositionLostMethod;
+jmethodID gPositionListener_PositionChangedMethod;
+jmethodID gPositionListener_PositionLostMethod;
 
 static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
-        jlong renderNodePtr, jobject surfaceview) {
-    class SurfaceViewPositionUpdater : public RenderNode::PositionListener {
+        jlong renderNodePtr, jobject listener) {
+    class PositionListenerTrampoline : public RenderNode::PositionListener {
     public:
-        SurfaceViewPositionUpdater(JNIEnv* env, jobject surfaceview) {
+        PositionListenerTrampoline(JNIEnv* env, jobject listener) {
             env->GetJavaVM(&mVm);
-            mWeakRef = env->NewWeakGlobalRef(surfaceview);
+            mWeakRef = env->NewWeakGlobalRef(listener);
         }
 
-        virtual ~SurfaceViewPositionUpdater() {
+        virtual ~PositionListenerTrampoline() {
             jnienv()->DeleteWeakGlobalRef(mWeakRef);
             mWeakRef = nullptr;
         }
@@ -481,16 +546,21 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             if (CC_LIKELY(transform.isPureTranslate())) {
                 // snap/round the computed bounds, so they match the rounding behavior
                 // of the clear done in SurfaceView#draw().
-                bounds.snapToPixelBoundaries();
+                bounds.snapGeometryToPixelBoundaries(false);
             } else {
                 // Conservatively round out so the punched hole (in the ZOrderOnTop = true case)
                 // doesn't extend beyond the other window
                 bounds.roundOut();
             }
 
+            if (mPreviousPosition == bounds) {
+                return;
+            }
+            mPreviousPosition = bounds;
+
             incStrong(0);
             auto functor = std::bind(
-                std::mem_fn(&SurfaceViewPositionUpdater::doUpdatePositionAsync), this,
+                std::mem_fn(&PositionListenerTrampoline::doUpdatePositionAsync), this,
                 (jlong) info.canvasContext.getFrameNumber(),
                 (jint) bounds.left, (jint) bounds.top,
                 (jint) bounds.right, (jint) bounds.bottom);
@@ -501,6 +571,11 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         virtual void onPositionLost(RenderNode& node, const TreeInfo* info) override {
             if (CC_UNLIKELY(!mWeakRef || (info && !info->updateWindowPositions))) return;
 
+            if (mPreviousPosition.isEmpty()) {
+                return;
+            }
+            mPreviousPosition.setEmpty();
+
             ATRACE_NAME("SurfaceView position lost");
             JNIEnv* env = jnienv();
             jobject localref = env->NewLocalRef(mWeakRef);
@@ -510,7 +585,8 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 return;
             }
 
-            env->CallVoidMethod(localref, gSurfaceViewPositionLostMethod,
+            // TODO: Remember why this is synchronous and then make a comment
+            env->CallVoidMethod(localref, gPositionListener_PositionLostMethod,
                     info ? info->canvasContext.getFrameNumber() : 0);
             env->DeleteLocalRef(localref);
         }
@@ -534,7 +610,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 env->DeleteWeakGlobalRef(mWeakRef);
                 mWeakRef = nullptr;
             } else {
-                env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
+                env->CallVoidMethod(localref, gPositionListener_PositionChangedMethod,
                         frameNumber, left, top, right, bottom);
                 env->DeleteLocalRef(localref);
             }
@@ -545,17 +621,18 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 
         JavaVM* mVm;
         jobject mWeakRef;
+        uirenderer::Rect mPreviousPosition;
     };
 
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderNode->setPositionListener(new SurfaceViewPositionUpdater(env, surfaceview));
+    renderNode->setPositionListener(new PositionListenerTrampoline(env, listener));
 }
 
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/RenderNode";
+const char* const kClassPathName = "android/graphics/RenderNode";
 
 static const JNINativeMethod gMethods[] = {
 // ----------------------------------------------------------------------------
@@ -567,7 +644,7 @@ static const JNINativeMethod gMethods[] = {
     { "nGetDebugSize",         "(J)I",    (void*) android_view_RenderNode_getDebugSize },
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
-    { "nRequestPositionUpdates",   "(JLandroid/view/SurfaceView;)V", (void*) android_view_RenderNode_requestPositionUpdates },
+    { "nRequestPositionUpdates",   "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V", (void*) android_view_RenderNode_requestPositionUpdates },
     { "nSetDisplayList",       "(JJ)V",   (void*) android_view_RenderNode_setDisplayList },
 
 
@@ -582,10 +659,13 @@ static const JNINativeMethod gMethods[] = {
 // ----------------------------------------------------------------------------
     { "nIsValid",              "(J)Z",   (void*) android_view_RenderNode_isValid },
     { "nSetLayerType",         "(JI)Z",  (void*) android_view_RenderNode_setLayerType },
+    { "nGetLayerType",         "(J)I",   (void*) android_view_RenderNode_getLayerType },
     { "nSetLayerPaint",        "(JJ)Z",  (void*) android_view_RenderNode_setLayerPaint },
     { "nSetStaticMatrix",      "(JJ)Z",  (void*) android_view_RenderNode_setStaticMatrix },
     { "nSetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_setAnimationMatrix },
+    { "nGetAnimationMatrix",   "(JJ)Z",  (void*) android_view_RenderNode_getAnimationMatrix },
     { "nSetClipToBounds",      "(JZ)Z",  (void*) android_view_RenderNode_setClipToBounds },
+    { "nGetClipToBounds",      "(J)Z",   (void*) android_view_RenderNode_getClipToBounds },
     { "nSetClipBounds",        "(JIIII)Z", (void*) android_view_RenderNode_setClipBounds },
     { "nSetClipBoundsEmpty",   "(J)Z",   (void*) android_view_RenderNode_setClipBoundsEmpty },
     { "nSetProjectBackwards",  "(JZ)Z",  (void*) android_view_RenderNode_setProjectBackwards },
@@ -606,6 +686,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetAlpha",             "(JF)Z",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)Z",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
+    { "nSetUsageHint",    "(JI)V", (void*) android_view_RenderNode_setUsageHint },
     { "nSetElevation",         "(JF)Z",  (void*) android_view_RenderNode_setElevation },
     { "nSetTranslationX",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationX },
     { "nSetTranslationY",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationY },
@@ -623,6 +704,10 @@ static const JNINativeMethod gMethods[] = {
     { "nSetTop",               "(JI)Z",  (void*) android_view_RenderNode_setTop },
     { "nSetRight",             "(JI)Z",  (void*) android_view_RenderNode_setRight },
     { "nSetBottom",            "(JI)Z",  (void*) android_view_RenderNode_setBottom },
+    { "nGetLeft",              "(J)I",  (void*) android_view_RenderNode_getLeft },
+    { "nGetTop",               "(J)I",  (void*) android_view_RenderNode_getTop },
+    { "nGetRight",             "(J)I",  (void*) android_view_RenderNode_getRight },
+    { "nGetBottom",            "(J)I",  (void*) android_view_RenderNode_getBottom },
     { "nSetLeftTopRightBottom","(JIIII)Z", (void*) android_view_RenderNode_setLeftTopRightBottom },
     { "nOffsetLeftAndRight",   "(JI)Z",  (void*) android_view_RenderNode_offsetLeftAndRight },
     { "nOffsetTopAndBottom",   "(JI)Z",  (void*) android_view_RenderNode_offsetTopAndBottom },
@@ -648,14 +733,19 @@ static const JNINativeMethod gMethods[] = {
 
     { "nGetPivotX",                "(J)F",  (void*) android_view_RenderNode_getPivotX },
     { "nGetPivotY",                "(J)F",  (void*) android_view_RenderNode_getPivotY },
+    { "nGetWidth",                 "(J)I",  (void*) android_view_RenderNode_getWidth },
+    { "nGetHeight",                "(J)I",  (void*) android_view_RenderNode_getHeight },
+    { "nSetAllowForceDark",        "(JZ)Z", (void*) android_view_RenderNode_setAllowForceDark },
+    { "nGetAllowForceDark",        "(J)Z",  (void*) android_view_RenderNode_getAllowForceDark },
+    { "nGetUniqueId",              "(J)J",  (void*) android_view_RenderNode_getUniqueId },
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
-    gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
-            "updateSurfacePosition_renderWorker", "(JIIII)V");
-    gSurfaceViewPositionLostMethod = GetMethodIDOrDie(env, clazz,
-            "surfacePositionLost_uiRtSync", "(J)V");
+    jclass clazz = FindClassOrDie(env, "android/graphics/RenderNode$PositionUpdateListener");
+    gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
+            "positionChanged", "(JIIII)V");
+    gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,
+            "positionLost", "(J)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

@@ -7,7 +7,7 @@
     <uses-sdk android:minSdkVersion="9" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
     <instrumentation
-        android:name="android.support.test.runner.AndroidJUnitRunner"
+        android:name="androidx.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.android.framework.multidexlegacytestservices" />
 
     <application

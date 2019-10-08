@@ -30,6 +30,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.telecom.Logging.Session;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IConnectionServiceAdapter;
@@ -1937,6 +1938,8 @@ public abstract class ConnectionService extends Service {
             return;
         }
 
+        String callingPackage = getOpPackageName();
+
         mAdapter.queryRemoteConnectionServices(new RemoteServiceCallback.Stub() {
             @Override
             public void onResult(
@@ -1965,7 +1968,7 @@ public abstract class ConnectionService extends Service {
                     }
                 }.prepare());
             }
-        });
+        }, callingPackage);
     }
 
     /**
@@ -2054,7 +2057,11 @@ public abstract class ConnectionService extends Service {
                     conference.getConnectTimeMillis(),
                     conference.getConnectionStartElapsedRealTime(),
                     conference.getStatusHints(),
-                    conference.getExtras());
+                    conference.getExtras(),
+                    conference.getAddress(),
+                    conference.getAddressPresentation(),
+                    conference.getCallerDisplayName(),
+                    conference.getCallerDisplayNamePresentation());
 
             mAdapter.addConferenceCall(id, parcelableConference);
             mAdapter.setVideoProvider(id, conference.getVideoProvider());
@@ -2086,6 +2093,10 @@ public abstract class ConnectionService extends Service {
     /**
      * Call to inform Telecom that your {@link ConnectionService} has released call resources (e.g
      * microphone, camera).
+     *
+     * <p>
+     * The {@link ConnectionService} will be disconnected when it failed to call this method within
+     * 5 seconds after {@link #onConnectionServiceFocusLost()} is called.
      *
      * @see ConnectionService#onConnectionServiceFocusLost()
      */
@@ -2134,7 +2145,8 @@ public abstract class ConnectionService extends Service {
                     connection.getDisconnectCause(),
                     emptyList,
                     connection.getExtras(),
-                    conferenceId);
+                    conferenceId,
+                    connection.getCallDirection());
             mAdapter.addExistingConnection(id, parcelableConnection);
         }
     }
@@ -2660,5 +2672,14 @@ public abstract class ConnectionService extends Service {
         synchronized (mIdSyncRoot) {
             return ++mId;
         }
+    }
+
+    /**
+     * Returns this handler, ONLY FOR TESTING.
+     * @hide
+     */
+    @VisibleForTesting
+    public Handler getHandler() {
+        return mHandler;
     }
 }

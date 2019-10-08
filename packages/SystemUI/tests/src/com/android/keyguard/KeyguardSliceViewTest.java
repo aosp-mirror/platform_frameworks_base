@@ -19,11 +19,18 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 
+import androidx.slice.SliceProvider;
+import androidx.slice.SliceSpecs;
+import androidx.slice.builders.ListBuilder;
+
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,12 +41,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import androidx.slice.SliceProvider;
-import androidx.slice.SliceSpecs;
-import androidx.slice.builders.ListBuilder;
-
 @SmallTest
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardSliceViewTest extends SysuiTestCase {
     private KeyguardSliceView mKeyguardSliceView;
@@ -47,7 +50,12 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mKeyguardSliceView = (KeyguardSliceView) LayoutInflater.from(getContext())
+        com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
+        InjectionInflationController inflationController = new InjectionInflationController(
+                SystemUIFactory.getInstance().getRootComponent());
+        LayoutInflater layoutInflater = inflationController
+                .injectable(LayoutInflater.from(getContext()));
+        mKeyguardSliceView = (KeyguardSliceView) layoutInflater
                 .inflate(R.layout.keyguard_status_area, null);
         mSliceUri = Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
         SliceProvider.setSpecs(new HashSet<>(Collections.singletonList(SliceSpecs.LIST)));
@@ -55,7 +63,7 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
 
     @Test
     public void showSlice_notifiesListener() {
-        ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
+        ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
         AtomicBoolean notified = new AtomicBoolean();
         mKeyguardSliceView.setContentChangeListener(()-> notified.set(true));
         mKeyguardSliceView.onChanged(builder.build());
@@ -74,13 +82,11 @@ public class KeyguardSliceViewTest extends SysuiTestCase {
 
     @Test
     public void hasHeader_readsSliceData() {
-        ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
+        ListBuilder builder = new ListBuilder(getContext(), mSliceUri, ListBuilder.INFINITY);
         mKeyguardSliceView.onChanged(builder.build());
         Assert.assertFalse("View should not have a header", mKeyguardSliceView.hasHeader());
 
-        builder.setHeader((ListBuilder.HeaderBuilder headerBuilder) -> {
-            headerBuilder.setTitle("header title!");
-        });
+        builder.setHeader(new ListBuilder.HeaderBuilder().setTitle("header title!"));
         mKeyguardSliceView.onChanged(builder.build());
         Assert.assertTrue("View should have a header", mKeyguardSliceView.hasHeader());
     }

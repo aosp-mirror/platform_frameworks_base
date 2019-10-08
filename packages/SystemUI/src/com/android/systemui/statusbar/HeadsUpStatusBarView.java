@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.widget.TextView;
@@ -32,7 +31,8 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.plugins.DarkIconDispatcher;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private int mEndMargin;
     private View mIconPlaceholder;
     private TextView mTextView;
-    private NotificationData.Entry mShowingEntry;
+    private NotificationEntry mShowingEntry;
     private Rect mLayoutedIconRect = new Rect();
     private int[] mTmpPosition = new int[2];
     private boolean mFirstLayout = true;
@@ -162,7 +162,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         mTextView = findViewById(R.id.text);
     }
 
-    public void setEntry(NotificationData.Entry entry) {
+    public void setEntry(NotificationEntry entry) {
         if (entry != null) {
             mShowingEntry = entry;
             CharSequence text = entry.headsUpStatusBarText;
@@ -214,7 +214,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     }
 
     /** In order to do UI alignment, this view will be notified by
-     * {@link com.android.systemui.statusbar.stack.NotificationStackScrollLayout}.
+     * {@link com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout}.
      * After scroller laid out, the scroller will tell this view about scroller's getX()
      * @param translationX how to translate the horizontal position
      */
@@ -261,7 +261,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         return super.fitSystemWindows(insets);
     }
 
-    public NotificationData.Entry getShowingEntry() {
+    public NotificationEntry getShowingEntry() {
         return mShowingEntry;
     }
 

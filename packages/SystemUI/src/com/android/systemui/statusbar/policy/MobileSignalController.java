@@ -36,7 +36,9 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
+import com.android.settingslib.Utils;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.net.SignalStrengthUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
@@ -74,6 +76,8 @@ public class MobileSignalController extends SignalController<
     private SignalStrength mSignalStrength;
     private MobileIconGroup mDefaultIcons;
     private Config mConfig;
+    @VisibleForTesting
+    boolean mInflateSignalStrengths = false;
     // Some specific carriers have 5GE network which is special LTE CA network.
     private static final int NETWORK_TYPE_LTE_CA_5GE = TelephonyManager.MAX_NETWORK_TYPE + 1;
 
@@ -91,8 +95,7 @@ public class MobileSignalController extends SignalController<
         mPhone = phone;
         mDefaults = defaults;
         mSubscriptionInfo = info;
-        mPhoneStateListener = new MobilePhoneStateListener(info.getSubscriptionId(),
-                receiverLooper);
+        mPhoneStateListener = new MobilePhoneStateListener(receiverLooper);
         mNetworkNameSeparator = getStringIfExists(R.string.status_bar_network_name_separator);
         mNetworkNameDefault = getStringIfExists(
                 com.android.internal.R.string.lockscreen_carrier_default);
@@ -117,6 +120,7 @@ public class MobileSignalController extends SignalController<
 
     public void setConfiguration(Config config) {
         mConfig = config;
+        updateInflateSignalStrength();
         mapIconSets();
         updateTelephony();
     }
@@ -244,8 +248,13 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_IWLAN, TelephonyIcons.WFC);
     }
 
+    private void updateInflateSignalStrength() {
+        mInflateSignalStrengths = SignalStrengthUtil.shouldInflateSignalStrength(mContext,
+                mSubscriptionInfo.getSubscriptionId());
+    }
+
     private int getNumLevels() {
-        if (mConfig.inflateSignalStrengths) {
+        if (mInflateSignalStrengths) {
             return SignalStrength.NUM_SIGNAL_STRENGTH_BINS + 1;
         }
         return SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
@@ -257,11 +266,12 @@ public class MobileSignalController extends SignalController<
             return SignalDrawable.getCarrierChangeState(getNumLevels());
         } else if (mCurrentState.connected) {
             int level = mCurrentState.level;
-            if (mConfig.inflateSignalStrengths) {
+            if (mInflateSignalStrengths) {
                 level++;
             }
             boolean dataDisabled = mCurrentState.userSetup
-                    && mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
+                    && (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
+                    || mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA);
             boolean noInternet = mCurrentState.inetCondition == 0;
             boolean cutOut = dataDisabled || noInternet;
             return SignalDrawable.getState(level, getNumLevels(), cutOut);
@@ -274,10 +284,6 @@ public class MobileSignalController extends SignalController<
 
     @Override
     public int getQsCurrentIconId() {
-        if (mCurrentState.airplaneMode) {
-            return SignalDrawable.getAirplaneModeState(getNumLevels());
-        }
-
         return getCurrentIconId();
     }
 
@@ -290,7 +296,8 @@ public class MobileSignalController extends SignalController<
         if (mCurrentState.inetCondition == 0) {
             dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
         }
-        final boolean dataDisabled = mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
+        final boolean dataDisabled = (mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
+                || mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA)
                 && mCurrentState.userSetup;
 
         // Show icon in QS when we are connected or data is disabled.
@@ -324,28 +331,6 @@ public class MobileSignalController extends SignalController<
     @Override
     protected MobileState cleanState() {
         return new MobileState();
-    }
-
-    private boolean hasService() {
-        if (mServiceState != null) {
-            // Consider the device to be in service if either voice or data
-            // service is available. Some SIM cards are marketed as data-only
-            // and do not support voice service, and on these SIM cards, we
-            // want to show signal bars for data service as well as the "no
-            // service" or "emergency calls only" text that indicates that voice
-            // is not available.
-            switch (mServiceState.getVoiceRegState()) {
-                case ServiceState.STATE_POWER_OFF:
-                    return false;
-                case ServiceState.STATE_OUT_OF_SERVICE:
-                case ServiceState.STATE_EMERGENCY_ONLY:
-                    return mServiceState.getDataRegState() == ServiceState.STATE_IN_SERVICE;
-                default:
-                    return true;
-            }
-        } else {
-            return false;
-        }
     }
 
     private boolean isCdma() {
@@ -473,10 +458,11 @@ public class MobileSignalController extends SignalController<
      */
     private final void updateTelephony() {
         if (DEBUG) {
-            Log.d(mTag, "updateTelephonySignalStrength: hasService=" + hasService()
-                    + " ss=" + mSignalStrength);
+            Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
+                    Utils.isInService(mServiceState) + " ss=" + mSignalStrength);
         }
-        mCurrentState.connected = hasService() && mSignalStrength != null;
+        mCurrentState.connected = Utils.isInService(mServiceState)
+                && mSignalStrength != null;
         if (mCurrentState.connected) {
             if (!mSignalStrength.isGsm() && mConfig.alwaysShowCdmaRssi) {
                 mCurrentState.level = mSignalStrength.getCdmaLevel();
@@ -502,16 +488,27 @@ public class MobileSignalController extends SignalController<
         if (isCarrierNetworkChangeActive()) {
             mCurrentState.iconGroup = TelephonyIcons.CARRIER_NETWORK_CHANGE;
         } else if (isDataDisabled() && !mConfig.alwaysShowDataRatIcon) {
-            mCurrentState.iconGroup = TelephonyIcons.DATA_DISABLED;
+            if (mSubscriptionInfo.getSubscriptionId()
+                    != mDefaults.getDefaultDataSubId()) {
+                mCurrentState.iconGroup = TelephonyIcons.NOT_DEFAULT_DATA;
+            } else {
+                mCurrentState.iconGroup = TelephonyIcons.DATA_DISABLED;
+            }
         }
         if (isEmergencyOnly() != mCurrentState.isEmergency) {
             mCurrentState.isEmergency = isEmergencyOnly();
             mNetworkController.recalculateEmergency();
         }
         // Fill in the network name if we think we have it.
-        if (mCurrentState.networkName == mNetworkNameDefault && mServiceState != null
+        if (mCurrentState.networkName.equals(mNetworkNameDefault) && mServiceState != null
                 && !TextUtils.isEmpty(mServiceState.getOperatorAlphaShort())) {
             mCurrentState.networkName = mServiceState.getOperatorAlphaShort();
+        }
+        // If this is the data subscription, update the currentState data name
+        if (mCurrentState.networkNameData.equals(mNetworkNameDefault) && mServiceState != null
+                && mCurrentState.dataSim
+                && !TextUtils.isEmpty(mServiceState.getDataOperatorAlphaShort())) {
+            mCurrentState.networkNameData = mServiceState.getDataOperatorAlphaShort();
         }
 
         notifyListenersIfNecessary();
@@ -568,12 +565,13 @@ public class MobileSignalController extends SignalController<
         pw.println("  mSignalStrength=" + mSignalStrength + ",");
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mDataNetType=" + mDataNetType + ",");
+        pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
     }
 
     class MobilePhoneStateListener extends PhoneStateListener {
-        public MobilePhoneStateListener(int subId, Looper looper) {
-            super(subId, looper);
+        public MobilePhoneStateListener(Looper looper) {
+            super(looper);
         }
 
         @Override

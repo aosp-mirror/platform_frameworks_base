@@ -212,6 +212,10 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
         return 0;
     }
 
+    if (convertPixelFormat(ANativeWindow_getFormat(surface.get())) == kUnknown_SkColorType) {
+        native_window_set_buffers_format(surface.get(), PIXEL_FORMAT_RGBA_8888);
+    }
+
     Rect dirtyRect(Rect::EMPTY_RECT);
     Rect* dirtyRectPtr = NULL;
 
@@ -236,8 +240,7 @@ static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
     SkImageInfo info = SkImageInfo::Make(outBuffer.width, outBuffer.height,
                                          convertPixelFormat(outBuffer.format),
                                          outBuffer.format == PIXEL_FORMAT_RGBX_8888
-                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType,
-                                         GraphicsJNI::defaultColorSpace());
+                                                 ? kOpaque_SkAlphaType : kPremul_SkAlphaType);
 
     SkBitmap bitmap;
     ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
@@ -313,18 +316,23 @@ static jlong nativeCreateFromSurfaceControl(JNIEnv* env, jclass clazz,
 }
 
 static jlong nativeGetFromSurfaceControl(JNIEnv* env, jclass clazz,
+        jlong nativeObject,
         jlong surfaceControlNativeObj) {
-    /*
-     * This is used by the WindowManagerService just after constructing
-     * a Surface and is necessary for returning the Surface reference to
-     * the caller. At this point, we should only have a SurfaceControl.
-     */
-
+    Surface* self(reinterpret_cast<Surface *>(nativeObject));
     sp<SurfaceControl> ctrl(reinterpret_cast<SurfaceControl *>(surfaceControlNativeObj));
+
+    // If the underlying IGBP's are the same, we don't need to do anything.
+    if (self != nullptr &&
+            IInterface::asBinder(self->getIGraphicBufferProducer()) ==
+            IInterface::asBinder(ctrl->getIGraphicBufferProducer())) {
+        return nativeObject;
+    }
+
     sp<Surface> surface(ctrl->getSurface());
     if (surface != NULL) {
         surface->incStrong(&sRefBaseOwner);
     }
+
     return reinterpret_cast<jlong>(surface.get());
 }
 
@@ -461,18 +469,18 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
         proxy->setWideGamut(true);
     }
     proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-    proxy->initialize(surface);
+    proxy->setSurface(surface);
     // Shadows can't be used via this interface, so just set the light source
     // to all 0s.
-    proxy->setup(0, 0, 0);
-    proxy->setLightCenter((Vector3){0, 0, 0});
+    proxy->setLightAlpha(0, 0);
+    proxy->setLightGeometry((Vector3){0, 0, 0}, 0);
     return (jlong) proxy;
 }
 
 static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfacePtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
     sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
-    proxy->updateSurface(surface);
+    proxy->setSurface(surface);
 }
 
 static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
@@ -512,7 +520,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeAllocateBuffers },
     {"nativeCreateFromSurfaceControl", "(J)J",
             (void*)nativeCreateFromSurfaceControl },
-    {"nativeGetFromSurfaceControl", "(J)J",
+    {"nativeGetFromSurfaceControl", "(JJ)J",
             (void*)nativeGetFromSurfaceControl },
     {"nativeReadFromParcel", "(JLandroid/os/Parcel;)J",
             (void*)nativeReadFromParcel },

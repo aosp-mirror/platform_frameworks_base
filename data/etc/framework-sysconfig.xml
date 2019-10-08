@@ -28,7 +28,7 @@
     <!-- Whitelist of what components are permitted as backup data transports.  The
          'service' attribute here is a flattened ComponentName string. -->
     <backup-transport-whitelisted-service
-        service="android/com.android.internal.backup.LocalTransportService" />
+        service="com.android.localtransport/.LocalTransportService" />
 
     <!-- Whitelist of bundled applications which all handle URLs to their websites by default -->
     <app-link package="com.android.carrierdefaultapp" />

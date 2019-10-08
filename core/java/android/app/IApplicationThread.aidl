@@ -21,7 +21,9 @@ import android.app.IUiAutomationConnection;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.servertransaction.ClientTransaction;
+import android.content.AutofillOptions;
 import android.content.ComponentName;
+import android.content.ContentCaptureOptions;
 import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -38,6 +40,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.RemoteCallback;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -57,8 +60,10 @@ oneway interface IApplicationThread {
             in CompatibilityInfo compatInfo,
             int resultCode, in String data, in Bundle extras, boolean sync,
             int sendingUser, int processState);
+    @UnsupportedAppUsage
     void scheduleCreateService(IBinder token, in ServiceInfo info,
             in CompatibilityInfo compatInfo, int processState);
+    @UnsupportedAppUsage
     void scheduleStopService(IBinder token);
     void bindApplication(in String packageName, in ApplicationInfo info,
             in List<ProviderInfo> providers, in ComponentName testName,
@@ -67,15 +72,17 @@ oneway interface IApplicationThread {
             int debugMode, boolean enableBinderTracking, boolean trackAllocation,
             boolean restrictedBackupMode, boolean persistent, in Configuration config,
             in CompatibilityInfo compatInfo, in Map services,
-            in Bundle coreSettings, in String buildSerial, boolean isAutofillCompatEnabled,
-            in long[] disabledCompatChanges);
+            in Bundle coreSettings, in String buildSerial, in AutofillOptions autofillOptions,
+            in ContentCaptureOptions contentCaptureOptions, in long[] disabledCompatChanges);
     void runIsolatedEntryPoint(in String entryPoint, in String[] entryPointArgs);
     void scheduleExit();
     void scheduleServiceArgs(IBinder token, in ParceledListSlice args);
     void updateTimeZone();
     void processInBackground();
+    @UnsupportedAppUsage
     void scheduleBindService(IBinder token,
             in Intent intent, boolean rebind, int processState);
+    @UnsupportedAppUsage
     void scheduleUnbindService(IBinder token,
             in Intent intent);
     void dumpService(in ParcelFileDescriptor fd, IBinder servicetoken,
@@ -88,15 +95,15 @@ oneway interface IApplicationThread {
     void profilerControl(boolean start, in ProfilerInfo profilerInfo, int profileType);
     void setSchedulingGroup(int group);
     void scheduleCreateBackupAgent(in ApplicationInfo app, in CompatibilityInfo compatInfo,
-            int backupMode);
+            int backupMode, int userId);
     void scheduleDestroyBackupAgent(in ApplicationInfo app,
-            in CompatibilityInfo compatInfo);
+            in CompatibilityInfo compatInfo, int userId);
     void scheduleOnNewActivityOptions(IBinder token, in Bundle options);
     void scheduleSuicide();
     void dispatchPackageBroadcast(int cmd, in String[] packages);
     void scheduleCrash(in String msg);
     void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, in String path,
-            in ParcelFileDescriptor fd);
+            in ParcelFileDescriptor fd, in RemoteCallback finishCallback);
     void dumpActivity(in ParcelFileDescriptor fd, IBinder servicetoken, in String prefix,
             in String[] args);
     void clearDnsCache();
@@ -133,4 +140,9 @@ oneway interface IApplicationThread {
     void scheduleApplicationInfoChanged(in ApplicationInfo ai);
     void setNetworkBlockSeq(long procStateSeq);
     void scheduleTransaction(in ClientTransaction transaction);
+    void requestDirectActions(IBinder activityToken, IVoiceInteractor intractor,
+            in RemoteCallback cancellationCallback, in RemoteCallback callback);
+    void performDirectAction(IBinder activityToken, String actionId,
+            in Bundle arguments, in RemoteCallback cancellationCallback,
+            in RemoteCallback resultCallback);
 }

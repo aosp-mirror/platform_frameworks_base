@@ -15,12 +15,15 @@
  */
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.provider.Settings;
 import android.telecom.TelecomManager;
 
 import com.android.internal.util.NotificationMessagingUtil;
@@ -47,6 +50,21 @@ public class NotificationComparator
 
     @Override
     public int compare(NotificationRecord left, NotificationRecord right) {
+        final int leftImportance = left.getImportance();
+        final int rightImportance = right.getImportance();
+        final boolean isLeftHighImportance = leftImportance >= IMPORTANCE_DEFAULT;
+        final boolean isRightHighImportance = rightImportance >= IMPORTANCE_DEFAULT;
+
+        // With new interruption model, prefer importance bucket above all other criteria
+        // (to ensure buckets are contiguous)
+        if (Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL, 1) == 1) {
+            if (isLeftHighImportance != isRightHighImportance) {
+                // by importance bucket, high importance higher than low importance
+                return -1 * Boolean.compare(isLeftHighImportance, isRightHighImportance);
+            }
+        }
+
         // first all colorized notifications
         boolean leftImportantColorized = isImportantColorized(left);
         boolean rightImportantColorized = isImportantColorized(right);
@@ -86,8 +104,6 @@ public class NotificationComparator
             return -1 * Boolean.compare(leftPeople, rightPeople);
         }
 
-        final int leftImportance = left.getImportance();
-        final int rightImportance = right.getImportance();
         if (leftImportance != rightImportance) {
             // by importance, high to low
             return -1 * Integer.compare(leftImportance, rightImportance);

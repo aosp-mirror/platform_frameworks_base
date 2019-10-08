@@ -30,16 +30,16 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.support.test.rule.logging.AtraceLogger;
 import android.test.InstrumentationTestCase;
 import android.test.InstrumentationTestRunner;
 import android.util.Log;
+
+import androidx.test.rule.logging.AtraceLogger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,6 +52,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 /**
  * This test is intended to measure the time it takes for the apps to start.
  * Names of the applications are passed in command line, and the

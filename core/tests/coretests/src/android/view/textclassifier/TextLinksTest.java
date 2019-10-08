@@ -18,11 +18,13 @@ package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
 
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +40,12 @@ import java.util.Map;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextLinksTest {
+    private static final String BUNDLE_KEY = "key";
+    private static final String BUNDLE_VALUE = "value";
+    private static final Bundle BUNDLE = new Bundle();
+    static {
+        BUNDLE.putString(BUNDLE_KEY, BUNDLE_VALUE);
+    }
 
     private Map<String, Float> getEntityScores(float address, float phone, float other) {
         final Map<String, Float> result = new ArrayMap<>();
@@ -57,8 +65,9 @@ public class TextLinksTest {
     public void testParcel() {
         final String fullText = "this is just a test";
         final TextLinks reference = new TextLinks.Builder(fullText)
-                .addLink(0, 4, getEntityScores(0.f, 0.f, 1.f))
+                .addLink(0, 4, getEntityScores(0.f, 0.f, 1.f), BUNDLE)
                 .addLink(5, 12, getEntityScores(.8f, .1f, .5f))
+                .setExtras(BUNDLE)
                 .build();
 
         // Parcel and unparcel.
@@ -74,6 +83,7 @@ public class TextLinksTest {
         assertEquals(1, resultList.get(0).getEntityCount());
         assertEquals(TextClassifier.TYPE_OTHER, resultList.get(0).getEntity(0));
         assertEquals(1.f, resultList.get(0).getConfidenceScore(TextClassifier.TYPE_OTHER), 1e-7f);
+        assertEquals(BUNDLE_VALUE, resultList.get(0).getExtras().getString(BUNDLE_KEY));
         assertEquals(5, resultList.get(1).getStart());
         assertEquals(12, resultList.get(1).getEnd());
         assertEquals(3, resultList.get(1).getEntityCount());
@@ -83,10 +93,12 @@ public class TextLinksTest {
         assertEquals(.8f, resultList.get(1).getConfidenceScore(TextClassifier.TYPE_ADDRESS), 1e-7f);
         assertEquals(.5f, resultList.get(1).getConfidenceScore(TextClassifier.TYPE_OTHER), 1e-7f);
         assertEquals(.1f, resultList.get(1).getConfidenceScore(TextClassifier.TYPE_PHONE), 1e-7f);
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
     }
 
     @Test
     public void testParcelOptions() {
+        final String packageName = "packageName";
         final TextClassifier.EntityConfig entityConfig = TextClassifier.EntityConfig.create(
                 Arrays.asList(TextClassifier.HINT_TEXT_IS_EDITABLE),
                 Arrays.asList("a", "b", "c"),
@@ -94,7 +106,9 @@ public class TextLinksTest {
         final TextLinks.Request reference = new TextLinks.Request.Builder("text")
                 .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
                 .setEntityConfig(entityConfig)
+                .setExtras(BUNDLE)
                 .build();
+        reference.setCallingPackageName(packageName);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -108,5 +122,7 @@ public class TextLinksTest {
                 result.getEntityConfig().getHints().toArray());
         assertEquals(new HashSet<String>(Arrays.asList("a", "c")),
                 result.getEntityConfig().resolveEntityListModifications(Collections.emptyList()));
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
+        assertEquals(packageName, result.getCallingPackageName());
     }
 }

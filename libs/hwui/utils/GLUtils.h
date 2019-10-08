@@ -20,6 +20,12 @@
 
 #include <log/log.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -43,7 +49,52 @@ public:
      */
     static bool dumpGLErrors();
 
+    static const char* getGLFramebufferError();
 };  // class GLUtils
+
+class AutoEglImage {
+public:
+    AutoEglImage(EGLDisplay display, EGLClientBuffer clientBuffer) : mDisplay(display) {
+        EGLint imageAttrs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
+        image = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer,
+                                  imageAttrs);
+    }
+
+    ~AutoEglImage() {
+        if (image != EGL_NO_IMAGE_KHR) {
+            eglDestroyImageKHR(mDisplay, image);
+        }
+    }
+
+    EGLImageKHR image = EGL_NO_IMAGE_KHR;
+
+private:
+    EGLDisplay mDisplay = EGL_NO_DISPLAY;
+};
+
+class AutoSkiaGlTexture {
+public:
+    AutoSkiaGlTexture() {
+        glGenTextures(1, &mTexture);
+        glBindTexture(GL_TEXTURE_2D, mTexture);
+    }
+
+    ~AutoSkiaGlTexture() { glDeleteTextures(1, &mTexture); }
+
+    GLuint mTexture = 0;
+};
+
+class AutoGLFramebuffer {
+public:
+    AutoGLFramebuffer() {
+        glGenFramebuffers(1, &mFb);
+        glBindFramebuffer(GL_FRAMEBUFFER, mFb);
+    }
+
+    ~AutoGLFramebuffer() { glDeleteFramebuffers(1, &mFb); }
+
+    GLuint mFb;
+};
 
 } /* namespace uirenderer */
 } /* namespace android */

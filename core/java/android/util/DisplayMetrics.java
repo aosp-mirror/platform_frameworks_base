@@ -34,9 +34,30 @@ public class DisplayMetrics {
     public static final int DENSITY_LOW = 120;
 
     /**
+     * Intermediate density for screens that sit between {@link #DENSITY_LOW} (120dpi) and
+     * {@link #DENSITY_MEDIUM} (160dpi). This is not a density that applications should target,
+     * instead relying on the system to scale their {@link #DENSITY_MEDIUM} assets for them.
+     */
+    public static final int DENSITY_140 = 140;
+
+    /**
      * Standard quantized DPI for medium-density screens.
      */
     public static final int DENSITY_MEDIUM = 160;
+
+    /**
+     * Intermediate density for screens that sit between {@link #DENSITY_MEDIUM} (160dpi) and
+     * {@link #DENSITY_HIGH} (240dpi). This is not a density that applications should target,
+     * instead relying on the system to scale their {@link #DENSITY_HIGH} assets for them.
+     */
+    public static final int DENSITY_180 = 180;
+
+    /**
+     * Intermediate density for screens that sit between {@link #DENSITY_MEDIUM} (160dpi) and
+     * {@link #DENSITY_HIGH} (240dpi). This is not a density that applications should target,
+     * instead relying on the system to scale their {@link #DENSITY_HIGH} assets for them.
+     */
+    public static final int DENSITY_200 = 200;
 
     /**
      * This is a secondary density, added for some common screen configurations.
@@ -56,6 +77,13 @@ public class DisplayMetrics {
      * when these devices have 1280x720 displays.
      */
     public static final int DENSITY_TV = 213;
+
+    /**
+     * Intermediate density for screens that sit between {@link #DENSITY_MEDIUM} (160dpi) and
+     * {@link #DENSITY_HIGH} (240dpi). This is not a density that applications should target,
+     * instead relying on the system to scale their {@link #DENSITY_HIGH} assets for them.
+     */
+    public static final int DENSITY_220 = 220;
 
     /**
      * Standard quantized DPI for high-density screens.
@@ -127,6 +155,14 @@ public class DisplayMetrics {
      * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
      */
     public static final int DENSITY_440 = 440;
+
+    /**
+     * Intermediate density for screens that sit somewhere between
+     * {@link #DENSITY_XHIGH} (320 dpi) and {@link #DENSITY_XXHIGH} (480 dpi).
+     * This is not a density that applications should target, instead relying
+     * on the system to scale their {@link #DENSITY_XXHIGH} assets for them.
+     */
+    public static final int DENSITY_450 = 450;
 
     /**
      * Standard quantized DPI for extra-extra-high-density screens.

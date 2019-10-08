@@ -1627,7 +1627,7 @@ public final class LinkProperties implements Parcelable {
     /**
      * Implement the Parcelable interface.
      */
-    public static final Creator<LinkProperties> CREATOR =
+    public static final @android.annotation.NonNull Creator<LinkProperties> CREATOR =
         new Creator<LinkProperties>() {
             public LinkProperties createFromParcel(Parcel in) {
                 LinkProperties netProp = new LinkProperties();

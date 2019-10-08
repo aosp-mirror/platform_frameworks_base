@@ -16,8 +16,6 @@
 package android.hardware.fingerprint;
 
 import android.hardware.fingerprint.Fingerprint;
-import android.os.Bundle;
-import android.os.UserHandle;
 
 /**
  * Communication channel from the FingerprintService back to FingerprintManager.

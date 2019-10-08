@@ -53,7 +53,6 @@ public class GraphicBuffer implements Parcelable {
     private final int mHeight;
     private final int mFormat;
     private final int mUsage;
-    private final boolean mCapturedSecureLayers;
     // Note: do not rename, this field is used by native code
     @UnsupportedAppUsage
     private final long mNativeObject;
@@ -88,22 +87,12 @@ public class GraphicBuffer implements Parcelable {
      * Private use only. See {@link #create(int, int, int, int)}.
      */
     @UnsupportedAppUsage
-    private GraphicBuffer(int width, int height, int format, int usage, long nativeObject,
-            boolean capturedSecureLayers) {
+    private GraphicBuffer(int width, int height, int format, int usage, long nativeObject) {
         mWidth = width;
         mHeight = height;
         mFormat = format;
         mUsage = usage;
         mNativeObject = nativeObject;
-        mCapturedSecureLayers = capturedSecureLayers;
-    }
-
-    /**
-     * Private use only. See {@link #create(int, int, int, int)}.
-     */
-    @UnsupportedAppUsage
-    private GraphicBuffer(int width, int height, int format, int usage, long nativeObject) {
-        this(width, height, format, usage, nativeObject, false);
     }
 
     /**
@@ -112,31 +101,12 @@ public class GraphicBuffer implements Parcelable {
      */
     @UnsupportedAppUsage
     public static GraphicBuffer createFromExisting(int width, int height,
-            int format, int usage, long unwrappedNativeObject,
-            boolean capturedSecureLayers) {
+            int format, int usage, long unwrappedNativeObject) {
         long nativeObject = nWrapGraphicBuffer(unwrappedNativeObject);
         if (nativeObject != 0) {
-            return new GraphicBuffer(width, height, format, usage, nativeObject,
-                                     capturedSecureLayers);
+            return new GraphicBuffer(width, height, format, usage, nativeObject);
         }
         return null;
-    }
-
-    /**
-     * For SurfaceControl JNI. Provides and ignored value for capturedSecureLayers for backwards
-     * compatibility
-     * @hide
-     */
-    public static GraphicBuffer createFromExisting(int width, int height,
-            int format, int usage, long unwrappedNativeObject) {
-        return createFromExisting(width, height, format, usage, unwrappedNativeObject, false);
-    }
-
-    /**
-      * Returns true if the buffer contains visible secure layers.
-      */
-    public boolean doesContainSecureLayers() {
-        return mCapturedSecureLayers;
     }
 
     /**
@@ -309,7 +279,7 @@ public class GraphicBuffer implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Parcelable.Creator<GraphicBuffer> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<GraphicBuffer> CREATOR =
             new Parcelable.Creator<GraphicBuffer>() {
         public GraphicBuffer createFromParcel(Parcel in) {
             int width = in.readInt();

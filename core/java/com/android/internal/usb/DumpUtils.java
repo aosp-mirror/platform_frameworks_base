@@ -16,12 +16,12 @@
 
 package com.android.internal.usb;
 
-import static android.hardware.usb.UsbPort.MODE_AUDIO_ACCESSORY;
-import static android.hardware.usb.UsbPort.MODE_DEBUG_ACCESSORY;
-import static android.hardware.usb.UsbPort.MODE_DFP;
-import static android.hardware.usb.UsbPort.MODE_DUAL;
-import static android.hardware.usb.UsbPort.MODE_NONE;
-import static android.hardware.usb.UsbPort.MODE_UFP;
+import static android.hardware.usb.UsbPortStatus.MODE_AUDIO_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.MODE_DEBUG_ACCESSORY;
+import static android.hardware.usb.UsbPortStatus.MODE_DFP;
+import static android.hardware.usb.UsbPortStatus.MODE_DUAL;
+import static android.hardware.usb.UsbPortStatus.MODE_NONE;
+import static android.hardware.usb.UsbPortStatus.MODE_UFP;
 
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
@@ -196,6 +196,15 @@ public class DumpUtils {
         }
     }
 
+    private static void writeContaminantPresenceStatus(@NonNull DualDumpOutputStream dump,
+            @NonNull String idName, long id, int contaminantPresenceStatus) {
+        if (dump.isProto()) {
+            dump.write(idName, id, contaminantPresenceStatus);
+        } else {
+            dump.write(idName, id,
+                    UsbPort.contaminantPresenceStatusToString(contaminantPresenceStatus));
+        }
+    }
 
     public static void writePortStatus(@NonNull DualDumpOutputStream dump, @NonNull String idName,
             long id, @NonNull UsbPortStatus status) {
@@ -231,6 +240,10 @@ public class DumpUtils {
                     dataRole);
             dump.end(roleCombinationToken);
         }
+
+        writeContaminantPresenceStatus(dump, "contaminant_presence_status",
+                UsbPortStatusProto.CONTAMINANT_PRESENCE_STATUS,
+                status.getContaminantDetectionStatus());
 
         dump.end(token);
     }

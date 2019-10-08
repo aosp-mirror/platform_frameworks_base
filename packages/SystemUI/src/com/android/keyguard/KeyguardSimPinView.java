@@ -16,31 +16,31 @@
 
 package com.android.keyguard;
 
-import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.telephony.PhoneConstants;
-
-import android.content.Context;
-import android.content.res.ColorStateList;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.telephony.euicc.EuiccManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
+import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.IccCardConstants.State;
+import com.android.internal.telephony.PhoneConstants;
 
 /**
  * Displays a PIN pad for unlocking.
@@ -100,18 +100,14 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         esimButton.setVisibility(isEsimLocked ? View.VISIBLE : View.GONE);
     }
 
-    private void showDefaultMessage() {
-        if (mRemainingAttempts >= 0) {
-            mSecurityMessageDisplay.setMessage(getPinPasswordErrorMessage(
-                    mRemainingAttempts, true));
-            return;
-        }
-
+    private void setLockedSimMessage() {
         boolean isEsimLocked = KeyguardEsimArea.isEsimLocked(mContext, mSubId);
         int count = TelephonyManager.getDefault().getSimCount();
         Resources rez = getResources();
         String msg;
-        int color = Color.WHITE;
+        TypedArray array = mContext.obtainStyledAttributes(new int[] { R.attr.wallpaperTextColor });
+        int color = array.getColor(0, Color.WHITE);
+        array.recycle();
         if (count < 2) {
             msg = rez.getString(R.string.kg_sim_pin_instructions);
         } else {
@@ -123,13 +119,21 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                 color = info.getIconTint();
             }
         }
-
         if (isEsimLocked) {
             msg = rez.getString(R.string.kg_sim_lock_esim_instructions, msg);
         }
 
-        mSecurityMessageDisplay.setMessage(msg);
+        if (mSecurityMessageDisplay != null) {
+            mSecurityMessageDisplay.setMessage(msg);
+        }
         mSimImageView.setImageTintList(ColorStateList.valueOf(color));
+    }
+
+    private void showDefaultMessage() {
+        setLockedSimMessage();
+        if (mRemainingAttempts >= 0) {
+            return;
+        }
 
         // Sending empty PIN here to query the number of remaining PIN attempts
         new CheckSimPin("", mSubId) {
@@ -138,8 +142,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                         " attemptsRemaining=" + attemptsRemaining);
                 if (attemptsRemaining >= 0) {
                     mRemainingAttempts = attemptsRemaining;
-                    mSecurityMessageDisplay.setMessage(
-                            getPinPasswordErrorMessage(attemptsRemaining, true));
+                    setLockedSimMessage();
                 }
             }
         }.start();
@@ -212,19 +215,15 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
-    }
-
-    @Override
     public void showUsabilityHint() {
+
+    }
+
+    @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+        resetState();
     }
 
     @Override
@@ -234,6 +233,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             mSimUnlockProgressDialog.dismiss();
             mSimUnlockProgressDialog = null;
         }
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
     }
 
     /**

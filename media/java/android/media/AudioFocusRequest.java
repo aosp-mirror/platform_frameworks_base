@@ -225,9 +225,9 @@ public final class AudioFocusRequest {
     /** @hide */
     public static final String KEY_ACCESSIBILITY_FORCE_FOCUS_DUCKING = "a11y_force_ducking";
 
-    private final OnAudioFocusChangeListener mFocusListener; // may be null
-    private final Handler mListenerHandler;                  // may be null
-    private final AudioAttributes mAttr;                     // never null
+    private final @Nullable OnAudioFocusChangeListener mFocusListener;
+    private final @Nullable Handler mListenerHandler;
+    private final @NonNull AudioAttributes mAttr;
     private final int mFocusGain;
     private final int mFlags;
 

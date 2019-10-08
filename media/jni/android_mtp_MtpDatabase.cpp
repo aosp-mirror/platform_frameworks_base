@@ -1216,6 +1216,7 @@ MtpProperty* MtpDatabase::getDevicePropertyDesc(MtpDeviceProperty property) {
             case MTP_DEVICE_PROPERTY_DEVICE_FRIENDLY_NAME:
                 writable = true;
                 // fall through
+                FALLTHROUGH_INTENDED;
             case MTP_DEVICE_PROPERTY_IMAGE_SIZE:
             {
                 result = new MtpProperty(property, MTP_TYPE_STR, writable);

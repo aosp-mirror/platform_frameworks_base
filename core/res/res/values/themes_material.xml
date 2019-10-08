@@ -52,6 +52,9 @@ please see themes_device_defaults.xml.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
         <item name="colorError">@color/error_color_material_dark</item>
+        <item name="colorPopupBackground">?attr/colorBackground</item>
+        <item name="colorListDivider">?attr/colorForeground</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_material</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
@@ -422,6 +425,9 @@ please see themes_device_defaults.xml.
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_light</item>
         <item name="backgroundDimAmount">0.6</item>
         <item name="colorError">@color/error_color_material_light</item>
+        <item name="colorPopupBackground">?attr/colorBackground</item>
+        <item name="colorListDivider">?attr/colorForeground</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_material</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
@@ -1341,14 +1347,6 @@ please see themes_device_defaults.xml.
         <item name="notificationHeaderIconSize">@dimen/notification_header_icon_size</item>
     </style>
 
-    <!-- Theme for inflating ambient notification -->
-    <style name="Theme.Material.Notification.Ambient">
-        <item name="notificationHeaderStyle">@style/Notification.Header.Ambient</item>
-        <item name="notificationHeaderTextAppearance">@style/TextAppearance.Material.Notification.Info.Ambient</item>
-        <item name="notificationHeaderAppNameVisibility">gone</item>
-        <item name="notificationHeaderIconSize">@dimen/notification_header_icon_size_ambient</item>
-    </style>
-
     <!-- Default theme for Settings and activities launched from Settings. -->
     <style name="Theme.Material.Settings" parent="Theme.Material.Light.LightStatusBar">
         <item name="homeAsUpIndicator">@drawable/ic_ab_back_material_settings</item>
@@ -1416,26 +1414,6 @@ please see themes_device_defaults.xml.
         <item name="colorPrimary">@color/primary_material_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_material_settings</item>
         <item name="colorSecondary">@color/secondary_material_settings</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="Theme.Material.Autofill" parent="Theme.Material">
-        <item name="colorBackground">@color/autofill_background_material_dark</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="Theme.Material.Autofill.Light" parent="Theme.Material.Light">
-        <item name="colorBackground">@color/autofill_background_material_light</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="Theme.Material.Autofill.Save" parent="Theme.Material.Panel">
-        <item name="colorBackground">@color/autofill_background_material_dark</item>
-    </style>
-
-    <!-- @hide -->
-    <style name="Theme.Material.Autofill.Save.Light" parent="Theme.Material.Light.Panel">
-        <item name="colorBackground">@color/autofill_background_material_light</item>
     </style>
 
 </resources>

@@ -17,3 +17,4 @@
 package android.app;
 
 parcelable Notification;
+parcelable Notification.Action;

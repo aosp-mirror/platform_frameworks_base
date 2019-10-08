@@ -16,6 +16,8 @@
 
 package android.service.voice;
 
+import com.android.internal.app.IVoiceActionCheckCallback;
+
 /**
  * @hide
  */
@@ -24,4 +26,6 @@ oneway interface IVoiceInteractionService {
     void soundModelsChanged();
     void shutdown();
     void launchVoiceAssistFromKeyguard();
+    void getActiveServiceSupportedActions(in List<String> voiceActions,
+     in IVoiceActionCheckCallback callback);
 }

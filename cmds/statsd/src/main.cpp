@@ -18,7 +18,6 @@
 #include "Log.h"
 
 #include "StatsService.h"
-#include "logd/LogReader.h"
 #include "socket/StatsSocketListener.h"
 
 #include <binder/IInterface.h>
@@ -26,8 +25,11 @@
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <binder/Status.h>
+#include <hidl/HidlTransportSupport.h>
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>
+
+#include <memory>
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -37,64 +39,12 @@
 using namespace android;
 using namespace android::os::statsd;
 
-const bool kUseLogd = false;
-const bool kUseStatsdSocket = true;
-
 /**
  * Thread function data.
  */
 struct log_reader_thread_data {
     sp<StatsService> service;
 };
-
-/**
- * Thread func for where the log reader runs.
- */
-static void* log_reader_thread_func(void* cookie) {
-    log_reader_thread_data* data = static_cast<log_reader_thread_data*>(cookie);
-    sp<LogReader> reader = new LogReader(data->service);
-
-    // Run the read loop. Never returns.
-    reader->Run();
-
-    ALOGW("statsd LogReader.Run() is not supposed to return.");
-
-    delete data;
-    return NULL;
-}
-
-/**
- * Creates and starts the thread to own the LogReader.
- */
-static status_t start_log_reader_thread(const sp<StatsService>& service) {
-    status_t err;
-    pthread_attr_t attr;
-    pthread_t thread;
-
-    // Thread data.
-    log_reader_thread_data* data = new log_reader_thread_data();
-    data->service = service;
-
-    // Create the thread
-    err = pthread_attr_init(&attr);
-    if (err != NO_ERROR) {
-        return err;
-    }
-    // TODO: Do we need to tweak thread priority?
-    err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if (err != NO_ERROR) {
-        pthread_attr_destroy(&attr);
-        return err;
-    }
-    err = pthread_create(&thread, &attr, log_reader_thread_func, static_cast<void*>(data));
-    if (err != NO_ERROR) {
-        pthread_attr_destroy(&attr);
-        return err;
-    }
-    pthread_attr_destroy(&attr);
-
-    return NO_ERROR;
-}
 
 
 sp<StatsService> gStatsService = nullptr;
@@ -128,11 +78,24 @@ int main(int /*argc*/, char** /*argv*/) {
     ps->giveThreadPoolName();
     IPCThreadState::self()->disableBackgroundScheduling(true);
 
+    ::android::hardware::configureRpcThreadpool(1 /*threads*/, false /*willJoin*/);
+
+    std::shared_ptr<LogEventQueue> eventQueue =
+            std::make_shared<LogEventQueue>(2000 /*buffer limit. Buffer is NOT pre-allocated*/);
+
     // Create the service
-    gStatsService = new StatsService(looper);
-    if (defaultServiceManager()->addService(String16("stats"), gStatsService) != 0) {
-        ALOGE("Failed to add service");
+    gStatsService = new StatsService(looper, eventQueue);
+    if (defaultServiceManager()->addService(String16("stats"), gStatsService, false,
+                IServiceManager::DUMP_FLAG_PRIORITY_NORMAL | IServiceManager::DUMP_FLAG_PROTO)
+            != 0) {
+        ALOGE("Failed to add service as AIDL service");
         return -1;
+    }
+
+    auto ret = gStatsService->registerAsService();
+    if (ret != ::android::OK) {
+        ALOGE("Failed to add service as HIDL service");
+        return 1; // or handle error
     }
 
     registerSigHandler();
@@ -141,23 +104,12 @@ int main(int /*argc*/, char** /*argv*/) {
 
     gStatsService->Startup();
 
-    sp<StatsSocketListener> socketListener = new StatsSocketListener(gStatsService);
+    sp<StatsSocketListener> socketListener = new StatsSocketListener(eventQueue);
 
-    if (kUseLogd) {
-        ALOGI("using logd");
-        // Start the log reader thread
-        status_t err = start_log_reader_thread(gStatsService);
-        if (err != NO_ERROR) {
-            return 1;
-        }
-    }
-
-    if (kUseStatsdSocket) {
-        ALOGI("using statsd socket");
-        // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
-        if (socketListener->startListener(600)) {
-            exit(1);
-        }
+    ALOGI("Statsd starts to listen to socket.");
+    // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
+    if (socketListener->startListener(600)) {
+        exit(1);
     }
 
     // Loop forever -- the reports run on this thread in a handler, and the

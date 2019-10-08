@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+#include "Diff.h"
+
 #include "android-base/macros.h"
 
-#include "Flags.h"
 #include "LoadedApk.h"
 #include "ValueVisitor.h"
 #include "process/IResourceTableConsumer.h"
@@ -344,23 +345,18 @@ static void ZeroOutAppReferences(ResourceTable* table) {
   VisitAllValuesInTable(table, &visitor);
 }
 
-int Diff(const std::vector<StringPiece>& args) {
+int DiffCommand::Action(const std::vector<std::string>& args) {
   DiffContext context;
 
-  Flags flags;
-  if (!flags.Parse("aapt2 diff", args, &std::cerr)) {
-    return 1;
-  }
-
-  if (flags.GetArgs().size() != 2u) {
+  if (args.size() != 2u) {
     std::cerr << "must have two apks as arguments.\n\n";
-    flags.Usage("aapt2 diff", &std::cerr);
+    Usage(&std::cerr);
     return 1;
   }
 
   IDiagnostics* diag = context.GetDiagnostics();
-  std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(flags.GetArgs()[0], diag);
-  std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(flags.GetArgs()[1], diag);
+  std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(args[0], diag);
+  std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(args[1], diag);
   if (!apk_a || !apk_b) {
     return 1;
   }

@@ -349,7 +349,7 @@ class SecurityLogMonitor implements Runnable {
                 lastPos++;
             } else {
                 // Two events have the same timestamp, check if they are the same.
-                if (lastEvent.equals(curEvent)) {
+                if (lastEvent.eventEquals(curEvent)) {
                     // Actual overlap, just skip the event.
                     if (DEBUG) Slog.d(TAG, "Skipped dup event with timestamp: " + lastNanos);
                 } else {

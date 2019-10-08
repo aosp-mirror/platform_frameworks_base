@@ -37,7 +37,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-@Ignore
 public class LocationControllerImplTest extends SysuiTestCase {
 
     private LocationControllerImpl mLocationController;
@@ -49,6 +48,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky")
     public void testRemoveSelfActive_DoesNotCrash() {
         LocationController.LocationChangeCallback callback = new LocationChangeCallback() {
             @Override
@@ -70,6 +70,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("flaky")
     public void testRemoveSelfSettings_DoesNotCrash() {
         LocationController.LocationChangeCallback callback = new LocationChangeCallback() {
             @Override

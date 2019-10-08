@@ -16,14 +16,32 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.net.Uri;
+import android.os.Binder;
+import android.os.RemoteException;
+import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRcsFeature;
+import android.telephony.ims.aidl.IRcsFeatureListener;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.RcsPresenceExchangeImplBase;
 import android.telephony.ims.stub.RcsSipOptionsImplBase;
+import android.util.Log;
+
+import com.android.internal.util.FunctionalUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
@@ -33,10 +51,132 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class RcsFeature extends ImsFeature {
 
-    /**{@inheritDoc}*/
-    private final IImsRcsFeature mImsRcsBinder = new IImsRcsFeature.Stub() {
-        // Empty Default Implementation.
-    };
+    private static final String LOG_TAG = "RcsFeature";
+
+    private static final class RcsFeatureBinder extends IImsRcsFeature.Stub {
+        // Reference the outer class in order to have better test coverage metrics instead of
+        // creating a inner class referencing the outer class directly.
+        private final RcsFeature mReference;
+        private final Executor mExecutor;
+
+        RcsFeatureBinder(RcsFeature classRef, @CallbackExecutor Executor executor) {
+            mReference = classRef;
+            mExecutor = executor;
+        }
+
+        @Override
+        public void setListener(IRcsFeatureListener listener) {
+            mReference.setListener(listener);
+        }
+
+        @Override
+        public int queryCapabilityStatus() throws RemoteException {
+            return executeMethodAsyncForResult(
+                    () -> mReference.queryCapabilityStatus().mCapabilities,
+                    "queryCapabilityStatus");
+        }
+
+        @Override
+        public void addCapabilityCallback(IImsCapabilityCallback c) throws RemoteException {
+            executeMethodAsync(() -> mReference.addCapabilityCallback(c), "addCapabilityCallback");
+        }
+
+        @Override
+        public void removeCapabilityCallback(IImsCapabilityCallback c) throws RemoteException {
+            executeMethodAsync(() -> mReference.removeCapabilityCallback(c),
+                    "removeCapabilityCallback");
+        }
+
+        @Override
+        public void changeCapabilitiesConfiguration(CapabilityChangeRequest r,
+                IImsCapabilityCallback c) throws RemoteException {
+            executeMethodAsync(() -> mReference.requestChangeEnabledCapabilities(r, c),
+                    "changeCapabilitiesConfiguration");
+        }
+
+        @Override
+        public void queryCapabilityConfiguration(int capability, int radioTech,
+                IImsCapabilityCallback c) throws RemoteException {
+            executeMethodAsync(() -> mReference.queryCapabilityConfigurationInternal(capability,
+                    radioTech, c), "queryCapabilityConfiguration");
+        }
+
+        @Override
+        public int getFeatureState() throws RemoteException {
+            return executeMethodAsyncForResult(mReference::getFeatureState, "getFeatureState");
+        }
+
+        // RcsPresenceExchangeImplBase specific APIS
+        @Override
+        public void requestCapabilities(List<Uri> uris, int operationToken) throws RemoteException {
+            executeMethodAsync(() -> mReference.getPresenceExchangeInternal()
+                    .requestCapabilities(uris, operationToken), "requestCapabilities");
+        }
+        @Override
+        public void updateCapabilities(RcsContactUceCapability capabilities, int operationToken)
+                throws RemoteException {
+            executeMethodAsync(() -> mReference.getPresenceExchangeInternal()
+                            .updateCapabilities(capabilities, operationToken),
+                    "updateCapabilities");
+
+        }
+        // RcsSipOptionsImplBase specific APIS
+        @Override
+        public void sendCapabilityRequest(Uri contactUri, RcsContactUceCapability capabilities,
+                int operationToken) throws RemoteException {
+            executeMethodAsync(() -> mReference.getOptionsExchangeInternal()
+                            .sendCapabilityRequest(contactUri, capabilities, operationToken),
+                    "sendCapabilityRequest");
+
+        }
+        @Override
+        public void respondToCapabilityRequest(String contactUri,
+                RcsContactUceCapability ownCapabilities, int operationToken)
+                throws RemoteException {
+            executeMethodAsync(() -> mReference.getOptionsExchangeInternal()
+                            .respondToCapabilityRequest(contactUri, ownCapabilities,
+                                    operationToken), "respondToCapabilityRequest");
+
+        }
+        @Override
+        public void respondToCapabilityRequestWithError(Uri contactUri, int code, String reason,
+                int operationToken) throws RemoteException {
+            executeMethodAsync(() -> mReference.getOptionsExchangeInternal()
+                            .respondToCapabilityRequestWithError(contactUri, code, reason,
+                                    operationToken), "respondToCapabilityRequestWithError");
+        }
+
+        // Call the methods with a clean calling identity on the executor and wait indefinitely for
+        // the future to return.
+        private void executeMethodAsync(FunctionalUtils.ThrowingRunnable r, String errorLogName)
+                throws RemoteException {
+            // call with a clean calling identity on the executor and wait indefinitely for the
+            // future to return.
+            try {
+                CompletableFuture.runAsync(
+                        () -> Binder.withCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "RcsFeatureBinder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
+        }
+
+        private <T> T executeMethodAsyncForResult(FunctionalUtils.ThrowingSupplier<T> r,
+                String errorLogName) throws RemoteException {
+            // call with a clean calling identity on the executor and wait indefinitely for the
+            // future to return.
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> Binder.withCleanCallingIdentity(r), mExecutor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(LOG_TAG, "RcsFeatureBinder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                throw new RemoteException(e.getMessage());
+            }
+        }
+    }
 
     /**
      * Contains the capabilities defined and supported by a {@link RcsFeature} in the
@@ -81,27 +221,66 @@ public class RcsFeature extends ImsFeature {
 
         /**@hide*/
         public RcsImsCapabilities(@RcsImsCapabilityFlag int capabilities) {
+            super(capabilities);
+        }
 
+        /**@hide*/
+        private RcsImsCapabilities(Capabilities c) {
+            super(c.getMask());
         }
 
         /**@hide*/
         @Override
         public void addCapabilities(@RcsImsCapabilityFlag int capabilities) {
-
+            super.addCapabilities(capabilities);
         }
 
         /**@hide*/
         @Override
         public void removeCapabilities(@RcsImsCapabilityFlag int capabilities) {
-
+            super.removeCapabilities(capabilities);
         }
 
         /**@hide*/
         @Override
         public boolean isCapable(@RcsImsCapabilityFlag int capabilities) {
-            return false;
+            return super.isCapable(capabilities);
         }
     }
+
+    private final RcsFeatureBinder mImsRcsBinder;
+    private IRcsFeatureListener mListenerBinder;
+    private RcsPresenceExchangeImplBase mPresExchange;
+    private RcsSipOptionsImplBase mSipOptions;
+
+    /**
+     * Create a new RcsFeature.
+     * <p>
+     * Method stubs called from the framework will be called asynchronously. To specify the
+     * {@link Executor} that the methods stubs will be called, use
+     * {@link RcsFeature#RcsFeature(Executor)} instead.
+     */
+    public RcsFeature() {
+        super();
+        // Run on the Binder threads that call them.
+        mImsRcsBinder = new RcsFeatureBinder(this, Runnable::run);
+    }
+
+    /**
+     * Create a new RcsFeature using the Executor specified for methods being called by the
+     * framework.
+     * @param executor The executor for the framework to use when making calls to this service.
+     * @hide
+     */
+    public RcsFeature(@NonNull Executor executor) {
+        super();
+        if (executor == null) {
+            throw new IllegalArgumentException("executor can not be null.");
+        }
+        // Run on the Binder thread by default.
+        mImsRcsBinder = new RcsFeatureBinder(this, executor);
+    }
+
     /**
      * Query the current {@link RcsImsCapabilities} status set by the RcsFeature. If a capability is
      * set, the {@link RcsFeature} has brought up the capability and is ready for framework
@@ -111,7 +290,7 @@ public class RcsFeature extends ImsFeature {
      */
     @Override
     public final RcsImsCapabilities queryCapabilityStatus() {
-        throw new UnsupportedOperationException();
+        return new RcsImsCapabilities(super.queryCapabilityStatus());
     }
 
     /**
@@ -120,8 +299,11 @@ public class RcsFeature extends ImsFeature {
      * Call {@link #queryCapabilityStatus()} to return the current capability status.
      * @hide
      */
-    public final void notifyCapabilitiesStatusChanged(RcsImsCapabilities c) {
-        throw new UnsupportedOperationException();
+    public final void notifyCapabilitiesStatusChanged(@NonNull RcsImsCapabilities c) {
+        if (c == null) {
+            throw new IllegalArgumentException("RcsImsCapabilities must be non-null!");
+        }
+        super.notifyCapabilitiesStatusChanged(c);
     }
 
     /**
@@ -133,8 +315,10 @@ public class RcsFeature extends ImsFeature {
      * @hide
      */
     public boolean queryCapabilityConfiguration(
-            @RcsImsCapabilities.RcsImsCapabilityFlag int capability) {
-        throw new UnsupportedOperationException();
+            @RcsImsCapabilities.RcsImsCapabilityFlag int capability,
+            @ImsRegistrationImplBase.ImsRegistrationTech int radioTech) {
+        // Base Implementation - Override to provide functionality
+        return false;
     }
     /**
      * Called from the framework when the {@link RcsImsCapabilities} that have been configured for
@@ -155,7 +339,7 @@ public class RcsFeature extends ImsFeature {
     @Override
     public void changeEnabledCapabilities(CapabilityChangeRequest request,
             CapabilityCallbackProxy c) {
-        throw new UnsupportedOperationException();
+        // Base Implementation - Override to provide functionality
     }
 
     /**
@@ -192,13 +376,6 @@ public class RcsFeature extends ImsFeature {
         return new RcsPresenceExchangeImplBase();
     }
 
-    /**
-     * Construct a new {@link RcsFeature} instance.
-     */
-    public RcsFeature() {
-        super();
-    }
-
     /**{@inheritDoc}*/
     @Override
     public void onFeatureRemoved() {
@@ -217,5 +394,41 @@ public class RcsFeature extends ImsFeature {
     @Override
     public final IImsRcsFeature getBinder() {
         return mImsRcsBinder;
+    }
+
+    /**@hide*/
+    public IRcsFeatureListener getListener() {
+        synchronized (mLock) {
+            return mListenerBinder;
+        }
+    }
+
+    private void setListener(IRcsFeatureListener listener) {
+        synchronized (mLock) {
+            mListenerBinder = listener;
+            if (mListenerBinder != null) {
+                onFeatureReady();
+            }
+        }
+    }
+
+    private RcsPresenceExchangeImplBase getPresenceExchangeInternal() {
+        synchronized (mLock) {
+            if (mPresExchange == null) {
+                mPresExchange = getPresenceExchangeImpl();
+                mPresExchange.initialize(this);
+            }
+            return mPresExchange;
+        }
+    }
+
+    private RcsSipOptionsImplBase getOptionsExchangeInternal() {
+        synchronized (mLock) {
+            if (mSipOptions == null) {
+                mSipOptions = getOptionsExchangeImpl();
+                mSipOptions.initialize(this);
+            }
+            return mSipOptions;
+        }
     }
 }

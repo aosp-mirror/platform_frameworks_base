@@ -34,6 +34,7 @@ class MockFileCollection : public io::IFileCollection {
  public:
   MOCK_METHOD1(FindFile, io::IFile*(const StringPiece& path));
   MOCK_METHOD0(Iterator, std::unique_ptr<io::IFileCollectionIterator>());
+  MOCK_METHOD0(GetDirSeparator, char());
 };
 
 TEST(ProtoSerializeTest, SerializeSinglePackage) {
@@ -92,8 +93,11 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       util::make_unique<Reference>(expected_ref), context->GetDiagnostics()));
 
   // Make an overlayable resource.
+  OverlayableItem overlayable_item(std::make_shared<Overlayable>(
+      "OverlayableName", "overlay://theme", Source("res/values/overlayable.xml", 40)));
+  overlayable_item.source = Source("res/values/overlayable.xml", 42);
   ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.a:integer/overlayable"),
-                                    Overlayable{}, test::GetDiagnostics()));
+                                    overlayable_item, test::GetDiagnostics()));
 
   pb::ResourceTable pb_table;
   SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
@@ -105,7 +109,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
 
   ResourceTable new_table;
   std::string error;
-  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error)) << error;
   EXPECT_THAT(error, IsEmpty());
 
   Id* new_id = test::GetValue<Id>(&new_table, "com.app.a:id/foo");
@@ -159,7 +163,15 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       new_table.FindResource(test::ParseNameOrDie("com.app.a:integer/overlayable"));
   ASSERT_TRUE(search_result);
   ASSERT_THAT(search_result.value().entry, NotNull());
-  EXPECT_TRUE(search_result.value().entry->overlayable);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("OverlayableName"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.line, Eq(40));
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.source.line, Eq(42));
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
@@ -253,6 +265,42 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   child_text = xml::NodeCast<xml::Text>(child_el->children[0].get());
   ASSERT_THAT(child_text, NotNull());
   EXPECT_THAT(child_text->text, StrEq("woah there"));
+}
+
+TEST(ProtoSerializeTest, SerializeAndDeserializeXmlTrimEmptyWhitepsace) {
+  xml::Element element;
+  element.line_number = 22;
+  element.column_number = 23;
+  element.name = "element";
+
+  std::unique_ptr<xml::Text> trim_text = util::make_unique<xml::Text>();
+  trim_text->line_number = 25;
+  trim_text->column_number = 3;
+  trim_text->text = "  \n   ";
+  element.AppendChild(std::move(trim_text));
+
+  std::unique_ptr<xml::Text> keep_text = util::make_unique<xml::Text>();
+  keep_text->line_number = 26;
+  keep_text->column_number = 3;
+  keep_text->text = "  hello   ";
+  element.AppendChild(std::move(keep_text));
+
+  pb::XmlNode pb_xml;
+  SerializeXmlOptions options;
+  options.remove_empty_text_nodes = true;
+  SerializeXmlToPb(element, &pb_xml, options);
+
+  StringPool pool;
+  xml::Element actual_el;
+  std::string error;
+  ASSERT_TRUE(DeserializeXmlFromPb(pb_xml, &actual_el, &pool, &error));
+  ASSERT_THAT(error, IsEmpty());
+
+  // Only the child that does not consist of only whitespace should remain
+  ASSERT_THAT(actual_el.children, SizeIs(1u));
+  const xml::Text* child_text_keep = xml::NodeCast<xml::Text>(actual_el.children[0].get());
+  ASSERT_THAT(child_text_keep, NotNull());
+  EXPECT_THAT(child_text_keep->text, StrEq( "  hello   "));
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
@@ -461,6 +509,101 @@ TEST(ProtoSerializeTest, SerializeDeserializeConfiguration) {
   ExpectConfigSerializes(
       "mcc123-mnc456-b+en+GB-ldltr-sw300dp-w300dp-h400dp-large-long-round-widecg-highdr-land-car-"
       "night-xhdpi-stylus-keysexposed-qwerty-navhidden-dpad-300x200-v23");
+}
+
+TEST(ProtoSerializeTest, SerializeAndDeserializeOverlayable) {
+  OverlayableItem overlayable_item_foo(std::make_shared<Overlayable>(
+      "CustomizableResources", "overlay://customization"));
+  overlayable_item_foo.policies |= OverlayableItem::Policy::kSystem;
+  overlayable_item_foo.policies |= OverlayableItem::Policy::kProduct;
+
+  OverlayableItem overlayable_item_bar(std::make_shared<Overlayable>(
+      "TaskBar", "overlay://theme"));
+  overlayable_item_bar.policies |= OverlayableItem::Policy::kPublic;
+  overlayable_item_bar.policies |= OverlayableItem::Policy::kVendor;
+
+  OverlayableItem overlayable_item_baz(std::make_shared<Overlayable>(
+      "FontPack", "overlay://theme"));
+  overlayable_item_baz.policies |= OverlayableItem::Policy::kPublic;
+
+  OverlayableItem overlayable_item_boz(std::make_shared<Overlayable>(
+      "IconPack", "overlay://theme"));
+  overlayable_item_boz.policies |= OverlayableItem::Policy::kSignature;
+  overlayable_item_boz.policies |= OverlayableItem::Policy::kOdm;
+  overlayable_item_boz.policies |= OverlayableItem::Policy::kOem;
+
+  OverlayableItem overlayable_item_biz(std::make_shared<Overlayable>(
+      "Other", "overlay://customization"));
+  overlayable_item_biz.comment ="comment";
+
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetOverlayable("com.app.a:bool/foo", overlayable_item_foo)
+          .SetOverlayable("com.app.a:bool/bar", overlayable_item_bar)
+          .SetOverlayable("com.app.a:bool/baz", overlayable_item_baz)
+          .SetOverlayable("com.app.a:bool/boz", overlayable_item_boz)
+          .SetOverlayable("com.app.a:bool/biz", overlayable_item_biz)
+          .AddValue("com.app.a:bool/fiz", ResourceUtils::TryParseBool("true"))
+          .Build();
+
+  pb::ResourceTable pb_table;
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
+
+  MockFileCollection files;
+  ResourceTable new_table;
+  std::string error;
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  Maybe<ResourceTable::SearchResult> search_result =
+      new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  OverlayableItem& overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("CustomizableResources"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://customization"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSystem
+                                              | OverlayableItem::Policy::kProduct));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("TaskBar"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic
+                                              | OverlayableItem::Policy::kVendor));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/baz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("FontPack"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kPublic));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/boz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("IconPack"));
+  EXPECT_THAT(overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kSignature
+                                            | OverlayableItem::Policy::kOdm
+                                            | OverlayableItem::Policy::kOem));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/biz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+  overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(overlayable_item.overlayable->name, Eq("Other"));
+  EXPECT_THAT(overlayable_item.policies, Eq(OverlayableItem::Policy::kNone));
+  EXPECT_THAT(overlayable_item.comment, Eq("comment"));
+
+  search_result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/fiz"));
+  ASSERT_TRUE(search_result);
+  ASSERT_FALSE(search_result.value().entry->overlayable_item);
 }
 
 }  // namespace aapt

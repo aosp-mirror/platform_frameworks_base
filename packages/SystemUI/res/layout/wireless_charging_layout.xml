@@ -23,11 +23,12 @@
     android:layout_height="match_parent">
 
     <!-- Circle animation -->
-    <com.android.systemui.charging.WirelessChargingView
+    <ImageView
         android:id="@+id/wireless_charging_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:elevation="4dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/wireless_charging_animation"/>
 
     <!-- Text inside circle -->
     <LinearLayout
@@ -42,8 +43,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textSize="24sp"
-            android:textColor="?attr/wallpaperTextColor"/>
+            android:textSize="24sp"/>
     </LinearLayout>
 
 </FrameLayout>

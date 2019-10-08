@@ -34,6 +34,7 @@ import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.SystemService;
 
+import dalvik.system.BlockGuard;
 import dalvik.system.VMRuntime;
 
 import java.io.FileDescriptor;
@@ -70,14 +71,19 @@ public class Installer extends SystemService {
     /** Indicates that dexopt should generate an app image */
     public static final int DEXOPT_GENERATE_APP_IMAGE = 1 << 12;
 
-    // NOTE: keep in sync with installd
-    public static final int FLAG_CLEAR_CACHE_ONLY = 1 << 8;
-    public static final int FLAG_CLEAR_CODE_CACHE_ONLY = 1 << 9;
-    public static final int FLAG_USE_QUOTA = 1 << 12;
-    public static final int FLAG_FREE_CACHE_V2 = 1 << 13;
-    public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = 1 << 14;
-    public static final int FLAG_FREE_CACHE_NOOP = 1 << 15;
-    public static final int FLAG_FORCE = 1 << 16;
+    public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;
+    public static final int FLAG_STORAGE_CE = IInstalld.FLAG_STORAGE_CE;
+    public static final int FLAG_STORAGE_EXTERNAL = IInstalld.FLAG_STORAGE_EXTERNAL;
+
+    public static final int FLAG_CLEAR_CACHE_ONLY = IInstalld.FLAG_CLEAR_CACHE_ONLY;
+    public static final int FLAG_CLEAR_CODE_CACHE_ONLY = IInstalld.FLAG_CLEAR_CODE_CACHE_ONLY;
+
+    public static final int FLAG_FREE_CACHE_V2 = IInstalld.FLAG_FREE_CACHE_V2;
+    public static final int FLAG_FREE_CACHE_V2_DEFY_QUOTA = IInstalld.FLAG_FREE_CACHE_V2_DEFY_QUOTA;
+    public static final int FLAG_FREE_CACHE_NOOP = IInstalld.FLAG_FREE_CACHE_NOOP;
+
+    public static final int FLAG_USE_QUOTA = IInstalld.FLAG_USE_QUOTA;
+    public static final int FLAG_FORCE = IInstalld.FLAG_FORCE;
 
     private final boolean mIsolated;
 
@@ -239,6 +245,11 @@ public class Installer extends SystemService {
             long[] ceDataInodes, String[] codePaths, PackageStats stats)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        if (codePaths != null) {
+            for (String codePath : codePaths) {
+                BlockGuard.getVmPolicy().onPathAccess(codePath);
+            }
+        }
         try {
             final long[] res = mInstalld.getAppSize(uuid, packageNames, userId, flags,
                     appId, ceDataInodes, codePaths);
@@ -296,6 +307,9 @@ public class Installer extends SystemService {
             @Nullable String profileName, @Nullable String dexMetadataPath,
             @Nullable String compilationReason) throws InstallerException {
         assertValidInstructionSet(instructionSet);
+        BlockGuard.getVmPolicy().onPathAccess(apkPath);
+        BlockGuard.getVmPolicy().onPathAccess(outputPath);
+        BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
@@ -319,6 +333,7 @@ public class Installer extends SystemService {
     public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
+        BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
             return mInstalld.dumpProfiles(uid, packageName, profileName, codePath);
         } catch (Exception e) {
@@ -339,6 +354,8 @@ public class Installer extends SystemService {
     public void idmap(String targetApkPath, String overlayApkPath, int uid)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(targetApkPath);
+        BlockGuard.getVmPolicy().onPathAccess(overlayApkPath);
         try {
             mInstalld.idmap(targetApkPath, overlayApkPath, uid);
         } catch (Exception e) {
@@ -348,6 +365,7 @@ public class Installer extends SystemService {
 
     public void removeIdmap(String overlayApkPath) throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(overlayApkPath);
         try {
             mInstalld.removeIdmap(overlayApkPath);
         } catch (Exception e) {
@@ -358,6 +376,7 @@ public class Installer extends SystemService {
     public void rmdex(String codePath, String instructionSet) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(codePath);
         try {
             mInstalld.rmdex(codePath, instructionSet);
         } catch (Exception e) {
@@ -367,6 +386,7 @@ public class Installer extends SystemService {
 
     public void rmPackageDir(String packageDir) throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(packageDir);
         try {
             mInstalld.rmPackageDir(packageDir);
         } catch (Exception e) {
@@ -439,6 +459,7 @@ public class Installer extends SystemService {
     public void linkNativeLibraryDirectory(String uuid, String packageName, String nativeLibPath32,
             int userId) throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(nativeLibPath32);
         try {
             mInstalld.linkNativeLibraryDirectory(uuid, packageName, nativeLibPath32, userId);
         } catch (Exception e) {
@@ -459,6 +480,8 @@ public class Installer extends SystemService {
     public void linkFile(String relativePath, String fromBase, String toBase)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(fromBase);
+        BlockGuard.getVmPolicy().onPathAccess(toBase);
         try {
             mInstalld.linkFile(relativePath, fromBase, toBase);
         } catch (Exception e) {
@@ -469,6 +492,8 @@ public class Installer extends SystemService {
     public void moveAb(String apkPath, String instructionSet, String outputPath)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(apkPath);
+        BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
             mInstalld.moveAb(apkPath, instructionSet, outputPath);
         } catch (Exception e) {
@@ -479,6 +504,8 @@ public class Installer extends SystemService {
     public void deleteOdex(String apkPath, String instructionSet, String outputPath)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(apkPath);
+        BlockGuard.getVmPolicy().onPathAccess(outputPath);
         try {
             mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
         } catch (Exception e) {
@@ -489,6 +516,7 @@ public class Installer extends SystemService {
     public void installApkVerity(String filePath, FileDescriptor verityInput, int contentSize)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
         try {
             mInstalld.installApkVerity(filePath, verityInput, contentSize);
         } catch (Exception e) {
@@ -499,6 +527,7 @@ public class Installer extends SystemService {
     public void assertFsverityRootHashMatches(String filePath, @NonNull byte[] expectedHash)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
+        BlockGuard.getVmPolicy().onPathAccess(filePath);
         try {
             mInstalld.assertFsverityRootHashMatches(filePath, expectedHash);
         } catch (Exception e) {
@@ -512,6 +541,7 @@ public class Installer extends SystemService {
             assertValidInstructionSet(isas[i]);
         }
         if (!checkBeforeRemote()) return false;
+        BlockGuard.getVmPolicy().onPathAccess(apkPath);
         try {
             return mInstalld.reconcileSecondaryDexFile(apkPath, packageName, uid, isas,
                     volumeUuid, flags);
@@ -523,6 +553,7 @@ public class Installer extends SystemService {
     public byte[] hashSecondaryDexFile(String dexPath, String packageName, int uid,
             @Nullable String volumeUuid, int flags) throws InstallerException {
         if (!checkBeforeRemote()) return new byte[0];
+        BlockGuard.getVmPolicy().onPathAccess(dexPath);
         try {
             return mInstalld.hashSecondaryDexFile(dexPath, packageName, uid, volumeUuid, flags);
         } catch (Exception e) {
@@ -571,9 +602,107 @@ public class Installer extends SystemService {
     public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
             String profileName, String codePath, String dexMetadataPath) throws InstallerException {
         if (!checkBeforeRemote()) return false;
+        BlockGuard.getVmPolicy().onPathAccess(codePath);
+        BlockGuard.getVmPolicy().onPathAccess(dexMetadataPath);
         try {
             return mInstalld.prepareAppProfile(pkg, userId, appId, profileName, codePath,
                     dexMetadataPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Snapshots user data of the given package.
+     *
+     * @param pkg name of the package to snapshot user data for.
+     * @param userId id of the user whose data to snapshot.
+     * @param snapshotId id of this snapshot.
+     * @param storageFlags flags controlling which data (CE or DE) to snapshot.
+     *
+     * @return inode of the snapshot of users CE package data, or {@code 0} if a remote calls
+     *  shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to snapshot user data.
+     */
+    public long snapshotAppData(String pkg, @UserIdInt int userId, int snapshotId, int storageFlags)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return 0;
+
+        try {
+            return mInstalld.snapshotAppData(null, pkg, userId, snapshotId, storageFlags);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Restores user data snapshot of the given package.
+     *
+     * @param pkg name of the package to restore user data for.
+     * @param appId id of the package to restore user data for.
+     * @param userId id of the user whose data to restore.
+     * @param snapshotId id of the snapshot to restore.
+     * @param storageFlags flags controlling which data (CE or DE) to restore.
+     *
+     * @return {@code true} if user data restore was successful, or {@code false} if a remote call
+     *  shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to restore user data.
+     */
+    public boolean restoreAppDataSnapshot(String pkg, @AppIdInt  int appId, String seInfo,
+            @UserIdInt int userId, int snapshotId, int storageFlags) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.restoreAppDataSnapshot(null, pkg, appId, seInfo, userId, snapshotId,
+                    storageFlags);
+            return true;
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Deletes user data snapshot of the given package.
+     *
+     * @param pkg name of the package to delete user data snapshot for.
+     * @param userId id of the user whose user data snapshot to delete.
+     * @param ceSnapshotInode inode of CE user data snapshot.
+     * @param snapshotId id of the snapshot to delete.
+     * @param storageFlags flags controlling which user data snapshot (CE or DE) to delete.
+     *
+     * @return {@code true} if user data snapshot was successfully deleted, or {@code false} if a
+     *  remote call shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to delete user data snapshot.
+     */
+    public boolean destroyAppDataSnapshot(String pkg, @UserIdInt int userId, long ceSnapshotInode,
+            int snapshotId, int storageFlags) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.destroyAppDataSnapshot(null, pkg, userId, ceSnapshotInode, snapshotId,
+                    storageFlags);
+            return true;
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
+     * Migrates obb data from its legacy location {@code /data/media/obb} to
+     * {@code /data/media/0/Android/obb}. This call is idempotent and a fast no-op if data has
+     * already been migrated.
+     *
+     * @throws InstallerException if an error occurs.
+     */
+    public boolean migrateLegacyObbData() throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.migrateLegacyObbData();
+            return true;
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

@@ -16,13 +16,14 @@
 
 package android.widget.listview;
 
+import android.util.ListItemFactory;
+import android.util.ListScenario;
 import android.view.View;
- import android.view.ViewGroup;
- import com.google.android.collect.Sets;
- import android.util.ListScenario;
- import android.util.ListItemFactory;
+import android.view.ViewGroup;
 
- import java.util.Set;
+import com.google.android.collect.Sets;
+
+import java.util.Set;
 
 /**
  * List that interleaves focusable items.

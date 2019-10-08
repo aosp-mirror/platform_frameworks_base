@@ -364,6 +364,8 @@ public final class Sensor {
      * count steps if it is not activated. This sensor is ideal for fitness tracking applications.
      * It is defined as an {@link Sensor#REPORTING_MODE_ON_CHANGE} sensor.
      * <p>
+     * This sensor requires permission {@code android.permission.ACTIVITY_RECOGNITION}.
+     * <p>
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      */
     public static final int TYPE_STEP_COUNTER = 19;
@@ -381,6 +383,8 @@ public final class Sensor {
      * Similar to {@link #TYPE_ROTATION_VECTOR}, but using a magnetometer instead of using a
      * gyroscope. This sensor uses lower power than the other rotation vectors, because it doesn't
      * use the gyroscope. However, it is more noisy and will work best outdoors.
+     * <p>
+     * This sensor requires permission {@code android.permission.ACTIVITY_RECOGNITION}.
      * <p>
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      */

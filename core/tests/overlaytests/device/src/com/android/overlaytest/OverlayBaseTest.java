@@ -17,17 +17,21 @@
 package com.android.overlaytest;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.UiAutomation;
+import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.os.LocaleList;
-import android.os.ParcelFileDescriptor;
-import android.support.test.InstrumentationRegistry;
 import android.util.AttributeSet;
 import android.util.Xml;
+
+import androidx.test.InstrumentationRegistry;
+
+import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -278,17 +282,43 @@ public abstract class OverlayBaseTest {
             }
         }
 
-        final String no = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, " +
-            "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. " +
-            "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip " +
-            "ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit " +
-            "esse cillum dolore eu fugiat nulla pariatur. " +
-            "Excepteur sint occaecat cupidatat non proident, " +
-            "sunt in culpa qui officia deserunt mollit anim id est laborum.";
+        final String no = "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do "
+                + "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
+                + "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo "
+                + "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse "
+                + "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non "
+                + "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         final String so = "Lorem ipsum: single overlay.";
         final String mo = "Lorem ipsum: multiple overlays.";
 
         assertEquals(getExpected(no, so, mo), actual);
+    }
+
+    @Test
+    public void testAssetsNotPossibleToOverlay() throws Throwable {
+        final AssetManager am = mResources.getAssets();
+
+        // AssetManager#list will include assets from all loaded non-overlay
+        // APKs, including the framework; framework-res.apk contains at least
+        // assets/{images,webkit}. Rather than checking the list, verify that
+        // assets only present in overlays are never part of the list.
+        String[] files = am.list("");
+        assertTrue(ArrayUtils.contains(files, "package-name.txt"));
+        assertFalse(ArrayUtils.contains(files, "foo.txt"));
+        assertFalse(ArrayUtils.contains(files, "bar.txt"));
+
+        String contents = null;
+        try (InputStream is = am.open("package-name.txt")) {
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(is, StandardCharsets.UTF_8));
+            StringBuilder str = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                str.append(line);
+            }
+            contents = str.toString();
+        }
+        assertEquals("com.android.overlaytest", contents);
     }
 
     /*
@@ -536,61 +566,5 @@ public abstract class OverlayBaseTest {
         final int resId = R.integer.matrix_111111;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
-    }
-
-    /**
-     * Executes the shell command and reads all the output to ensure the command ran and didn't
-     * get stuck buffering on output.
-     */
-    protected static String executeShellCommand(UiAutomation automation, String command)
-            throws Exception {
-        final ParcelFileDescriptor pfd = automation.executeShellCommand(command);
-        try (InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
-            final BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(in, StandardCharsets.UTF_8));
-            StringBuilder str = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                str.append(line);
-            }
-            return str.toString();
-        }
-    }
-
-    /**
-     * Enables overlay packages and waits for a configuration change event before
-     * returning, to guarantee that Resources are up-to-date.
-     * @param packages the list of package names to enable.
-     */
-    protected static void enableOverlayPackages(String... packages) throws Exception {
-        enableOverlayPackages(true, packages);
-    }
-
-    /**
-     * Disables overlay packages and waits for a configuration change event before
-     * returning, to guarantee that Resources are up-to-date.
-     * @param packages the list of package names to disable.
-     */
-    protected static void disableOverlayPackages(String... packages) throws Exception {
-        enableOverlayPackages(false, packages);
-    }
-
-    /**
-     * Enables/disables overlay packages and waits for a configuration change event before
-     * returning, to guarantee that Resources are up-to-date.
-     * @param enable enables the overlays when true, disables when false.
-     * @param packages the list of package names to enable/disable.
-     */
-    private static void enableOverlayPackages(boolean enable, String[] packages)
-            throws Exception {
-        final UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation()
-                .getUiAutomation();
-        for (final String pkg : packages) {
-            executeShellCommand(uiAutomation,
-                    "cmd overlay " + (enable ? "enable " : "disable ") + pkg);
-        }
-
-        // Wait for the overlay change to propagate.
-        Thread.sleep(1000);
     }
 }

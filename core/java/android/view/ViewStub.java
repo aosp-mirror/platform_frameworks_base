@@ -108,6 +108,9 @@ public final class ViewStub extends View {
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.ViewStub, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.ViewStub, attrs, a, defStyleAttr,
+                defStyleRes);
+
         mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);
         mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, 0);
         mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);

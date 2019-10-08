@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<!-- extends RelativeLayout -->
+<com.android.systemui.qs.car.CarQSFooter
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qs_footer"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/car_qs_footer_height"
+    android:baselineAligned="false"
+    android:clickable="false"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:paddingBottom="@dimen/car_qs_footer_padding_bottom"
+    android:paddingTop="@dimen/car_qs_footer_padding_top"
+    android:paddingEnd="@dimen/car_qs_footer_padding_end"
+    android:paddingStart="@dimen/car_qs_footer_padding_start"
+    android:gravity="center_vertical">
+
+    <com.android.systemui.statusbar.phone.MultiUserSwitch
+        android:id="@+id/multi_user_switch"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_width="@dimen/car_qs_footer_icon_width"
+        android:layout_height="@dimen/car_qs_footer_icon_height"
+        android:background="?android:attr/selectableItemBackground"
+        android:focusable="true">
+
+        <ImageView
+            android:id="@+id/multi_user_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"/>
+    </com.android.systemui.statusbar.phone.MultiUserSwitch>
+
+    <ImageView
+        android:id="@+id/user_switch_expand_icon"
+        android:layout_height="match_parent"
+        android:layout_width="@dimen/car_qs_footer_user_switch_icon_width"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/multi_user_switch"
+        android:layout_marginLeft="@dimen/car_qs_footer_user_switch_icon_margin"
+        android:layout_marginRight="@dimen/car_qs_footer_user_switch_icon_margin"
+        android:src="@drawable/car_ic_arrow_drop_up"
+        android:scaleType="fitCenter">
+    </ImageView>
+
+    <TextView android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/car_qs_footer_user_name_text_size"
+        android:textColor="@color/car_qs_footer_user_name_color"
+        android:gravity="start|center_vertical"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/user_switch_expand_icon" />
+
+    <com.android.systemui.statusbar.phone.SettingsButton
+        android:id="@+id/settings_button"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_width="@dimen/car_qs_footer_icon_width"
+        android:layout_height="@dimen/car_qs_footer_icon_height"
+        android:background="@drawable/ripple_drawable"
+        android:contentDescription="@string/accessibility_quick_settings_settings"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_settings_16dp"
+        android:tint="?android:attr/colorForeground"
+        style="@android:style/Widget.Material.Button.Borderless" />
+
+</com.android.systemui.qs.car.CarQSFooter>

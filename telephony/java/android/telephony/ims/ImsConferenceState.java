@@ -16,6 +16,7 @@
 
 package android.telephony.ims;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -135,7 +136,7 @@ public final class ImsConferenceState implements Parcelable {
         }
     }
 
-    public static final Creator<ImsConferenceState> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsConferenceState> CREATOR =
             new Creator<ImsConferenceState>() {
         @Override
         public ImsConferenceState createFromParcel(Parcel in) {
@@ -176,6 +177,7 @@ public final class ImsConferenceState implements Parcelable {
         return Call.STATE_ACTIVE;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

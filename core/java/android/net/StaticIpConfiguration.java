@@ -236,6 +236,7 @@ public final class StaticIpConfiguration implements Parcelable {
         return lp;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuffer str = new StringBuffer();
@@ -267,7 +268,7 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof StaticIpConfiguration)) return false;
@@ -282,7 +283,7 @@ public final class StaticIpConfiguration implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<StaticIpConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<StaticIpConfiguration> CREATOR =
         new Creator<StaticIpConfiguration>() {
             public StaticIpConfiguration createFromParcel(Parcel in) {
                 return readFromParcel(in);

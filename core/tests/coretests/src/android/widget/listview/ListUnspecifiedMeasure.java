@@ -16,12 +16,13 @@
 
 package android.widget.listview;
 
-import com.android.frameworks.coretests.R;
-
-import android.test.ActivityInstrumentationTestCase;
 import android.app.Activity;
-import android.test.suitebuilder.annotation.MediumTest;
+import android.test.ActivityInstrumentationTestCase;
 import android.widget.ListView;
+
+import androidx.test.filters.MediumTest;
+
+import com.android.frameworks.coretests.R;
 
 public class ListUnspecifiedMeasure<T extends Activity> extends ActivityInstrumentationTestCase<T> {
     private T mActivity;

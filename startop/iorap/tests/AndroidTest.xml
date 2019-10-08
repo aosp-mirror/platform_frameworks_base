@@ -33,9 +33,18 @@
     <target_preparer class="com.android.tradefed.targetprep.DisableSELinuxTargetPreparer">
     </target_preparer>
 
+    <target_preparer
+        class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- Crash instead of using Log.wtf within the system_server iorap code. -->
+        <option name="set-property" key="iorapd.forwarding_service.wtf_crash" value="true" />
+        <!-- IIorapd has fake behavior: it doesn't do anything but reply with 'DONE' status -->
+        <option name="set-property" key="iorapd.binder.fake" value="true" />
+        <option name="restore-properties" value="true" />
+    </target_preparer>
+
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.google.android.startop.iorap.tests" />
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
     </test>
 </configuration>
 

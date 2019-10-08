@@ -70,7 +70,7 @@
     <shortcode country="ca" pattern="\\d{5,6}" premium="60999|88188|43030" standard="244444" />
 
     <!-- Switzerland: 3-5 digits: http://www.swisscom.ch/fxres/kmu/thirdpartybusiness_code_of_conduct_en.pdf -->
-    <shortcode country="ch" pattern="[2-9]\\d{2,4}" premium="543|83111|30118" free="98765|30075" />
+    <shortcode country="ch" pattern="[2-9]\\d{2,4}" premium="543|83111|30118" free="98765|30075|30047" />
 
     <!-- Chile: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="cl" pattern="\\d{4,5}" free="9963|9240" />

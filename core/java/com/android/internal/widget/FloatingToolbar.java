@@ -33,7 +33,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Size;
-import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -593,7 +592,7 @@ public final class FloatingToolbar {
             refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
             // We need to specify the position in window coordinates.
-            // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
+            // TODO: Consider to use PopupWindow.setIsLaidOutInScreen(true) so that we can
             // specify the popup position in screen coordinates.
             mPopupWindow.showAtLocation(
                     mParent, Gravity.NO_GRAVITY, mCoordsOnWindow.x, mCoordsOnWindow.y);
@@ -661,7 +660,7 @@ public final class FloatingToolbar {
             refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
             preparePopupContent();
             // We need to specify the position in window coordinates.
-            // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can
+            // TODO: Consider to use PopupWindow.setIsLaidOutInScreen(true) so that we can
             // specify the popup position in screen coordinates.
             mPopupWindow.update(
                     mCoordsOnWindow.x, mCoordsOnWindow.y,
@@ -755,7 +754,7 @@ public final class FloatingToolbar {
             // and screen coordiantes, where the offset between them should be equal to the window
             // origin, and 2) we can use an arbitrary for this calculation while calculating the
             // location of the rootview is supposed to be least expensive.
-            // TODO: Consider to use PopupWindow.setLayoutInScreenEnabled(true) so that we can avoid
+            // TODO: Consider to use PopupWindow.setIsLaidOutInScreen(true) so that we can avoid
             // the following calculation.
             mParent.getRootView().getLocationOnScreen(mTmpCoords);
             int rootViewLeftOnScreen = mTmpCoords[0];
@@ -1722,7 +1721,7 @@ public final class FloatingToolbar {
     private static PopupWindow createPopupWindow(ViewGroup content) {
         ViewGroup popupContentHolder = new LinearLayout(content.getContext());
         PopupWindow popupWindow = new PopupWindow(popupContentHolder);
-        // TODO: Use .setLayoutInScreenEnabled(true) instead of .setClippingEnabled(false)
+        // TODO: Use .setIsLaidOutInScreen(true) instead of .setClippingEnabled(false)
         // unless FLAG_LAYOUT_IN_SCREEN has any unintentional side-effects.
         popupWindow.setClippingEnabled(false);
         popupWindow.setWindowLayoutType(

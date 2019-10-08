@@ -149,4 +149,7 @@
     <color name="autofill_background_material_dark">@color/material_blue_grey_900</color>
     <color name="autofill_background_material_light">@color/material_grey_50</color>
 
+    <!-- List divider opacity -->
+    <color name="list_divider_opacity_material">#1f000000</color>
+
 </resources>

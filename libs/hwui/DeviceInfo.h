@@ -16,48 +16,45 @@
 #ifndef DEVICEINFO_H
 #define DEVICEINFO_H
 
+#include <SkImageInfo.h>
 #include <ui/DisplayInfo.h>
 
-#include "Extensions.h"
 #include "utils/Macros.h"
 
 namespace android {
 namespace uirenderer {
 
+namespace renderthread {
+    class RenderThread;
+}
+
 class DeviceInfo {
     PREVENT_COPY_AND_ASSIGN(DeviceInfo);
 
 public:
-    // returns nullptr if DeviceInfo is not initialized yet
-    // Note this does not have a memory fence so it's up to the caller
-    // to use one if required. Normally this should not be necessary
-    static const DeviceInfo* get();
+    static DeviceInfo* get();
 
-    // only call this after GL has been initialized, or at any point if compiled
-    // with HWUI_NULL_GPU
-    static void initialize();
-    static void initialize(int maxTextureSize);
-
-    int maxTextureSize() const { return mMaxTextureSize; }
+    // this value is only valid after the GPU has been initialized and there is a valid graphics
+    // context or if you are using the HWUI_NULL_GPU
+    int maxTextureSize() const;
     const DisplayInfo& displayInfo() const { return mDisplayInfo; }
-    const Extensions& extensions() const { return mExtensions; }
+    sk_sp<SkColorSpace> getWideColorSpace() const { return mWideColorSpace; }
+    SkColorType getWideColorType() const { return mWideColorType; }
+    float getMaxRefreshRate() const { return mMaxRefreshRate; }
 
-    static uint32_t multiplyByResolution(uint32_t in) {
-        auto di = DeviceInfo::get()->displayInfo();
-        return di.w * di.h * in;
-    }
-
-    static DisplayInfo queryDisplayInfo();
+    void onDisplayConfigChanged();
 
 private:
-    DeviceInfo() {}
-    ~DeviceInfo() {}
+    friend class renderthread::RenderThread;
+    static void setMaxTextureSize(int maxTextureSize);
 
-    void load();
+    DeviceInfo();
 
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;
-    Extensions mExtensions;
+    sk_sp<SkColorSpace> mWideColorSpace;
+    SkColorType mWideColorType;
+    const float mMaxRefreshRate;
 };
 
 } /* namespace uirenderer */

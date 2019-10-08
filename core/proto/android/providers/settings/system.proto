@@ -20,7 +20,7 @@ package android.providers.settings;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/providers/settings/common.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 // Note: it's a conscious decision to add each setting as a separate field. This
 // allows annotating each setting with its own privacy tag.
@@ -232,6 +232,8 @@ message SystemSettingsProto {
         // Which streams are affected by mute. The stream type's bit should be set
         // to 1 if it should be muted when a mute request is received.
         optional SettingProto mute_streams_affected = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Master balance (float -1.f = 100% left, 0.f = dead center, 1.f = 100% right).
+        optional SettingProto master_balance = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Volume volume = 33;
 

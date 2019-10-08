@@ -131,7 +131,7 @@ public final class SubscriptionPlan implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof SubscriptionPlan) {
             final SubscriptionPlan other = (SubscriptionPlan) obj;
             return Objects.equals(cycleRule, other.cycleRule)
@@ -145,7 +145,7 @@ public final class SubscriptionPlan implements Parcelable {
         return false;
     }
 
-    public static final Parcelable.Creator<SubscriptionPlan> CREATOR = new Parcelable.Creator<SubscriptionPlan>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<SubscriptionPlan> CREATOR = new Parcelable.Creator<SubscriptionPlan>() {
         @Override
         public SubscriptionPlan createFromParcel(Parcel source) {
             return new SubscriptionPlan(source);

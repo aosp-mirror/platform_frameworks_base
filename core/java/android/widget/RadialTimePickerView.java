@@ -404,6 +404,8 @@ public class RadialTimePickerView extends View {
         final Context context = getContext();
         final TypedArray a = getContext().obtainStyledAttributes(attrs,
                 R.styleable.TimePicker, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.TimePicker,
+                attrs, a, defStyleAttr, defStyleRes);
 
         final ColorStateList numbersTextColor = a.getColorStateList(
                 R.styleable.TimePicker_numbersTextColor);

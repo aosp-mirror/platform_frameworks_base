@@ -627,7 +627,7 @@ public final class TvInputManagerService extends SystemService {
         updateServiceConnectionLocked(serviceState.component, userId);
     }
 
-    private void createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
+    private boolean createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
             int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
@@ -639,6 +639,7 @@ public final class TvInputManagerService extends SystemService {
         // Set up a callback to send the session token.
         ITvInputSessionCallback callback = new SessionCallback(sessionState, channels);
 
+        boolean created = true;
         // Create a session. When failed, send a null token immediately.
         try {
             if (sessionState.isRecordingSession) {
@@ -648,11 +649,12 @@ public final class TvInputManagerService extends SystemService {
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
-            removeSessionStateLocked(sessionToken, userId);
             sendSessionTokenToClientLocked(sessionState.client, sessionState.inputId, null,
                     null, sessionState.seq);
+            created = false;
         }
         channels[1].dispose();
+        return created;
     }
 
     private void sendSessionTokenToClientLocked(ITvInputClient client, String inputId,
@@ -840,6 +842,10 @@ public final class TvInputManagerService extends SystemService {
     private void setStateLocked(String inputId, int state, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         TvInputState inputState = userState.inputMap.get(inputId);
+        if (inputState == null) {
+            Slog.e(TAG, "failed to setStateLocked - unknown input id " + inputId);
+            return;
+        }
         ServiceState serviceState = userState.serviceStateMap.get(inputState.info.getComponent());
         int oldState = inputState.state;
         inputState.state = state;
@@ -1194,8 +1200,10 @@ public final class TvInputManagerService extends SystemService {
                     serviceState.sessionTokens.add(sessionToken);
 
                     if (serviceState.service != null) {
-                        createSessionInternalLocked(serviceState.service, sessionToken,
-                                resolvedUserId);
+                        if (!createSessionInternalLocked(serviceState.service, sessionToken,
+                                resolvedUserId)) {
+                            removeSessionStateLocked(sessionToken, resolvedUserId);
+                        }
                     } else {
                         updateServiceConnectionLocked(info.getComponent(), resolvedUserId);
                     }
@@ -2286,9 +2294,17 @@ public final class TvInputManagerService extends SystemService {
                     }
                 }
 
+                List<IBinder> tokensToBeRemoved = new ArrayList<>();
+
                 // And create sessions, if any.
                 for (IBinder sessionToken : serviceState.sessionTokens) {
-                    createSessionInternalLocked(serviceState.service, sessionToken, mUserId);
+                    if (!createSessionInternalLocked(serviceState.service, sessionToken, mUserId)) {
+                        tokensToBeRemoved.add(sessionToken);
+                    }
+                }
+
+                for (IBinder sessionToken : tokensToBeRemoved) {
+                    removeSessionStateLocked(sessionToken, mUserId);
                 }
 
                 for (TvInputState inputState : userState.inputMap.values()) {

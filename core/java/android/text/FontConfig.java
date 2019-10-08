@@ -181,7 +181,8 @@ public final class FontConfig {
     public static final class Family {
         private final @NonNull String mName;
         private final @NonNull Font[] mFonts;
-        private final @NonNull String[] mLanguages;
+        // Comma separated BCP47 complient locale strings
+        private final @NonNull String mLanguages;
 
         /** @hide */
         @Retention(SOURCE)
@@ -219,7 +220,7 @@ public final class FontConfig {
         // See frameworks/minikin/include/minikin/FontFamily.h
         private final @Variant int mVariant;
 
-        public Family(@NonNull String name, @NonNull Font[] fonts, @NonNull String[] languages,
+        public Family(@NonNull String name, @NonNull Font[] fonts, @NonNull String languages,
                 @Variant int variant) {
             mName = name;
             mFonts = fonts;
@@ -244,9 +245,9 @@ public final class FontConfig {
         }
 
         /**
-         * Returns the languages for this family. May be null.
+         * Returns the comma separated BCP47 complient languages for this family. May be null.
          */
-        public @Nullable String[] getLanguages() {
+        public @NonNull String getLanguages() {
             return mLanguages;
         }
 

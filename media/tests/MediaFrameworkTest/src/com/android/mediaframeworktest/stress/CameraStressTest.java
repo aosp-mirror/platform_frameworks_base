@@ -28,13 +28,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.List;
 
 import android.hardware.Camera.Parameters;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.SurfaceHolder;
+
+import androidx.test.InstrumentationRegistry;
 
 /**
  * Junit / Instrumentation test case for the following camera APIs:
@@ -85,7 +86,8 @@ public class CameraStressTest extends ActivityInstrumentationTestCase2<MediaFram
 
         mCameraTestHelper = new CameraTestHelper();
         File stressOutFile = new File(String.format("%s/%s",
-                Environment.getExternalStorageDirectory(), CAMERA_STRESS_OUTPUT));
+                InstrumentationRegistry.getInstrumentation().getTargetContext()
+                .getExternalFilesDir(null).getPath(), CAMERA_STRESS_OUTPUT));
         mOutput = new BufferedWriter(new FileWriter(stressOutFile, true));
         mOutput.write(this.getName() + "\n");
     }

@@ -15,6 +15,7 @@
  */
 package com.android.server.pm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
@@ -55,10 +56,14 @@ public class ShortcutParser {
     private static final String TAG_SHORTCUT = "shortcut";
     private static final String TAG_INTENT = "intent";
     private static final String TAG_CATEGORIES = "categories";
+    private static final String TAG_SHARE_TARGET = "share-target";
+    private static final String TAG_DATA = "data";
+    private static final String TAG_CATEGORY = "category";
 
     @Nullable
-    public static List<ShortcutInfo> parseShortcuts(ShortcutService service,
-            String packageName, @UserIdInt int userId) throws IOException, XmlPullParserException {
+    public static List<ShortcutInfo> parseShortcuts(ShortcutService service, String packageName,
+            @UserIdInt int userId, @NonNull List<ShareTargetInfo> outShareTargets)
+            throws IOException, XmlPullParserException {
         if (ShortcutService.DEBUG) {
             Slog.d(TAG, String.format("Scanning package %s for manifest shortcuts on user %d",
                     packageName, userId));
@@ -69,6 +74,7 @@ public class ShortcutParser {
         }
 
         List<ShortcutInfo> result = null;
+        outShareTargets.clear();
 
         try {
             final int size = activities.size();
@@ -82,8 +88,8 @@ public class ShortcutParser {
                         service.getActivityInfoWithMetadata(
                         activityInfoNoMetadata.getComponentName(), userId);
                 if (activityInfoWithMetadata != null) {
-                    result = parseShortcutsOneFile(
-                            service, activityInfoWithMetadata, packageName, userId, result);
+                    result = parseShortcutsOneFile(service, activityInfoWithMetadata, packageName,
+                            userId, result, outShareTargets);
                 }
             }
         } catch (RuntimeException e) {
@@ -99,7 +105,8 @@ public class ShortcutParser {
     private static List<ShortcutInfo> parseShortcutsOneFile(
             ShortcutService service,
             ActivityInfo activityInfo, String packageName, @UserIdInt int userId,
-            List<ShortcutInfo> result) throws IOException, XmlPullParserException {
+            List<ShortcutInfo> result, @NonNull List<ShareTargetInfo> outShareTargets)
+            throws IOException, XmlPullParserException {
         if (ShortcutService.DEBUG) {
             Slog.d(TAG, String.format(
                     "Checking main activity %s", activityInfo.getComponentName()));
@@ -126,8 +133,18 @@ public class ShortcutParser {
             // after parsing <intent>.  We keep the current one in here.
             ShortcutInfo currentShortcut = null;
 
+            // We instantiate ShareTargetInfo at <share-target>, but add it to outShareTargets at
+            // </share-target>, after parsing <data> and <category>. We keep the current one here.
+            ShareTargetInfo currentShareTarget = null;
+
+            // Keeps parsed categories for both ShortcutInfo and ShareTargetInfo
             Set<String> categories = null;
+
+            // Keeps parsed intents for ShortcutInfo
             final ArrayList<Intent> intents = new ArrayList<>();
+
+            // Keeps parsed data fields for ShareTargetInfo
+            final ArrayList<ShareTargetInfo.TargetData> dataList = new ArrayList<>();
 
             outer:
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -194,6 +211,32 @@ public class ShortcutParser {
                     continue;
                 }
 
+                // When a share-target tag is closing, publish.
+                if ((type == XmlPullParser.END_TAG) && (depth == 2)
+                        && (TAG_SHARE_TARGET.equals(tag))) {
+                    if (currentShareTarget == null) {
+                        // ShareTarget was invalid.
+                        continue;
+                    }
+                    final ShareTargetInfo sti = currentShareTarget;
+                    currentShareTarget = null; // Make sure to null out for the next iteration.
+
+                    if (categories == null || categories.isEmpty() || dataList.isEmpty()) {
+                        // Incomplete ShareTargetInfo.
+                        continue;
+                    }
+
+                    final ShareTargetInfo newShareTarget = new ShareTargetInfo(
+                            dataList.toArray(new ShareTargetInfo.TargetData[dataList.size()]),
+                            sti.mTargetClass, categories.toArray(new String[categories.size()]));
+                    outShareTargets.add(newShareTarget);
+                    if (ShortcutService.DEBUG) {
+                        Slog.d(TAG, "ShareTarget added: " + newShareTarget.toString());
+                    }
+                    categories = null;
+                    dataList.clear();
+                }
+
                 // Otherwise, just look at start tags.
                 if (type != XmlPullParser.START_TAG) {
                     continue;
@@ -222,6 +265,17 @@ public class ShortcutParser {
                     }
                     currentShortcut = si;
                     categories = null;
+                    continue;
+                }
+                if (depth == 2 && TAG_SHARE_TARGET.equals(tag)) {
+                    final ShareTargetInfo sti = parseShareTargetAttributes(service, attrs);
+                    if (sti == null) {
+                        // ShareTarget was invalid.
+                        continue;
+                    }
+                    currentShareTarget = sti;
+                    categories = null;
+                    dataList.clear();
                     continue;
                 }
                 if (depth == 3 && TAG_INTENT.equals(tag)) {
@@ -256,6 +310,34 @@ public class ShortcutParser {
                         categories = new ArraySet<>();
                     }
                     categories.add(name);
+                    continue;
+                }
+                if (depth == 3 && TAG_CATEGORY.equals(tag)) {
+                    if ((currentShareTarget == null)) {
+                        continue;
+                    }
+                    final String name = parseCategory(service, attrs);
+                    if (TextUtils.isEmpty(name)) {
+                        Log.e(TAG, "Empty category found. activity=" + activity);
+                        continue;
+                    }
+
+                    if (categories == null) {
+                        categories = new ArraySet<>();
+                    }
+                    categories.add(name);
+                    continue;
+                }
+                if (depth == 3 && TAG_DATA.equals(tag)) {
+                    if ((currentShareTarget == null)) {
+                        continue;
+                    }
+                    final ShareTargetInfo.TargetData data = parseShareTargetData(service, attrs);
+                    if (data == null) {
+                        Log.e(TAG, "Invalid data tag found. activity=" + activity);
+                        continue;
+                    }
+                    dataList.add(data);
                     continue;
                 }
 
@@ -367,6 +449,61 @@ public class ShortcutParser {
                 iconResId,
                 null, // icon res name
                 null, // bitmap path
-                disabledReason);
+                disabledReason,
+                null /* persons */,
+                null /* locusId */);
+    }
+
+    private static String parseCategory(ShortcutService service, AttributeSet attrs) {
+        final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
+                R.styleable.IntentCategory);
+        try {
+            if (sa.getType(R.styleable.IntentCategory_name) != TypedValue.TYPE_STRING) {
+                Log.w(TAG, "android:name must be string literal.");
+                return null;
+            }
+            return sa.getString(R.styleable.IntentCategory_name);
+        } finally {
+            sa.recycle();
+        }
+    }
+
+    private static ShareTargetInfo parseShareTargetAttributes(ShortcutService service,
+            AttributeSet attrs) {
+        final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
+                R.styleable.Intent);
+        try {
+            String targetClass = sa.getString(R.styleable.Intent_targetClass);
+            if (TextUtils.isEmpty(targetClass)) {
+                Log.w(TAG, "android:targetClass must be provided.");
+                return null;
+            }
+            return new ShareTargetInfo(null, targetClass, null);
+        } finally {
+            sa.recycle();
+        }
+    }
+
+    private static ShareTargetInfo.TargetData parseShareTargetData(ShortcutService service,
+            AttributeSet attrs) {
+        final TypedArray sa = service.mContext.getResources().obtainAttributes(attrs,
+                R.styleable.AndroidManifestData);
+        try {
+            if (sa.getType(R.styleable.AndroidManifestData_mimeType) != TypedValue.TYPE_STRING) {
+                Log.w(TAG, "android:mimeType must be string literal.");
+                return null;
+            }
+            String scheme = sa.getString(R.styleable.AndroidManifestData_scheme);
+            String host = sa.getString(R.styleable.AndroidManifestData_host);
+            String port = sa.getString(R.styleable.AndroidManifestData_port);
+            String path = sa.getString(R.styleable.AndroidManifestData_path);
+            String pathPattern = sa.getString(R.styleable.AndroidManifestData_pathPattern);
+            String pathPrefix = sa.getString(R.styleable.AndroidManifestData_pathPrefix);
+            String mimeType = sa.getString(R.styleable.AndroidManifestData_mimeType);
+            return new ShareTargetInfo.TargetData(scheme, host, port, path, pathPattern, pathPrefix,
+                    mimeType);
+        } finally {
+            sa.recycle();
+        }
     }
 }

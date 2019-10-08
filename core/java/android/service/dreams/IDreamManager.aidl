@@ -29,7 +29,6 @@ interface IDreamManager {
     void awaken();
     @UnsupportedAppUsage
     void setDreamComponents(in ComponentName[] componentNames);
-    @UnsupportedAppUsage
     ComponentName[] getDreamComponents();
     ComponentName getDefaultDreamComponent();
     void testDream(in ComponentName componentName);
@@ -38,4 +37,5 @@ interface IDreamManager {
     void finishSelf(in IBinder token, boolean immediate);
     void startDozing(in IBinder token, int screenState, int screenBrightness);
     void stopDozing(in IBinder token);
+    void forceAmbientDisplayEnabled(boolean enabled);
 }

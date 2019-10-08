@@ -50,8 +50,10 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.WindowManagerGlobal;
 
 import com.android.internal.content.ReferrerIntent;
 
@@ -111,6 +113,7 @@ public class Instrumentation {
     private PerformanceCollector mPerformanceCollector;
     private Bundle mPerfMetrics = new Bundle();
     private UiAutomation mUiAutomation;
+    private final Object mAnimationCompleteLock = new Object();
 
     public Instrumentation() {
     }
@@ -398,6 +401,31 @@ public class Instrumentation {
         idler.waitForIdle();
     }
 
+    private void waitForEnterAnimationComplete(Activity activity) {
+        synchronized (mAnimationCompleteLock) {
+            long timeout = 5000;
+            try {
+                // We need to check that this specified Activity completed the animation, not just
+                // any Activity. If it was another Activity, then decrease the timeout by how long
+                // it's already waited and wait for the thread to wakeup again.
+                while (timeout > 0 && !activity.mEnterAnimationComplete) {
+                    long startTime = System.currentTimeMillis();
+                    mAnimationCompleteLock.wait(timeout);
+                    long totalTime = System.currentTimeMillis() - startTime;
+                    timeout -= totalTime;
+                }
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
+    /** @hide */
+    public void onEnterAnimationComplete() {
+        synchronized (mAnimationCompleteLock) {
+            mAnimationCompleteLock.notifyAll();
+        }
+    }
+
     /**
      * Execute a call on the application's main thread, blocking until it is
      * complete.  Useful for doing things that are not thread-safe, such as
@@ -500,6 +528,13 @@ public class Instrumentation {
                 }
             } while (mWaitingActivities.contains(aw));
 
+            waitForEnterAnimationComplete(aw.activity);
+
+            // Apply an empty transaction to ensure SF has a chance to update before
+            // the Activity is ready (b/138263890).
+            try (SurfaceControl.Transaction t = new SurfaceControl.Transaction()) {
+                t.apply(true);
+            }
             return aw.activity;
         }
     }
@@ -1010,7 +1045,7 @@ public class Instrumentation {
      * from its event processing, though it may <em>not</em> have completely
      * finished reacting from the event -- for example, if it needs to update
      * its display as a result, it may still be in the process of doing that.
-     * 
+     *
      * @param event The event to send to the current focus.
      */
     public void sendKeySync(KeyEvent event) {
@@ -1018,14 +1053,7 @@ public class Instrumentation {
 
         long downTime = event.getDownTime();
         long eventTime = event.getEventTime();
-        int action = event.getAction();
-        int code = event.getKeyCode();
-        int repeatCount = event.getRepeatCount();
-        int metaState = event.getMetaState();
-        int deviceId = event.getDeviceId();
-        int scancode = event.getScanCode();
         int source = event.getSource();
-        int flags = event.getFlags();
         if (source == InputDevice.SOURCE_UNKNOWN) {
             source = InputDevice.SOURCE_KEYBOARD;
         }
@@ -1035,12 +1063,14 @@ public class Instrumentation {
         if (downTime == 0) {
             downTime = eventTime;
         }
-        KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
+        KeyEvent newEvent = new KeyEvent(event);
+        newEvent.setTime(downTime, eventTime);
+        newEvent.setSource(source);
+        newEvent.setFlags(event.getFlags() | KeyEvent.FLAG_FROM_SYSTEM);
         InputManager.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
-    
+
     /**
      * Sends an up and down key event sync to the currently focused window.
      * 
@@ -1080,8 +1110,11 @@ public class Instrumentation {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
             event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
         }
-        InputManager.getInstance().injectInputEvent(event,
-                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        try {
+            WindowManagerGlobal.getWindowManagerService().injectInputAfterTransactionsApplied(event,
+                    InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
@@ -1180,7 +1213,7 @@ public class Instrumentation {
     public Activity newActivity(Class<?> clazz, Context context, 
             IBinder token, Application application, Intent intent, ActivityInfo info, 
             CharSequence title, Activity parent, String id,
-            Object lastNonConfigurationInstance) throws InstantiationException, 
+            Object lastNonConfigurationInstance) throws InstantiationException,
             IllegalAccessException {
         Activity activity = (Activity)clazz.newInstance();
         ActivityThread aThread = null;
@@ -1192,7 +1225,7 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */);
+                null /* window */, null /* activityConfigCallback */, null /*assistToken*/);
         return activity;
     }
 
@@ -1315,7 +1348,8 @@ public class Instrumentation {
      * @param activity The activity being restored.
      * @param savedInstanceState The previously saved state being restored.
      */
-    public void callActivityOnRestoreInstanceState(Activity activity, Bundle savedInstanceState) {
+    public void callActivityOnRestoreInstanceState(@NonNull Activity activity,
+            @NonNull Bundle savedInstanceState) {
         activity.performRestoreInstanceState(savedInstanceState);
     }
 
@@ -1324,11 +1358,12 @@ public class Instrumentation {
      * method.  The default implementation simply calls through to that method.
      *
      * @param activity The activity being restored.
-     * @param savedInstanceState The previously saved state being restored.
+     * @param savedInstanceState The previously saved state being restored (or null).
      * @param persistentState The previously persisted state (or null)
      */
-    public void callActivityOnRestoreInstanceState(Activity activity, Bundle savedInstanceState,
-            PersistableBundle persistentState) {
+    public void callActivityOnRestoreInstanceState(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
         activity.performRestoreInstanceState(savedInstanceState, persistentState);
     }
 
@@ -1337,11 +1372,12 @@ public class Instrumentation {
      * The default implementation simply calls through to that method.
      *
      * @param activity The activity being created.
-     * @param icicle The previously frozen state (or null) to pass through to
+     * @param savedInstanceState The previously saved state (or null) to pass through to
      *               onPostCreate().
      */
-    public void callActivityOnPostCreate(Activity activity, Bundle icicle) {
-        activity.onPostCreate(icicle);
+    public void callActivityOnPostCreate(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState) {
+        activity.onPostCreate(savedInstanceState);
     }
 
     /**
@@ -1349,12 +1385,14 @@ public class Instrumentation {
      * The default implementation simply calls through to that method.
      *
      * @param activity The activity being created.
-     * @param icicle The previously frozen state (or null) to pass through to
+     * @param savedInstanceState The previously frozen state (or null) to pass through to
      *               onPostCreate().
+     * @param persistentState The previously persisted state (or null)
      */
-    public void callActivityOnPostCreate(Activity activity, Bundle icicle,
-            PersistableBundle persistentState) {
-        activity.onPostCreate(icicle, persistentState);
+    public void callActivityOnPostCreate(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
+        activity.onPostCreate(savedInstanceState, persistentState);
     }
 
     /**
@@ -1442,7 +1480,8 @@ public class Instrumentation {
      * @param activity The activity being saved.
      * @param outState The bundle to pass to the call.
      */
-    public void callActivityOnSaveInstanceState(Activity activity, Bundle outState) {
+    public void callActivityOnSaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState) {
         activity.performSaveInstanceState(outState);
     }
 
@@ -1453,8 +1492,8 @@ public class Instrumentation {
      * @param outState The bundle to pass to the call.
      * @param outPersistentState The persistent bundle to pass to the call.
      */
-    public void callActivityOnSaveInstanceState(Activity activity, Bundle outState,
-            PersistableBundle outPersistentState) {
+    public void callActivityOnSaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
         activity.performSaveInstanceState(outState, outPersistentState);
     }
 
@@ -1669,7 +1708,7 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityManager.getService()
+            int result = ActivityTaskManager.getService()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
@@ -1742,7 +1781,7 @@ public class Instrumentation {
                 intents[i].prepareToLeaveProcess(who);
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
-            int result = ActivityManager.getService()
+            int result = ActivityTaskManager.getService()
                 .startActivities(whoThread, who.getBasePackageName(), intents, resolvedTypes,
                         token, options, userId);
             checkStartActivityResult(result, intents[0]);
@@ -1810,7 +1849,7 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityManager.getService()
+            int result = ActivityTaskManager.getService()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target, requestCode, 0, null, options);
@@ -1878,7 +1917,7 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityManager.getService()
+            int result = ActivityTaskManager.getService()
                 .startActivityAsUser(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, resultWho,
@@ -1897,8 +1936,8 @@ public class Instrumentation {
     @UnsupportedAppUsage
     public ActivityResult execStartActivityAsCaller(
             Context who, IBinder contextThread, IBinder token, Activity target,
-            Intent intent, int requestCode, Bundle options, boolean ignoreTargetSecurity,
-            int userId) {
+            Intent intent, int requestCode, Bundle options, IBinder permissionToken,
+            boolean ignoreTargetSecurity, int userId) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
@@ -1925,11 +1964,12 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityManager.getService()
+            int result = ActivityTaskManager.getService()
                 .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, options, ignoreTargetSecurity, userId);
+                        requestCode, 0, null, options, permissionToken,
+                        ignoreTargetSecurity, userId);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);

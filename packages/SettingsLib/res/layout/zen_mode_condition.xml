@@ -67,7 +67,7 @@
         android:layout_toStartOf="@android:id/button2"
         android:contentDescription="@string/accessibility_manual_zen_less_time"
         android:tint="?android:attr/colorAccent"
-        android:src="@drawable/ic_minus" />
+        android:src="@*android:drawable/ic_minus" />
 
     <ImageView
         android:id="@android:id/button2"
@@ -79,6 +79,6 @@
         android:layout_centerVertical="true"
         android:contentDescription="@string/accessibility_manual_zen_more_time"
         android:tint="?android:attr/colorAccent"
-        android:src="@drawable/ic_plus" />
+        android:src="@*android:drawable/ic_plus" />
 
 </RelativeLayout>

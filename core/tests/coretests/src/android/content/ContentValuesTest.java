@@ -17,8 +17,8 @@
 package android.content;
 
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 
 /*
   runtest -c android.content.ContentValuesTest frameworks-core
@@ -29,7 +29,7 @@ import android.test.suitebuilder.annotation.SmallTest;
     adb shell pm uninstall -k com.android.frameworks.coretests && \
     adb install out/target/product/bullhead/testcases/FrameworksCoreTests/FrameworksCoreTests.apk && \
     adb shell am instrument -w -e package android.content \
-      com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+      com.android.frameworks.coretests/androidx.test.runner.AndroidJUnitRunner
 */
 public class ContentValuesTest extends AndroidTestCase {
 

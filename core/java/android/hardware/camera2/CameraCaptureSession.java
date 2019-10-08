@@ -23,8 +23,8 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.os.Handler;
 import android.view.Surface;
 
-import java.util.concurrent.Executor;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A configured capture session for a {@link CameraDevice}, used for capturing images from the
@@ -745,7 +745,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      *
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
-     * @see StateCallback#onIdle
+     * @see StateCallback#onReady
      */
     public abstract void stopRepeating() throws CameraAccessException;
 

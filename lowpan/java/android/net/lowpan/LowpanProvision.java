@@ -128,7 +128,7 @@ public class LowpanProvision implements Parcelable {
     }
 
     /** Implement the Parcelable interface. */
-    public static final Creator<LowpanProvision> CREATOR =
+    public static final @android.annotation.NonNull Creator<LowpanProvision> CREATOR =
             new Creator<LowpanProvision>() {
                 public LowpanProvision createFromParcel(Parcel in) {
                     Builder builder = new Builder();

@@ -1,0 +1,146 @@
+
+###############################################################################
+#
+# Android-specific MIME type <-> extension mappings
+#
+# Each line below defines a mapping from one MIME type to the first of the
+# listed extensions, and from listed extension back to the MIME type.
+# A mapping overrides any previous mapping _from_ that same MIME type or
+# extension (put() semantics), unless that MIME type / extension is prefixed with '?'
+# (putIfAbsent() semantics).
+#
+#
+###############################################################################
+#
+# EXAMPLES
+#
+# A line of the form:
+#
+#    ?mime ext1 ?ext2 ext3
+#
+# affects the current mappings along the lines of the following pseudo code:
+#
+#    mimeToExt.putIfAbsent("mime", "ext1");
+#    extToMime.put("ext1", "mime");
+#    extToMime.putIfAbsent("ext2", "mime");
+#    extToMime.put("ext3", "mime");
+#
+# The line:
+#
+#     ?text/plain txt
+#
+# leaves any earlier mapping for "text/plain" untouched, or maps that MIME type
+# to the file extension ".txt" if there is no earlier mapping. The line also
+# sets the mapping from file extension ".txt" to be the MIME type "text/plain",
+# regardless of whether a previous mapping existed.
+#
+###############################################################################
+
+
+# File extensions that Android wants to override to point to the given MIME type.
+#
+# After processing a line of the form:
+# ?<mimeType> <extension1> <extension2>
+# If <mimeType> was not already mapped to an extension then it will be
+# mapped to <extension1>.
+# <extension1> and <extension2> are mapped (or remapped) to <mimeType>.
+
+?application/epub+zip epub
+?application/pkix-cert cer
+?application/rss+xml rss
+?application/vnd.android.ota ota
+?application/vnd.apple.mpegurl m3u8
+?application/vnd.ms-pki.stl stl
+?application/vnd.ms-powerpoint pot
+?application/vnd.ms-wpl wpl
+?application/vnd.stardivision.impress sdp
+?application/vnd.stardivision.writer vor
+?application/vnd.youtube.yt yt
+?application/x-android-drm-fl fl
+?application/x-flac flac
+?application/x-font pcf
+?application/x-mpegurl m3u m3u8
+?application/x-pem-file pem
+?application/x-pkcs12 p12 pfx
+?application/x-webarchive webarchive
+?application/x-webarchive-xml webarchivexml
+?application/x-x509-server-cert crt
+?application/x-x509-user-cert crt
+
+?audio/3gpp 3gpp
+?audio/aac-adts aac
+?audio/imelody imy
+?audio/midi rtttl xmf
+?audio/mobile-xmf mxmf
+?audio/mp4 m4a
+?audio/mpegurl m3u
+?audio/sp-midi smf
+?audio/x-matroska mka
+?audio/x-pn-realaudio ra
+
+?image/bmp bmp
+?image/heic heic
+?image/heic-sequence heics
+?image/heif heif hif
+?image/heif-sequence heifs
+?image/ico cur
+?image/webp webp
+?image/x-adobe-dng dng
+?image/x-fuji-raf raf
+?image/x-icon ico
+?image/x-nikon-nrw nrw
+?image/x-panasonic-rw2 rw2
+?image/x-pentax-pef pef
+?image/x-samsung-srw srw
+?image/x-sony-arw arw
+
+?text/comma-separated-values csv
+?text/plain diff po
+?text/rtf rtf
+?text/text phps
+?text/xml xml
+?text/x-vcard vcf
+
+?video/3gpp2 3gpp2 3g2
+?video/3gpp 3gpp
+?video/avi avi
+?video/m4v m4v
+?video/mp2p mpeg
+?video/mp2t m2ts mts
+?video/mp2ts ts
+?video/vnd.youtube.yt yt
+?video/x-webex wrf
+
+# Optional additions that should not override any previous mapping.
+
+?application/x-wifi-config ?xml
+
+# Special cases where Android has a strong opinion about mappings, so we
+# define them very last and make them override in both directions (no "?").
+#
+# Lines here are of the form:
+# <mimeType> <extension1> <extension2> ...
+#
+# After processing each line,
+#   <mimeType> is mapped to <extension1>
+#   <extension1>, <extension2>, ... are all mapped to <mimeType>
+# This overrides any mappings for this <mimeType> / for these extensions
+# that may have been defined earlier.
+
+application/pgp-signature pgp
+application/x-x509-ca-cert crt
+audio/aac aac
+audio/basic snd
+audio/flac flac
+audio/midi rtx
+audio/mpeg mp3 m4a m4r
+audio/x-mpegurl m3u m3u8
+image/jpeg jpg
+image/x-ms-bmp bmp
+text/plain txt
+text/x-c++hdr hpp
+text/x-c++src cpp
+video/3gpp 3gpp
+video/mpeg mpeg
+video/quicktime mov
+video/x-matroska mkv

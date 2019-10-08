@@ -16,7 +16,7 @@
 package com.android.test.uibench.listview;
 
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import androidx.fragment.app.ListFragment;
 import android.widget.ListView;
 
 public class FadingEdgeListFragment extends ListFragment {

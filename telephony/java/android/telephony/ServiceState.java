@@ -16,8 +16,6 @@
 
 package android.telephony;
 
-import static android.telephony.TelephonyManager.NETWORK_TYPE_BITMASK_UNKNOWN;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -371,15 +369,16 @@ public class ServiceState implements Parcelable {
     /**
      * Create a new ServiceState from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver and maybe by
+     * This method is used by PhoneStateIntentReceiver, CellBroadcastReceiver, and maybe by
      * external applications.
      *
      * @param m Bundle from intent notifier
      * @return newly created ServiceState
      * @hide
      */
+    @NonNull
     @UnsupportedAppUsage
-    public static ServiceState newFromBundle(Bundle m) {
+    public static ServiceState newFromBundle(@NonNull Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
         ret.setFromNotifierBundle(m);
@@ -504,7 +503,7 @@ public class ServiceState implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<ServiceState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ServiceState> CREATOR =
             new Parcelable.Creator<ServiceState>() {
         public ServiceState createFromParcel(Parcel in) {
             return new ServiceState(in);
@@ -1607,12 +1606,6 @@ public class ServiceState implements Parcelable {
         }
     }
 
-    /** @hide */
-    public static int networkTypeToAccessNetworkType(@TelephonyManager.NetworkType
-            int networkType) {
-        return rilRadioTechnologyToAccessNetworkType(networkTypeToRilRadioTechnology(networkType));
-    }
-
     /**
      * Get current data network type.
      *
@@ -1735,36 +1728,6 @@ public class ServiceState implements Parcelable {
         } else if (radioTech >= 1) {
             return ((bearerBitmask & (1 << (radioTech - 1))) != 0);
         }
-        return false;
-    }
-
-    /**
-     *
-     * Returns whether the bearerBitmask includes a networkType that matches the accessNetworkType.
-     *
-     * The NetworkType refers to NetworkType in TelephonyManager. For example
-     * {@link TelephonyManager#NETWORK_TYPE_GPRS}.
-     *
-     * The accessNetworkType refers to {@link AccessNetworkType}.
-     *
-     * @hide
-     * */
-    public static boolean networkBitmaskHasAccessNetworkType(
-            @TelephonyManager.NetworkTypeBitMask int networkBitmask, int accessNetworkType) {
-        if (networkBitmask == NETWORK_TYPE_BITMASK_UNKNOWN) return true;
-        if (accessNetworkType == AccessNetworkType.UNKNOWN) return false;
-
-        int networkType = 1;
-        while (networkBitmask != 0) {
-            if ((networkBitmask & 1) != 0) {
-                if (networkTypeToAccessNetworkType(networkType) == accessNetworkType) {
-                    return true;
-                }
-            }
-            networkBitmask = networkBitmask >> 1;
-            networkType++;
-        }
-
         return false;
     }
 

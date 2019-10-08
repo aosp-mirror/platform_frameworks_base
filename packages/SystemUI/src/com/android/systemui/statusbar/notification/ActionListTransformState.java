@@ -16,11 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
-import android.text.Layout;
-import android.text.TextUtils;
 import android.util.Pools;
-import android.view.View;
-import android.widget.TextView;
 
 /**
  * A transform state of the action list

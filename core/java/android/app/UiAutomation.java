@@ -22,6 +22,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Bitmap;
@@ -354,12 +355,17 @@ public final class UiAutomation {
     }
 
     /**
-     * Adopt the permission identity of the shell UID. This allows you to call APIs protected
-     * permissions which normal apps cannot hold but are granted to the shell UID. If you
-     * already adopted the shell permission identity this method would be a no-op.
-     * Note that your permission state becomes that of the shell UID and it is not a
-     * combination of your and the shell UID permissions.
+     * Adopt the permission identity of the shell UID for all permissions. This allows
+     * you to call APIs protected permissions which normal apps cannot hold but are
+     * granted to the shell UID. If you already adopted all shell permissions by calling
+     * this method or {@link #adoptShellPermissionIdentity(String...)} a subsequent call
+     * would be a no-op. Note that your permission state becomes that of the shell UID
+     * and it is not a combination of your and the shell UID permissions.
+     * <p>
+     * <strong>Note:<strong/> Calling this method adopts all shell permissions and overrides
+     * any subset of adopted permissions via {@link #adoptShellPermissionIdentity(String...)}.
      *
+     * @see #adoptShellPermissionIdentity(String...)
      * @see #dropShellPermissionIdentity()
      */
     public void adoptShellPermissionIdentity() {
@@ -368,7 +374,35 @@ public final class UiAutomation {
         }
         try {
             // Calling out without a lock held.
-            mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid());
+            mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), null);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+        }
+    }
+
+    /**
+     * Adopt the permission identity of the shell UID only for the provided permissions.
+     * This allows you to call APIs protected permissions which normal apps cannot hold
+     * but are granted to the shell UID. If you already adopted the specified shell
+     * permissions by calling this method or {@link #adoptShellPermissionIdentity()} a
+     * subsequent call would be a no-op. Note that your permission state becomes that of the
+     * shell UID and it is not a combination of your and the shell UID permissions.
+     * <p>
+     * <strong>Note:<strong/> Calling this method adopts only the specified shell permissions
+     * and overrides all adopted permissions via {@link #adoptShellPermissionIdentity()}.
+     *
+     * @param permissions The permissions to adopt or <code>null</code> to adopt all.
+     *
+     * @see #adoptShellPermissionIdentity()
+     * @see #dropShellPermissionIdentity()
+     */
+    public void adoptShellPermissionIdentity(@Nullable String... permissions) {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            // Calling out without a lock held.
+            mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid(), permissions);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
         }
@@ -565,6 +599,25 @@ public final class UiAutomation {
             Log.e(LOG_TAG, "Error while injecting input event!", re);
         }
         return false;
+    }
+
+    /**
+     * A request for WindowManagerService to wait until all animations have completed and input
+     * information has been sent from WindowManager to native InputManager.
+     *
+     * @hide
+     */
+    @TestApi
+    public void syncInputTransactions() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            // Calling out without a lock held.
+            mUiAutomationConnection.syncInputTransactions();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while syncing input transactions!", re);
+        }
     }
 
     /**
@@ -1197,10 +1250,9 @@ public final class UiAutomation {
                     }
                     if (listener != null) {
                         // Calling out only without a lock held.
-                        mLocalCallbackHandler.post(PooledLambda.obtainRunnable(
+                        mLocalCallbackHandler.sendMessage(PooledLambda.obtainMessage(
                                 OnAccessibilityEventListener::onAccessibilityEvent,
-                                listener, AccessibilityEvent.obtain(event))
-                                .recycleOnUse());
+                                listener, AccessibilityEvent.obtain(event)));
                     }
                 }
 
@@ -1210,7 +1262,7 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void onMagnificationChanged(@NonNull Region region,
+                public void onMagnificationChanged(int displayId, @NonNull Region region,
                         float scale, float centerX, float centerY) {
                     /* do nothing */
                 }

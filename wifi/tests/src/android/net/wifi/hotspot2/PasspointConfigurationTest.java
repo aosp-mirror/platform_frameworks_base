@@ -25,8 +25,9 @@ import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
 import android.util.Base64;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
@@ -146,6 +147,7 @@ public class PasspointConfigurationTest {
      */
     private static PasspointConfiguration createConfig() {
         PasspointConfiguration config = new PasspointConfiguration();
+        config.setUpdateIdentifier(1234);
         config.setHomeSp(createHomeSp());
         config.setCredential(createCredential());
         config.setPolicy(createPolicy());
@@ -165,6 +167,10 @@ public class PasspointConfigurationTest {
         config.setUsageLimitStartTimeInMillis(124214213);
         config.setUsageLimitDataLimit(14121);
         config.setUsageLimitTimeLimitInMinutes(78912);
+        Map<String, String> friendlyNames = new HashMap<>();
+        friendlyNames.put("en", "ServiceName1");
+        friendlyNames.put("kr", "ServiceName2");
+        config.setServiceFriendlyNames(friendlyNames);
         return config;
     }
 
@@ -202,6 +208,18 @@ public class PasspointConfigurationTest {
     @Test
     public void verifyParcelWithFullConfiguration() throws Exception {
         verifyParcel(createConfig());
+    }
+
+    /**
+     * Verify parcel read/write for a configuration that doesn't contain a list of service names.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void verifyParcelWithoutServiceNames() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.setServiceFriendlyNames(null);
+        verifyParcel(config);
     }
 
     /**
@@ -273,18 +291,37 @@ public class PasspointConfigurationTest {
     @Test
     public void validateDefaultConfig() throws Exception {
         PasspointConfiguration config = new PasspointConfiguration();
+
         assertFalse(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**
-     * Verify that a configuration contained all fields is valid.
+     * Verify that a configuration containing all fields is valid for R1/R2.
      *
      * @throws Exception
      */
     @Test
     public void validateFullConfig() throws Exception {
         PasspointConfiguration config = createConfig();
+
         assertTrue(config.validate());
+        assertTrue(config.validateForR2());
+    }
+
+    /**
+     * Verify that a configuration containing all fields except for UpdateIdentifier is valid for
+     * R1, but invalid for R2.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateFullConfigWithoutUpdateIdentifier() throws Exception {
+        PasspointConfiguration config = createConfig();
+        config.setUpdateIdentifier(Integer.MIN_VALUE);
+
+        assertTrue(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**
@@ -296,7 +333,9 @@ public class PasspointConfigurationTest {
     public void validateConfigWithoutCredential() throws Exception {
         PasspointConfiguration config = createConfig();
         config.setCredential(null);
+
         assertFalse(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**
@@ -308,12 +347,14 @@ public class PasspointConfigurationTest {
     public void validateConfigWithoutHomeSp() throws Exception {
         PasspointConfiguration config = createConfig();
         config.setHomeSp(null);
+
         assertFalse(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**
      * Verify that a configuration without Policy is valid, since Policy configurations
-     * are optional (applied for Hotspot 2.0 Release only).
+     * are optional for R1 and R2.
      *
      * @throws Exception
      */
@@ -321,12 +362,14 @@ public class PasspointConfigurationTest {
     public void validateConfigWithoutPolicy() throws Exception {
         PasspointConfiguration config = createConfig();
         config.setPolicy(null);
+
         assertTrue(config.validate());
+        assertTrue(config.validateForR2());
     }
 
     /**
-     * Verify that a configuration without subscription update is valid, since subscription
-     * update configurations are optional (applied for Hotspot 2.0 Release only).
+     * Verify that a configuration without subscription update is valid for R1 and invalid for R2,
+     * since subscription update configuration is only applicable for R2.
      *
      * @throws Exception
      */
@@ -334,7 +377,9 @@ public class PasspointConfigurationTest {
     public void validateConfigWithoutSubscriptionUpdate() throws Exception {
         PasspointConfiguration config = createConfig();
         config.setSubscriptionUpdate(null);
+
         assertTrue(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**
@@ -352,12 +397,15 @@ public class PasspointConfigurationTest {
         trustRootCertList.put(new String(rawUrlBytes, StandardCharsets.UTF_8),
                 new byte[CERTIFICATE_FINGERPRINT_BYTES]);
         config.setTrustRootCertList(trustRootCertList);
+
         assertFalse(config.validate());
 
         trustRootCertList = new HashMap<>();
         trustRootCertList.put(null, new byte[CERTIFICATE_FINGERPRINT_BYTES]);
         config.setTrustRootCertList(trustRootCertList);
+
         assertFalse(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**
@@ -382,6 +430,7 @@ public class PasspointConfigurationTest {
         trustRootCertList.put("test.cert.com", null);
         config.setTrustRootCertList(trustRootCertList);
         assertFalse(config.validate());
+        assertFalse(config.validateForR2());
     }
 
     /**

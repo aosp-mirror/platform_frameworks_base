@@ -211,6 +211,7 @@ public class RttManager {
         /** Draft 11mc version supported, including major and minor version. e.g, draft 4.3 is 43 */
         public int mcVersion;
 
+        @NonNull
         @Override
         public String toString() {
             StringBuffer sb = new StringBuffer();
@@ -292,7 +293,7 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<RttCapabilities> CREATOR =
+        public static final @android.annotation.NonNull Creator<RttCapabilities> CREATOR =
             new Creator<RttCapabilities>() {
             @Override
             public RttCapabilities createFromParcel(Parcel in) {
@@ -556,7 +557,7 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ParcelableRttParams> CREATOR =
+        public static final @android.annotation.NonNull Creator<ParcelableRttParams> CREATOR =
                 new Creator<ParcelableRttParams>() {
                     @Override
                     public ParcelableRttParams createFromParcel(Parcel in) {
@@ -859,7 +860,7 @@ public class RttManager {
         }
 
         /** Implement the Parcelable interface {@hide} */
-        public static final Creator<ParcelableRttResults> CREATOR =
+        public static final @android.annotation.NonNull Creator<ParcelableRttResults> CREATOR =
                 new Creator<ParcelableRttResults>() {
                     @Override
                     public ParcelableRttResults createFromParcel(Parcel in) {
@@ -1130,6 +1131,7 @@ public class RttManager {
          */
         public int preamble;
 
+        @NonNull
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
@@ -1158,7 +1160,7 @@ public class RttManager {
         }
 
         /** Implement {@link Parcelable} interface */
-        public static final Parcelable.Creator<ResponderConfig> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<ResponderConfig> CREATOR =
                 new Parcelable.Creator<ResponderConfig>() {
             @Override
             public ResponderConfig createFromParcel(Parcel in) {

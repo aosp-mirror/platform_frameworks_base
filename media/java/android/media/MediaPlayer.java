@@ -19,15 +19,16 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.SurfaceTexture;
+import android.media.SubtitleController.Anchor;
+import android.media.SubtitleTrack.RenderingWidget;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -36,30 +37,19 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-import android.util.ArrayMap;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.VideoView;
-import android.graphics.SurfaceTexture;
-import android.media.AudioManager;
-import android.media.MediaDrm;
-import android.media.MediaFormat;
-import android.media.MediaTimeProvider;
-import android.media.PlaybackParams;
-import android.media.SubtitleController;
-import android.media.SubtitleController.Anchor;
-import android.media.SubtitleData;
-import android.media.SubtitleTrack.RenderingWidget;
-import android.media.SyncParams;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -73,7 +63,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Runnable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -640,7 +629,6 @@ public class MediaPlayer extends PlayerBase
     private boolean mStayAwake;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private int mUsage = -1;
-    private boolean mBypassInterruptionPolicy;
 
     // Modular DRM
     private UUID mDrmUUID;
@@ -1114,7 +1102,7 @@ public class MediaPlayer extends PlayerBase
             setDataSource(afd);
             return true;
         } catch (NullPointerException | SecurityException | IOException ex) {
-            Log.w(TAG, "Couldn't open " + uri + ": " + ex);
+            Log.w(TAG, "Couldn't open " + (uri == null ? "null uri" : uri.toSafeString()), ex);
             return false;
         }
     }
@@ -1191,13 +1179,8 @@ public class MediaPlayer extends PlayerBase
         }
 
         final File file = new File(path);
-        if (file.exists()) {
-            FileInputStream is = new FileInputStream(file);
-            FileDescriptor fd = is.getFD();
-            setDataSource(fd);
-            is.close();
-        } else {
-            throw new IOException("setDataSource failed.");
+        try (FileInputStream is = new FileInputStream(file)) {
+            setDataSource(is.getFD());
         }
     }
 
@@ -1680,37 +1663,6 @@ public class MediaPlayer extends PlayerBase
     public native boolean isPlaying();
 
     /**
-     * Gets the current buffering management params used by the source component.
-     * Calling it only after {@code setDataSource} has been called.
-     * Each type of data source might have different set of default params.
-     *
-     * @return the current buffering management params used by the source component.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized, or {@code setDataSource} has not been called.
-     * @hide
-     */
-    @NonNull
-    @TestApi
-    public native BufferingParams getBufferingParams();
-
-    /**
-     * Sets buffering management params.
-     * The object sets its internal BufferingParams to the input, except that the input is
-     * invalid or not supported.
-     * Call it only after {@code setDataSource} has been called.
-     * The input is a hint to MediaPlayer.
-     *
-     * @param params the buffering management params.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released, or {@code setDataSource} has not been called.
-     * @throws IllegalArgumentException if params is invalid or not supported.
-     * @hide
-     */
-    @TestApi
-    public native void setBufferingParams(@NonNull BufferingParams params);
-
-    /**
      * Change playback speed of audio by resampling the audio.
      * <p>
      * Specifies resampling as audio mode for variable rate playback, i.e.,
@@ -2137,9 +2089,11 @@ public class MediaPlayer extends PlayerBase
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
-        if (mTimeProvider != null) {
-            mTimeProvider.close();
-            mTimeProvider = null;
+        synchronized (mTimeProviderLock) {
+            if (mTimeProvider != null) {
+                mTimeProvider.close();
+                mTimeProvider = null;
+            }
         }
         synchronized(this) {
             mSubtitleDataListenerDisabled = false;
@@ -2179,9 +2133,11 @@ public class MediaPlayer extends PlayerBase
         if (mSubtitleController != null) {
             mSubtitleController.reset();
         }
-        if (mTimeProvider != null) {
-            mTimeProvider.close();
-            mTimeProvider = null;
+        synchronized (mTimeProviderLock) {
+            if (mTimeProvider != null) {
+                mTimeProvider.close();
+                mTimeProvider = null;
+            }
         }
 
         stayAwake(false);
@@ -2261,8 +2217,6 @@ public class MediaPlayer extends PlayerBase
         }
         baseUpdateAudioAttributes(attributes);
         mUsage = attributes.getUsage();
-        mBypassInterruptionPolicy = (attributes.getAllFlags()
-                & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
         Parcel pattributes = Parcel.obtain();
         attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
         setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
@@ -2562,7 +2516,7 @@ public class MediaPlayer extends PlayerBase
          * Used to read a TrackInfo from a Parcel.
          */
         @UnsupportedAppUsage
-        static final Parcelable.Creator<TrackInfo> CREATOR
+        static final @android.annotation.NonNull Parcelable.Creator<TrackInfo> CREATOR
                 = new Parcelable.Creator<TrackInfo>() {
                     @Override
                     public TrackInfo createFromParcel(Parcel in) {
@@ -2688,6 +2642,7 @@ public class MediaPlayer extends PlayerBase
      */
     private synchronized void setSubtitleAnchor() {
         if ((mSubtitleController == null) && (ActivityThread.currentApplication() != null)) {
+            final TimeProvider timeProvider = (TimeProvider) getMediaTimeProvider();
             final HandlerThread thread = new HandlerThread("SetSubtitleAnchorThread");
             thread.start();
             Handler handler = new Handler(thread.getLooper());
@@ -2695,7 +2650,8 @@ public class MediaPlayer extends PlayerBase
                 @Override
                 public void run() {
                     Context context = ActivityThread.currentApplication();
-                    mSubtitleController = new SubtitleController(context, mTimeProvider, MediaPlayer.this);
+                    mSubtitleController =
+                            new SubtitleController(context, timeProvider, MediaPlayer.this);
                     mSubtitleController.setAnchor(new Anchor() {
                         @Override
                         public void setSubtitleWidget(RenderingWidget subtitleWidget) {
@@ -2703,7 +2659,7 @@ public class MediaPlayer extends PlayerBase
 
                         @Override
                         public Looper getSubtitleLooper() {
-                            return Looper.getMainLooper();
+                            return timeProvider.mEventHandler.getLooper();
                         }
                     });
                     thread.getLooper().quitSafely();
@@ -2822,12 +2778,17 @@ public class MediaPlayer extends PlayerBase
                 synchronized (mIndexTrackPairs) {
                     mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
                 }
-                Handler h = mTimeProvider.mEventHandler;
-                int what = TimeProvider.NOTIFY;
-                int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
-                Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, contents.getBytes());
-                Message m = h.obtainMessage(what, arg1, 0, trackData);
-                h.sendMessage(m);
+                synchronized (mTimeProviderLock) {
+                    if (mTimeProvider != null) {
+                        Handler h = mTimeProvider.mEventHandler;
+                        int what = TimeProvider.NOTIFY;
+                        int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                        Pair<SubtitleTrack, byte[]> trackData =
+                                Pair.create(track, contents.getBytes());
+                        Message m = h.obtainMessage(what, arg1, 0, trackData);
+                        h.sendMessage(m);
+                    }
+                }
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
 
@@ -2901,15 +2862,9 @@ public class MediaPlayer extends PlayerBase
             throw new IllegalArgumentException(msg);
         }
 
-        File file = new File(path);
-        if (file.exists()) {
-            FileInputStream is = new FileInputStream(file);
-            FileDescriptor fd = is.getFD();
-            addTimedTextSource(fd, mimeType);
-            is.close();
-        } else {
-            // We do not support the case where the path is not a file.
-            throw new IOException(path);
+        final File file = new File(path);
+        try (FileInputStream is = new FileInputStream(file)) {
+            addTimedTextSource(is.getFD(), mimeType);
         }
     }
 
@@ -3052,12 +3007,17 @@ public class MediaPlayer extends PlayerBase
                             total += bytes;
                         }
                     }
-                    Handler h = mTimeProvider.mEventHandler;
-                    int what = TimeProvider.NOTIFY;
-                    int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
-                    Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, bos.toByteArray());
-                    Message m = h.obtainMessage(what, arg1, 0, trackData);
-                    h.sendMessage(m);
+                    synchronized (mTimeProviderLock) {
+                        if (mTimeProvider != null) {
+                            Handler h = mTimeProvider.mEventHandler;
+                            int what = TimeProvider.NOTIFY;
+                            int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
+                            Pair<SubtitleTrack, byte[]> trackData =
+                                    Pair.create(track, bos.toByteArray());
+                            Message m = h.obtainMessage(what, arg1, 0, trackData);
+                            h.sendMessage(m);
+                        }
+                    }
                     return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
@@ -3340,14 +3300,17 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private TimeProvider mTimeProvider;
+    private final Object mTimeProviderLock = new Object();
 
     /** @hide */
     @UnsupportedAppUsage
     public MediaTimeProvider getMediaTimeProvider() {
-        if (mTimeProvider == null) {
-            mTimeProvider = new TimeProvider(this);
+        synchronized (mTimeProviderLock) {
+            if (mTimeProvider == null) {
+                mTimeProvider = new TimeProvider(this);
+            }
+            return mTimeProvider;
         }
-        return mTimeProvider;
     }
 
     private class EventHandler extends Handler

@@ -131,7 +131,7 @@ public final class ExternalStorageStats implements Parcelable {
         dest.writeLong(obbBytes);
     }
 
-    public static final Creator<ExternalStorageStats> CREATOR = new Creator<ExternalStorageStats>() {
+    public static final @android.annotation.NonNull Creator<ExternalStorageStats> CREATOR = new Creator<ExternalStorageStats>() {
         @Override
         public ExternalStorageStats createFromParcel(Parcel in) {
             return new ExternalStorageStats(in);

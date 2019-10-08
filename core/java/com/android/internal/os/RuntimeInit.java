@@ -20,6 +20,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ApplicationErrorReport;
+import android.content.type.DefaultMimeMapFactory;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Debug;
@@ -33,6 +34,9 @@ import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
 import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
+
+import libcore.content.type.MimeMap;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -192,6 +196,24 @@ public class RuntimeInit {
         }
     }
 
+    /**
+     * Common initialization that (unlike {@link #commonInit()} should happen prior to
+     * the Zygote fork.
+     */
+    public static void preForkInit() {
+        if (DEBUG) Slog.d(TAG, "Entered preForkInit.");
+        RuntimeInit.enableDdms();
+        // TODO(b/142019040#comment13): Decide whether to load the default instance eagerly, i.e.
+        // MimeMap.setDefault(DefaultMimeMapFactory.create());
+        /*
+         * Replace libcore's minimal default mapping between MIME types and file
+         * extensions with a mapping that's suitable for Android. Android's mapping
+         * contains many more entries that are derived from IANA registrations but
+         * with several customizations (extensions, overrides).
+         */
+        MimeMap.setDefaultSupplier(DefaultMimeMapFactory::create);
+    }
+
     @UnsupportedAppUsage
     protected static final void commonInit() {
         if (DEBUG) Slog.d(TAG, "Entered RuntimeInit!");
@@ -324,7 +346,7 @@ public class RuntimeInit {
 
     @UnsupportedAppUsage
     public static final void main(String[] argv) {
-        enableDdms();
+        preForkInit();
         if (argv.length == 2 && argv[1].equals("application")) {
             if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application");
             redirectLogStreams();
@@ -418,7 +440,7 @@ public class RuntimeInit {
     /**
      * Enable DDMS.
      */
-    static final void enableDdms() {
+    private static void enableDdms() {
         // Register handlers for DDM messages.
         android.ddm.DdmRegister.registerHandlers();
     }

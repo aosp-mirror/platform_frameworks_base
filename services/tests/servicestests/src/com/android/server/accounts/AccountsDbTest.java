@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -71,7 +73,7 @@ public class AccountsDbTest {
     private File deDb;
     private File ceDb;
 
-    @Mock private PrintWriter mMockWriter;
+    @Mock private PrintWriter mockWriter;
 
     @Before
     public void setUp() {
@@ -470,9 +472,9 @@ public class AccountsDbTest {
         logStatement.bindLong(6, insertionPoint);
         logStatement.execute();
 
-        mAccountsDb.dumpDebugTable(mMockWriter);
+        mAccountsDb.dumpDebugTable(mockWriter);
 
-        verify(mMockWriter, times(3)).println(anyString());
+        verify(mockWriter, times(3)).println(anyString());
     }
 
     @Test

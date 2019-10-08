@@ -16,16 +16,18 @@
 
 package android.view;
 
-import static android.app.RemoteAnimationTargetProto.CLIP_RECT;
-import static android.app.RemoteAnimationTargetProto.CONTENT_INSETS;
-import static android.app.RemoteAnimationTargetProto.IS_TRANSLUCENT;
-import static android.app.RemoteAnimationTargetProto.LEASH;
-import static android.app.RemoteAnimationTargetProto.MODE;
-import static android.app.RemoteAnimationTargetProto.POSITION;
-import static android.app.RemoteAnimationTargetProto.PREFIX_ORDER_INDEX;
-import static android.app.RemoteAnimationTargetProto.SOURCE_CONTAINER_BOUNDS;
-import static android.app.RemoteAnimationTargetProto.TASK_ID;
-import static android.app.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
+import static android.view.RemoteAnimationTargetProto.CLIP_RECT;
+import static android.view.RemoteAnimationTargetProto.CONTENT_INSETS;
+import static android.view.RemoteAnimationTargetProto.IS_TRANSLUCENT;
+import static android.view.RemoteAnimationTargetProto.LEASH;
+import static android.view.RemoteAnimationTargetProto.MODE;
+import static android.view.RemoteAnimationTargetProto.POSITION;
+import static android.view.RemoteAnimationTargetProto.PREFIX_ORDER_INDEX;
+import static android.view.RemoteAnimationTargetProto.SOURCE_CONTAINER_BOUNDS;
+import static android.view.RemoteAnimationTargetProto.START_BOUNDS;
+import static android.view.RemoteAnimationTargetProto.START_LEASH;
+import static android.view.RemoteAnimationTargetProto.TASK_ID;
+import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 
 import android.annotation.IntDef;
 import android.annotation.UnsupportedAppUsage;
@@ -57,9 +59,15 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public static final int MODE_CLOSING = 1;
 
+    /**
+     * The app is in the set of resizing apps (eg. mode change) of this transition.
+     */
+    public static final int MODE_CHANGING = 2;
+
     @IntDef(prefix = { "MODE_" }, value = {
             MODE_OPENING,
-            MODE_CLOSING
+            MODE_CLOSING,
+            MODE_CHANGING
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Mode {}
@@ -81,6 +89,13 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     @UnsupportedAppUsage
     public final SurfaceControl leash;
+
+    /**
+     * The {@link SurfaceControl} for the starting state of a target if this transition is
+     * MODE_CHANGING, {@code null)} otherwise. This is relative to the app window.
+     */
+    @UnsupportedAppUsage
+    public final SurfaceControl startLeash;
 
     /**
      * Whether the app is translucent and may reveal apps behind.
@@ -128,6 +143,15 @@ public class RemoteAnimationTarget implements Parcelable {
     public final Rect sourceContainerBounds;
 
     /**
+     * The starting bounds of the source container in screen space coordinates. This is {@code null}
+     * if the animation target isn't MODE_CHANGING. Since this is the starting bounds, it's size
+     * should be equivalent to the size of the starting thumbnail. Note that sourceContainerBounds
+     * is the end bounds of a change transition.
+     */
+    @UnsupportedAppUsage
+    public final Rect startBounds;
+
+    /**
      * The window configuration for the target.
      */
     @UnsupportedAppUsage
@@ -141,7 +165,8 @@ public class RemoteAnimationTarget implements Parcelable {
 
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
-            Rect sourceContainerBounds, WindowConfiguration windowConfig, boolean isNotInRecents) {
+            Rect sourceContainerBounds, WindowConfiguration windowConfig, boolean isNotInRecents,
+            SurfaceControl startLeash, Rect startBounds) {
         this.mode = mode;
         this.taskId = taskId;
         this.leash = leash;
@@ -153,6 +178,8 @@ public class RemoteAnimationTarget implements Parcelable {
         this.sourceContainerBounds = new Rect(sourceContainerBounds);
         this.windowConfiguration = windowConfig;
         this.isNotInRecents = isNotInRecents;
+        this.startLeash = startLeash;
+        this.startBounds = startBounds == null ? null : new Rect(startBounds);
     }
 
     public RemoteAnimationTarget(Parcel in) {
@@ -167,6 +194,8 @@ public class RemoteAnimationTarget implements Parcelable {
         sourceContainerBounds = in.readParcelable(null);
         windowConfiguration = in.readParcelable(null);
         isNotInRecents = in.readBoolean();
+        startLeash = in.readParcelable(null);
+        startBounds = in.readParcelable(null);
     }
 
     @Override
@@ -187,6 +216,8 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeParcelable(sourceContainerBounds, 0 /* flags */);
         dest.writeParcelable(windowConfiguration, 0 /* flags */);
         dest.writeBoolean(isNotInRecents);
+        dest.writeParcelable(startLeash, 0 /* flags */);
+        dest.writeParcelable(startBounds, 0 /* flags */);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -215,10 +246,16 @@ public class RemoteAnimationTarget implements Parcelable {
         position.writeToProto(proto, POSITION);
         sourceContainerBounds.writeToProto(proto, SOURCE_CONTAINER_BOUNDS);
         windowConfiguration.writeToProto(proto, WINDOW_CONFIGURATION);
+        if (startLeash != null) {
+            startLeash.writeToProto(proto, START_LEASH);
+        }
+        if (startBounds != null) {
+            startBounds.writeToProto(proto, START_BOUNDS);
+        }
         proto.end(token);
     }
 
-    public static final Creator<RemoteAnimationTarget> CREATOR
+    public static final @android.annotation.NonNull Creator<RemoteAnimationTarget> CREATOR
             = new Creator<RemoteAnimationTarget>() {
         public RemoteAnimationTarget createFromParcel(Parcel in) {
             return new RemoteAnimationTarget(in);

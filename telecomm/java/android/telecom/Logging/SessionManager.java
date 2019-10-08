@@ -391,6 +391,20 @@ public class SessionManager {
         return mCurrentThreadId.get();
     }
 
+    /**
+     * @return A String representation of the active sessions at the time that this method is
+     * called.
+     */
+    @VisibleForTesting
+    public synchronized String printActiveSessions() {
+        StringBuilder message = new StringBuilder();
+        for (ConcurrentHashMap.Entry<Integer, Session> entry : mSessionMapper.entrySet()) {
+            message.append(entry.getValue().printFullSessionTree());
+            message.append("\n");
+        }
+        return message.toString();
+    }
+
     @VisibleForTesting
     public synchronized void cleanupStaleSessions(long timeoutMs) {
         String logMessage = "Stale Sessions Cleaned:\n";

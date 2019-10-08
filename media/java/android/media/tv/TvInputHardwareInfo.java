@@ -19,12 +19,14 @@ package android.media.tv;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.input.V1_0.Constants;
 import android.media.AudioManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+
 import java.lang.annotation.Retention;
 
 /**
@@ -74,7 +76,7 @@ public final class TvInputHardwareInfo implements Parcelable {
     public static final int CABLE_CONNECTION_STATUS_DISCONNECTED =
             Constants.CABLE_CONNECTION_STATUS_DISCONNECTED;
 
-    public static final Parcelable.Creator<TvInputHardwareInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TvInputHardwareInfo> CREATOR =
             new Parcelable.Creator<TvInputHardwareInfo>() {
         @Override
         public TvInputHardwareInfo createFromParcel(Parcel source) {
@@ -141,6 +143,7 @@ public final class TvInputHardwareInfo implements Parcelable {
         return mCableConnectionStatus;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder(128);

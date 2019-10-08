@@ -35,13 +35,14 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
-import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.UserBackupManagerService;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
+import com.android.server.backup.keyvalue.BackupRequest;
+import com.android.server.backup.keyvalue.KeyValueBackupTask;
 import com.android.server.backup.params.AdbBackupParams;
 import com.android.server.backup.params.AdbParams;
 import com.android.server.backup.params.AdbRestoreParams;
@@ -52,9 +53,11 @@ import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
+import com.android.server.backup.transport.TransportClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Asynchronous backup/restore handler thread.
@@ -81,10 +84,10 @@ public class BackupHandler extends Handler {
     public static final int MSG_BACKUP_RESTORE_STEP = 20;
     public static final int MSG_OP_COMPLETE = 21;
 
-    private final BackupManagerService backupManagerService;
+    private final UserBackupManagerService backupManagerService;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public BackupHandler(BackupManagerService backupManagerService, Looper looper) {
+    public BackupHandler(UserBackupManagerService backupManagerService, Looper looper) {
         super(looper);
         this.backupManagerService = backupManagerService;
         mAgentTimeoutParameters = Preconditions.checkNotNull(
@@ -119,8 +122,8 @@ public class BackupHandler extends Handler {
                     break;
                 }
 
-                // snapshot the pending-backup set and work on that
-                ArrayList<BackupRequest> queue = new ArrayList<>();
+                // Snapshot the pending-backup set and work on that.
+                List<String> queue = new ArrayList<>();
                 DataChangedJournal oldJournal = backupManagerService.getJournal();
                 synchronized (backupManagerService.getQueueLock()) {
                     // Do we have any work to do?  Construct the work queue
@@ -128,7 +131,7 @@ public class BackupHandler extends Handler {
                     // the backup.
                     if (backupManagerService.getPendingBackups().size() > 0) {
                         for (BackupRequest b : backupManagerService.getPendingBackups().values()) {
-                            queue.add(b);
+                            queue.add(b.packageName);
                         }
                         if (DEBUG) {
                             Slog.v(TAG, "clearing pending backups");
@@ -150,17 +153,22 @@ public class BackupHandler extends Handler {
                 if (queue.size() > 0) {
                     // Spin up a backup state sequence and set it running
                     try {
-                        String dirName = transport.transportDirName();
                         OnTaskFinishedListener listener =
                                 caller ->
                                         transportManager
                                                 .disposeOfTransportClient(transportClient, caller);
-                        PerformBackupTask pbt = new PerformBackupTask(
-                                backupManagerService, transportClient, dirName, queue,
-                                oldJournal, null, null, listener, Collections.emptyList(), false,
-                                false /* nonIncremental */);
-                        Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
-                        sendMessage(pbtMessage);
+                        KeyValueBackupTask.start(
+                                backupManagerService,
+                                transportClient,
+                                transport.transportDirName(),
+                                queue,
+                                oldJournal,
+                                /* observer */ null,
+                                /* monitor */ null,
+                                listener,
+                                Collections.emptyList(),
+                                /* userInitiated */ false,
+                                /* nonIncremental */ false);
                     } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.
@@ -398,20 +406,21 @@ public class BackupHandler extends Handler {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "MSG_REQUEST_BACKUP observer=" + params.observer);
                 }
-                ArrayList<BackupRequest> kvQueue = new ArrayList<>();
-                for (String packageName : params.kvPackages) {
-                    kvQueue.add(new BackupRequest(packageName));
-                }
                 backupManagerService.setBackupRunning(true);
                 backupManagerService.getWakelock().acquire();
 
-                PerformBackupTask pbt = new PerformBackupTask(
+                KeyValueBackupTask.start(
                         backupManagerService,
-                        params.transportClient, params.dirName,
-                        kvQueue, null, params.observer, params.monitor, params.listener,
-                        params.fullPackages, true, params.nonIncrementalBackup);
-                Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
-                sendMessage(pbtMessage);
+                        params.transportClient,
+                        params.dirName,
+                        params.kvPackages,
+                        /* dataChangedJournal */ null,
+                        params.observer,
+                        params.monitor,
+                        params.listener,
+                        params.fullPackages,
+                        /* userInitiated */ true,
+                        params.nonIncrementalBackup);
                 break;
             }
 

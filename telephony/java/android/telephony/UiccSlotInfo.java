@@ -16,6 +16,8 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -63,7 +65,7 @@ public class UiccSlotInfo implements Parcelable {
     private final boolean mIsExtendedApduSupported;
     private final boolean mIsRemovable;
 
-    public static final Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
+    public static final @android.annotation.NonNull Creator<UiccSlotInfo> CREATOR = new Creator<UiccSlotInfo>() {
         @Override
         public UiccSlotInfo createFromParcel(Parcel in) {
             return new UiccSlotInfo(in);
@@ -179,7 +181,7 @@ public class UiccSlotInfo implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -210,6 +212,7 @@ public class UiccSlotInfo implements Parcelable {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "UiccSlotInfo (mIsActive="

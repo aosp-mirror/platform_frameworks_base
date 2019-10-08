@@ -17,8 +17,8 @@ package com.android.test.uibench;
 
 import android.content.Context;
 import android.os.Trace;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.android.test.uibench.recyclerview.RvBoxAdapter;
 import com.android.test.uibench.recyclerview.RvCompatListActivity;
 

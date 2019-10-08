@@ -17,6 +17,7 @@
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">->
     <View
+        android:id="@+id/customizer_transparent_view"
         android:layout_width="match_parent"
         android:layout_height="@*android:dimen/quick_qs_offset_height"
         android:background="@android:color/transparent" />
@@ -36,14 +37,14 @@
             android:layout_height="wrap_content"
             android:background="@drawable/qs_customizer_toolbar"
             android:navigationContentDescription="@*android:string/action_bar_up_description"
-            style="?android:attr/toolbarStyle" />
+            style="@style/QSCustomizeToolbar"
+            />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingTop="28dp"
             android:paddingLeft="@dimen/qs_tile_layout_margin_side"
             android:paddingRight="@dimen/qs_tile_layout_margin_side"
             android:paddingBottom="28dp"

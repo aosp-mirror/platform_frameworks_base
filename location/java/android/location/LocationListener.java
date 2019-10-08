@@ -44,29 +44,12 @@ public interface LocationListener {
     void onLocationChanged(Location location);
 
     /**
-     * Called when the provider status changes. This method is called when
-     * a provider is unable to fetch a location or if the provider has recently
-     * become available after a period of unavailability.
+     * This callback will never be invoked and providers can be considers as always in the
+     * {@link LocationProvider#AVAILABLE} state.
      *
-     * @param provider the name of the location provider associated with this
-     * update.
-     * @param status {@link LocationProvider#OUT_OF_SERVICE} if the
-     * provider is out of service, and this is not expected to change in the
-     * near future; {@link LocationProvider#TEMPORARILY_UNAVAILABLE} if
-     * the provider is temporarily unavailable but is expected to be available
-     * shortly; and {@link LocationProvider#AVAILABLE} if the
-     * provider is currently available.
-     * @param extras an optional Bundle which will contain provider specific
-     * status variables.
-     *
-     * <p> A number of common key/value pairs for the extras Bundle are listed
-     * below. Providers that use any of the keys on this list must
-     * provide the corresponding value as described below.
-     *
-     * <ul>
-     * <li> satellites - the number of satellites used to derive the fix
-     * </ul>
+     * @deprecated This callback will never be invoked.
      */
+    @Deprecated
     void onStatusChanged(String provider, int status, Bundle extras);
 
     /**

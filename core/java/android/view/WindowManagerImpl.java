@@ -157,4 +157,48 @@ public final class WindowManagerImpl implements WindowManager {
         }
         return null;
     }
+
+    @Override
+    public void setShouldShowWithInsecureKeyguard(int displayId, boolean shouldShow) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .setShouldShowWithInsecureKeyguard(displayId, shouldShow);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void setShouldShowSystemDecors(int displayId, boolean shouldShow) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .setShouldShowSystemDecors(displayId, shouldShow);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public boolean shouldShowSystemDecors(int displayId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().shouldShowSystemDecors(displayId);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    @Override
+    public void setShouldShowIme(int displayId, boolean shouldShow) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setShouldShowIme(displayId, shouldShow);
+        } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public boolean shouldShowIme(int displayId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().shouldShowIme(displayId);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
 }

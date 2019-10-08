@@ -180,6 +180,9 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.AdapterViewAnimator, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.AdapterViewAnimator,
+                attrs, a, defStyleAttr, defStyleRes);
+
         int resource = a.getResourceId(
                 com.android.internal.R.styleable.AdapterViewAnimator_inAnimation, 0);
         if (resource > 0) {
@@ -801,7 +804,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             return "AdapterViewAnimator.SavedState{ whichChild = " + this.whichChild + " }";
         }
 
-        public static final Parcelable.Creator<SavedState> CREATOR
+        public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR
                 = new Parcelable.Creator<SavedState>() {
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);

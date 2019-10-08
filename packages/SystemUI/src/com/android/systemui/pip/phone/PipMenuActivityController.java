@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.app.RemoteAction;
 import android.content.Context;
@@ -36,12 +37,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.IWindowManager;
 
 import com.android.systemui.pip.phone.PipMediaController.ActionListener;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.component.HidePipMenuEvent;
-import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.shared.system.InputConsumerController;
 
 import java.io.PrintWriter;
@@ -130,7 +127,7 @@ public class PipMenuActivityController {
     // The dismiss fraction update is sent frequently, so use a temporary bundle for the message
     private Bundle mTmpDismissFractionData = new Bundle();
 
-    private ReferenceCountedTrigger mOnAttachDecrementTrigger;
+    private Runnable mOnAnimationEndRunnable;
     private boolean mStartActivityRequested;
     private long mStartActivityRequestedTime;
     private Messenger mToActivityMessenger;
@@ -170,9 +167,9 @@ public class PipMenuActivityController {
                 case MESSAGE_UPDATE_ACTIVITY_CALLBACK: {
                     mToActivityMessenger = msg.replyTo;
                     setStartActivityRequested(false);
-                    if (mOnAttachDecrementTrigger != null) {
-                        mOnAttachDecrementTrigger.decrement();
-                        mOnAttachDecrementTrigger = null;
+                    if (mOnAnimationEndRunnable != null) {
+                        mOnAnimationEndRunnable.run();
+                        mOnAnimationEndRunnable = null;
                     }
                     // Mark the menu as invisible once the activity finishes as well
                     if (mToActivityMessenger == null) {
@@ -187,9 +184,9 @@ public class PipMenuActivityController {
 
     private Runnable mStartActivityRequestedTimeoutRunnable = () -> {
         setStartActivityRequested(false);
-        if (mOnAttachDecrementTrigger != null) {
-            mOnAttachDecrementTrigger.decrement();
-            mOnAttachDecrementTrigger = null;
+        if (mOnAnimationEndRunnable != null) {
+            mOnAnimationEndRunnable.run();
+            mOnAnimationEndRunnable = null;
         }
         Log.e(TAG, "Expected start menu activity request timed out");
     };
@@ -208,8 +205,6 @@ public class PipMenuActivityController {
         mActivityManager = activityManager;
         mMediaController = mediaController;
         mInputConsumerController = inputConsumerController;
-
-        EventBus.getDefault().register(this);
     }
 
     public boolean isMenuActivityVisible() {
@@ -352,6 +347,36 @@ public class PipMenuActivityController {
     }
 
     /**
+     * Hides the menu activity.
+     */
+    public void hideMenu(Runnable onStartCallback, Runnable onEndCallback) {
+        if (mStartActivityRequested) {
+            // If the menu has been start-requested, but not actually started, then we defer the
+            // trigger callback until the menu has started and called back to the controller.
+            mOnAnimationEndRunnable = onEndCallback;
+            onStartCallback.run();
+
+            // Fallback for b/63752800, we have started the PipMenuActivity but it has not made any
+            // callbacks. Don't continue to wait for the menu to show past some timeout.
+            mHandler.removeCallbacks(mStartActivityRequestedTimeoutRunnable);
+            mHandler.postDelayed(mStartActivityRequestedTimeoutRunnable,
+                    START_ACTIVITY_REQUEST_TIMEOUT_MS);
+        } else if (mMenuState != MENU_STATE_NONE && mToActivityMessenger != null) {
+            // If the menu is visible in either the closed or full state, then hide the menu and
+            // trigger the animation trigger afterwards
+            onStartCallback.run();
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_HIDE_MENU;
+            m.obj = onEndCallback;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify hide menu", e);
+            }
+        }
+    }
+
+    /**
      * Preemptively mark the menu as invisible, used when we are directly manipulating the pinned
      * stack and don't want to trigger a resize which can animate the stack in a conflicting way
      * (ie. when manually expanding or dismissing).
@@ -384,7 +409,7 @@ public class PipMenuActivityController {
     private void startMenuActivity(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout, boolean willResizeMenu) {
         try {
-            StackInfo pinnedStackInfo = mActivityManager.getStackInfo(
+            StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
@@ -423,7 +448,7 @@ public class PipMenuActivityController {
             // Fetch the pinned stack bounds
             Rect stackBounds = null;
             try {
-                StackInfo pinnedStackInfo = mActivityManager.getStackInfo(
+                StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                 if (pinnedStackInfo != null) {
                     stackBounds = pinnedStackInfo.bounds;
@@ -493,21 +518,6 @@ public class PipMenuActivityController {
         mHandler.removeCallbacks(mStartActivityRequestedTimeoutRunnable);
         mStartActivityRequested = requested;
         mStartActivityRequestedTime = requested ? SystemClock.uptimeMillis() : 0;
-    }
-
-    public final void onBusEvent(HidePipMenuEvent event) {
-        if (mStartActivityRequested) {
-            // If the menu has been start-requested, but not actually started, then we defer the
-            // trigger callback until the menu has started and called back to the controller.
-            mOnAttachDecrementTrigger = event.getAnimationTrigger();
-            mOnAttachDecrementTrigger.increment();
-
-            // Fallback for b/63752800, we have started the PipMenuActivity but it has not made any
-            // callbacks. Don't continue to wait for the menu to show past some timeout.
-            mHandler.removeCallbacks(mStartActivityRequestedTimeoutRunnable);
-            mHandler.postDelayed(mStartActivityRequestedTimeoutRunnable,
-                    START_ACTIVITY_REQUEST_TIMEOUT_MS);
-        }
     }
 
     public void dump(PrintWriter pw, String prefix) {

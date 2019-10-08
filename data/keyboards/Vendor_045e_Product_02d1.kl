@@ -13,20 +13,22 @@
 # limitations under the License.
 
 #
-# XBox One USB Controller
+# XBox One Controller - Model 1537 - USB
 #
+
+# Mapping according to https://developer.android.com/training/game-controllers/controller-input.html
 
 key 304   BUTTON_A
 key 305   BUTTON_B
 key 307   BUTTON_X
 key 308   BUTTON_Y
+
 key 310   BUTTON_L1
 key 311   BUTTON_R1
-key 314   BACK
-key 315   BUTTON_START
-key 316   HOME
-key 317   BUTTON_THUMBL
-key 318   BUTTON_THUMBR
+
+# Triggers.
+axis 0x02 LTRIGGER
+axis 0x05 RTRIGGER
 
 # Left and right stick.
 # The reported value for flat is 128 out of a range from -32767 to 32768, which is absurd.
@@ -37,10 +39,19 @@ axis 0x01 Y flat 4096
 axis 0x03 Z flat 4096
 axis 0x04 RZ flat 4096
 
-# Triggers.
-axis 0x02 LTRIGGER
-axis 0x05 RTRIGGER
+key 317   BUTTON_THUMBL
+key 318   BUTTON_THUMBR
 
 # Hat.
 axis 0x10 HAT_X
 axis 0x11 HAT_Y
+
+
+# Mapping according to https://www.kernel.org/doc/Documentation/input/gamepad.txt
+# Two overlapping rectangles
+key 314   BUTTON_SELECT
+# Hamburger - 3 parallel lines
+key 315   BUTTON_START
+
+# Xbox key
+key 316   BUTTON_MODE

@@ -19,10 +19,12 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
+import android.app.admin.DevicePolicyEventLogger;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -36,11 +38,13 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +71,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         verifyCallingPackage(callingPackage);
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CROSS_PROFILE_APPS_GET_TARGET_USER_PROFILES)
+                .setStrings(new String[] {callingPackage})
+                .write();
+
         return getTargetUserProfilesUnchecked(
                 callingPackage, mInjector.getCallingUserId());
     }
@@ -76,18 +85,25 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             IApplicationThread caller,
             String callingPackage,
             ComponentName component,
-            UserHandle user) throws RemoteException {
+            @UserIdInt int userId,
+            boolean launchMainActivity) throws RemoteException {
         Preconditions.checkNotNull(callingPackage);
         Preconditions.checkNotNull(component);
-        Preconditions.checkNotNull(user);
 
         verifyCallingPackage(callingPackage);
 
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.CROSS_PROFILE_APPS_START_ACTIVITY_AS_USER)
+                .setStrings(new String[] {callingPackage})
+                .write();
+
+        final int callerUserId = mInjector.getCallingUserId();
+        final int callingUid = mInjector.getCallingUid();
+
         List<UserHandle> allowedTargetUsers = getTargetUserProfilesUnchecked(
-                callingPackage, mInjector.getCallingUserId());
-        if (!allowedTargetUsers.contains(user)) {
-            throw new SecurityException(
-                    callingPackage + " cannot access unrelated user " + user.getIdentifier());
+                callingPackage, callerUserId);
+        if (!allowedTargetUsers.contains(UserHandle.of(userId))) {
+            throw new SecurityException(callingPackage + " cannot access unrelated user " + userId);
         }
 
         // Verify that caller package is starting activity in its own package.
@@ -97,25 +113,43 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                             + component.getPackageName());
         }
 
-        final int callingUid = mInjector.getCallingUid();
-
-        // Verify that target activity does handle the intent with ACTION_MAIN and
-        // CATEGORY_LAUNCHER as calling startActivityAsUser ignore them if component is present.
-        final Intent launchIntent = new Intent(Intent.ACTION_MAIN);
-        launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-        // Only package name is set here, as opposed to component name, because intent action and
-        // category are ignored if component name is present while we are resolving intent.
-        launchIntent.setPackage(component.getPackageName());
-        verifyActivityCanHandleIntentAndExported(launchIntent, component, callingUid, user);
+        // Verify that target activity does handle the intent correctly.
+        final Intent launchIntent = new Intent();
+        if (launchMainActivity) {
+            launchIntent.setAction(Intent.ACTION_MAIN);
+            launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+            // Only package name is set here, as opposed to component name, because intent action
+            // and category are ignored if component name is present while we are resolving intent.
+            launchIntent.setPackage(component.getPackageName());
+        } else {
+            // If the main activity is not being launched and the users are different, the caller
+            // must have the required permission and the users must be in the same profile group
+            // in order to launch any of its own activities.
+            if (callerUserId != userId) {
+                final int permissionFlag = ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.INTERACT_ACROSS_PROFILES, callingUid,
+                        -1, true);
+                if (permissionFlag != PackageManager.PERMISSION_GRANTED
+                        || !isSameProfileGroup(callerUserId, userId)) {
+                    throw new SecurityException("Attempt to launch activity without required "
+                            + android.Manifest.permission.INTERACT_ACROSS_PROFILES + " permission"
+                            + " or target user is not in the same profile group.");
+                }
+            }
+            launchIntent.setComponent(component);
+        }
+        verifyActivityCanHandleIntentAndExported(launchIntent, component, callingUid, userId);
 
         launchIntent.setPackage(null);
         launchIntent.setComponent(component);
-        mInjector.getActivityManagerInternal().startActivityAsUser(
+        mInjector.getActivityTaskManagerInternal().startActivityAsUser(
                 caller, callingPackage, launchIntent,
-                ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(),
-                user.getIdentifier());
+                launchMainActivity
+                        ? ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle()
+                        : null,
+                userId);
     }
 
     private List<UserHandle> getTargetUserProfilesUnchecked(
@@ -162,7 +196,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
      * activity is exported.
      */
     private void verifyActivityCanHandleIntentAndExported(
-            Intent launchIntent, ComponentName component, int callingUid, UserHandle user) {
+            Intent launchIntent, ComponentName component, int callingUid, @UserIdInt int userId) {
         final long ident = mInjector.clearCallingIdentity();
         try {
             final List<ResolveInfo> apps =
@@ -170,7 +204,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                             launchIntent,
                             MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                             callingUid,
-                            user.getIdentifier());
+                            userId);
             final int size = apps.size();
             for (int i = 0; i < size; ++i) {
                 final ActivityInfo activityInfo = apps.get(i).activityInfo;
@@ -182,6 +216,15 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             }
             throw new SecurityException("Attempt to launch activity without "
                     + " category Intent.CATEGORY_LAUNCHER or activity is not exported" + component);
+        } finally {
+            mInjector.restoreCallingIdentity(ident);
+        }
+    }
+
+    private boolean isSameProfileGroup(@UserIdInt int callerUserId, @UserIdInt int userId) {
+        final long ident = mInjector.clearCallingIdentity();
+        try {
+            return mInjector.getUserManager().isSameProfileGroup(callerUserId, userId);
         } finally {
             mInjector.restoreCallingIdentity(ident);
         }
@@ -241,6 +284,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         public ActivityManagerInternal getActivityManagerInternal() {
             return LocalServices.getService(ActivityManagerInternal.class);
         }
+
+        @Override
+        public ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return LocalServices.getService(ActivityTaskManagerInternal.class);
+        }
     }
 
     @VisibleForTesting
@@ -264,5 +312,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         AppOpsManager getAppOpsManager();
 
         ActivityManagerInternal getActivityManagerInternal();
+
+        ActivityTaskManagerInternal getActivityTaskManagerInternal();
     }
 }

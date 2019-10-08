@@ -28,14 +28,8 @@ import android.util.ArraySet;
 import android.widget.Toast;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.AppTransitionFinishedEvent;
-import com.android.systemui.recents.events.component.ShowUserToastEvent;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.stackdivider.events.StartedDragingEvent;
-import com.android.systemui.stackdivider.events.StoppedDragingEvent;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 
 /**
  * Controller that decides when to show the {@link ForcedResizableInfoActivity}.
@@ -49,7 +43,7 @@ public class ForcedResizableInfoActivityController {
     private final Handler mHandler = new Handler();
     private final ArraySet<PendingTaskRecord> mPendingTasks = new ArraySet<>();
     private final ArraySet<String> mPackagesShownInSession = new ArraySet<>();
-    private boolean mDividerDraging;
+    private boolean mDividerDragging;
 
     private final Runnable mTimeoutRunnable = new Runnable() {
         @Override
@@ -75,9 +69,8 @@ public class ForcedResizableInfoActivityController {
 
     public ForcedResizableInfoActivityController(Context context) {
         mContext = context;
-        EventBus.getDefault().register(this);
         ActivityManagerWrapper.getInstance().registerTaskStackListener(
-                new SysUiTaskStackChangeListener() {
+                new TaskStackChangeListener() {
                     @Override
                     public void onActivityForcedResizable(String packageName, int taskId,
                             int reason) {
@@ -102,19 +95,19 @@ public class ForcedResizableInfoActivityController {
         }
     }
 
-    public final void onBusEvent(AppTransitionFinishedEvent event) {
-        if (!mDividerDraging) {
+    public void onAppTransitionFinished() {
+        if (!mDividerDragging) {
             showPending();
         }
     }
 
-    public final void onBusEvent(StartedDragingEvent event) {
-        mDividerDraging = true;
+    void onDraggingStart() {
+        mDividerDragging = true;
         mHandler.removeCallbacks(mTimeoutRunnable);
     }
 
-    public final void onBusEvent(StoppedDragingEvent event) {
-        mDividerDraging = false;
+    void onDraggingEnd() {
+        mDividerDragging = false;
         showPending();
     }
 
@@ -127,13 +120,13 @@ public class ForcedResizableInfoActivityController {
     }
 
     private void activityDismissingDockedStack() {
-        EventBus.getDefault().send(new ShowUserToastEvent(
-                R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT));
+        Toast.makeText(mContext, R.string.dock_non_resizeble_failed_to_dock_text,
+                Toast.LENGTH_SHORT).show();
     }
 
     private void activityLaunchOnSecondaryDisplayFailed() {
-        EventBus.getDefault().send(new ShowUserToastEvent(
-                R.string.activity_launch_on_secondary_display_failed_text, Toast.LENGTH_SHORT));
+        Toast.makeText(mContext, R.string.activity_launch_on_secondary_display_failed_text,
+                Toast.LENGTH_SHORT).show();
     }
 
     private void showPending() {

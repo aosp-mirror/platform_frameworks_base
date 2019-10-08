@@ -17,8 +17,9 @@
 package android.content.res;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.TypedValue;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.frameworks.coretests.R;
 

@@ -18,6 +18,7 @@ import static android.content.ContentProvider.maybeAddUserId;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -59,7 +60,7 @@ import org.junit.runner.RunWith;
 public class SliceManagerServiceTest extends UiServiceTestCase {
 
     private static final String AUTH = "com.android.services.uitests";
-    private static final Uri TEST_URI = maybeAddUserId(Uri.parse("content://" + AUTH + "/path"), 0);
+    private static final Uri TEST_URI = Uri.parse("content://" + AUTH + "/path");
 
     private static final SliceSpec[] EMPTY_SPECS = new SliceSpec[]{
     };
@@ -70,7 +71,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     private TestableContext mContextSpy;
 
     @Before
-    public void setup() {
+    public void setUp() {
         LocalServices.addService(UsageStatsManagerInternal.class,
                 mock(UsageStatsManagerInternal.class));
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
@@ -93,7 +94,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
 
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
         mService.pinSlice("pkg", TEST_URI, EMPTY_SPECS, mToken);
-        verify(mService, times(1)).createPinnedSlice(eq(TEST_URI), anyString());
+        verify(mService, times(1)).createPinnedSlice(eq(maybeAddUserId(TEST_URI, 0)), anyString());
     }
 
     @Test
@@ -119,11 +120,27 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(PERMISSION_DENIED);
         when(mContextSpy.checkPermission("perm2", Process.myPid(), Process.myUid()))
                 .thenReturn(PERMISSION_GRANTED);
-        mService.checkSlicePermission(TEST_URI, mContext.getPackageName(), Process.myPid(),
+        mService.checkSlicePermission(TEST_URI, mContext.getPackageName(),
+                mContext.getPackageName(), Process.myPid(),
                 Process.myUid(), testPerms);
 
         verify(mContextSpy).checkPermission(eq("perm1"), eq(Process.myPid()), eq(Process.myUid()));
         verify(mContextSpy).checkPermission(eq("perm2"), eq(Process.myPid()), eq(Process.myUid()));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testNoPinThrow() throws Exception {
+        mService.getPinnedSpecs(TEST_URI, "pkg");
+    }
+
+    @Test
+    public void testGetPinnedSpecs() throws Exception {
+        SliceSpec[] specs = new SliceSpec[] {
+            new SliceSpec("Something", 1) };
+        mService.pinSlice("pkg", TEST_URI, specs, mToken);
+
+        when(mCreatedSliceState.getSpecs()).thenReturn(specs);
+        assertEquals(specs, mService.getPinnedSpecs(TEST_URI, "pkg"));
     }
 
 }

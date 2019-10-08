@@ -37,6 +37,7 @@ import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
 
@@ -160,6 +161,8 @@ public class DatePicker extends FrameLayout {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
                 defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.DatePicker,
+                attrs, a, defStyleAttr, defStyleRes);
         final boolean isDialogMode = a.getBoolean(R.styleable.DatePicker_dialogMode, false);
         final int requestedMode = a.getInt(R.styleable.DatePicker_datePickerMode, MODE_SPINNER);
         final int firstDayOfWeek = a.getInt(R.styleable.DatePicker_firstDayOfWeek, 0);
@@ -212,6 +215,10 @@ public class DatePicker extends FrameLayout {
      * @attr ref android.R.styleable#DatePicker_datePickerMode
      * @hide Visible for testing only.
      */
+    @InspectableProperty(name = "datePickerMode", enumMapping = {
+            @InspectableProperty.EnumEntry(value = MODE_SPINNER, name = "spinner"),
+            @InspectableProperty.EnumEntry(value = MODE_CALENDAR, name = "calendar")
+    })
     @DatePickerMode
     @TestApi
     public int getMode() {
@@ -257,6 +264,7 @@ public class DatePicker extends FrameLayout {
     /**
      * @return The selected year.
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getYear() {
         return mDelegate.getYear();
     }
@@ -264,6 +272,7 @@ public class DatePicker extends FrameLayout {
     /**
      * @return The selected month.
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getMonth() {
         return mDelegate.getMonth();
     }
@@ -271,6 +280,7 @@ public class DatePicker extends FrameLayout {
     /**
      * @return The selected day of month.
      */
+    @InspectableProperty(hasAttributeId = false)
     public int getDayOfMonth() {
         return mDelegate.getDayOfMonth();
     }
@@ -285,6 +295,7 @@ public class DatePicker extends FrameLayout {
      *
      * @return The minimal supported date.
      */
+    @InspectableProperty
     public long getMinDate() {
         return mDelegate.getMinDate().getTimeInMillis();
     }
@@ -310,6 +321,7 @@ public class DatePicker extends FrameLayout {
      *
      * @return The maximal supported date.
      */
+    @InspectableProperty
     public long getMaxDate() {
         return mDelegate.getMaxDate().getTimeInMillis();
     }
@@ -411,6 +423,7 @@ public class DatePicker extends FrameLayout {
      *
      * @attr ref android.R.styleable#DatePicker_firstDayOfWeek
      */
+    @InspectableProperty
     public int getFirstDayOfWeek() {
         return mDelegate.getFirstDayOfWeek();
     }
@@ -426,6 +439,7 @@ public class DatePicker extends FrameLayout {
      * @see #getCalendarView()
      * @deprecated Not supported by Material-style {@code calendar} mode
      */
+    @InspectableProperty
     @Deprecated
     public boolean getCalendarViewShown() {
         return mDelegate.getCalendarViewShown();
@@ -476,6 +490,7 @@ public class DatePicker extends FrameLayout {
      * @return {@code true} if the spinners are shown
      * @deprecated Not supported by Material-style {@code calendar} mode
      */
+    @InspectableProperty
     @Deprecated
     public boolean getSpinnersShown() {
         return mDelegate.getSpinnersShown();
@@ -776,7 +791,7 @@ public class DatePicker extends FrameLayout {
 
             @SuppressWarnings("all")
             // suppress unused and hiding
-            public static final Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            public static final @android.annotation.NonNull Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
 
                 public SavedState createFromParcel(Parcel in) {
                     return new SavedState(in);

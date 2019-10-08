@@ -19,7 +19,6 @@ package com.android.systemui.usb;
 import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.Notification.Action;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -30,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.MoveCallback;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.storage.DiskInfo;
 import android.os.storage.StorageEventListener;
@@ -640,11 +640,16 @@ public class StorageNotification extends SystemUI {
     }
 
     private PendingIntent buildBrowsePendingIntent(VolumeInfo vol) {
-        final Intent intent = vol.buildBrowseIntentForUser(vol.getMountUserId());
+        final StrictMode.VmPolicy oldPolicy = StrictMode.allowVmViolations();
+        try {
+            final Intent intent = vol.buildBrowseIntentForUser(vol.getMountUserId());
 
-        final int requestKey = vol.getId().hashCode();
-        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+            final int requestKey = vol.getId().hashCode();
+            return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                    PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+        } finally {
+            StrictMode.setVmPolicy(oldPolicy);
+        }
     }
 
     private PendingIntent buildVolumeSettingsPendingIntent(VolumeInfo vol) {

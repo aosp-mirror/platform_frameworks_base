@@ -1113,6 +1113,19 @@ public final class PendingIntent implements Parcelable {
 
     /**
      * @hide
+     * Check whether this PendingIntent will launch an Activity.
+     */
+    public boolean isBroadcast() {
+        try {
+            return ActivityManager.getService()
+                .isIntentSenderABroadcast(mTarget);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
      * Return the Intent of this PendingIntent.
      */
     @UnsupportedAppUsage
@@ -1195,7 +1208,7 @@ public final class PendingIntent implements Parcelable {
 
     }
 
-    public static final Parcelable.Creator<PendingIntent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PendingIntent> CREATOR
             = new Parcelable.Creator<PendingIntent>() {
         public PendingIntent createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();

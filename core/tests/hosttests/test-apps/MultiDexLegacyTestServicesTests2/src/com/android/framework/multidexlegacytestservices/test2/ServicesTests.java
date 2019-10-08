@@ -19,22 +19,26 @@ package com.android.framework.multidexlegacytestservices.test2;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+
+import junit.framework.Assert;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.TimeoutException;
-import junit.framework.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Run the tests with: <code>adb shell am instrument -w
- * com.android.framework.multidexlegacytestservices.test2/android.support.test.runner.AndroidJUnitRunner
+ * com.android.framework.multidexlegacytestservices.test2/androidx.test.runner.AndroidJUnitRunner
  * </code>
  */
 @RunWith(AndroidJUnit4.class)

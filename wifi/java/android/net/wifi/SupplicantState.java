@@ -251,7 +251,7 @@ public enum SupplicantState implements Parcelable {
     }
 
     /** Implement the Parcelable interface {@hide} */
-    public static final Creator<SupplicantState> CREATOR =
+    public static final @android.annotation.NonNull Creator<SupplicantState> CREATOR =
         new Creator<SupplicantState>() {
             public SupplicantState createFromParcel(Parcel in) {
                 return SupplicantState.valueOf(in.readString());

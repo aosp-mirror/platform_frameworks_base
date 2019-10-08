@@ -16,12 +16,19 @@
 
 package android.os;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.util.Log;
 
+import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Monitors files (using <a href="http://en.wikipedia.org/wiki/Inotify">inotify</a>)
@@ -29,7 +36,7 @@ import java.util.HashMap;
  * the device (including this one).  FileObserver is an abstract class;
  * subclasses must implement the event handler {@link #onEvent(int, String)}.
  *
- * <p>Each FileObserver instance monitors a single file or directory.
+ * <p>Each FileObserver instance can monitor multiple files or directories.
  * If a directory is monitored, events will be triggered for all files and
  * subdirectories inside the monitored directory.</p>
  *
@@ -42,6 +49,24 @@ import java.util.HashMap;
  * keep a reference to the FileObserver instance from some other live object.</p>
  */
 public abstract class FileObserver {
+    /** @hide */
+    @IntDef(flag = true, value = {
+            ACCESS,
+            MODIFY,
+            ATTRIB,
+            CLOSE_WRITE,
+            CLOSE_NOWRITE,
+            OPEN,
+            MOVED_FROM,
+            MOVED_TO,
+            CREATE,
+            DELETE,
+            DELETE_SELF,
+            MOVE_SELF
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NotifyEventType {}
+
     /** Event type: Data was read from a file */
     public static final int ACCESS = 0x00000001;
     /** Event type: Data was written to a file */
@@ -68,6 +93,7 @@ public abstract class FileObserver {
     public static final int MOVE_SELF = 0x00000800;
 
     /** Event mask: All valid event types, combined */
+    @NotifyEventType
     public static final int ALL_EVENTS = ACCESS | MODIFY | ATTRIB | CLOSE_WRITE
             | CLOSE_NOWRITE | OPEN | MOVED_FROM | MOVED_TO | DELETE | CREATE
             | DELETE_SELF | MOVE_SELF;
@@ -87,25 +113,37 @@ public abstract class FileObserver {
             observe(m_fd);
         }
 
-        public int startWatching(String path, int mask, FileObserver observer) {
-            int wfd = startWatching(m_fd, path, mask);
+        public int[] startWatching(List<File> files,
+                @NotifyEventType int mask, FileObserver observer) {
+            final int count = files.size();
+            final String[] paths = new String[count];
+            for (int i = 0; i < count; ++i) {
+                paths[i] = files.get(i).getAbsolutePath();
+            }
+            final int[] wfds = new int[count];
+            Arrays.fill(wfds, -1);
 
-            Integer i = new Integer(wfd);
-            if (wfd >= 0) {
-                synchronized (m_observers) {
-                    m_observers.put(i, new WeakReference(observer));
+            startWatching(m_fd, paths, mask, wfds);
+
+            final WeakReference<FileObserver> fileObserverWeakReference =
+                    new WeakReference<>(observer);
+            synchronized (m_observers) {
+                for (int wfd : wfds) {
+                    if (wfd >= 0) {
+                        m_observers.put(wfd, fileObserverWeakReference);
+                    }
                 }
             }
 
-            return i;
+            return wfds;
         }
 
-        public void stopWatching(int descriptor) {
-            stopWatching(m_fd, descriptor);
+        public void stopWatching(int[] descriptors) {
+            stopWatching(m_fd, descriptors);
         }
 
         @UnsupportedAppUsage
-        public void onEvent(int wfd, int mask, String path) {
+        public void onEvent(int wfd, @NotifyEventType int mask, String path) {
             // look up our observer, fixing up the map if necessary...
             FileObserver observer = null;
 
@@ -131,8 +169,9 @@ public abstract class FileObserver {
 
         private native int init();
         private native void observe(int fd);
-        private native int startWatching(int fd, String path, int mask);
-        private native void stopWatching(int fd, int wfd);
+        private native void startWatching(int fd, String[] paths,
+                @NotifyEventType int mask, int[] wfds);
+        private native void stopWatching(int fd, int[] wfds);
     }
 
     @UnsupportedAppUsage
@@ -144,15 +183,34 @@ public abstract class FileObserver {
     }
 
     // instance
-    private String m_path;
-    private Integer m_descriptor;
-    private int m_mask;
+    private final List<File> mFiles;
+    private int[] mDescriptors;
+    private final int mMask;
 
     /**
      * Equivalent to FileObserver(path, FileObserver.ALL_EVENTS).
+     *
+     * @deprecated use {@link #FileObserver(File)} instead.
      */
+    @Deprecated
     public FileObserver(String path) {
-        this(path, ALL_EVENTS);
+        this(new File(path));
+    }
+
+    /**
+     * Equivalent to FileObserver(file, FileObserver.ALL_EVENTS).
+     */
+    public FileObserver(@NonNull File file) {
+        this(Arrays.asList(file));
+    }
+
+    /**
+     * Equivalent to FileObserver(paths, FileObserver.ALL_EVENTS).
+     *
+     * @param files The files or directories to monitor
+     */
+    public FileObserver(@NonNull List<File> files) {
+        this(files, ALL_EVENTS);
     }
 
     /**
@@ -162,11 +220,36 @@ public abstract class FileObserver {
      *
      * @param path The file or directory to monitor
      * @param mask The event or events (added together) to watch for
+     *
+     * @deprecated use {@link #FileObserver(File, int)} instead.
      */
-    public FileObserver(String path, int mask) {
-        m_path = path;
-        m_mask = mask;
-        m_descriptor = -1;
+    @Deprecated
+    public FileObserver(String path, @NotifyEventType int mask) {
+        this(new File(path), mask);
+    }
+
+    /**
+     * Create a new file observer for a certain file or directory.
+     * Monitoring does not start on creation!  You must call
+     * {@link #startWatching()} before you will receive events.
+     *
+     * @param file The file or directory to monitor
+     * @param mask The event or events (added together) to watch for
+     */
+    public FileObserver(@NonNull File file, @NotifyEventType int mask) {
+        this(Arrays.asList(file), mask);
+    }
+
+    /**
+     * Version of {@link #FileObserver(File, int)} that allows callers to monitor
+     * multiple files or directories.
+     *
+     * @param files The files or directories to monitor
+     * @param mask The event or events (added together) to watch for
+     */
+    public FileObserver(@NonNull List<File> files, @NotifyEventType int mask) {
+        mFiles = files;
+        mMask = mask;
     }
 
     protected void finalize() {
@@ -179,8 +262,8 @@ public abstract class FileObserver {
      * If monitoring is already started, this call has no effect.
      */
     public void startWatching() {
-        if (m_descriptor < 0) {
-            m_descriptor = s_observerThread.startWatching(m_path, m_mask, this);
+        if (mDescriptors == null) {
+            mDescriptors = s_observerThread.startWatching(mFiles, mMask, this);
         }
     }
 
@@ -190,9 +273,9 @@ public abstract class FileObserver {
      * monitoring is already stopped, this call has no effect.
      */
     public void stopWatching() {
-        if (m_descriptor >= 0) {
-            s_observerThread.stopWatching(m_descriptor);
-            m_descriptor = -1;
+        if (mDescriptors != null) {
+            s_observerThread.stopWatching(mDescriptors);
+            mDescriptors = null;
         }
     }
 

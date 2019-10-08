@@ -23,10 +23,10 @@ import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.util.FloatProperty;
 import android.util.MathUtils;
-import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
@@ -132,7 +132,7 @@ class RippleForeground extends RippleComponent {
         }
     }
 
-    private void startPending(DisplayListCanvas c) {
+    private void startPending(RecordingCanvas c) {
         if (!mPendingHwAnimators.isEmpty()) {
             for (int i = 0; i < mPendingHwAnimators.size(); i++) {
                 RenderNodeAnimator animator = mPendingHwAnimators.get(i);
@@ -164,7 +164,7 @@ class RippleForeground extends RippleComponent {
         }
     }
 
-    private void drawHardware(DisplayListCanvas c, Paint p) {
+    private void drawHardware(RecordingCanvas c, Paint p) {
         startPending(c);
         pruneHwFinished();
         if (mPropPaint != null) {
@@ -332,11 +332,11 @@ class RippleForeground extends RippleComponent {
      * @param p the paint used to draw the ripple
      */
     public void draw(Canvas c, Paint p) {
-        final boolean hasDisplayListCanvas = !mForceSoftware && c instanceof DisplayListCanvas;
+        final boolean hasDisplayListCanvas = !mForceSoftware && c instanceof RecordingCanvas;
 
         pruneSwFinished();
         if (hasDisplayListCanvas) {
-            final DisplayListCanvas hw = (DisplayListCanvas) c;
+            final RecordingCanvas hw = (RecordingCanvas) c;
             drawHardware(hw, p);
         } else {
             drawSoftware(c, p);

@@ -42,6 +42,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,7 +51,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * CameraServiceProxy is the system_server analog to the camera service running in mediaserver.
+ * CameraServiceProxy is the system_server analog to the camera service running in cameraserver.
  *
  * @hide
  */
@@ -74,6 +75,7 @@ public class CameraServiceProxy extends SystemService
     private static final int MSG_SWITCH_USER = 1;
 
     private static final int RETRY_DELAY_TIME = 20; //ms
+    private static final int RETRY_TIMES = 30;
 
     // Maximum entries to keep in usage history before dumping out
     private static final int MAX_USAGE_HISTORY = 100;
@@ -89,8 +91,10 @@ public class CameraServiceProxy extends SystemService
 
     private ICameraService mCameraServiceRaw;
 
+    // Map of currently active camera IDs
     private final ArrayMap<String, CameraUsageEvent> mActiveCameraUsage = new ArrayMap<>();
     private final List<CameraUsageEvent> mCameraUsageHistory = new ArrayList<>();
+
     private final MetricsLogger mLogger = new MetricsLogger();
     private static final String NFC_NOTIFICATION_PROP = "ro.camera.notify_nfc";
     private static final String NFC_SERVICE_BINDER_NAME = "nfc";
@@ -171,7 +175,7 @@ public class CameraServiceProxy extends SystemService
                         " camera service UID!");
                 return;
             }
-            notifySwitchWithRetries(30);
+            notifySwitchWithRetries(RETRY_TIMES);
         }
 
         @Override
@@ -242,7 +246,8 @@ public class CameraServiceProxy extends SystemService
     public void onStartUser(int userHandle) {
         synchronized(mLock) {
             if (mEnabledCameraUsers == null) {
-                // Initialize mediaserver, or update mediaserver if we are recovering from a crash.
+                // Initialize cameraserver, or update cameraserver if we are recovering
+                // from a crash.
                 switchUserLocked(userHandle);
             }
         }
@@ -324,9 +329,9 @@ public class CameraServiceProxy extends SystemService
         Set<Integer> currentUserHandles = getEnabledUserHandles(userHandle);
         mLastUser = userHandle;
         if (mEnabledCameraUsers == null || !mEnabledCameraUsers.equals(currentUserHandles)) {
-            // Some user handles have been added or removed, update mediaserver.
+            // Some user handles have been added or removed, update cameraserver.
             mEnabledCameraUsers = currentUserHandles;
-            notifyMediaserverLocked(ICameraService.EVENT_USER_SWITCHED, currentUserHandles);
+            notifySwitchWithRetriesLocked(RETRY_TIMES);
         }
     }
 
@@ -343,12 +348,16 @@ public class CameraServiceProxy extends SystemService
 
     private void notifySwitchWithRetries(int retries) {
         synchronized(mLock) {
-            if (mEnabledCameraUsers == null) {
-                return;
-            }
-            if (notifyMediaserverLocked(ICameraService.EVENT_USER_SWITCHED, mEnabledCameraUsers)) {
-                retries = 0;
-            }
+            notifySwitchWithRetriesLocked(retries);
+        }
+    }
+
+    private void notifySwitchWithRetriesLocked(int retries) {
+        if (mEnabledCameraUsers == null) {
+            return;
+        }
+        if (notifyCameraserverLocked(ICameraService.EVENT_USER_SWITCHED, mEnabledCameraUsers)) {
+            retries = 0;
         }
         if (retries <= 0) {
             return;
@@ -358,13 +367,13 @@ public class CameraServiceProxy extends SystemService
                 RETRY_DELAY_TIME);
     }
 
-    private boolean notifyMediaserverLocked(int eventType, Set<Integer> updatedUserHandles) {
-        // Forward the user switch event to the native camera service running in the mediaserver
+    private boolean notifyCameraserverLocked(int eventType, Set<Integer> updatedUserHandles) {
+        // Forward the user switch event to the native camera service running in the cameraserver
         // process.
         if (mCameraServiceRaw == null) {
             IBinder cameraServiceBinder = getBinderService(CAMERA_SERVICE_BINDER_NAME);
             if (cameraServiceBinder == null) {
-                Slog.w(TAG, "Could not notify mediaserver, camera service not available.");
+                Slog.w(TAG, "Could not notify cameraserver, camera service not available.");
                 return false; // Camera service not active, cannot evict user clients.
             }
             try {
@@ -380,7 +389,7 @@ public class CameraServiceProxy extends SystemService
         try {
             mCameraServiceRaw.notifySystemEvent(eventType, toArray(updatedUserHandles));
         } catch (RemoteException e) {
-            Slog.w(TAG, "Could not notify mediaserver, remote exception: " + e);
+            Slog.w(TAG, "Could not notify cameraserver, remote exception: " + e);
             // Not much we can do if camera service is dead.
             return false;
         }
@@ -409,6 +418,24 @@ public class CameraServiceProxy extends SystemService
                     }
                     break;
                 case ICameraServiceProxy.CAMERA_STATE_ACTIVE:
+                    // Check current active camera IDs to see if this package is already talking to
+                    // some camera
+                    boolean alreadyActivePackage = false;
+                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
+                        if (mActiveCameraUsage.valueAt(i).mClientName.equals(clientName)) {
+                            alreadyActivePackage = true;
+                            break;
+                        }
+                    }
+                    // If not already active, notify window manager about this new package using a
+                    // camera
+                    if (!alreadyActivePackage) {
+                        WindowManagerInternal wmi =
+                                LocalServices.getService(WindowManagerInternal.class);
+                        wmi.addNonHighRefreshRatePackage(clientName);
+                    }
+
+                    // Update activity events
                     CameraUsageEvent newEvent = new CameraUsageEvent(facing, clientName, apiLevel);
                     CameraUsageEvent oldEvent = mActiveCameraUsage.put(cameraId, newEvent);
                     if (oldEvent != null) {
@@ -420,13 +447,31 @@ public class CameraServiceProxy extends SystemService
                 case ICameraServiceProxy.CAMERA_STATE_IDLE:
                 case ICameraServiceProxy.CAMERA_STATE_CLOSED:
                     CameraUsageEvent doneEvent = mActiveCameraUsage.remove(cameraId);
-                    if (doneEvent != null) {
-                        doneEvent.markCompleted();
-                        mCameraUsageHistory.add(doneEvent);
-                        if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
-                            dumpUsageEvents();
+                    if (doneEvent == null) break;
+
+                    doneEvent.markCompleted();
+                    mCameraUsageHistory.add(doneEvent);
+                    if (mCameraUsageHistory.size() > MAX_USAGE_HISTORY) {
+                        dumpUsageEvents();
+                    }
+
+                    // Check current active camera IDs to see if this package is still talking to
+                    // some camera
+                    boolean stillActivePackage = false;
+                    for (int i = 0; i < mActiveCameraUsage.size(); i++) {
+                        if (mActiveCameraUsage.valueAt(i).mClientName.equals(clientName)) {
+                            stillActivePackage = true;
+                            break;
                         }
                     }
+                    // If not longer active, notify window manager about this package being done
+                    // with camera
+                    if (!stillActivePackage) {
+                        WindowManagerInternal wmi =
+                                LocalServices.getService(WindowManagerInternal.class);
+                        wmi.removeNonHighRefreshRatePackage(clientName);
+                    }
+
                     break;
             }
             boolean isEmpty = mActiveCameraUsage.isEmpty();

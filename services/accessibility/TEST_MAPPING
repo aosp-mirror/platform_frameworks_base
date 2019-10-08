@@ -1,0 +1,111 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsAccessibilityServiceTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsAccessibilityTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsUiAutomationTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.accessibility"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.accessibility"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-filter": "android.view.textclassifier.TextClassifierTest#testSuggetsConversationActions_deduplicate"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.view.accessibility"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-filter": "android.view.textclassifier.TextClassifierTest#testSuggetsConversationActions_deduplicate"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsAccessibilityServiceTestCases"
+    },
+    {
+      "name": "CtsAccessibilityTestCases"
+    },
+    {
+      "name": "CtsUiAutomationTestCases"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.accessibility"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "com.android.internal.accessibility"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.view.accessibility"
+        }
+      ]
+    }
+  ]
+}

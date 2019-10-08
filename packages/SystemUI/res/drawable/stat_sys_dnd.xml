@@ -18,17 +18,5 @@
 -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:insetLeft="2.5dp"
-    android:insetRight="2.5dp" >
-    <vector
-        android:width="17dp"
-        android:height="17dp"
-        android:viewportWidth="24.0"
-        android:viewportHeight="24.0">
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M12,2C6.48,2 2,6.48 2,12c0,5.52 4.48,10 10,10c5.52,0 10,-4.48 10,-10C22,6.48 17.52,2 12,2zM12,20c-4.41,0 -8,-3.59 -8,-8c0,-4.41 3.59,-8 8,-8c4.41,0 8,3.59 8,8C20,16.41 16.41,20 12,20z"/>
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M7,11h10v2h-10z"/>
-    </vector>
-</inset>
+    android:insetRight="2.5dp"
+    android:drawable="@*android:drawable/ic_qs_dnd" />

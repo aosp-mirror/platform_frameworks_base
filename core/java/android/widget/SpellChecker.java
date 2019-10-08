@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import android.content.Context;
+import android.annotation.Nullable;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.Spanned;
@@ -93,6 +93,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
     // concurrently due to the asynchronous nature of onGetSuggestions.
     private WordIterator mWordIterator;
 
+    @Nullable
     private TextServicesManager mTextServicesManager;
 
     private Runnable mSpellRunnable;
@@ -114,13 +115,14 @@ public class SpellChecker implements SpellCheckerSessionListener {
         mCookie = hashCode();
     }
 
-    private void resetSession() {
+    void resetSession() {
         closeSession();
 
-        mTextServicesManager = (TextServicesManager) mTextView.getContext().
-                getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        if (!mTextServicesManager.isSpellCheckerEnabled()
-                || mCurrentLocale == null
+        mTextServicesManager = mTextView.getTextServicesManagerForUser();
+        if (mCurrentLocale == null
+                || mTextServicesManager == null
+                || mTextView.length() == 0
+                || !mTextServicesManager.isSpellCheckerEnabled()
                 || mTextServicesManager.getCurrentSpellCheckerSubtype(true) == null) {
             mSpellCheckerSession = null;
         } else {
@@ -225,7 +227,8 @@ public class SpellChecker implements SpellCheckerSessionListener {
             start = 0;
             end = mTextView.getText().length();
         } else {
-            final boolean spellCheckerActivated = mTextServicesManager.isSpellCheckerEnabled();
+            final boolean spellCheckerActivated =
+                    mTextServicesManager != null && mTextServicesManager.isSpellCheckerEnabled();
             if (isSessionActive != spellCheckerActivated) {
                 // Spell checker has been turned of or off since last spellCheck
                 resetSession();

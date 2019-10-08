@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1157,7 +1158,7 @@ public class GpsMeasurement implements Parcelable {
         mUsedInFix = value;
     }
 
-    public static final Creator<GpsMeasurement> CREATOR = new Creator<GpsMeasurement>() {
+    public static final @android.annotation.NonNull Creator<GpsMeasurement> CREATOR = new Creator<GpsMeasurement>() {
         @Override
         public GpsMeasurement createFromParcel(Parcel parcel) {
             GpsMeasurement gpsMeasurement = new GpsMeasurement();
@@ -1244,6 +1245,7 @@ public class GpsMeasurement implements Parcelable {
         return 0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         final String format = "   %-29s = %s\n";

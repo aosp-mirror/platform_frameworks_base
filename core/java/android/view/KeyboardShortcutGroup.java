@@ -125,7 +125,7 @@ public final class KeyboardShortcutGroup implements Parcelable {
         dest.writeInt(mSystemGroup ? 1 : 0);
     }
 
-    public static final Creator<KeyboardShortcutGroup> CREATOR =
+    public static final @android.annotation.NonNull Creator<KeyboardShortcutGroup> CREATOR =
             new Creator<KeyboardShortcutGroup>() {
                 public KeyboardShortcutGroup createFromParcel(Parcel source) {
                     return new KeyboardShortcutGroup(source);

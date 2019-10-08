@@ -40,7 +40,6 @@ public class EasyEditSpan implements ParcelableSpan {
      *
      * @see #TEXT_DELETED
      * @see #TEXT_MODIFIED
-     * @see #getPendingIntent()
      */
     public static final String EXTRA_TEXT_CHANGED_TYPE =
             "android.text.style.EXTRA_TEXT_CHANGED_TYPE";

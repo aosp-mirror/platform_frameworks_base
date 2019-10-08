@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Touch to type password"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Type password to unlock"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Type PIN to unlock"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Enter your PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Enter your pattern"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Enter your password"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Incorrect PIN code."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Invalid card."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Charged"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Charging"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Charging rapidly"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Charging slowly"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Fully charged"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wirelessly Charging"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging rapidly"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Charging slowly"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Connect your charger."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Press Menu to unlock."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Network locked"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM card is PUK-locked."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Unlocking SIM card…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN area"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Device password"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"SIM PIN area"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"SIM PUK area"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Next alarm set for <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"The eSIM can’t be disabled due to an error."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Forgotten Pattern"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Wrong Pattern"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Wrong Password"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Wrong pattern"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Wrong password"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Wrong PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Try again in <xliff:g id="NUMBER">%d</xliff:g> seconds.</item>
@@ -136,8 +141,9 @@
       <item quantity="other">Device hasn\'t been unlocked for <xliff:g id="NUMBER_1">%d</xliff:g> hours. Confirm password.</item>
       <item quantity="one">Device hasn\'t been unlocked for <xliff:g id="NUMBER_0">%d</xliff:g> hour. Confirm password.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Not recognised"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Not recognised"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Not recognised"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Enter SIM PIN. You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts.</item>
       <item quantity="one">Enter SIM PIN. You have <xliff:g id="NUMBER_0">%d</xliff:g> remaining attempt before you must contact your operator to unlock your device.</item>
     </plurals>
@@ -145,4 +151,84 @@
       <item quantity="other">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_1">%d</xliff:g> remaining attempts before SIM becomes permanently unusable. Contact operator for details.</item>
       <item quantity="one">SIM is now disabled. Enter PUK code to continue. You have <xliff:g id="_NUMBER_0">%d</xliff:g> remaining attempt before SIM becomes permanently unusable. Contact operator for details.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="other">"<annotation name="color">"It’s"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"It’s"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Twelve"</item>
+    <item msgid="7389464214252023751">"One"</item>
+    <item msgid="8803180377002008046">"Two"</item>
+    <item msgid="8614897059944644719">"Three"</item>
+    <item msgid="2293058674782619556">"Four"</item>
+    <item msgid="4815402358455041664">"Five"</item>
+    <item msgid="3325754778509665687">"Six"</item>
+    <item msgid="5805551341866280575">"Seven"</item>
+    <item msgid="203334816668238610">"Eight"</item>
+    <item msgid="4828052671464488923">"Nine"</item>
+    <item msgid="2233497913571137419">"Ten"</item>
+    <item msgid="5621554266768657830">"Eleven"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"O’Clock"</item>
+    <item msgid="8837126587669001578">"O’One"</item>
+    <item msgid="4294343372940455660">"O’Two"</item>
+    <item msgid="7129166637707421536">"O’Three"</item>
+    <item msgid="7579404865008788673">"O’Four"</item>
+    <item msgid="3873924689207380586">"O’Five"</item>
+    <item msgid="4849565597850069377">"O’Six"</item>
+    <item msgid="4404219424523572364">"O’Seven"</item>
+    <item msgid="8740481214764087329">"O’Eight"</item>
+    <item msgid="1713216865806811237">"O’Nine"</item>
+    <item msgid="3508406095411245038">"Ten"</item>
+    <item msgid="7161996337755311711">"Eleven"</item>
+    <item msgid="4044549963329624197">"Twelve"</item>
+    <item msgid="333373157917379088">"Thirteen"</item>
+    <item msgid="2631202907124819385">"Fourteen"</item>
+    <item msgid="6472396076858033453">"15"</item>
+    <item msgid="8656981856181581643">"Sixteen"</item>
+    <item msgid="7289026608562030619">"Seventeen"</item>
+    <item msgid="3881477602692646573">"Eighteen"</item>
+    <item msgid="3358129827772984226">"Nineteen"</item>
+    <item msgid="3308575407402865807">"Twenty"</item>
+    <item msgid="5346560955382229629">"Twenty\nOne"</item>
+    <item msgid="226750304761473436">"Twenty\nTwo"</item>
+    <item msgid="616811325336838734">"Twenty\nThree"</item>
+    <item msgid="616346116869053440">"Twenty\nFour"</item>
+    <item msgid="4642996410384042830">"Twenty\nFive"</item>
+    <item msgid="7506092849993571465">"Twenty\nSix"</item>
+    <item msgid="1915078191101042031">"Twenty\nSeven"</item>
+    <item msgid="4292378641900520252">"Twenty\nEight"</item>
+    <item msgid="5339513901773103696">"Twenty\nNine"</item>
+    <item msgid="3574673250891657607">"Thirty"</item>
+    <item msgid="5796923836589110940">"Thirty\nOne"</item>
+    <item msgid="5859323597571702052">"Thirty\nTwo"</item>
+    <item msgid="5133326723148876507">"Thirty\nThree"</item>
+    <item msgid="2693999494655663096">"Thirty\nFour"</item>
+    <item msgid="3316754944962836197">"Thirty\nFive"</item>
+    <item msgid="816891008836796723">"Thirty\nSix"</item>
+    <item msgid="9158890488666520078">"Thirty\nSeven"</item>
+    <item msgid="1894769703213894011">"Thirty\nEight"</item>
+    <item msgid="5638820345598572399">"Thirty\nNine"</item>
+    <item msgid="8838304023017895439">"Forty"</item>
+    <item msgid="1834742948932559597">"Forty\nOne"</item>
+    <item msgid="6573707308847773944">"Forty\nTwo"</item>
+    <item msgid="2450149950652678001">"Forty\nThree"</item>
+    <item msgid="2874667401318178036">"Forty\nFour"</item>
+    <item msgid="3391101532763048862">"Forty\nFive"</item>
+    <item msgid="1671489330863254362">"Forty\nSix"</item>
+    <item msgid="5916017359554531038">"Forty\nSeven"</item>
+    <item msgid="8205413177993059967">"Forty\nEight"</item>
+    <item msgid="6607867415142171302">"Forty\nNine"</item>
+    <item msgid="8358850748472089162">"Fifty"</item>
+    <item msgid="3551313125255080234">"Fifty\nOne"</item>
+    <item msgid="1559678130725716542">"Fifty\nTwo"</item>
+    <item msgid="431441994725492377">"Fifty\nThree"</item>
+    <item msgid="6345774640539623024">"Fifty\nFour"</item>
+    <item msgid="8018192990793931120">"Fifty\nFive"</item>
+    <item msgid="6187650843754604534">"Fifty\nSix"</item>
+    <item msgid="8727240174015993259">"Fifty\nSeven"</item>
+    <item msgid="848339003778952950">"Fifty\nEight"</item>
+    <item msgid="5798985802835423618">"Fifty\nNine"</item>
+  </string-array>
 </resources>

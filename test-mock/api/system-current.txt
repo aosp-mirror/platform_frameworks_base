@@ -12,6 +12,7 @@ package android.test.mock {
 
   @Deprecated public class MockPackageManager extends android.content.pm.PackageManager {
     method public void addOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
+    method public boolean arePermissionsIndividuallyControlled();
     method @Deprecated public java.util.List<android.content.IntentFilter> getAllIntentFilters(String);
     method public String getDefaultBrowserPackageNameAsUser(int);
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
@@ -29,6 +30,7 @@ package android.test.mock {
     method public void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void revokeRuntimePermission(String, String, android.os.UserHandle);
     method public boolean setDefaultBrowserPackageNameAsUser(String, int);
+    method public String[] setPackagesSuspended(String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, String);
     method public void setUpdateAvailable(String, boolean);
     method public boolean updateIntentVerificationStatusAsUser(String, int, int);
     method public void updatePermissionFlags(String, String, int, int, android.os.UserHandle);

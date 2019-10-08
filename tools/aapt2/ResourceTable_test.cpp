@@ -244,19 +244,130 @@ TEST(ResourceTableTest, SetAllowNew) {
 
 TEST(ResourceTableTest, SetOverlayable) {
   ResourceTable table;
+  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme",
+                                                   Source("res/values/overlayable.xml", 40));
+  OverlayableItem overlayable_item(overlayable);
+  overlayable_item.policies |= OverlayableItem::Policy::kProduct;
+  overlayable_item.policies |= OverlayableItem::Policy::kVendor;
+  overlayable_item.comment = "comment";
+  overlayable_item.source = Source("res/values/overlayable.xml", 42);
+
+  const ResourceName name = test::ParseNameOrDie("android:string/foo");
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable_item, test::GetDiagnostics()));
+  Maybe<ResourceTable::SearchResult> search_result = table.FindResource(name);
+
+  ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result.value().entry->overlayable_item);
+
+  OverlayableItem& result_overlayable_item = search_result.value().entry->overlayable_item.value();
+  EXPECT_THAT(result_overlayable_item.overlayable->name, Eq("Name"));
+  EXPECT_THAT(result_overlayable_item.overlayable->actor, Eq("overlay://theme"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.overlayable->source.line, 40);
+  EXPECT_THAT(result_overlayable_item.policies, Eq(OverlayableItem::Policy::kProduct
+                                                   | OverlayableItem::Policy::kVendor));
+  ASSERT_THAT(result_overlayable_item.comment, StrEq("comment"));
+  EXPECT_THAT(result_overlayable_item.source.path, Eq("res/values/overlayable.xml"));
+  EXPECT_THAT(result_overlayable_item.source.line, 42);
+}
+
+TEST(ResourceTableTest, SetMultipleOverlayableResources) {
+  ResourceTable table;
+
+  const ResourceName foo = test::ParseNameOrDie("android:string/foo");
+  auto group = std::make_shared<Overlayable>("Name", "overlay://theme");
+  OverlayableItem overlayable(group);
+  overlayable.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(foo, overlayable, test::GetDiagnostics()));
+
+  const ResourceName bar = test::ParseNameOrDie("android:string/bar");
+  OverlayableItem overlayable2(group);
+  overlayable2.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(bar, overlayable2, test::GetDiagnostics()));
+
+  const ResourceName baz = test::ParseNameOrDie("android:string/baz");
+  OverlayableItem overlayable3(group);
+  overlayable3.policies = OverlayableItem::Policy::kVendor;
+  ASSERT_TRUE(table.SetOverlayable(baz, overlayable3, test::GetDiagnostics()));
+}
+
+TEST(ResourceTableTest, SetOverlayableDifferentResourcesDifferentName) {
+  ResourceTable table;
+
+  const ResourceName foo = test::ParseNameOrDie("android:string/foo");
+  OverlayableItem overlayable_item(std::make_shared<Overlayable>("Name", "overlay://theme"));
+  overlayable_item.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(foo, overlayable_item, test::GetDiagnostics()));
+
+  const ResourceName bar = test::ParseNameOrDie("android:string/bar");
+  OverlayableItem overlayable_item2(std::make_shared<Overlayable>("Name2",  "overlay://theme"));
+  overlayable_item2.policies = OverlayableItem::Policy::kProduct;
+  ASSERT_TRUE(table.SetOverlayable(bar, overlayable_item2, test::GetDiagnostics()));
+}
+
+TEST(ResourceTableTest, SetOverlayableSameResourcesFail) {
+  ResourceTable table;
   const ResourceName name = test::ParseNameOrDie("android:string/foo");
 
-  Overlayable overlayable;
+  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme");
+  OverlayableItem overlayable_item(overlayable);
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable_item, test::GetDiagnostics()));
 
-  overlayable.comment = "first";
-  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
-  Maybe<ResourceTable::SearchResult> result = table.FindResource(name);
-  ASSERT_TRUE(result);
-  ASSERT_TRUE(result.value().entry->overlayable);
-  ASSERT_THAT(result.value().entry->overlayable.value().comment, StrEq("first"));
+  OverlayableItem overlayable_item2(overlayable);
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable_item2, test::GetDiagnostics()));
+}
 
-  overlayable.comment = "second";
-  ASSERT_FALSE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
+TEST(ResourceTableTest,  SetOverlayableSameResourcesDifferentNameFail) {
+  ResourceTable table;
+  const ResourceName name = test::ParseNameOrDie("android:string/foo");
+
+  auto overlayable = std::make_shared<Overlayable>("Name", "overlay://theme");
+  OverlayableItem overlayable_item(overlayable);
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable_item, test::GetDiagnostics()));
+
+  auto overlayable2 = std::make_shared<Overlayable>("Other", "overlay://theme");
+  OverlayableItem overlayable_item2(overlayable2);
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable_item2, test::GetDiagnostics()));
+}
+
+TEST(ResourceTableTest, AllowDuplictaeResourcesNames) {
+  ResourceTable table(/* validate_resources */ false);
+
+  const ResourceName foo_name = test::ParseNameOrDie("android:bool/foo");
+  ASSERT_TRUE(table.AddResourceWithId(foo_name, ResourceId(0x7f0100ff), ConfigDescription{} , "",
+                                      test::BuildPrimitive(android::Res_value::TYPE_INT_BOOLEAN, 0),
+                                      test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResourceWithId(foo_name, ResourceId(0x7f010100), ConfigDescription{} , "",
+                                      test::BuildPrimitive(android::Res_value::TYPE_INT_BOOLEAN, 1),
+                                      test::GetDiagnostics()));
+
+  ASSERT_TRUE(table.SetVisibilityWithId(foo_name, Visibility{Visibility::Level::kPublic},
+                                        ResourceId(0x7f0100ff), test::GetDiagnostics()));
+  ASSERT_TRUE(table.SetVisibilityWithId(foo_name, Visibility{Visibility::Level::kPrivate},
+                                        ResourceId(0x7f010100), test::GetDiagnostics()));
+
+  auto package = table.FindPackageById(0x7f);
+  ASSERT_THAT(package, NotNull());
+  auto type = package->FindType(ResourceType::kBool);
+  ASSERT_THAT(type, NotNull());
+
+  auto entry1 = type->FindEntry("foo", 0x00ff);
+  ASSERT_THAT(entry1, NotNull());
+  ASSERT_THAT(entry1->id, Eq(0x00ff));
+  ASSERT_THAT(entry1->values[0], NotNull());
+  ASSERT_THAT(entry1->values[0]->value, NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry1->values[0]->value.get()), NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry1->values[0]->value.get())->value.data, Eq(0u));
+  ASSERT_THAT(entry1->visibility.level, Visibility::Level::kPublic);
+
+  auto entry2 = type->FindEntry("foo", 0x0100);
+  ASSERT_THAT(entry2, NotNull());
+  ASSERT_THAT(entry2->id, Eq(0x0100));
+  ASSERT_THAT(entry2->values[0], NotNull());
+  ASSERT_THAT(entry1->values[0]->value, NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry2->values[0]->value.get()), NotNull());
+  ASSERT_THAT(ValueCast<BinaryPrimitive>(entry2->values[0]->value.get())->value.data, Eq(1u));
+  ASSERT_THAT(entry2->visibility.level, Visibility::Level::kPrivate);
 }
 
 }  // namespace aapt

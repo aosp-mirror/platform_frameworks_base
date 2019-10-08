@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 
 #include <SkClipStack.h>
-#include <SkLiteRecorder.h>
 #include <SkSurface_Base.h>
 #include <string.h>
 #include "AnimationContext.h"
@@ -28,8 +27,12 @@
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
+#include "pipeline/skia/SkiaUtils.h"
 #include "renderthread/CanvasContext.h"
 #include "tests/common/TestUtils.h"
+
+#include <gui/BufferItemConsumer.h>
+#include <gui/Surface.h>
 
 using namespace android;
 using namespace android::uirenderer;
@@ -42,7 +45,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
                 redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
             });
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     std::vector<sp<RenderNode>> renderNodes;
     renderNodes.push_back(redNode);
     bool opaque = true;
@@ -51,8 +54,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
     auto surface = SkSurface::MakeRasterN32Premul(1, 1);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
@@ -63,7 +66,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
             });
 
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     std::vector<sp<RenderNode>> renderNodes;
     renderNodes.push_back(redNode);
     bool opaque = true;
@@ -84,8 +87,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     // drawFrame will crash if "SkiaPipeline::onPrepareTree" did not clean invalid VD pointer
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorRED);
 }
 
@@ -98,7 +101,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
                 bottomHalfGreenCanvas.drawRect(0, 1, 2, 2, greenPaint);
             });
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     std::vector<sp<RenderNode>> renderNodes;
     renderNodes.push_back(halfGreenNode);
     android::uirenderer::Rect contentDrawBounds(0, 0, 2, 2);
@@ -106,12 +109,12 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
     auto surface = SkSurface::MakeRasterN32Premul(2, 2);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, false, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, false, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned int)SK_ColorTRANSPARENT);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorGREEN);
 }
@@ -130,8 +133,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckDirtyRect) {
     auto surface = SkSurface::MakeRasterN32Premul(2, 2);
     surface->getCanvas()->drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, true, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 1, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 1), SK_ColorRED);
@@ -161,18 +164,18 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
 
     // attach both layers to the update queue
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     layerUpdateQueue.enqueueLayerWithDamage(redNode.get(), dirty);
     layerUpdateQueue.enqueueLayerWithDamage(blueNode.get(), SkRect::MakeWH(2, 1));
     ASSERT_EQ(layerUpdateQueue.entries().size(), 2UL);
 
     bool opaque = true;
-    FrameBuilder::LightGeometry lightGeometry;
+    LightGeometry lightGeometry;
     lightGeometry.radius = 1.0f;
     lightGeometry.center = {0.0f, 0.0f, 0.0f};
-    BakedOpRenderer::LightInfo lightInfo;
+    LightInfo lightInfo;
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
-    pipeline->renderLayers(lightGeometry, &layerUpdateQueue, opaque, false, lightInfo);
+    pipeline->renderLayers(lightGeometry, &layerUpdateQueue, opaque, lightInfo);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer1, 0, 0), SK_ColorRED);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer2, 0, 0), SK_ColorBLUE);
     ASSERT_EQ(TestUtils::getColor(surfaceLayer2, 0, 1), SK_ColorWHITE);
@@ -203,38 +206,38 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderOverdraw) {
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
 
     // Single draw, should be white.
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
 
     // 1 Overdraw, should be blue blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffd0d0ff);
 
     // 2 Overdraw, should be green blended onto white
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffd0ffd0);
 
     // 3 Overdraw, should be pink blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffffc0c0);
 
     // 4 Overdraw, should be red blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffff8080);
 
     // 5 Overdraw, should be red blended onto white.
     renderNodes.push_back(whiteNode);
-    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, false, contentDrawBounds,
-                          surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, surface,
+            SkMatrix::I());
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), (unsigned)0xffff8080);
 }
 
@@ -247,7 +250,7 @@ public:
 
     SkCanvas* onNewCanvas() override { return new T(); }
     sk_sp<SkSurface> onNewSurface(const SkImageInfo&) override { return nullptr; }
-    sk_sp<SkImage> onNewImageSnapshot() override { return nullptr; }
+    sk_sp<SkImage> onNewImageSnapshot(const SkIRect* bounds) override { return nullptr; }
     T* canvas() { return static_cast<T*>(getCanvas()); }
     void onCopyOnWrite(ContentChangeMode) override {}
     void onWritePixels(const SkPixmap&, int x, int y) override {}
@@ -319,7 +322,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, deferRenderNodeScene) {
     SkRect dirty = SkRect::MakeWH(800, 600);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     sk_sp<DeferLayer<DeferTestCanvas>> surface(new DeferLayer<DeferTestCanvas>());
-    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, false, contentDrawBounds, surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, contentDrawBounds, surface,
+            SkMatrix::I());
     EXPECT_EQ(4, surface->canvas()->mDrawCounter);
 }
 
@@ -349,8 +353,44 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped) {
     SkRect dirty = SkRect::MakeLTRB(10, 20, 30, 40);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     sk_sp<DeferLayer<ClippedTestCanvas>> surface(new DeferLayer<ClippedTestCanvas>());
-    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, false,
-                          SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
+                          SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface, SkMatrix::I());
+    EXPECT_EQ(1, surface->canvas()->mDrawCounter);
+}
+
+// Test renderFrame with a dirty clip and a pre-transform matrix.
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clipped_rotated) {
+    static const int CANVAS_WIDTH = 200;
+    static const int CANVAS_HEIGHT = 100;
+    static const SkMatrix rotateMatrix = SkMatrix::MakeAll(0, -1, CANVAS_HEIGHT, 1, 0, 0, 0, 0, 1);
+    static const SkRect dirty = SkRect::MakeLTRB(10, 20, 20, 40);
+    class ClippedTestCanvas : public SkCanvas {
+    public:
+        ClippedTestCanvas() : SkCanvas(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*) override {
+            EXPECT_EQ(0, mDrawCounter++);
+            // Expect clip to be rotated.
+            EXPECT_EQ(SkRect::MakeLTRB(CANVAS_HEIGHT - dirty.fTop - dirty.height(), dirty.fLeft,
+                    CANVAS_HEIGHT - dirty.fTop, dirty.fLeft + dirty.width()),
+                    TestUtils::getClipBounds(this));
+            EXPECT_EQ(rotateMatrix, getTotalMatrix());
+        }
+        int mDrawCounter = 0;
+    };
+
+    std::vector<sp<RenderNode>> nodes;
+    nodes.push_back(TestUtils::createSkiaNode(
+            0, 0, CANVAS_WIDTH, CANVAS_HEIGHT,
+            [](RenderProperties& props, SkiaRecordingCanvas& canvas) {
+                sk_sp<Bitmap> bitmap(TestUtils::createBitmap(CANVAS_WIDTH, CANVAS_HEIGHT));
+                canvas.drawBitmap(*bitmap, 0, 0, nullptr);
+            }));
+
+    LayerUpdateQueue layerUpdateQueue;
+    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
+    sk_sp<DeferLayer<ClippedTestCanvas>> surface(new DeferLayer<ClippedTestCanvas>());
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
+                          SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface, rotateMatrix);
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
 }
 
@@ -379,7 +419,26 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
     SkRect dirty = SkRect::MakeLTRB(10, 10, 40, 40);
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     sk_sp<DeferLayer<ClipReplaceTestCanvas>> surface(new DeferLayer<ClipReplaceTestCanvas>());
-    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true, false,
-                          SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface);
+    pipeline->renderFrame(layerUpdateQueue, dirty, nodes, true,
+                          SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT), surface, SkMatrix::I());
     EXPECT_EQ(1, surface->canvas()->mDrawCounter);
+}
+
+static sp<Surface> createDummySurface() {
+    sp<IGraphicBufferProducer> producer;
+    sp<IGraphicBufferConsumer> consumer;
+    BufferQueue::createBufferQueue(&producer, &consumer);
+    producer->setMaxDequeuedBufferCount(1);
+    producer->setAsyncMode(true);
+    return new Surface(producer);
+}
+
+RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
+    auto surface = createDummySurface();
+    auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
+    EXPECT_FALSE(pipeline->isSurfaceReady());
+    EXPECT_TRUE(pipeline->setSurface(surface.get(), SwapBehavior::kSwap_default, ColorMode::SRGB, 0));
+    EXPECT_TRUE(pipeline->isSurfaceReady());
+    renderThread.destroyRenderingContext();
+    EXPECT_FALSE(pipeline->isSurfaceReady());
 }

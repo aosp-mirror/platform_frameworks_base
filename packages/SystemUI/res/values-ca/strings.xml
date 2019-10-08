@@ -21,21 +21,13 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Esborra"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Elimina de la llista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informació de l\'aplicació"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Aquí es mostren les teves pantalles recents."</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignora les aplicacions recents"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d pantalles en la visió general</item>
-      <item quantity="one">1 pantalla en la visió general</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Cap notificació"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continu"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacions"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"És possible que la bateria s\'esgoti aviat"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>."</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>; temps restant aproximat segons l\'ús que en fas: <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>; temps restant aproximat: <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g>; temps restant aproximat segons l\'ús que en fas: <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Queda un <xliff:g id="PERCENTAGE">%1$s</xliff:g>; temps restant aproximat: <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g>. El mode d\'estalvi de bateria està activat."</string>
     <string name="invalid_charger" msgid="2741987096648693172">"No es pot carregar el dispositiu per USB. Fes servir el carregador original del dispositiu."</string>
     <string name="invalid_charger_title" msgid="2836102177577255404">"No es pot carregar per USB"</string>
@@ -63,10 +55,13 @@
     <string name="always_use_device" msgid="4015357883336738417">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració per USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
+    <string name="usb_debugging_allow" msgid="2272145052073254852">"Permet"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració per USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
+    <string name="usb_contaminant_title" msgid="206854874263058490">"El port USB està desactivat"</string>
+    <string name="usb_contaminant_message" msgid="2205845572186473860">"Per protegir el teu dispositiu dels líquids o la pols, el port USB s\'ha desactivat i no detectarà cap accessori.\n\nRebràs una notificació quan sigui segur utilitzar-lo."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -78,6 +73,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Prova de tornar a fer una captura de pantalla"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"La captura de pantalla no es pot desar perquè no hi ha prou espai d\'emmagatzematge"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"L\'aplicació o la teva organització no permeten fer captures de pantalla"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Gravació de la pantalla"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Inicia la gravació"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Grava la veu en off"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Mostra els tocs"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Atura"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Posa en pausa"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Reprèn"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Cancel·la"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Comparteix"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Suprimeix"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"S\'ha cancel·lat la gravació de la pantalla"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"S\'ha desat la gravació de la pantalla; toca per mostrar"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"S\'ha suprimit la gravació de la pantalla"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"S\'ha produït un error en suprimir la gravació de la pantalla"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"No s\'han pogut obtenir els permisos"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcions transf. fitxers USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Munta com a reproductor multimèdia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Munta com a càmera (PTP)"</string>
@@ -97,16 +108,19 @@
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloqueja sense utilitzar l\'empremta digital"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"S\'està escanejant la cara"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Envia"</string>
+    <!-- no translation found for accessibility_manage_notification (2026361503393549753) -->
+    <skip />
     <string name="unlock_label" msgid="8779712358041029439">"desbloqueja"</string>
     <string name="phone_label" msgid="2320074140205331708">"obre el telèfon"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"obre l\'assistència per veu"</string>
     <string name="camera_label" msgid="7261107956054836961">"obre la càmera"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Selecciona el disseny de la tasca nova"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel·la"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Confirma"</string>
+    <string name="biometric_dialog_try_again" msgid="1900185172633183201">"Torna-ho a provar"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes digitals"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona d\'empremta digital"</string>
-    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Icona d\'aplicació"</string>
-    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Àrea de missatge d\'ajuda"</string>
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"S\'està cercant la teva cara…"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Icona facial"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botó de zoom de compatibilitat."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Amplia menys com més gran sigui la pantalla."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connectat."</string>
@@ -156,6 +170,8 @@
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_5g" msgid="6357743323196864504">"5G"</string>
+    <string name="data_connection_5g_plus" msgid="3284146603743732965">"5G+"</string>
     <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Itinerància"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
@@ -164,6 +180,8 @@
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dades mòbils"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dades mòbils activades"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"S\'han desactivat les dades mòbils"</string>
+    <!-- no translation found for not_default_data_content_description (9194667237765917844) -->
+    <skip />
     <string name="cell_data_off" msgid="1051264981229902873">"Desactivades"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Compartició de xarxa per Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
@@ -186,11 +204,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Ignora <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"S\'ha omès <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"S\'han descartat totes les aplicacions recents."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Obre la informació sobre l\'aplicació <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"S\'està iniciant <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificació omesa."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Àrea de notificacions"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuració ràpida"</string>
@@ -210,9 +223,12 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"S\'ha activat el Mode d\'avió."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"silenci total"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"només alarmes"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Mode No molestis."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"S\'ha desactivat el mode No molestis."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"S\'ha activat el mode No molestis."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd (5555155552520665891) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_changed_off (2757071272328547807) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_changed_on (6808220653747701059) -->
+    <skip />
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Bluetooth desactivat."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Bluetooth activat."</string>
@@ -244,6 +260,8 @@
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="249840330756998612">"S\'ha activat el mode de feina."</string>
     <string name="accessibility_quick_settings_data_saver_changed_off" msgid="650231949881093289">"S\'ha desactivat l\'Economitzador de dades."</string>
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"S\'ha activat l\'Economitzador de dades."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="5152819588955163090">"El sensor de privadesa està desactivat."</string>
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="529705259565826355">"El sensor de privadesa està activat."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Brillantor de la pantalla"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"S\'està carregant"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Les dades 2G-3G estan aturades"</string>
@@ -257,7 +275,6 @@
     <string name="accessibility_location_active" msgid="2427290146138169014">"Sol·licituds d\'ubicació actives"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Esborra totes les notificacions."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%s</xliff:g> i <xliff:g id="OVERFLOW">%s</xliff:g> més"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificacions més a l\'interior.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificació més a l\'interior.</item>
@@ -274,7 +291,8 @@
     <string name="start_dreams" msgid="5640361424498338327">"Estalvi de pantalla"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Mantén premudes les icones per veure més opcions"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"No molestis"</string>
+    <!-- no translation found for quick_settings_dnd_label (7112342227663678739) -->
+    <skip />
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Només amb prioritat"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Només alarmes"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Silenci total"</string>
@@ -286,6 +304,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Àudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Auriculars"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Entrada"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="4930931771490695395">"Audiòfons"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"S\'està activant…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Brillantor"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Gira automàticament"</string>
@@ -312,11 +331,12 @@
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"La Wi-Fi està activada"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"No hi ha cap xarxa Wi-Fi disponible"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"S\'està activant…"</string>
-    <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emet"</string>
+    <string name="quick_settings_cast_title" msgid="6954684227605751758">"Screen Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"En emissió"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositiu sense nom"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"A punt per emetre"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"No hi ha cap dispositiu disponible."</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"La Wi‑Fi no està connectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverteix els colors"</string>
@@ -352,23 +372,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"L\'NFC està desactivada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"L\'NFC està activada"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"No hi ha cap element recent"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Ho has esborrat tot"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informació de l\'aplicació"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixació de pantalla"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"cerca"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"No s\'ha pogut iniciar <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"En mode segur, l\'aplicació <xliff:g id="APP">%s</xliff:g> està desactivada."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Esborra-ho tot"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrossega-ho aquí per utilitzar la pantalla dividida"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Llisca cap amunt per canviar d\'aplicació"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Arrossega el dit cap a la dreta per canviar ràpidament d\'aplicació"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Divideix la pantalla cap amunt"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Divideix la pantalla cap a l\'esquerra"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Divideix la pantalla cap a la dreta"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Activa o desactiva Aplicacions recents"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Carregada"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"S\'està carregant"</string>
@@ -400,9 +405,9 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Només\ninterr. prior."</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Només\nalarmes"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="5376059837186496558">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant sense fils (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant ràpidament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant lentament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • S\'està carregant (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant ràpidament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Carregant lentament (temps restant: <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Canvia d\'usuari"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Canvia d\'usuari. Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Usuari actual: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -427,16 +432,24 @@
     <string name="user_logout_notification_action" msgid="1195428991423425062">"TANCA LA SESSIÓ DE L\'USUARI"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Quan s\'afegeix un usuari nou, aquest usuari ha de configurar-se l\'espai.\n\nQualsevol usuari pot actualitzar les aplicacions de la resta d\'usuaris."</string>
+    <string name="user_limit_reached_title" msgid="7374910700117359177">"S\'ha assolit el límit d\'usuaris"</string>
+    <plurals name="user_limit_reached_message" formatted="false" msgid="1855040563671964242">
+      <item quantity="other">Pots afegir fins a <xliff:g id="COUNT">%d</xliff:g> usuaris.</item>
+      <item quantity="one">Només es pot crear un usuari.</item>
+    </plurals>
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vols suprimir l\'usuari?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Suprimeix"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"S\'ha activat l\'estalvi de bateria"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactiva l\'estalvi de bateria"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> començarà a gravar tot el que es mostri a la pantalla."</string>
+    <!-- no translation found for media_projection_dialog_text (5751657130671431216) -->
+    <skip />
+    <!-- no translation found for media_projection_dialog_title (8124184308671641248) -->
+    <skip />
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
-    <string name="manage_notifications_text" msgid="8035284146227267681">"Gestiona les notificacions"</string>
+    <string name="manage_notifications_text" msgid="2386728145475108753">"Gestió"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificacions pausades pel mode No molestis"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Comença ara"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Cap notificació"</string>
@@ -508,6 +521,10 @@
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Configuració del so"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Amplia"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Replega"</string>
+    <!-- no translation found for volume_odi_captions_tip (1193653197906918269) -->
+    <skip />
+    <!-- no translation found for accessibility_volume_close_odi_captions_tip (1163987066404128967) -->
+    <skip />
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Canvia el dispositiu de sortida"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"La pantalla està fixada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Aquest element es continuarà mostrant fins que deixis de fixar-lo. Per fer-ho, toca i mantén premudes els botons Enrere i Aplicacions recents."</string>
@@ -604,13 +621,32 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificacions"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Ja no veuràs aquestes notificacions"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Aquestes notificacions es minimitzaran"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Aquestes notificacions es mostraran de manera silenciosa"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Aquestes notificacions t\'enviaran una alerta"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Normalment ignores aquestes notificacions. \nVols que es continuïn mostrant?"</string>
+    <string name="inline_done_button" msgid="492513001558716452">"Fet"</string>
+    <!-- no translation found for inline_ok_button (966006867967928987) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"Vols continuar rebent aquestes notificacions?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Deixa d\'enviar notificacions"</string>
+    <string name="inline_deliver_silently_button" msgid="7756289895745629140">"Envia de manera silenciosa"</string>
+    <string name="inline_block_button" msgid="8735843688021655065">"Bloqueja"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continua rebent"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimitza"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Mostra de manera silenciosa"</string>
+    <string name="inline_silent_button_stay_silent" msgid="6308371431217601009">"Continua silenciant"</string>
+    <!-- no translation found for inline_silent_button_alert (2273030946176140380) -->
+    <skip />
+    <string name="inline_silent_button_keep_alerting" msgid="327696842264359693">"Continua avisant-me"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
+    <!-- no translation found for hint_text_block (3554459167504485284) -->
+    <skip />
+    <!-- no translation found for hint_text_silent (859468056340177016) -->
+    <skip />
+    <!-- no translation found for hint_text_alert (428122667751463119) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Aquestes notificacions no es poden desactivar"</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"mitjançant <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Aquesta aplicació utilitza la càmera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Aquesta aplicació utilitza el micròfon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Aquesta aplicació es mostra sobre altres aplicacions a la pantalla."</string>
@@ -653,7 +689,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Esquerra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Dreta"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centre"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Pestanya"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulador"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Espai"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Retorn"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Retrocés"</string>
@@ -677,7 +713,7 @@
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Enrere"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"Notificacions"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"Tecles de drecera"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"Canvia el mètode d\'introducció"</string>
+    <string name="keyboard_shortcut_group_system_switch_input" msgid="8413348767825486492">"Canvia la disposició de teclat"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"Aplicacions"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"Assistència"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"Navegador"</string>
@@ -688,9 +724,11 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"Calendari"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Mostra amb els controls de volum"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"No molestis"</string>
+    <!-- no translation found for volume_and_do_not_disturb (1750270820297253561) -->
+    <skip />
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Drecera per als botons de volum"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"Desactiva el mode No molestis apujant el volum"</string>
+    <!-- no translation found for volume_up_silent (7545869833038212815) -->
+    <skip />
     <string name="battery" msgid="7498329822413202973">"Bateria"</string>
     <string name="clock" msgid="7416090374234785905">"Rellotge"</string>
     <string name="headset" msgid="4534219457597457353">"Auriculars"</string>
@@ -730,6 +768,7 @@
     <string name="left_icon" msgid="3096287125959387541">"Icona de l\'esquerra"</string>
     <string name="right_icon" msgid="3952104823293824311">"Icona de la dreta"</string>
     <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantén premut i arrossega per afegir funcions"</string>
+    <string name="drag_to_rearrange_tiles" msgid="4566074720193667473">"Mantén premut i arrossega per reorganitzar les funcions"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arrossega aquí per suprimir una funció"</string>
     <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Necessites com a mínim 6 mosaics"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edita"</string>
@@ -744,6 +783,7 @@
     <item msgid="2139628951880142927">"Mostra el percentatge quan es carregui (opció predeterminada)"</item>
     <item msgid="3327323682209964956">"No mostris aquesta icona"</item>
   </string-array>
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Mostra les icones de notificació amb prioritat baixa"</string>
     <string name="other" msgid="4060683095962566764">"Altres"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Divisor de pantalles"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Pantalla esquerra completa"</string>
@@ -758,12 +798,10 @@
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Pantalla inferior completa"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Posició <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Fes doble toc per editar-la."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Fes doble toc per afegir-ho."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Posició <xliff:g id="POSITION">%1$d</xliff:g>. Fes doble toc per seleccionar-la."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Mou <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Suprimeix <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha afegit a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha suprimit"</string>
-    <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> s\'ha mogut a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add" msgid="3520406665865985109">"Afegeix <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_move" msgid="3108103090006972938">"Mou <xliff:g id="TILE_NAME">%1$s</xliff:g> a la posició <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Editor de configuració ràpida."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"Notificació de <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"És possible que l\'aplicació no funcioni amb la pantalla dividida."</string>
@@ -777,6 +815,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"S\'ha iniciat la sessió com a <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Sense connexió a Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Obre la informació detallada."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"No està disponible pel motiu següent: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Obre la configuració per a <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edita l\'ordre de la configuració."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>
@@ -799,6 +838,9 @@
     <string name="high_temp_title" msgid="4589508026407318374">"El telèfon s\'està escalfant"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"Algunes funcions estaran limitades mentre el telèfon es refreda"</string>
     <string name="high_temp_dialog_message" msgid="6840700639374113553">"El telèfon provarà de refredar-se automàticament. Podràs continuar utilitzant-lo, però és possible que funcioni més lentament.\n\nUn cop s\'hagi refredat, funcionarà amb normalitat."</string>
+    <string name="high_temp_alarm_title" msgid="442812040762745210">"Desconnecta el carregador"</string>
+    <string name="high_temp_alarm_notify_message" msgid="1802871059489414932">"No es pot carregar el dispositiu. Desconnecta l\'adaptador de corrent amb compte, ja que el cable podria estar calent."</string>
+    <string name="high_temp_alarm_help_care_steps" msgid="3631075329318070726">"Mostra els pasos de manteniment"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"Drecera de l\'esquerra"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"Drecera de la dreta"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"La drecera de l\'esquerra també desbloqueja el dispositiu"</string>
@@ -820,11 +862,13 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Emmagatzematge"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Suggeriments"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Aplicacions instantànies"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"No cal instal·lar les aplicacions instantànies."</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"S\'està executant <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"L\'aplicació s\'ha obert sense instal·lar-se."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"L\'aplicació s\'ha obert sense instal·lar-se. Toca per obtenir més informació."</string>
     <string name="app_info" msgid="6856026610594615344">"Informació de l\'aplicació"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Ves al navegador"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Dades mòbils"</string>
-    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> - <xliff:g id="ID_2">%s</xliff:g>"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"La Wi-Fi està desactivada"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"El Bluetooth està desactivat"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"El mode No molestis està desactivat"</string>
@@ -854,4 +898,44 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Configuració"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"D\'acord"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Aboca espai de SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> està fent servir el següent: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Algunes aplicacions estan fent servir el següent: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_ok" msgid="3273300106348958308">"D\'acord"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6773015940472748876">"Config. de privadesa"</string>
+    <string name="ongoing_privacy_dialog_single_app_title" msgid="6019646962021696632">"Aplicació que fa servir: <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_multiple_apps_title" msgid="8013356222977903365">"Aplicacions que fan servir: <xliff:g id="TYPES_LIST">%s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="6854860652480837439">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="2400503446627122483">" i "</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"càmera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"ubicació"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"micròfon"</string>
+    <string name="sensor_privacy_mode" msgid="8982771253020769598">"Sensors desactivats"</string>
+    <string name="device_services" msgid="1191212554435440592">"Serveis per a dispositius"</string>
+    <string name="music_controls_no_title" msgid="5236895307087002011">"Sense títol"</string>
+    <!-- no translation found for restart_button_description (2035077840254950187) -->
+    <skip />
+    <string name="bubbles_deep_link_button_description" msgid="8895837143057564517">"Obre <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for bubbles_settings_button_description (2970630476657287189) -->
+    <skip />
+    <!-- no translation found for bubbles_prompt (8807968030159469710) -->
+    <skip />
+    <!-- no translation found for no_bubbles (337101288173078247) -->
+    <skip />
+    <string name="yes_bubbles" msgid="668809525728633841">"Permet"</string>
+    <!-- no translation found for ask_me_later_bubbles (2147688438402939029) -->
+    <skip />
+    <!-- no translation found for bubble_content_description_single (1184462974339387516) -->
+    <skip />
+    <!-- no translation found for bubble_content_description_stack (8666349184095622232) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move (1794879742234803840) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_top_left (104736832249802724) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_top_right (1671844272347036806) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_bottom_left (206369104473183217) -->
+    <skip />
+    <!-- no translation found for bubble_accessibility_action_move_bottom_right (8705660152384312329) -->
+    <skip />
 </resources>

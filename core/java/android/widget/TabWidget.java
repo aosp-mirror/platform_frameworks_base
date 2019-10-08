@@ -95,6 +95,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.TabWidget, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.TabWidget,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mDrawBottomStrips = a.getBoolean(R.styleable.TabWidget_tabStripEnabled, mDrawBottomStrips);
 

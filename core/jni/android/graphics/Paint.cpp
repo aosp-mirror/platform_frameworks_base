@@ -28,6 +28,9 @@
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
+#include "SkFont.h"
+#include "SkFontMetrics.h"
+#include "SkFontTypes.h"
 #include "SkMaskFilter.h"
 #include "SkPath.h"
 #include "SkPathEffect.h"
@@ -44,6 +47,7 @@
 #include <minikin/GraphemeBreak.h>
 #include <minikin/LocaleList.h>
 #include <minikin/Measurement.h>
+#include <minikin/MinikinPaint.h>
 #include <unicode/utf16.h>
 
 #include <cassert>
@@ -67,9 +71,22 @@ static JMetricsID gFontMetrics_fieldID;
 static jclass   gFontMetricsInt_class;
 static JMetricsID gFontMetricsInt_fieldID;
 
-static void defaultSettingsForAndroid(Paint* paint) {
-    // GlyphID encoding is required because we are using Harfbuzz shaping
-    paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
+static void getPosTextPath(const SkFont& font, const uint16_t glyphs[], int count,
+                           const SkPoint pos[], SkPath* dst) {
+    dst->reset();
+    struct Rec {
+        SkPath* fDst;
+        const SkPoint* fPos;
+    } rec = { dst, pos };
+    font.getPaths(glyphs, count, [](const SkPath* src, const SkMatrix& mx, void* ctx) {
+        Rec* rec = (Rec*)ctx;
+        if (src) {
+            SkMatrix tmp(mx);
+            tmp.postTranslate(rec->fPos->fX, rec->fPos->fY);
+            rec->fDst->addPath(*src, tmp);
+        }
+        rec->fPos += 1;
+    }, &rec);
 }
 
 namespace PaintGlue {
@@ -86,19 +103,7 @@ namespace PaintGlue {
     }
 
     static jlong init(JNIEnv* env, jobject) {
-        static_assert(1 <<  0 == SkPaint::kAntiAlias_Flag,             "paint_flags_mismatch");
-        static_assert(1 <<  2 == SkPaint::kDither_Flag,                "paint_flags_mismatch");
-        static_assert(1 <<  3 == SkPaint::kUnderlineText_ReserveFlag,  "paint_flags_mismatch");
-        static_assert(1 <<  4 == SkPaint::kStrikeThruText_ReserveFlag, "paint_flags_mismatch");
-        static_assert(1 <<  5 == SkPaint::kFakeBoldText_Flag,          "paint_flags_mismatch");
-        static_assert(1 <<  6 == SkPaint::kLinearText_Flag,            "paint_flags_mismatch");
-        static_assert(1 <<  7 == SkPaint::kSubpixelText_Flag,          "paint_flags_mismatch");
-        static_assert(1 <<  8 == SkPaint::kDevKernText_Flag,           "paint_flags_mismatch");
-        static_assert(1 << 10 == SkPaint::kEmbeddedBitmapText_Flag,    "paint_flags_mismatch");
-
-        Paint* obj = new Paint();
-        defaultSettingsForAndroid(obj);
-        return reinterpret_cast<jlong>(obj);
+        return reinterpret_cast<jlong>(new Paint);
     }
 
     static jlong initWithPaint(JNIEnv* env, jobject clazz, jlong paintHandle) {
@@ -287,10 +292,11 @@ namespace PaintGlue {
                 pos[i].fX = x + layout.getX(i);
                 pos[i].fY = y + layout.getY(i);
             }
+            const SkFont& font = paint->getSkFont();
             if (start == 0) {
-                paint->getPosTextPath(glyphs + start, (end - start) << 1, pos + start, path);
+                getPosTextPath(font, glyphs, end, pos, path);
             } else {
-                paint->getPosTextPath(glyphs + start, (end - start) << 1, pos + start, &tmpPath);
+                getPosTextPath(font, glyphs + start, end - start, pos + start, &tmpPath);
                 path->addPath(tmpPath);
             }
         }
@@ -308,7 +314,10 @@ namespace PaintGlue {
     static void getTextPath(JNIEnv* env, Paint* paint, const Typeface* typeface, const jchar* text,
             jint count, jint bidiFlags, jfloat x, jfloat y, SkPath* path) {
         minikin::Layout layout = MinikinUtils::doLayout(
-                paint, static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count,
+                paint, static_cast<minikin::Bidi>(bidiFlags), typeface,
+                text, count,  // text buffer
+                0, count,  // draw range
+                0, count,  // context range
                 nullptr);
         size_t nGlyphs = layout.nGlyphs();
         uint16_t* glyphs = new uint16_t[nGlyphs];
@@ -317,7 +326,6 @@ namespace PaintGlue {
         x += MinikinUtils::xOffsetForTextAlign(paint, layout);
         Paint::Align align = paint->getTextAlign();
         paint->setTextAlign(Paint::kLeft_Align);
-        paint->setTextEncoding(Paint::kGlyphID_TextEncoding);
         GetTextFunctor f(layout, path, x, y, paint, glyphs, pos);
         MinikinUtils::forFontRun(layout, paint, f);
         paint->setTextAlign(align);
@@ -351,7 +359,11 @@ namespace PaintGlue {
         SkIRect ir;
 
         minikin::Layout layout = MinikinUtils::doLayout(&paint,
-                static_cast<minikin::Bidi>(bidiFlags), typeface, text, 0, count, count, nullptr);
+                static_cast<minikin::Bidi>(bidiFlags), typeface,
+                text, count,  // text buffer
+                0, count,  // draw range
+                0, count,  // context range
+                nullptr);
         minikin::MinikinRect rect;
         layout.getBounds(&rect);
         r.fLeft = rect.mLeft;
@@ -466,8 +478,11 @@ namespace PaintGlue {
             prevCp = cp;
         }
         minikin::Layout layout = MinikinUtils::doLayout(paint,
-                static_cast<minikin::Bidi>(bidiFlags), typeface, str.get(), 0, str.size(),
-                str.size(), nullptr);
+                static_cast<minikin::Bidi>(bidiFlags), typeface,
+                str.get(), str.size(),  // text buffer
+                0, str.size(),  // draw range
+                0, str.size(),  // context range
+                nullptr);
         size_t nGlyphs = countNonSpaceGlyphs(layout);
         if (nGlyphs != 1 && nChars > 1) {
             // multiple-character input, and was not a ligature
@@ -487,7 +502,10 @@ namespace PaintGlue {
             // U+1F1FF (REGIONAL INDICATOR SYMBOL LETTER Z) is \uD83C\uDDFF in UTF16.
             static const jchar ZZ_FLAG_STR[] = { 0xD83C, 0xDDFF, 0xD83C, 0xDDFF };
             minikin::Layout zzLayout = MinikinUtils::doLayout(paint,
-                    static_cast<minikin::Bidi>(bidiFlags), typeface, ZZ_FLAG_STR, 0, 4, 4,
+                    static_cast<minikin::Bidi>(bidiFlags), typeface,
+                    ZZ_FLAG_STR, 4,  // text buffer
+                    0, 4,  // draw range
+                    0, 4,  // context range
                     nullptr);
             if (zzLayout.nGlyphs() != 1 || layoutContainsNotdef(zzLayout)) {
                 // The font collection doesn't have a glyph for unknown flag. Just return true.
@@ -563,27 +581,28 @@ namespace PaintGlue {
         }
     }
 
-    static SkScalar getMetricsInternal(jlong paintHandle, Paint::FontMetrics *metrics) {
+    static SkScalar getMetricsInternal(jlong paintHandle, SkFontMetrics *metrics) {
         const int kElegantTop = 2500;
         const int kElegantBottom = -1000;
         const int kElegantAscent = 1900;
         const int kElegantDescent = -500;
         const int kElegantLeading = 0;
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        SkFont* font = &paint->getSkFont();
         const Typeface* typeface = paint->getAndroidTypeface();
         typeface = Typeface::resolveDefault(typeface);
         minikin::FakedFont baseFont = typeface->fFontCollection->baseFontFaked(typeface->fStyle);
-        float saveSkewX = paint->getTextSkewX();
-        bool savefakeBold = paint->isFakeBoldText();
-        MinikinFontSkia::populateSkPaint(paint, baseFont.font->typeface().get(), baseFont.fakery);
-        SkScalar spacing = paint->getFontMetrics(metrics);
+        float saveSkewX = font->getSkewX();
+        bool savefakeBold = font->isEmbolden();
+        MinikinFontSkia::populateSkFont(font, baseFont.font->typeface().get(), baseFont.fakery);
+        SkScalar spacing = font->getMetrics(metrics);
         // The populateSkPaint call may have changed fake bold / text skew
         // because we want to measure with those effects applied, so now
         // restore the original settings.
-        paint->setTextSkewX(saveSkewX);
-        paint->setFakeBoldText(savefakeBold);
-        if (paint->getFamilyVariant() == minikin::FontFamily::Variant::ELEGANT) {
-            SkScalar size = paint->getTextSize();
+        font->setSkewX(saveSkewX);
+        font->setEmbolden(savefakeBold);
+        if (paint->getFamilyVariant() == minikin::FamilyVariant::ELEGANT) {
+            SkScalar size = font->getSize();
             metrics->fTop = -size * kElegantTop / 2048;
             metrics->fBottom = -size * kElegantBottom / 2048;
             metrics->fAscent = -size * kElegantAscent / 2048;
@@ -595,7 +614,7 @@ namespace PaintGlue {
     }
 
     static jfloat getFontMetrics(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         SkScalar spacing = getMetricsInternal(paintHandle, &metrics);
 
         if (metricsObj) {
@@ -610,7 +629,7 @@ namespace PaintGlue {
     }
 
     static jint getFontMetricsInt(JNIEnv* env, jobject, jlong paintHandle, jobject metricsObj) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
 
         getMetricsInternal(paintHandle, &metrics);
         int ascent = SkScalarRoundToInt(metrics.fAscent);
@@ -632,9 +651,7 @@ namespace PaintGlue {
     // ------------------ @CriticalNative ---------------------------
 
     static void reset(jlong objHandle) {
-        Paint* obj = reinterpret_cast<Paint*>(objHandle);
-        obj->reset();
-        defaultSettingsForAndroid(obj);
+        reinterpret_cast<Paint*>(objHandle)->reset();
     }
 
     static void assign(jlong dstPaintHandle, jlong srcPaintHandle) {
@@ -643,41 +660,23 @@ namespace PaintGlue {
         *dst = *src;
     }
 
-    // Equivalent to the Java Paint's FILTER_BITMAP_FLAG.
-    static const uint32_t sFilterBitmapFlag = 0x02;
-
     static jint getFlags(jlong paintHandle) {
-        Paint* nativePaint = reinterpret_cast<Paint*>(paintHandle);
-        uint32_t result = nativePaint->getFlags();
-        result &= ~sFilterBitmapFlag; // Filtering no longer stored in this bit. Mask away.
-        if (nativePaint->getFilterQuality() != kNone_SkFilterQuality) {
-            result |= sFilterBitmapFlag;
-        }
-        return static_cast<jint>(result);
+        uint32_t flags = reinterpret_cast<Paint*>(paintHandle)->getJavaFlags();
+        return static_cast<jint>(flags);
     }
 
     static void setFlags(jlong paintHandle, jint flags) {
-        Paint* nativePaint = reinterpret_cast<Paint*>(paintHandle);
-        // Instead of modifying 0x02, change the filter level.
-        nativePaint->setFilterQuality(flags & sFilterBitmapFlag
-                ? kLow_SkFilterQuality
-                : kNone_SkFilterQuality);
-        // Don't pass through filter flag, which is no longer stored in paint's flags.
-        flags &= ~sFilterBitmapFlag;
-        // Use the existing value for 0x02.
-        const uint32_t existing0x02Flag = nativePaint->getFlags() & sFilterBitmapFlag;
-        flags |= existing0x02Flag;
-        nativePaint->setFlags(flags);
+        reinterpret_cast<Paint*>(paintHandle)->setJavaFlags(flags);
     }
 
     static jint getHinting(jlong paintHandle) {
-        return reinterpret_cast<Paint*>(paintHandle)->getHinting()
-                == Paint::kNo_Hinting ? 0 : 1;
+        return (SkFontHinting)reinterpret_cast<Paint*>(paintHandle)->getSkFont().getHinting()
+                == kNo_SkFontHinting ? 0 : 1;
     }
 
     static void setHinting(jlong paintHandle, jint mode) {
-        reinterpret_cast<Paint*>(paintHandle)->setHinting(
-                mode == 0 ? Paint::kNo_Hinting : Paint::kNormal_Hinting);
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setHinting(
+                mode == 0 ? kNo_SkFontHinting : kNormal_SkFontHinting);
     }
 
     static void setAntiAlias(jlong paintHandle, jboolean aa) {
@@ -685,37 +684,23 @@ namespace PaintGlue {
     }
 
     static void setLinearText(jlong paintHandle, jboolean linearText) {
-        reinterpret_cast<Paint*>(paintHandle)->setLinearText(linearText);
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setLinearMetrics(linearText);
     }
 
     static void setSubpixelText(jlong paintHandle, jboolean subpixelText) {
-        reinterpret_cast<Paint*>(paintHandle)->setSubpixelText(subpixelText);
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setSubpixel(subpixelText);
     }
 
     static void setUnderlineText(jlong paintHandle, jboolean underlineText) {
-        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        uint32_t flags = paint->getFlags();
-        if (underlineText) {
-            flags |= Paint::kUnderlineText_ReserveFlag;
-        } else {
-            flags &= ~Paint::kUnderlineText_ReserveFlag;
-        }
-        paint->setFlags(flags);
+        reinterpret_cast<Paint*>(paintHandle)->setUnderline(underlineText);
     }
 
     static void setStrikeThruText(jlong paintHandle, jboolean strikeThruText) {
-        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        uint32_t flags = paint->getFlags();
-        if (strikeThruText) {
-            flags |= Paint::kStrikeThruText_ReserveFlag;
-        } else {
-            flags &= ~Paint::kStrikeThruText_ReserveFlag;
-        }
-        paint->setFlags(flags);
+        reinterpret_cast<Paint*>(paintHandle)->setStrikeThru(strikeThruText);
     }
 
     static void setFakeBoldText(jlong paintHandle, jboolean fakeBoldText) {
-        reinterpret_cast<Paint*>(paintHandle)->setFakeBoldText(fakeBoldText);
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setEmbolden(fakeBoldText);
     }
 
     static void setFilterBitmap(jlong paintHandle, jboolean filterBitmap) {
@@ -738,16 +723,11 @@ namespace PaintGlue {
         obj->setStyle(style);
     }
 
-    static jint getColor(jlong paintHandle) {
-        int color;
-        color = reinterpret_cast<Paint*>(paintHandle)->getColor();
-        return static_cast<jint>(color);
-    }
-
-    static jint getAlpha(jlong paintHandle) {
-        int alpha;
-        alpha = reinterpret_cast<Paint*>(paintHandle)->getAlpha();
-        return static_cast<jint>(alpha);
+    static void setColorLong(jlong paintHandle, jlong colorSpaceHandle,
+            jlong colorLong) {
+        SkColor4f color = GraphicsJNI::convertColorLong(colorLong);
+        sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
+        reinterpret_cast<Paint*>(paintHandle)->setColor4f(color, cs.get());
     }
 
     static void setColor(jlong paintHandle, jint color) {
@@ -831,12 +811,23 @@ namespace PaintGlue {
         static_assert(9 == static_cast<int>(SkBlendMode::kSrcATop), "xfermode_mismatch");
         static_assert(10 == static_cast<int>(SkBlendMode::kDstATop), "xfermode_mismatch");
         static_assert(11 == static_cast<int>(SkBlendMode::kXor), "xfermode_mismatch");
-        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
-        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
         static_assert(13 == static_cast<int>(SkBlendMode::kModulate), "xfermode_mismatch");
         static_assert(14 == static_cast<int>(SkBlendMode::kScreen), "xfermode_mismatch");
-        static_assert(12 == static_cast<int>(SkBlendMode::kPlus), "xfermode_mismatch");
         static_assert(15 == static_cast<int>(SkBlendMode::kOverlay), "xfermode_mismatch");
+        static_assert(16 == static_cast<int>(SkBlendMode::kDarken), "xfermode_mismatch");
+        static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "xfermode_mismatch");
+        static_assert(18 == static_cast<int>(SkBlendMode::kColorDodge), "xfermode mismatch");
+        static_assert(19 == static_cast<int>(SkBlendMode::kColorBurn), "xfermode mismatch");
+        static_assert(20 == static_cast<int>(SkBlendMode::kHardLight), "xfermode mismatch");
+        static_assert(21 == static_cast<int>(SkBlendMode::kSoftLight), "xfermode mismatch");
+        static_assert(22 == static_cast<int>(SkBlendMode::kDifference), "xfermode mismatch");
+        static_assert(23 == static_cast<int>(SkBlendMode::kExclusion), "xfermode mismatch");
+        static_assert(24 == static_cast<int>(SkBlendMode::kMultiply), "xfermode mismatch");
+        static_assert(25 == static_cast<int>(SkBlendMode::kHue), "xfermode mismatch");
+        static_assert(26 == static_cast<int>(SkBlendMode::kSaturation), "xfermode mismatch");
+        static_assert(27 == static_cast<int>(SkBlendMode::kColor), "xfermode mismatch");
+        static_assert(28 == static_cast<int>(SkBlendMode::kLuminosity), "xfermode mismatch");
 
         SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
@@ -881,37 +872,39 @@ namespace PaintGlue {
 
     static jboolean isElegantTextHeight(jlong paintHandle) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
-        return obj->getFamilyVariant() == minikin::FontFamily::Variant::ELEGANT;
+        return obj->getFamilyVariant() == minikin::FamilyVariant::ELEGANT;
     }
 
     static void setElegantTextHeight(jlong paintHandle, jboolean aa) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
         obj->setFamilyVariant(
-                aa ? minikin::FontFamily::Variant::ELEGANT : minikin::FontFamily::Variant::DEFAULT);
+                aa ? minikin::FamilyVariant::ELEGANT : minikin::FamilyVariant::DEFAULT);
     }
 
     static jfloat getTextSize(jlong paintHandle) {
-        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getTextSize());
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize());
     }
 
     static void setTextSize(jlong paintHandle, jfloat textSize) {
-        reinterpret_cast<Paint*>(paintHandle)->setTextSize(textSize);
+        if (textSize >= 0) {
+            reinterpret_cast<Paint*>(paintHandle)->getSkFont().setSize(textSize);
+        }
     }
 
     static jfloat getTextScaleX(jlong paintHandle) {
-        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getTextScaleX());
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getSkFont().getScaleX());
     }
 
     static void setTextScaleX(jlong paintHandle, jfloat scaleX) {
-        reinterpret_cast<Paint*>(paintHandle)->setTextScaleX(scaleX);
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setScaleX(scaleX);
     }
 
     static jfloat getTextSkewX(jlong paintHandle) {
-        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getTextSkewX());
+        return SkScalarToFloat(reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSkewX());
     }
 
     static void setTextSkewX(jlong paintHandle, jfloat skewX) {
-        reinterpret_cast<Paint*>(paintHandle)->setTextSkewX(skewX);
+        reinterpret_cast<Paint*>(paintHandle)->getSkFont().setSkewX(skewX);
     }
 
     static jfloat getLetterSpacing(jlong paintHandle) {
@@ -934,71 +927,85 @@ namespace PaintGlue {
         paint->setWordSpacing(wordSpacing);
     }
 
-    static jint getHyphenEdit(jlong paintHandle, jint hyphen) {
+    static jint getStartHyphenEdit(jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        return paint->getHyphenEdit();
+        return static_cast<jint>(paint->getStartHyphenEdit());
     }
 
-    static void setHyphenEdit(jlong paintHandle, jint hyphen) {
+    static jint getEndHyphenEdit(jlong paintHandle, jint hyphen) {
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-        paint->setHyphenEdit((uint32_t)hyphen);
+        return static_cast<jint>(paint->getEndHyphenEdit());
+    }
+
+    static void setStartHyphenEdit(jlong paintHandle, jint hyphen) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setStartHyphenEdit((uint32_t)hyphen);
+    }
+
+    static void setEndHyphenEdit(jlong paintHandle, jint hyphen) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        paint->setEndHyphenEdit((uint32_t)hyphen);
     }
 
     static jfloat ascent(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fAscent);
     }
 
     static jfloat descent(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         return SkScalarToFloat(metrics.fDescent);
     }
 
     static jfloat getUnderlinePosition(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar position;
         if (metrics.hasUnderlinePosition(&position)) {
             return SkScalarToFloat(position);
         } else {
-            const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getTextSize();
+            const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize();
             return SkScalarToFloat(Paint::kStdUnderline_Top * textSize);
         }
     }
 
     static jfloat getUnderlineThickness(jlong paintHandle) {
-        Paint::FontMetrics metrics;
+        SkFontMetrics metrics;
         getMetricsInternal(paintHandle, &metrics);
         SkScalar thickness;
         if (metrics.hasUnderlineThickness(&thickness)) {
             return SkScalarToFloat(thickness);
         } else {
-            const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getTextSize();
+            const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize();
             return SkScalarToFloat(Paint::kStdUnderline_Thickness * textSize);
         }
     }
 
     static jfloat getStrikeThruPosition(jlong paintHandle) {
-        const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getTextSize();
+        const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize();
         return SkScalarToFloat(Paint::kStdStrikeThru_Top * textSize);
     }
 
     static jfloat getStrikeThruThickness(jlong paintHandle) {
-        const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getTextSize();
+        const SkScalar textSize = reinterpret_cast<Paint*>(paintHandle)->getSkFont().getSize();
         return SkScalarToFloat(Paint::kStdStrikeThru_Thickness * textSize);
     }
 
     static void setShadowLayer(jlong paintHandle, jfloat radius,
-                               jfloat dx, jfloat dy, jint color) {
+                               jfloat dx, jfloat dy, jlong colorSpaceHandle,
+                               jlong colorLong) {
+        SkColor4f color = GraphicsJNI::convertColorLong(colorLong);
+        sk_sp<SkColorSpace> cs = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
+
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         if (radius <= 0) {
             paint->setLooper(nullptr);
         }
         else {
             SkScalar sigma = android::uirenderer::Blur::convertRadiusToSigma(radius);
-            paint->setLooper(SkBlurDrawLooper::Make((SkColor)color, sigma, dx, dy));
+            paint->setLooper(SkBlurDrawLooper::Make(color, cs.get(), sigma, dx, dy));
         }
     }
 
@@ -1079,9 +1086,8 @@ static const JNINativeMethod methods[] = {
     {"nSetDither","(JZ)V", (void*) PaintGlue::setDither},
     {"nGetStyle","(J)I", (void*) PaintGlue::getStyle},
     {"nSetStyle","(JI)V", (void*) PaintGlue::setStyle},
-    {"nGetColor","(J)I", (void*) PaintGlue::getColor},
     {"nSetColor","(JI)V", (void*) PaintGlue::setColor},
-    {"nGetAlpha","(J)I", (void*) PaintGlue::getAlpha},
+    {"nSetColor","(JJJ)V", (void*) PaintGlue::setColorLong},
     {"nSetAlpha","(JI)V", (void*) PaintGlue::setAlpha},
     {"nGetStrokeWidth","(J)F", (void*) PaintGlue::getStrokeWidth},
     {"nSetStrokeWidth","(JF)V", (void*) PaintGlue::setStrokeWidth},
@@ -1114,15 +1120,17 @@ static const JNINativeMethod methods[] = {
     {"nSetLetterSpacing","(JF)V", (void*) PaintGlue::setLetterSpacing},
     {"nGetWordSpacing","(J)F", (void*) PaintGlue::getWordSpacing},
     {"nSetWordSpacing","(JF)V", (void*) PaintGlue::setWordSpacing},
-    {"nGetHyphenEdit", "(J)I", (void*) PaintGlue::getHyphenEdit},
-    {"nSetHyphenEdit", "(JI)V", (void*) PaintGlue::setHyphenEdit},
+    {"nGetStartHyphenEdit", "(J)I", (void*) PaintGlue::getStartHyphenEdit},
+    {"nGetEndHyphenEdit", "(J)I", (void*) PaintGlue::getEndHyphenEdit},
+    {"nSetStartHyphenEdit", "(JI)V", (void*) PaintGlue::setStartHyphenEdit},
+    {"nSetEndHyphenEdit", "(JI)V", (void*) PaintGlue::setEndHyphenEdit},
     {"nAscent","(J)F", (void*) PaintGlue::ascent},
     {"nDescent","(J)F", (void*) PaintGlue::descent},
     {"nGetUnderlinePosition","(J)F", (void*) PaintGlue::getUnderlinePosition},
     {"nGetUnderlineThickness","(J)F", (void*) PaintGlue::getUnderlineThickness},
     {"nGetStrikeThruPosition","(J)F", (void*) PaintGlue::getStrikeThruPosition},
     {"nGetStrikeThruThickness","(J)F", (void*) PaintGlue::getStrikeThruThickness},
-    {"nSetShadowLayer", "(JFFFI)V", (void*)PaintGlue::setShadowLayer},
+    {"nSetShadowLayer", "(JFFFJJ)V", (void*)PaintGlue::setShadowLayer},
     {"nHasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer},
     {"nEqualsForTextMeasurement", "(JJ)Z", (void*)PaintGlue::equalsForTextMeasurement},
 };

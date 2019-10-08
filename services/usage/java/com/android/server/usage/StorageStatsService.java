@@ -120,6 +120,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
             @Override
             public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
                 switch (vol.type) {
+                    case VolumeInfo.TYPE_PUBLIC:
                     case VolumeInfo.TYPE_PRIVATE:
                     case VolumeInfo.TYPE_EMULATED:
                         if (newState == VolumeInfo.STATE_MOUNTED) {
@@ -156,8 +157,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public boolean isQuotaSupported(String volumeUuid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
-
         try {
             return mInstaller.isQuotaSupported(volumeUuid);
         } catch (InstallerException e) {
@@ -167,8 +166,6 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
 
     @Override
     public boolean isReservedSupported(String volumeUuid, String callingPackage) {
-        enforcePermission(Binder.getCallingUid(), callingPackage);
-
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
             return SystemProperties.getBoolean(StorageManager.PROP_HAS_RESERVED, false)
                     || Build.IS_CONTAINER;

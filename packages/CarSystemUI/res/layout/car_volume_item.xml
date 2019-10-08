@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2019 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/car_volume_dialog_background_color"
+    android:paddingStart="@dimen/car_volume_item_padding_start"
+    android:paddingEnd="@dimen/car_volume_item_padding_end"
+    android:minHeight="@dimen/car_volume_item_height">
+
+    <!-- Primary Action. -->
+    <ImageView
+        android:id="@+id/primary_icon"
+        android:layout_width="@dimen/car_volume_item_icon_size"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:layout_height="@dimen/car_volume_item_icon_size"/>
+
+    <!-- Note: the horizontal padding and offset are set to 0 so that the track and thumb
+             aligns with the proper keylines. -->
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/car_volume_item_seekbar_margin_vertical"
+        android:layout_marginTop="@dimen/car_volume_item_seekbar_margin_vertical"
+        android:min="0"
+        android:paddingBottom="@dimen/car_volume_item_seekbar_padding_vertical"
+        android:layout_centerVertical="true"
+        android:paddingEnd="0dp"
+        android:paddingStart="0dp"
+        android:paddingTop="@dimen/car_volume_item_seekbar_padding_vertical"
+        android:splitTrack="false"
+        android:layout_toStartOf="@id/supplemental_icon_divider"
+        android:layout_marginStart="@dimen/car_volume_item_seekbar_margin_start"
+        android:layout_marginEnd="@dimen/car_volume_item_seekbar_margin_end"
+        android:thumbOffset="0dp"/>
+
+    <!-- Supplemental action. -->
+    <View
+        android:id="@+id/supplemental_icon_divider"
+        android:layout_width="@dimen/car_volume_item_divider_width"
+        android:layout_height="@dimen/car_volume_item_divider_height"
+        android:layout_marginEnd="@dimen/car_volume_item_divider_margin_end"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/supplemental_icon"
+        android:background="@color/car_volume_item_divider_color"/>
+    <ImageView
+        android:id="@+id/supplemental_icon"
+        android:layout_width="@dimen/car_volume_item_icon_size"
+        android:layout_height="@dimen/car_volume_item_icon_size"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:scaleType="fitCenter"/>
+</RelativeLayout>

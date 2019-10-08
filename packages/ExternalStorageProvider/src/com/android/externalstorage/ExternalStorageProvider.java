@@ -37,6 +37,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -66,7 +67,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
     private static final boolean DEBUG = false;
 
-    public static final String AUTHORITY = "com.android.externalstorage.documents";
+    public static final String AUTHORITY = DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY;
 
     private static final Uri BASE_URI =
             new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY).build();
@@ -75,7 +76,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
     private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
             Root.COLUMN_ROOT_ID, Root.COLUMN_FLAGS, Root.COLUMN_ICON, Root.COLUMN_TITLE,
-            Root.COLUMN_DOCUMENT_ID, Root.COLUMN_AVAILABLE_BYTES,
+            Root.COLUMN_DOCUMENT_ID, Root.COLUMN_AVAILABLE_BYTES, Root.COLUMN_QUERY_ARGS
     };
 
     private static final String[] DEFAULT_DOCUMENT_PROJECTION = new String[] {
@@ -95,7 +96,8 @@ public class ExternalStorageProvider extends FileSystemProvider {
         public boolean reportAvailableBytes = true;
     }
 
-    private static final String ROOT_ID_PRIMARY_EMULATED = "primary";
+    private static final String ROOT_ID_PRIMARY_EMULATED =
+            DocumentsContract.EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID;
     private static final String ROOT_ID_HOME = "home";
 
     private StorageManager mStorageManager;
@@ -145,6 +147,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
         }
     }
 
+    @GuardedBy("mRootsLock")
     private void updateVolumesLocked() {
         mRoots.clear();
 
@@ -441,6 +444,7 @@ public class ExternalStorageProvider extends FileSystemProvider {
                 row.add(Root.COLUMN_FLAGS, root.flags);
                 row.add(Root.COLUMN_TITLE, root.title);
                 row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
+                row.add(Root.COLUMN_QUERY_ARGS, SUPPORTED_QUERY_ARGS);
 
                 long availableBytes = -1;
                 if (root.reportAvailableBytes) {
@@ -539,14 +543,14 @@ public class ExternalStorageProvider extends FileSystemProvider {
     }
 
     @Override
-    public Cursor querySearchDocuments(String rootId, String query, String[] projection)
+    public Cursor querySearchDocuments(String rootId, String[] projection, Bundle queryArgs)
             throws FileNotFoundException {
         final File parent;
         synchronized (mRootsLock) {
             parent = mRoots.get(rootId).path;
         }
 
-        return querySearchDocuments(parent, query, projection, Collections.emptySet());
+        return querySearchDocuments(parent, projection, Collections.emptySet(), queryArgs);
     }
 
     @Override
@@ -606,11 +610,16 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     }
                     break;
                 }
-                case "getDocumentId": {
-                    final String path = arg;
-                    final List<UriPermission> accessUriPermissions =
-                            extras.getParcelableArrayList(AUTHORITY + ".extra.uriPermissions");
+                case MediaStore.GET_DOCUMENT_URI_CALL: {
+                    // All callers must go through MediaProvider
+                    getContext().enforceCallingPermission(
+                            android.Manifest.permission.WRITE_MEDIA_STORAGE, TAG);
 
+                    final Uri fileUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+                    final List<UriPermission> accessUriPermissions = extras
+                            .getParcelableArrayList(DocumentsContract.EXTRA_URI_PERMISSIONS);
+
+                    final String path = fileUri.getPath();
                     try {
                         final Bundle out = new Bundle();
                         final Uri uri = getDocumentUri(path, accessUriPermissions);
@@ -619,7 +628,22 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     } catch (FileNotFoundException e) {
                         throw new IllegalStateException("File in " + path + " is not found.", e);
                     }
+                }
+                case MediaStore.GET_MEDIA_URI_CALL: {
+                    // All callers must go through MediaProvider
+                    getContext().enforceCallingPermission(
+                            android.Manifest.permission.WRITE_MEDIA_STORAGE, TAG);
 
+                    final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+                    final String docId = DocumentsContract.getDocumentId(documentUri);
+                    try {
+                        final Bundle out = new Bundle();
+                        final Uri uri = Uri.fromFile(getFileForDocId(docId, true));
+                        out.putParcelable(DocumentsContract.EXTRA_URI, uri);
+                        return out;
+                    } catch (FileNotFoundException e) {
+                        throw new IllegalStateException(e);
+                    }
                 }
                 default:
                     Log.w(TAG, "unknown method passed to call(): " + method);

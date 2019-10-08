@@ -18,17 +18,15 @@ package com.android.server.pm.dex;
 
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.DynamicCodeFile;
+import static com.android.server.pm.dex.PackageDynamicCodeLoading.PackageDynamicCode;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -57,6 +55,7 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +73,6 @@ public class DexManagerTests {
     @Mock Installer mInstaller;
     @Mock IPackageManager mPM;
     private final Object mInstallLock = new Object();
-    @Mock DexManager.Listener mListener;
 
     private DexManager mDexManager;
 
@@ -110,9 +108,8 @@ public class DexManagerTests {
         mBarUser0DelegateLastClassLoader = new TestData(bar, isa, mUser0,
                 DELEGATE_LAST_CLASS_LOADER_NAME);
 
-        mDexManager = new DexManager(
-            /*Context*/ null, mPM, /*PackageDexOptimizer*/ null, mInstaller, mInstallLock,
-            mListener);
+        mDexManager = new DexManager(/*Context*/ null, mPM, /*PackageDexOptimizer*/ null,
+                mInstaller, mInstallLock);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;
@@ -129,6 +126,9 @@ public class DexManagerTests {
 
         // Package is not used by others, so we should get nothing back.
         assertNoUseInfo(mFooUser0);
+
+        // A package loading its own code is not stored as DCL.
+        assertNoDclInfo(mFooUser0);
     }
 
     @Test
@@ -140,6 +140,9 @@ public class DexManagerTests {
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
         assertIsUsedByOtherApps(mBarUser0, pui, true);
         assertTrue(pui.getDexUseInfoMap().isEmpty());
+
+        // A package loading another package's APK is not DCL (it's not app data).
+        assertNoDclInfo(mBarUser0);
     }
 
     @Test
@@ -152,6 +155,8 @@ public class DexManagerTests {
         assertIsUsedByOtherApps(mFooUser0, pui, false);
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
+
+        assertHasDclInfo(mFooUser0, mFooUser0, fooSecondaries);
     }
 
     @Test
@@ -164,6 +169,8 @@ public class DexManagerTests {
         assertIsUsedByOtherApps(mBarUser0, pui, false);
         assertEquals(barSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, barSecondaries, /*isUsedByOtherApps*/true, mUser0);
+
+        assertHasDclInfo(mBarUser0, mFooUser0, barSecondaries);
     }
 
     @Test
@@ -200,9 +207,10 @@ public class DexManagerTests {
     }
 
     @Test
-    public void testPackageUseInfoNotFound() {
+    public void testNoNotify() {
         // Assert we don't get back data we did not previously record.
         assertNoUseInfo(mFooUser0);
+        assertNoDclInfo(mFooUser0);
     }
 
     @Test
@@ -210,6 +218,7 @@ public class DexManagerTests {
         // Notifying with an invalid ISA should be ignored.
         notifyDexLoad(mInvalidIsa, mInvalidIsa.getSecondaryDexPaths(), mUser0);
         assertNoUseInfo(mInvalidIsa);
+        assertNoDclInfo(mInvalidIsa);
     }
 
     @Test
@@ -218,6 +227,7 @@ public class DexManagerTests {
         // register in DexManager#load should be ignored.
         notifyDexLoad(mDoesNotExist, mDoesNotExist.getBaseAndSplitDexPaths(), mUser0);
         assertNoUseInfo(mDoesNotExist);
+        assertNoDclInfo(mDoesNotExist);
     }
 
     @Test
@@ -226,6 +236,8 @@ public class DexManagerTests {
         // Request should be ignored.
         notifyDexLoad(mBarUser1, mBarUser0.getSecondaryDexPaths(), mUser1);
         assertNoUseInfo(mBarUser1);
+
+        assertNoDclInfo(mBarUser1);
     }
 
     @Test
@@ -235,6 +247,10 @@ public class DexManagerTests {
         // still check that nothing goes unexpected in DexManager.
         notifyDexLoad(mBarUser0, mFooUser0.getBaseAndSplitDexPaths(), mUser1);
         assertNoUseInfo(mBarUser1);
+        assertNoUseInfo(mFooUser0);
+
+        assertNoDclInfo(mBarUser1);
+        assertNoDclInfo(mFooUser0);
     }
 
     @Test
@@ -247,6 +263,7 @@ public class DexManagerTests {
         // is trying to load something from it we should not find it.
         notifyDexLoad(mFooUser0, newSecondaries, mUser0);
         assertNoUseInfo(newPackage);
+        assertNoDclInfo(newPackage);
 
         // Notify about newPackage install and let mFoo load its dexes.
         mDexManager.notifyPackageInstalled(newPackage.mPackageInfo, mUser0);
@@ -257,6 +274,7 @@ public class DexManagerTests {
         assertIsUsedByOtherApps(newPackage, pui, false);
         assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/true, mUser0);
+        assertHasDclInfo(newPackage, mFooUser0, newSecondaries);
     }
 
     @Test
@@ -273,6 +291,7 @@ public class DexManagerTests {
         assertIsUsedByOtherApps(newPackage, pui, false);
         assertEquals(newSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(newPackage, pui, newSecondaries, /*isUsedByOtherApps*/false, mUser0);
+        assertHasDclInfo(newPackage, newPackage, newSecondaries);
     }
 
     @Test
@@ -305,6 +324,7 @@ public class DexManagerTests {
         // We shouldn't find yet the new split as we didn't notify the package update.
         notifyDexLoad(mFooUser0, newSplits, mUser0);
         assertNoUseInfo(mBarUser0);
+        assertNoDclInfo(mBarUser0);
 
         // Notify that bar is updated. splitSourceDirs will contain the updated path.
         mDexManager.notifyPackageUpdated(mBarUser0.getPackageName(),
@@ -314,8 +334,10 @@ public class DexManagerTests {
         // Now, when the split is loaded we will find it and we should mark Bar as usedByOthers.
         notifyDexLoad(mFooUser0, newSplits, mUser0);
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
-        assertNotNull(pui);
         assertIsUsedByOtherApps(newSplits, pui, true);
+
+        // Primary and split APKs are not recorded as DCL.
+        assertNoDclInfo(mBarUser0);
     }
 
     @Test
@@ -326,11 +348,15 @@ public class DexManagerTests {
 
         mDexManager.notifyPackageDataDestroyed(mBarUser0.getPackageName(), mUser0);
 
-        // Bar should not be around since it was removed for all users.
+        // Data for user 1 should still be present
         PackageUseInfo pui = getPackageUseInfo(mBarUser1);
-        assertNotNull(pui);
         assertSecondaryUse(mBarUser1, pui, mBarUser1.getSecondaryDexPaths(),
                 /*isUsedByOtherApps*/false, mUser1);
+        assertHasDclInfo(mBarUser1, mBarUser1, mBarUser1.getSecondaryDexPaths());
+
+        // But not user 0
+        assertNoUseInfo(mBarUser0, mUser0);
+        assertNoDclInfo(mBarUser0, mUser0);
     }
 
     @Test
@@ -349,6 +375,8 @@ public class DexManagerTests {
         PackageUseInfo pui = getPackageUseInfo(mFooUser0);
         assertIsUsedByOtherApps(mFooUser0, pui, true);
         assertTrue(pui.getDexUseInfoMap().isEmpty());
+
+        assertNoDclInfo(mFooUser0);
     }
 
     @Test
@@ -362,6 +390,7 @@ public class DexManagerTests {
         // Foo should not be around since all its secondary dex info were deleted
         // and it is not used by other apps.
         assertNoUseInfo(mFooUser0);
+        assertNoDclInfo(mFooUser0);
     }
 
     @Test
@@ -374,6 +403,7 @@ public class DexManagerTests {
 
         // Bar should not be around since it was removed for all users.
         assertNoUseInfo(mBarUser0);
+        assertNoDclInfo(mBarUser0);
     }
 
     @Test
@@ -381,8 +411,10 @@ public class DexManagerTests {
         String frameworkDex = "/system/framework/com.android.location.provider.jar";
         // Load a dex file from framework.
         notifyDexLoad(mFooUser0, Arrays.asList(frameworkDex), mUser0);
-        // The dex file should not be recognized as a package.
-        assertFalse(mDexManager.hasInfoOnPackage(frameworkDex));
+        // The dex file should not be recognized as owned by the package.
+        assertFalse(mDexManager.hasInfoOnPackage(mFooUser0.getPackageName()));
+
+        assertNull(getPackageDynamicCodeInfo(mFooUser0));
     }
 
     @Test
@@ -395,6 +427,8 @@ public class DexManagerTests {
         assertIsUsedByOtherApps(mFooUser0, pui, false);
         assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
         assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0);
+
+        assertHasDclInfo(mFooUser0, mFooUser0, fooSecondaries);
     }
 
     @Test
@@ -402,7 +436,12 @@ public class DexManagerTests {
         List<String> secondaries = mBarUser0UnsupportedClassLoader.getSecondaryDexPaths();
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
 
+        // We don't record the dex usage
         assertNoUseInfo(mBarUser0UnsupportedClassLoader);
+
+        // But we do record this as an intance of dynamic code loading
+        assertHasDclInfo(
+                mBarUser0UnsupportedClassLoader, mBarUser0UnsupportedClassLoader, secondaries);
     }
 
     @Test
@@ -414,6 +453,8 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0, classLoaders, classPaths, mUser0);
 
         assertNoUseInfo(mBarUser0);
+
+        assertHasDclInfo(mBarUser0, mBarUser0, mBarUser0.getSecondaryDexPaths());
     }
 
     @Test
@@ -421,6 +462,7 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0, null, mUser0);
 
         assertNoUseInfo(mBarUser0);
+        assertNoDclInfo(mBarUser0);
     }
 
     @Test
@@ -455,27 +497,14 @@ public class DexManagerTests {
         notifyDexLoad(mBarUser0, secondaries, mUser0);
         PackageUseInfo pui = getPackageUseInfo(mBarUser0);
         assertSecondaryUse(mBarUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
+        assertHasDclInfo(mBarUser0, mBarUser0, secondaries);
 
         // Record bar secondaries again with an unsupported class loader. This should not change the
         // context.
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
         pui = getPackageUseInfo(mBarUser0);
         assertSecondaryUse(mBarUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
-    }
-
-    @Test
-    public void testReconcileSecondaryDexFiles_invokesListener() throws Exception {
-        List<String> fooSecondaries = mFooUser0.getSecondaryDexPathsFromProtectedDirs();
-        notifyDexLoad(mFooUser0, fooSecondaries, mUser0);
-
-        when(mPM.getPackageInfo(mFooUser0.getPackageName(), 0, 0))
-                .thenReturn(mFooUser0.mPackageInfo);
-
-        mDexManager.reconcileSecondaryDexFiles(mFooUser0.getPackageName());
-
-        verify(mListener, times(fooSecondaries.size()))
-                .onReconcileSecondaryDexFile(any(ApplicationInfo.class),
-                        any(DexUseInfo.class), anyString(), anyInt());
+        assertHasDclInfo(mBarUser0, mBarUser0, secondaries);
     }
 
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
@@ -533,11 +562,56 @@ public class DexManagerTests {
 
     private PackageUseInfo getPackageUseInfo(TestData testData) {
         assertTrue(mDexManager.hasInfoOnPackage(testData.getPackageName()));
-        return mDexManager.getPackageUseInfoOrDefault(testData.getPackageName());
+        PackageUseInfo pui = mDexManager.getPackageUseInfoOrDefault(testData.getPackageName());
+        assertNotNull(pui);
+        return pui;
+    }
+
+    private PackageDynamicCode getPackageDynamicCodeInfo(TestData testData) {
+        return mDexManager.getDynamicCodeLogger()
+                .getPackageDynamicCodeInfo(testData.getPackageName());
     }
 
     private void assertNoUseInfo(TestData testData) {
         assertFalse(mDexManager.hasInfoOnPackage(testData.getPackageName()));
+    }
+
+    private void assertNoUseInfo(TestData testData, int userId) {
+        if (!mDexManager.hasInfoOnPackage(testData.getPackageName())) {
+            return;
+        }
+        PackageUseInfo pui = getPackageUseInfo(testData);
+        for (DexUseInfo dexUseInfo : pui.getDexUseInfoMap().values()) {
+            assertNotEquals(userId, dexUseInfo.getOwnerUserId());
+        }
+    }
+
+    private void assertNoDclInfo(TestData testData) {
+        assertNull(getPackageDynamicCodeInfo(testData));
+    }
+
+    private void assertNoDclInfo(TestData testData, int userId) {
+        PackageDynamicCode info = getPackageDynamicCodeInfo(testData);
+        if (info == null) {
+            return;
+        }
+
+        for (DynamicCodeFile fileInfo : info.mFileUsageMap.values()) {
+            assertNotEquals(userId, fileInfo.mUserId);
+        }
+    }
+
+    private void assertHasDclInfo(TestData owner, TestData loader, List<String> paths) {
+        PackageDynamicCode info = getPackageDynamicCodeInfo(owner);
+        assertNotNull("No DCL data for owner " + owner.getPackageName(), info);
+        for (String path : paths) {
+            DynamicCodeFile fileInfo = info.mFileUsageMap.get(path);
+            assertNotNull("No DCL data for path " + path, fileInfo);
+            assertEquals(PackageDynamicCodeLoading.FILE_TYPE_DEX, fileInfo.mFileType);
+            assertEquals(owner.mUserId, fileInfo.mUserId);
+            assertTrue("No DCL data for loader " + loader.getPackageName(),
+                    fileInfo.mLoadingPackages.contains(loader.getPackageName()));
+        }
     }
 
     private static PackageInfo getMockPackageInfo(String packageName, int userId) {
@@ -563,11 +637,13 @@ public class DexManagerTests {
         private final PackageInfo mPackageInfo;
         private final String mLoaderIsa;
         private final String mClassLoader;
+        private final int mUserId;
 
         private TestData(String packageName, String loaderIsa, int userId, String classLoader) {
             mPackageInfo = getMockPackageInfo(packageName, userId);
             mLoaderIsa = loaderIsa;
             mClassLoader = classLoader;
+            mUserId = userId;
         }
 
         private TestData(String packageName, String loaderIsa, int userId) {
@@ -603,9 +679,7 @@ public class DexManagerTests {
         List<String> getBaseAndSplitDexPaths() {
             List<String> paths = new ArrayList<>();
             paths.add(mPackageInfo.applicationInfo.sourceDir);
-            for (String split : mPackageInfo.applicationInfo.splitSourceDirs) {
-                paths.add(split);
-            }
+            Collections.addAll(paths, mPackageInfo.applicationInfo.splitSourceDirs);
             return paths;
         }
 
@@ -615,5 +689,69 @@ public class DexManagerTests {
             mPackageInfo.applicationInfo.splitSourceDirs[length - 1] += ".dex";
             return mPackageInfo.applicationInfo.splitSourceDirs[length - 1];
         }
+    }
+
+    private boolean shouldPackageRunOob(
+            boolean isDefaultEnabled, String defaultWhitelist, String overrideEnabled,
+            String overrideWhitelist, Collection<String> packageNamesInSameProcess) {
+        return DexManager.isPackageSelectedToRunOobInternal(
+                isDefaultEnabled, defaultWhitelist, overrideEnabled, overrideWhitelist,
+                packageNamesInSameProcess);
+    }
+
+    @Test
+    public void testOobPackageSelectionSwitch() {
+        // Feature is off by default, not overriden
+        assertFalse(shouldPackageRunOob(false, "ALL", null, null, null));
+
+        // Feature is off by default, overriden
+        assertTrue(shouldPackageRunOob(false, "ALL", "true", "ALL", null));
+        assertFalse(shouldPackageRunOob(false, "ALL", "false", null, null));
+        assertFalse(shouldPackageRunOob(false, "ALL", "false", "ALL", null));
+        assertFalse(shouldPackageRunOob(false, "ALL", "false", null, null));
+
+        // Feature is on by default, not overriden
+        assertTrue(shouldPackageRunOob(true, "ALL", null, null, null));
+        assertTrue(shouldPackageRunOob(true, "ALL", null, null, null));
+        assertTrue(shouldPackageRunOob(true, "ALL", null, "ALL", null));
+
+        // Feature is on by default, overriden
+        assertTrue(shouldPackageRunOob(true, "ALL", "true", null, null));
+        assertTrue(shouldPackageRunOob(true, "ALL", "true", "ALL", null));
+        assertFalse(shouldPackageRunOob(true, "ALL", "false", null, null));
+        assertFalse(shouldPackageRunOob(true, "ALL", "false", "ALL", null));
+    }
+
+    @Test
+    public void testOobPackageSelectionWhitelist() {
+        // Various whitelist of apps to run in OOB mode.
+        final String kWhitelistApp0 = "com.priv.app0";
+        final String kWhitelistApp1 = "com.priv.app1";
+        final String kWhitelistApp2 = "com.priv.app2";
+        final String kWhitelistApp1AndApp2 = "com.priv.app1,com.priv.app2";
+
+        // Packages that shares the targeting process.
+        final Collection<String> runningPackages = Arrays.asList("com.priv.app1", "com.priv.app2");
+
+        // Feature is off, whitelist does not matter
+        assertFalse(shouldPackageRunOob(false, kWhitelistApp0, null, null, runningPackages));
+        assertFalse(shouldPackageRunOob(false, kWhitelistApp1, null, null, runningPackages));
+        assertFalse(shouldPackageRunOob(false, "", null, kWhitelistApp1, runningPackages));
+        assertFalse(shouldPackageRunOob(false, "", null, "ALL", runningPackages));
+        assertFalse(shouldPackageRunOob(false, "ALL", null, "ALL", runningPackages));
+        assertFalse(shouldPackageRunOob(false, "ALL", null, "", runningPackages));
+
+        // Feature is on, app not in default or overridden whitelist
+        assertFalse(shouldPackageRunOob(true, kWhitelistApp0, null, null, runningPackages));
+        assertFalse(shouldPackageRunOob(true, "", null, kWhitelistApp0, runningPackages));
+        assertFalse(shouldPackageRunOob(true, "ALL", null, kWhitelistApp0, runningPackages));
+
+        // Feature is on, app in default or overridden whitelist
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp1, null, null, runningPackages));
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp2, null, null, runningPackages));
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp1AndApp2, null, null, runningPackages));
+        assertTrue(shouldPackageRunOob(true, kWhitelistApp1, null, "ALL", runningPackages));
+        assertTrue(shouldPackageRunOob(true, "", null, kWhitelistApp1, runningPackages));
+        assertTrue(shouldPackageRunOob(true, "ALL", null, kWhitelistApp1, runningPackages));
     }
 }

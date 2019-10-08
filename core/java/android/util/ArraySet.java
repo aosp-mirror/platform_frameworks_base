@@ -16,15 +16,17 @@
 
 package android.util;
 
+import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
+
 import libcore.util.EmptyArray;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Build;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * ArraySet is a generic set data structure that is designed to be more memory efficient than a
@@ -72,15 +74,15 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     static int sTwiceBaseCacheSize;
 
     final boolean mIdentityHashCode;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Hashes are an implementation detail. Use public API.
     int[] mHashes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Storage is an implementation detail. Use public API.
     Object[] mArray;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use size()
     int mSize;
     MapCollections<E, E> mCollections;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Hashes are an implementation detail. Use indexOfKey(Object).
     private int indexOf(Object key, int hash) {
         final int N = mSize;
 
@@ -119,7 +121,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return ~end;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use indexOf(null)
     private int indexOfNull() {
         final int N = mSize;
 
@@ -158,7 +160,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return ~end;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Allocations are an implementation detail.
     private void allocArrays(final int size) {
         if (size == (BASE_SIZE * 2)) {
             synchronized (ArraySet.class) {
@@ -216,7 +218,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         mArray = new Object[size];
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Allocations are an implementation detail.
     private static void freeArrays(final int[] hashes, final Object[] array, final int size) {
         if (hashes.length == (BASE_SIZE * 2)) {
             synchronized (ArraySet.class) {
@@ -290,9 +292,10 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         }
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public ArraySet(Collection<E> set) {
+    /**
+     * Create a new ArraySet with items from the given collection.
+     */
+    public ArraySet(Collection<? extends E> set) {
         this();
         if (set != null) {
             addAll(set);
@@ -353,10 +356,33 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
 
     /**
      * Return the value at the given index in the array.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     *
      * @param index The desired index, must be between 0 and {@link #size()}-1.
      * @return Returns the value stored at the given index.
      */
     public E valueAt(int index) {
+        if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
+        return valueAtUnchecked(index);
+    }
+
+    /**
+     * Returns the value at the given index in the array without checking that the index is within
+     * bounds. This allows testing values at the end of the internal array, outside of the
+     * [0, mSize) bounds.
+     *
+     * @hide
+     */
+    @TestApi
+    public E valueAtUnchecked(int index) {
         return (E) mArray[index];
     }
 
@@ -491,26 +517,47 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return false;
     }
 
+    /** Returns true if the array size should be decreased. */
+    private boolean shouldShrink() {
+        return mHashes.length > (BASE_SIZE * 2) && mSize < mHashes.length / 3;
+    }
+
+    /**
+     * Returns the new size the array should have. Is only valid if {@link #shouldShrink} returns
+     * true.
+     */
+    private int getNewShrunkenSize() {
+        // We don't allow it to shrink smaller than (BASE_SIZE*2) to avoid flapping between that
+        // and BASE_SIZE.
+        return mSize > (BASE_SIZE * 2) ? (mSize + (mSize >> 1)) : (BASE_SIZE * 2);
+    }
+
     /**
      * Remove the key/value mapping at the given index.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     *
      * @param index The desired index, must be between 0 and {@link #size()}-1.
      * @return Returns the value that was stored at this index.
      */
     public E removeAt(int index) {
+        if (index >= mSize && UtilConfig.sThrowExceptionForUpperArrayOutOfBounds) {
+            // The array might be slightly bigger than mSize, in which case, indexing won't fail.
+            // Check if exception should be thrown outside of the critical path.
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
         final Object old = mArray[index];
         if (mSize <= 1) {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
-            freeArrays(mHashes, mArray, mSize);
-            mHashes = EmptyArray.INT;
-            mArray = EmptyArray.OBJECT;
-            mSize = 0;
+            clear();
         } else {
-            if (mHashes.length > (BASE_SIZE * 2) && mSize < mHashes.length / 3) {
-                // Shrunk enough to reduce size of arrays.  We don't allow it to
-                // shrink smaller than (BASE_SIZE*2) to avoid flapping between
-                // that and BASE_SIZE.
-                final int n = mSize > (BASE_SIZE * 2) ? (mSize + (mSize >> 1)) : (BASE_SIZE * 2);
+            if (shouldShrink()) {
+                // Shrunk enough to reduce size of arrays.
+                final int n = getNewShrunkenSize();
 
                 if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to " + n);
 
@@ -565,6 +612,62 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             remove(array.valueAt(i));
         }
         return originalSize != mSize;
+    }
+
+    /**
+     * Removes all values that satisfy the predicate. This implementation avoids using the
+     * {@link #iterator()}.
+     *
+     * @param filter A predicate which returns true for elements to be removed
+     */
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        if (mSize == 0) {
+            return false;
+        }
+
+        // Intentionally not using removeAt() to avoid unnecessary intermediate resizing.
+
+        int replaceIndex = 0;
+        int numRemoved = 0;
+        for (int i = 0; i < mSize; ++i) {
+            if (filter.test((E) mArray[i])) {
+                numRemoved++;
+            } else {
+                if (replaceIndex != i) {
+                    mArray[replaceIndex] = mArray[i];
+                    mHashes[replaceIndex] = mHashes[i];
+                }
+                replaceIndex++;
+            }
+        }
+
+        if (numRemoved == 0) {
+            return false;
+        } else if (numRemoved == mSize) {
+            clear();
+            return true;
+        }
+
+        mSize -= numRemoved;
+        if (shouldShrink()) {
+            // Shrunk enough to reduce size of arrays.
+            final int n = getNewShrunkenSize();
+            final int[] ohashes = mHashes;
+            final Object[] oarray = mArray;
+            allocArrays(n);
+
+            System.arraycopy(ohashes, 0, mHashes, 0, mSize);
+            System.arraycopy(oarray, 0, mArray, 0, mSize);
+        } else {
+            // Null out values at the end of the array. Not doing it in the loop above to avoid
+            // writing twice to the same index or writing unnecessarily if the array would have been
+            // discarded anyway.
+            for (int i = mSize; i < mArray.length; ++i) {
+                mArray[i] = null;
+            }
+        }
+        return true;
     }
 
     /**

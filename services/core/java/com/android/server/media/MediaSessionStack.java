@@ -28,6 +28,7 @@ import android.util.SparseArray;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Keeps track of media sessions and their priority for notifications, media
@@ -133,6 +134,21 @@ class MediaSessionStack {
      */
     public boolean contains(MediaSessionRecord record) {
         return mSessions.contains(record);
+    }
+
+    /**
+     * Gets the {@link MediaSessionRecord} with the {@link MediaSession.Token}.
+     *
+     * @param sessionToken session token
+     * @return the MediaSessionRecord. Can be {@code null} if the session is gone meanwhile.
+     */
+    public MediaSessionRecord getMediaSessionRecord(MediaSession.Token sessionToken) {
+        for (MediaSessionRecord record : mSessions) {
+            if (Objects.equals(record.getControllerBinder(), sessionToken.getBinder())) {
+                return record;
+            }
+        }
+        return null;
     }
 
     /**

@@ -1,0 +1,41 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.net.wifi;
+
+import android.net.wifi.WifiUsabilityStatsEntry;
+
+/**
+ * Interface for Wi-Fi usability stats listener.
+ *
+ * @hide
+ */
+oneway interface IOnWifiUsabilityStatsListener
+{
+    /**
+     * Service to manager callback providing current Wi-Fi usability stats.
+     *
+     * @param seqNum The sequence number of stats, used to derive the timing of updated Wi-Fi
+     *               usability statistics, set by framework and shall be incremented by one
+     *               after each update.
+     * @param isSameBssidAndFreq The flag to indicate whether the BSSID and the frequency of
+     *                           network stays the same or not relative to the last update of
+     *                           Wi-Fi usability stats.
+     * @param stats The updated Wi-Fi usability statistics.
+     */
+    void onWifiUsabilityStats(int seqNum, boolean isSameBssidAndFreq,
+            in WifiUsabilityStatsEntry stats);
+}

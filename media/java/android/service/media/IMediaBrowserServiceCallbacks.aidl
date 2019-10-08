@@ -3,7 +3,6 @@
 package android.service.media;
 
 import android.content.pm.ParceledListSlice;
-import android.graphics.Bitmap;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 
@@ -20,8 +19,11 @@ oneway interface IMediaBrowserServiceCallbacks {
      *         the playback of the media app.
      * @param extra Extras returned by the media service.
      */
+    @UnsupportedAppUsage
     void onConnect(String root, in MediaSession.Token session, in Bundle extras);
+    @UnsupportedAppUsage
     void onConnectFailed();
     void onLoadChildren(String mediaId, in ParceledListSlice list);
-    void onLoadChildrenWithOptions(String mediaId, in ParceledListSlice list, in Bundle options);
+    void onLoadChildrenWithOptions(String mediaId, in ParceledListSlice list,
+            in Bundle options);
 }

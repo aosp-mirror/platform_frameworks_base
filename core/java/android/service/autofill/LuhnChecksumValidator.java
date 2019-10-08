@@ -124,7 +124,7 @@ public final class LuhnChecksumValidator extends InternalValidator implements Va
         parcel.writeParcelableArray(mIds, flags);
     }
 
-    public static final Parcelable.Creator<LuhnChecksumValidator> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<LuhnChecksumValidator> CREATOR =
             new Parcelable.Creator<LuhnChecksumValidator>() {
         @Override
         public LuhnChecksumValidator createFromParcel(Parcel parcel) {

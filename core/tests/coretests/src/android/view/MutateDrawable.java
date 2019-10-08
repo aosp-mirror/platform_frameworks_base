@@ -18,8 +18,9 @@ package android.view;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 import android.widget.Button;
+import android.widget.LinearLayout;
+
 import com.android.frameworks.coretests.R;
 
 public class MutateDrawable extends Activity {

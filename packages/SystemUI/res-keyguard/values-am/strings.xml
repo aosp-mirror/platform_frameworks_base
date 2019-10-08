@@ -22,18 +22,22 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="3171996292755059205">"የቁልፍ ጥበቃ"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"ፒን ኮድ ይተይቡ"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"የሲም ፒዩኬ እና አዲሱን ፒን ኮድ ይተይቡ"</string>
-    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"የሲም ፒዩኬ ኮድ"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"የሲም PUK እና አዲሱን ፒን ኮድ ይተይቡ"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"የሲም PUK ኮድ"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"አዲስ የሲም ፒን  ኮድ"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"የይለፍ ቃል ለመተየብ ይንኩ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ለመክፈት የይለፍ ቃል ይተይቡ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ለመክፈት ፒን ይተይቡ"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"የእርስዎን ፒን ያስገቡ"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"ሥርዓተ-ጥለትዎን ያስገቡ"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"ይለፍ ቃልዎን ያስገቡ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ትክክል ያልሆነ ፒን  ኮድ።"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ልክ ያልሆነ ካርድ።"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"ባትሪ ሞልቷል"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"ኃይል በመሙላት ላይ"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"ኃይል በፍጥነት በመሙላት ላይ"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"ኃይል በዝግታ በመሙላት ላይ"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"ሙሉ በሙሉ ኃይል ተሞልቷል"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በገመድ አልባ ኃይል በመሙላት ላይ"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ኃይል በመሙላት ላይ"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በፍጥነት ኃይልን በመሙላት ላይ"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • በዝግታ ኃይልን በመሙላት ላይ"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"ኃይል መሙያዎን ያያይዙ።"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"ለመክፈት ምናሌ ተጫን።"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"አውታረ መረብ ተቆልፏል"</string>
@@ -45,11 +49,12 @@
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"የማይሰራ ሲም ካርድ።"</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"ሲም ካርድዎ እስከመጨረሻው ተሰናክሏል።\n ሌላ ሲም ካርድ ለማግኘት ከገመድ አልባ አገልግሎት አቅራቢዎ ጋር ይገናኙ።"</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"ሲም ካርድ ተዘግቷል።"</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ሲም ካርድ በፒዩኬ ተቆልፏል።"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ሲም ካርድ በPUK ተቆልፏል።"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ሲም ካርድን በመክፈት ላይ..."</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"የፒን አካባቢ"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"የመሣሪያ ይለፍ ቃል"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"የሲም ፒን አካባቢ"</string>
-    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"የሲም ፒዩኬ አካባቢ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"የሲም PUK አካባቢ"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"ቀጣዩ ማንቂያ ለ<xliff:g id="ALARM">%1$s</xliff:g> ተዘጋጅቷል"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"ሰርዝ"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIMን አሰናክል"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"በአንድ ስህተት ምክንያት eSIM ሊሰናከል አልቻለም።"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"አስገባ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ስርዓተ ጥለቱን እርሳ"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"የተሳሳተ ስርዓተ ጥለት"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"የተሳሳተ ይለፍ ቃል"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"የተሳሳተ ሥርዓተ ጥለት"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"የተሳሳተ የይለፍ ቃል"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"የተሳሳተ ፒን"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one">በ<xliff:g id="NUMBER">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።</item>
@@ -70,14 +75,14 @@
     <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> መሣሪያን ያለሞባይል አገልግሎት ለመጠቀም eSIMን ያሰናክሉ።"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"ፒን ያስገቡ"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"የይለፍ ቃል ያስገቡ"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ሲም አሁን ተሰናክሏል። ለመቀጠል የፒዩኬ ኮድ ያስገቡ። ለዝርዝር አገልግሎት አቅራቢን ያግኙ።"</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"ሲም «<xliff:g id="CARRIER">%1$s</xliff:g>» አሁን ተሰናክሏል። ለመቀጠል የፒዩኬ ኮድ ያስገቡ። ዝርዝር መረጃን ለማግኘት የተንቀሳቃሽ ስልክ አገልግሎት አቅራቢውን ያነጋግሩ።"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ለዝርዝር አገልግሎት አቅራቢን ያግኙ።"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"ሲም «<xliff:g id="CARRIER">%1$s</xliff:g>» አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ዝርዝር መረጃን ለማግኘት የተንቀሳቃሽ ስልክ አገልግሎት አቅራቢውን ያነጋግሩ።"</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"የተፈለገውን የፒን ኮድ ያስገቡ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"የተፈለገውን ፒን ኮድ ያረጋግጡ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"ሲም ካርድን በመክፈት ላይ..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን ይተይቡ።"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"የፒዩኬ ኮድ 8 ወይም ከዚያ በላይ ቁጥሮች ሊኖረው ይገባል።"</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"ትክክለኛውን የፒዩኬ ኮድ እንደገና ያስገቡ። ተደጋጋሚ ሙከራዎች ሲሙን እስከመጨረሻው ያሰናክሉታል።"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"የPUK ኮድ 8 ወይም ከዚያ በላይ ቁጥሮች ሊኖረው ይገባል።"</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"ትክክለኛውን የPUK ኮድ እንደገና ያስገቡ። ተደጋጋሚ ሙከራዎች ሲሙን እስከመጨረሻው ያሰናክሉታል።"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"ፒን ኮዶቹ አይገጣጠሙም"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"በጣም ብዙ የስርዓተ ጥለት ሙከራዎች"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"ፒንዎን <xliff:g id="NUMBER_0">%1$d</xliff:g> ጊዜ በትክክል አልተየቡም። \n\nበ<xliff:g id="NUMBER_1">%2$d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።"</string>
@@ -108,7 +113,7 @@
       <item quantity="other">ልክ ያልሆነ የሲም ፒዩኬ ኮድ፣ ሲሙ እስከመጨረሻው የማይሰራ ከመሆኑ በፊት <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
     </plurals>
     <string name="kg_password_pin_failed" msgid="8769990811451236223">"የሲም ፒን ክወና አልተሳካም!"</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"የሲም ፒዩኬ ክወና አልተሳካም!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"የሲም PUK ክወና አልተሳካም!"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"ኮዱ ተቀባይነት አግኝቷል!"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"ከአገልግሎት መስጫ ክልል ውጪ።"</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"የግቤት ስልት ቀይር"</string>
@@ -136,13 +141,94 @@
       <item quantity="one">መሣሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g> ሰዓቶች አልተከፈተም ነበር። የይለፍ ቃል ያረጋግጡ።</item>
       <item quantity="other">መሣሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g> ሰዓቶች አልተከፈተም ነበር። የይለፍ ቃል ያረጋግጡ።</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"አልታወቀም"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
-      <item quantity="one">የሲም ፒን ያስገቡ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
-      <item quantity="other">የሲም ፒን ያስገቡ፣ <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"አልታወቀም"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"አልታወቀም"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
+      <item quantity="one">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
+      <item quantity="other">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="one">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
       <item quantity="other">ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ሲም እስከመጨረሻው መጠቀም የማይቻል ከመሆኑ በፊት <xliff:g id="_NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል። ዝርዝሮችን ለማግኘት የአገልግሎት አቅራቢን ያነጋግሩ።</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color"></annotation>\n"^1\n^2 ነው</item>
+      <item quantity="other">"<annotation name="color"></annotation>\n"^1\n^2 ነው</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"አስራ ሁለት"</item>
+    <item msgid="7389464214252023751">"አንድ"</item>
+    <item msgid="8803180377002008046">"ሁለት"</item>
+    <item msgid="8614897059944644719">"ሶስት"</item>
+    <item msgid="2293058674782619556">"አራት"</item>
+    <item msgid="4815402358455041664">"አምስት"</item>
+    <item msgid="3325754778509665687">"ስድስት"</item>
+    <item msgid="5805551341866280575">"ሰባት"</item>
+    <item msgid="203334816668238610">"ስምንት"</item>
+    <item msgid="4828052671464488923">"ዘጠኝ"</item>
+    <item msgid="2233497913571137419">"አስር"</item>
+    <item msgid="5621554266768657830">"አስራ አንድ"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"ሰዓት"</item>
+    <item msgid="8837126587669001578">"አንድ"</item>
+    <item msgid="4294343372940455660">"ሁለት"</item>
+    <item msgid="7129166637707421536">"ሶስት"</item>
+    <item msgid="7579404865008788673">"አራት"</item>
+    <item msgid="3873924689207380586">"አምስት"</item>
+    <item msgid="4849565597850069377">"ስድስት"</item>
+    <item msgid="4404219424523572364">"ሰባት"</item>
+    <item msgid="8740481214764087329">"ስምንት"</item>
+    <item msgid="1713216865806811237">"ዘጠኝ"</item>
+    <item msgid="3508406095411245038">"አስር"</item>
+    <item msgid="7161996337755311711">"አስራ አንድ"</item>
+    <item msgid="4044549963329624197">"አስራ ሁለት"</item>
+    <item msgid="333373157917379088">"አስራ ሶስት"</item>
+    <item msgid="2631202907124819385">"አስራ አራት"</item>
+    <item msgid="6472396076858033453">"አስራ አምስት"</item>
+    <item msgid="8656981856181581643">"አስራ ስድስት"</item>
+    <item msgid="7289026608562030619">"አስራ ሰባት"</item>
+    <item msgid="3881477602692646573">"አስራ ስምንት"</item>
+    <item msgid="3358129827772984226">"አስራ ዘጠኝ"</item>
+    <item msgid="3308575407402865807">"ሃያ"</item>
+    <item msgid="5346560955382229629">"ሃያ\nአንድ"</item>
+    <item msgid="226750304761473436">"ሃያ\nሁለት"</item>
+    <item msgid="616811325336838734">"ሃያ\nሶስት"</item>
+    <item msgid="616346116869053440">"ሃያ\nአራት"</item>
+    <item msgid="4642996410384042830">"ሃያ\nአምስት"</item>
+    <item msgid="7506092849993571465">"ሃያ\nስድስት"</item>
+    <item msgid="1915078191101042031">"ሃያ\nሰባት"</item>
+    <item msgid="4292378641900520252">"ሃያ\nስምንት"</item>
+    <item msgid="5339513901773103696">"ሃያ\nዘጠኝ"</item>
+    <item msgid="3574673250891657607">"ሰላሳ"</item>
+    <item msgid="5796923836589110940">"ሰላሳ\nአንድ"</item>
+    <item msgid="5859323597571702052">"ሰላሳ\nሁለት"</item>
+    <item msgid="5133326723148876507">"ሰላሳ\nሶስት"</item>
+    <item msgid="2693999494655663096">"ሰላሳ\nአራት"</item>
+    <item msgid="3316754944962836197">"ሰላሳ\nአምስት"</item>
+    <item msgid="816891008836796723">"ሰላሳ\nስድስት"</item>
+    <item msgid="9158890488666520078">"ሰላሳ\nሰባት"</item>
+    <item msgid="1894769703213894011">"ሰላሳ\nስምንት"</item>
+    <item msgid="5638820345598572399">"ሰላሳ\nዘጠኝ"</item>
+    <item msgid="8838304023017895439">"አርባ"</item>
+    <item msgid="1834742948932559597">"አርባ\nአንድ"</item>
+    <item msgid="6573707308847773944">"አርባ\nሁለት"</item>
+    <item msgid="2450149950652678001">"አርባ\nሶስት"</item>
+    <item msgid="2874667401318178036">"አርባ\nአራት"</item>
+    <item msgid="3391101532763048862">"አርባ\nአምስት"</item>
+    <item msgid="1671489330863254362">"አርባ\nስድስት"</item>
+    <item msgid="5916017359554531038">"አርባ\nሰባት"</item>
+    <item msgid="8205413177993059967">"አርባ\nስምንት"</item>
+    <item msgid="6607867415142171302">"አርባ\nዘጠኝ"</item>
+    <item msgid="8358850748472089162">"ሃምሳ"</item>
+    <item msgid="3551313125255080234">"ሃምሳ\nአንድ"</item>
+    <item msgid="1559678130725716542">"ሃምሳ\nሁለት"</item>
+    <item msgid="431441994725492377">"ሃምሳ\nሶስት"</item>
+    <item msgid="6345774640539623024">"ሃምሳ\nአራት"</item>
+    <item msgid="8018192990793931120">"ሃምሳ\nአምስት"</item>
+    <item msgid="6187650843754604534">"ሃምሳ\nስድስት"</item>
+    <item msgid="8727240174015993259">"ሃምሳ\nሰባት"</item>
+    <item msgid="848339003778952950">"ሃምሳ\nስምንት"</item>
+    <item msgid="5798985802835423618">"ሃምሳ\nዘጠኝ"</item>
+  </string-array>
 </resources>

@@ -104,6 +104,18 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  set bind-instant-service-allowed [true | false]");
             pw.println("    Sets whether binding to services provided by instant apps is allowed");
             pw.println("");
+            pw.println("  set temporary-augmented-service USER_ID [COMPONENT_NAME DURATION]");
+            pw.println("    Temporarily (for DURATION ms) changes the augmented autofill service "
+                    + "implementation.");
+            pw.println("    To reset, call with just the USER_ID argument.");
+            pw.println("");
+            pw.println("  set default-augmented-service-enabled USER_ID [true|false]");
+            pw.println("    Enable / disable the default augmented autofill service for the user.");
+            pw.println("");
+            pw.println("  get default-augmented-service-enabled USER_ID");
+            pw.println("    Checks whether the default augmented autofill service is enabled for "
+                    + "the user.");
+            pw.println("");
             pw.println("  list sessions [--user USER_ID]");
             pw.println("    Lists all pending sessions.");
             pw.println("");
@@ -131,6 +143,8 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getFullScreenMode(pw);
             case "bind-instant-service-allowed":
                 return getBindInstantService(pw);
+            case "default-augmented-service-enabled":
+                return getDefaultAugmentedServiceEnabled(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -151,6 +165,10 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setFullScreenMode(pw);
             case "bind-instant-service-allowed":
                 return setBindInstantService(pw);
+            case "temporary-augmented-service":
+                return setTemporaryAugmentedService(pw);
+            case "default-augmented-service-enabled":
+                return setDefaultAugmentedServiceEnabled(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -185,7 +203,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 mService.setLogLevel(AutofillManager.FLAG_ADD_CLIENT_DEBUG);
                 return 0;
             case "off":
-                mService.setLogLevel(0);
+                mService.setLogLevel(AutofillManager.NO_LOGGING);
                 return 0;
             default:
                 pw.println("Invalid level: " + logLevel);
@@ -226,7 +244,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         final String value2 = getNextArgRequired();
 
         final CountDownLatch latch = new CountDownLatch(1);
-        mService.getScore(algorithm, value1, value2, new RemoteCallback((result) -> {
+        mService.calculateScore(algorithm, value1, value2, new RemoteCallback((result) -> {
             final Scores scores = result.getParcelable(EXTRA_SCORES);
             if (scores == null) {
                 pw.println("no score");
@@ -291,6 +309,37 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 pw.println("Invalid mode: " + mode);
                 return -1;
         }
+    }
+
+    private int setTemporaryAugmentedService(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final String serviceName = getNextArg();
+        if (serviceName == null) {
+            mService.resetTemporaryAugmentedAutofillService(userId);
+            return 0;
+        }
+        final int duration = getNextIntArgRequired();
+        mService.setTemporaryAugmentedAutofillService(userId, serviceName, duration);
+        pw.println("AugmentedAutofillService temporarily set to " + serviceName + " for "
+                + duration + "ms");
+        return 0;
+    }
+
+    private int getDefaultAugmentedServiceEnabled(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final boolean enabled = mService.isDefaultAugmentedServiceEnabled(userId);
+        pw.println(enabled);
+        return 0;
+    }
+
+    private int setDefaultAugmentedServiceEnabled(PrintWriter pw) {
+        final int userId = getNextIntArgRequired();
+        final boolean enabled = Boolean.parseBoolean(getNextArgRequired());
+        final boolean changed = mService.setDefaultAugmentedServiceEnabled(userId, enabled);
+        if (!changed) {
+            pw.println("already " + enabled);
+        }
+        return 0;
     }
 
     private int requestDestroy(PrintWriter pw) {
@@ -370,5 +419,9 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             return UserHandle.parseUserArg(getNextArgRequired());
         }
         return UserHandle.USER_ALL;
+    }
+
+    private int getNextIntArgRequired() {
+        return Integer.parseInt(getNextArgRequired());
     }
 }

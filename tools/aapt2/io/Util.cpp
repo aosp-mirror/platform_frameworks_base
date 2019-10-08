@@ -18,6 +18,8 @@
 
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
+#include "trace/TraceBuffer.h"
+
 using ::android::StringPiece;
 using ::google::protobuf::io::ZeroCopyOutputStream;
 
@@ -26,6 +28,7 @@ namespace io {
 
 bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std::string& out_path,
                               uint32_t compression_flags, IArchiveWriter* writer) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
   }
@@ -40,6 +43,7 @@ bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, const std:
 
 bool CopyFileToArchive(IAaptContext* context, io::IFile* file, const std::string& out_path,
                        uint32_t compression_flags, IArchiveWriter* writer) {
+  TRACE_CALL();
   std::unique_ptr<io::IData> data = file->OpenAsData();
   if (!data) {
     context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "failed to open file");
@@ -57,6 +61,7 @@ bool CopyFileToArchivePreserveCompression(IAaptContext* context, io::IFile* file
 bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::MessageLite* proto_msg,
                         const std::string& out_path, uint32_t compression_flags,
                         IArchiveWriter* writer) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage() << "writing " << out_path << " to archive");
   }
@@ -83,6 +88,7 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::MessageLite* 
 }
 
 bool Copy(OutputStream* out, InputStream* in) {
+  TRACE_CALL();
   const void* in_buffer;
   size_t in_len;
   while (in->Next(&in_buffer, &in_len)) {

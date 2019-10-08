@@ -118,7 +118,7 @@ public final class BluetoothAvrcpPlayerSettings implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<BluetoothAvrcpPlayerSettings> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothAvrcpPlayerSettings> CREATOR =
             new Parcelable.Creator<BluetoothAvrcpPlayerSettings>() {
         public BluetoothAvrcpPlayerSettings createFromParcel(Parcel in) {
             return new BluetoothAvrcpPlayerSettings(in);

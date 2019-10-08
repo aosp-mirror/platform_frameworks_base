@@ -316,7 +316,7 @@ public class IntentSender implements Parcelable {
         out.writeStrongBinder(mTarget.asBinder());
     }
 
-    public static final Parcelable.Creator<IntentSender> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IntentSender> CREATOR
             = new Parcelable.Creator<IntentSender>() {
         public IntentSender createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();

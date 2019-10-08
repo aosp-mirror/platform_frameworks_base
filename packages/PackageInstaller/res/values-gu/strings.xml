@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="7488448184431507488">"પૅકેજ ઇન્સ્ટૉલર"</string>
+    <string name="install" msgid="711829760615509273">"ઇન્સ્ટૉલ કરો"</string>
+    <string name="done" msgid="6632441120016885253">"થઈ ગયું"</string>
+    <string name="cancel" msgid="1018267193425558088">"રદ કરો"</string>
+    <string name="installing" msgid="4921993079741206516">"ઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ને ઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>
+    <string name="install_done" msgid="5987363587661783896">"ઍપ્લિકેશન ઇન્સ્ટૉલ કરી."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"શું તમે આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરવા માંગો છો?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"શું તમે આ અસ્તિત્વમાંની ઍપ્લિકેશનના અપડેટને ઇન્સ્ટૉલ કરવા માગો છો? તમારો અસ્તિત્વમાંનો ડેટા ગુમ થશે નહીં."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"શું તમે આ બિલ્ટ-ઇન ઍપ્લિકેશનના અપડેટને ઇન્સ્ટૉલ કરવા માગો છો? તમારો અસ્તિત્વમાંનો ડેટા ગુમ થશે નહીં."</string>
+    <string name="install_failed" msgid="5777824004474125469">"ઍપ્લિકેશન ઇન્સ્ટૉલ કરી નથી."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"પૅકેજને ઇન્સ્ટૉલ થવાથી બ્લૉક કરવામાં આવ્યું હતું."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"પૅકેજનો અસ્તિત્વમાંના પૅકેજ સાથે વિરોધાભાસ હોવાને કારણે ઍપ્લિકેશન ઇન્સ્ટૉલ થઈ નથી."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"તમારા ટેબ્લેટ સાથે ઍપ્લિકેશન સુસંગત ન હોવાને કારણે ઍપ્લિકેશન ઇન્સ્ટૉલ થઈ નથી."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"આ ઍપ્લિકેશન તમારા ટીવી સાથે સુસંગત નથી."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"તમારા ફોન સાથે ઍપ્લિકેશન સુસંગત ન હોવાને કારણે ઍપ્લિકેશન ઇન્સ્ટૉલ થઈ નથી."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"પૅકેજ અમાન્ય લાગી રહ્યું હોવાને કારણે ઍપ્લિકેશન ઇન્સ્ટૉલ થઈ નથી."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"તમારા ટૅબ્લેટ પર <xliff:g id="APP_NAME">%1$s</xliff:g> ઇન્સ્ટૉલ કરી શકાઈ નથી."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"તમારા ટીવી પર <xliff:g id="APP_NAME">%1$s</xliff:g> ઇન્સ્ટૉલ કરી શકાઈ નથી."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"તમારા ફોન પર <xliff:g id="APP_NAME">%1$s</xliff:g> ઇન્સ્ટૉલ કરી શકાઈ નથી."</string>
+    <string name="launch" msgid="3952550563999890101">"ખોલો"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"તમારા વ્યવસ્થાપક અજાણ્યા સ્રોતોથી મેળવેલી ઍપ્લિકેશનોના ઇન્સ્ટૉલેશનની મંજૂરી આપતા નથી"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"આ વપરાશકર્તા અજાણી ઍપ્લિકેશનોને ઇન્સ્ટૉલ કરી શકતા નથી"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"આ વપરાશકર્તાને ઍપ્લિકેશનો ઇન્સ્ટૉલ કરવાની મંજૂરી નથી"</string>
+    <string name="ok" msgid="7871959885003339302">"ઓકે"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"ઍપને મેનેજ કરો"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"સ્પેસ નથી"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ઇન્સ્ટૉલ કરી શકાઈ નથી. થોડું સ્પેસ ખાલી કરો અને ફરીથી પ્રયાસ કરો."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"ઍપ્લિકેશન મળી નથી"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ઇન્સ્ટૉલ કરેલી ઍપ્લિકેશનોની સૂચિમાં ઍપ્લિકેશન મળી નહોતી."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"મંજૂરી નથી"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"વર્તમાન વપરાશકર્તાને આ અનઇન્સ્ટૉલેશન કરવાની મંજૂરી નથી."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"ભૂલ"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"ઍપ્લિકેશન અનઇન્સ્ટૉલ કરી શકાઈ નહીં."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"ઍપ્લિકેશન અનઇન્સ્ટૉલ કરો"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"અપડેટ અનઇન્સ્ટૉલ કરો"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g>, નીચેની ઍપ્લિકેશનનો ભાગ છે:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"શું તમે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માંગો છો?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"શું તમે "<b>"બધા"</b>" વપરાશકર્તાઓ માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો? ડિવાઇસ પરના "<b>"બધા"</b>" વપરાશકર્તાઓની ઍપ્લિકેશન અને તેનો ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"શું તમે <xliff:g id="USERNAME">%1$s</xliff:g> વપરાશકર્તા માટે આ ઍપ્લિકેશનને અનઇન્સ્ટૉલ કરવા માગો છો?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"આ ઍપ્લિકેશનને ફેક્ટરી વર્ઝનથી બદલીએ? બધો ડેટા કાઢી નાખવામાં આવશે."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"આ ઍપ્લિકેશનને ફેક્ટરી વર્ઝનથી બદલીએ? બધો ડેટા કાઢી નાખવામાં આવશે. આનાથી કાર્યાલયની પ્રોફાઇલ ધરાવનારા વપરાશકર્તાઓ સહિત આ ડિવાઇસના બધા વપરાશકર્તાઓ પ્રભાવિત થશે."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"<xliff:g id="SIZE">%1$s</xliff:g>ની સંકળાયેલી મીડિયા ફાઇલોને પણ કાઢી નાખો."</string>
+    <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g>નો ઍપ ડેટા રાખો."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"ચાલી રહેલા અનઇન્સ્ટૉલ"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"નિષ્ફળ થયેલા અનઇન્સ્ટૉલ"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"અનઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ને અનઇન્સ્ટૉલ કરી રહ્યાં છીએ…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"અનઇન્સ્ટૉલ કરવાનું સમાપ્ત થયું."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> અનઇન્સ્ટૉલ કર્યું"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"અનઇન્સ્ટૉલ કરવું નિષ્ફળ રહ્યું."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ને અનઇન્સ્ટૉલ કરવું અસફળ રહ્યું."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"સક્રિય ડિવાઇસ વ્યવસ્થાપક ઍપ્લિકેશનો અનઇન્સ્ટૉલ કરી શકાતી નથી"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> માટે સક્રિય ડિવાઇસ વ્યવસ્થાપક ઍપ્લિકેશનો અનઇન્સ્ટૉલ કરી શકાતી નથી"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"આ ઍપ્લિકેશન અમુક વપરાશકર્તા કે પ્રોફાઇલ માટે જરૂરી છે અને તે અન્ય માટે અનઇન્સ્ટૉલ કરી હતી"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"તમારી પ્રોફાઇલ માટે ઍપ્લિકેશન જરૂરી છે અને અનઇન્સ્ટૉલ કરી શકાતી નથી."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"આ ઍપ્લિકેશન તમારા ડિવાઇસ વ્યવસ્થાપક માટે જરૂરી છે અને અનઇન્સ્ટૉલ કરી શકાતી નથી."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"ડિવાઇસ વ્યવસ્થાપક ઍપ્લિકેશનોને મેનેજ કરો"</string>
+    <string name="manage_users" msgid="1243995386982560813">"વપરાશકર્તાઓને મેનેજ કરો"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> અનઇન્સ્ટૉલ કરી શકાઈ નથી."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"પૅકેજનું વિશ્લેષણ કરવામાં સમસ્યા આવી હતી."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear પર ઇન્સ્ટૉલ/અનઇન્સ્ટૉલ ક્રિયાઓ સમર્થિત નથી."</string>
+    <string name="message_staging" msgid="8032722385658438567">"ઍપ્લિકેશનની પ્રક્રિયા ચાલુ છે…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"અજાણ"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"તમારી સુરક્ષા માટે, તમારા ટૅબ્લેટને આ સ્રોત પરથી અજાણી ઍપ્લિકેશનો ઇન્સ્ટૉલ કરવાની મંજૂરી નથી."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"તમારી સુરક્ષા માટે, તમારા ટીવીને આ સ્રોત પરથી અજાણી ઍપ્લિકેશનો ઇન્સ્ટૉલ કરવાની મંજૂરી નથી."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"તમારી સુરક્ષા માટે, તમારા ફોનને આ સ્રોત પરથી અજાણી ઍપ્લિકેશનો ઇન્સ્ટૉલ કરવાની મંજૂરી નથી."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"તમારો ફોન અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ફોનને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"તમારું ટૅબ્લેટ અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ટૅબ્લેટને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"તમારું ટીવી અને વ્યક્તિગત ડેટા અજાણી ઍપ્લિકેશનો દ્વારા હુમલા માટે વધુ સંવેદનશીલ છે. આ ઍપ્લિકેશન ઇન્સ્ટૉલ કરીને તમે સંમત થાઓ છો કે આનો ઉપયોગ કરવાથી તમારા ટીવીને થતી કોઈપણ હાનિ અથવા ડેટાના નુકસાન માટે તમે જવાબદાર છો."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"આગળ વધો"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"સેટિંગ"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"એમ્બેડ ઍપ્લિકેશનો ઇન્સ્ટૉલ/અનઇન્સ્ટૉલ"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ઍપ ઇન્સ્ટૉલ થવાનું નોટિફિકેશન"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"સફળતાપૂર્વક ઇન્સ્ટૉલ કરેલ"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” સફળતાપૂર્વક ઇન્સ્ટૉલ કરેલ"</string>
+</resources>

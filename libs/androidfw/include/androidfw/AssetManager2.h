@@ -49,6 +49,9 @@ struct ResolvedBag {
 
     Res_value value;
 
+    // The resource ID of the origin style associated with the given entry.
+    uint32_t style;
+
     // Which ApkAssets this entry came from.
     ApkAssetsCookie cookie;
 
@@ -74,6 +77,8 @@ struct FindEntryResult;
 // AssetManager2 is the main entry point for accessing assets and resources.
 // AssetManager2 provides caching of resources retrieved via the underlying ApkAssets.
 class AssetManager2 {
+  friend Theme;
+
  public:
   struct ResourceName {
     const char* package = nullptr;
@@ -118,6 +123,9 @@ class AssetManager2 {
   // Returns the DynamicRefTable for the ApkAssets represented by the cookie.
   // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
+
+  const std::unordered_map<std::string, std::string>*
+    GetOverlayableMapForPackage(uint32_t package_id) const;
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
@@ -224,6 +232,16 @@ class AssetManager2 {
                                    ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
                                    uint32_t* out_last_reference) const;
 
+  // Enables or disables resource resolution logging. Clears stored steps when
+  // disabled.
+  void SetResourceResolutionLoggingEnabled(bool enabled);
+
+  // Returns formatted log of last resource resolution path, or empty if no
+  // resource has been resolved yet.
+  std::string GetLastResourceResolution() const;
+
+  const std::vector<uint32_t> GetBagResIdStack(uint32_t resid);
+
   // Retrieves the best matching bag/map resource with ID `resid`.
   // This method will resolve all parent references for this bag and merge keys with the child.
   // To iterate over the keys, use the following idiom:
@@ -239,11 +257,12 @@ class AssetManager2 {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
-  template <typename Func>
-  void ForEachPackage(Func func) const {
+  void ForEachPackage(const std::function<bool(const std::string&, uint8_t)> func) const {
     for (const PackageGroup& package_group : package_groups_) {
-      func(package_group.packages_.front().loaded_package_->GetPackageName(),
-           package_group.dynamic_ref_table.mAssignedPackageId);
+      if (!func(package_group.packages_.front().loaded_package_->GetPackageName(),
+           package_group.dynamic_ref_table.mAssignedPackageId)) {
+        return;
+      }
     }
   }
 
@@ -264,10 +283,13 @@ class AssetManager2 {
   // care about the value. In this case, the value of `FindEntryResult::type_flags` is incomplete
   // and should not be used.
   //
+  // When `ignore_configuration` is true, FindEntry will return always select the first entry in
+  // for the type seen regardless of its configuration.
+  //
   // NOTE: FindEntry takes care of ensuring that structs within FindEntryResult have been properly
   // bounds-checked. Callers of FindEntry are free to trust the data if this method succeeds.
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            FindEntryResult* out_entry) const;
+                            bool ignore_configuration, FindEntryResult* out_entry) const;
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
@@ -284,6 +306,9 @@ class AssetManager2 {
   // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
   // been seen while traversing bag parents.
   const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
+
+  // Retrieve the assigned package id of the package if loaded into this AssetManager
+  uint8_t GetAssignedPackageId(const LoadedPackage* package);
 
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
@@ -338,6 +363,52 @@ class AssetManager2 {
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.
   std::unordered_map<uint32_t, util::unique_cptr<ResolvedBag>> cached_bags_;
+
+  // Cached set of bag resid stacks for each bag. These are cached because they might be requested
+  // a number of times for each view during View inspection.
+  std::unordered_map<uint32_t, std::vector<uint32_t>> cached_bag_resid_stacks_;
+
+  // Whether or not to save resource resolution steps
+  bool resource_resolution_logging_enabled_ = false;
+
+  struct Resolution {
+
+    struct Step {
+
+      enum class Type {
+        INITIAL,
+        BETTER_MATCH,
+        OVERLAID
+      };
+
+      // Marks what kind of override this step was.
+      Type type;
+
+      // Built name of configuration for this step.
+      String8 config_name;
+
+      // Marks the package name of the better resource found in this step.
+      const std::string* package_name;
+    };
+
+    // Last resolved resource ID.
+    uint32_t resid;
+
+    // Last resolved resource result cookie.
+    ApkAssetsCookie cookie = kInvalidCookie;
+
+    // Last resolved resource type.
+    StringPoolRef type_string_ref;
+
+    // Last resolved resource entry.
+    StringPoolRef entry_string_ref;
+
+    // Steps taken to resolve last resource.
+    std::vector<Step> steps;
+  };
+
+  // Record of the last resolved resource's resolution path.
+  mutable Resolution last_resolution;
 };
 
 class Theme {
@@ -355,10 +426,13 @@ class Theme {
   bool ApplyStyle(uint32_t resid, bool force = false);
 
   // Sets this Theme to be a copy of `o` if `o` has the same AssetManager as this Theme.
-  // Returns false if the AssetManagers of the Themes were not compatible.
-  bool SetTo(const Theme& o);
+  // If `o` does not have the same AssetManager as this theme, only attributes from ApkAssets loaded
+  // into both AssetManagers will be copied to this theme.
+  void SetTo(const Theme& o);
 
   void Clear();
+
+  void Dump() const;
 
   inline const AssetManager2* GetAssetManager() const {
     return asset_manager_;

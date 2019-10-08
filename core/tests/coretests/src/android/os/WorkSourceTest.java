@@ -341,12 +341,37 @@ public class WorkSourceTest extends TestCase {
     }
 
     public void testGetAttributionId() {
-        WorkSource ws1 = new WorkSource();
-        WorkChain wc = ws1.createWorkChain();
-        wc.addNode(100, "tag");
-        assertEquals(100, wc.getAttributionUid());
-        wc.addNode(200, "tag2");
-        assertEquals(100, wc.getAttributionUid());
+        WorkSource ws = new WorkSource();
+        WorkChain wc1 = ws.createWorkChain();
+        wc1.addNode(100, "tag");
+        assertEquals(100, wc1.getAttributionUid());
+        assertEquals(100, ws.getAttributionUid());
+        wc1.addNode(200, "tag2");
+        assertEquals(100, wc1.getAttributionUid());
+        assertEquals(100, ws.getAttributionUid());
+        WorkChain wc2 = ws.createWorkChain();
+        wc2.addNode(300, "tag3");
+        assertEquals(300, wc2.getAttributionUid());
+        assertEquals(100, ws.getAttributionUid());
+    }
+
+    public void testGetAttributionIdWithoutWorkChain() {
+        WorkSource ws1 = new WorkSource(100);
+        ws1.add(200);
+        WorkSource ws2 = new WorkSource();
+        ws2.add(100);
+        ws2.add(200);
+        assertEquals(100, ws1.getAttributionUid());
+        assertEquals(100, ws2.getAttributionUid());
+    }
+
+    public void testGetAttributionWhenEmpty() {
+        WorkSource ws = new WorkSource();
+        assertEquals(-1, ws.getAttributionUid());
+        WorkChain wc = ws.createWorkChain();
+        assertEquals(-1, ws.getAttributionUid());
+        assertEquals(-1, wc.getAttributionUid());
+        assertNull(wc.getAttributionTag());
     }
 
     public void testGetAttributionTag() {
@@ -376,6 +401,17 @@ public class WorkSourceTest extends TestCase {
         assertTrue(ws1.remove(ws2));
         assertEquals(1, ws1.getWorkChains().size());
         assertEquals(75, ws1.getWorkChains().get(0).getAttributionUid());
+    }
+
+    public void testRemove_fromSameWorkSource() {
+        WorkSource ws1 = new WorkSource(50, "foo");
+        WorkSource ws2 = ws1;
+        ws2.add(ws1);
+        assertTrue(ws2.remove(ws1));
+
+        assertEquals(0, ws1.size());
+        assertEquals(50, ws1.get(0));
+        assertEquals("foo", ws1.getName(0));
     }
 
     public void testTransferWorkChains() {

@@ -85,7 +85,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -686,10 +685,10 @@ public class AppStateTrackerTest {
         List<OpEntry> entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
-                AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
+                AppOpsManager.MODE_IGNORED));
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
+                AppOpsManager.MODE_IGNORED));
 
         ops.add(new PackageOps(PACKAGE_1, UID_1, entries));
 
@@ -697,7 +696,7 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
+                AppOpsManager.MODE_IGNORED));
 
         ops.add(new PackageOps(PACKAGE_2, UID_2, entries));
 
@@ -705,7 +704,7 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_ALLOWED, 0, 0, 0, 0, null));
+                AppOpsManager.MODE_ALLOWED));
 
         ops.add(new PackageOps(PACKAGE_1, UID_10_1, entries));
 
@@ -713,10 +712,10 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
+                AppOpsManager.MODE_IGNORED));
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
-                AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
+                AppOpsManager.MODE_IGNORED));
 
         ops.add(new PackageOps(PACKAGE_3, UID_10_3, entries));
 
@@ -794,7 +793,6 @@ public class AppStateTrackerTest {
     }
 
     @Test
-    @FlakyTest(bugId = 114098433)
     public void testAllListeners() throws Exception {
         final AppStateTrackerTestable instance = newInstance();
         callStart(instance);

@@ -20,8 +20,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,6 +35,7 @@ public class WrappedApplicationKeyTest {
 
     private static final String ALIAS = "karlin";
     private static final byte[] KEY_MATERIAL = new byte[] { 0, 1, 2, 3, 4 };
+    private static final byte[] METADATA = new byte[] {3, 2, 1, 0};
 
     private Parcel mParcel;
 
@@ -58,8 +60,18 @@ public class WrappedApplicationKeyTest {
     }
 
     @Test
+    public void build_setsMetadata_nonNull() {
+        assertArrayEquals(METADATA, buildTestKeyWithMetadata(METADATA).getMetadata());
+    }
+
+    @Test
+    public void build_setsMetadata_null() {
+        assertArrayEquals(null, buildTestKeyWithMetadata(null).getMetadata());
+    }
+
+    @Test
     public void writeToParcel_writesAliasToParcel() {
-        buildTestKey().writeToParcel(mParcel, /*flags=*/ 0);
+        buildTestKeyWithMetadata(/*metadata=*/ null).writeToParcel(mParcel, /*flags=*/ 0);
 
         mParcel.setDataPosition(0);
         WrappedApplicationKey readFromParcel =
@@ -69,7 +81,7 @@ public class WrappedApplicationKeyTest {
 
     @Test
     public void writeToParcel_writesKeyMaterial() {
-        buildTestKey().writeToParcel(mParcel, /*flags=*/ 0);
+        buildTestKeyWithMetadata(/*metadata=*/ null).writeToParcel(mParcel, /*flags=*/ 0);
 
         mParcel.setDataPosition(0);
         WrappedApplicationKey readFromParcel =
@@ -77,10 +89,48 @@ public class WrappedApplicationKeyTest {
         assertArrayEquals(KEY_MATERIAL, readFromParcel.getEncryptedKeyMaterial());
     }
 
+    @Test
+    public void writeToParcel_writesMetadata_nonNull() {
+        buildTestKeyWithMetadata(METADATA).writeToParcel(mParcel, /*flags=*/ 0);
+
+        mParcel.setDataPosition(0);
+        WrappedApplicationKey readFromParcel =
+                WrappedApplicationKey.CREATOR.createFromParcel(mParcel);
+        assertArrayEquals(METADATA, readFromParcel.getMetadata());
+    }
+
+    @Test
+    public void writeToParcel_writesMetadata_null() {
+        buildTestKeyWithMetadata(/*metadata=*/ null).writeToParcel(mParcel, /*flags=*/ 0);
+
+        mParcel.setDataPosition(0);
+        WrappedApplicationKey readFromParcel =
+                WrappedApplicationKey.CREATOR.createFromParcel(mParcel);
+        assertArrayEquals(null, readFromParcel.getMetadata());
+    }
+
+    @Test
+    public void writeToParcel_writesMetadata_absent() {
+        buildTestKey().writeToParcel(mParcel, /*flags=*/ 0);
+
+        mParcel.setDataPosition(0);
+        WrappedApplicationKey readFromParcel =
+                WrappedApplicationKey.CREATOR.createFromParcel(mParcel);
+        assertArrayEquals(null, readFromParcel.getMetadata());
+    }
+
     private WrappedApplicationKey buildTestKey() {
         return new WrappedApplicationKey.Builder()
                 .setAlias(ALIAS)
                 .setEncryptedKeyMaterial(KEY_MATERIAL)
+                .build();
+    }
+
+    private WrappedApplicationKey buildTestKeyWithMetadata(byte[] metadata) {
+        return new WrappedApplicationKey.Builder()
+                .setAlias(ALIAS)
+                .setEncryptedKeyMaterial(KEY_MATERIAL)
+                .setMetadata(metadata)
                 .build();
     }
 }

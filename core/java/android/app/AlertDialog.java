@@ -25,6 +25,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.ResourceId;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -465,7 +466,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          * @param context the parent context
          */
         public Builder(Context context) {
-            this(context, resolveDialogTheme(context, ResourceId.ID_NULL));
+            this(context, resolveDialogTheme(context, Resources.ID_NULL));
         }
 
         /**

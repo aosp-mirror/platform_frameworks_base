@@ -35,7 +35,10 @@ import java.util.Set;
  * <p>Connection and bonding state changes affecting specific devices
  * are handled by {@link CachedBluetoothDeviceManager},
  * {@link BluetoothEventManager}, and {@link LocalBluetoothProfileManager}.
+ *
+ * @deprecated use {@link BluetoothAdapter} instead.
  */
+@Deprecated
 public class LocalBluetoothAdapter {
     private static final String TAG = "LocalBluetoothAdapter";
 
@@ -232,7 +235,7 @@ public class LocalBluetoothAdapter {
                 ? BluetoothAdapter.STATE_TURNING_ON
                 : BluetoothAdapter.STATE_TURNING_OFF);
         } else {
-            if (Utils.V) {
+            if (BluetoothUtils.V) {
                 Log.v(TAG, "setBluetoothEnabled call, manager didn't return " +
                         "success for enabled: " + enabled);
             }

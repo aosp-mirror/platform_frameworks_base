@@ -16,52 +16,98 @@
 
 package com.android.server.location;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.PrintWriter;
+import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationProvider;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.WorkSource;
 import android.util.Log;
 
-import com.android.internal.location.ProviderProperties;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ILocationProvider;
+import com.android.internal.location.ILocationProviderManager;
+import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.os.TransferPipe;
+import com.android.server.FgThread;
 import com.android.server.LocationManagerService;
 import com.android.server.ServiceWatcher;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Proxy for ILocationProvider implementations.
  */
-public class LocationProviderProxy implements LocationProviderInterface {
+public class LocationProviderProxy extends AbstractLocationProvider {
+
     private static final String TAG = "LocationProviderProxy";
     private static final boolean D = LocationManagerService.D;
 
-    private final Context mContext;
-    private final String mName;
+    // used to ensure that updates to mProviderPackages are atomic
+    private final Object mProviderPackagesLock = new Object();
+
+    // used to ensure that updates to mRequest and mWorkSource are atomic
+    private final Object mRequestLock = new Object();
+
+    private final ILocationProviderManager.Stub mManager = new ILocationProviderManager.Stub() {
+        // executed on binder thread
+        @Override
+        public void onSetAdditionalProviderPackages(List<String> packageNames) {
+            LocationProviderProxy.this.onSetAdditionalProviderPackages(packageNames);
+        }
+
+        // executed on binder thread
+        @Override
+        public void onSetEnabled(boolean enabled) {
+            LocationProviderProxy.this.setEnabled(enabled);
+        }
+
+        // executed on binder thread
+        @Override
+        public void onSetProperties(ProviderProperties properties) {
+            LocationProviderProxy.this.setProperties(properties);
+        }
+
+        // executed on binder thread
+        @Override
+        public void onReportLocation(Location location) {
+            LocationProviderProxy.this.reportLocation(location);
+        }
+    };
+
     private final ServiceWatcher mServiceWatcher;
 
-    private Object mLock = new Object();
+    @GuardedBy("mProviderPackagesLock")
+    private final CopyOnWriteArrayList<String> mProviderPackages = new CopyOnWriteArrayList<>();
 
-    // cached values set by the location manager, synchronized on mLock
-    private ProviderProperties mProperties;
-    private boolean mEnabled = false;
-    private ProviderRequest mRequest = null;
-    private WorkSource mWorksource = new WorkSource();
+    @GuardedBy("mRequestLock")
+    @Nullable
+    private ProviderRequest mRequest;
+    @GuardedBy("mRequestLock")
+    private WorkSource mWorkSource;
 
+    /**
+     * Creates a new LocationProviderProxy and immediately begins binding to the best applicable
+     * service.
+     */
+    @Nullable
     public static LocationProviderProxy createAndBind(
-            Context context, String name, String action,
+            Context context, LocationProviderManager locationProviderManager, String action,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler) {
-        LocationProviderProxy proxy = new LocationProviderProxy(context, name, action,
-                overlaySwitchResId, defaultServicePackageNameResId, initialPackageNamesResId,
-                handler);
+            int initialPackageNamesResId) {
+        LocationProviderProxy proxy = new LocationProviderProxy(context, locationProviderManager,
+                action, overlaySwitchResId, defaultServicePackageNameResId,
+                initialPackageNamesResId);
         if (proxy.bind()) {
             return proxy;
         } else {
@@ -69,241 +115,127 @@ public class LocationProviderProxy implements LocationProviderInterface {
         }
     }
 
-    private LocationProviderProxy(Context context, String name, String action,
-            int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler) {
-        mContext = context;
-        mName = name;
-        mServiceWatcher = new ServiceWatcher(mContext, TAG + "-" + name, action, overlaySwitchResId,
+    private LocationProviderProxy(Context context, LocationProviderManager locationProviderManager,
+            String action, int overlaySwitchResId, int defaultServicePackageNameResId,
+            int initialPackageNamesResId) {
+        super(context, locationProviderManager);
+
+        mServiceWatcher = new ServiceWatcher(context, TAG, action, overlaySwitchResId,
                 defaultServicePackageNameResId, initialPackageNamesResId,
-                mNewServiceWork, handler);
+                FgThread.getHandler()) {
+
+            @Override
+            protected void onBind() {
+                runOnBinder(LocationProviderProxy.this::initializeService);
+            }
+
+            @Override
+            protected void onUnbind() {
+                resetProviderPackages(Collections.emptyList());
+                setEnabled(false);
+                setProperties(null);
+            }
+        };
+
+        mRequest = null;
+        mWorkSource = new WorkSource();
     }
 
-    private boolean bind () {
+    private boolean bind() {
         return mServiceWatcher.start();
     }
 
-    public String getConnectedPackageName() {
-        return mServiceWatcher.getBestPackageName();
-    }
+    private void initializeService(IBinder binder) throws RemoteException {
+        ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
+        if (D) Log.d(TAG, "applying state to connected service " + mServiceWatcher);
 
-    /**
-     * Work to apply current state to a newly connected provider.
-     * Remember we can switch the service that implements a providers
-     * at run-time, so need to apply current state.
-     */
-    private Runnable mNewServiceWork = new Runnable() {
-        @Override
-        public void run() {
-            if (D) Log.d(TAG, "applying state to connected service");
+        resetProviderPackages(Collections.emptyList());
 
-            boolean enabled;
-            final ProviderProperties[] properties = new ProviderProperties[1];
-            ProviderRequest request;
-            WorkSource source;
-            synchronized (mLock) {
-                enabled = mEnabled;
-                request = mRequest;
-                source = mWorksource;
-            }
+        service.setLocationProviderManager(mManager);
 
-
-            mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-                @Override
-                public void run(IBinder binder) {
-                    ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                    try {
-                        // load properties from provider
-                        properties[0] = service.getProperties();
-                        if (properties[0] == null) {
-                            Log.e(TAG, mServiceWatcher.getBestPackageName() +
-                                    " has invalid location provider properties");
-                        }
-
-                        // apply current state to new service
-                        if (enabled) {
-                            service.enable();
-                            if (request != null) {
-                                service.setRequest(request, source);
-                            }
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, e);
-                    } catch (Exception e) {
-                        // never let remote service crash system server
-                        Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                    }
-                }
-            });
-
-            synchronized (mLock) {
-                mProperties = properties[0];
+        synchronized (mRequestLock) {
+            if (mRequest != null) {
+                service.setRequest(mRequest, mWorkSource);
             }
         }
-    };
-
-    @Override
-    public String getName() {
-        return mName;
     }
 
     @Override
-    public ProviderProperties getProperties() {
-        synchronized (mLock) {
-            return mProperties;
-        }
-    }
-
-    @Override
-    public void enable() {
-        synchronized (mLock) {
-            mEnabled = true;
-        }
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    service.enable();
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                } catch (Exception e) {
-                    // never let remote service crash system server
-                    Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void disable() {
-        synchronized (mLock) {
-            mEnabled = false;
-        }
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    service.disable();
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                } catch (Exception e) {
-                    // never let remote service crash system server
-                    Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                }
-            }
-        });
-    }
-
-    @Override
-    public boolean isEnabled() {
-        synchronized (mLock) {
-            return mEnabled;
+    public List<String> getProviderPackages() {
+        synchronized (mProviderPackagesLock) {
+            return mProviderPackages;
         }
     }
 
     @Override
     public void setRequest(ProviderRequest request, WorkSource source) {
-        synchronized (mLock) {
+        synchronized (mRequestLock) {
             mRequest = request;
-            mWorksource = source;
+            mWorkSource = source;
         }
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    service.setRequest(request, source);
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                } catch (Exception e) {
-                    // never let remote service crash system server
-                    Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                }
-            }
+        mServiceWatcher.runOnBinder(binder -> {
+            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
+            service.setRequest(request, source);
         });
     }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.append("REMOTE SERVICE");
-        pw.append(" name=").append(mName);
-        pw.append(" pkg=").append(mServiceWatcher.getBestPackageName());
-        pw.append(" version=").append("" + mServiceWatcher.getBestVersion());
-        pw.append('\n');
-        if (!mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    TransferPipe.dumpAsync(service.asBinder(), fd, args);
-                } catch (IOException | RemoteException e) {
-                    pw.println("Failed to dump location provider: " + e);
-                }
+        pw.println("    service=" + mServiceWatcher);
+        synchronized (mProviderPackagesLock) {
+            if (mProviderPackages.size() > 1) {
+                pw.println("    additional packages=" + mProviderPackages);
             }
-        })) {
-            pw.println("service down (null)");
         }
     }
 
     @Override
     public int getStatus(Bundle extras) {
-        final int[] result = new int[] {LocationProvider.TEMPORARILY_UNAVAILABLE};
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    result[0] = service.getStatus(extras);
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                } catch (Exception e) {
-                    // never let remote service crash system server
-                    Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                }
-            }
-        });
-        return result[0];
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
+            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
+            return service.getStatus(extras);
+        }, LocationProvider.TEMPORARILY_UNAVAILABLE);
     }
 
     @Override
     public long getStatusUpdateTime() {
-        final long[] result = new long[] {0L};
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    result[0] = service.getStatusUpdateTime();
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                } catch (Exception e) {
-                    // never let remote service crash system server
-                    Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                }
-            }
-        });
-        return result[0];
+        return mServiceWatcher.runOnBinderBlocking(binder -> {
+            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
+            return service.getStatusUpdateTime();
+        }, 0L);
     }
 
     @Override
-    public boolean sendExtraCommand(String command, Bundle extras) {
-        final boolean[] result = new boolean[] {false};
-        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
-            @Override
-            public void run(IBinder binder) {
-                ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
-                try {
-                    result[0] = service.sendExtraCommand(command, extras);
-                } catch (RemoteException e) {
-                    Log.w(TAG, e);
-                } catch (Exception e) {
-                    // never let remote service crash system server
-                    Log.e(TAG, "Exception from " + mServiceWatcher.getBestPackageName(), e);
-                }
-            }
+    public void sendExtraCommand(String command, Bundle extras) {
+        mServiceWatcher.runOnBinder(binder -> {
+            ILocationProvider service = ILocationProvider.Stub.asInterface(binder);
+            service.sendExtraCommand(command, extras);
         });
-        return result[0];
     }
- }
+
+    private void onSetAdditionalProviderPackages(List<String> packageNames) {
+        resetProviderPackages(packageNames);
+    }
+
+    private void resetProviderPackages(List<String> additionalPackageNames) {
+        ArrayList<String> permittedPackages = new ArrayList<>(additionalPackageNames.size());
+        for (String packageName : additionalPackageNames) {
+            try {
+                mContext.getPackageManager().getPackageInfo(packageName, MATCH_SYSTEM_ONLY);
+                permittedPackages.add(packageName);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, mServiceWatcher + " specified unknown additional provider package: "
+                        + packageName);
+            }
+        }
+
+        synchronized (mProviderPackagesLock) {
+            mProviderPackages.clear();
+            String myPackage = mServiceWatcher.getCurrentPackageName();
+            if (myPackage != null) {
+                mProviderPackages.add(myPackage);
+                mProviderPackages.addAll(permittedPackages);
+            }
+        }
+    }
+}

@@ -22,6 +22,7 @@ import android.text.TextUtils;
 
 import com.android.printservice.recommendation.util.DiscoveryListenerMultiplexer;
 import com.android.printservice.recommendation.util.NsdResolveQueue;
+import com.android.printservice.recommendation.util.PrinterHashMap;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -195,12 +196,7 @@ class ServiceResolver {
     }
 
     public ArrayList<InetAddress> getPrinters() {
-        ArrayList<InetAddress> printerAddresses = new ArrayList<>();
-        for (NsdServiceInfo printer : mPrinterHashMap.values()) {
-            printerAddresses.add(printer.getHost());
-        }
-
-        return printerAddresses;
+        return mPrinterHashMap.getPrinterAddresses();
     }
 
 }

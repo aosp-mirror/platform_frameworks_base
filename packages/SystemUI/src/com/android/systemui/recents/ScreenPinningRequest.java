@@ -16,9 +16,13 @@
 
 package com.android.systemui.recents;
 
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
+import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
+
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +32,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,26 +44,29 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.shared.system.QuickStepContract;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
 
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
-
-public class ScreenPinningRequest implements View.OnClickListener {
+public class ScreenPinningRequest implements View.OnClickListener,
+        NavigationModeController.ModeChangedListener {
 
     private final Context mContext;
 
     private final AccessibilityManager mAccessibilityService;
     private final WindowManager mWindowManager;
+    private final OverviewProxyService mOverviewProxyService;
 
     private RequestWindowView mRequestWindow;
+    private int mNavBarMode;
 
     // Id of task to be pinned or locked.
     private int taskId;
@@ -71,6 +77,8 @@ public class ScreenPinningRequest implements View.OnClickListener {
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mWindowManager = (WindowManager)
                 mContext.getSystemService(Context.WINDOW_SERVICE);
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
     }
 
     public void clearPrompt() {
@@ -99,6 +107,11 @@ public class ScreenPinningRequest implements View.OnClickListener {
         mWindowManager.addView(mRequestWindow, lp);
     }
 
+    @Override
+    public void onNavigationModeChanged(int mode) {
+        mNavBarMode = mode;
+    }
+
     public void onConfigurationChanged() {
         if (mRequestWindow != null) {
             mRequestWindow.onConfigurationChanged();
@@ -124,7 +137,7 @@ public class ScreenPinningRequest implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.screen_pinning_ok_button || mRequestWindow == v) {
             try {
-                ActivityManager.getService().startSystemLockTaskMode(taskId);
+                ActivityTaskManager.getService().startSystemLockTaskMode(taskId);
             } catch (RemoteException e) {}
         }
         clearPrompt();
@@ -219,8 +232,9 @@ public class ScreenPinningRequest implements View.OnClickListener {
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            if (Recents.getSystemServices() != null &&
-                    Recents.getSystemServices().hasSoftNavigationBar()) {
+            WindowManagerWrapper wm = WindowManagerWrapper.getInstance();
+            if (!QuickStepContract.isGesturalMode(mNavBarMode) 
+            	    && wm.hasSoftNavigationBar(mContext.getDisplayId())) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {
@@ -244,7 +258,9 @@ public class ScreenPinningRequest implements View.OnClickListener {
                     && navigationBarView.isRecentsButtonVisible();
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
             int descriptionStringResId;
-            if (recentsVisible) {
+            if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+                descriptionStringResId = R.string.screen_pinning_description_gestural;
+            } else if (recentsVisible) {
                 mLayout.findViewById(R.id.screen_pinning_recents_group).setVisibility(VISIBLE);
                 mLayout.findViewById(R.id.screen_pinning_home_bg_light).setVisibility(INVISIBLE);
                 mLayout.findViewById(R.id.screen_pinning_home_bg).setVisibility(INVISIBLE);
@@ -261,16 +277,10 @@ public class ScreenPinningRequest implements View.OnClickListener {
             }
 
             if (navigationBarView != null) {
-                int dualToneDarkTheme = Utils.getThemeAttr(getContext(), R.attr.darkIconTheme);
-                int dualToneLightTheme = Utils.getThemeAttr(getContext(), R.attr.lightIconTheme);
-                Context lightContext = new ContextThemeWrapper(getContext(), dualToneLightTheme);
-                Context darkContext = new ContextThemeWrapper(getContext(), dualToneDarkTheme);
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
-                        .setImageDrawable(navigationBarView.getBackDrawable(lightContext,
-                                darkContext));
+                        .setImageDrawable(navigationBarView.getBackDrawable());
                 ((ImageView) mLayout.findViewById(R.id.screen_pinning_home_icon))
-                        .setImageDrawable(navigationBarView.getHomeDrawable(lightContext,
-                                darkContext));
+                        .setImageDrawable(navigationBarView.getHomeDrawable());
             }
 
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))

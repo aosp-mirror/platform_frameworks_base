@@ -62,7 +62,7 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
             IBinder token = new Binder();
             try {
                 ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                        providerName, UserHandle.USER_SYSTEM, token);
+                        providerName, UserHandle.USER_SYSTEM, token, "*uiautomator*");
                 if (holder == null) {
                     throw new IllegalStateException("Could not find provider: " + providerName);
                 }
@@ -84,7 +84,8 @@ public class ShellUiAutomatorBridge extends UiAutomatorBridge {
                     cursor.close();
                 }
                 if (provider != null) {
-                    activityManager.removeContentProviderExternal(providerName, token);
+                    activityManager.removeContentProviderExternalAsUser(providerName, token,
+                            UserHandle.USER_SYSTEM);
                 }
             }
         } catch (RemoteException e) {

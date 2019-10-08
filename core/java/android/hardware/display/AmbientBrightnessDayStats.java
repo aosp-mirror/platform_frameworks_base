@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -121,7 +122,7 @@ public final class AmbientBrightnessDayStats implements Parcelable {
         mStats = source.createFloatArray();
     }
 
-    public static final Creator<AmbientBrightnessDayStats> CREATOR =
+    public static final @android.annotation.NonNull Creator<AmbientBrightnessDayStats> CREATOR =
             new Creator<AmbientBrightnessDayStats>() {
 
                 @Override
@@ -136,7 +137,7 @@ public final class AmbientBrightnessDayStats implements Parcelable {
             };
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -161,6 +162,7 @@ public final class AmbientBrightnessDayStats implements Parcelable {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder bucketBoundariesString = new StringBuilder();

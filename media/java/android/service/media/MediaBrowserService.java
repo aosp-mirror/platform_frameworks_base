@@ -29,17 +29,14 @@ import android.content.pm.ParceledListSlice;
 import android.media.browse.MediaBrowser;
 import android.media.browse.MediaBrowserUtils;
 import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
+import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.media.session.MediaSessionManager;
-import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.service.media.IMediaBrowserService;
-import android.service.media.IMediaBrowserServiceCallbacks;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -101,7 +98,7 @@ public abstract class MediaBrowserService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
+    @IntDef(flag = true, value = { RESULT_FLAG_OPTION_NOT_HANDLED,
             RESULT_FLAG_ON_LOAD_ITEM_NOT_IMPLEMENTED })
     private @interface ResultFlags { }
 
@@ -294,7 +291,7 @@ public abstract class MediaBrowserService extends Service {
                         final ConnectionRecord connection = mConnections.get(b);
                         if (connection == null) {
                             Log.w(TAG, "addSubscription for callback that isn't registered id="
-                                + id);
+                                    + id);
                             return;
                         }
 
@@ -304,7 +301,8 @@ public abstract class MediaBrowserService extends Service {
         }
 
         @Override
-        public void removeSubscriptionDeprecated(String id, IMediaBrowserServiceCallbacks callbacks) {
+        public void removeSubscriptionDeprecated(
+                String id, IMediaBrowserServiceCallbacks callbacks) {
             // do-nothing
         }
 
@@ -490,7 +488,7 @@ public abstract class MediaBrowserService extends Service {
             @Override
             public void run() {
                 Iterator<ConnectionRecord> iter = mConnections.values().iterator();
-                while (iter.hasNext()){
+                while (iter.hasNext()) {
                     ConnectionRecord connection = iter.next();
                     try {
                         connection.callbacks.onConnect(connection.root.getRootId(), token,
@@ -544,8 +542,7 @@ public abstract class MediaBrowserService extends Service {
             throw new IllegalStateException("This should be called inside of onGetRoot or"
                     + " onLoadChildren or onLoadItem methods");
         }
-        return new RemoteUserInfo(mCurConnection.pkg, mCurConnection.pid, mCurConnection.uid,
-                mCurConnection.callbacks.asBinder());
+        return new RemoteUserInfo(mCurConnection.pkg, mCurConnection.pid, mCurConnection.uid);
     }
 
     /**
@@ -611,7 +608,7 @@ public abstract class MediaBrowserService extends Service {
         final PackageManager pm = getPackageManager();
         final String[] packages = pm.getPackagesForUid(uid);
         final int N = packages.length;
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             if (packages[i].equals(pkg)) {
                 return true;
             }
@@ -652,7 +649,7 @@ public abstract class MediaBrowserService extends Service {
         List<Pair<IBinder, Bundle>> callbackList = connection.subscriptions.get(id);
         if (callbackList != null) {
             Iterator<Pair<IBinder, Bundle>> iter = callbackList.iterator();
-            while (iter.hasNext()){
+            while (iter.hasNext()) {
                 if (token == iter.next().first) {
                     removed = true;
                     iter.remove();
@@ -672,8 +669,8 @@ public abstract class MediaBrowserService extends Service {
      */
     private void performLoadChildren(final String parentId, final ConnectionRecord connection,
             final Bundle options) {
-        final Result<List<MediaBrowser.MediaItem>> result
-                = new Result<List<MediaBrowser.MediaItem>>(parentId) {
+        final Result<List<MediaBrowser.MediaItem>> result =
+                new Result<List<MediaBrowser.MediaItem>>(parentId) {
             @Override
             void onResultSent(List<MediaBrowser.MediaItem> list, @ResultFlags int flag) {
                 if (mConnections.get(connection.callbacks.asBinder()) != connection) {
@@ -686,7 +683,7 @@ public abstract class MediaBrowserService extends Service {
 
                 List<MediaBrowser.MediaItem> filteredList =
                         (flag & RESULT_FLAG_OPTION_NOT_HANDLED) != 0
-                        ? applyOptions(list, options) : list;
+                                ? applyOptions(list, options) : list;
                 final ParceledListSlice<MediaBrowser.MediaItem> pls =
                         filteredList == null ? null : new ParceledListSlice<>(filteredList);
                 try {
@@ -823,8 +820,8 @@ public abstract class MediaBrowserService extends Service {
          */
         public static final String EXTRA_SUGGESTED = "android.service.media.extra.SUGGESTED";
 
-        final private String mRootId;
-        final private Bundle mExtras;
+        private final String mRootId;
+        private final Bundle mExtras;
 
         /**
          * Constructs a browser root.
@@ -833,8 +830,8 @@ public abstract class MediaBrowserService extends Service {
          */
         public BrowserRoot(@NonNull String rootId, @Nullable Bundle extras) {
             if (rootId == null) {
-                throw new IllegalArgumentException("The root id in BrowserRoot cannot be null. " +
-                        "Use null for BrowserRoot instead.");
+                throw new IllegalArgumentException("The root id in BrowserRoot cannot be null. "
+                        + "Use null for BrowserRoot instead.");
             }
             mRootId = rootId;
             mExtras = extras;

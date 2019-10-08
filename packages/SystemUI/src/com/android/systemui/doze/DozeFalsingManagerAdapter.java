@@ -16,7 +16,7 @@
 
 package com.android.systemui.doze;
 
-import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.plugins.FalsingManager;
 
 /**
  * Notifies FalsingManager of whether or not AOD is showing.

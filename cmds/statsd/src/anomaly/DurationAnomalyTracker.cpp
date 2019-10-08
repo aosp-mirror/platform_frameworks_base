@@ -65,7 +65,9 @@ void DurationAnomalyTracker::stopAlarm(const MetricDimensionKey& dimensionKey,
 
     // If the alarm is set in the past but hasn't fired yet (due to lag), catch it now.
     if (itr->second != nullptr && timestampNs >= (int64_t)NS_PER_SEC * itr->second->timestampSec) {
-        declareAnomaly(timestampNs, dimensionKey);
+        declareAnomaly(timestampNs, mAlert.metric_id(), dimensionKey,
+                       mAlert.trigger_if_sum_gt() + (timestampNs / NS_PER_SEC) -
+                               itr->second->timestampSec);
     }
     if (mAlarmMonitor != nullptr) {
         mAlarmMonitor->remove(itr->second);
@@ -100,7 +102,9 @@ void DurationAnomalyTracker::informAlarmsFired(const int64_t& timestampNs,
 
     // Now declare each of these alarms to have fired.
     for (const auto& kv : matchedAlarms) {
-        declareAnomaly(timestampNs, kv.first);
+        declareAnomaly(
+                timestampNs, mAlert.metric_id(), kv.first,
+                mAlert.trigger_if_sum_gt() + (timestampNs / NS_PER_SEC) - kv.second->timestampSec);
         mAlarms.erase(kv.first);
         firedAlarms.erase(kv.second);  // No one else can also own it, so we're done with it.
     }

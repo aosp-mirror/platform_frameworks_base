@@ -189,7 +189,7 @@ public class IpConfiguration implements Parcelable {
     }
 
     /** Implement the Parcelable interface */
-    public static final Creator<IpConfiguration> CREATOR =
+    public static final @android.annotation.NonNull Creator<IpConfiguration> CREATOR =
         new Creator<IpConfiguration>() {
             public IpConfiguration createFromParcel(Parcel in) {
                 IpConfiguration config = new IpConfiguration();

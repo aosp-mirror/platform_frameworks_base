@@ -17,6 +17,8 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -84,7 +86,7 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<IpManagerEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<IpManagerEvent> CREATOR
         = new Parcelable.Creator<IpManagerEvent>() {
         public IpManagerEvent createFromParcel(Parcel in) {
             return new IpManagerEvent(in);
@@ -95,6 +97,7 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
         }
     };
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("IpManagerEvent(%s, %dms)",
@@ -102,7 +105,7 @@ public final class IpManagerEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null || !(obj.getClass().equals(IpManagerEvent.class))) return false;
         final IpManagerEvent other = (IpManagerEvent) obj;
         return eventType == other.eventType

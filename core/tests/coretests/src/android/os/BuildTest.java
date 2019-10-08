@@ -16,9 +16,8 @@
 
 package android.os;
 
-import android.os.Build;
-import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Log;
+import androidx.test.filters.SmallTest;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 

@@ -48,8 +48,11 @@ import java.io.File;
  *
  * <p class="note"><strong>Note:</strong> this class assumes
  * monotonically increasing version numbers for upgrades.</p>
+ *
+ * <p class="note"><strong>Note:</strong> the {@link AutoCloseable} interface was
+ * first added in the {@link android.os.Build.VERSION_CODES#Q} release.</p>
  */
-public abstract class SQLiteOpenHelper {
+public abstract class SQLiteOpenHelper implements AutoCloseable {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();
 
     private final Context mContext;
@@ -199,8 +202,9 @@ public abstract class SQLiteOpenHelper {
                 }
                 mOpenParamsBuilder.setWriteAheadLoggingEnabled(enabled);
             }
+
             // Compatibility WAL is disabled if an app disables or enables WAL
-            mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.DISABLE_COMPATIBILITY_WAL);
+            mOpenParamsBuilder.removeOpenFlags(SQLiteDatabase.ENABLE_LEGACY_COMPATIBILITY_WAL);
         }
     }
 
@@ -263,9 +267,22 @@ public abstract class SQLiteOpenHelper {
      * <p>This method should be called from the constructor of the subclass,
      * before opening the database
      *
+     * <p><b>DO NOT USE</b> this method.
+     * This feature has negative side effects that are very hard to foresee.
+     * See the javadoc of
+     * {@link SQLiteDatabase.OpenParams.Builder#setIdleConnectionTimeout(long)}
+     * for the details.
+     *
      * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE} value
      * to allow unlimited idle connections.
+     *
+     * @see SQLiteDatabase.OpenParams.Builder#setIdleConnectionTimeout(long)
+     *
+     * @deprecated DO NOT USE this method. See the javadoc of
+     * {@link SQLiteDatabase.OpenParams.Builder#setIdleConnectionTimeout(long)}
+     * for the details.
      */
+    @Deprecated
     public void setIdleConnectionTimeout(@IntRange(from = 0) final long idleConnectionTimeoutMs) {
         synchronized (this) {
             if (mDatabase != null && mDatabase.isOpen()) {

@@ -603,6 +603,7 @@ public class SubscriptionInfo implements Parcelable {
      * @return the card string of the SIM card which contains the subscription. The card string is
      * the ICCID for UICCs or the EID for eUICCs.
      * @hide
+     * //TODO rename usages in LPA: UiccSlotUtil.java, UiccSlotsManager.java, UiccSlotInfoTest.java
      */
     public String getCardString() {
         return this.mCardString;
@@ -633,7 +634,7 @@ public class SubscriptionInfo implements Parcelable {
         return mIsGroupDisabled;
     }
 
-    public static final Parcelable.Creator<SubscriptionInfo> CREATOR = new Parcelable.Creator<SubscriptionInfo>() {
+    public static final @android.annotation.NonNull Parcelable.Creator<SubscriptionInfo> CREATOR = new Parcelable.Creator<SubscriptionInfo>() {
         @Override
         public SubscriptionInfo createFromParcel(Parcel source) {
             int id = source.readInt();

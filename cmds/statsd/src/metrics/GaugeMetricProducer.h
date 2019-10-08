@@ -24,6 +24,7 @@
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
 #include "../matchers/matcher_util.h"
+#include "../matchers/EventMatcherWizard.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "../stats_util.h"
@@ -33,12 +34,11 @@ namespace os {
 namespace statsd {
 
 struct GaugeAtom {
-    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t elapsedTimeNs, int wallClockNs)
-        : mFields(fields), mElapsedTimestamps(elapsedTimeNs), mWallClockTimestampNs(wallClockNs) {
+    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t elapsedTimeNs)
+        : mFields(fields), mElapsedTimestamps(elapsedTimeNs) {
     }
     std::shared_ptr<vector<FieldValue>> mFields;
     int64_t mElapsedTimestamps;
-    int64_t mWallClockTimestampNs;
 };
 
 struct GaugeBucket {
@@ -57,27 +57,34 @@ typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>
 class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs);
+                        const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
+                        const int whatMatcherIndex,
+                        const sp<EventMatcherWizard>& matcherWizard,
+                        const int pullTagId, const int triggerAtomId, const int atomId,
+                        const int64_t timeBaseNs, const int64_t startTimeNs,
+                        const sp<StatsPullerManager>& pullerManager);
 
     virtual ~GaugeMetricProducer();
 
     // Handles when the pulled data arrives.
-    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
+    void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data,
+                      bool pullSuccess, int64_t originalPullTimeNs) override;
 
     // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
     void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
 
+        if (!mSplitBucketForAppUpgrade) {
+            return;
+        }
         if (eventTimeNs > getCurrentBucketEndTimeNs()) {
             // Flush full buckets on the normal path up to the latest bucket boundary.
             flushIfNeededLocked(eventTimeNs);
         }
-        flushCurrentBucketLocked(eventTimeNs);
-        mCurrentBucketStartTimeNs = eventTimeNs;
-        if (mPullTagId != -1) {
-            pullLocked(eventTimeNs);
+        flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
+        if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+            pullAndMatchEventsLocked(eventTimeNs);
         }
     };
 
@@ -90,19 +97,17 @@ protected:
 private:
     void onDumpReportLocked(const int64_t dumpTimeNs,
                             const bool include_current_partial_bucket,
+                            const bool erase_data,
+                            const DumpLatency dumpLatency,
                             std::set<string> *str_set,
                             android::util::ProtoOutputStream* protoOutput) override;
     void clearPastBucketsLocked(const int64_t dumpTimeNs) override;
 
-    // for testing
-    GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId,
-                        const int64_t timeBaseNs, const int64_t startTimeNs,
-                        std::shared_ptr<StatsPullerManager> statsPullerManager);
-
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
+
+    // Internal interface to handle active state change.
+    void onActiveStateChangedLocked(const int64_t& eventTimeNs) override;
 
     // Internal interface to handle sliced condition change.
     void onSlicedConditionMayChangeLocked(bool overallCondition, const int64_t eventTime) override;
@@ -117,18 +122,31 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const int64_t& eventTime) override;
 
-    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                  const int64_t& nextBucketStartTimeNs) override;
 
-    void pullLocked(const int64_t timestampNs);
+    void prepareFirstBucketLocked() override;
 
-    int mTagId;
+    void pullAndMatchEventsLocked(const int64_t timestampNs);
 
-    std::shared_ptr<StatsPullerManager> mStatsPullerManager;
+    const int mWhatMatcherIndex;
+
+    sp<EventMatcherWizard> mEventMatcherWizard;
+
+    sp<StatsPullerManager> mPullerManager;
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
+    // tagId for atoms that trigger the pulling, if any
+    const int mTriggerAtomId;
+
+    // tagId for output atom
+    const int mAtomId;
+
+    // if this is pulled metric
+    const bool mIsPulled;
+
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
     // The current partial bucket.
@@ -152,6 +170,8 @@ private:
 
     GaugeMetric::SamplingType mSamplingType;
 
+    const int64_t mMaxPullDelayNs;
+
     // apply a whitelist on the original input
     std::shared_ptr<vector<FieldValue>> getGaugeFields(const LogEvent& event);
 
@@ -166,12 +186,18 @@ private:
 
     const size_t mGaugeAtomsPerDimensionLimit;
 
-    FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
-    FRIEND_TEST(GaugeMetricProducerTest, TestWithSlicedCondition);
-    FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
+    const bool mSplitBucketForAppUpgrade;
+
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);
-    FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithAppUpgradeDisabled);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection);
+    FRIEND_TEST(GaugeMetricProducerTest, TestFirstBucket);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPullOnTrigger);
+    FRIEND_TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput);
 };
 
 }  // namespace statsd

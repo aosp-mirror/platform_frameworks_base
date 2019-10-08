@@ -18,7 +18,6 @@ package com.android.systemui.pip.phone;
 
 import android.graphics.PointF;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -85,7 +84,7 @@ public class PipTouchState {
      * Processes a given touch event and updates the state.
      */
     public void onTouchEvent(MotionEvent ev) {
-        switch (ev.getAction()) {
+        switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 if (!mAllowTouches) {
                     return;
@@ -93,12 +92,13 @@ public class PipTouchState {
 
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
+                addMovement(ev);
 
                 mActivePointerId = ev.getPointerId(0);
                 if (DEBUG) {
                     Log.e(TAG, "Setting active pointer id on DOWN: " + mActivePointerId);
                 }
-                mLastTouch.set(ev.getX(), ev.getY());
+                mLastTouch.set(ev.getRawX(), ev.getRawY());
                 mDownTouch.set(mLastTouch);
                 mAllowDraggingOffscreen = true;
                 mIsUserInteracting = true;
@@ -119,15 +119,15 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                mVelocityTracker.addMovement(ev);
+                addMovement(ev);
                 int pointerIndex = ev.findPointerIndex(mActivePointerId);
                 if (pointerIndex == -1) {
                     Log.e(TAG, "Invalid active pointer id on MOVE: " + mActivePointerId);
                     break;
                 }
 
-                float x = ev.getX(pointerIndex);
-                float y = ev.getY(pointerIndex);
+                float x = ev.getRawX(pointerIndex);
+                float y = ev.getRawY(pointerIndex);
                 mLastDelta.set(x - mLastTouch.x, y - mLastTouch.y);
                 mDownDelta.set(x - mDownTouch.x, y - mDownTouch.y);
 
@@ -150,7 +150,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                mVelocityTracker.addMovement(ev);
+                addMovement(ev);
 
                 int pointerIndex = ev.getActionIndex();
                 int pointerId = ev.getPointerId(pointerIndex);
@@ -162,7 +162,7 @@ public class PipTouchState {
                         Log.e(TAG, "Relinquish active pointer id on POINTER_UP: " +
                                 mActivePointerId);
                     }
-                    mLastTouch.set(ev.getX(newPointerIndex), ev.getY(newPointerIndex));
+                    mLastTouch.set(ev.getRawX(newPointerIndex), ev.getRawY(newPointerIndex));
                 }
                 break;
             }
@@ -173,7 +173,7 @@ public class PipTouchState {
                 }
 
                 // Update the velocity tracker
-                mVelocityTracker.addMovement(ev);
+                addMovement(ev);
                 mVelocityTracker.computeCurrentVelocity(1000,
                         mViewConfig.getScaledMaximumFlingVelocity());
                 mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
@@ -185,7 +185,7 @@ public class PipTouchState {
                 }
 
                 mUpTouchTime = ev.getEventTime();
-                mLastTouch.set(ev.getX(pointerIndex), ev.getY(pointerIndex));
+                mLastTouch.set(ev.getRawX(pointerIndex), ev.getRawY(pointerIndex));
                 mPreviouslyDragging = mIsDragging;
                 mIsWaitingForDoubleTap = !mIsDoubleTap && !mIsDragging &&
                         (mUpTouchTime - mDownTouchTime) < DOUBLE_TAP_TIMEOUT;
@@ -330,6 +330,16 @@ public class PipTouchState {
             mVelocityTracker.recycle();
             mVelocityTracker = null;
         }
+    }
+
+    private void addMovement(MotionEvent event) {
+        // Add movement to velocity tracker using raw screen X and Y coordinates instead
+        // of window coordinates because the window frame may be moving at the same time.
+        float deltaX = event.getRawX() - event.getX();
+        float deltaY = event.getRawY() - event.getY();
+        event.offsetLocation(deltaX, deltaY);
+        mVelocityTracker.addMovement(event);
+        event.offsetLocation(-deltaX, -deltaY);
     }
 
     public void dump(PrintWriter pw, String prefix) {

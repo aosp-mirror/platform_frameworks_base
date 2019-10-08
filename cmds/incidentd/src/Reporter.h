@@ -15,103 +15,258 @@
  */
 #pragma once
 
-#ifndef REPORTER_H
-#define REPORTER_H
+#include "FdBuffer.h"
+#include "WorkDirectory.h"
 
+#include "frameworks/base/core/proto/android/os/metadata.pb.h"
+#include <android/content/ComponentName.h>
 #include <android/os/IIncidentReportStatusListener.h>
 #include <android/os/IncidentReportArgs.h>
+#include <android/util/protobuf.h>
 
 #include <map>
 #include <string>
 #include <vector>
 
 #include <time.h>
-
-#include "Throttler.h"
-#include "frameworks/base/libs/incident/proto/android/os/metadata.pb.h"
+#include <stdarg.h>
 
 namespace android {
 namespace os {
 namespace incidentd {
 
+using namespace std;
+using namespace android::content;
+using namespace android::os;
+
+class Section;
+
 // ================================================================================
-struct ReportRequest : public virtual RefBase {
+class ReportRequest : public virtual RefBase {
+public:
     IncidentReportArgs args;
-    sp<IIncidentReportStatusListener> listener;
-    int fd;
-    status_t err;
 
     ReportRequest(const IncidentReportArgs& args, const sp<IIncidentReportStatusListener>& listener,
                   int fd);
     virtual ~ReportRequest();
 
+    bool isStreaming() { return mIsStreaming; }
+
+    void setStatus(status_t err) { mStatus = err; }
+    status_t getStatus() const { return mStatus; }
+
     bool ok();  // returns true if the request is ok for write.
+
+    bool containsSection(int sectionId) const;
+
+    sp<IIncidentReportStatusListener> getListener() { return mListener; }
+
+    int getFd() { return mFd; }
+
+    int setPersistedFd(int fd);
+
+    void closeFd();
+
+private:
+    sp<IIncidentReportStatusListener> mListener;
+    int mFd;
+    bool mIsStreaming;
+    status_t mStatus;
 };
 
 // ================================================================================
-class ReportRequestSet {
+class ReportBatch : public virtual RefBase {
 public:
-    ReportRequestSet();
-    ~ReportRequestSet();
+    ReportBatch();
+    virtual ~ReportBatch();
 
-    void add(const sp<ReportRequest>& request);
-    void setMainFd(int fd);
-    void setMainDest(int dest);
+    // TODO: Should there be some kind of listener associated with the
+    // component? Could be good for getting status updates e.g. in the ui,
+    // as it progresses.  But that's out of scope for now.
 
-    typedef vector<sp<ReportRequest>>::iterator iterator;
+    /**
+     * Schedule a report for the "main" report, where it will be delivered to
+     * the uploaders and/or dropbox.
+     */
+    void addPersistedReport(const IncidentReportArgs& args);
 
-    iterator begin() { return mRequests.begin(); }
-    iterator end() { return mRequests.end(); }
+    /**
+     * Adds a ReportRequest to the queue for one that has a listener an and fd
+     */
+    void addStreamingReport(const IncidentReportArgs& args,
+           const sp<IIncidentReportStatusListener>& listener, int streamFd);
 
-    int mainFd() { return mMainFd; }
-    int mainDest() { return mMainDest; }
-    IncidentMetadata& metadata() { return mMetadata; }
-    map<int, IncidentMetadata::SectionStats>& allSectionStats() { return mSectionStats; }
+    /**
+     * Returns whether both queues are empty.
+     */
+    bool empty() const;
 
+    /**
+     * Returns whether there are any persisted records.
+     */
+    bool hasPersistedReports() const { return mPersistedRequests.size() > 0; }
+
+    /**
+     * Return the persisted request for the given component, or nullptr.
+     */
+    sp<ReportRequest> getPersistedRequest(const ComponentName& component);
+
+    /**
+     * Call func(request) for each Request.
+     */
+    void forEachPersistedRequest(const function<void (const sp<ReportRequest>&)>& func);
+
+    /**
+     * Call func(request) for each Request.
+     */
+    void forEachStreamingRequest(const function<void (const sp<ReportRequest>&)>& func);
+
+    /**
+     * Call func(request) for each file descriptor that has 
+     */
+    void forEachFd(int sectionId, const function<void (const sp<ReportRequest>&)>& func);
+
+    /**
+     * Call func(listener) for every listener in this batch.
+     */
+    void forEachListener(const function<void (const sp<IIncidentReportStatusListener>&)>& func);
+
+    /**
+     * Call func(listener) for every listener in this batch that requests
+     * sectionId.
+     */
+    void forEachListener(int sectionId,
+            const function<void (const sp<IIncidentReportStatusListener>&)>& func);
+    /**
+     * Get an IncidentReportArgs that represents the combined args for the
+     * persisted requests.
+     */
+    void getCombinedPersistedArgs(IncidentReportArgs* results);
+
+    /**
+     * Return whether any of the requests contain the section.
+     */
     bool containsSection(int id);
-    IncidentMetadata::SectionStats* sectionStats(int id);
+
+    /**
+     * Remove all of the broadcast (persisted) requests.
+     */
+    void clearPersistedRequests();
+
+    /**
+     * Move the streaming requests in this batch to that batch.  After this call there
+     * will be no streaming requests in this batch.
+     */
+    void transferStreamingRequests(const sp<ReportBatch>& that);
+
+    /**
+     * Move the persisted requests in this batch to that batch.  After this call there
+     * will be no streaming requests in this batch.
+     */
+    void transferPersistedRequests(const sp<ReportBatch>& that);
+
+    /**
+     * Get the requests that have encountered errors.
+     */
+    void getFailedRequests(vector<sp<ReportRequest>>* requests);
+
+    /**
+     * Remove the request from whichever list it's in.
+     */
+    void removeRequest(const sp<ReportRequest>& request);
+
 
 private:
-    vector<sp<ReportRequest>> mRequests;
-    IncidentReportArgs mSections;
-    int mMainFd;
-    int mMainDest;
+    map<ComponentName, sp<ReportRequest>> mPersistedRequests;
+    vector<sp<ReportRequest>> mStreamingRequests;
+};
 
-    IncidentMetadata mMetadata;
-    map<int, IncidentMetadata::SectionStats> mSectionStats;
+// ================================================================================
+class ReportWriter {
+public:
+    ReportWriter(const sp<ReportBatch>& batch);
+    ~ReportWriter();
+
+    void setPersistedFile(sp<ReportFile> file);
+    void setMaxPersistedPrivacyPolicy(uint8_t privacyPolicy);
+
+    void startSection(int sectionId);
+    void endSection(IncidentMetadata::SectionStats* sectionStats);
+
+    void setSectionStats(const FdBuffer& buffer);
+
+    void warning(const Section* section, status_t err, const char* format, ...);
+    void error(const Section* section, status_t err, const char* format, ...);
+
+    status_t writeSection(const FdBuffer& buffer);
+
+private:
+    // Data about all requests
+    sp<ReportBatch> mBatch;
+
+    /**
+     * The file on disk where we will store the persisted file.
+     */
+    sp<ReportFile> mPersistedFile;
+
+    /**
+     * The least restricted privacy policy of all of the perstited
+     * requests. We pre-filter to that to save disk space.
+     */
+    uint8_t mMaxPersistedPrivacyPolicy;
+
+    /**
+     * The current section that is being written.
+     */
+    int mCurrentSectionId;
+
+    /**
+     * The time that that the current section was started.
+     */
+    int64_t mSectionStartTimeMs;
+
+    /**
+     * The last section that setSectionStats was called for, so if someone misses
+     * it we can log that.
+     */
+    int mSectionStatsCalledForSectionId;
+
+    /*
+     * Fields for IncidentMetadata.SectionStats.  Set by setSectionStats.  Accessed by
+     * getSectionStats.
+     */
+    int32_t mDumpSizeBytes;
+    int64_t mDumpDurationMs;
+    bool mSectionTimedOut;
+    bool mSectionTruncated;
+    bool mSectionBufferSuccess;
+    bool mHadError;
+    string mSectionErrors;
+    size_t mMaxSectionDataFilteredSize;
+
+    void vflog(const Section* section, status_t err, int level, const char* levelText,
+        const char* format, va_list args);
 };
 
 // ================================================================================
 class Reporter : public virtual RefBase {
 public:
-    enum run_report_status_t { REPORT_FINISHED = 0, REPORT_NEEDS_DROPBOX = 1 };
+    Reporter(const sp<WorkDirectory>& workDirectory, const sp<ReportBatch>& batch);
 
-    ReportRequestSet batch;
-
-    Reporter();                       // PROD must use this constructor.
-    explicit Reporter(const char* directory);  // For testing purpose only.
     virtual ~Reporter();
 
     // Run the report as described in the batch and args parameters.
-    run_report_status_t runReport(size_t* reportByteSize);
-
-    static run_report_status_t upload_backlog();
+    void runReport(size_t* reportByteSize);
 
 private:
-    String8 mIncidentDirectory;
+    sp<WorkDirectory> mWorkDirectory;
+    ReportWriter mWriter;
+    sp<ReportBatch> mBatch;
+    sp<ReportFile> mPersistedFile;
 
-    string mFilename;
-    off_t mMaxSize;
-    size_t mMaxCount;
-    time_t mStartTime;
-
-    status_t create_file(int* fd);
-
-    bool isTest = true;  // default to true for testing
+    void cancel_and_remove_failed_requests();
 };
 
 }  // namespace incidentd
 }  // namespace os
 }  // namespace android
-
-#endif  // REPORTER_H

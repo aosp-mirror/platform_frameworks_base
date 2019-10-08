@@ -18,7 +18,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import android.app.Fragment;
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.LayoutInflaterBuilder;
@@ -32,11 +35,20 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.CarrierText;
 import com.android.systemui.Dependency;
+import com.android.systemui.DumpController;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiBaseFragmentTest;
+import com.android.systemui.qs.tileimpl.QSFactoryImpl;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -44,18 +56,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @SmallTest
-@Ignore("failing")
+@Ignore
 public class QSFragmentTest extends SysuiBaseFragmentTest {
 
     private MetricsLogger mMockMetricsLogger;
 
     public QSFragmentTest() {
         super(QSFragment.class);
+        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Before
+    @Ignore("failing")
     public void addLeakCheckDependencies() {
         mMockMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mContext.addMockSystemService(Context.LAYOUT_INFLATER_SERVICE,
@@ -70,16 +84,19 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         mDependency.injectTestDependency(Dependency.BG_LOOPER,
                 TestableLooper.get(this).getLooper());
         mDependency.injectMockDependency(UserSwitcherController.class);
-        injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
     }
 
     @Test
+    @Ignore("failing")
     public void testListening() {
         assertEquals(Looper.myLooper(), Looper.getMainLooper());
         QSFragment qs = (QSFragment) mFragment;
         mFragments.dispatchResume();
         processAllMessages();
-        QSTileHost host = new QSTileHost(mContext, null, mock(StatusBarIconController.class));
+        QSTileHost host = new QSTileHost(mContext, mock(StatusBarIconController.class),
+                mock(QSFactoryImpl.class), new Handler(), Looper.myLooper(),
+                mock(PluginManager.class), mock(TunerService.class),
+                () -> mock(AutoTileManager.class), mock(DumpController.class));
         qs.setHost(host);
 
         qs.setListening(true);
@@ -97,6 +114,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @Ignore("failing")
     public void testSaveState() {
         QSFragment qs = (QSFragment) mFragment;
 
@@ -113,5 +131,14 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         qs = (QSFragment) mFragment;
         assertTrue(qs.isListening());
         assertTrue(qs.isExpanded());
+    }
+
+    @Override
+    protected Fragment instantiate(Context context, String className, Bundle arguments) {
+        return new QSFragment(
+                new RemoteInputQuickSettingsDisabler(context, mock(ConfigurationController.class)),
+                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
+                context,
+                mock(QSTileHost.class));
     }
 }

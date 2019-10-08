@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:paddingEnd="12dp"
             android:paddingBottom="4dp"
-            android:textColor="@color/ksh_keyword_color"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="16sp"
             android:maxLines="5"
             android:singleLine="false"

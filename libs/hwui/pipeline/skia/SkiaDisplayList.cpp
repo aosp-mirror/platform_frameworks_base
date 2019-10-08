@@ -22,20 +22,21 @@
 #include "renderthread/CanvasContext.h"
 
 #include <SkImagePriv.h>
+#include <SkPathOps.h>
 
 namespace android {
 namespace uirenderer {
 namespace skiapipeline {
 
-void SkiaDisplayList::syncContents() {
+void SkiaDisplayList::syncContents(const WebViewSyncData& data) {
     for (auto& functor : mChildFunctors) {
-        functor.syncFunctor();
+        functor->syncFunctor(data);
     }
     for (auto& animatedImage : mAnimatedImages) {
         animatedImage->syncProperties();
     }
     for (auto& vectorDrawable : mVectorDrawables) {
-        vectorDrawable->syncProperties();
+        vectorDrawable.first->syncProperties();
     }
 }
 
@@ -49,6 +50,29 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
     for (auto& child : mChildNodes) {
         updateFn(child.getRenderNode());
     }
+}
+
+static bool intersects(const SkISize screenSize, const Matrix4& mat, const SkRect& bounds) {
+    Vector3 points[] = { Vector3 {bounds.fLeft, bounds.fTop, 0},
+                         Vector3 {bounds.fRight, bounds.fTop, 0},
+                         Vector3 {bounds.fRight, bounds.fBottom, 0},
+                         Vector3 {bounds.fLeft, bounds.fBottom, 0}};
+    float minX, minY, maxX, maxY;
+    bool first = true;
+    for (auto& point : points) {
+        mat.mapPoint3d(point);
+        if (first) {
+            minX = maxX = point.x;
+            minY = maxY = point.y;
+            first = false;
+        } else {
+            minX = std::min(minX, point.x);
+            minY = std::min(minY, point.y);
+            maxX = std::max(maxX, point.x);
+            maxY = std::max(maxY, point.y);
+        }
+    }
+    return SkRect::Make(screenSize).intersects(SkRect::MakeLTRB(minX, minY, maxX, maxY));
 }
 
 bool SkiaDisplayList::prepareListAndChildren(
@@ -73,7 +97,6 @@ bool SkiaDisplayList::prepareListAndChildren(
         RenderNode* childNode = child.getRenderNode();
         Matrix4 mat4(child.getRecordedMatrix());
         info.damageAccumulator->pushTransform(&mat4);
-        // TODO: a layer is needed if the canvas is rotated or has a non-rect clip
         info.hasBackwardProjectedNodes = false;
         childFn(childNode, observer, info, functorsNeedLayer);
         hasBackwardProjectedNodesSubtree |= info.hasBackwardProjectedNodes;
@@ -108,15 +131,23 @@ bool SkiaDisplayList::prepareListAndChildren(
         }
     }
 
-    for (auto& vectorDrawable : mVectorDrawables) {
+    for (auto& vectorDrawablePair : mVectorDrawables) {
         // If any vector drawable in the display list needs update, damage the node.
+        auto& vectorDrawable = vectorDrawablePair.first;
         if (vectorDrawable->isDirty()) {
-            isDirty = true;
-            static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
-                    ->getVectorDrawables()
-                    ->push_back(vectorDrawable);
+            Matrix4 totalMatrix;
+            info.damageAccumulator->computeCurrentTransform(&totalMatrix);
+            Matrix4 canvasMatrix(vectorDrawablePair.second);
+            totalMatrix.multiply(canvasMatrix);
+            const SkRect& bounds = vectorDrawable->properties().getBounds();
+            if (intersects(info.screenSize, totalMatrix, bounds)) {
+                isDirty = true;
+                static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
+                        ->getVectorDrawables()
+                        ->push_back(vectorDrawable);
+                vectorDrawable->setPropertyChangeWillBeConsumed(true);
+            }
         }
-        vectorDrawable->setPropertyChangeWillBeConsumed(true);
     }
     return isDirty;
 }
@@ -132,7 +163,6 @@ void SkiaDisplayList::reset() {
     mChildFunctors.clear();
     mChildNodes.clear();
 
-    projectionReceiveIndex = -1;
     allocator.~LinearAllocator();
     new (&allocator) LinearAllocator();
 }
@@ -142,6 +172,6 @@ void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
     mDisplayList.draw(&canvas);
 }
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

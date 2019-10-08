@@ -17,12 +17,14 @@
 package com.android.settingslib;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -34,8 +36,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.view.MenuItem;
-
-import com.android.internal.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,8 +83,6 @@ public class HelpUtilsTest {
         when(mContext.getResources().getString(R.string.config_feedbackIntentNameKey))
                 .thenReturn(FEEDBACK_INTENT_NAME_KEY);
         when(mActivity.getPackageManager()).thenReturn(mPackageManager);
-
-
     }
 
     @Test

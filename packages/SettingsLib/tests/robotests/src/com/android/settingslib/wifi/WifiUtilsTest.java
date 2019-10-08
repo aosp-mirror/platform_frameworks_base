@@ -16,6 +16,7 @@
 package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
@@ -36,19 +37,19 @@ import android.text.format.DateUtils;
 import android.util.ArraySet;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 import java.util.Set;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class WifiUtilsTest {
     private static final String TEST_SSID = "\"test_ssid\"";
     private static final String TEST_BSSID = "00:00:00:00:00:00";
@@ -78,7 +79,7 @@ public class WifiUtilsTest {
         Bundle bundle = new Bundle();
         ArrayList<ScanResult> scanResults = buildScanResultCache();
         bundle.putParcelableArray(AccessPoint.KEY_SCANRESULTS,
-                                  scanResults.toArray(new Parcelable[scanResults.size()]));
+                                  scanResults.toArray(new Parcelable[0]));
         AccessPoint ap = new AccessPoint(mContext, bundle);
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))

@@ -36,7 +36,7 @@ public class NotifyingAppTest extends UiServiceTestCase {
     @Test
     public void testConstructor() {
         NotifyingApp na = new NotifyingApp();
-        assertEquals(0, na.getUid());
+        assertEquals(0, na.getUserId());
         assertEquals(0, na.getLastNotified());
         assertEquals(null, na.getPackage());
     }
@@ -49,10 +49,10 @@ public class NotifyingAppTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUid() {
+    public void testUserId() {
         NotifyingApp na = new NotifyingApp();
-        na.setUid(90);
-        assertEquals(90, na.getUid());
+        na.setUserId(90);
+        assertEquals(90, na.getUserId());
     }
 
     @Test
@@ -66,7 +66,7 @@ public class NotifyingAppTest extends UiServiceTestCase {
     public void testWriteToParcel() {
         NotifyingApp na = new NotifyingApp();
         na.setPackage("package");
-        na.setUid(200);
+        na.setUserId(200);
         na.setLastNotified(4000);
 
         Parcel parcel = Parcel.obtain();
@@ -75,19 +75,19 @@ public class NotifyingAppTest extends UiServiceTestCase {
         NotifyingApp na1 = NotifyingApp.CREATOR.createFromParcel(parcel);
         assertEquals(na.getLastNotified(), na1.getLastNotified());
         assertEquals(na.getPackage(), na1.getPackage());
-        assertEquals(na.getUid(), na1.getUid());
+        assertEquals(na.getUserId(), na1.getUserId());
     }
 
     @Test
     public void testCompareTo() {
         NotifyingApp na1 = new NotifyingApp();
         na1.setPackage("pkg1");
-        na1.setUid(1000);
+        na1.setUserId(1000);
         na1.setLastNotified(6);
 
         NotifyingApp na2 = new NotifyingApp();
         na2.setPackage("a");
-        na2.setUid(999);
+        na2.setUserId(999);
         na2.setLastNotified(1);
 
         assertTrue(na1.compareTo(na2) < 0);

@@ -18,10 +18,11 @@ package android.app.backup;
 
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
-import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import androidx.test.filters.LargeTest;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

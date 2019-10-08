@@ -64,10 +64,6 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.ListItem" parent="TextAppearance.Material.Body1" />
     <style name="TextAppearance.Material.ListItemSecondary" parent="TextAppearance.Material.Caption" />
 
-    <style name="Widget.Material.TextView" parent="Widget.TextView">
-        <item name="breakStrategy">balanced</item>
-    </style>
-
     <style name="TextAppearance.Material.NumberPicker" parent="TextAppearance.Material.Body1">
         <item name="textSize">@dimen/text_size_medium_material</item>
     </style>

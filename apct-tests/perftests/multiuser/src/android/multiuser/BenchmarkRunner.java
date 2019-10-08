@@ -17,10 +17,8 @@ package android.multiuser;
 
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.UiDevice;
+import android.perftests.utils.ShellHelper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 // Based on //platform/frameworks/base/apct-tests/perftests/utils/BenchmarkState.java
@@ -74,12 +72,7 @@ public class BenchmarkRunner {
 
     private void prepareForNextRun() {
         SystemClock.sleep(COOL_OFF_PERIOD_MS);
-        try {
-            UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-                    .executeShellCommand("am wait-for-broadcast-idle");
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot execute shell command", e);
-        }
+        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
         mStartTimeNs = System.nanoTime();
         mPausedDurationNs = 0;
     }

@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pools;
@@ -57,6 +58,7 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
     private int mActualWidth;
     private int mActualHeight;
     private boolean mIsIsolated;
+    private ImageResolver mImageResolver;
 
     public MessagingImageMessage(@NonNull Context context) {
         this(context, null);
@@ -96,9 +98,14 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
         MessagingMessage.super.setMessage(message);
         Drawable drawable;
         try {
-            drawable = LocalImageResolver.resolveImage(message.getDataUri(), getContext());
+            Uri uri = message.getDataUri();
+            drawable = mImageResolver != null ? mImageResolver.loadImage(uri) :
+                    LocalImageResolver.resolveImage(uri, getContext());
         } catch (IOException | SecurityException e) {
             e.printStackTrace();
+            return false;
+        }
+        if (drawable == null) {
             return false;
         }
         int intrinsicHeight = drawable.getIntrinsicHeight();
@@ -114,7 +121,7 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
     }
 
     static MessagingMessage createMessage(MessagingLayout layout,
-            Notification.MessagingStyle.Message m) {
+            Notification.MessagingStyle.Message m, ImageResolver resolver) {
         MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
         MessagingImageMessage createdMessage = sInstancePool.acquire();
         if (createdMessage == null) {
@@ -125,12 +132,17 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
                             false);
             createdMessage.addOnLayoutChangeListener(MessagingLayout.MESSAGING_PROPERTY_ANIMATOR);
         }
+        createdMessage.setImageResolver(resolver);
         boolean created = createdMessage.setMessage(m);
         if (!created) {
             createdMessage.recycle();
             return MessagingTextMessage.createMessage(layout, m);
         }
         return createdMessage;
+    }
+
+    private void setImageResolver(ImageResolver resolver) {
+        mImageResolver = resolver;
     }
 
     @Override

@@ -19,7 +19,6 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_PACKAGE_NAME := OverlayDeviceTests_AppOverlayOne
 LOCAL_SDK_VERSION := current
 LOCAL_COMPATIBILITY_SUITE := device-tests
-LOCAL_CERTIFICATE := platform
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_FLAGS := --no-resource-removal
 include $(BUILD_PACKAGE)

@@ -146,7 +146,7 @@ public final class ConfigurationStats implements Parcelable {
         dest.writeInt(mActivationCount);
     }
 
-    public static final Creator<ConfigurationStats> CREATOR = new Creator<ConfigurationStats>() {
+    public static final @android.annotation.NonNull Creator<ConfigurationStats> CREATOR = new Creator<ConfigurationStats>() {
         @Override
         public ConfigurationStats createFromParcel(Parcel source) {
             ConfigurationStats stats = new ConfigurationStats();

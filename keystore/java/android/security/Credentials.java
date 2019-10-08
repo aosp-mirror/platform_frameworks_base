@@ -16,16 +16,11 @@
 
 package android.security;
 
-import android.annotation.UnsupportedAppUsage;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-
 import com.android.org.bouncycastle.util.io.pem.PemObject;
 import com.android.org.bouncycastle.util.io.pem.PemReader;
 import com.android.org.bouncycastle.util.io.pem.PemWriter;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,7 +29,6 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
@@ -52,8 +46,6 @@ public class Credentials {
     public static final String INSTALL_ACTION = "android.credentials.INSTALL";
 
     public static final String INSTALL_AS_USER_ACTION = "android.credentials.INSTALL_AS_USER";
-
-    public static final String UNLOCK_ACTION = "com.android.credentials.UNLOCK";
 
     /** Key prefix for CA certificates. */
     public static final String CA_CERTIFICATE = "CACERT_";
@@ -169,58 +161,6 @@ public class Credentials {
             return result;
         } finally {
             pr.close();
-        }
-    }
-
-    private static Credentials singleton;
-
-    @UnsupportedAppUsage
-    public static Credentials getInstance() {
-        if (singleton == null) {
-            singleton = new Credentials();
-        }
-        return singleton;
-    }
-
-    @UnsupportedAppUsage
-    public void unlock(Context context) {
-        try {
-            Intent intent = new Intent(UNLOCK_ACTION);
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(LOGTAG, e.toString());
-        }
-    }
-
-    public void install(Context context) {
-        try {
-            Intent intent = KeyChain.createInstallIntent();
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(LOGTAG, e.toString());
-        }
-    }
-
-    @UnsupportedAppUsage
-    public void install(Context context, KeyPair pair) {
-        try {
-            Intent intent = KeyChain.createInstallIntent();
-            intent.putExtra(EXTRA_PRIVATE_KEY, pair.getPrivate().getEncoded());
-            intent.putExtra(EXTRA_PUBLIC_KEY, pair.getPublic().getEncoded());
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(LOGTAG, e.toString());
-        }
-    }
-
-    @UnsupportedAppUsage
-    public void install(Context context, String type, byte[] value) {
-        try {
-            Intent intent = KeyChain.createInstallIntent();
-            intent.putExtra(type, value);
-            context.startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            Log.w(LOGTAG, e.toString());
         }
     }
 

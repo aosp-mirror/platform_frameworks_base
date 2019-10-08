@@ -188,7 +188,13 @@ public class TransitionManager {
 
         final ViewGroup sceneRoot = scene.getSceneRoot();
         if (!sPendingTransitions.contains(sceneRoot)) {
+            Scene oldScene = Scene.getCurrentScene(sceneRoot);
             if (transition == null) {
+                // Notify old scene that it is being exited
+                if (oldScene != null) {
+                    oldScene.exit();
+                }
+
                 scene.enter();
             } else {
                 sPendingTransitions.add(sceneRoot);
@@ -196,7 +202,6 @@ public class TransitionManager {
                 Transition transitionClone = transition.clone();
                 transitionClone.setSceneRoot(sceneRoot);
 
-                Scene oldScene = Scene.getCurrentScene(sceneRoot);
                 if (oldScene != null && oldScene.isCreatedFromLayoutResource()) {
                     transitionClone.setCanRemoveViews(true);
                 }
@@ -214,14 +219,16 @@ public class TransitionManager {
     private static ArrayMap<ViewGroup, ArrayList<Transition>> getRunningTransitions() {
         WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>> runningTransitions =
                 sRunningTransitions.get();
-        if (runningTransitions == null || runningTransitions.get() == null) {
-            ArrayMap<ViewGroup, ArrayList<Transition>> transitions =
-                    new ArrayMap<ViewGroup, ArrayList<Transition>>();
-            runningTransitions = new WeakReference<ArrayMap<ViewGroup, ArrayList<Transition>>>(
-                    transitions);
-            sRunningTransitions.set(runningTransitions);
+        if (runningTransitions != null) {
+            ArrayMap<ViewGroup, ArrayList<Transition>> transitions = runningTransitions.get();
+            if (transitions != null) {
+                return transitions;
+            }
         }
-        return runningTransitions.get();
+        ArrayMap<ViewGroup, ArrayList<Transition>> transitions = new ArrayMap<>();
+        runningTransitions = new WeakReference<>(transitions);
+        sRunningTransitions.set(runningTransitions);
+        return transitions;
     }
 
     private static void sceneChangeRunTransition(final ViewGroup sceneRoot,
@@ -308,6 +315,7 @@ public class TransitionManager {
                     ArrayList<Transition> currentTransitions =
                             runningTransitions.get(mSceneRoot);
                     currentTransitions.remove(transition);
+                    transition.removeListener(this);
                 }
             });
             mTransition.captureValues(mSceneRoot, false);

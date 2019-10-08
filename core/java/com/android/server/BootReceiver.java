@@ -307,6 +307,9 @@ public class BootReceiver extends BroadcastReceiver {
         if (tag.equals(TAG_TOMBSTONE) && fileContents.contains(">>> system_server <<<")) {
             addTextToDropBox(db, "system_server_native_crash", text, filename, maxSize);
         }
+        if (tag.equals(TAG_TOMBSTONE)) {
+            StatsLog.write(StatsLog.TOMB_STONE_OCCURRED);
+        }
         addTextToDropBox(db, tag, text, filename, maxSize);
     }
 

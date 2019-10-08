@@ -103,7 +103,7 @@ public class GpsMeasurementsEvent implements Parcelable {
         return mReadOnlyMeasurements;
     }
 
-    public static final Creator<GpsMeasurementsEvent> CREATOR =
+    public static final @android.annotation.NonNull Creator<GpsMeasurementsEvent> CREATOR =
             new Creator<GpsMeasurementsEvent>() {
         @Override
         public GpsMeasurementsEvent createFromParcel(Parcel in) {
@@ -140,6 +140,7 @@ public class GpsMeasurementsEvent implements Parcelable {
         parcel.writeTypedArray(measurementsArray, flags);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("[ GpsMeasurementsEvent:\n\n");

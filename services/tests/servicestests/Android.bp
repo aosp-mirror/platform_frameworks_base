@@ -27,8 +27,8 @@ android_test {
         "services.net",
         "services.usage",
         "guava",
+        "androidx.test.runner",
         "androidx.test.rules",
-        "hamcrest-library",
         "mockito-target-minus-junit4",
         "platform-test-annotations",
         "ShortcutManagerTestUtils",
@@ -37,6 +37,7 @@ android_test {
         "testng",
         "ub-uiautomator",
         "platformprotosnano",
+        "hamcrest-library",
         "servicestests-utils",
         "xml-writer-device-lib",
     ],
@@ -47,6 +48,7 @@ android_test {
 
     libs: [
         "android.hidl.manager-V1.0-java",
+        "android.hardware.tv.cec-V1.0-java",
         "android.test.mock",
         "android.test.base",
         "android.test.runner",
@@ -68,6 +70,7 @@ android_test {
         "liblog",
         "liblzma",
         "libnativehelper",
+        "libpsi",
         "libui",
         "libunwindstack",
         "libutils",
@@ -89,7 +92,7 @@ java_library {
         "utils/**/*.java",
     ],
     static_libs: [
-        "androidx.test.rules",
+        "junit",
         "mockito-target-minus-junit4",
     ],
     libs: [

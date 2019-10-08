@@ -33,7 +33,7 @@ using android::util::ProtoOutputStream;
 #ifdef __ANDROID__
 
 TEST(StatsServiceTest, TestAddConfig_simple) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     StatsdConfig config;
     config.set_id(12345);
     string serialized = config.SerializeAsString();
@@ -43,7 +43,7 @@ TEST(StatsServiceTest, TestAddConfig_simple) {
 }
 
 TEST(StatsServiceTest, TestAddConfig_empty) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     string serialized = "";
 
     EXPECT_TRUE(
@@ -51,11 +51,50 @@ TEST(StatsServiceTest, TestAddConfig_empty) {
 }
 
 TEST(StatsServiceTest, TestAddConfig_invalid) {
-    StatsService service(nullptr);
+    StatsService service(nullptr, nullptr);
     string serialized = "Invalid config!";
 
     EXPECT_FALSE(
             service.addConfigurationChecked(123, 12345, {serialized.begin(), serialized.end()}));
+}
+
+TEST(StatsServiceTest, TestGetUidFromArgs) {
+    Vector<String8> args;
+    args.push(String8("-1"));
+    args.push(String8("0"));
+    args.push(String8("1"));
+    args.push(String8("9999999999999999999999999999999999"));
+    args.push(String8("a1"));
+    args.push(String8(""));
+
+    int32_t uid;
+
+    StatsService service(nullptr, nullptr);
+    service.mEngBuild = true;
+
+    // "-1"
+    EXPECT_FALSE(service.getUidFromArgs(args, 0, uid));
+
+    // "0"
+    EXPECT_TRUE(service.getUidFromArgs(args, 1, uid));
+    EXPECT_EQ(0, uid);
+
+    // "1"
+    EXPECT_TRUE(service.getUidFromArgs(args, 2, uid));
+    EXPECT_EQ(1, uid);
+
+    // "999999999999999999"
+    EXPECT_FALSE(service.getUidFromArgs(args, 3, uid));
+
+    // "a1"
+    EXPECT_FALSE(service.getUidFromArgs(args, 4, uid));
+
+    // ""
+    EXPECT_FALSE(service.getUidFromArgs(args, 5, uid));
+
+    // For a non-userdebug, uid "1" cannot be impersonated.
+    service.mEngBuild = false;
+    EXPECT_FALSE(service.getUidFromArgs(args, 2, uid));
 }
 
 #else

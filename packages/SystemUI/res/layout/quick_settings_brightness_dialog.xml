@@ -22,16 +22,6 @@
     android:paddingRight="16dp"
     style="@style/BrightnessDialogContainer">
 
-    <ImageView
-        android:id="@+id/brightness_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_qs_brightness_auto_off"
-        android:contentDescription="@null"
-        android:visibility="gone" />
-
     <com.android.systemui.settings.ToggleSliderView
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"

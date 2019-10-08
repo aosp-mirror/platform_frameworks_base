@@ -54,10 +54,10 @@ public class MockContentProvider extends ContentProvider {
      */
     private class InversionIContentProvider implements IContentProvider {
         @Override
-        public ContentProviderResult[] applyBatch(String callingPackage,
+        public ContentProviderResult[] applyBatch(String callingPackage, String authority,
                 ArrayList<ContentProviderOperation> operations)
                 throws RemoteException, OperationApplicationException {
-            return MockContentProvider.this.applyBatch(operations);
+            return MockContentProvider.this.applyBatch(authority, operations);
         }
 
         @Override
@@ -112,14 +112,14 @@ public class MockContentProvider extends ContentProvider {
         }
 
         @Override
-        public Bundle call(String callingPackage, String method, String request, Bundle args)
-                throws RemoteException {
-            return MockContentProvider.this.call(method, request, args);
+        public Bundle call(String callingPackage, String authority, String method, String request,
+                Bundle args) throws RemoteException {
+            return MockContentProvider.this.call(authority, method, request, args);
         }
 
         @Override
         public IBinder asBinder() {
-            throw new UnsupportedOperationException();
+            return MockContentProvider.this.getIContentProviderBinder();
         }
 
         @Override
@@ -276,6 +276,13 @@ public class MockContentProvider extends ContentProvider {
     @Override
     public final IContentProvider getIContentProvider() {
         return mIContentProvider;
+    }
+
+    /**
+     * @hide
+     */
+    public IBinder getIContentProviderBinder() {
+        throw new UnsupportedOperationException("unimplemented mock method");
     }
 
     /**

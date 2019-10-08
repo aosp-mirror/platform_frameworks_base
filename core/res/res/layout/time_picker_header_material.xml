@@ -48,10 +48,11 @@
         android:layout_marginLeft="@dimen/timepicker_separator_padding"
         android:layout_marginRight="@dimen/timepicker_separator_padding"
         android:layout_centerInParent="true"
+        android:paddingBottom="4dp"
         android:textAppearance="@style/TextAppearance.Material.TimePicker.TimeLabel"
         android:importantForAccessibility="no" />
 
-    <!-- The minutes should always be to the left of the separator,
+    <!-- The minutes should always be to the right of the separator,
          regardless of the current locale's layout direction. -->
     <com.android.internal.widget.NumericTextView
         android:id="@+id/minutes"

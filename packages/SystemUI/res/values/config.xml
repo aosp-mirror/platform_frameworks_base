@@ -20,19 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
-    for devices where the java drawing of round rects may be slow -->
-    <bool name="config_recents_use_hardware_layers">false</bool>
-
-    <!-- The number of app thumbnails we keep in memory -->
-    <integer name="config_recents_max_thumbnail_count">10</integer>
-
-    <!-- The number of app icons we keep in memory -->
-    <integer name="config_recents_max_icon_count">20</integer>
-
-    <!-- Whether to use cheap, less good looking shadows for recents -->
-    <bool name="config_recents_fake_shadows">false</bool>
-
     <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
          certain GPU's and thus can be turned off with only minimal visual impact. -->
     <bool name="config_notifications_round_rect_clipping">true</bool>
@@ -45,8 +32,16 @@
      interface.  This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
 
+    <!-- Component to be used as the recents implementation.  Must implement the
+     RecentsImplementation interface.  This name is in the ComponentName flattened format
+     (package/class)  -->
+    <string name="config_recentsComponent" translatable="false">com.android.systemui.recents.OverviewProxyRecentsImpl</string>
+
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
+
+    <!-- If the lock screen should be dismissed after biometric auth. -->
+    <bool name="config_faceAuthDismissesKeyguard">false</bool>
 
     <!-- Vibrator pattern for camera gesture launch. -->
     <integer-array translatable="false" name="config_cameraLaunchGestureVibePattern">
@@ -79,13 +74,6 @@
     <!-- Show camera affordance on Keyguard -->
     <bool name="config_keyguardShowCameraAffordance">false</bool>
 
-    <!-- Whether we should use SRC drawing mode when drawing the scrim behind. If this flag is set,
-         we change the canvas opacity so libhwui doesn't call glClear on our surface, and then we
-         draw the scrim with SRC to overwrite the whole buffer, which saves us a layer of overdraw.
-         However, SRC performs poorly on some devices, where it is more efficient to
-         glClear + SRC_OVER, in which case this flag should be disabled. -->
-    <bool name="config_status_bar_scrim_behind_use_src">true</bool>
-
     <!-- The length of the vibration when the notification pops open. -->
     <integer name="one_finger_pop_duration_ms">10</integer>
 
@@ -104,6 +92,9 @@
          prevent wasting cpu cycles on the dimming animation -->
     <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
 
+    <!-- The maximum number of tiles in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_columns">6</integer>
+
     <!-- Whether QuickSettings is in a phone landscape -->
     <bool name="quick_settings_wide">false</bool>
 
@@ -111,7 +102,7 @@
     <integer name="quick_settings_num_columns">3</integer>
 
     <!-- The number of rows in the QuickSettings -->
-    <integer name="quick_settings_num_rows">1</integer>
+    <integer name="quick_settings_max_rows">3</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
@@ -121,9 +112,12 @@
         wifi,bt,dnd,flashlight,rotation,battery,cell,airplane,cast
     </string>
 
+    <!-- The minimum number of tiles to display in QuickSettings -->
+    <integer name="quick_settings_min_num_tiles">6</integer>
+
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,work,cast,night
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,dark,work,cast,night
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -144,42 +138,28 @@
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
 
-    <!-- milliseconds before the heads up notification auto-dismisses. -->
+    <!-- The number of milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
 
-    <!-- milliseconds after a heads up notification is pushed back
+    <!-- The number of milliseconds after a heads up notification is pushed back
      before the app can interrupt again. -->
     <integer name="heads_up_default_snooze_length_ms">60000</integer>
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
 
-    <!-- milliseconds before the heads up notification accepts touches. -->
+    <!-- The number of milliseconds before the heads up notification accepts touches. -->
     <integer name="touch_acceptance_delay">700</integer>
 
-    <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
-    <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
+    <!-- The number of milliseconds before the ambient notification auto-dismisses. This will
+         override the default pulse length. -->
+    <integer name="ambient_notification_decay">10000</integer>
 
-    <!-- The duration for animating the task decorations in after transitioning from an app. -->
-    <integer name="recents_task_enter_from_app_duration">200</integer>
+    <!-- Minimum display time for a heads up notification, in milliseconds. -->
+    <integer name="ambient_notification_minimum_time">2000</integer>
 
-    <!-- The duration for animating the task decorations in after transitioning from an app. -->
-    <integer name="recents_task_enter_from_affiliated_app_duration">125</integer>
-
-    <!-- The duration for animating the task decorations out before transitioning to an app. -->
-    <integer name="recents_task_exit_to_app_duration">125</integer>
-
-    <!-- The min animation duration for animating the nav bar scrim in. -->
-    <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
-
-    <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_animate_task_stack_scroll_duration">200</integer>
-
-    <!-- The delay to enforce between each alt-tab key press. -->
-    <integer name="recents_alt_tab_key_delay">200</integer>
-
-    <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
-    <integer name="recents_svelte_level">0</integer>
+    <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
+    <integer name="ambient_notification_extension_time">6000</integer>
 
     <!-- In multi-window, determines whether the stack where recents lives should grow from
          the smallest position when being launched. -->
@@ -187,16 +167,6 @@
 
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
-
-    <!-- Recents: The relative range of visible tasks from the current scroll position
-         while the stack is focused. -->
-    <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>
-    <item name="recents_layout_focused_range_max" format="float" type="integer">2</item>
-
-    <!-- Recents: The relative range of visible tasks from the current scroll position
-         while the stack is not focused. -->
-    <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
-    <item name="recents_layout_unfocused_range_max" format="float" type="integer">2.5</item>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
@@ -326,7 +296,7 @@
 
     <!-- SystemUI Services: The classes of the stuff to start. -->
     <string-array name="config_systemUIServiceComponents" translatable="false">
-        <item>com.android.systemui.Dependency</item>
+        <item>com.android.systemui.Dependency$DependencyCreator</item>
         <item>com.android.systemui.util.NotificationChannels</item>
         <item>com.android.systemui.statusbar.CommandQueue$CommandQueueStart</item>
         <item>com.android.systemui.keyguard.KeyguardViewMediator</item>
@@ -345,8 +315,11 @@
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.ScreenDecorations</item>
-        <item>com.android.systemui.fingerprint.FingerprintDialogImpl</item>
+        <item>com.android.systemui.biometrics.BiometricDialogImpl</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
+        <item>com.android.systemui.SizeCompatModeActivityController</item>
+        <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
+        <item>com.android.systemui.theme.ThemeOverlayController</item>
     </string-array>
 
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->
@@ -354,41 +327,22 @@
 
     <!-- SystemUI Services (per user): The classes of the stuff to start for each user. This is a subset of the config_systemUIServiceComponents -->
     <string-array name="config_systemUIServiceComponentsPerUser" translatable="false">
-        <item>com.android.systemui.Dependency</item>
+        <item>com.android.systemui.Dependency$DependencyCreator</item>
         <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.recents.Recents</item>
     </string-array>
 
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">left[.5W],back[1WC];home;recent[1WC],right[.5W]</string>
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
+    <string name="config_navBarLayoutHandle" translatable="false">back[40AC];home_handle;ime_switcher[40AC]</string>
 
     <bool name="quick_settings_show_full_alarm">false</bool>
 
-    <!-- Whether or not beep sound should be when overheat -->
-    <bool name="config_alarmTemperatureBeepSound">false</bool>
-
-    <!-- Whether to show a warning notification when the device reaches a certain temperature. -->
+    <!-- Whether to show a warning notification when device's skin temperature is high. -->
     <integer name="config_showTemperatureWarning">0</integer>
 
-    <!-- Whether to show a alarm dialog when device of usb cable reaches a certain temperature. -->
-    <integer name="config_showTemperatureAlarm">0</integer>
-
-    <!-- Temp at which to show a warning notification if config_showTemperatureWarning is true.
-         If < 0, uses the skin temperature sensor shutdown value from
-         HardwarePropertiesManager#getDeviceTemperatures - config_warningTemperatureTolerance. -->
-    <integer name="config_warningTemperature">-1</integer>
-
-    <!-- Temp at which to show a alarm dialog if config_showTemperatureAlarm is true.
-         If < 0, uses the skin temperature sensor shutdown value of index[1] from
-         HardwarePropertiesManager#getDeviceTemperatures -->
-    <integer name="config_alarmTemperature">60</integer>
-
-    <!-- Fudge factor for how much below the shutdown temp to show the warning. -->
-    <integer name="config_warningTemperatureTolerance">2</integer>
-
-    <!-- Fudge factor for how much below the overheat temp to dismiss alarm. -->
-    <integer name="config_alarmTemperatureTolerance">5</integer>
+    <!-- Whether to show a alarm dialog when device's usb port is overheating. -->
+    <integer name="config_showUsbPortAlarm">0</integer>
 
     <!-- Accessibility actions -->
     <item type="id" name="action_split_task_to_left" />
@@ -466,10 +420,6 @@
          it has been expanded to reveal its children. -->
     <bool name="config_showGroupNotificationBgWhenExpanded">false</bool>
 
-    <!-- Whether to artificially interpret all signal strengths as
-         one bar higher than they actually are -->
-    <bool name="config_inflateSignalStrength">false</bool>
-
     <!-- Should we vibrate on an icon animation of the shelf. This should only be active if the
      vibrator is capable of subtle vibrations -->
     <bool name="config_vibrateOnIconAnimation">false</bool>
@@ -500,6 +450,28 @@
          better (narrower) line-break for a double-line smart reply button. -->
     <integer name="config_smart_replies_in_notifications_max_squeeze_remeasure_attempts">3</integer>
 
+    <!-- Smart replies in notifications: Whether by default tapping on a choice should let the user
+         edit the input before it is sent to the app. Developers can override this via
+         RemoteInput.Builder.setEditChoicesBeforeSending. -->
+    <bool name="config_smart_replies_in_notifications_edit_choices_before_sending">false</bool>
+
+    <!-- Smart replies in notifications: Whether smart suggestions in notifications are enabled in
+         heads-up notifications.  -->
+    <bool name="config_smart_replies_in_notifications_show_in_heads_up">true</bool>
+
+    <!-- Smart replies in notifications: Minimum number of system generated smart replies that
+         should be shown in a notification. If we cannot show at least this many replies we instead
+         show none. -->
+    <integer name="config_smart_replies_in_notifications_min_num_system_generated_replies">0</integer>
+
+    <!-- Smart replies in notifications: Maximum number of smart actions to show in notifications.
+         -->
+    <integer name="config_smart_replies_in_notifications_max_num_actions">-1</integer>
+
+    <!-- Smart replies in notifications: Delay (ms) before smart suggestions are clickable, since
+         they were added. -->
+    <integer name="config_smart_replies_in_notifications_onclick_init_delay">200</integer>
+
     <!-- Screenshot editing default activity.  Must handle ACTION_EDIT image/png intents.
          Blank sends the user to the Chooser first.
          This name is in the ComponentName flattened format (package/class)  -->
@@ -507,4 +479,21 @@
 
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
+
+    <!-- Allow dragging the PIP to a location to close it -->
+    <bool name="config_pipEnableDismissDragToEdge">true</bool>
+
+    <!-- SystemUI Plugins that can be loaded on user builds. -->
+    <string-array name="config_pluginWhitelist" translatable="false">
+        <item>com.android.systemui</item>
+    </string-array>
+
+    <integer name="ongoing_appops_dialog_max_apps">5</integer>
+
+    <!-- Launcher package name for overlaying icons. -->
+    <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>
+
+    <!-- ThemePicker package name for overlaying icons. -->
+    <string name="themepicker_overlayable_package" translatable="false">com.android.wallpaper</string>
+
 </resources>

@@ -1,0 +1,75 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option java_multiple_files = true;
+
+package android.os;
+
+// This field contains internal metadata associated with an incident report,
+// such as the section ids and privacy policy specs from caller as well as how long
+// and how many bytes a section takes, etc.
+message IncidentMetadata {
+
+    // The id of the incident report.
+    optional int64 report_id = 1;
+
+    // No longer filled in as of Qt.
+    optional int32 sequence_number = 2;
+
+    // privacy level of the incident report.
+    enum Destination {
+        AUTOMATIC = 0;
+        EXPLICIT = 1;
+        LOCAL = 2;
+    }
+    optional Destination dest = 3;
+
+    // No longer filled in as of Qt.
+    optional int32 request_size = 4;
+
+    // No longer filled in as of Qt.
+    optional bool use_dropbox = 5;
+
+    // stats of each section taken in this incident report.
+    message SectionStats {
+        // section id.
+        optional int32 id = 1;
+        // if the section is successfully taken.
+        optional bool success = 2;
+        // number of bytes in the report after filtering.
+        optional int32 report_size_bytes = 3;
+        // the total duration to execute the section.
+        optional int64 exec_duration_ms = 4;
+
+        // number of bytes dumped from the section directly.
+        optional int32 dump_size_bytes = 5;
+        // duration of the dump takes.
+        optional int64 dump_duration_ms = 6;
+        // true if the section timed out.
+        optional bool timed_out = 7;
+        // true if the section is truncated.
+        optional bool is_truncated = 8;
+        // message for debugging if there is an error.
+        optional string error_msg = 9;
+
+        // Next Tag: 10;
+    }
+    repeated SectionStats sections = 6;
+
+    // Next Tag: 7
+}
+

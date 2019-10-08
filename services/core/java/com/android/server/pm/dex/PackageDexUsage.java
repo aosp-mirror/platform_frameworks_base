@@ -16,9 +16,9 @@
 
 package com.android.server.pm.dex;
 
+import android.os.Build;
 import android.util.AtomicFile;
 import android.util.Slog;
-import android.os.Build;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -26,25 +26,26 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.server.pm.AbstractStatsBase;
 import com.android.server.pm.PackageManagerServiceUtils;
 
+import dalvik.system.VMRuntime;
+
+import libcore.io.IoUtils;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import dalvik.system.VMRuntime;
-import libcore.io.IoUtils;
 
 /**
  * Stat file which store usage information about dex files.
@@ -85,6 +86,13 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
     // files so discarded on read).
     private static final String UNSUPPORTED_CLASS_LOADER_CONTEXT =
             "=UnsupportedClassLoaderContext=";
+
+    /**
+     * Limit on how many secondary DEX paths we store for a single owner, to avoid one app causing
+     * unbounded memory consumption.
+     */
+    @VisibleForTesting
+    /* package */ static final int MAX_SECONDARY_FILES_PER_OWNER = 100;
 
     // Map which structures the information we have on a package.
     // Maps package name to package data (which stores info about UsedByOtherApps and
@@ -164,8 +172,12 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                     DexUseInfo existingData = packageUseInfo.mDexUseInfoMap.get(dexPath);
                     if (existingData == null) {
                         // It's the first time we see this dex file.
-                        packageUseInfo.mDexUseInfoMap.put(dexPath, newData);
-                        return true;
+                        if (packageUseInfo.mDexUseInfoMap.size() < MAX_SECONDARY_FILES_PER_OWNER) {
+                            packageUseInfo.mDexUseInfoMap.put(dexPath, newData);
+                            return true;
+                        } else {
+                            return updateLoadingPackages;
+                        }
                     } else {
                         if (ownerUserId != existingData.mOwnerUserId) {
                             // Oups, this should never happen, the DexManager who calls this should

@@ -16,9 +16,10 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/restricted_icon"
-        android:layout_width="@dimen/restricted_icon_size"
-        android:layout_height="@dimen/restricted_icon_size"
-        android:src="@drawable/ic_info"
+        android:layout_width="@*android:dimen/config_restrictedIconSize"
+        android:layout_height="@*android:dimen/config_restrictedIconSize"
+        android:tint="?android:attr/colorAccent"
+        android:src="@*android:drawable/ic_info"
         android:gravity="end|center_vertical" />
     <!-- Based off frameworks/base/core/res/res/layout/preference_widget_switch.xml -->
     <Switch xmlns:android="http://schemas.android.com/apk/res/android"

@@ -18,10 +18,11 @@ package com.android.settingslib.deviceinfo;
 
 import android.content.Context;
 import android.os.Build;
+import android.text.TextUtils;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
-import android.text.TextUtils;
 
 import com.android.settingslib.core.AbstractPreferenceController;
 

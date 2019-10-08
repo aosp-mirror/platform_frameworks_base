@@ -18,6 +18,7 @@ package com.android.systemui.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
 import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN;
 import static com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN;
@@ -31,6 +32,7 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -45,8 +47,7 @@ import android.view.animation.Interpolator;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.PipSnapAlgorithm;
-import com.android.systemui.recents.misc.ForegroundThread;
-import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.io.PrintWriter;
@@ -54,7 +55,7 @@ import java.io.PrintWriter;
 /**
  * A helper to animate and manipulate the PiP.
  */
-public class PipMotionHelper implements Handler.Callback {
+public class PipMotionHelper implements Handler.Callback, PipAppOpsListener.Callback {
 
     private static final String TAG = "PipMotionHelper";
     private static final boolean DEBUG = false;
@@ -78,9 +79,11 @@ public class PipMotionHelper implements Handler.Callback {
 
     private static final int MSG_RESIZE_IMMEDIATE = 1;
     private static final int MSG_RESIZE_ANIMATE = 2;
+    private static final int MSG_OFFSET_ANIMATE = 3;
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private IActivityTaskManager mActivityTaskManager;
     private Handler mHandler;
 
     private PipMenuActivityController mMenuController;
@@ -94,11 +97,12 @@ public class PipMotionHelper implements Handler.Callback {
     private ValueAnimator mBoundsAnimator = null;
 
     public PipMotionHelper(Context context, IActivityManager activityManager,
-            PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
-            FlingAnimationUtils flingAnimationUtils) {
+            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
+            PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils) {
         mContext = context;
         mHandler = new Handler(ForegroundThread.get().getLooper(), this);
         mActivityManager = activityManager;
+        mActivityTaskManager = activityTaskManager;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
@@ -112,7 +116,7 @@ public class PipMotionHelper implements Handler.Callback {
      */
     void onConfigurationChanged() {
         mSnapAlgorithm.onConfigurationChanged();
-        SystemServicesProxy.getInstance(mContext).getStableInsets(mStableInsets);
+        WindowManagerWrapper.getInstance().getStableInsets(mStableInsets);
     }
 
     /**
@@ -121,8 +125,8 @@ public class PipMotionHelper implements Handler.Callback {
     void synchronizePinnedStackBounds() {
         cancelAnimations();
         try {
-            StackInfo stackInfo =
-                    mActivityManager.getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            StackInfo stackInfo = mActivityTaskManager.getStackInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {
                 mBounds.set(stackInfo.bounds);
             }
@@ -159,7 +163,7 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.dismissPip(!skipAnimation, EXPAND_STACK_TO_FULLSCREEN_DURATION);
+                mActivityTaskManager.dismissPip(!skipAnimation, EXPAND_STACK_TO_FULLSCREEN_DURATION);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error expanding PiP activity", e);
             }
@@ -169,7 +173,8 @@ public class PipMotionHelper implements Handler.Callback {
     /**
      * Dismisses the pinned stack.
      */
-    void dismissPip() {
+    @Override
+    public void dismissPip() {
         if (DEBUG) {
             Log.d(TAG, "dismissPip: callers=\n" + Debug.getCallers(5, "    "));
         }
@@ -177,7 +182,8 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.removeStacksInWindowingModes(new int[]{ WINDOWING_MODE_PINNED });
+                mActivityTaskManager.removeStacksInWindowingModes(
+                        new int[]{ WINDOWING_MODE_PINNED });
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to remove PiP", e);
             }
@@ -355,9 +361,20 @@ public class PipMotionHelper implements Handler.Callback {
     /**
      * Animates the PiP to offset it from the IME or shelf.
      */
-    void animateToOffset(Rect toBounds) {
+    void animateToOffset(Rect originalBounds, int offset) {
         cancelAnimations();
-        resizeAndAnimatePipUnchecked(toBounds, SHIFT_DURATION);
+        adjustAndAnimatePipOffset(originalBounds, offset, SHIFT_DURATION);
+    }
+
+    private void adjustAndAnimatePipOffset(Rect originalBounds, int offset, int duration) {
+        if (offset == 0) {
+            return;
+        }
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = originalBounds;
+        args.argi1 = offset;
+        args.argi2 = duration;
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_OFFSET_ANIMATE, args));
     }
 
     /**
@@ -512,7 +529,8 @@ public class PipMotionHelper implements Handler.Callback {
                 SomeArgs args = (SomeArgs) msg.obj;
                 Rect toBounds = (Rect) args.arg1;
                 try {
-                    mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);
+                    mActivityTaskManager.resizePinnedStack(
+                            toBounds, null /* tempPinnedTaskBounds */);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not resize pinned stack to bounds: " + toBounds, e);
@@ -525,7 +543,7 @@ public class PipMotionHelper implements Handler.Callback {
                 Rect toBounds = (Rect) args.arg1;
                 int duration = args.argi1;
                 try {
-                    StackInfo stackInfo = mActivityManager.getStackInfo(
+                    StackInfo stackInfo = mActivityTaskManager.getStackInfo(
                             WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                     if (stackInfo == null) {
                         // In the case where we've already re-expanded or dismissed the PiP, then
@@ -533,12 +551,37 @@ public class PipMotionHelper implements Handler.Callback {
                         return true;
                     }
 
-                    mActivityManager.resizeStack(stackInfo.stackId, toBounds,
+                    mActivityTaskManager.resizeStack(stackInfo.stackId, toBounds,
                             false /* allowResizeInDockedMode */, true /* preserveWindows */,
                             true /* animate */, duration);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not animate resize pinned stack to bounds: " + toBounds, e);
+                }
+                return true;
+            }
+
+            case MSG_OFFSET_ANIMATE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                Rect originalBounds = (Rect) args.arg1;
+                final int offset = args.argi1;
+                final int duration = args.argi2;
+                try {
+                    StackInfo stackInfo = mActivityTaskManager.getStackInfo(
+                            WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+                    if (stackInfo == null) {
+                        // In the case where we've already re-expanded or dismissed the PiP, then
+                        // just skip the resize
+                        return true;
+                    }
+
+                    mActivityTaskManager.offsetPinnedStackBounds(stackInfo.stackId, originalBounds,
+                            0/* xOffset */, offset, duration);
+                    Rect toBounds = new Rect(originalBounds);
+                    toBounds.offset(0, offset);
+                    mBounds.set(toBounds);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not animate offset pinned stack with offset: " + offset, e);
                 }
                 return true;
             }

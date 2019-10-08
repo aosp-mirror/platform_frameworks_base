@@ -45,6 +45,10 @@ struct ResourceParserOptions {
    * warnings.
    */
   bool error_on_positional_arguments = true;
+
+  // If visibility was forced, we need to use it when creating a new resource and also error if we
+  // try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
+  Maybe<Visibility::Level> visibility;
 };
 
 /*

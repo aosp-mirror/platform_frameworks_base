@@ -15,6 +15,7 @@
 //
 
 toolSources = [
+    "cmd/Command.cpp",
     "cmd/Compile.cpp",
     "cmd/Convert.cpp",
     "cmd/Diff.cpp",
@@ -40,6 +41,7 @@ cc_defaults {
         windows: {
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
+            ldflags: ["-static"],
         },
         darwin: {
             cflags: ["-D_DARWIN_UNLIMITED_STREAMS"],
@@ -56,7 +58,9 @@ cc_defaults {
         "libbase",
         "libprotobuf-cpp-lite",
         "libz",
+        "libbuildversion",
     ],
+    stl: "libc++_static",
     group_static_libs: true,
 }
 
@@ -82,6 +86,7 @@ cc_library_host_static {
         "compile/Pseudolocalizer.cpp",
         "compile/XmlIdCollector.cpp",
         "configuration/ConfigurationParser.cpp",
+        "dump/DumpManifest.cpp",
         "filter/AbiFilter.cpp",
         "filter/ConfigFilter.cpp",
         "format/Archive.cpp",
@@ -105,12 +110,15 @@ cc_library_host_static {
         "link/ProductFilter.cpp",
         "link/PrivateAttributeMover.cpp",
         "link/ReferenceLinker.cpp",
+        "link/ResourceExcluder.cpp",
         "link/TableMerger.cpp",
         "link/XmlCompatVersioner.cpp",
         "link/XmlNamespaceRemover.cpp",
         "link/XmlReferenceLinker.cpp",
         "optimize/MultiApkGenerator.cpp",
         "optimize/ResourceDeduper.cpp",
+        "optimize/ResourceFilter.cpp",
+        "optimize/ResourcePathShortener.cpp",
         "optimize/VersionCollapser.cpp",
         "process/SymbolTable.cpp",
         "split/TableSplitter.cpp",
@@ -122,7 +130,6 @@ cc_library_host_static {
         "util/Util.cpp",
         "Debug.cpp",
         "DominatorTree.cpp",
-        "Flags.cpp",
         "java/AnnotationProcessor.cpp",
         "java/ClassDefinition.cpp",
         "java/JavaClassGenerator.cpp",
@@ -136,6 +143,7 @@ cc_library_host_static {
         "ResourceValues.cpp",
         "SdkConstants.cpp",
         "StringPool.cpp",
+        "trace/TraceBuffer.cpp",
         "xml/XmlActionExecutor.cpp",
         "xml/XmlDom.cpp",
         "xml/XmlPullParser.cpp",
@@ -168,6 +176,7 @@ cc_test_host {
     srcs: [
         "test/Builders.cpp",
         "test/Common.cpp",
+        "test/Fixture.cpp",
         "**/*_test.cpp",
     ] + toolSources,
     static_libs: [
@@ -175,7 +184,11 @@ cc_test_host {
         "libgmock",
     ],
     defaults: ["aapt2_defaults"],
-    data: ["integration-tests/CompileTest/**/*"],
+    data: [
+         "integration-tests/CompileTest/**/*",
+         "integration-tests/CommandTests/**/*",
+         "integration-tests/ConvertTest/**/*"
+    ],
 }
 
 // ==========================================================

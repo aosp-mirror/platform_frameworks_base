@@ -83,6 +83,8 @@ public class AnalogClock extends View {
         final Resources r = context.getResources();
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.AnalogClock, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.AnalogClock,
+                attrs, a, defStyleAttr, defStyleRes);
 
         mDial = a.getDrawable(com.android.internal.R.styleable.AnalogClock_dial);
         if (mDial == null) {

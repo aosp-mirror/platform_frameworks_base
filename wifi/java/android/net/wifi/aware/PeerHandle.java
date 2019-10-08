@@ -32,6 +32,7 @@ package android.net.wifi.aware;
  * configuration's service-specific information field,
  * {@link PublishConfig.Builder#setServiceSpecificInfo(byte[])}, or match filter,
  * {@link PublishConfig.Builder#setMatchFilter(java.util.List)}.
+ * <p>A parcelable handle object is available with {@link ParcelablePeerHandle}.
  */
 public class PeerHandle {
     /** @hide */

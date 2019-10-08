@@ -204,6 +204,10 @@ public abstract class WindowOrientationListener {
         }
     }
 
+    public Handler getHandler() {
+        return mHandler;
+    }
+
     /**
      * Sets the current rotation.
      *
@@ -1043,8 +1047,14 @@ public abstract class WindowOrientationListener {
         @Override
         public void onSensorChanged(SensorEvent event) {
             int newRotation;
+
+            int reportedRotation = (int) event.values[0];
+            if (reportedRotation < 0 || reportedRotation > 3) {
+                return;
+            }
+
             synchronized (mLock) {
-                mDesiredRotation = (int) event.values[0];
+                mDesiredRotation = reportedRotation;
                 newRotation = evaluateRotationChangeLocked();
             }
             if (newRotation >=0) {

@@ -18,10 +18,12 @@ package com.android.server;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ public class SystemServiceManager {
     private static final String TAG = "SystemServiceManager";
     private static final int SERVICE_CALL_WARN_TIME_MS = 50;
 
+    private static File sSystemDir;
     private final Context mContext;
     private boolean mSafeMode;
     private boolean mRuntimeRestarted;
@@ -315,6 +318,22 @@ public class SystemServiceManager {
             Slog.w(TAG, "Service " + service.getClass().getName() + " took " + duration + " ms in "
                     + operation);
         }
+    }
+
+    /**
+     * Ensures that the system directory exist creating one if needed.
+     * @deprecated Use {@link Environment#getDataSystemCeDirectory()}
+     * or {@link Environment#getDataSystemDeDirectory()} instead.
+     * @return The system directory.
+     */
+    @Deprecated
+    public static File ensureSystemDir() {
+        if (sSystemDir == null) {
+            File dataDir = Environment.getDataDirectory();
+            sSystemDir = new File(dataDir, "system");
+            sSystemDir.mkdirs();
+        }
+        return sSystemDir;
     }
 
     /**

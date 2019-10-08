@@ -68,5 +68,4 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
 
         assertTrue(mTransitions.isLightsOut(BarTransitions.MODE_LIGHTS_OUT));
     }
-
 }

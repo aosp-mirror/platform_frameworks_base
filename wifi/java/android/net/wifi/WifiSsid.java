@@ -129,6 +129,8 @@ public class WifiSsid implements Parcelable {
                                 val = Integer.parseInt(asciiEncoded.substring(i, i + 2), HEX_RADIX);
                             } catch (NumberFormatException e) {
                                 val = -1;
+                            } catch (StringIndexOutOfBoundsException e) {
+                                val = -1;
                             }
                             if (val < 0) {
                                 val = Character.digit(asciiEncoded.charAt(i), HEX_RADIX);
@@ -252,7 +254,7 @@ public class WifiSsid implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<WifiSsid> CREATOR =
+    public static final @android.annotation.NonNull Creator<WifiSsid> CREATOR =
         new Creator<WifiSsid>() {
             public WifiSsid createFromParcel(Parcel in) {
                 WifiSsid ssid = new WifiSsid();

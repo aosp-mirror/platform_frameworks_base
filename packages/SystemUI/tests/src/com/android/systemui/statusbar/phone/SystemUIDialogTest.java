@@ -36,7 +36,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 @RunWith(AndroidTestingRunner.class)
-@RunWithLooper(setAsMainLooper = true)
+@RunWithLooper
 @SmallTest
 public class SystemUIDialogTest extends SysuiTestCase {
 

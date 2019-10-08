@@ -269,7 +269,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate {
             mRadialTimePickerModeButton.setContentDescription(
                     mTextInputPickerModeEnabledDescription);
             updateTextInputPicker();
-            InputMethodManager imm = InputMethodManager.peekInstance();
+            InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
             if (imm != null) {
                 imm.hideSoftInputFromWindow(mDelegator.getWindowToken(), 0);
             }

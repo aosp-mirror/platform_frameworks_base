@@ -259,6 +259,19 @@ public class PopupMenu {
     }
 
     /**
+     * Sets whether the popup menu's adapter is forced to show icons in the
+     * menu item views.
+     * <p>
+     * Changes take effect on the next call to show().
+     *
+     * @param forceShowIcon {@code true} to force icons to be shown, or
+     *                  {@code false} for icons to be optionally shown
+     */
+    public void setForceShowIcon(boolean forceShowIcon) {
+        mPopup.setForceShowIcon(forceShowIcon);
+    }
+
+    /**
      * Interface responsible for receiving menu item click events if the items
      * themselves do not have individual item click listeners.
      */

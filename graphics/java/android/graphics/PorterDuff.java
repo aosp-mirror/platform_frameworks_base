@@ -23,6 +23,8 @@ import android.annotation.UnsupportedAppUsage;
  * that can be passed to {@link PorterDuffXfermode}, a specialized implementation
  * of {@link Paint}'s {@link Paint#setXfermode(Xfermode) transfer mode}.
  * All the available modes can be found in the {@link Mode} enum.</p>
+ *
+ * Consider using {@link BlendMode} instead as it provides a wider variety of tinting options
  */
 public class PorterDuff {
     /**

@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.Slog;
 
@@ -28,7 +29,7 @@ import java.util.List;
 
 /**
  * Feature action that handles device discovery sequences.
- * Device discovery is launched when TV device is woken from "Standby" state
+ * Device discovery is launched when device is woken from "Standby" state
  * or enabled "Control for Hdmi" from disabled state.
  *
  * <p>Device discovery goes through the following steps.
@@ -51,6 +52,10 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private static final int STATE_WAITING_FOR_OSD_NAME = 3;
     // State in which the action is waiting for gathering vendor id of non-local devices.
     private static final int STATE_WAITING_FOR_VENDOR_ID = 4;
+    // State in which the action is waiting for devices to be ready.
+    private static final int STATE_WAITING_FOR_DEVICES = 5;
+    // State in which the action is waiting for gathering power status of non-local devices.
+    private static final int STATE_WAITING_FOR_POWER = 6;
 
     /**
      * Interface used to report result of device discovery.
@@ -72,6 +77,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
         private int mPortId = Constants.INVALID_PORT_ID;
         private int mVendorId = Constants.UNKNOWN_VENDOR_ID;
+        private int mPowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
         private String mDisplayName = "";
         private int mDeviceType = HdmiDeviceInfo.DEVICE_INACTIVE;
 
@@ -81,7 +87,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
         private HdmiDeviceInfo toHdmiDeviceInfo() {
             return new HdmiDeviceInfo(mLogicalAddress, mPhysicalAddress, mPortId, mDeviceType,
-                    mVendorId, mDisplayName);
+                    mVendorId, mDisplayName, mPowerStatus);
         }
     }
 
@@ -89,6 +95,20 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private final DeviceDiscoveryCallback mCallback;
     private int mProcessedDeviceCount = 0;
     private int mTimeoutRetry = 0;
+    private boolean mIsTvDevice = localDevice().mService.isTvDevice();
+    private final int mDelayPeriod;
+
+    /**
+     * Constructor.
+     *
+     * @param source an instance of {@link HdmiCecLocalDevice}.
+     * @param delay delay action for this period between query Physical Address and polling
+     */
+    DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback, int delay) {
+        super(source);
+        mCallback = Preconditions.checkNotNull(callback);
+        mDelayPeriod = delay;
+    }
 
     /**
      * Constructor.
@@ -96,8 +116,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
      * @param source an instance of {@link HdmiCecLocalDevice}.
      */
     DeviceDiscoveryAction(HdmiCecLocalDevice source, DeviceDiscoveryCallback callback) {
-        super(source);
-        mCallback = Preconditions.checkNotNull(callback);
+        this(source, callback, 0);
     }
 
     @Override
@@ -116,7 +135,11 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
                 Slog.v(TAG, "Device detected: " + ackedAddress);
                 allocateDevices(ackedAddress);
-                startPhysicalAddressStage();
+                if (mDelayPeriod > 0) {
+                    startToDelayAction();
+                } else {
+                    startPhysicalAddressStage();
+                }
             }
         }, Constants.POLL_ITERATION_REVERSE_ORDER
             | Constants.POLL_STRATEGY_REMOTES_DEVICES, HdmiConfig.DEVICE_POLLING_RETRY);
@@ -128,6 +151,13 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             DeviceInfo info = new DeviceInfo(i);
             mDevices.add(info);
         }
+    }
+
+    private void startToDelayAction() {
+        Slog.v(TAG, "Waiting for connected devices to be ready");
+        mState = STATE_WAITING_FOR_DEVICES;
+
+        checkAndProceedStage();
     }
 
     private void startPhysicalAddressStage() {
@@ -156,6 +186,11 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         }
         sendCommand(HdmiCecMessageBuilder.buildGivePhysicalAddress(getSourceAddress(), address));
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
+    }
+
+    private void delayActionWithTimePeriod(int timeDelay) {
+        mActionTimer.clearTimerMessage();
+        addTimer(mState, timeDelay);
     }
 
     private void startOsdNameStage() {
@@ -206,6 +241,29 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
     }
 
+    private void startPowerStatusStage() {
+        Slog.v(TAG, "Start [Power Status Stage]:" + mDevices.size());
+        mProcessedDeviceCount = 0;
+        mState = STATE_WAITING_FOR_POWER;
+
+        checkAndProceedStage();
+    }
+
+    private void queryPowerStatus(int address) {
+        if (!verifyValidLogicalAddress(address)) {
+            checkAndProceedStage();
+            return;
+        }
+
+        mActionTimer.clearTimerMessage();
+
+        if (mayProcessMessageIfCached(address, Constants.MESSAGE_REPORT_POWER_STATUS)) {
+            return;
+        }
+        sendCommand(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(getSourceAddress(), address));
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
+    }
+
     private boolean mayProcessMessageIfCached(int address, int opcode) {
         HdmiCecMessage message = getCecMessageCache().getMessage(address, opcode);
         if (message != null) {
@@ -244,6 +302,16 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                     return true;
                 }
                 return false;
+            case STATE_WAITING_FOR_POWER:
+                if (cmd.getOpcode() == Constants.MESSAGE_REPORT_POWER_STATUS) {
+                    handleReportPowerStatus(cmd);
+                    return true;
+                } else if ((cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT)
+                        && ((cmd.getParams()[0] & 0xFF) == Constants.MESSAGE_REPORT_POWER_STATUS)) {
+                    handleReportPowerStatus(cmd);
+                    return true;
+                }
+                return false;
             case STATE_WAITING_FOR_DEVICE_POLLING:
                 // Fall through.
             default:
@@ -265,16 +333,20 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
         current.mPortId = getPortId(current.mPhysicalAddress);
         current.mDeviceType = params[2] & 0xFF;
+        current.mDisplayName = HdmiUtils.getDefaultDeviceName(current.mDeviceType);
 
-        tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
+        // This is to manager CEC device separately in case they don't have address.
+        if (mIsTvDevice) {
+            tv().updateCecSwitchInfo(current.mLogicalAddress, current.mDeviceType,
                     current.mPhysicalAddress);
-
+        }
         increaseProcessedDeviceCount();
         checkAndProceedStage();
     }
 
     private int getPortId(int physicalAddress) {
-        return tv().getPortId(physicalAddress);
+        return mIsTvDevice ? tv().getPortId(physicalAddress)
+            : source().getPortId(physicalAddress);
     }
 
     private void handleSetOsdName(HdmiCecMessage cmd) {
@@ -324,6 +396,26 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         checkAndProceedStage();
     }
 
+    private void handleReportPowerStatus(HdmiCecMessage cmd) {
+        Preconditions.checkState(mProcessedDeviceCount < mDevices.size());
+
+        DeviceInfo current = mDevices.get(mProcessedDeviceCount);
+        if (current.mLogicalAddress != cmd.getSource()) {
+            Slog.w(TAG, "Unmatched address[expected:" + current.mLogicalAddress + ", actual:"
+                    + cmd.getSource());
+            return;
+        }
+
+        if (cmd.getOpcode() != Constants.MESSAGE_FEATURE_ABORT) {
+            byte[] params = cmd.getParams();
+            int powerStatus = params[0] & 0xFF;
+            current.mPowerStatus = powerStatus;
+        }
+
+        increaseProcessedDeviceCount();
+        checkAndProceedStage();
+    }
+
     private void increaseProcessedDeviceCount() {
         mProcessedDeviceCount++;
         mTimeoutRetry = 0;
@@ -345,7 +437,9 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         mCallback.onDeviceDiscoveryDone(result);
         finish();
         // Process any commands buffered while device discovery action was in progress.
-        tv().processAllDelayedMessages();
+        if (mIsTvDevice) {
+            tv().processAllDelayedMessages();
+        }
     }
 
     private void checkAndProceedStage() {
@@ -365,6 +459,9 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                     startVendorIdStage();
                     return;
                 case STATE_WAITING_FOR_VENDOR_ID:
+                    startPowerStatusStage();
+                    return;
+                case STATE_WAITING_FOR_POWER:
                     wrapUpAndFinish();
                     return;
                 default:
@@ -378,6 +475,9 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private void sendQueryCommand() {
         int address = mDevices.get(mProcessedDeviceCount).mLogicalAddress;
         switch (mState) {
+            case STATE_WAITING_FOR_DEVICES:
+                delayActionWithTimePeriod(mDelayPeriod);
+                return;
             case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
                 queryPhysicalAddress(address);
                 return;
@@ -386,6 +486,10 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                 return;
             case STATE_WAITING_FOR_VENDOR_ID:
                 queryVendorId(address);
+                return;
+            case STATE_WAITING_FOR_POWER:
+                queryPowerStatus(address);
+                return;
             default:
                 return;
         }
@@ -397,13 +501,24 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             return;
         }
 
+        if (mState == STATE_WAITING_FOR_DEVICES) {
+            startPhysicalAddressStage();
+            return;
+        }
         if (++mTimeoutRetry < HdmiConfig.TIMEOUT_RETRY) {
             sendQueryCommand();
             return;
         }
         mTimeoutRetry = 0;
         Slog.v(TAG, "Timeout[State=" + mState + ", Processed=" + mProcessedDeviceCount);
-        removeDevice(mProcessedDeviceCount);
+        if (mState != STATE_WAITING_FOR_POWER && mState != STATE_WAITING_FOR_OSD_NAME) {
+            // We don't need to remove the device info if the power status is unknown.
+            // Some device does not have preferred OSD name and does not respond to Give OSD name.
+            // Like LG TV. We can give it default device name and not remove it.
+            removeDevice(mProcessedDeviceCount);
+        } else {
+            increaseProcessedDeviceCount();
+        }
         checkAndProceedStage();
     }
 }

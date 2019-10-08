@@ -28,20 +28,18 @@ import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
+import android.view.SyncRtSurfaceTransactionApplier;
+import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
+import android.view.View;
 
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.shared.system.SurfaceControlCompat;
-import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
-import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier.SurfaceParams;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationListContainer;
-import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-
-import java.util.ArrayList;
 
 /**
  * A class that allows activities to be launched in a seamless way where the notification
@@ -59,29 +57,35 @@ public class ActivityLaunchAnimator {
     private final NotificationPanelView mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
     private final StatusBarWindowView mStatusBarWindow;
-    private StatusBar mStatusBar;
+    private final float mWindowCornerRadius;
+    private Callback mCallback;
     private final Runnable mTimeoutRunnable = () -> {
         setAnimationPending(false);
-        mStatusBar.collapsePanel(true /* animate */);
+        mCallback.onExpandAnimationTimedOut();
     };
     private boolean mAnimationPending;
+    private boolean mAnimationRunning;
+    private boolean mIsLaunchForActivity;
 
     public ActivityLaunchAnimator(StatusBarWindowView statusBarWindow,
-            StatusBar statusBar,
+            Callback callback,
             NotificationPanelView notificationPanel,
             NotificationListContainer container) {
         mNotificationPanel = notificationPanel;
         mNotificationContainer = container;
         mStatusBarWindow = statusBarWindow;
-        mStatusBar = statusBar;
+        mCallback = callback;
+        mWindowCornerRadius = ScreenDecorationsUtils
+                .getWindowCornerRadius(statusBarWindow.getResources());
     }
 
     public RemoteAnimationAdapter getLaunchAnimation(
-            ExpandableNotificationRow sourceNotification, boolean occluded) {
-        if (mStatusBar.getBarState() != StatusBarState.SHADE || occluded) {
+            View sourceView, boolean occluded) {
+        if (!(sourceView instanceof ExpandableNotificationRow) || !mCallback.areLaunchAnimationsEnabled() || occluded) {
             return null;
         }
-        AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
+        AnimationRunner animationRunner = new AnimationRunner(
+                (ExpandableNotificationRow) sourceView);
         return new RemoteAnimationAdapter(animationRunner, ANIMATION_DURATION,
                 ANIMATION_DURATION - 150 /* statusBarTransitionDelay */);
     }
@@ -90,10 +94,21 @@ public class ActivityLaunchAnimator {
         return mAnimationPending;
     }
 
-    public void setLaunchResult(int launchResult) {
+    /**
+     * Set the launch result the intent requested
+     *
+     * @param launchResult the launch result
+     * @param wasIntentActivity was this launch for an activity
+     */
+    public void setLaunchResult(int launchResult, boolean wasIntentActivity) {
+        mIsLaunchForActivity = wasIntentActivity;
         setAnimationPending((launchResult == ActivityManager.START_TASK_TO_FRONT
                 || launchResult == ActivityManager.START_SUCCESS)
-                        && mStatusBar.getBarState() == StatusBarState.SHADE);
+                        && mCallback.areLaunchAnimationsEnabled());
+    }
+
+    public boolean isLaunchForActivity() {
+        return mIsLaunchForActivity;
     }
 
     private void setAnimationPending(boolean pending) {
@@ -106,18 +121,26 @@ public class ActivityLaunchAnimator {
         }
     }
 
+    public boolean isAnimationRunning() {
+        return mAnimationRunning;
+    }
+
     class AnimationRunner extends IRemoteAnimationRunner.Stub {
 
         private final ExpandableNotificationRow mSourceNotification;
         private final ExpandAnimationParameters mParams;
         private final Rect mWindowCrop = new Rect();
-        private boolean mInstantCollapsePanel = true;
+        private final float mNotificationCornerRadius;
+        private float mCornerRadius;
+        private boolean mIsFullScreenLaunch = true;
         private final SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
 
         public AnimationRunner(ExpandableNotificationRow sourceNofitication) {
             mSourceNotification = sourceNofitication;
             mParams = new ExpandAnimationParameters();
             mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(mSourceNotification);
+            mNotificationCornerRadius = Math.max(mSourceNotification.getCurrentTopRoundness(),
+                    mSourceNotification.getCurrentBottomRoundness());
         }
 
         @Override
@@ -130,14 +153,15 @@ public class ActivityLaunchAnimator {
                 if (primary == null) {
                     setAnimationPending(false);
                     invokeCallback(iRemoteAnimationFinishedCallback);
+                    mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
                     return;
                 }
 
                 setExpandAnimationRunning(true);
-                mInstantCollapsePanel = primary.position.y == 0
+                mIsFullScreenLaunch = primary.position.y == 0
                         && primary.sourceContainerBounds.height()
                                 >= mNotificationPanel.getHeight();
-                if (!mInstantCollapsePanel) {
+                if (!mIsFullScreenLaunch) {
                     mNotificationPanel.collapseWithDuration(ANIMATION_DURATION);
                 }
                 ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
@@ -168,8 +192,7 @@ public class ActivityLaunchAnimator {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
                         mParams.linearProgress = animation.getAnimatedFraction();
-                        float progress
-                                = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                        float progress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
                                         mParams.linearProgress);
                         int newWidth = (int) MathUtils.lerp(notificationWidth,
                                 targetWidth, progress);
@@ -181,6 +204,8 @@ public class ActivityLaunchAnimator {
                                         + notificationHeight,
                                 primary.position.y + primary.sourceContainerBounds.bottom,
                                 progress);
+                        mCornerRadius = MathUtils.lerp(mNotificationCornerRadius,
+                                mWindowCornerRadius, progress);
                         applyParamsToWindow(primary);
                         applyParamsToNotification(mParams);
                         applyParamsToNotificationList(mParams);
@@ -190,9 +215,6 @@ public class ActivityLaunchAnimator {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         setExpandAnimationRunning(false);
-                        if (mInstantCollapsePanel) {
-                            mStatusBar.collapsePanel(false /* animate */);
-                        }
                         invokeCallback(iRemoteAnimationFinishedCallback);
                     }
                 });
@@ -226,7 +248,9 @@ public class ActivityLaunchAnimator {
             mSourceNotification.setExpandAnimationRunning(running);
             mStatusBarWindow.setExpandAnimationRunning(running);
             mNotificationContainer.setExpandingNotification(running ? mSourceNotification : null);
+            mAnimationRunning = running;
             if (!running) {
+                mCallback.onExpandAnimationFinished(mIsFullScreenLaunch);
                 applyParamsToNotification(null);
                 applyParamsToNotificationList(null);
             }
@@ -246,8 +270,8 @@ public class ActivityLaunchAnimator {
             Matrix m = new Matrix();
             m.postTranslate(0, (float) (mParams.top - app.position.y));
             mWindowCrop.set(mParams.left, 0, mParams.right, mParams.getHeight());
-            SurfaceParams params = new SurfaceParams(new SurfaceControlCompat(app.leash),
-                    1f /* alpha */, m, mWindowCrop, app.prefixOrderIndex);
+            SurfaceParams params = new SurfaceParams(app.leash, 1f /* alpha */, m, mWindowCrop,
+                    app.prefixOrderIndex, mCornerRadius, true /* visible */);
             mSyncRtTransactionApplier.scheduleApply(params);
         }
 
@@ -255,7 +279,7 @@ public class ActivityLaunchAnimator {
         public void onAnimationCancelled() throws RemoteException {
             mSourceNotification.post(() -> {
                 setAnimationPending(false);
-                mStatusBar.onLaunchAnimationCancelled();
+                mCallback.onLaunchAnimationCancelled();
             });
         }
     };
@@ -320,5 +344,31 @@ public class ActivityLaunchAnimator {
         public float getStartTranslationZ() {
             return startTranslationZ;
         }
+    }
+
+    public interface Callback {
+
+        /**
+         * Called when the launch animation was cancelled.
+         */
+        void onLaunchAnimationCancelled();
+
+        /**
+         * Called when the launch animation has timed out without starting an actual animation.
+         */
+        void onExpandAnimationTimedOut();
+
+        /**
+         * Called when the expand animation has finished.
+         *
+         * @param launchIsFullScreen True if this launch was fullscreen, such that now the window
+         *                           fills the whole screen
+         */
+        void onExpandAnimationFinished(boolean launchIsFullScreen);
+
+        /**
+         * Are animations currently enabled.
+         */
+        boolean areLaunchAnimationsEnabled();
     }
 }

@@ -13,14 +13,19 @@
  */
 package com.android.server;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManagerInternal;
+import android.net.Uri;
 import android.os.Build;
 import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
+
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,6 +34,7 @@ import org.mockito.MockitoAnnotations;
 
 public class UiServiceTestCase {
     @Mock protected PackageManagerInternal mPmi;
+    @Mock protected UriGrantsManagerInternal mUgmInternal;
 
     protected static final String PKG_N_MR1 = "com.example.n_mr1";
     protected static final String PKG_O = "com.example.o";
@@ -43,7 +49,7 @@ public class UiServiceTestCase {
     }
 
     @Before
-    public void setup() {
+    public final void setup() {
         MockitoAnnotations.initMocks(this);
 
         // Share classloader to allow package access.
@@ -65,5 +71,10 @@ public class UiServiceTestCase {
                             return Build.VERSION_CODES.CUR_DEVELOPMENT;
                     }
                 });
+
+        LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
+        LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
+        when(mUgmInternal.checkGrantUriPermission(
+                anyInt(), anyString(), any(Uri.class), anyInt(), anyInt())).thenReturn(-1);
     }
 }

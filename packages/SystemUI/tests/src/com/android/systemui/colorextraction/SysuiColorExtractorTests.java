@@ -18,6 +18,12 @@ package com.android.systemui.colorextraction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
@@ -27,10 +33,15 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.internal.colorextraction.types.Tonal;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests color extraction generation.
@@ -47,73 +58,75 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
             ColorExtractor.TYPE_DARK,
             ColorExtractor.TYPE_EXTRA_DARK};
 
-    @Test
-    public void getColors_usesGreyIfWallpaperNotVisible() {
-        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
-        colors.setMainColor(Color.RED);
-        colors.setSecondaryColor(Color.RED);
+    @Mock
+    private WallpaperManager mWallpaperManager;
+    private ColorExtractor.GradientColors mColors;
+    private SysuiColorExtractor mColorExtractor;
 
-        SysuiColorExtractor extractor = getTestableExtractor(colors);
-        simulateEvent(extractor);
-        extractor.setWallpaperVisible(false);
-
-        ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
-
-        for (int type : sTypes) {
-            assertEquals("Not using fallback!",
-                    extractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
-            assertNotEquals("Wallpaper visibility event should not affect lock wallpaper.",
-                    extractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
-        }
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mColors = new ColorExtractor.GradientColors();
+        mColors.setMainColor(Color.RED);
+        mColors.setSecondaryColor(Color.RED);
+        mColorExtractor = new SysuiColorExtractor(getContext(),
+                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
+                        outGradientColorsExtraDark) -> {
+                    outGradientColorsNormal.set(mColors);
+                    outGradientColorsDark.set(mColors);
+                    outGradientColorsExtraDark.set(mColors);
+                }, mock(ConfigurationController.class), mWallpaperManager, true /* immediately */);
     }
 
     @Test
-    public void getColors_doesntUseFallbackIfVisible() {
-        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
-        colors.setMainColor(Color.RED);
-        colors.setSecondaryColor(Color.RED);
+    public void getColors() {
+        mColors.setMainColor(Color.RED);
+        mColors.setSecondaryColor(Color.RED);
 
-        SysuiColorExtractor extractor = getTestableExtractor(colors);
-        simulateEvent(extractor);
-        extractor.setWallpaperVisible(true);
-
+        simulateEvent(mColorExtractor);
         for (int which : sWhich) {
             for (int type : sTypes) {
                 assertEquals("Not using extracted colors!",
-                        extractor.getColors(which, type), colors);
+                        mColorExtractor.getColors(which, type), mColors);
             }
         }
     }
 
     @Test
     public void getColors_fallbackWhenMediaIsVisible() {
-        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
-        colors.setMainColor(Color.RED);
-        colors.setSecondaryColor(Color.RED);
+        simulateEvent(mColorExtractor);
+        mColorExtractor.setHasMediaArtwork(true);
 
-        SysuiColorExtractor extractor = getTestableExtractor(colors);
-        simulateEvent(extractor);
-        extractor.setWallpaperVisible(true);
-        extractor.setHasBackdrop(true);
-
-        ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
+        ColorExtractor.GradientColors fallbackColors = mColorExtractor.getNeutralColors();
 
         for (int type : sTypes) {
             assertEquals("Not using fallback!",
-                    extractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
+                    mColorExtractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
             assertNotEquals("Media visibility should not affect system wallpaper.",
-                    extractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
+                    mColorExtractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
         }
     }
 
-    private SysuiColorExtractor getTestableExtractor(ColorExtractor.GradientColors colors) {
-        return new SysuiColorExtractor(getContext(),
-                (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,
-                        outGradientColorsExtraDark) -> {
-                    outGradientColorsNormal.set(colors);
-                    outGradientColorsDark.set(colors);
-                    outGradientColorsExtraDark.set(colors);
-                }, false);
+    @Test
+    public void onUiModeChanged_reloadsColors() {
+        Tonal tonal = mock(Tonal.class);
+        ConfigurationController configurationController = mock(ConfigurationController.class);
+        SysuiColorExtractor sysuiColorExtractor = new SysuiColorExtractor(getContext(),
+                tonal, configurationController, mWallpaperManager, true /* immediately */);
+        verify(configurationController).addCallback(eq(sysuiColorExtractor));
+
+        reset(tonal);
+        sysuiColorExtractor.onUiModeChanged();
+        verify(tonal).applyFallback(any(), any());
+    }
+
+    @Test
+    public void onUiModeChanged_notifiesListener() {
+        ColorExtractor.OnColorsChangedListener listener = mock(
+                ColorExtractor.OnColorsChangedListener.class);
+        mColorExtractor.addOnColorsChangedListener(listener);
+        mColorExtractor.onUiModeChanged();
+        verify(listener).onColorsChanged(any(), anyInt());
     }
 
     private void simulateEvent(SysuiColorExtractor extractor) {

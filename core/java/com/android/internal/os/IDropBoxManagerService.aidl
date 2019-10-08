@@ -38,5 +38,5 @@ interface IDropBoxManagerService {
 
     /** @see DropBoxManager#getNextEntry */
     @UnsupportedAppUsage
-    DropBoxManager.Entry getNextEntry(String tag, long millis);
+    DropBoxManager.Entry getNextEntry(String tag, long millis, String packageName);
 }

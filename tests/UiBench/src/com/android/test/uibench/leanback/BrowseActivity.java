@@ -13,7 +13,7 @@
  */
 package com.android.test.uibench.leanback;
 
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 import android.app.Activity;
 import android.os.Bundle;
 
