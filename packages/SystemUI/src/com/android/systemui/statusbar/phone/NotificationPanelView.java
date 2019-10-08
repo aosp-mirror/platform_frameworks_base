@@ -518,6 +518,7 @@ public class NotificationPanelView extends PanelView implements
      * Call after this view has been fully inflated and had its children attached.
      */
     public void onChildrenAttached() {
+        loadDimens();
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         mKeyguardStatusView = findViewById(R.id.keyguard_status_view);
 
