@@ -300,7 +300,7 @@ import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.Watchdog;
-import com.android.server.compat.PlatformCompat;
+import com.android.server.compat.CompatConfig;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.DatabaseVersion;
@@ -836,7 +836,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final Singleton<StorageManager> mStorageManagerProducer;
         private final Singleton<AppOpsManager> mAppOpsManagerProducer;
         private final Singleton<AppsFilter> mAppsFilterProducer;
-        private final Singleton<PlatformCompat> mPlatformCompatProducer;
+        private final Singleton<CompatConfig> mPlatformCompatProducer;
 
         Injector(Context context, Object lock, Installer installer,
                 Object installLock, PackageAbiHelper abiHelper,
@@ -854,7 +854,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Producer<StorageManager> storageManagerProducer,
                 Producer<AppOpsManager> appOpsManagerProducer,
                 Producer<AppsFilter> appsFilterProducer,
-                Producer<PlatformCompat> platformCompatProducer) {
+                Producer<CompatConfig> platformCompatProducer) {
             mContext = context;
             mLock = lock;
             mInstaller = installer;
@@ -965,7 +965,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mAppsFilterProducer.get(this, mPackageManager);
         }
 
-        public PlatformCompat getCompatibility() {
+        public CompatConfig getCompatibility() {
             return mPlatformCompatProducer.get(this, mPackageManager);
         }
     }
@@ -2467,7 +2467,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 new Injector.SystemServiceProducer<>(StorageManager.class),
                 new Injector.SystemServiceProducer<>(AppOpsManager.class),
                 (i, pm) -> AppsFilter.create(i),
-                (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"));
+                (i, pm) -> CompatConfig.get());
 
         PackageManagerService m = new PackageManagerService(injector, factoryTest, onlyCore);
         t.traceEnd(); // "create package manager"
