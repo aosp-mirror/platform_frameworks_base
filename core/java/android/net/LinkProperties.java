@@ -68,6 +68,7 @@ public final class LinkProperties implements Parcelable {
     // in the format "rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max"
     private String mTcpBufferSizes;
     private IpPrefix mNat64Prefix;
+    private boolean mWakeOnLanSupported;
 
     private static final int MIN_MTU    = 68;
     private static final int MIN_MTU_V6 = 1280;
@@ -193,6 +194,7 @@ public final class LinkProperties implements Parcelable {
             setMtu(source.mMtu);
             mTcpBufferSizes = source.mTcpBufferSizes;
             mNat64Prefix = source.mNat64Prefix;
+            mWakeOnLanSupported = source.mWakeOnLanSupported;
         }
     }
 
@@ -852,6 +854,7 @@ public final class LinkProperties implements Parcelable {
         mMtu = 0;
         mTcpBufferSizes = null;
         mNat64Prefix = null;
+        mWakeOnLanSupported = false;
     }
 
     /**
@@ -912,6 +915,10 @@ public final class LinkProperties implements Parcelable {
 
         resultJoiner.add("MTU:");
         resultJoiner.add(Integer.toString(mMtu));
+
+        if (mWakeOnLanSupported) {
+            resultJoiner.add("WakeOnLanSupported: true");
+        }
 
         if (mTcpBufferSizes != null) {
             resultJoiner.add("TcpBufferSizes:");
@@ -1425,6 +1432,37 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Compares this {@code LinkProperties} WakeOnLan supported against the target.
+     *
+     * @param target LinkProperties to compare.
+     * @return {@code true} if both are identical, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIdenticalWakeOnLan(LinkProperties target) {
+        return isWakeOnLanSupported() == target.isWakeOnLanSupported();
+    }
+
+    /**
+     * Set whether the network interface supports WakeOnLAN
+     *
+     * @param supported WakeOnLAN supported value
+     *
+     * @hide
+     */
+    public void setWakeOnLanSupported(boolean supported) {
+        mWakeOnLanSupported = supported;
+    }
+
+    /**
+     * Returns whether the network interface supports WakeOnLAN
+     *
+     * @return {@code true} if interface supports WakeOnLAN, {@code false} otherwise.
+     */
+    public boolean isWakeOnLanSupported() {
+        return mWakeOnLanSupported;
+    }
+
+    /**
      * Compares this {@code LinkProperties} instance against the target
      * LinkProperties in {@code obj}. Two LinkPropertieses are equal if
      * all their fields are equal in values.
@@ -1461,7 +1499,8 @@ public final class LinkProperties implements Parcelable {
                 && isIdenticalStackedLinks(target)
                 && isIdenticalMtu(target)
                 && isIdenticalTcpBufferSizes(target)
-                && isIdenticalNat64Prefix(target);
+                && isIdenticalNat64Prefix(target)
+                && isIdenticalWakeOnLan(target);
     }
 
     /**
@@ -1577,7 +1616,8 @@ public final class LinkProperties implements Parcelable {
                 + (mUsePrivateDns ? 57 : 0)
                 + mPcscfs.size() * 67
                 + ((null == mPrivateDnsServerName) ? 0 : mPrivateDnsServerName.hashCode())
-                + Objects.hash(mNat64Prefix);
+                + Objects.hash(mNat64Prefix)
+                + (mWakeOnLanSupported ? 71 : 0);
     }
 
     /**
@@ -1622,6 +1662,8 @@ public final class LinkProperties implements Parcelable {
 
         ArrayList<LinkProperties> stackedLinks = new ArrayList<>(mStackedLinks.values());
         dest.writeList(stackedLinks);
+
+        dest.writeBoolean(mWakeOnLanSupported);
     }
 
     /**
@@ -1677,6 +1719,7 @@ public final class LinkProperties implements Parcelable {
                 for (LinkProperties stackedLink: stackedLinks) {
                     netProp.addStackedLink(stackedLink);
                 }
+                netProp.setWakeOnLanSupported(in.readBoolean());
                 return netProp;
             }
 
