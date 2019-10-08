@@ -518,7 +518,10 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArraySet<Session> mSessions = new ArraySet<>();
 
     /** Mapping from an IWindow IBinder to the server's Window object. */
-    final WindowHashMap mWindowMap = new WindowHashMap();
+    final HashMap<IBinder, WindowState> mWindowMap = new HashMap<>();
+
+    /** Mapping from an InputWindowHandle token to the server's Window object. */
+    final HashMap<IBinder, WindowState> mInputToWindowMap = new HashMap<>();
 
     /** Global service lock used by the package the owns this service. */
     final WindowManagerGlobalLock mGlobalLock;
@@ -1585,7 +1588,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.attach();
             mWindowMap.put(client.asBinder(), win);
-
             win.initAppOpsState();
 
             final boolean suspended = mPmInternal.isPackageSuspended(win.getOwningPackage(),
@@ -7621,7 +7623,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void onPointerDownOutsideFocusLocked(IBinder touchedToken) {
-        final WindowState touchedWindow = windowForClientLocked(null, touchedToken, false);
+        final WindowState touchedWindow = mInputToWindowMap.get(touchedToken);
         if (touchedWindow == null || !touchedWindow.canReceiveKeys()) {
             return;
         }
@@ -7694,9 +7696,9 @@ public class WindowManagerService extends IWindowManager.Stub
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
 
-        mInputManager.registerInputChannel(inputChannel, null /* generate new token */);
+        mInputManager.registerInputChannel(inputChannel);
 
-        InputWindowHandle h = new InputWindowHandle(null, null, displayId);
+        InputWindowHandle h = new InputWindowHandle(null, displayId);
         h.token = inputChannel.getToken();
         h.name = name;
         h.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;

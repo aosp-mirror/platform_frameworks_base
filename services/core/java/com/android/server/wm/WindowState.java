@@ -820,8 +820,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedHeight = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mAppToken != null ? mAppToken.mInputApplicationHandle : null, c,
-                    getDisplayId());
+                mAppToken != null ? mAppToken.mInputApplicationHandle : null, getDisplayId());
     }
 
     void attach() {
@@ -2191,7 +2190,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
         mInputChannel = inputChannels[0];
         mClientChannel = inputChannels[1];
-        mInputWindowHandle.token = mClient.asBinder();
+        mWmService.mInputManager.registerInputChannel(mInputChannel);
+        mClientChannel.setToken(mInputChannel.getToken());
+        mInputWindowHandle.token = mInputChannel.getToken();
         if (outInputChannel != null) {
             mClientChannel.transferTo(outInputChannel);
             mClientChannel.dispose();
@@ -2202,7 +2203,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Create dummy event receiver that simply reports all events as handled.
             mDeadWindowEventReceiver = new DeadWindowEventReceiver(mClientChannel);
         }
-        mWmService.mInputManager.registerInputChannel(mInputChannel, mClient.asBinder());
+        mWmService.mInputToWindowMap.put(mInputWindowHandle.token, this);
     }
 
     void disposeInputChannel() {
@@ -2223,6 +2224,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClientChannel = null;
         }
         mWmService.mKeyInterceptionInfoForToken.remove(mInputWindowHandle.token);
+        mWmService.mInputToWindowMap.remove(mInputWindowHandle.token);
         mInputWindowHandle.token = null;
     }
 

@@ -263,7 +263,7 @@ class DragState {
             InputChannel[] channels = InputChannel.openInputChannelPair("drag");
             mServerChannel = channels[0];
             mClientChannel = channels[1];
-            mService.mInputManager.registerInputChannel(mServerChannel, null);
+            mService.mInputManager.registerInputChannel(mServerChannel);
             mInputEventReceiver = new DragInputEventReceiver(mClientChannel,
                     mService.mH.getLooper(), mDragDropController);
 
@@ -272,7 +272,7 @@ class DragState {
             mDragApplicationHandle.dispatchingTimeoutNanos =
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle,
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.token = mServerChannel.getToken();

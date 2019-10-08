@@ -5,20 +5,25 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSIDE_FOCUS;
 
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
+import android.view.IWindow;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.android.server.input.InputManagerService;
 
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class InputManagerCallback implements InputManagerService.WindowManagerCallbacks {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "InputManagerCallback" : TAG_WM;
     private final WindowManagerService mService;
 
     // Set to true when the first input device configuration change notification
@@ -37,6 +42,13 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     // which point the ActivityManager will enable dispatching.
     private boolean mInputDispatchEnabled;
 
+    // TODO(b/141749603)) investigate if this can be part of client focus change dispatch
+    // Tracks the currently focused window used to update pointer capture state in clients
+    private AtomicReference<IWindow> mFocusedWindow = new AtomicReference<>();
+
+    // Tracks focused window pointer capture state
+    private boolean mFocusedWindowHasCapture;
+
     public InputManagerCallback(WindowManagerService service) {
         mService = service;
     }
@@ -53,7 +65,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         }
 
         synchronized (mService.mGlobalLock) {
-            WindowState windowState = mService.windowForClientLocked(null, token, false);
+            WindowState windowState = mService.mInputToWindowMap.get(token);
             if (windowState != null) {
                 Slog.i(TAG_WM, "WINDOW DIED " + windowState);
                 windowState.removeIfPossible();
@@ -72,9 +84,10 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         AppWindowToken appWindowToken = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
+        //TODO(b/141764879) Limit scope of wm lock when input calls notifyANR
         synchronized (mService.mGlobalLock) {
             if (token != null) {
-                windowState = mService.windowForClientLocked(null, token, false);
+                windowState = mService.mInputToWindowMap.get(token);
                 if (windowState != null) {
                     appWindowToken = windowState.mAppToken;
                 }
@@ -109,7 +122,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
             final boolean abort = appWindowToken.keyDispatchingTimedOut(reason,
-                    (windowState != null) ? windowState.mSession.mPid : -1);
+                    windowState.mSession.mPid);
             if (!abort) {
                 // The activity manager declined to abort dispatching.
                 // Wait a bit longer and timeout again later.
@@ -237,6 +250,59 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     @Override
     public void onPointerDownOutsideFocus(IBinder touchedToken) {
         mService.mH.obtainMessage(ON_POINTER_DOWN_OUTSIDE_FOCUS, touchedToken).sendToTarget();
+    }
+
+    @Override
+    public boolean notifyFocusChanged(IBinder oldToken, IBinder newToken) {
+        boolean requestRefreshConfiguration = false;
+        final IWindow newFocusedWindow;
+        final WindowState win;
+
+        // TODO(b/141749603) investigate if this can be part of client focus change dispatch
+        synchronized (mService.mGlobalLock) {
+            win = mService.mInputToWindowMap.get(newToken);
+        }
+        newFocusedWindow = (win != null) ? win.mClient : null;
+
+        final IWindow focusedWindow = mFocusedWindow.get();
+        if (focusedWindow != null) {
+            if (focusedWindow.asBinder() == newFocusedWindow.asBinder()) {
+                Slog.w(TAG, "notifyFocusChanged called with unchanged mFocusedWindow="
+                        + focusedWindow);
+                return false;
+            }
+            requestRefreshConfiguration = dispatchPointerCaptureChanged(focusedWindow, false);
+        }
+        mFocusedWindow.set(newFocusedWindow);
+        return requestRefreshConfiguration;
+    }
+
+    @Override
+    public boolean requestPointerCapture(IBinder windowToken, boolean enabled) {
+        final IWindow focusedWindow = mFocusedWindow.get();
+        if (focusedWindow == null || focusedWindow.asBinder() != windowToken) {
+            Slog.e(TAG, "requestPointerCapture called for a window that has no focus: "
+                    + windowToken);
+            return false;
+        }
+        if (mFocusedWindowHasCapture == enabled) {
+            Slog.i(TAG, "requestPointerCapture: already " + (enabled ? "enabled" : "disabled"));
+            return false;
+        }
+        return dispatchPointerCaptureChanged(focusedWindow, enabled);
+    }
+
+    private boolean dispatchPointerCaptureChanged(IWindow focusedWindow, boolean enabled) {
+        if (mFocusedWindowHasCapture != enabled) {
+            mFocusedWindowHasCapture = enabled;
+            try {
+                focusedWindow.dispatchPointerCaptureChanged(enabled);
+            } catch (RemoteException ex) {
+                /* ignore */
+            }
+            return true;
+        }
+        return false;
     }
 
     /** Waits until the built-in input devices have been configured. */

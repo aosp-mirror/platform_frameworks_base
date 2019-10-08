@@ -411,7 +411,7 @@ final class InputMonitor {
         WallpaperController wallpaperController;
 
         // An invalid window handle that tells SurfaceFlinger not update the input info.
-        final InputWindowHandle mInvalidInputWindow = new InputWindowHandle(null, null, mDisplayId);
+        final InputWindowHandle mInvalidInputWindow = new InputWindowHandle(null, mDisplayId);
 
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");

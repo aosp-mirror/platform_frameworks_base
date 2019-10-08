@@ -71,7 +71,6 @@ import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
 import android.view.IInputMonitorHost;
-import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -185,9 +184,6 @@ public class InputManagerService extends IInputManager.Stub
     final Object mInputFilterLock = new Object();
     IInputFilter mInputFilter; // guarded by mInputFilterLock
     InputFilterHost mInputFilterHost; // guarded by mInputFilterLock
-
-    private IWindow mFocusedWindow;
-    private boolean mFocusedWindowHasCapture;
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -544,20 +540,16 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     /**
-     * Registers an input channel so that it can be used as an input event target.
+     * Registers an input channel so that it can be used as an input event target. The channel is
+     * registered with a generated token.
+     *
      * @param inputChannel The input channel to register.
-     * @param inputWindowHandle The handle of the input window associated with the
-     * input channel, or null if none.
      */
-    public void registerInputChannel(InputChannel inputChannel, IBinder token) {
+    public void registerInputChannel(InputChannel inputChannel) {
         if (inputChannel == null) {
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
-
-        if (token == null) {
-            token = new Binder();
-        }
-        inputChannel.setToken(token);
+        inputChannel.setToken(new Binder());
 
         nativeRegisterInputChannel(mPtr, inputChannel, Display.INVALID_DISPLAY);
     }
@@ -1513,26 +1505,9 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     public void requestPointerCapture(IBinder windowToken, boolean enabled) {
-        if (mFocusedWindow == null || mFocusedWindow.asBinder() != windowToken) {
-            Slog.e(TAG, "requestPointerCapture called for a window that has no focus: "
-                    + windowToken);
-            return;
-        }
-        if (mFocusedWindowHasCapture == enabled) {
-            Slog.i(TAG, "requestPointerCapture: already " + (enabled ? "enabled" : "disabled"));
-            return;
-        }
-        setPointerCapture(enabled);
-    }
-
-    private void setPointerCapture(boolean enabled) {
-        if (mFocusedWindowHasCapture != enabled) {
-            mFocusedWindowHasCapture = enabled;
-            try {
-                mFocusedWindow.dispatchPointerCaptureChanged(enabled);
-            } catch (RemoteException ex) {
-                /* ignore */
-            }
+        boolean requestConfigurationRefresh =
+                mWindowManagerCallbacks.requestPointerCapture(windowToken, enabled);
+        if (requestConfigurationRefresh) {
             nativeSetPointerCapture(mPtr, enabled);
         }
     }
@@ -1829,16 +1804,11 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     private void notifyFocusChanged(IBinder oldToken, IBinder newToken) {
-        if (mFocusedWindow != null) {
-            if (mFocusedWindow.asBinder() == newToken) {
-                Slog.w(TAG, "notifyFocusChanged called with unchanged mFocusedWindow="
-                        + mFocusedWindow);
-                return;
-            }
-            setPointerCapture(false);
+        final boolean requestConfigurationRefresh =
+                mWindowManagerCallbacks.notifyFocusChanged(oldToken, newToken);
+        if (requestConfigurationRefresh) {
+            nativeSetPointerCapture(mPtr, false);
         }
-
-        mFocusedWindow = IWindow.Stub.asInterface(newToken);
     }
 
     // Native callback.
@@ -2116,6 +2086,20 @@ public class InputManagerService extends IInputManager.Stub
          * @param touchedToken The token for the window that received the input event.
          */
         void onPointerDownOutsideFocus(IBinder touchedToken);
+
+        /**
+         * Called when the focused window has changed.
+         *
+         * @return true if we want to request a configuration refresh.
+         */
+        boolean notifyFocusChanged(IBinder oldToken, IBinder newToken);
+
+        /**
+         * Called by the client to request pointer capture.
+         *
+         * @return true if we want to request a configuration refresh.
+         */
+        boolean requestPointerCapture(IBinder windowToken, boolean enabled);
     }
 
     /**
