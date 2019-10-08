@@ -305,8 +305,11 @@ public final class Parcel {
     private static native void nativeWriteFloat(long nativePtr, float val);
     @FastNative
     private static native void nativeWriteDouble(long nativePtr, double val);
+    @FastNative
     static native void nativeWriteString(long nativePtr, String val);
+    @FastNative
     private static native void nativeWriteStrongBinder(long nativePtr, IBinder val);
+    @FastNative
     private static native long nativeWriteFileDescriptor(long nativePtr, FileDescriptor val);
 
     private static native byte[] nativeCreateByteArray(long nativePtr);
@@ -320,8 +323,11 @@ public final class Parcel {
     private static native float nativeReadFloat(long nativePtr);
     @CriticalNative
     private static native double nativeReadDouble(long nativePtr);
+    @FastNative
     static native String nativeReadString(long nativePtr);
+    @FastNative
     private static native IBinder nativeReadStrongBinder(long nativePtr);
+    @FastNative
     private static native FileDescriptor nativeReadFileDescriptor(long nativePtr);
 
     private static native long nativeCreate();
