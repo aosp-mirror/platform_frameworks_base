@@ -39,3 +39,6 @@
 #
 # Add your custom mappings below this line (with no "#" at the start of the line):
 
+test/mimeA extA extB extX
+?test/mimeC ?extX ?extY ?extZ
+test/mimeB extC ?extD extF
