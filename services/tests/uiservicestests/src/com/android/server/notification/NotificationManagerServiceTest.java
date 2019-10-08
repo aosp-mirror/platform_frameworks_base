@@ -1182,6 +1182,36 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAutobundledSummary_notificationAdded() {
+        NotificationRecord summary =
+                generateNotificationRecord(mTestNotificationChannel, 0, "pkg", true);
+        summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
+        mService.addNotification(summary);
+        mService.mSummaryByGroupKey.put("pkg", summary);
+        mService.mAutobundledSummaries.put(0, new ArrayMap<>());
+        mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
+        mService.updateAutobundledSummaryFlags(0, "pkg", true);
+
+        assertTrue(summary.sbn.isOngoing());
+    }
+
+    @Test
+    public void testAutobundledSummary_notificationRemoved() {
+        NotificationRecord summary =
+                generateNotificationRecord(mTestNotificationChannel, 0, "pkg", true);
+        summary.getNotification().flags |= Notification.FLAG_AUTOGROUP_SUMMARY;
+        summary.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        mService.addNotification(summary);
+        mService.mAutobundledSummaries.put(0, new ArrayMap<>());
+        mService.mAutobundledSummaries.get(0).put("pkg", summary.getKey());
+        mService.mSummaryByGroupKey.put("pkg", summary);
+
+        mService.updateAutobundledSummaryFlags(0, "pkg", false);
+
+        assertFalse(summary.sbn.isOngoing());
+    }
+
+    @Test
     public void testCancelAllNotifications_IgnoreForegroundService() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= FLAG_FOREGROUND_SERVICE;
