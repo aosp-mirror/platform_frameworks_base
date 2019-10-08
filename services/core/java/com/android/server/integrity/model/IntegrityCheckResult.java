@@ -23,7 +23,7 @@ package com.android.server.integrity.model;
  * <p>It contains the outcome effect (whether to allow or block the install), and the rule causing
  * that effect.
  */
-public final class EvaluationOutcome {
+public final class IntegrityCheckResult {
 
     public enum Effect {
         ALLOW,
@@ -33,7 +33,7 @@ public final class EvaluationOutcome {
     private final Effect mEffect;
     private final Rule mRule;
 
-    private EvaluationOutcome(Effect effect, Rule rule) {
+    private IntegrityCheckResult(Effect effect, Rule rule) {
         this.mEffect = effect;
         this.mRule = rule;
     }
@@ -51,8 +51,8 @@ public final class EvaluationOutcome {
      *
      * @return An evaluation outcome with ALLOW effect and empty rule.
      */
-    public static EvaluationOutcome allow() {
-        return new EvaluationOutcome(Effect.ALLOW, Rule.EMPTY);
+    public static IntegrityCheckResult allow() {
+        return new IntegrityCheckResult(Effect.ALLOW, Rule.EMPTY);
     }
 
     /**
@@ -61,7 +61,7 @@ public final class EvaluationOutcome {
      * @param rule Rule causing the DENY effect.
      * @return An evaluation outcome with DENY effect and rule causing that effect.
      */
-    public static EvaluationOutcome deny(Rule rule) {
-        return new EvaluationOutcome(Effect.DENY, rule);
+    public static IntegrityCheckResult deny(Rule rule) {
+        return new IntegrityCheckResult(Effect.DENY, rule);
     }
 }
