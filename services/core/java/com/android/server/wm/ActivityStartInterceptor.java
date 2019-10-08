@@ -274,7 +274,7 @@ class ActivityStartInterceptor {
         // ConfirmCredentials intent and unassign it, as otherwise the task will move to
         // front even if ConfirmCredentials is cancelled.
         if (mInTask != null) {
-            mIntent.putExtra(EXTRA_TASK_ID, mInTask.taskId);
+            mIntent.putExtra(EXTRA_TASK_ID, mInTask.mTaskId);
             mInTask = null;
         }
         if (mActivityOptions == null) {

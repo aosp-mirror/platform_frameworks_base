@@ -317,24 +317,24 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         doAnswer(invocation -> {
             display.positionChildAtTop(stack3, false);
             return true;
-        }).when(mSupervisor).removeTaskByIdLocked(eq(task4.taskId), anyBoolean(), anyBoolean(),
+        }).when(mSupervisor).removeTaskByIdLocked(eq(task4.mTaskId), anyBoolean(), anyBoolean(),
                 any());
 
         // Removing stacks from the display while removing stacks.
         doAnswer(invocation -> {
             display.removeChild(stack2);
             return true;
-        }).when(mSupervisor).removeTaskByIdLocked(eq(task2.taskId), anyBoolean(), anyBoolean(),
+        }).when(mSupervisor).removeTaskByIdLocked(eq(task2.mTaskId), anyBoolean(), anyBoolean(),
                 any());
 
         runnable.run();
-        verify(mSupervisor).removeTaskByIdLocked(eq(task4.taskId), anyBoolean(), anyBoolean(),
+        verify(mSupervisor).removeTaskByIdLocked(eq(task4.mTaskId), anyBoolean(), anyBoolean(),
                 any());
-        verify(mSupervisor).removeTaskByIdLocked(eq(task3.taskId), anyBoolean(), anyBoolean(),
+        verify(mSupervisor).removeTaskByIdLocked(eq(task3.mTaskId), anyBoolean(), anyBoolean(),
                 any());
-        verify(mSupervisor).removeTaskByIdLocked(eq(task2.taskId), anyBoolean(), anyBoolean(),
+        verify(mSupervisor).removeTaskByIdLocked(eq(task2.mTaskId), anyBoolean(), anyBoolean(),
                 any());
-        verify(mSupervisor).removeTaskByIdLocked(eq(task1.taskId), anyBoolean(), anyBoolean(),
+        verify(mSupervisor).removeTaskByIdLocked(eq(task1.mTaskId), anyBoolean(), anyBoolean(),
                 any());
     }
 

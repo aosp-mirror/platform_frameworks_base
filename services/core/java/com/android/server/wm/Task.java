@@ -67,7 +67,9 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
     // TODO: Track parent marks like this in WindowContainer.
     TaskStack mStack;
+    /* Unique identifier for this task. */
     final int mTaskId;
+    /* User for which this task was created. */
     final int mUserId;
     private boolean mDeferRemoval = false;
 
@@ -101,6 +103,8 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     private boolean mDragResizing;
     private int mDragResizeMode;
 
+    // This represents the last resolved activity values for this task
+    // NOTE: This value needs to be persisted with each task
     private TaskDescription mTaskDescription;
 
     // If set to true, the task will report that it is not in the floating

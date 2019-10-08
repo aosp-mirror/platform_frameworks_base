@@ -208,7 +208,7 @@ class TaskRecord extends ConfigurationContainer {
      */
     private static TaskRecordFactory sTaskRecordFactory;
 
-    final int taskId;       // Unique identifier for this task.
+    final int mTaskId;      // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
     String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
     final IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
@@ -234,7 +234,7 @@ class TaskRecord extends ConfigurationContainer {
     boolean hasBeenVisible; // Set if any activities in the task have been visible to the user.
 
     String stringName;      // caching of toString() result.
-    int userId;             // user for which this task was created
+    int mUserId;            // user for which this task was created
     boolean mUserSetupComplete; // The user set-up is complete as of the last time the task activity
                                 // was changed.
 
@@ -262,7 +262,7 @@ class TaskRecord extends ConfigurationContainer {
 
     // This represents the last resolved activity values for this task
     // NOTE: This value needs to be persisted with each task
-    TaskDescription lastTaskDescription = new TaskDescription();
+    TaskDescription mTaskDescription;
 
     /** List of all activities in the task arranged in history order */
     final ArrayList<ActivityRecord> mActivities;
@@ -282,7 +282,7 @@ class TaskRecord extends ConfigurationContainer {
     /** Only used for persistable tasks, otherwise 0. The last time this task was moved. Used for
      * determining the order when restoring. Sign indicates whether last task movement was to front
      * (positive) or back (negative). Absolute value indicates time. */
-    long mLastTimeMoved = System.currentTimeMillis();
+    long mLastTimeMoved;
 
     /** If original intent did not allow relinquishing task identity, save that information */
     private boolean mNeverRelinquishIdentity = true;
@@ -304,7 +304,7 @@ class TaskRecord extends ConfigurationContainer {
     int mCallingUid;
     String mCallingPackage;
 
-    final ActivityTaskManagerService mService;
+    final ActivityTaskManagerService mAtmService;
 
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
@@ -342,60 +342,25 @@ class TaskRecord extends ConfigurationContainer {
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
      * ActivityInfo, Intent, TaskDescription)} instead.
      */
-    TaskRecord(ActivityTaskManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
-        mService = service;
-        userId = UserHandle.getUserId(info.applicationInfo.uid);
-        taskId = _taskId;
-        lastActiveTime = SystemClock.elapsedRealtime();
-        mAffiliatedTaskId = _taskId;
-        voiceSession = _voiceSession;
-        voiceInteractor = _voiceInteractor;
-        isAvailable = true;
-        mActivities = new ArrayList<>();
-        mCallingUid = info.applicationInfo.uid;
-        mCallingPackage = info.packageName;
-        setIntent(_intent, info);
-        setMinDimensions(info);
-        touchActiveTime();
-        mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
+    TaskRecord(ActivityTaskManagerService atmService, int _taskId, ActivityInfo info,
+            Intent _intent, IVoiceInteractionSession _voiceSession,
+            IVoiceInteractor _voiceInteractor, TaskDescription _taskDescription) {
+        this(atmService, _taskId, _intent,  null /*_affinityIntent*/, null /*_affinity*/,
+                null /*_rootAffinity*/, null /*_realActivity*/, null /*_origActivity*/,
+                false /*_rootWasReset*/, false /*_autoRemoveRecents*/, false /*_askedCompatMode*/,
+                UserHandle.getUserId(info.applicationInfo.uid), 0 /*_effectiveUid*/,
+                null /*_lastDescription*/, new ArrayList<>(), System.currentTimeMillis(),
+                true /*neverRelinquishIdentity*/,
+                _taskDescription != null ? _taskDescription : new TaskDescription(),
+                _taskId, INVALID_TASK_ID, INVALID_TASK_ID, 0 /*taskAffiliationColor*/,
+                info.applicationInfo.uid, info.packageName, info.resizeMode,
+                info.supportsPictureInPicture(), false /*_realActivitySuspended*/,
+                false /*userSetupComplete*/, INVALID_MIN_SIZE, INVALID_MIN_SIZE, info,
+                _voiceSession, _voiceInteractor);
     }
 
-    /**
-     * Don't use constructor directly.
-     * Use {@link #create(ActivityTaskManagerService, int, ActivityInfo,
-     * Intent, IVoiceInteractionSession, IVoiceInteractor)} instead.
-     */
-    TaskRecord(ActivityTaskManagerService service, int _taskId, ActivityInfo info, Intent _intent,
-            TaskDescription _taskDescription) {
-        mService = service;
-        userId = UserHandle.getUserId(info.applicationInfo.uid);
-        taskId = _taskId;
-        lastActiveTime = SystemClock.elapsedRealtime();
-        mAffiliatedTaskId = _taskId;
-        voiceSession = null;
-        voiceInteractor = null;
-        isAvailable = true;
-        mActivities = new ArrayList<>();
-        mCallingUid = info.applicationInfo.uid;
-        mCallingPackage = info.packageName;
-        setIntent(_intent, info);
-        setMinDimensions(info);
-
-        isPersistable = true;
-        // Clamp to [1, max].
-        maxRecents = Math.min(Math.max(info.maxRecents, 1),
-                ActivityTaskManager.getMaxAppRecentsLimitStatic());
-
-        lastTaskDescription = _taskDescription;
-        touchActiveTime();
-        mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
-    }
-
-    /**
-     * Don't use constructor directly. This is only used by XML parser.
-     */
-    TaskRecord(ActivityTaskManagerService service, int _taskId, Intent _intent,
+    /** Don't use constructor directly. This is only used by XML parser. */
+    TaskRecord(ActivityTaskManagerService atmService, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
@@ -404,15 +369,15 @@ class TaskRecord extends ConfigurationContainer {
             TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
             int resizeMode, boolean supportsPictureInPicture, boolean _realActivitySuspended,
-            boolean userSetupComplete, int minWidth, int minHeight) {
-        mService = service;
-        taskId = _taskId;
-        intent = _intent;
+            boolean userSetupComplete, int minWidth, int minHeight, ActivityInfo info,
+            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
+        mAtmService = atmService;
+        mTaskId = _taskId;
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
-        voiceSession = null;
-        voiceInteractor = null;
+        voiceSession = _voiceSession;
+        voiceInteractor = _voiceInteractor;
         realActivity = _realActivity;
         realActivitySuspended = _realActivitySuspended;
         origActivity = _origActivity;
@@ -420,15 +385,15 @@ class TaskRecord extends ConfigurationContainer {
         isAvailable = true;
         autoRemoveRecents = _autoRemoveRecents;
         askedCompatMode = _askedCompatMode;
-        userId = _userId;
+        mUserId = _userId;
         mUserSetupComplete = userSetupComplete;
         effectiveUid = _effectiveUid;
-        lastActiveTime = SystemClock.elapsedRealtime();
+        touchActiveTime();
         lastDescription = _lastDescription;
         mActivities = activities;
         mLastTimeMoved = lastTimeMoved;
         mNeverRelinquishIdentity = neverRelinquishIdentity;
-        lastTaskDescription = _lastTaskDescription;
+        mTaskDescription = _lastTaskDescription;
         mAffiliatedTaskId = taskAffiliation;
         mAffiliatedTaskColor = taskAffiliationColor;
         mPrevAffiliateTaskId = prevTaskId;
@@ -437,9 +402,15 @@ class TaskRecord extends ConfigurationContainer {
         mCallingPackage = callingPackage;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
-        mMinWidth = minWidth;
-        mMinHeight = minHeight;
-        mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
+        if (info != null) {
+            setIntent(_intent, info);
+            setMinDimensions(info);
+        } else {
+            intent = _intent;
+            mMinWidth = minWidth;
+            mMinHeight = minHeight;
+        }
+        mAtmService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     Task getTask() {
@@ -458,9 +429,9 @@ class TaskRecord extends ConfigurationContainer {
         if (stack == null) {
             throw new IllegalArgumentException("TaskRecord: invalid stack=" + mStack);
         }
-        EventLog.writeEvent(WM_TASK_CREATED, taskId, stack.mStackId);
-        mTask = new Task(taskId, stack, userId, mService.mWindowManager, mResizeMode,
-                mSupportsPictureInPicture, lastTaskDescription, this);
+        EventLog.writeEvent(WM_TASK_CREATED, mTaskId, stack.mStackId);
+        mTask = new Task(mTaskId, stack, mUserId, mAtmService.mWindowManager, mResizeMode,
+                mSupportsPictureInPicture, mTaskDescription, this);
         final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
 
         if (!mDisplayedBounds.isEmpty()) {
@@ -487,14 +458,14 @@ class TaskRecord extends ConfigurationContainer {
         final boolean isVoiceSession = voiceSession != null;
         if (isVoiceSession) {
             try {
-                voiceSession.taskFinished(intent, taskId);
+                voiceSession.taskFinished(intent, mTaskId);
             } catch (RemoteException e) {
             }
         }
         if (autoRemoveFromRecents() || isVoiceSession) {
             // Task creator asked to remove this when done, or this task was a voice
             // interaction, so it should not remain on the recent tasks list.
-            mService.mStackSupervisor.mRecentTasks.remove(this);
+            mAtmService.mStackSupervisor.mRecentTasks.remove(this);
         }
 
         removeWindowContainer();
@@ -502,9 +473,9 @@ class TaskRecord extends ConfigurationContainer {
 
     @VisibleForTesting
     void removeWindowContainer() {
-        mService.getLockTaskController().clearLockedTask(this);
+        mAtmService.getLockTaskController().clearLockedTask(this);
         if (mTask == null) {
-            if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: could not find taskId=" + taskId);
+            if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: could not find taskId=" + mTaskId);
             return;
         }
         mTask.removeIfPossible();
@@ -514,11 +485,11 @@ class TaskRecord extends ConfigurationContainer {
             // default configuration the next time it launches.
             setBounds(null);
         }
-        mService.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
+        mAtmService.getTaskChangeNotificationController().notifyTaskRemoved(mTaskId);
     }
 
-    public void onSnapshotChanged(TaskSnapshot snapshot) {
-        mService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(taskId, snapshot);
+    void onSnapshotChanged(TaskSnapshot snapshot) {
+        mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(mTaskId, snapshot);
     }
 
     void setResizeMode(int resizeMode) {
@@ -527,13 +498,13 @@ class TaskRecord extends ConfigurationContainer {
         }
         mResizeMode = resizeMode;
         mTask.setResizeable(resizeMode);
-        mService.mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
-        mService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+        mAtmService.mRootActivityContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
     }
 
     void setTaskDockedResizing(boolean resizing) {
         if (mTask == null) {
-            Slog.w(TAG_WM, "setTaskDockedResizing: taskId " + taskId + " not found.");
+            Slog.w(TAG_WM, "setTaskDockedResizing: taskId " + mTaskId + " not found.");
             return;
         }
         mTask.setTaskDockedResizing(resizing);
@@ -541,11 +512,11 @@ class TaskRecord extends ConfigurationContainer {
 
     // TODO: Consolidate this with the resize() method below.
     public void requestResize(Rect bounds, int resizeMode) {
-        mService.resizeTask(taskId, bounds, resizeMode);
+        mAtmService.resizeTask(mTaskId, bounds, resizeMode);
     }
 
     boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
-        mService.deferWindowLayout();
+        mAtmService.deferWindowLayout();
 
         try {
             if (!isResizeable()) {
@@ -568,7 +539,7 @@ class TaskRecord extends ConfigurationContainer {
                 setBounds(bounds);
                 if (!inFreeformWindowingMode()) {
                     // re-restore the task so it can have the proper stack association.
-                    mService.mStackSupervisor.restoreRecentTaskLocked(this, null, !ON_TOP);
+                    mAtmService.mStackSupervisor.restoreRecentTaskLocked(this, null, !ON_TOP);
                 }
                 return true;
             }
@@ -582,7 +553,7 @@ class TaskRecord extends ConfigurationContainer {
             // This method assumes that the task is already placed in the right stack.
             // we do not mess with that decision and we only do the resize!
 
-            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + taskId);
+            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + mTaskId);
 
             boolean updatedConfig = false;
             mTmpConfig.setTo(getResolvedOverrideConfiguration());
@@ -606,9 +577,9 @@ class TaskRecord extends ConfigurationContainer {
                     // this won't cause tons of irrelevant windows being preserved because only
                     // activities in this task may experience a bounds change. Configs for other
                     // activities stay the same.
-                    mService.mRootActivityContainer.ensureActivitiesVisible(r, 0, preserveWindow);
+                    mAtmService.mRootActivityContainer.ensureActivitiesVisible(r, 0, preserveWindow);
                     if (!kept) {
-                        mService.mRootActivityContainer.resumeFocusedStacksTopActivities();
+                        mAtmService.mRootActivityContainer.resumeFocusedStacksTopActivities();
                     }
                 }
             }
@@ -619,7 +590,7 @@ class TaskRecord extends ConfigurationContainer {
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
             return kept;
         } finally {
-            mService.continueWindowLayout();
+            mAtmService.continueWindowLayout();
         }
     }
 
@@ -687,9 +658,9 @@ class TaskRecord extends ConfigurationContainer {
     boolean reparent(ActivityStack preferredStack, int position,
             @ReparentMoveStackMode int moveStackMode, boolean animate, boolean deferResume,
             boolean schedulePictureInPictureModeChange, String reason) {
-        final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
-        final RootActivityContainer root = mService.mRootActivityContainer;
-        final WindowManagerService windowManager = mService.mWindowManager;
+        final ActivityStackSupervisor supervisor = mAtmService.mStackSupervisor;
+        final RootActivityContainer root = mAtmService.mRootActivityContainer;
+        final WindowManagerService windowManager = mAtmService.mWindowManager;
         final ActivityStack sourceStack = getStack();
         final ActivityStack toStack = supervisor.getReparentTargetStack(this, preferredStack,
                 position == MAX_VALUE);
@@ -725,7 +696,7 @@ class TaskRecord extends ConfigurationContainer {
             windowManager.setWillReplaceWindow(topActivity.appToken, animate);
         }
 
-        mService.deferWindowLayout();
+        mAtmService.deferWindowLayout();
         boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
@@ -764,7 +735,7 @@ class TaskRecord extends ConfigurationContainer {
             // Notify the voice session if required
             if (voiceSession != null) {
                 try {
-                    voiceSession.taskStarted(intent, taskId);
+                    voiceSession.taskStarted(intent, mTaskId);
                 } catch (RemoteException e) {
                 }
             }
@@ -776,7 +747,7 @@ class TaskRecord extends ConfigurationContainer {
                         wasPaused, reason);
             }
             if (!animate) {
-                mService.mStackSupervisor.mNoAnimActivities.add(topActivity);
+                mAtmService.mStackSupervisor.mNoAnimActivities.add(topActivity);
             }
 
             // We might trigger a configuration change. Save the current task bounds for freezing.
@@ -795,7 +766,7 @@ class TaskRecord extends ConfigurationContainer {
             } else if (toStackWindowingMode == WINDOWING_MODE_FREEFORM) {
                 Rect bounds = getLaunchBounds();
                 if (bounds == null) {
-                    mService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
+                    mAtmService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
                     bounds = configBounds;
                 }
                 kept = resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
@@ -803,13 +774,13 @@ class TaskRecord extends ConfigurationContainer {
                 if (toStackSplitScreenPrimary && moveStackMode == REPARENT_KEEP_STACK_AT_FRONT) {
                     // Move recents to front so it is not behind home stack when going into docked
                     // mode
-                    mService.mStackSupervisor.moveRecentsStackToFront(reason);
+                    mAtmService.mStackSupervisor.moveRecentsStackToFront(reason);
                 }
                 kept = resize(toStack.getRequestedOverrideBounds(), RESIZE_MODE_SYSTEM,
                         !mightReplaceWindow, deferResume);
             }
         } finally {
-            mService.continueWindowLayout();
+            mAtmService.continueWindowLayout();
         }
 
         if (mightReplaceWindow) {
@@ -846,7 +817,7 @@ class TaskRecord extends ConfigurationContainer {
 
     void cancelWindowTransition() {
         if (mTask == null) {
-            Slog.w(TAG_WM, "cancelWindowTransition: taskId " + taskId + " not found.");
+            Slog.w(TAG_WM, "cancelWindowTransition: taskId " + mTaskId + " not found.");
             return;
         }
         mTask.cancelTaskWindowTransition();
@@ -859,7 +830,7 @@ class TaskRecord extends ConfigurationContainer {
 
         // TODO: Move this to {@link TaskWindowContainerController} once recent tasks are more
         // synchronized between AM and WM.
-        return mService.mWindowManager.getTaskSnapshot(taskId, userId, reducedResolution,
+        return mAtmService.mWindowManager.getTaskSnapshot(mTaskId, mUserId, reducedResolution,
                 restoreFromDisk);
     }
 
@@ -938,9 +909,9 @@ class TaskRecord extends ConfigurationContainer {
             // task as having a true root activity.
             rootWasReset = true;
         }
-        userId = UserHandle.getUserId(info.applicationInfo.uid);
-        mUserSetupComplete = Settings.Secure.getIntForUser(mService.mContext.getContentResolver(),
-                USER_SETUP_COMPLETE, 0, userId) != 0;
+        mUserId = UserHandle.getUserId(info.applicationInfo.uid);
+        mUserSetupComplete = Settings.Secure.getIntForUser(
+                mAtmService.mContext.getContentResolver(), USER_SETUP_COMPLETE, 0, mUserId) != 0;
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
@@ -993,12 +964,12 @@ class TaskRecord extends ConfigurationContainer {
 
     void setPrevAffiliate(TaskRecord prevAffiliate) {
         mPrevAffiliate = prevAffiliate;
-        mPrevAffiliateTaskId = prevAffiliate == null ? INVALID_TASK_ID : prevAffiliate.taskId;
+        mPrevAffiliateTaskId = prevAffiliate == null ? INVALID_TASK_ID : prevAffiliate.mTaskId;
     }
 
     void setNextAffiliate(TaskRecord nextAffiliate) {
         mNextAffiliate = nextAffiliate;
-        mNextAffiliateTaskId = nextAffiliate == null ? INVALID_TASK_ID : nextAffiliate.taskId;
+        mNextAffiliateTaskId = nextAffiliate == null ? INVALID_TASK_ID : nextAffiliate.mTaskId;
     }
 
     <T extends ActivityStack> T getStack() {
@@ -1061,7 +1032,7 @@ class TaskRecord extends ConfigurationContainer {
     @Override
     protected void onParentChanged() {
         super.onParentChanged();
-        mService.mRootActivityContainer.updateUIDsPresentOnDisplay();
+        mAtmService.mRootActivityContainer.updateUIDsPresentOnDisplay();
     }
 
     // Close up recents linked list.
@@ -1080,13 +1051,13 @@ class TaskRecord extends ConfigurationContainer {
         closeRecentsChain();
         if (inRecents) {
             inRecents = false;
-            mService.notifyTaskPersisterLocked(this, false);
+            mAtmService.notifyTaskPersisterLocked(this, false);
         }
 
         clearRootProcess();
 
-        mService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
-                taskId, userId);
+        mAtmService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
+                mTaskId, mUserId);
     }
 
     void setTaskToAffiliateWith(TaskRecord taskToAffiliateWith) {
@@ -1235,7 +1206,7 @@ class TaskRecord extends ConfigurationContainer {
     boolean okToShowLocked() {
         // NOTE: If {@link TaskRecord#topRunningActivity} return is not null then it is
         // okay to show the activity when locked.
-        return mService.mStackSupervisor.isCurrentProfileLocked(userId)
+        return mAtmService.mStackSupervisor.isCurrentProfileLocked(mUserId)
                 || topRunningActivityLocked() != null;
     }
 
@@ -1324,7 +1295,7 @@ class TaskRecord extends ConfigurationContainer {
 
         updateEffectiveIntent();
         if (r.isPersistable()) {
-            mService.notifyTaskPersisterLocked(this, false);
+            mAtmService.notifyTaskPersisterLocked(this, false);
         }
 
         if (r.getParent() != null) {
@@ -1335,7 +1306,7 @@ class TaskRecord extends ConfigurationContainer {
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
-        mService.mRootActivityContainer.updateUIDsPresentOnDisplay();
+        mAtmService.mRootActivityContainer.updateUIDsPresentOnDisplay();
     }
 
     /**
@@ -1360,14 +1331,14 @@ class TaskRecord extends ConfigurationContainer {
             numFullscreen--;
         }
         if (r.isPersistable()) {
-            mService.notifyTaskPersisterLocked(this, false);
+            mAtmService.notifyTaskPersisterLocked(this, false);
         }
 
         if (inPinnedWindowingMode()) {
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
-            mService.getTaskChangeNotificationController().notifyTaskStackChanged();
+            mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
         if (mActivities.isEmpty()) {
@@ -1530,10 +1501,10 @@ class TaskRecord extends ConfigurationContainer {
         }
 
         final String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
-        final LockTaskController lockTaskController = mService.getLockTaskController();
+        final LockTaskController lockTaskController = mAtmService.getLockTaskController();
         switch (r.lockTaskLaunchMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                mLockTaskAuth = lockTaskController.isPackageWhitelisted(userId, pkg)
+                mLockTaskAuth = lockTaskController.isPackageWhitelisted(mUserId, pkg)
                         ? LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
@@ -1546,7 +1517,7 @@ class TaskRecord extends ConfigurationContainer {
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                mLockTaskAuth = lockTaskController.isPackageWhitelisted(userId, pkg)
+                mLockTaskAuth = lockTaskController.isPackageWhitelisted(mUserId, pkg)
                         ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }
@@ -1555,7 +1526,7 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     private boolean isResizeable(boolean checkSupportsPip) {
-        return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+        return (mAtmService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
                 || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
@@ -1568,8 +1539,8 @@ class TaskRecord extends ConfigurationContainer {
         // A task can not be docked even if it is considered resizeable because it only supports
         // picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && mService.mSupportsSplitScreenMultiWindow
-                && (mService.mForceResizableActivities
+                && mAtmService.mSupportsSplitScreenMultiWindow
+                && (mAtmService.mForceResizableActivities
                         || (isResizeable(false /* checkSupportsPip */)
                                 && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
     }
@@ -1582,7 +1553,7 @@ class TaskRecord extends ConfigurationContainer {
      *         secondary display.
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
-        return mService.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
+        return mAtmService.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
                 -1 /* don't check PID */, -1 /* don't check UID */, null /* activityInfo */);
     }
 
@@ -1700,15 +1671,15 @@ class TaskRecord extends ConfigurationContainer {
                 }
                 topActivity = false;
             }
-            lastTaskDescription = new TaskDescription(label, null, iconResource, iconFilename,
+            mTaskDescription = new TaskDescription(label, null, iconResource, iconFilename,
                     colorPrimary, colorBackground, statusBarColor, navigationBarColor,
                     statusBarContrastWhenTransparent, navigationBarContrastWhenTransparent);
             if (mTask != null) {
-                mTask.setTaskDescription(lastTaskDescription);
+                mTask.setTaskDescription(mTaskDescription);
             }
             // Update the task affiliation color if we are the parent of the group
-            if (taskId == mAffiliatedTaskId) {
-                mAffiliatedTaskColor = lastTaskDescription.getPrimaryColor();
+            if (mTaskId == mAffiliatedTaskId) {
+                mAffiliatedTaskColor = mTaskDescription.getPrimaryColor();
             }
         }
     }
@@ -1767,9 +1738,9 @@ class TaskRecord extends ConfigurationContainer {
         // to do this for the pinned stack as the bounds are controlled by the system.
         if (!inPinnedWindowingMode() && mStack != null) {
             final int defaultMinSizeDp =
-                    mService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp;
+                    mAtmService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp;
             final ActivityDisplay display =
-                    mService.mRootActivityContainer.getActivityDisplay(mStack.mDisplayId);
+                    mAtmService.mRootActivityContainer.getActivityDisplay(mStack.mDisplayId);
             final float density =
                     (float) display.getConfiguration().densityDpi / DisplayMetrics.DENSITY_DEFAULT;
             final int defaultMinSize = (int) (defaultMinSizeDp * density);
@@ -1849,7 +1820,7 @@ class TaskRecord extends ConfigurationContainer {
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         super.onConfigurationChanged(newParentConfig);
         if (wasInMultiWindowMode != inMultiWindowMode()) {
-            mService.mStackSupervisor.scheduleUpdateMultiWindowMode(this);
+            mAtmService.mStackSupervisor.scheduleUpdateMultiWindowMode(this);
         }
 
         // If the configuration supports persistent bounds (eg. Freeform), keep track of the
@@ -1890,7 +1861,7 @@ class TaskRecord extends ConfigurationContainer {
         }
 
         // Saves the new state so that we can launch the activity at the same location.
-        mService.mStackSupervisor.mLaunchParamsPersister.saveTask(this);
+        mAtmService.mStackSupervisor.mLaunchParamsPersister.saveTask(this);
     }
 
     /**
@@ -2293,7 +2264,7 @@ class TaskRecord extends ConfigurationContainer {
             if (mLastNonFullscreenBounds != null) {
                 setBounds(mLastNonFullscreenBounds);
             } else {
-                mService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
+                mAtmService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
             }
         } else {
             setBounds(inStack.getRequestedOverrideBounds());
@@ -2354,9 +2325,9 @@ class TaskRecord extends ConfigurationContainer {
      */
     void fillTaskInfo(TaskInfo info) {
         getNumRunningActivities(mReuseActivitiesReport);
-        info.userId = userId;
+        info.userId = mUserId;
         info.stackId = getStackId();
-        info.taskId = taskId;
+        info.taskId = mTaskId;
         info.displayId = mStack == null ? Display.INVALID_DISPLAY : mStack.mDisplayId;
         info.isRunning = getTopActivity() != null;
         info.baseIntent = new Intent(getBaseIntent());
@@ -2370,7 +2341,7 @@ class TaskRecord extends ConfigurationContainer {
         info.realActivity = realActivity;
         info.numActivities = mReuseActivitiesReport.numActivities;
         info.lastActiveTime = lastActiveTime;
-        info.taskDescription = new ActivityManager.TaskDescription(lastTaskDescription);
+        info.taskDescription = new ActivityManager.TaskDescription(mTaskDescription);
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.resizeMode = mResizeMode;
         info.configuration.setTo(getConfiguration());
@@ -2386,7 +2357,7 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("userId="); pw.print(userId);
+        pw.print(prefix); pw.print("userId="); pw.print(mUserId);
                 pw.print(" effectiveUid="); UserHandle.formatUid(pw, effectiveUid);
                 pw.print(" mCallingUid="); UserHandle.formatUid(pw, mCallingUid);
                 pw.print(" mUserSetupComplete="); pw.print(mUserSetupComplete);
@@ -2440,7 +2411,7 @@ class TaskRecord extends ConfigurationContainer {
                     pw.print(" mReuseTask="); pw.print(mReuseTask);
                     pw.print(" mLockTaskAuth="); pw.println(lockTaskAuthToString());
         }
-        if (mAffiliatedTaskId != taskId || mPrevAffiliateTaskId != INVALID_TASK_ID
+        if (mAffiliatedTaskId != mTaskId || mPrevAffiliateTaskId != INVALID_TASK_ID
                 || mPrevAffiliate != null || mNextAffiliateTaskId != INVALID_TASK_ID
                 || mNextAffiliate != null) {
             pw.print(prefix); pw.print("affiliation="); pw.print(mAffiliatedTaskId);
@@ -2487,7 +2458,7 @@ class TaskRecord extends ConfigurationContainer {
         if (stringName != null) {
             sb.append(stringName);
             sb.append(" U=");
-            sb.append(userId);
+            sb.append(mUserId);
             sb.append(" StackId=");
             sb.append(getStackId());
             sb.append(" sz=");
@@ -2498,7 +2469,7 @@ class TaskRecord extends ConfigurationContainer {
         sb.append("TaskRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" #");
-        sb.append(taskId);
+        sb.append(mTaskId);
         if (affinity != null) {
             sb.append(" A=");
             sb.append(affinity);
@@ -2523,7 +2494,7 @@ class TaskRecord extends ConfigurationContainer {
 
         final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
-        proto.write(ID, taskId);
+        proto.write(ID, mTaskId);
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             ActivityRecord activity = mActivities.get(i);
             activity.writeToProto(proto, ACTIVITIES);
@@ -2573,7 +2544,7 @@ class TaskRecord extends ConfigurationContainer {
     void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
         if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
 
-        out.attribute(null, ATTR_TASKID, String.valueOf(taskId));
+        out.attribute(null, ATTR_TASKID, String.valueOf(mTaskId));
         if (realActivity != null) {
             out.attribute(null, ATTR_REALACTIVITY, realActivity.flattenToShortString());
         }
@@ -2596,7 +2567,7 @@ class TaskRecord extends ConfigurationContainer {
         out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
         out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
-        out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        out.attribute(null, ATTR_USERID, String.valueOf(mUserId));
         out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
         out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
         out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
@@ -2604,8 +2575,8 @@ class TaskRecord extends ConfigurationContainer {
         if (lastDescription != null) {
             out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
         }
-        if (lastTaskDescription != null) {
-            lastTaskDescription.saveToXml(out);
+        if (mTaskDescription != null) {
+            mTaskDescription.saveToXml(out);
         }
         out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
         out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
@@ -2692,13 +2663,14 @@ class TaskRecord extends ConfigurationContainer {
         TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent, IVoiceInteractionSession voiceSession,
                 IVoiceInteractor voiceInteractor) {
-            return new TaskRecord(
-                    service, taskId, info, intent, voiceSession, voiceInteractor);
+            return new TaskRecord(service, taskId, info, intent, voiceSession, voiceInteractor,
+                    null /*taskDescription*/);
         }
 
         TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent, TaskDescription taskDescription) {
-            return new TaskRecord(service, taskId, info, intent, taskDescription);
+            return new TaskRecord(service, taskId, info, intent, null /*voiceSession*/,
+                    null /*voiceInteractor*/, taskDescription);
         }
 
         /**
@@ -2720,7 +2692,8 @@ class TaskRecord extends ConfigurationContainer {
                     lastTimeMoved, neverRelinquishIdentity, lastTaskDescription, taskAffiliation,
                     prevTaskId, nextTaskId, taskAffiliationColor, callingUid, callingPackage,
                     resizeMode, supportsPictureInPicture, realActivitySuspended, userSetupComplete,
-                    minWidth, minHeight);
+                    minWidth, minHeight, null /*ActivityInfo*/, null /*_voiceSession*/,
+                    null /*_voiceInteractor*/);
         }
 
         TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)

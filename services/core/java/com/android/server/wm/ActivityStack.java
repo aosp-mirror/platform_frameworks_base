@@ -775,7 +775,7 @@ class ActivityStack extends ConfigurationContainer {
             // multi-window mode.
             final String packageName = topActivity.info.applicationInfo.packageName;
             mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
-                    topTask.taskId, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN, packageName);
+                    topTask.mTaskId, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN, packageName);
         }
 
         mService.deferWindowLayout();
@@ -1114,7 +1114,7 @@ class ActivityStack extends ConfigurationContainer {
     final ActivityRecord topRunningActivityLocked(IBinder token, int taskId) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             TaskRecord task = mTaskHistory.get(taskNdx);
-            if (task.taskId == taskId) {
+            if (task.mTaskId == taskId) {
                 continue;
             }
             ArrayList<ActivityRecord> activities = task.mActivities;
@@ -1150,7 +1150,7 @@ class ActivityStack extends ConfigurationContainer {
     TaskRecord taskForIdLocked(int id) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            if (task.taskId == id) {
+            if (task.mTaskId == id) {
                 return task;
             }
         }
@@ -1345,7 +1345,7 @@ class ActivityStack extends ConfigurationContainer {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": voice session");
                 continue;
             }
-            if (task.userId != userId) {
+            if (task.mUserId != userId) {
                 // Looking for a different task.
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": different user");
                 continue;
@@ -2863,7 +2863,7 @@ class ActivityStack extends ConfigurationContainer {
                 next.notifyAppResumed(next.stopped);
 
                 EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.mUserId,
-                        System.identityHashCode(next), next.getTaskRecord().taskId,
+                        System.identityHashCode(next), next.getTaskRecord().mTaskId,
                         next.shortComponentName);
 
                 next.sleeping = false;
@@ -2973,7 +2973,7 @@ class ActivityStack extends ConfigurationContainer {
         // The task can't be shown, put non-current user tasks below current user tasks.
         while (maxPosition > 0) {
             final TaskRecord tmpTask = mTaskHistory.get(maxPosition - 1);
-            if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.userId)
+            if (!mStackSupervisor.isCurrentProfileLocked(tmpTask.mUserId)
                     || tmpTask.topRunningActivityLocked() == null) {
                 break;
             }
@@ -3026,7 +3026,7 @@ class ActivityStack extends ConfigurationContainer {
     void startActivityLocked(ActivityRecord r, ActivityRecord focusedTopActivity,
             boolean newTask, boolean keepCurTransition, ActivityOptions options) {
         TaskRecord rTask = r.getTaskRecord();
-        final int taskId = rTask.taskId;
+        final int taskId = rTask.mTaskId;
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
         if (!r.mLaunchTaskBehind && allowMoveToFront
@@ -4098,7 +4098,7 @@ class ActivityStack extends ConfigurationContainer {
                             Slog.w(TAG, "Force removing " + r + ": app died, no saved state");
                             EventLog.writeEvent(EventLogTags.AM_FINISH_ACTIVITY,
                                     r.mUserId, System.identityHashCode(r),
-                                    r.getTaskRecord().taskId, r.shortComponentName,
+                                    r.getTaskRecord().mTaskId, r.shortComponentName,
                                     "proc died without state saved");
                         }
                     } else {
@@ -4223,7 +4223,7 @@ class ActivityStack extends ConfigurationContainer {
             }
 
             mRootActivityContainer.resumeFocusedStacksTopActivities();
-            EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
+            EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.mUserId, tr.mTaskId);
             mService.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.getTaskInfo());
         } finally {
             getDisplay().continueUpdateImeTarget();
@@ -4520,7 +4520,7 @@ class ActivityStack extends ConfigurationContainer {
                 continue;
             }
             if (task.effectiveUid != callingUid) {
-                if (task.userId != userId && !crossUser && !profileIds.contains(task.userId)) {
+                if (task.mUserId != userId && !crossUser && !profileIds.contains(task.mUserId)) {
                     // Skip if the caller does not have cross user permission or cannot access
                     // the task's profile
                     continue;
@@ -4545,7 +4545,7 @@ class ActivityStack extends ConfigurationContainer {
                 // For the focused stack top task, update the last stack active time so that it can
                 // be used to determine the order of the tasks (it may not be set for newly created
                 // tasks)
-                task.lastActiveTime = SystemClock.elapsedRealtime();
+                task.touchActiveTime();
                 topTask = false;
             }
             tasksOut.add(task);
@@ -4654,7 +4654,7 @@ class ActivityStack extends ConfigurationContainer {
             if (needSep) {
                 pw.println("");
             }
-            pw.println(prefix + "Task id #" + task.taskId);
+            pw.println(prefix + "Task id #" + task.mTaskId);
             pw.println(prefix + "mBounds=" + task.getRequestedOverrideBounds());
             pw.println(prefix + "mMinWidth=" + task.mMinWidth);
             pw.println(prefix + "mMinHeight=" + task.mMinHeight);
@@ -4732,7 +4732,7 @@ class ActivityStack extends ConfigurationContainer {
         final boolean removed = mTaskHistory.remove(task);
 
         if (removed) {
-            EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, task.taskId, getStackId());
+            EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, task.mTaskId, getStackId());
         }
 
         removeActivitiesFromLRUList(task);
@@ -4884,7 +4884,7 @@ class ActivityStack extends ConfigurationContainer {
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, prevStack);
         } else if (task.voiceSession != null) {
             try {
-                task.voiceSession.taskStarted(task.intent, task.taskId);
+                task.voiceSession.taskStarted(task.intent, task.mTaskId);
             } catch (RemoteException e) {
             }
         }

@@ -882,7 +882,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     @Test
     public void testNotRestoreRecentTaskApis() {
         final TaskRecord task = createTaskBuilder(".Task").build();
-        final int taskId = task.taskId;
+        final int taskId = task.mTaskId;
         mRecentTasks.add(task);
         // Only keep the task in RecentTasks.
         task.removeWindowContainer();
@@ -968,7 +968,7 @@ public class RecentTasksTest extends ActivityTestsBase {
                 TEST_USER_0_ID, 0).getList();
         assertTrue(expectedTasks.length == infos.size());
         for (int i = 0; i < infos.size(); i++)  {
-            assertTrue(expectedTasks[i].taskId == infos.get(i).taskId);
+            assertTrue(expectedTasks[i].mTaskId == infos.get(i).taskId);
         }
     }
 

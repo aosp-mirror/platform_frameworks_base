@@ -492,7 +492,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
             final TaskRecord task = targetStack.getChildAt(i);
-            if (task.userId == mUserId
+            if (task.mUserId == mUserId
                     && task.getBaseIntent().getComponent().equals(mTargetIntent.getComponent())) {
                 return task.getTopActivity();
             }

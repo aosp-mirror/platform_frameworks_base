@@ -1103,7 +1103,7 @@ class RootActivityContainer extends ConfigurationContainer
                 }
             }
         }
-        return finishedTask != null ? finishedTask.taskId : INVALID_TASK_ID;
+        return finishedTask != null ? finishedTask.mTaskId : INVALID_TASK_ID;
     }
 
     boolean resumeFocusedStacksTopActivities() {
@@ -1260,14 +1260,14 @@ class RootActivityContainer extends ConfigurationContainer
         int[] taskUserIds = new int[numTasks];
         for (int i = 0; i < numTasks; ++i) {
             final TaskRecord task = tasks.get(i);
-            taskIds[i] = task.taskId;
+            taskIds[i] = task.mTaskId;
             taskNames[i] = task.origActivity != null ? task.origActivity.flattenToString()
                     : task.realActivity != null ? task.realActivity.flattenToString()
                     : task.getTopActivity() != null ? task.getTopActivity().packageName
                     : "unknown";
             taskBounds[i] = new Rect();
             task.getWindowContainerBounds(taskBounds[i]);
-            taskUserIds[i] = task.userId;
+            taskUserIds[i] = task.mUserId;
         }
         info.taskIds = taskIds;
         info.taskNames = taskNames;
@@ -2103,7 +2103,7 @@ class RootActivityContainer extends ConfigurationContainer
                         // picker for personal files, opened by a work app, should still get locked.
                         if (taskTopActivityIsUser(task, userId)) {
                             mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
-                                    task.taskId, userId);
+                                    task.mTaskId, userId);
                         }
                     }
                 }

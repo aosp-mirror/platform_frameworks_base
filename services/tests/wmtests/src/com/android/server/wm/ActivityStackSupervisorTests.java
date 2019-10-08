@@ -127,7 +127,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         mSupervisor.handleNonResizableTaskIfNeeded(task, newDisplay.getWindowingMode(),
                 newDisplay.mDisplayId, stack);
         // The top activity is unresizable, so it should notify the activity is forced resizing.
-        verify(taskChangeNotifier).notifyActivityForcedResizable(eq(task.taskId),
+        verify(taskChangeNotifier).notifyActivityForcedResizable(eq(task.mTaskId),
                 eq(FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY),
                 eq(unresizableActivity.packageName));
         reset(taskChangeNotifier);
