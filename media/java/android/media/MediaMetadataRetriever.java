@@ -227,6 +227,44 @@ public class MediaMetadataRetriever implements AutoCloseable {
     public native String extractMetadata(int keyCode);
 
     /**
+     * This method is similar to {@link #getFrameAtTime(long, int, BitmapParams)}
+     * except that the device will choose the actual {@link Bitmap.Config} to use.
+     *
+     * @param timeUs The time position where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarantee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @param option a hint on how the frame is found. Use
+     * {@link #OPTION_PREVIOUS_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp earlier than or the same as timeUs. Use
+     * {@link #OPTION_NEXT_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp later than or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp closest to or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST} if one wants to retrieve a frame that may
+     * or may not be a sync frame but is closest to or the same as timeUs.
+     * {@link #OPTION_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at timeUs.
+     *
+     * @return A Bitmap containing a representative video frame, which can be null,
+     *         if such a frame cannot be retrieved. {@link Bitmap#getConfig()} can
+     *         be used to query the actual {@link Bitmap.Config}.
+     *
+     * @see {@link #getFrameAtTime(long, int, BitmapParams)}
+     */
+    public Bitmap getFrameAtTime(long timeUs, @Option int option) {
+        if (option < OPTION_PREVIOUS_SYNC ||
+            option > OPTION_CLOSEST) {
+            throw new IllegalArgumentException("Unsupported option: " + option);
+        }
+
+        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/, null);
+    }
+
+    /**
      * Call this method after setDataSource(). This method finds a
      * representative frame close to the given time position by considering
      * the given option if possible, and returns it as a bitmap.
@@ -255,16 +293,60 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * {@link #OPTION_CLOSEST} often has larger performance overhead compared
      * to the other options if there is no sync frame located at timeUs.
      *
+     * @param params BitmapParams that controls the returned bitmap config
+     *        (such as pixel formats).
+     *
      * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.
+     *
+     * @see {@link #getFrameAtTime(long, int)}
      */
-    public Bitmap getFrameAtTime(long timeUs, @Option int option) {
+    public Bitmap getFrameAtTime(
+            long timeUs, @Option int option, @NonNull BitmapParams params) {
         if (option < OPTION_PREVIOUS_SYNC ||
             option > OPTION_CLOSEST) {
             throw new IllegalArgumentException("Unsupported option: " + option);
         }
 
-        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/);
+        return _getFrameAtTime(timeUs, option, -1 /*dst_width*/, -1 /*dst_height*/, params);
+    }
+
+    /**
+     * This method is similar to {@link #getScaledFrameAtTime(long, int, int, int, BitmapParams)}
+     * except that the device will choose the actual {@link Bitmap.Config} to use.
+     *
+     * @param timeUs The time position in microseconds where the frame will be retrieved.
+     * When retrieving the frame at the given time position, there is no
+     * guarantee that the data source has a frame located at the position.
+     * When this happens, a frame nearby will be returned. If timeUs is
+     * negative, time position and option will ignored, and any frame
+     * that the implementation considers as representative may be returned.
+     *
+     * @param option a hint on how the frame is found. Use
+     * {@link #OPTION_PREVIOUS_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp earlier than or the same as timeUs. Use
+     * {@link #OPTION_NEXT_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp later than or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST_SYNC} if one wants to retrieve a sync frame
+     * that has a timestamp closest to or the same as timeUs. Use
+     * {@link #OPTION_CLOSEST} if one wants to retrieve a frame that may
+     * or may not be a sync frame but is closest to or the same as timeUs.
+     * {@link #OPTION_CLOSEST} often has larger performance overhead compared
+     * to the other options if there is no sync frame located at timeUs.
+     *
+     * @param dstWidth expected output bitmap width
+     * @param dstHeight expected output bitmap height
+     * @return A Bitmap containing a representative video frame, which can be null,
+     *         if such a frame cannot be retrieved. {@link Bitmap#getConfig()} can
+     *         be used to query the actual {@link Bitmap.Config}.
+     * @throws IllegalArgumentException if passed in invalid option or width by height
+     *         is less than or equal to 0.
+     * @see {@link #getScaledFrameAtTime(long, int, int, int, BitmapParams)}
+     */
+    public Bitmap getScaledFrameAtTime(
+            long timeUs, @Option int option, int dstWidth, int dstHeight) {
+        validate(option, dstWidth, dstHeight);
+        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight, null);
     }
 
     /**
@@ -297,15 +379,23 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *
      * @param dstWidth expected output bitmap width
      * @param dstHeight expected output bitmap height
+     * @param params BitmapParams that controls the returned bitmap config
+     *        (such as pixel formats).
+     *
      * @return A Bitmap of size not larger than dstWidth by dstHeight containing a
      *         scaled video frame, which can be null, if such a frame cannot be retrieved.
      * @throws IllegalArgumentException if passed in invalid option or width by height
      *         is less than or equal to 0.
+     * @see {@link #getScaledFrameAtTime(long, int, int, int)}
      */
-    public Bitmap getScaledFrameAtTime(
-            long timeUs, @Option int option, int dstWidth, int dstHeight) {
-        if (option < OPTION_PREVIOUS_SYNC ||
-            option > OPTION_CLOSEST) {
+    public Bitmap getScaledFrameAtTime(long timeUs, @Option int option,
+            int dstWidth, int dstHeight, @NonNull BitmapParams params) {
+        validate(option, dstWidth, dstHeight);
+        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight, params);
+    }
+
+    private void validate(@Option int option, int dstWidth, int dstHeight) {
+        if (option < OPTION_PREVIOUS_SYNC || option > OPTION_CLOSEST) {
             throw new IllegalArgumentException("Unsupported option: " + option);
         }
         if (dstWidth <= 0) {
@@ -314,8 +404,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
         if (dstHeight <= 0) {
             throw new IllegalArgumentException("Invalid height: " + dstHeight);
         }
-
-        return _getFrameAtTime(timeUs, option, dstWidth, dstHeight);
     }
 
     /**
@@ -365,10 +453,12 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see #getFrameAtTime(long, int)
      */
     public Bitmap getFrameAtTime() {
-        return _getFrameAtTime(-1, OPTION_CLOSEST_SYNC, -1 /*dst_width*/, -1 /*dst_height*/);
+        return _getFrameAtTime(
+                -1, OPTION_CLOSEST_SYNC, -1 /*dst_width*/, -1 /*dst_height*/, null);
     }
 
-    private native Bitmap _getFrameAtTime(long timeUs, int option, int width, int height);
+    private native Bitmap _getFrameAtTime(
+            long timeUs, int option, int width, int height, @Nullable BitmapParams params);
 
     public static final class BitmapParams {
         private Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
