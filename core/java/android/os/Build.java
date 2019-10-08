@@ -243,7 +243,8 @@ public class Build {
         public static final String BASE_OS = SystemProperties.get("ro.build.version.base_os", "");
 
         /**
-         * The user-visible security patch level.
+         * The user-visible security patch level. This value represents the date when the device
+         * most recently applied a security patch.
          */
         public static final String SECURITY_PATCH = SystemProperties.get(
                 "ro.build.version.security_patch", "");
