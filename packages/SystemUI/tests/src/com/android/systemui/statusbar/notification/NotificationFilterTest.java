@@ -42,6 +42,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -94,10 +95,11 @@ public class NotificationFilterTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationGroupManager.class,
                 new NotificationGroupManager(mock(StatusBarStateController.class)));
         mDependency.injectMockDependency(ShadeController.class);
+        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectTestDependency(NotificationData.KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-        mRow = new NotificationTestHelper(getContext()).createRow();
+        mRow = new NotificationTestHelper(getContext(), mDependency).createRow();
         mNotificationFilter = new NotificationFilter();
     }
 

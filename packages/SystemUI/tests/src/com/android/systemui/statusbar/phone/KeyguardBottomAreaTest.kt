@@ -1,14 +1,11 @@
 package com.android.systemui.statusbar.phone
 
-import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.LayoutInflater
-
+import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.KeyguardIndicationController
-
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +14,7 @@ import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class KeyguardBottomAreaTest : SysuiTestCase() {
 
     @Mock

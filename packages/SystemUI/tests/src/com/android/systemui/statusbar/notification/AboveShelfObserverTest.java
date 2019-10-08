@@ -47,7 +47,7 @@ public class AboveShelfObserverTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mNotificationTestHelper = new NotificationTestHelper(getContext());
+        mNotificationTestHelper = new NotificationTestHelper(getContext(), mDependency);
         mHostLayout = new FrameLayout(getContext());
         mObserver = new AboveShelfObserver(mHostLayout);
         ExpandableNotificationRow row = mNotificationTestHelper.createRow();

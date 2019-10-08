@@ -49,6 +49,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.DevicePolicyManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -204,8 +205,11 @@ public class DependencyProvider {
     @Singleton
     @Provides
     public AutoHideController provideAutoHideController(Context context,
-            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
-        return new AutoHideController(context, mainHandler);
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler,
+            NotificationRemoteInputManager notificationRemoteInputManager,
+            IWindowManager iWindowManager) {
+        return new AutoHideController(context, mainHandler, notificationRemoteInputManager,
+                iWindowManager);
     }
 
     @Singleton

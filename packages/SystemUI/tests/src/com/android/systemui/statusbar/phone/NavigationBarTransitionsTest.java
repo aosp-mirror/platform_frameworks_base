@@ -28,7 +28,11 @@ import android.view.IWindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +48,12 @@ public class NavigationBarTransitionsTest extends SysuiTestCase {
     @Before
     public void setup() {
         mDependency.injectMockDependency(IWindowManager.class);
+        mDependency.injectMockDependency(AssistManager.class);
+        mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(NavigationModeController.class);
+        mDependency.injectMockDependency(StatusBarStateController.class);
+        mDependency.injectMockDependency(KeyguardStateController.class);
+
         mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         NavigationBarView navBar = spy(new NavigationBarView(mContext, null));
         when(navBar.getCurrentView()).thenReturn(navBar);

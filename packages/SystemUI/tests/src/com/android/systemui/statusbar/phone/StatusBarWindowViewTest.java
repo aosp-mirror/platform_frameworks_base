@@ -34,9 +34,11 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -61,6 +63,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     @Mock private PluginManager mPluginManager;
     @Mock private TunerService mTunerService;
     @Mock private DragDownHelper mDragDownHelper;
+    @Mock private KeyguardStateController mKeyguardStateController;
+    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private ShadeController mShadeController;
     @Mock private NotificationLockscreenUserManager mNotificationLockScreenUserManager;
     @Mock private NotificationEntryManager mNotificationEntryManager;
@@ -88,6 +92,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mTunerService,
                 mNotificationLockScreenUserManager,
                 mNotificationEntryManager,
+                mKeyguardStateController,
+                mStatusBarStateController,
                 mDozeLog)
                 .setShadeController(mShadeController)
                 .setStatusBarWindowView(mView)

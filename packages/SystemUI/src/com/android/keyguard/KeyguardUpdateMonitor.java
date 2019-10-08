@@ -99,6 +99,7 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -1437,6 +1438,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleScreenTurnedOff() {
+        final String tag = "KeyguardUpdateMonitor#handleScreenTurnedOff";
+        DejankUtils.startDetectingBlockingIpcs(tag);
         checkIsHandlerThread();
         mHardwareFingerprintUnavailableRetryCount = 0;
         mHardwareFaceUnavailableRetryCount = 0;
@@ -1446,6 +1449,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 cb.onScreenTurnedOff();
             }
         }
+        DejankUtils.stopDetectingBlockingIpcs(tag);
     }
 
     private void handleDreamingStateChanged(int dreamStart) {

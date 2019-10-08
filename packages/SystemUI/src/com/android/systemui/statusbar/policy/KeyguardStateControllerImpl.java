@@ -25,11 +25,12 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.os.Build;
 import android.os.Trace;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
@@ -42,25 +43,22 @@ import javax.inject.Singleton;
 /**
  */
 @Singleton
-public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
-        implements KeyguardStateController, Dumpable {
+public class KeyguardStateControllerImpl implements KeyguardStateController, Dumpable {
 
     private static final boolean DEBUG_AUTH_WITH_ADB = false;
     private static final String AUTH_BROADCAST_KEY = "debug_trigger_auth";
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
-    private final Context mContext;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
-            new LockedStateInvalidator();
+            new UpdateMonitorCallback();
 
     private boolean mCanDismissLockScreen;
     private boolean mShowing;
     private boolean mSecure;
     private boolean mOccluded;
 
-    private boolean mListening;
     private boolean mKeyguardFadingAway;
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
@@ -75,10 +73,10 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
     /**
      */
     @Inject
-    public KeyguardStateControllerImpl(Context context) {
-        mContext = context;
-        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        mLockPatternUtils = new LockPatternUtils(context);
+    public KeyguardStateControllerImpl(Context context,
+            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils) {
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
 
         update(true /* updateAlways */);
@@ -104,19 +102,12 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         if (!mCallbacks.contains(callback)) {
             mCallbacks.add(callback);
         }
-        if (mCallbacks.size() != 0 && !mListening) {
-            mListening = true;
-            mKeyguardUpdateMonitor.registerCallback(this);
-        }
     }
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
         Preconditions.checkNotNull(callback, "Callback must not be null. b/128895449");
-        if (mCallbacks.remove(callback) && mCallbacks.size() == 0 && mListening) {
-            mListening = false;
-            mKeyguardUpdateMonitor.removeCallback(this);
-        }
+        mCallbacks.remove(callback);
     }
 
     @Override
@@ -140,16 +131,10 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
     }
 
     @Override
-    public void notifyKeyguardState(boolean showing, boolean secure, boolean occluded) {
-        if (mShowing == showing && mSecure == secure && mOccluded == occluded) return;
+    public void notifyKeyguardState(boolean showing, boolean occluded) {
+        if (mShowing == showing && mOccluded == occluded) return;
         mShowing = showing;
-        mSecure = secure;
         mOccluded = occluded;
-        notifyKeyguardChanged();
-    }
-
-    @Override
-    public void onTrustChanged(int userId) {
         notifyKeyguardChanged();
     }
 
@@ -191,7 +176,8 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         setKeyguardFadingAway(false);
     }
 
-    private void update(boolean updateAlways) {
+    @VisibleForTesting
+    void update(boolean updateAlways) {
         Trace.beginSection("KeyguardStateController#update");
         int user = KeyguardUpdateMonitor.getCurrentUser();
         boolean secure = mLockPatternUtils.isSecure(user);
@@ -201,7 +187,7 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
         boolean faceAuthEnabled = mKeyguardUpdateMonitor.isFaceAuthEnabledForUser(user);
         boolean changed = secure != mSecure || canDismissLockScreen != mCanDismissLockScreen
-                || trustManaged != mTrustManaged
+                || trustManaged != mTrustManaged || mTrusted != trusted
                 || mFaceAuthEnabled != faceAuthEnabled;
         if (changed || updateAlways) {
             mSecure = secure;
@@ -284,7 +270,7 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         pw.println("  mFaceAuthEnabled: " + mFaceAuthEnabled);
     }
 
-    private class LockedStateInvalidator extends KeyguardUpdateMonitorCallback {
+    private class UpdateMonitorCallback extends KeyguardUpdateMonitorCallback {
         @Override
         public void onUserSwitchComplete(int userId) {
             update(false /* updateAlways */);
@@ -293,6 +279,7 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         @Override
         public void onTrustChanged(int userId) {
             update(false /* updateAlways */);
+            notifyKeyguardChanged();
         }
 
         @Override
@@ -327,11 +314,6 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         }
 
         @Override
-        public void onScreenTurnedOff() {
-            update(false /* updateAlways */);
-        }
-
-        @Override
         public void onKeyguardVisibilityChanged(boolean showing) {
             update(false /* updateAlways */);
         }
@@ -340,5 +322,5 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
         public void onBiometricsCleared() {
             update(false /* alwaysUpdate */);
         }
-    };
+    }
 }

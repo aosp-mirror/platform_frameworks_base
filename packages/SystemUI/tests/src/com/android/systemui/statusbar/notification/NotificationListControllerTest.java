@@ -42,6 +42,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
@@ -85,6 +86,7 @@ public class NotificationListControllerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 

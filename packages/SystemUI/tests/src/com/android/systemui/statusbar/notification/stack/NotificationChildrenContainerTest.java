@@ -45,7 +45,7 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
         mGroup = mNotificationTestHelper.createGroup();
         mChildrenContainer = mGroup.getChildrenContainer();
     }

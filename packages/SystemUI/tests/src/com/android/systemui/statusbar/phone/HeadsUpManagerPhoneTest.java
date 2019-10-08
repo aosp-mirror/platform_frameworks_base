@@ -29,6 +29,7 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
@@ -36,6 +37,7 @@ import com.android.systemui.statusbar.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -85,6 +87,9 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         when(accessibilityMgr.getRecommendedTimeoutMillis(anyInt(), anyInt()))
                 .thenReturn(TEST_AUTO_DISMISS_TIME);
         when(mVSManager.isReorderingAllowed()).thenReturn(true);
+        mDependency.injectMockDependency(BubbleController.class);
+        mDependency.injectMockDependency(StatusBarWindowController.class);
+        mDependency.injectMockDependency(ConfigurationController.class);
         mHeadsUpManager = new TestableHeadsUpManagerPhone(mContext, mStatusBarWindowView,
                 mGroupManager, mBar, mVSManager, mStatusBarStateController, mBypassController);
         super.setUp();

@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -141,7 +142,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mStatusBarStateController,
                 new FalsingManagerFake());
         mNotificationPanelView = new TestableNotificationPanelView(coordinator, expansionHandler,
-                mKeyguardBypassController);
+                mKeyguardBypassController, mStatusBarStateController);
         mNotificationPanelView.setHeadsUpManager(mHeadsUpManager);
         mNotificationPanelView.setBar(mPanelBar);
 
@@ -218,7 +219,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private class TestableNotificationPanelView extends NotificationPanelView {
         TestableNotificationPanelView(NotificationWakeUpCoordinator coordinator,
                 PulseExpansionHandler expansionHandler,
-                KeyguardBypassController bypassController) {
+                KeyguardBypassController bypassController,
+                SysuiStatusBarStateController statusBarStateController) {
             super(
                     NotificationPanelViewTest.this.mContext,
                     null,
@@ -235,6 +237,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                     new NotificationEntryManager(new NotificationData(mock(
                             NotificationSectionsFeatureManager.class), mock(NotifLog.class)),
                             mock(NotifLog.class)),
+                    mock(KeyguardStateController.class),
+                    statusBarStateController,
                     mock(DozeLog.class));
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;

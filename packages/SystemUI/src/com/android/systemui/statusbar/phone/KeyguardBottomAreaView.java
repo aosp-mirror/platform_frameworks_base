@@ -132,7 +132,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private ActivityStarter mActivityStarter;
     private KeyguardStateController mKeyguardStateController;
-    private LockPatternUtils mLockPatternUtils;
     private FlashlightController mFlashlightController;
     private PreviewInflater mPreviewInflater;
     private AccessibilityController mAccessibilityController;
@@ -231,7 +230,6 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mLockPatternUtils = new LockPatternUtils(mContext);
         mPreviewInflater = new PreviewInflater(mContext, new LockPatternUtils(mContext),
                 new ActivityIntentHelper(mContext));
         mPreviewContainer = findViewById(R.id.preview_container);

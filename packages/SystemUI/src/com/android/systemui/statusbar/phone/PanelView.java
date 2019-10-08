@@ -44,7 +44,6 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -144,10 +143,8 @@ public abstract class PanelView extends FrameLayout {
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
-    protected final KeyguardStateController mKeyguardStateController = Dependency.get(
-            KeyguardStateController.class);
-    protected final SysuiStatusBarStateController mStatusBarStateController =
-            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
+    protected final KeyguardStateController mKeyguardStateController;
+    protected final SysuiStatusBarStateController mStatusBarStateController;
 
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
@@ -206,8 +203,11 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public PanelView(Context context, AttributeSet attrs, FalsingManager falsingManager,
-            DozeLog dozeLog) {
+            DozeLog dozeLog, KeyguardStateController keyguardStateController,
+            SysuiStatusBarStateController statusBarStateController) {
         super(context, attrs);
+        mKeyguardStateController = keyguardStateController;
+        mStatusBarStateController = statusBarStateController;
         mFlingAnimationUtils = new FlingAnimationUtils(context, 0.6f /* maxLengthSeconds */,
                 0.6f /* speedUpFactor */);
         mFlingAnimationUtilsClosing = new FlingAnimationUtils(context, 0.5f /* maxLengthSeconds */,
