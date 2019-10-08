@@ -34,6 +34,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DataUnit;
 import android.util.Log;
@@ -441,7 +442,7 @@ public final class ConnectivityController extends StateController implements
         synchronized (mLock) {
             // Since this is a really hot codepath, temporarily cache any
             // answers that we get from ConnectivityManager.
-            final SparseArray<NetworkCapabilities> networkToCapabilities = new SparseArray<>();
+            final ArrayMap<Network, NetworkCapabilities> networkToCapabilities = new ArrayMap<>();
 
             boolean changed = false;
             if (filterUid == -1) {
@@ -460,17 +461,16 @@ public final class ConnectivityController extends StateController implements
     }
 
     private boolean updateTrackedJobsLocked(ArraySet<JobStatus> jobs, Network filterNetwork,
-            SparseArray<NetworkCapabilities> networkToCapabilities) {
+            ArrayMap<Network, NetworkCapabilities> networkToCapabilities) {
         if (jobs == null || jobs.size() == 0) {
             return false;
         }
 
         final Network network = mConnManager.getActiveNetworkForUid(jobs.valueAt(0).getSourceUid());
-        final int netId = network != null ? network.netId : -1;
-        NetworkCapabilities capabilities = networkToCapabilities.get(netId);
+        NetworkCapabilities capabilities = networkToCapabilities.get(network);
         if (capabilities == null) {
             capabilities = mConnManager.getNetworkCapabilities(network);
-            networkToCapabilities.put(netId, capabilities);
+            networkToCapabilities.put(network, capabilities);
         }
         final boolean networkMatch = (filterNetwork == null
                 || Objects.equals(filterNetwork, network));
