@@ -7303,6 +7303,29 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void showImePostLayout(IBinder imeTargetWindowToken) {
+            synchronized (mGlobalLock) {
+                final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+                if (imeTarget == null) {
+                    return;
+                }
+                final DisplayContent displayContent = imeTarget.getDisplayContent();
+                if (displayContent == null) {
+                    Slog.w(TAG_WM, "Attempted to show IME on an IME target that does not exist: "
+                            + imeTarget.getName());
+                    return;
+                }
+                if (displayContent.isUntrustedVirtualDisplay()) {
+                    throw new SecurityException("Attempted to show IME on an untrusted "
+                            + "virtual display: " + displayContent.getDisplayId());
+                }
+
+                displayContent.getInsetsStateController().getImeSourceProvider()
+                        .scheduleShowImePostLayout(imeTarget);
+            }
+        }
+
+        @Override
         public boolean isUidAllowedOnDisplay(int displayId, int uid) {
             if (displayId == Display.DEFAULT_DISPLAY) {
                 return true;
