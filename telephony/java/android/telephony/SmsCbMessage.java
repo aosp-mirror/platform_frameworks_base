@@ -207,17 +207,19 @@ public final class SmsCbMessage implements Parcelable {
     /** CMAS warning area coordinates. */
     private final List<Geometry> mGeometries;
 
+    private int mSlotIndex = 0;
+
     /**
      * Create a new SmsCbMessage with the specified data.
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
             @NonNull SmsCbLocation location, int serviceCategory, @Nullable String language,
             @Nullable String body, int priority, @Nullable SmsCbEtwsInfo etwsWarningInfo,
-            @Nullable SmsCbCmasInfo cmasWarningInfo) {
+            @Nullable SmsCbCmasInfo cmasWarningInfo, int slotIndex) {
 
         this(messageFormat, geographicalScope, serialNumber, location, serviceCategory, language,
                 body, priority, etwsWarningInfo, cmasWarningInfo, 0 /* maximumWaitingTime */,
-                null /* geometries */, System.currentTimeMillis());
+                null /* geometries */, System.currentTimeMillis(), slotIndex);
     }
 
     /**
@@ -227,7 +229,8 @@ public final class SmsCbMessage implements Parcelable {
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
             SmsCbLocation location, int serviceCategory, String language, String body,
             int priority, SmsCbEtwsInfo etwsWarningInfo, SmsCbCmasInfo cmasWarningInfo,
-            int maximumWaitTimeSec, List<Geometry> geometries, long receivedTimeMillis) {
+            int maximumWaitTimeSec, List<Geometry> geometries, long receivedTimeMillis,
+            int slotIndex) {
         mMessageFormat = messageFormat;
         mGeographicalScope = geographicalScope;
         mSerialNumber = serialNumber;
@@ -241,6 +244,7 @@ public final class SmsCbMessage implements Parcelable {
         mReceivedTimeMillis = receivedTimeMillis;
         mGeometries = geometries;
         mMaximumWaitTimeSec = maximumWaitTimeSec;
+        mSlotIndex = slotIndex;
     }
 
     /**
@@ -278,6 +282,7 @@ public final class SmsCbMessage implements Parcelable {
         String geoStr = in.readString();
         mGeometries = geoStr != null ? CbGeoUtils.parseGeometriesFromString(geoStr) : null;
         mMaximumWaitTimeSec = in.readInt();
+        mSlotIndex = in.readInt();
     }
 
     /**
@@ -312,6 +317,7 @@ public final class SmsCbMessage implements Parcelable {
         dest.writeString(
                 mGeometries != null ? CbGeoUtils.encodeGeometriesToString(mGeometries) : null);
         dest.writeInt(mMaximumWaitTimeSec);
+        dest.writeInt(mSlotIndex);
     }
 
     @NonNull
@@ -423,6 +429,14 @@ public final class SmsCbMessage implements Parcelable {
     }
 
     /**
+     * Get the slotIndex associated with this message.
+     * @return the slotIndex associated with this message
+     */
+    public int getSlotIndex() {
+        return mSlotIndex;
+    }
+
+    /**
      * Get the message format ({@link #MESSAGE_FORMAT_3GPP} or {@link #MESSAGE_FORMAT_3GPP2}).
      * @return an integer representing 3GPP or 3GPP2 message format
      */
@@ -502,6 +516,7 @@ public final class SmsCbMessage implements Parcelable {
                 + (mEtwsWarningInfo != null ? (", " + mEtwsWarningInfo.toString()) : "")
                 + (mCmasWarningInfo != null ? (", " + mCmasWarningInfo.toString()) : "")
                 + ", maximumWaitingTime = " + mMaximumWaitTimeSec
+                + ", slotIndex = " + mSlotIndex
                 + ", geo=" + (mGeometries != null
                 ? CbGeoUtils.encodeGeometriesToString(mGeometries) : "null")
                 + '}';
@@ -522,6 +537,7 @@ public final class SmsCbMessage implements Parcelable {
     @NonNull
     public ContentValues getContentValues() {
         ContentValues cv = new ContentValues(16);
+        cv.put(CellBroadcasts.SLOT_INDEX, mSlotIndex);
         cv.put(CellBroadcasts.GEOGRAPHICAL_SCOPE, mGeographicalScope);
         if (mLocation.getPlmn() != null) {
             cv.put(CellBroadcasts.PLMN, mLocation.getPlmn());
@@ -563,6 +579,7 @@ public final class SmsCbMessage implements Parcelable {
         }
 
         cv.put(CellBroadcasts.MAXIMUM_WAIT_TIME, mMaximumWaitTimeSec);
+        cv.put(CellBroadcasts.SLOT_INDEX, mSlotIndex);
 
         return cv;
     }
@@ -584,6 +601,7 @@ public final class SmsCbMessage implements Parcelable {
         String body = cursor.getString(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_BODY));
         int format = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_FORMAT));
         int priority = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_PRIORITY));
+        int slotIndex = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SLOT_INDEX));
 
         String plmn;
         int plmnColumn = cursor.getColumnIndex(CellBroadcasts.PLMN);
@@ -681,7 +699,7 @@ public final class SmsCbMessage implements Parcelable {
 
         return new SmsCbMessage(format, geoScope, serialNum, location, category,
                 language, body, priority, etwsInfo, cmasInfo, maximumWaitTimeSec, geometries,
-                receivedTimeMillis);
+                receivedTimeMillis, slotIndex);
     }
 
     /**

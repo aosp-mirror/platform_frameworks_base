@@ -3962,11 +3962,19 @@ public final class Telephony {
         public static final Uri CONTENT_URI = Uri.parse("content://cellbroadcasts");
 
         /**
-         * The id of the subscription which received this cell broadcast message.
+         * The subscription which received this cell broadcast message.
+         * @deprecated use {@link #SLOT_INDEX} instead.
          * <P>Type: INTEGER</P>
          * @hide
          */
         public static final String SUB_ID = "sub_id";
+
+        /**
+         * The slot which received this cell broadcast message.
+         * <P>Type: INTEGER</P>
+         * @hide
+         */
+        public static final String SLOT_INDEX = "slot_index";
 
         /**
          * Message geographical scope. Valid values are:
@@ -4202,7 +4210,7 @@ public final class Telephony {
         public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
 
         /**
-         * Query columns for instantiating {@link android.telephony.CellBroadcastMessage} objects.
+         * Query columns for instantiating com.android.cellbroadcastreceiver.CellBroadcastMessage.
          * @hide
          */
         @NonNull
@@ -4235,6 +4243,7 @@ public final class Telephony {
          */
         public static final String[] QUERY_COLUMNS_FWK = {
                 _ID,
+                SLOT_INDEX,
                 GEOGRAPHICAL_SCOPE,
                 PLMN,
                 LAC,

@@ -8114,7 +8114,7 @@ package android.telephony {
   }
 
   public final class SmsCbMessage implements android.os.Parcelable {
-    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo);
+    ctor public SmsCbMessage(int, int, int, @NonNull android.telephony.SmsCbLocation, int, @Nullable String, @Nullable String, int, @Nullable android.telephony.SmsCbEtwsInfo, @Nullable android.telephony.SmsCbCmasInfo, int);
     method @NonNull public static android.telephony.SmsCbMessage createFromCursor(@NonNull android.database.Cursor);
     method public int describeContents();
     method @Nullable public android.telephony.SmsCbCmasInfo getCmasWarningInfo();
@@ -8129,6 +8129,7 @@ package android.telephony {
     method public long getReceivedTime();
     method public int getSerialNumber();
     method public int getServiceCategory();
+    method public int getSlotIndex();
     method public boolean isCmasMessage();
     method public boolean isEmergencyMessage();
     method public boolean isEtwsMessage();
