@@ -118,12 +118,14 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Watches for updates that may be interesting to the keyguard, and provides
  * the up to date information as well as a registration for callbacks that care
  * to be updated.
  */
+@Singleton
 public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private static final String TAG = "KeyguardUpdateMonitor";
