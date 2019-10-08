@@ -836,7 +836,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean inSizeCompatMode() {
         return (mAttrs.privateFlags & PRIVATE_FLAG_COMPATIBLE_WINDOW) != 0
-                || (mAppToken != null && mAppToken.inSizeCompatMode()
+                || (mAppToken != null && mAppToken.hasSizeCompatBounds()
                         // Exclude starting window because it is not displayed by the application.
                         && mAttrs.type != TYPE_APPLICATION_STARTING);
     }
@@ -2320,7 +2320,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             // The offset of compatibility bounds is applied to surface of {@link #AppWindowToken}
             // and frame, so it is unnecessary to translate twice in surface based coordinates.
-            final int surfaceOffsetX = mAppToken.inSizeCompatMode()
+            final int surfaceOffsetX = mAppToken.hasSizeCompatBounds()
                     ? mAppToken.getBounds().left : 0;
             mTmpRect.offset(surfaceOffsetX - mWindowFrames.mFrame.left, -mWindowFrames.mFrame.top);
             region.set(mTmpRect);
