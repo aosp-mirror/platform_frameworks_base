@@ -134,6 +134,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private final int mStatusBarColor;
     @VisibleForTesting final SystemBarBackgroundPainter mSystemBarBackgroundPainter;
     private final int mOrientationOnCreation;
+    private final SurfaceControl.Transaction mTransaction;
 
     static TaskSnapshotSurface create(WindowManagerService service, AppWindowToken token,
             TaskSnapshot snapshot) {
@@ -252,6 +253,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 windowPrivateFlags, sysUiVis, taskDescription, 1f);
         mStatusBarColor = taskDescription.getStatusBarColor();
         mOrientationOnCreation = currentOrientation;
+        mTransaction = mService.mTransactionFactory.get();
     }
 
     @Override
@@ -336,27 +338,23 @@ class TaskSnapshotSurface implements StartingSurface {
         surface.copyFrom(mChildSurfaceControl);
 
         final Rect frame;
-        SurfaceControl.openTransaction();
-        try {
-            // We can just show the surface here as it will still be hidden as the parent is
-            // still hidden.
-            mChildSurfaceControl.show();
-            if (aspectRatioMismatch) {
-                // Clip off ugly navigation bar.
-                final Rect crop = calculateSnapshotCrop();
-                frame = calculateSnapshotFrame(crop);
-                mChildSurfaceControl.setWindowCrop(crop);
-                mChildSurfaceControl.setPosition(frame.left, frame.top);
-            } else {
-                frame = null;
-            }
-
-            // Scale the mismatch dimensions to fill the task bounds
-            final float scale = 1 / mSnapshot.getScale();
-            mChildSurfaceControl.setMatrix(scale, 0, 0, scale);
-        } finally {
-            SurfaceControl.closeTransaction();
+        // We can just show the surface here as it will still be hidden as the parent is
+        // still hidden.
+        mTransaction.show(mChildSurfaceControl);
+        if (aspectRatioMismatch) {
+            // Clip off ugly navigation bar.
+            final Rect crop = calculateSnapshotCrop();
+            frame = calculateSnapshotFrame(crop);
+            mTransaction.setWindowCrop(mChildSurfaceControl, crop);
+            mTransaction.setPosition(mChildSurfaceControl, frame.left, frame.top);
+        } else {
+            frame = null;
         }
+
+        // Scale the mismatch dimensions to fill the task bounds
+        final float scale = 1 / mSnapshot.getScale();
+        mTransaction.setMatrix(mChildSurfaceControl, scale, 0, 0, scale);
+        mTransaction.apply();
         surface.attachAndQueueBufferWithColorSpace(buffer, mSnapshot.getColorSpace());
         surface.release();
 

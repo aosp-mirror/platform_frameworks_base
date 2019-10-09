@@ -247,12 +247,12 @@ public class Letterbox {
             mLayoutFrameRelative.offset(-surfaceOrigin.x, -surfaceOrigin.y);
         }
 
-        private void createSurface() {
+        private void createSurface(SurfaceControl.Transaction t) {
             mSurface = mSurfaceControlFactory.get().setName("Letterbox - " + mType)
                     .setFlags(HIDDEN).setColorLayer().build();
-            mSurface.setLayer(-1);
-            mSurface.setColor(new float[]{0, 0, 0});
-            mSurface.setColorSpaceAgnostic(true);
+            t.setLayer(mSurface, -1)
+                    .setColor(mSurface, new float[]{0, 0, 0})
+                    .setColorSpaceAgnostic(mSurface, true);
         }
 
         void attachInput(WindowState win) {
@@ -300,7 +300,7 @@ public class Letterbox {
             mSurfaceFrameRelative.set(mLayoutFrameRelative);
             if (!mSurfaceFrameRelative.isEmpty()) {
                 if (mSurface == null) {
-                    createSurface();
+                    createSurface(t);
                 }
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
                 t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),

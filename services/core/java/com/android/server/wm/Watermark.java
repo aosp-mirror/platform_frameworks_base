@@ -55,7 +55,7 @@ class Watermark {
     private boolean mDrawNeeded;
 
     Watermark(Supplier<Surface> surfaceFactory, DisplayContent dc, DisplayMetrics dm,
-            String[] tokens) {
+            String[] tokens, SurfaceControl.Transaction t) {
         if (false) {
             Log.i(TAG_WM, "*********************** WATERMARK");
             for (int i=0; i<tokens.length; i++) {
@@ -121,21 +121,21 @@ class Watermark {
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
-            ctrl.setLayerStack(mDisplay.getLayerStack());
-            ctrl.setLayer(WindowManagerService.TYPE_LAYER_MULTIPLIER*100);
-            ctrl.setPosition(0, 0);
-            ctrl.show();
+            t.setLayerStack(ctrl, mDisplay.getLayerStack())
+                    .setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 100)
+                    .setPosition(ctrl, 0, 0)
+                    .show(ctrl);
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }
         mSurfaceControl = ctrl;
     }
 
-    void positionSurface(int dw, int dh) {
+    void positionSurface(int dw, int dh, SurfaceControl.Transaction t) {
         if (mLastDW != dw || mLastDH != dh) {
             mLastDW = dw;
             mLastDH = dh;
-            mSurfaceControl.setBufferSize(dw, dh);
+            t.setBufferSize(mSurfaceControl, dw, dh);
             mDrawNeeded = true;
         }
     }

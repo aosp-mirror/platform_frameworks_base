@@ -56,7 +56,7 @@ class CircularDisplayMask {
     private int mMaskThickness;
 
     CircularDisplayMask(Supplier<Surface> surfaceFactory, DisplayContent dc, int zOrder,
-            int screenOffset, int maskThickness) {
+            int screenOffset, int maskThickness, SurfaceControl.Transaction t) {
         final Display display = dc.getDisplay();
         mSurface = surfaceFactory.get();
         mScreenSize = new Point();
@@ -75,10 +75,10 @@ class CircularDisplayMask {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
-            ctrl.setLayerStack(display.getLayerStack());
-            ctrl.setLayer(zOrder);
-            ctrl.setPosition(0, 0);
-            ctrl.show();
+            t.setLayerStack(ctrl, display.getLayerStack());
+            t.setLayer(ctrl, zOrder);
+            t.setPosition(ctrl, 0, 0);
+            t.show(ctrl);
             mSurface.copyFrom(ctrl);
         } catch (OutOfResourcesException e) {
         }
@@ -91,7 +91,7 @@ class CircularDisplayMask {
         mMaskThickness = maskThickness;
     }
 
-    private void drawIfNeeded() {
+    private void drawIfNeeded(SurfaceControl.Transaction t) {
         if (!mDrawNeeded || !mVisible || mDimensionsUnequal) {
             return;
         }
@@ -108,45 +108,46 @@ class CircularDisplayMask {
             return;
         }
         switch (mRotation) {
-        case Surface.ROTATION_0:
-        case Surface.ROTATION_90:
-            // chin bottom or right
-            mSurfaceControl.setPosition(0, 0);
-            break;
-        case Surface.ROTATION_180:
-            // chin top
-            mSurfaceControl.setPosition(0, -mScreenOffset);
-            break;
-        case Surface.ROTATION_270:
-            // chin left
-            mSurfaceControl.setPosition(-mScreenOffset, 0);
-            break;
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_90:
+                // chin bottom or right
+                t.setPosition(mSurfaceControl, 0, 0);
+                break;
+            case Surface.ROTATION_180:
+                // chin top
+                t.setPosition(mSurfaceControl, 0, -mScreenOffset);
+                break;
+            case Surface.ROTATION_270:
+                // chin left
+                t.setPosition(mSurfaceControl, -mScreenOffset, 0);
+                break;
         }
 
         int circleRadius = mScreenSize.x / 2;
         c.drawColor(Color.BLACK);
 
-        // The radius is reduced by mMaskThickness to provide an anti aliasing effect on the display edges.
+        // The radius is reduced by mMaskThickness to provide an anti aliasing effect on the
+        // display edges.
         c.drawCircle(circleRadius, circleRadius, circleRadius - mMaskThickness, mPaint);
         mSurface.unlockCanvasAndPost(c);
     }
 
     // Note: caller responsible for being inside
     // Surface.openTransaction() / closeTransaction()
-    public void setVisibility(boolean on) {
+    public void setVisibility(boolean on, SurfaceControl.Transaction t) {
         if (mSurfaceControl == null) {
             return;
         }
         mVisible = on;
-        drawIfNeeded();
+        drawIfNeeded(t);
         if (on) {
-            mSurfaceControl.show();
+            t.show(mSurfaceControl);
         } else {
-            mSurfaceControl.hide();
+            t.hide(mSurfaceControl);
         }
     }
 
-    void positionSurface(int dw, int dh, int rotation) {
+    void positionSurface(int dw, int dh, int rotation, SurfaceControl.Transaction t) {
         if (mLastDW == dw && mLastDH == dh && mRotation == rotation) {
             return;
         }
@@ -154,7 +155,7 @@ class CircularDisplayMask {
         mLastDH = dh;
         mDrawNeeded = true;
         mRotation = rotation;
-        drawIfNeeded();
+        drawIfNeeded(t);
     }
 
 }

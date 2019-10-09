@@ -114,6 +114,8 @@ final class ColorFade {
     private final FloatBuffer mVertexBuffer = createNativeFloatBuffer(8);
     private final FloatBuffer mTexCoordBuffer = createNativeFloatBuffer(8);
 
+    private final Transaction mTransaction = new Transaction();
+
     /**
      * Animates an color fade warming up.
      */
@@ -659,14 +661,10 @@ final class ColorFade {
 
     private boolean showSurface(float alpha) {
         if (!mSurfaceVisible || mSurfaceAlpha != alpha) {
-            SurfaceControl.openTransaction();
-            try {
-                mSurfaceControl.setLayer(COLOR_FADE_LAYER);
-                mSurfaceControl.setAlpha(alpha);
-                mSurfaceControl.show();
-            } finally {
-                SurfaceControl.closeTransaction();
-            }
+            mTransaction.setLayer(mSurfaceControl, COLOR_FADE_LAYER)
+                    .setAlpha(mSurfaceControl, alpha)
+                    .show(mSurfaceControl)
+                    .apply();
             mSurfaceVisible = true;
             mSurfaceAlpha = alpha;
         }

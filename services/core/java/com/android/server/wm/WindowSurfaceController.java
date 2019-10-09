@@ -37,7 +37,6 @@ import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.WindowContentFrameStats;
 
 import com.android.server.protolog.common.ProtoLog;
@@ -85,7 +84,7 @@ class WindowSurfaceController {
 
     private final SurfaceControl.Transaction mTmpTransaction;
 
-    public WindowSurfaceController(SurfaceSession s, String name, int w, int h, int format,
+    WindowSurfaceController(String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
 

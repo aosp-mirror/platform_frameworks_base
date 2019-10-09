@@ -271,11 +271,11 @@ final class AccessibilityController {
         }
     }
 
-    /** NOTE: This has to be called within a surface transaction. */
-    public void drawMagnifiedRegionBorderIfNeededLocked(int displayId) {
+    public void drawMagnifiedRegionBorderIfNeededLocked(int displayId,
+            SurfaceControl.Transaction t) {
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
-            displayMagnifier.drawMagnifiedRegionBorderIfNeededLocked();
+            displayMagnifier.drawMagnifiedRegionBorderIfNeededLocked(t);
         }
         // Not relevant for the window observer.
     }
@@ -431,7 +431,7 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "Rotation: " + Surface.rotationToString(rotation)
                         + " displayId: " + displayContent.getDisplayId());
             }
-            mMagnifedViewport.onRotationChangedLocked();
+            mMagnifedViewport.onRotationChangedLocked(displayContent.getPendingTransaction());
             mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_ROTATION_CHANGED);
         }
 
@@ -536,9 +536,8 @@ final class AccessibilityController {
                     .sendToTarget();
         }
 
-        /** NOTE: This has to be called within a surface transaction. */
-        public void drawMagnifiedRegionBorderIfNeededLocked() {
-            mMagnifedViewport.drawWindowIfNeededLocked();
+        public void drawMagnifiedRegionBorderIfNeededLocked(SurfaceControl.Transaction t) {
+            mMagnifedViewport.drawWindowIfNeededLocked(t);
         }
 
         private final class MagnifiedViewport {
@@ -744,7 +743,7 @@ final class AccessibilityController {
                 return letterboxBounds;
             }
 
-            public void onRotationChangedLocked() {
+            public void onRotationChangedLocked(SurfaceControl.Transaction t) {
                 // If we are showing the magnification border, hide it immediately so
                 // the user does not see strange artifacts during rotation. The screenshot
                 // used for rotation already has the border. After the rotation is complete
@@ -758,7 +757,7 @@ final class AccessibilityController {
                     mHandler.sendMessageDelayed(message, delay);
                 }
                 recomputeBoundsLocked();
-                mWindow.updateSize();
+                mWindow.updateSize(t);
             }
 
             public void setMagnifiedRegionBorderShownLocked(boolean shown, boolean animate) {
@@ -784,10 +783,9 @@ final class AccessibilityController {
                 return mMagnificationSpec;
             }
 
-            /** NOTE: This has to be called within a surface transaction. */
-            public void drawWindowIfNeededLocked() {
+            public void drawWindowIfNeededLocked(SurfaceControl.Transaction t) {
                 recomputeBoundsLocked();
-                mWindow.drawIfNeeded();
+                mWindow.drawIfNeeded(t);
             }
 
             public void destroyWindow() {
@@ -837,10 +835,11 @@ final class AccessibilityController {
                         /* ignore */
                     }
                     mSurfaceControl = surfaceControl;
-                    mSurfaceControl.setLayer(mService.mPolicy.getWindowLayerFromTypeLw(
-                            TYPE_MAGNIFICATION_OVERLAY)
-                            * WindowManagerService.TYPE_LAYER_MULTIPLIER);
-                    mSurfaceControl.setPosition(0, 0);
+                    mService.mTransactionFactory.get().setLayer(mSurfaceControl,
+                            mService.mPolicy.getWindowLayerFromTypeLw(TYPE_MAGNIFICATION_OVERLAY)
+                                    * WindowManagerService.TYPE_LAYER_MULTIPLIER)
+                            .setPosition(mSurfaceControl, 0, 0)
+                            .apply();
                     mSurface.copyFrom(mSurfaceControl);
 
                     mAnimationController = new AnimationController(context,
@@ -905,10 +904,10 @@ final class AccessibilityController {
                     }
                 }
 
-                public void updateSize() {
+                public void updateSize(SurfaceControl.Transaction t) {
                     synchronized (mService.mGlobalLock) {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
-                        mSurfaceControl.setBufferSize(mTempPoint.x, mTempPoint.y);
+                        t.setBufferSize(mSurfaceControl, mTempPoint.x, mTempPoint.y);
                         invalidate(mDirtyRect);
                     }
                 }
@@ -923,8 +922,7 @@ final class AccessibilityController {
                     mService.scheduleAnimationLocked();
                 }
 
-                /** NOTE: This has to be called within a surface transaction. */
-                public void drawIfNeeded() {
+                public void drawIfNeeded(SurfaceControl.Transaction t) {
                     synchronized (mService.mGlobalLock) {
                         if (!mInvalidated) {
                             return;
@@ -959,9 +957,9 @@ final class AccessibilityController {
                             canvas.drawPath(path, mPaint);
 
                             mSurface.unlockCanvasAndPost(canvas);
-                            mSurfaceControl.show();
+                            t.show(mSurfaceControl);
                         } else {
-                            mSurfaceControl.hide();
+                            t.hide(mSurfaceControl);
                         }
                     }
                 }

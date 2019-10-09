@@ -331,7 +331,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /**
      * For default display it contains real metrics, empty for others.
-     * @see WindowManagerService#createWatermarkInTransaction()
+     * @see WindowManagerService#createWatermark()
      */
     final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
 
