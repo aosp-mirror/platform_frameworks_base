@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
+import android.telephony.euicc.EuiccCardManager.ResetOption;
 
 import com.android.internal.telephony.euicc.IEuiccController;
 
@@ -821,23 +822,54 @@ public class EuiccManager {
     }
 
     /**
-     * Erase all subscriptions and reset the eUICC.
+     * Erase all operational subscriptions and reset the eUICC.
      *
      * <p>Requires that the calling app has the
      * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
      * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @deprecated From R, callers should specify a flag for specific set of subscriptions to erase
+     * and use @link{eraseSubscriptionsWithOptions} instead
+     *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
-    public void eraseSubscriptions(PendingIntent callbackIntent) {
+    @Deprecated
+    public void eraseSubscriptions(@NonNull PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
         try {
             getIEuiccController().eraseSubscriptions(mCardId, callbackIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Erase all specific subscriptions and reset the eUICC.
+     *
+     * <p>Requires that the calling app has the
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @param options flag indicating specific set of subscriptions to erase
+     * @param callbackIntent a PendingIntent to launch when the operation completes.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
+    public void eraseSubscriptionsWithOptions(
+            @ResetOption int options, @NonNull PendingIntent callbackIntent) {
+        if (!isEnabled()) {
+            sendUnavailableError(callbackIntent);
+            return;
+        }
+        try {
+            getIEuiccController().eraseSubscriptionsWithOptions(mCardId, options, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
