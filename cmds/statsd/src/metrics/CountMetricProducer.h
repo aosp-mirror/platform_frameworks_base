@@ -42,7 +42,11 @@ class CountMetricProducer : public MetricProducer {
 public:
     CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int64_t timeBaseNs, const int64_t startTimeNs);
+                        const int64_t timeBaseNs, const int64_t startTimeNs,
+                        const std::unordered_map<int, std::shared_ptr<Activation>>&
+                                eventActivationMap = {},
+                        const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                                eventDeactivationMap = {});
 
     virtual ~CountMetricProducer();
 

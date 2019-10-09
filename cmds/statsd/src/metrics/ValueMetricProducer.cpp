@@ -81,8 +81,11 @@ ValueMetricProducer::ValueMetricProducer(
         const ConfigKey& key, const ValueMetric& metric, const int conditionIndex,
         const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
         const sp<EventMatcherWizard>& matcherWizard, const int pullTagId, const int64_t timeBaseNs,
-        const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager)
-    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, conditionWizard),
+        const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
+        const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
+        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap)
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, conditionWizard,
+                     eventActivationMap, eventDeactivationMap),
       mWhatMatcherIndex(whatMatcherIndex),
       mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),
@@ -108,7 +111,7 @@ ValueMetricProducer::ValueMetricProducer(
       mMaxPullDelayNs(metric.max_pull_delay_sec() > 0 ? metric.max_pull_delay_sec() * NS_PER_SEC
                                                       : StatsdStats::kPullMaxDelayNs),
       mSplitBucketForAppUpgrade(metric.split_bucket_for_app_upgrade()),
-      // Condition timer will be set in prepareFirstBucketLocked.
+      // Condition timer will be set later within the constructor after pulling events
       mConditionTimer(false, timeBaseNs) {
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
@@ -154,6 +157,15 @@ ValueMetricProducer::ValueMetricProducer(
     // Adjust start for partial bucket
     mCurrentBucketStartTimeNs = startTimeNs;
     mConditionTimer.newBucketStart(mCurrentBucketStartTimeNs);
+
+     // Kicks off the puller immediately if condition is true and diff based.
+    if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
+        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs, mCondition);
+    }
+    // Now that activations are processed, start the condition timer if needed.
+    mConditionTimer.onConditionChanged(mIsActive && mCondition == ConditionState::kTrue,
+                                       mCurrentBucketStartTimeNs);
+
     VLOG("value metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
@@ -163,16 +175,6 @@ ValueMetricProducer::~ValueMetricProducer() {
     if (mIsPulled) {
         mPullerManager->UnRegisterReceiver(mPullTagId, this);
     }
-}
-
-void ValueMetricProducer::prepareFirstBucketLocked() {
-    // Kicks off the puller immediately if condition is true and diff based.
-    if (mIsActive && mIsPulled && mCondition == ConditionState::kTrue && mUseDiff) {
-        pullAndMatchEventsLocked(mCurrentBucketStartTimeNs, mCondition);
-    }
-    // Now that activations are processed, start the condition timer if needed.
-    mConditionTimer.onConditionChanged(mIsActive && mCondition == ConditionState::kTrue,
-                                       mCurrentBucketStartTimeNs);
 }
 
 void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,

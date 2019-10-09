@@ -69,6 +69,19 @@ enum DumpLatency {
     NO_TIME_CONSTRAINTS = 2
 };
 
+struct Activation {
+    Activation(const ActivationType& activationType, const int64_t ttlNs)
+        : ttl_ns(ttlNs),
+          start_ns(0),
+          state(ActivationState::kNotActive),
+          activationType(activationType) {}
+
+    const int64_t ttl_ns;
+    int64_t start_ns;
+    ActivationState state;
+    const ActivationType activationType;
+};
+
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
 // writing the report to dropbox. MetricProducers should respond to package changes as required in
 // PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
@@ -76,21 +89,10 @@ enum DumpLatency {
 class MetricProducer : public virtual PackageInfoListener {
 public:
     MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
-                   const int conditionIndex, const sp<ConditionWizard>& wizard)
-        : mMetricId(metricId),
-          mConfigKey(key),
-          mTimeBaseNs(timeBaseNs),
-          mCurrentBucketStartTimeNs(timeBaseNs),
-          mCurrentBucketNum(0),
-          mCondition(initialCondition(conditionIndex)),
-          mConditionTrackerIndex(conditionIndex),
-          mConditionSliced(false),
-          mWizard(wizard),
-          mContainANYPositionInDimensionsInWhat(false),
-          mSliceByPositionALL(false),
-          mHasLinksToAllConditionDimensionsInTracker(false),
-          mIsActive(true) {
-    }
+                   const int conditionIndex, const sp<ConditionWizard>& wizard,
+                   const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
+                   const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                           eventDeactivationMap);
 
     virtual ~MetricProducer(){};
 
@@ -188,11 +190,6 @@ public:
         dropDataLocked(dropTimeNs);
     }
 
-    void prepareFirstBucket() {
-        std::lock_guard<std::mutex> lock(mMutex);
-        prepareFirstBucketLocked();
-    }
-
     void loadActiveMetric(const ActiveMetric& activeMetric, int64_t currentTimeNs) {
         std::lock_guard<std::mutex> lock(mMutex);
         loadActiveMetricLocked(activeMetric, currentTimeNs);
@@ -214,9 +211,6 @@ public:
     }
 
     void flushIfExpire(int64_t elapsedTimestampNs);
-
-    void addActivation(int activationTrackerIndex, const ActivationType& activationType,
-            int64_t ttl_seconds, int deactivationTrackerIndex = -1);
 
     void writeActiveMetricToProtoOutputStream(
             int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
@@ -310,7 +304,6 @@ protected:
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
     virtual void dropDataLocked(const int64_t dropTimeNs) = 0;
-    virtual void prepareFirstBucketLocked() {};
     void loadActiveMetricLocked(const ActiveMetric& activeMetric, int64_t currentTimeNs);
     void activateLocked(int activationTrackerIndex, int64_t elapsedTimestampNs);
     void cancelEventActivationLocked(int deactivationTrackerIndex);
@@ -378,19 +371,6 @@ protected:
     std::vector<sp<AnomalyTracker>> mAnomalyTrackers;
 
     mutable std::mutex mMutex;
-
-    struct Activation {
-        Activation(const ActivationType& activationType, const int64_t ttlNs)
-            : ttl_ns(ttlNs),
-              start_ns(0),
-              state(ActivationState::kNotActive),
-              activationType(activationType) {}
-
-        const int64_t ttl_ns;
-        int64_t start_ns;
-        ActivationState state;
-        const ActivationType activationType;
-    };
 
     // When the metric producer has multiple activations, these activations are ORed to determine
     // whether the metric producer is ready to generate metrics.

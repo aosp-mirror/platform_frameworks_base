@@ -40,6 +40,29 @@ const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_ATOM_MATCHER_INDEX = 1;
 const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_REMAINING_TTL_NANOS = 2;
 const int FIELD_ID_ACTIVE_EVENT_ACTIVATION_STATE = 3;
 
+MetricProducer::MetricProducer(
+        const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
+        const int conditionIndex, const sp<ConditionWizard>& wizard,
+        const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
+        const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
+                eventDeactivationMap)
+        : mMetricId(metricId),
+          mConfigKey(key),
+          mTimeBaseNs(timeBaseNs),
+          mCurrentBucketStartTimeNs(timeBaseNs),
+          mCurrentBucketNum(0),
+          mCondition(initialCondition(conditionIndex)),
+          mConditionTrackerIndex(conditionIndex),
+          mConditionSliced(false),
+          mWizard(wizard),
+          mContainANYPositionInDimensionsInWhat(false),
+          mSliceByPositionALL(false),
+          mHasLinksToAllConditionDimensionsInTracker(false),
+          mEventActivationMap(eventActivationMap),
+          mEventDeactivationMap(eventDeactivationMap),
+          mIsActive(mEventActivationMap.empty()) {
+    }
+
 void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) {
     if (!mIsActive) {
         return;
@@ -94,24 +117,6 @@ void MetricProducer::flushIfExpire(int64_t elapsedTimestampNs) {
     mIsActive = evaluateActiveStateLocked(elapsedTimestampNs);
     if (!mIsActive) {
         onActiveStateChangedLocked(elapsedTimestampNs);
-    }
-}
-
-void MetricProducer::addActivation(int activationTrackerIndex, const ActivationType& activationType,
-        int64_t ttl_seconds, int deactivationTrackerIndex) {
-    std::lock_guard<std::mutex> lock(mMutex);
-    // When a metric producer does not depend on any activation, its mIsActive is true.
-    // Therefore, if this is the 1st activation, mIsActive will turn to false. Otherwise it does not
-    // change.
-    if  (mEventActivationMap.empty()) {
-        mIsActive = false;
-    }
-    std::shared_ptr<Activation> activation =
-            std::make_shared<Activation>(activationType, ttl_seconds * NS_PER_SEC);
-    mEventActivationMap.emplace(activationTrackerIndex, activation);
-    if (-1 != deactivationTrackerIndex) {
-        auto& deactivationList = mEventDeactivationMap[deactivationTrackerIndex];
-        deactivationList.push_back(activation);
     }
 }
 

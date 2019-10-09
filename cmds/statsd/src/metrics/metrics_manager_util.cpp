@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "metrics_manager_util.h"
+#include "MetricProducer.h"
 
 #include "../condition/CombinationConditionTracker.h"
 #include "../condition/SimpleConditionTracker.h"
@@ -134,6 +135,62 @@ bool handleMetricWithConditions(
     // will create new vector if not exist before.
     auto& metricList = conditionToMetricMap[condition_it->second];
     metricList.push_back(metricIndex);
+    return true;
+}
+
+// Validates a metricActivation and populates state.
+// EventActivationMap and EventDeactivationMap are supplied to a MetricProducer
+//      to provide the producer with state about its activators and deactivators.
+// Returns false if there are errors.
+bool handleMetricActivation(
+        const StatsdConfig& config,
+        const int64_t metricId,
+        const int metricIndex,
+        const unordered_map<int64_t, int>& metricToActivationMap,
+        const unordered_map<int64_t, int>& logTrackerMap,
+        unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
+        unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
+        vector<int>& metricsWithActivation,
+        unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
+        unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap) {
+    // Check if metric has an associated activation
+    auto itr = metricToActivationMap.find(metricId);
+    if (itr == metricToActivationMap.end()) return true;
+
+    int activationIndex = itr->second;
+    const MetricActivation& metricActivation = config.metric_activation(activationIndex);
+
+    for (int i = 0; i < metricActivation.event_activation_size(); i++) {
+        const EventActivation& activation = metricActivation.event_activation(i);
+
+        auto itr = logTrackerMap.find(activation.atom_matcher_id());
+        if (itr == logTrackerMap.end()) {
+            ALOGE("Atom matcher not found for event activation.");
+            return false;
+        }
+
+        ActivationType activationType = (activation.has_activation_type()) ?
+                activation.activation_type() : metricActivation.activation_type();
+        std::shared_ptr<Activation> activationWrapper = std::make_shared<Activation>(
+                activationType, activation.ttl_seconds() * NS_PER_SEC);
+
+        int atomMatcherIndex = itr->second;
+        activationAtomTrackerToMetricMap[atomMatcherIndex].push_back(metricIndex);
+        eventActivationMap.emplace(atomMatcherIndex, activationWrapper);
+
+        if (activation.has_deactivation_atom_matcher_id()) {
+            itr = logTrackerMap.find(activation.deactivation_atom_matcher_id());
+            if (itr == logTrackerMap.end()) {
+                ALOGE("Atom matcher not found for event deactivation.");
+                return false;
+            }
+            int deactivationAtomMatcherIndex = itr->second;
+            deactivationAtomTrackerToMetricMap[deactivationAtomMatcherIndex].push_back(metricIndex);
+            eventDeactivationMap[deactivationAtomMatcherIndex].push_back(activationWrapper);
+        }
+    }
+
+    metricsWithActivation.push_back(metricIndex);
     return true;
 }
 
@@ -293,15 +350,32 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
                  vector<sp<MetricProducer>>& allMetricProducers,
-                 unordered_map<int, std::vector<int>>& conditionToMetricMap,
-                 unordered_map<int, std::vector<int>>& trackerToMetricMap,
-                 unordered_map<int64_t, int>& metricMap, std::set<int64_t>& noReportMetricIds) {
+                 unordered_map<int, vector<int>>& conditionToMetricMap,
+                 unordered_map<int, vector<int>>& trackerToMetricMap,
+                 unordered_map<int64_t, int>& metricMap, std::set<int64_t>& noReportMetricIds,
+                 unordered_map<int, vector<int>>& activationAtomTrackerToMetricMap,
+                 unordered_map<int, vector<int>>& deactivationAtomTrackerToMetricMap,
+                 vector<int>& metricsWithActivation) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     sp<EventMatcherWizard> matcherWizard = new EventMatcherWizard(allAtomMatchers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
-                                config.event_metric_size() + config.value_metric_size();
+                                config.event_metric_size() + config.gauge_metric_size() +
+                                config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
     StatsPullerManager statsPullerManager;
+
+    // Construct map from metric id to metric activation index. The map will be used to determine
+    // the metric activation corresponding to a metric.
+    unordered_map<int64_t, int> metricToActivationMap;
+    for (int i = 0; i < config.metric_activation_size(); i++) {
+        const MetricActivation& metricActivation = config.metric_activation(i);
+        int64_t metricId = metricActivation.metric_id();
+        if (metricToActivationMap.find(metricId) != metricToActivationMap.end()) {
+            ALOGE("Metric %lld has multiple MetricActivations", (long long) metricId);
+            return false;
+        }
+        metricToActivationMap.insert({metricId, i});
+    }
 
     // Build MetricProducers for each metric defined in config.
     // build CountMetricProducer
@@ -337,8 +411,17 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
-        sp<MetricProducer> countProducer =
-                new CountMetricProducer(key, metric, conditionIndex, wizard, timeBaseTimeNs, currentTimeNs);
+        unordered_map<int, shared_ptr<Activation>> eventActivationMap;
+        unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        bool success = handleMetricActivation(config, metric.id(), metricIndex,
+                metricToActivationMap, logTrackerMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation, eventActivationMap,
+                eventDeactivationMap);
+        if (!success) return false;
+
+        sp<MetricProducer> countProducer = new CountMetricProducer(
+                key, metric, conditionIndex, wizard, timeBaseTimeNs, currentTimeNs,
+                eventActivationMap, eventDeactivationMap);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -406,9 +489,18 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        unordered_map<int, shared_ptr<Activation>> eventActivationMap;
+        unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        bool success = handleMetricActivation(config, metric.id(), metricIndex,
+                metricToActivationMap, logTrackerMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation, eventActivationMap,
+                eventDeactivationMap);
+        if (!success) return false;
+
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
-                trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs, currentTimeNs);
+                trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs,
+                currentTimeNs, eventActivationMap, eventDeactivationMap);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -443,8 +535,17 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
-        sp<MetricProducer> eventMetric =
-                new EventMetricProducer(key, metric, conditionIndex, wizard, timeBaseTimeNs);
+        unordered_map<int, shared_ptr<Activation>> eventActivationMap;
+        unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        bool success = handleMetricActivation(config, metric.id(), metricIndex,
+                metricToActivationMap, logTrackerMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation, eventActivationMap,
+                eventDeactivationMap);
+        if (!success) return false;
+
+        sp<MetricProducer> eventMetric = new EventMetricProducer(
+                key, metric, conditionIndex, wizard, timeBaseTimeNs, eventActivationMap,
+                eventDeactivationMap);
 
         allMetricProducers.push_back(eventMetric);
     }
@@ -500,9 +601,18 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        unordered_map<int, shared_ptr<Activation>> eventActivationMap;
+        unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        bool success = handleMetricActivation(config, metric.id(), metricIndex,
+                metricToActivationMap, logTrackerMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation, eventActivationMap,
+                eventDeactivationMap);
+        if (!success) return false;
+
         sp<MetricProducer> valueProducer = new ValueMetricProducer(
                 key, metric, conditionIndex, wizard, trackerIndex, matcherWizard, pullTagId,
-                timeBaseTimeNs, currentTimeNs, pullerManager);
+                timeBaseTimeNs, currentTimeNs, pullerManager, eventActivationMap,
+                eventDeactivationMap);
         allMetricProducers.push_back(valueProducer);
     }
 
@@ -586,10 +696,19 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
+        unordered_map<int, shared_ptr<Activation>> eventActivationMap;
+        unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
+        bool success = handleMetricActivation(config, metric.id(), metricIndex,
+                metricToActivationMap, logTrackerMap, activationAtomTrackerToMetricMap,
+                deactivationAtomTrackerToMetricMap, metricsWithActivation, eventActivationMap,
+                eventDeactivationMap);
+        if (!success) return false;
+
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
                 key, metric, conditionIndex, wizard,
                 trackerIndex, matcherWizard, pullTagId, triggerAtomId, atomTagId,
-                timeBaseTimeNs, currentTimeNs, pullerManager);
+                timeBaseTimeNs, currentTimeNs, pullerManager,
+                eventActivationMap, eventDeactivationMap);
         allMetricProducers.push_back(gaugeProducer);
     }
     for (int i = 0; i < config.no_report_metric_size(); ++i) {
@@ -707,73 +826,6 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
     return true;
 }
 
-bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
-                           const int64_t currentTimeNs,
-                           const unordered_map<int64_t, int> &logEventTrackerMap,
-                           const unordered_map<int64_t, int> &metricProducerMap,
-                           vector<sp<MetricProducer>>& allMetricProducers,
-                           unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
-                           unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
-                           vector<int>& metricsWithActivation) {
-    for (int i = 0; i < config.metric_activation_size(); ++i) {
-        const MetricActivation& metric_activation = config.metric_activation(i);
-        auto itr = metricProducerMap.find(metric_activation.metric_id());
-        if (itr == metricProducerMap.end()) {
-            ALOGE("Metric id not found in metric activation: %lld",
-                (long long)metric_activation.metric_id());
-            return false;
-        }
-        const int metricTrackerIndex = itr->second;
-        if (metricTrackerIndex < 0 || metricTrackerIndex >= (int)allMetricProducers.size()) {
-            ALOGE("Invalid metric tracker index.");
-            return false;
-        }
-        const sp<MetricProducer>& metric = allMetricProducers[metricTrackerIndex];
-        metricsWithActivation.push_back(metricTrackerIndex);
-        for (int j = 0; j < metric_activation.event_activation_size(); ++j) {
-            const EventActivation& activation = metric_activation.event_activation(j);
-            auto logTrackerIt = logEventTrackerMap.find(activation.atom_matcher_id());
-            if (logTrackerIt == logEventTrackerMap.end()) {
-                ALOGE("Atom matcher not found for event activation.");
-                return false;
-            }
-            const int atomMatcherIndex = logTrackerIt->second;
-            activationAtomTrackerToMetricMap[atomMatcherIndex].push_back(
-                metricTrackerIndex);
-
-            ActivationType activationType;
-            if (activation.has_activation_type()) {
-                activationType = activation.activation_type();
-            } else {
-                activationType = metric_activation.activation_type();
-            }
-
-            if (activation.has_deactivation_atom_matcher_id()) {
-                auto deactivationAtomMatcherIt =
-                        logEventTrackerMap.find(activation.deactivation_atom_matcher_id());
-                if (deactivationAtomMatcherIt == logEventTrackerMap.end()) {
-                    ALOGE("Atom matcher not found for event deactivation.");
-                    return false;
-                }
-                const int deactivationMatcherIndex = deactivationAtomMatcherIt->second;
-                deactivationAtomTrackerToMetricMap[deactivationMatcherIndex]
-                        .push_back(metricTrackerIndex);
-                metric->addActivation(atomMatcherIndex, activationType, activation.ttl_seconds(),
-                                      deactivationMatcherIndex);
-            } else {
-                metric->addActivation(atomMatcherIndex, activationType, activation.ttl_seconds());
-            }
-        }
-    }
-    return true;
-}
-
-void prepareFirstBucket(const vector<sp<MetricProducer>>& allMetricProducers) {
-    for (const auto& metric: allMetricProducers) {
-        metric->prepareFirstBucket();
-    }
-}
-
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
                       const sp<StatsPullerManager>& pullerManager,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
@@ -810,7 +862,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
     if (!initMetrics(key, config, timeBaseNs, currentTimeNs, uidMap, pullerManager, logTrackerMap,
                      conditionTrackerMap, allAtomMatchers, allConditionTrackers, allMetricProducers,
                      conditionToMetricMap, trackerToMetricMap, metricProducerMap,
-                     noReportMetricIds)) {
+                     noReportMetricIds, activationAtomTrackerToMetricMap,
+                     deactivationAtomTrackerToMetricMap, metricsWithActivation)) {
         ALOGE("initMetricProducers failed");
         return false;
     }
@@ -824,14 +877,6 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         ALOGE("initAlarms failed");
         return false;
     }
-    if (!initMetricActivations(key, config, currentTimeNs, logTrackerMap, metricProducerMap,
-            allMetricProducers, activationAtomTrackerToMetricMap,
-            deactivationAtomTrackerToMetricMap, metricsWithActivation)) {
-        ALOGE("initMetricActivations failed");
-        return false;
-    }
-
-    prepareFirstBucket(allMetricProducers);
 
     return true;
 }

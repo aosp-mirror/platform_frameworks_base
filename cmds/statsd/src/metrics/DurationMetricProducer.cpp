@@ -36,6 +36,7 @@ using android::util::ProtoOutputStream;
 using std::string;
 using std::unordered_map;
 using std::vector;
+using std::shared_ptr;
 
 namespace android {
 namespace os {
@@ -62,14 +63,15 @@ const int FIELD_ID_BUCKET_NUM = 4;
 const int FIELD_ID_START_BUCKET_ELAPSED_MILLIS = 5;
 const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
-DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const DurationMetric& metric,
-                                               const int conditionIndex, const size_t startIndex,
-                                               const size_t stopIndex, const size_t stopAllIndex,
-                                               const bool nesting,
-                                               const sp<ConditionWizard>& wizard,
-                                               const FieldMatcher& internalDimensions,
-                                               const int64_t timeBaseNs, const int64_t startTimeNs)
-    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
+DurationMetricProducer::DurationMetricProducer(
+        const ConfigKey& key, const DurationMetric& metric, const int conditionIndex,
+        const size_t startIndex, const size_t stopIndex, const size_t stopAllIndex,
+        const bool nesting, const sp<ConditionWizard>& wizard,
+        const FieldMatcher& internalDimensions, const int64_t timeBaseNs, const int64_t startTimeNs,
+        const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
+        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap)
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard, eventActivationMap,
+                     eventDeactivationMap),
       mAggregationType(metric.aggregation_type()),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
