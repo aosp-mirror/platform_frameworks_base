@@ -32,7 +32,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 
 import android.content.ComponentName;
-import android.content.pm.PackageList;
 import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
 import android.os.UserHandle;
@@ -43,6 +42,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
 
 import com.android.server.LocalServices;
+import com.android.server.pm.PackageList;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import org.junit.Before;

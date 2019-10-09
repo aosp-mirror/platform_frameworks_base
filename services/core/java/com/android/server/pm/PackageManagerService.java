@@ -162,7 +162,6 @@ import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
@@ -3048,7 +3047,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Resolve protected action filters. Only the setup wizard is allowed to
             // have a high priority filter for these actions.
-            mSetupWizardPackage = getSetupWizardPackageName();
+            mSetupWizardPackage = getSetupWizardPackageNameImpl();
             mComponentResolver.fixProtectedFilterPriorities();
 
             mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
@@ -19652,7 +19651,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 set, comp, userId);
     }
 
-    private @Nullable String getSetupWizardPackageName() {
+    private @Nullable String getSetupWizardPackageNameImpl() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
 
@@ -19757,6 +19756,14 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         return systemCaptionsServiceComponentName.getPackageName();
+    }
+
+    @Override
+    public String getSetupWizardPackageName() {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Non-system caller");
+        }
+        return mPmInternal.getSetupWizardPackageName();
     }
 
     public String getIncidentReportApproverPackageName() {

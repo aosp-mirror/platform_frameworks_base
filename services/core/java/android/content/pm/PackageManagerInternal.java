@@ -33,6 +33,8 @@ import android.os.PersistableBundle;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import com.android.server.pm.PackageList;
+
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

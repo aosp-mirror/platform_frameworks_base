@@ -7427,6 +7427,17 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return the system defined setup wizard package name, or null if there's none.
+     *
+     * @hide
+     */
+    @Nullable
+    public String getSetupWizardPackageName() {
+        throw new UnsupportedOperationException(
+                "getSetupWizardPackageName not implemented in subclass");
+    }
+
+    /**
      * @return the incident report approver app package name, or null if it's not defined
      * by the OEM.
      *

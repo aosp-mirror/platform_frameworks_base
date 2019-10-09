@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package android.content.pm;
+package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 
 import com.android.server.LocalServices;
