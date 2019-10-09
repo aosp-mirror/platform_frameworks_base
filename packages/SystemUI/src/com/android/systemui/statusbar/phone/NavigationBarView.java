@@ -346,6 +346,10 @@ public class NavigationBarView extends FrameLayout implements
         return super.onTouchEvent(event);
     }
 
+    void onSystemUiVisibilityChanged(int systemUiVisibility) {
+        mEdgeBackGestureHandler.onSystemUiVisibilityChanged(systemUiVisibility);
+    }
+
     void onBarTransition(int newMode) {
         if (newMode == MODE_OPAQUE) {
             // If the nav bar background is opaque, stop auto tinting since we know the icons are
