@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.content.res.Configuration;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.view.IDisplayWindowListener;
@@ -56,6 +57,28 @@ class DisplayWindowListenerController {
         for (int i = 0; i < count; ++i) {
             try {
                 mDisplayListeners.getBroadcastItem(i).onDisplayAdded(display.mDisplayId);
+            } catch (RemoteException e) {
+            }
+        }
+        mDisplayListeners.finishBroadcast();
+    }
+
+    void dispatchDisplayChanged(ActivityDisplay display, Configuration newConfig) {
+        // Only report changed if this has actually been added to the hierarchy already.
+        boolean isInHierarchy = false;
+        for (int i = 0; i < display.getParent().getChildCount(); ++i) {
+            if (display.getParent().getChildAt(i) == display) {
+                isInHierarchy = true;
+            }
+        }
+        if (!isInHierarchy) {
+            return;
+        }
+        int count = mDisplayListeners.beginBroadcast();
+        for (int i = 0; i < count; ++i) {
+            try {
+                mDisplayListeners.getBroadcastItem(i).onDisplayConfigurationChanged(
+                        display.mDisplayId, newConfig);
             } catch (RemoteException e) {
             }
         }
