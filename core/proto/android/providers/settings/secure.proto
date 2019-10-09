@@ -211,6 +211,11 @@ message SecureSettingsProto {
         optional SettingProto silence_timer_touch_count = 11 [ (android.privacy).dest =
             DEST_AUTOMATIC ];
         optional SettingProto skip_touch_count = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto aware_tap_pause_gesture_count = 13 [
+            (android.privacy).dest =
+            DEST_AUTOMATIC ];
+        optional SettingProto aware_tap_pause_touch_count = 14 [ (android.privacy).dest =
+            DEST_AUTOMATIC ];
     }
     optional Gesture gesture = 74;
 
