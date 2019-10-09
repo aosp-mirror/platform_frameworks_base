@@ -792,18 +792,6 @@
         android:permissionFlags="hardRestricted"
         android:protectionLevel="dangerous" />
 
-    <!-- @SystemApi @TestApi Allows an application to forward cell broadcast messages to the cell
-         broadcast module. This is required in order to bind to the cell broadcast service, and
-         ensures that only the system can forward messages to it.
-
-         <p>Protection level: signature
-
-         @hide -->
-    <permission android:name="android.permission.BIND_CELL_BROADCAST_SERVICE"
-        android:label="@string/permlab_bindCellBroadcastService"
-        android:description="@string/permdesc_bindCellBroadcastService"
-        android:protectionLevel="signature" />
-
     <!-- @SystemApi @TestApi Allows an application to read previously received cell broadcast
          messages and to register a content observer to get notifications when
          a cell broadcast has been received and added to the database. For
