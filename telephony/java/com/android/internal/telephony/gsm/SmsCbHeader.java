@@ -72,22 +72,22 @@ public class SmsCbHeader {
     /**
      * Length of SMS-CB header
      */
-    public static final int PDU_HEADER_LENGTH = 6;
+    static final int PDU_HEADER_LENGTH = 6;
 
     /**
      * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1
      */
-    public static final int FORMAT_GSM = 1;
+    static final int FORMAT_GSM = 1;
 
     /**
      * UMTS pdu format, as defined in 3gpp TS 23.041, section 9.4.2
      */
-    public static final int FORMAT_UMTS = 2;
+    static final int FORMAT_UMTS = 2;
 
     /**
-     * ETWS pdu format, as defined in 3gpp TS 23.041, section 9.4.1.3
+     * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1.3
      */
-    public static final int FORMAT_ETWS_PRIMARY = 3;
+    static final int FORMAT_ETWS_PRIMARY = 3;
 
     /**
      * Message type value as defined in 3gpp TS 25.324, section 11.1.
@@ -237,11 +237,11 @@ public class SmsCbHeader {
         return mMessageIdentifier;
     }
 
-    public int getDataCodingScheme() {
+    int getDataCodingScheme() {
         return mDataCodingScheme;
     }
 
-    public DataCodingScheme getDataCodingSchemeStructedData() {
+    DataCodingScheme getDataCodingSchemeStructedData() {
         return mDataCodingSchemeStructedData;
     }
 
@@ -253,11 +253,11 @@ public class SmsCbHeader {
         return mNrOfPages;
     }
 
-    public SmsCbEtwsInfo getEtwsInfo() {
+    SmsCbEtwsInfo getEtwsInfo() {
         return mEtwsInfo;
     }
 
-    public SmsCbCmasInfo getCmasInfo() {
+    SmsCbCmasInfo getCmasInfo() {
         return mCmasInfo;
     }
 
@@ -265,7 +265,7 @@ public class SmsCbHeader {
      * Return whether this broadcast is an emergency (PWS) message type.
      * @return true if this message is emergency type; false otherwise
      */
-    public boolean isEmergencyMessage() {
+    boolean isEmergencyMessage() {
         return mMessageIdentifier >= SmsCbConstants.MESSAGE_ID_PWS_FIRST_IDENTIFIER
                 && mMessageIdentifier <= SmsCbConstants.MESSAGE_ID_PWS_LAST_IDENTIFIER;
     }
@@ -283,7 +283,7 @@ public class SmsCbHeader {
      * Return whether this broadcast is an ETWS primary notification.
      * @return true if this message is an ETWS primary notification; false otherwise
      */
-    public boolean isEtwsPrimaryNotification() {
+    boolean isEtwsPrimaryNotification() {
         return mFormat == FORMAT_ETWS_PRIMARY;
     }
 
@@ -291,7 +291,7 @@ public class SmsCbHeader {
      * Return whether this broadcast is in UMTS format.
      * @return true if this message is in UMTS format; false otherwise
      */
-    public boolean isUmtsFormat() {
+    boolean isUmtsFormat() {
         return mFormat == FORMAT_UMTS;
     }
 
