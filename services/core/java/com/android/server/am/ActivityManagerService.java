@@ -271,8 +271,8 @@ import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.provider.DeviceConfig.Properties;
+import android.provider.Settings;
 import android.server.ServerProtoEnums;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
@@ -5013,7 +5013,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (preBindAgent != null) {
                 thread.attachAgent(preBindAgent);
             }
-
+            if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                thread.attachStartupAgents(app.info.dataDir);
+            }
 
             // Figure out whether the app needs to run in autofill compat mode.
             AutofillOptions autofillOptions = null;
