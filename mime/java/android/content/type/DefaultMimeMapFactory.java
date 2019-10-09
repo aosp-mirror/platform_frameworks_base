@@ -23,11 +23,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  * Creates the framework default {@link MimeMap}, a bidirectional mapping
@@ -53,8 +51,6 @@ public class DefaultMimeMapFactory {
         return create(resourceName -> c.getResourceAsStream("/res/" + resourceName));
     }
 
-    private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s+");
-
     /**
      * Creates a {@link MimeMap} instance whose resources are loaded from the
      * InputStreams looked up in {@code resourceSupplier}.
@@ -63,49 +59,48 @@ public class DefaultMimeMapFactory {
      */
     public static MimeMap create(Function<String, InputStream> resourceSupplier) {
         MimeMap.Builder builder = MimeMap.builder();
-        parseTypes(builder, true, resourceSupplier, "mime.types");
-        parseTypes(builder, true, resourceSupplier, "android.mime.types");
-        parseTypes(builder, false, resourceSupplier, "vendor.mime.types");
+        // The files loaded here must be in minimized format with lines of the
+        // form "mime/type ext1 ext2 ext3", i.e. no comments, no empty lines, no
+        // leading/trailing whitespace and with a single space between entries on
+        // each line.  See http://b/142267887
+        //
+        // Note: the order here matters - later entries can overwrite earlier ones
+        // (except that vendor.mime.types entries are prefixed with '?' which makes
+        // them never overwrite).
+        parseTypes(builder, resourceSupplier, "debian.mime.types");
+        parseTypes(builder, resourceSupplier, "android.mime.types");
+        parseTypes(builder, resourceSupplier, "vendor.mime.types");
         return builder.build();
     }
 
-    private static void parseTypes(MimeMap.Builder builder, boolean allowOverwrite,
+    private static void parseTypes(MimeMap.Builder builder,
             Function<String, InputStream> resourceSupplier, String resourceName) {
         try (InputStream inputStream = Objects.requireNonNull(resourceSupplier.apply(resourceName));
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
+            List<String> specs = new ArrayList<>(10); // re-use for each line
             while ((line = reader.readLine()) != null) {
-                int commentPos = line.indexOf('#');
-                if (commentPos >= 0) {
-                    line = line.substring(0, commentPos);
-                }
-                line = line.trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-                List<String> specs = Arrays.asList(SPLIT_PATTERN.split(line));
-                if (!allowOverwrite) {
-                    // Pretend that the mimeType and each file extension listed in the line
-                    // carries a "?" prefix, which means that it can add new mappings but
-                    // not modify existing mappings (putIfAbsent() semantics).
-                    specs = ensurePrefix("?", specs);
-                }
+                specs.clear();
+                // Lines are of the form "mimeSpec extSpec extSpec[...]" with a single space
+                // separating them and no leading/trailing spaces and no empty lines.
+                int startIdx = 0;
+                do {
+                    int endIdx = line.indexOf(' ', startIdx);
+                    if (endIdx < 0) {
+                        endIdx = line.length();
+                    }
+                    String spec = line.substring(startIdx, endIdx);
+                    if (spec.isEmpty()) {
+                        throw new IllegalArgumentException("Malformed line: " + line);
+                    }
+                    specs.add(spec);
+                    startIdx = endIdx + 1; // skip over the space
+                } while (startIdx < line.length());
                 builder.put(specs.get(0), specs.subList(1, specs.size()));
             }
         } catch (IOException | RuntimeException e) {
             throw new RuntimeException("Failed to parse " + resourceName, e);
         }
-    }
-
-    private static List<String> ensurePrefix(String prefix, List<String> strings) {
-        List<String> result = new ArrayList<>(strings.size());
-        for (String s : strings) {
-            if (!s.startsWith(prefix)) {
-                s = prefix + s;
-            }
-            result.add(s);
-        }
-        return result;
     }
 
 }
