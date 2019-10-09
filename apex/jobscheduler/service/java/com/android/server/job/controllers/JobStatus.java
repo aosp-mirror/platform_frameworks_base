@@ -28,7 +28,7 @@ import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.format.TimeMigrationUtils;
+import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -1518,7 +1518,7 @@ public final class JobStatus {
             if (job.getClipData() != null) {
                 pw.print(prefix); pw.print("  Clip data: ");
                 StringBuilder b = new StringBuilder(128);
-                job.getClipData().toShortString(b);
+                b.append(job.getClipData());
                 pw.println(b);
             }
             if (uriPerms != null) {
@@ -1659,12 +1659,16 @@ public final class JobStatus {
         }
         if (mLastSuccessfulRunTime != 0) {
             pw.print(prefix); pw.print("Last successful run: ");
-            pw.println(TimeMigrationUtils.formatMillisWithFixedFormat(mLastSuccessfulRunTime));
+            pw.println(formatTime(mLastSuccessfulRunTime));
         }
         if (mLastFailedRunTime != 0) {
             pw.print(prefix); pw.print("Last failed run: ");
-            pw.println(TimeMigrationUtils.formatMillisWithFixedFormat(mLastFailedRunTime));
+            pw.println(formatTime(mLastFailedRunTime));
         }
+    }
+
+    private static CharSequence formatTime(long time) {
+        return DateFormat.format("yyyy-MM-dd HH:mm:ss", time);
     }
 
     public void dump(ProtoOutputStream proto, long fieldId, boolean full, long elapsedRealtimeMillis) {
