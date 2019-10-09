@@ -52,6 +52,18 @@ public final class OpenFormula extends Formula {
         return mFormulas;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mFormulas.size(); i++) {
+            if (i > 0) {
+                sb.append(String.format(" %s ", mConnector));
+            }
+            sb.append(mFormulas.get(i).toString());
+        }
+        return sb.toString();
+    }
+
     private void validateFormulas(Connector connector, List<Formula> formulas) {
         switch (connector) {
             case AND:

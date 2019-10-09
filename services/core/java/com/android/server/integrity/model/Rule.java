@@ -61,4 +61,9 @@ public final class Rule {
     public Effect getEffect() {
         return mEffect;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Rule: %s, %s", mFormula, mEffect);
+    }
 }

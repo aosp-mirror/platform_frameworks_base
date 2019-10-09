@@ -112,6 +112,26 @@ public final class AtomicFormula extends Formula {
         return mBoolValue;
     }
 
+    /**
+     * Get string representation of the value of the key in the formula.
+     *
+     * @return string representation of the value of the key.
+     */
+    public String getValue() {
+        if (mStringValue != null) {
+            return mStringValue;
+        }
+        if (mIntValue != null) {
+            return mIntValue.toString();
+        }
+        return mBoolValue.toString();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", mKey, mOperator, getValue());
+    }
+
     private void validateOperator(Key key, Operator operator) {
         boolean validOperator;
         switch (key) {
