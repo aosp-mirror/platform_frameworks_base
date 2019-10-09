@@ -144,7 +144,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
         mCarrierTextCallbackInfo = new CarrierTextController.CarrierTextCallbackInfo("",
                 new CharSequence[]{}, false, new int[]{});
-        when(mTelephonyManager.getMaxPhoneCount()).thenReturn(3);
+        when(mTelephonyManager.getSupportedModemCount()).thenReturn(3);
 
         mCarrierTextController = new CarrierTextController(mContext, SEPARATOR, true, true);
         // This should not start listening on any of the real dependencies but will test that
