@@ -1690,6 +1690,8 @@ public final class Debug
      * such runtime statistic exists.
      *
      * <p>The following table lists the runtime statistics that the runtime supports.
+     * All statistics are approximate. Individual allocations may not be immediately reflected
+     * in the results.
      * Note runtime statistics may be added or removed in a future API level.</p>
      *
      * <table>
