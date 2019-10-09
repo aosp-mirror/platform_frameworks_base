@@ -2324,9 +2324,9 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTaskRecord());
                 }
 
-                final ActivityStack launchStack = getLaunchStack(
-                        mStartActivity, mLaunchFlags, mStartActivity.getTaskRecord(), mOptions);
                 final TaskRecord intentTask = intentActivity.getTaskRecord();
+                final ActivityStack launchStack =
+                        getLaunchStack(mStartActivity, mLaunchFlags, intentTask, mOptions);
                 if (launchStack == null || launchStack == mTargetStack) {
                     // We only want to move to the front, if we aren't going to launch on a
                     // different stack. If we launch on a different stack, we will put the
@@ -2370,9 +2370,12 @@ class ActivityStarter {
                             REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                             "reparentingHome");
                     mMovedToFront = true;
-                } else if (launchStack.topTask() == null) {
+                }
+
+                if (launchStack.topTask() == null) {
                     // The task does not need to be reparented to the launch stack. Remove the
                     // launch stack if there is no activity in it.
+                    Slog.w(TAG, "Removing an empty stack: " + launchStack);
                     launchStack.remove();
                 }
 
