@@ -24,6 +24,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 @RunWith(JUnit4.class)
 public class OpenFormulaTest {
 
@@ -34,12 +37,11 @@ public class OpenFormulaTest {
 
     @Test
     public void testValidOpenFormula() {
-        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.AND, ATOMIC_FORMULA_1,
-                ATOMIC_FORMULA_2);
+        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.AND,
+                Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2));
 
         assertEquals(OpenFormula.Connector.AND, openFormula.getConnector());
-        assertEquals(ATOMIC_FORMULA_1, openFormula.getMainFormula());
-        assertEquals(ATOMIC_FORMULA_2, openFormula.getAuxiliaryFormula());
+        assertEquals(Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2), openFormula.getFormulas());
     }
 
     @Test
@@ -47,9 +49,10 @@ public class OpenFormulaTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex */
-                String.format("Invalid formulas used for connector %s", OpenFormula.Connector.AND),
-                () -> new OpenFormula(OpenFormula.Connector.AND, ATOMIC_FORMULA_1,
-                        null));
+                String.format("Connector %s must have at least 2 formulas",
+                        OpenFormula.Connector.AND),
+                () -> new OpenFormula(OpenFormula.Connector.AND,
+                        Collections.singletonList(ATOMIC_FORMULA_1)));
     }
 
     @Test
@@ -57,8 +60,8 @@ public class OpenFormulaTest {
         assertExpectException(
                 IllegalArgumentException.class,
                 /* expectedExceptionMessageRegex */
-                String.format("Invalid formulas used for connector %s", OpenFormula.Connector.NOT),
-                () -> new OpenFormula(OpenFormula.Connector.NOT, ATOMIC_FORMULA_1,
-                        ATOMIC_FORMULA_2));
+                String.format("Connector %s must have 1 formula only", OpenFormula.Connector.NOT),
+                () -> new OpenFormula(OpenFormula.Connector.NOT,
+                        Arrays.asList(ATOMIC_FORMULA_1, ATOMIC_FORMULA_2)));
     }
 }

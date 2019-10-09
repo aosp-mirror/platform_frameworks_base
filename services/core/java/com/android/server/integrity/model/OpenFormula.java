@@ -16,9 +16,11 @@
 
 package com.android.server.integrity.model;
 
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a complex formula consisting of other simple and complex formulas.
@@ -34,46 +36,33 @@ public final class OpenFormula extends Formula {
     }
 
     private final Connector mConnector;
-    private final Formula mMainFormula;
-    private final Formula mAuxiliaryFormula;
+    private final List<Formula> mFormulas;
 
-    public OpenFormula(Connector connector, Formula mainFormula,
-            @Nullable Formula auxiliaryFormula) {
-        validateAuxiliaryFormula(connector, auxiliaryFormula);
+    public OpenFormula(Connector connector, List<Formula> formulas) {
+        validateFormulas(connector, formulas);
         this.mConnector = checkNotNull(connector);
-        this.mMainFormula = checkNotNull(mainFormula);
-        // TODO: Add validators on auxiliary formula
-        this.mAuxiliaryFormula = auxiliaryFormula;
+        this.mFormulas = Collections.unmodifiableList(checkNotNull(formulas));
     }
 
     public Connector getConnector() {
         return mConnector;
     }
 
-    public Formula getMainFormula() {
-        return mMainFormula;
+    public List<Formula> getFormulas() {
+        return mFormulas;
     }
 
-    public Formula getAuxiliaryFormula() {
-        return mAuxiliaryFormula;
-    }
-
-    private void validateAuxiliaryFormula(Connector connector, Formula auxiliaryFormula) {
-        boolean validAuxiliaryFormula;
+    private void validateFormulas(Connector connector, List<Formula> formulas) {
         switch (connector) {
             case AND:
             case OR:
-                validAuxiliaryFormula = (auxiliaryFormula != null);
+                checkArgument(formulas.size() >= 2,
+                        String.format("Connector %s must have at least 2 formulas", connector));
                 break;
             case NOT:
-                validAuxiliaryFormula = (auxiliaryFormula == null);
+                checkArgument(formulas.size() == 1,
+                        String.format("Connector %s must have 1 formula only", connector));
                 break;
-            default:
-                validAuxiliaryFormula = false;
-        }
-        if (!validAuxiliaryFormula) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid formulas used for connector %s", connector));
         }
     }
 }
