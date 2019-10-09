@@ -884,6 +884,16 @@
       messages. This means the app could monitor or delete messages sent to your
       device without showing them to you.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR LIMIT=NONE] -->
+    <string name="permlab_bindCellBroadcastService">Forward cell broadcast messages</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bindCellBroadcastService">Allows the app to bind to the
+        cell broadcast module in order to forward cell broadcast messages
+        as they are received. Cell broadcast alerts are delivered in some
+        locations to warn you of emergency situations. Malicious apps may
+        interfere with the performance or operation of your device when an
+        emergency cell broadcast is received.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCellBroadcasts">read cell broadcast messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
