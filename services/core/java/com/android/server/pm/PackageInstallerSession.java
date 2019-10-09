@@ -1090,19 +1090,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 assertMultiPackageConsistencyLocked(childSessions);
             }
 
-            if (params.isStaged) {
-                final PackageInstallerSession activeSession = mStagingManager.getActiveSession();
-                final boolean anotherSessionAlreadyInProgress =
-                        activeSession != null && sessionId != activeSession.sessionId
-                                && mParentSessionId != activeSession.sessionId;
-                if (anotherSessionAlreadyInProgress) {
-                    throw new PackageManagerException(
-                            PackageManager.INSTALL_FAILED_OTHER_STAGED_SESSION_IN_PROGRESS,
-                            "There is already in-progress committed staged session "
-                                    + activeSession.sessionId, null);
-                }
-            }
-
             // Read transfers from the original owner stay open, but as the session's data
             // cannot be modified anymore, there is no leak of information. For staged sessions,
             // further validation is performed by the staging manager.
@@ -1124,6 +1111,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     // handled in the code above.
                     throw new PackageManagerException(e);
                 }
+            }
+
+            if (params.isStaged) {
+                mStagingManager.checkNonOverlappingWithStagedSessions(this);
             }
         } catch (PackageManagerException e) {
             // Session is sealed but could not be verified, we need to destroy it.
@@ -1449,7 +1440,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * Validate apex install.
      * <p>
-     * Sets {@link #mResolvedBaseFile} for RollbackManager to use.
+     * Sets {@link #mResolvedBaseFile} for RollbackManager to use. Sets {@link #mPackageName} for
+     * StagingManager to use.
      */
     @GuardedBy("mLock")
     private void validateApexInstallLocked()
@@ -1478,8 +1470,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final File targetFile = new File(stageDir, targetName);
         resolveAndStageFile(addedFile, targetFile);
-
         mResolvedBaseFile = targetFile;
+
+        // Populate package name of the apex session
+        mPackageName = null;
+        final ApkLite apk;
+        try {
+            apk = PackageParser.parseApkLite(
+                    mResolvedBaseFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
+        } catch (PackageParserException e) {
+            throw PackageManagerException.from(e);
+        }
+
+        if (mPackageName == null) {
+            mPackageName = apk.packageName;
+            mVersionCode = apk.getLongVersionCode();
+        }
     }
 
     /**
@@ -1844,6 +1850,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public int getInstallerUid() {
         synchronized (mLock) {
             return mInstallerUid;
+        }
+    }
+
+    /**
+     * @return the package name of this session
+     */
+    String getPackageName() {
+        synchronized (mLock) {
+            return mPackageName;
         }
     }
 

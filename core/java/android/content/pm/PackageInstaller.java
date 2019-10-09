@@ -68,6 +68,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 /**
  * Offers the ability to install, upgrade, and remove applications on the
@@ -486,35 +487,30 @@ public class PackageInstaller {
     }
 
     /**
-     * Returns an active staged session, or {@code null} if there is none.
+     * Returns first active staged session, or {@code null} if there is none.
      *
-     * <p>Staged session is active iff:
-     * <ul>
-     *     <li>It is committed, i.e. {@link SessionInfo#isCommitted()} is {@code true}, and
-     *     <li>it is not applied, i.e. {@link SessionInfo#isStagedSessionApplied()} is {@code
-     *     false}, and
-     *     <li>it is not failed, i.e. {@link SessionInfo#isStagedSessionFailed()} is {@code false}.
-     * </ul>
+     * <p>For more information on what sessions are considered active see
+     * {@link SessionInfo#isStagedSessionActive()}.
      *
-     * <p>In case of a multi-apk session, reasoning above is applied to the parent session, since
-     * that is the one that should been {@link Session#commit committed}.
+     * @deprecated Use {@link #getActiveStagedSessions} as there can be more than one active staged
+     * session
      */
+    @Deprecated
     public @Nullable SessionInfo getActiveStagedSession() {
-        final List<SessionInfo> stagedSessions = getStagedSessions();
-        for (SessionInfo s : stagedSessions) {
-            if (s.isStagedSessionApplied() || s.isStagedSessionFailed()) {
-                // Finalized session.
-                continue;
-            }
-            if (s.getParentSessionId() != SessionInfo.INVALID_ID) {
-                // Child session.
-                continue;
-            }
-            if (s.isCommitted()) {
-                return s;
-            }
-        }
-        return null;
+        List<SessionInfo> activeSessions = getActiveStagedSessions();
+        return activeSessions.isEmpty() ? null : activeSessions.get(0);
+    }
+
+    /**
+     * Returns list of active staged sessions. Returns empty list if there is none.
+     *
+     * <p>For more information on what sessions are considered active see
+     *      * {@link SessionInfo#isStagedSessionActive()}.
+     */
+    public @NonNull List<SessionInfo> getActiveStagedSessions() {
+        return getStagedSessions().stream()
+                .filter(s -> s.isStagedSessionActive())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -2234,10 +2230,33 @@ public class PackageInstaller {
         }
 
         /**
-         * Returns true if this session is a staged session which will be applied at next reboot.
+         * Returns true if this session is a staged session.
          */
         public boolean isStaged() {
             return isStaged;
+        }
+
+        /**
+         * Returns {@code true} if this session is an active staged session.
+         *
+         * We consider a session active if it has been committed and it is either pending
+         * verification, or will be applied at next reboot.
+         *
+         * <p>Staged session is active iff:
+         * <ul>
+         *     <li>It is committed, i.e. {@link SessionInfo#isCommitted()} is {@code true}, and
+         *     <li>it is not applied, i.e. {@link SessionInfo#isStagedSessionApplied()} is {@code
+         *     false}, and
+         *     <li>it is not failed, i.e. {@link SessionInfo#isStagedSessionFailed()} is
+         *     {@code false}.
+         * </ul>
+         *
+         * <p>In case of a multi-package session, reasoning above is applied to the parent session,
+         * since that is the one that should have been {@link Session#commit committed}.
+         */
+        public boolean isStagedSessionActive() {
+            return isStaged && isCommitted && !isStagedSessionApplied && !isStagedSessionFailed
+                    && !hasParentSessionId();
         }
 
         /**
@@ -2246,6 +2265,13 @@ public class PackageInstaller {
          */
         public int getParentSessionId() {
             return parentSessionId;
+        }
+
+        /**
+         * Returns true if session has a valid parent session, otherwise false.
+         */
+        public boolean hasParentSessionId() {
+            return parentSessionId != INVALID_ID;
         }
 
         /**
