@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -31,15 +32,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
-import android.hardware.display.DisplayManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.SparseArray;
-import android.view.Display;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -59,7 +55,6 @@ import org.junit.runner.RunWith;
 public class NavigationBarControllerTest extends SysuiTestCase {
 
     private NavigationBarController mNavigationBarController;
-    private Display mDisplay;
     private NavigationBarFragment mDefaultNavBar;
     private NavigationBarFragment mSecondaryNavBar;
 
@@ -89,37 +84,28 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mNavigationBarController = null;
-        mDisplay = null;
         mDefaultNavBar = null;
         mSecondaryNavBar = null;
     }
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultTrue() {
-        initializeDisplayManager();
         doNothing().when(mNavigationBarController).createNavigationBar(any(), any());
 
         mNavigationBarController.createNavigationBars(true, null);
 
-        verify(mNavigationBarController).createNavigationBar(any(Display.class), any());
+        verify(mNavigationBarController).createNavigationBar(
+                argThat(display -> display.getDisplayId() == DEFAULT_DISPLAY), any());
     }
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultFalse() {
-        initializeDisplayManager();
         doNothing().when(mNavigationBarController).createNavigationBar(any(), any());
 
         mNavigationBarController.createNavigationBars(false, null);
 
-        verify(mNavigationBarController, never()).createNavigationBar(any(), any());
-    }
-
-    private void initializeDisplayManager() {
-        DisplayManager displayManager = mock(DisplayManager.class);
-        mDisplay = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
-        Display[] displays = {mDisplay};
-        when(displayManager.getDisplays()).thenReturn(displays);
-        mContext.addMockSystemService(Context.DISPLAY_SERVICE, displayManager);
+        verify(mNavigationBarController, never()).createNavigationBar(
+                argThat(display -> display.getDisplayId() == DEFAULT_DISPLAY), any());
     }
 
     // Tests if NPE occurs when call checkNavBarModes() with invalid display.
