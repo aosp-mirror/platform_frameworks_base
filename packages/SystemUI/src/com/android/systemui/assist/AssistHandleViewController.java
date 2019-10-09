@@ -43,6 +43,7 @@ public class AssistHandleViewController implements NavigationBarTransitions.Dark
     private Handler mHandler;
     private CornerHandleView mAssistHintLeft;
     private CornerHandleView mAssistHintRight;
+    private int mBottomOffset;
 
     @VisibleForTesting
     boolean mAssistHintVisible;
@@ -59,6 +60,23 @@ public class AssistHandleViewController implements NavigationBarTransitions.Dark
     public void onDarkIntensity(float darkIntensity) {
         mAssistHintLeft.updateDarkness(darkIntensity);
         mAssistHintRight.updateDarkness(darkIntensity);
+    }
+
+    /**
+     * Set the bottom offset.
+     *
+     * @param bottomOffset the bottom offset to translate.
+     */
+    public void setBottomOffset(int bottomOffset) {
+        if (mBottomOffset != bottomOffset) {
+            mBottomOffset = bottomOffset;
+            if (mAssistHintVisible) {
+                // If assist handles are visible, hide them without animation and then make them
+                // show once again (with corrected bottom offset).
+                hideAssistHandles();
+                setAssistHintVisible(true);
+            }
+        }
     }
 
     /**
@@ -126,7 +144,8 @@ public class AssistHandleViewController implements NavigationBarTransitions.Dark
                 xDirection * translationStart * view.getWidth(),
                 xDirection * translationEnd * view.getWidth());
         Animator translateY = ObjectAnimator.ofFloat(view, View.TRANSLATION_Y,
-                translationStart * view.getHeight(), translationEnd * view.getHeight());
+                translationStart * view.getHeight() + mBottomOffset,
+                translationEnd * view.getHeight() + mBottomOffset);
 
         AnimatorSet set = new AnimatorSet();
         set.play(scaleX).with(scaleY);
