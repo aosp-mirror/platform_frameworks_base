@@ -361,7 +361,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         if (metaDataChanged) {
-            mEntryManager.updateNotifications();
+            mEntryManager.updateNotifications("NotificationMediaManager - metaDataChanged");
         }
 
         dispatchUpdateMediaMetaData(metaDataChanged, true /* allowEnterAnimation */);

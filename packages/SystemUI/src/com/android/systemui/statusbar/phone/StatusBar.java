@@ -210,6 +210,7 @@ import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -385,6 +386,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
     private final StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
+    private final NotifLog mNotifLog;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -585,7 +587,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onStrongAuthStateChanged(int userId) {
                     super.onStrongAuthStateChanged(userId);
-                    mEntryManager.updateNotifications();
+                    mEntryManager.updateNotifications("onStrongAuthStateChanged");
                 }
             };
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
@@ -599,6 +601,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mPulsing;
     private final BubbleController mBubbleController;
     private final BubbleController.BubbleExpandListener mBubbleExpandListener;
+
     private ActivityIntentHelper mActivityIntentHelper;
 
     @Override
@@ -669,7 +672,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotificationListener notificationListener,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
-            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder) {
+            StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
+            NotifLog notifLog) {
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -723,10 +727,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         mConfigurationController = configurationController;
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarWindowViewControllerBuilder = statusBarWindowViewControllerBuilder;
+        mNotifLog = notifLog;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
-                    mEntryManager.updateNotifications();
+                    mEntryManager.updateNotifications("onBubbleExpandChanged");
                     updateScrimController();
                 };
     }
@@ -1160,7 +1165,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mContext,
                         mAllowNotificationLongPress,
                         mKeyguardBypassController,
-                        mStatusBarStateController);
+                        mStatusBarStateController,
+                        mNotifLog);
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
@@ -1443,8 +1449,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mZenController.areNotificationsHiddenInShade();
     }
 
-    public void requestNotificationUpdate() {
-        mEntryManager.updateNotifications();
+    /**
+     * Request a notification update
+     * @param reason why we're requesting a notification update
+     */
+    public void requestNotificationUpdate(String reason) {
+        mEntryManager.updateNotifications(reason);
     }
 
     /**
@@ -1685,7 +1695,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mEntryManager.updateNotifications();
+        mEntryManager.updateNotifications("onHeadsUpStateChanged");
         if (isDozing() && isHeadsUp) {
             entry.setPulseSuppressed(false);
             mDozeServiceHost.fireNotificationPulse(entry);
@@ -3566,7 +3576,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
 
-        mEntryManager.updateNotifications();
+        mEntryManager.updateNotifications("onDozingChanged");
         updateDozingState();
         updateScrimController();
         updateReportRejectedTouchVisibility();

@@ -79,6 +79,7 @@ import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -141,7 +142,7 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
         mNotificationData = new TestableNotificationData(
                 mock(NotificationSectionsFeatureManager.class));
-        mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
+        mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class), "");
         mRow = new NotificationTestHelper(getContext()).createRow();
         Dependency.get(InitController.class).executePostInitTasks();
     }
@@ -633,7 +634,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
     public static class TestableNotificationData extends NotificationData {
         public TestableNotificationData(NotificationSectionsFeatureManager sectionsFeatureManager) {
-            super(sectionsFeatureManager);
+            super(sectionsFeatureManager, mock(NotifLog.class));
         }
 
         public static final String OVERRIDE_RANK = "r";

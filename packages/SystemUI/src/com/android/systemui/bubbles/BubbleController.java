@@ -569,7 +569,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     if (mStackView != null) {
                         mStackView.updateDotVisibility(entry.key);
                     }
-                    mNotificationEntryManager.updateNotifications();
+                    mNotificationEntryManager.updateNotifications(
+                            "BubbleController.onNotificationRemoveRequested");
                     return true;
                 } else if (!userRemovedNotif && entry != null) {
                     // This wasn't a user removal so we should remove the bubble as well
@@ -609,7 +610,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mBubbleData.addSummaryToSuppress(summary.notification.getGroupKey(),
                         summary.key);
                 // Tell shade to update for the suppression
-                mNotificationEntryManager.updateNotifications();
+                mNotificationEntryManager.updateNotifications(
+                        "BubbleController.handleSummaryRemovalInterception");
             }
             return !isAutogroupSummary;
         } else {
@@ -760,7 +762,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mStackView.setExpanded(true);
             }
 
-            mNotificationEntryManager.updateNotifications();
+            mNotificationEntryManager.updateNotifications(
+                    "BubbleData.Listener.applyUpdate");
             updateStack();
 
             if (DEBUG_BUBBLE_CONTROLLER) {
