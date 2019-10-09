@@ -17,9 +17,12 @@
 package android.os;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+
+import java.util.List;
 
 /**
  * Access to the service that keeps track of device idleness and drives low power mode based on
@@ -64,6 +67,21 @@ public class DeviceIdleManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return new String[0];
+        }
+    }
+
+    /**
+     * Add the specified packages to the power save whitelist.
+     *
+     * @return the number of packages that were successfully added to the whitelist
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public int addPowerSaveWhitelistApps(@NonNull List<String> packageNames) {
+        try {
+            return mService.addPowerSaveWhitelistApps(packageNames);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return 0;
         }
     }
 }

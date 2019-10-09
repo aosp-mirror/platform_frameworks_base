@@ -106,6 +106,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -1441,11 +1443,20 @@ public class DeviceIdleController extends SystemService
             if (DEBUG) {
                 Slog.i(TAG, "addPowerSaveWhitelistApp(name = " + name + ")");
             }
+            addPowerSaveWhitelistApps(Collections.singletonList(name));
+        }
+
+        @Override
+        public int addPowerSaveWhitelistApps(List<String> packageNames) {
+            if (DEBUG) {
+                Slog.i(TAG,
+                        "addPowerSaveWhitelistApps(name = " + packageNames + ")");
+            }
             getContext().enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER,
                     null);
             long ident = Binder.clearCallingIdentity();
             try {
-                addPowerSaveWhitelistAppInternal(name);
+                return addPowerSaveWhitelistAppsInternal(packageNames);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2069,21 +2080,35 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    public boolean addPowerSaveWhitelistAppInternal(String name) {
+    private int addPowerSaveWhitelistAppsInternal(List<String> pkgNames) {
+        int numAdded = 0;
+        int numErrors = 0;
         synchronized (this) {
-            try {
-                ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
-                        PackageManager.MATCH_ANY_USER);
-                if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid)) == null) {
-                    reportPowerSaveWhitelistChangedLocked();
-                    updateWhitelistAppIdsLocked();
-                    writeConfigFileLocked();
+            for (int i = pkgNames.size() - 1; i >= 0; --i) {
+                final String name = pkgNames.get(i);
+                if (name == null) {
+                    numErrors++;
+                    continue;
                 }
-                return true;
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
+                try {
+                    ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(name,
+                            PackageManager.MATCH_ANY_USER);
+                    if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid))
+                            == null) {
+                        numAdded++;
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    Slog.e(TAG, "Tried to add unknown package to power save whitelist: " + name);
+                    numErrors++;
+                }
+            }
+            if (numAdded > 0) {
+                reportPowerSaveWhitelistChangedLocked();
+                updateWhitelistAppIdsLocked();
+                writeConfigFileLocked();
             }
         }
+        return pkgNames.size() - numErrors;
     }
 
     public boolean removePowerSaveWhitelistAppInternal(String name) {
@@ -3922,7 +3947,8 @@ public class DeviceIdleController extends SystemService
                         char op = arg.charAt(0);
                         String pkg = arg.substring(1);
                         if (op == '+') {
-                            if (addPowerSaveWhitelistAppInternal(pkg)) {
+                            if (addPowerSaveWhitelistAppsInternal(Collections.singletonList(pkg))
+                                    == 1) {
                                 pw.println("Added: " + pkg);
                             } else {
                                 pw.println("Unknown package: " + pkg);
