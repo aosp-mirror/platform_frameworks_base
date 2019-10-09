@@ -172,7 +172,7 @@ public class CarrierTextController {
         mSeparator = separator;
         mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
         mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
-                Context.TELEPHONY_SERVICE)).getMaxPhoneCount();
+                Context.TELEPHONY_SERVICE)).getSupportedModemCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
         updateDisplayOpportunisticSubscriptionCarrierText(SystemProperties.getBoolean(
                 TelephonyProperties.DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME,
