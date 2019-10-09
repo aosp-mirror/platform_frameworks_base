@@ -16,6 +16,7 @@ else
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/ParcelAllTheThingsDataClass.java && \
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/HierrarchicalDataClassBase.java && \
         header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/HierrarchicalDataClassChild.java && \
+        header_and_eval codegen $ANDROID_BUILD_TOP/frameworks/base/tests/Codegen/src/com/android/codegentest/StaleDataclassDetectorFalsePositivesTest.java && \
         cd $ANDROID_BUILD_TOP &&
         header_and_eval mmma -j16 frameworks/base/tests/Codegen && \
         header_and_eval adb install -r -t "$(find $ANDROID_TARGET_OUT_TESTCASES -name 'CodegenTests.apk')" && \
