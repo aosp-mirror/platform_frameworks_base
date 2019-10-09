@@ -75,6 +75,7 @@ import android.graphics.RenderNode;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
@@ -5228,6 +5229,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sBrokenWindowBackground = targetSdkVersion < Build.VERSION_CODES.Q;
 
+            GradientDrawable.sWrapNegativeAngleMeasurements =
+                    targetSdkVersion >= Build.VERSION_CODES.Q;
             sCompatibilityDone = true;
         }
     }
