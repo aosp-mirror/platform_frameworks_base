@@ -335,8 +335,8 @@ abstract class ApexManager {
                 if (!packageInfo.packageName.equals(packageName)) {
                     continue;
                 }
-                if ((!matchActive || isActive(packageInfo))
-                        && (!matchFactory || isFactory(packageInfo))) {
+                if ((matchActive && isActive(packageInfo))
+                        || (matchFactory && isFactory(packageInfo))) {
                     return packageInfo;
                 }
             }
