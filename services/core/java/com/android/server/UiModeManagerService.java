@@ -288,7 +288,7 @@ final class UiModeManagerService extends SystemService {
         updateNightModeFromSettings(context, res, UserHandle.getCallingUserId());
 
         // Update the initial, static configurations.
-        SystemServerInitThreadPool.get().submit(() -> {
+        SystemServerInitThreadPool.submit(() -> {
             synchronized (mLock) {
                 updateConfigurationLocked();
                 sendConfigurationLocked();
