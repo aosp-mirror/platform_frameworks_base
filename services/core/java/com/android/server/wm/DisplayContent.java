@@ -132,7 +132,6 @@ import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.EXCLUSION_LEFT;
 import static com.android.server.wm.WindowState.EXCLUSION_RIGHT;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
-import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
@@ -3517,19 +3516,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             Slog.w(TAG_WM, "Force clearing orientation change: " + w);
         }, true /* traverseTopToBottom */);
         mWmService.mWindowPlacerLocked.performSurfacePlacement();
-    }
-
-    void waitForAllWindowsDrawn() {
-        final WindowManagerPolicy policy = mWmService.mPolicy;
-        forAllWindows(w -> {
-            final boolean keyguard = policy.isKeyguardHostWindow(w.mAttrs);
-            if (w.isVisibleLw() && (w.mAppToken != null || keyguard)) {
-                w.mWinAnimator.mDrawState = DRAW_PENDING;
-                // Force add to mResizingWindows.
-                w.resetLastContentInsets();
-                mWmService.mWaitingForDrawn.add(w);
-            }
-        }, true /* traverseTopToBottom */);
     }
 
     // TODO: Super crazy long method that should be broken down...

@@ -819,9 +819,12 @@ public class DockedStackDividerController {
 
         // We put all tasks into drag resizing mode - wait until all of them have completed the
         // drag resizing switch.
-        if (!mService.mWaitingForDrawn.isEmpty()) {
-            mService.mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT);
-            mService.mH.sendEmptyMessageDelayed(H.WAITING_FOR_DRAWN_TIMEOUT,
+        final Runnable existingWaitingForDrwanCallback =
+                mService.mWaitingForDrawnCallbacks.get(mService.mRoot);
+        if (existingWaitingForDrwanCallback != null) {
+            mService.mH.removeMessages(H.WAITING_FOR_DRAWN_TIMEOUT, mService.mRoot);
+            mService.mH.sendMessageDelayed(mService.mH.obtainMessage(H.WAITING_FOR_DRAWN_TIMEOUT,
+                    mService.mRoot),
                     IME_ADJUST_DRAWN_TIMEOUT);
             mAnimationStartDelayed = true;
             if (imeWin != null) {
@@ -838,10 +841,8 @@ public class DockedStackDividerController {
             // still gets executed.
             // TODO: Have a real system where we can wait on different windows to be drawn with
             // different callbacks.
-            if (mService.mWaitingForDrawnCallback != null) {
-                mService.mWaitingForDrawnCallback.run();
-            }
-            mService.mWaitingForDrawnCallback = () -> {
+            existingWaitingForDrwanCallback.run();
+            mService.mWaitingForDrawnCallbacks.put(mService.mRoot, () -> {
                 synchronized (mService.mGlobalLock) {
                     mAnimationStartDelayed = false;
                     if (mDelayedImeWin != null) {
@@ -863,7 +864,7 @@ public class DockedStackDividerController {
                     notifyAdjustedForImeChanged(
                             mAdjustedForIme || mAdjustedForDivider, duration);
                 }
-            };
+            });
         } else {
             notifyAdjustedForImeChanged(
                     adjustedForIme || adjustedForDivider, IME_ADJUST_ANIM_DURATION);
