@@ -1200,12 +1200,20 @@ public class ShortcutService extends IShortcutService.Stub {
         return mUsers.get(userId) != null;
     }
 
+    private int mLastLockedUser = -1;
+
     /** Return the per-user state. */
     @GuardedBy("mLock")
     @NonNull
     ShortcutUser getUserShortcutsLocked(@UserIdInt int userId) {
         if (!isUserUnlockedL(userId)) {
-            wtf("User still locked");
+            // Only do wtf once for each user. (until the user is unlocked)
+            if (userId != mLastLockedUser) {
+                wtf("User still locked");
+                mLastLockedUser = userId;
+            }
+        } else {
+            mLastLockedUser = -1;
         }
 
         ShortcutUser userPackages = mUsers.get(userId);
