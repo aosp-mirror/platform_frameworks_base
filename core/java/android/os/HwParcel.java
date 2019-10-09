@@ -23,6 +23,8 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 
+import dalvik.annotation.optimization.FastNative;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.lang.annotation.Retention;
@@ -72,46 +74,54 @@ public class HwParcel {
 
     /**
      * Writes an interface token into the parcel used to verify that
-     * a transaction has made it to the write type of interface.
+     * a transaction has made it to the right type of interface.
      *
      * @param interfaceName fully qualified name of interface message
      *     is being sent to.
      */
+    @FastNative
     public native final void writeInterfaceToken(String interfaceName);
     /**
      * Writes a boolean value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeBool(boolean val);
     /**
      * Writes a byte value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeInt8(byte val);
     /**
      * Writes a short value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeInt16(short val);
     /**
      * Writes a int value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeInt32(int val);
     /**
      * Writes a long value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeInt64(long val);
     /**
      * Writes a float value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeFloat(float val);
     /**
      * Writes a double value to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     public native final void writeDouble(double val);
     /**
      * Writes a String value to the end of the parcel.
@@ -120,6 +130,7 @@ public class HwParcel {
      *
      * @param val to write
      */
+    @FastNative
     public native final void writeString(String val);
     /**
      * Writes a native handle (without duplicating the underlying
@@ -127,42 +138,50 @@ public class HwParcel {
      *
      * @param val to write
      */
+    @FastNative
     public native final void writeNativeHandle(@Nullable NativeHandle val);
 
     /**
      * Writes an array of boolean values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeBoolVector(boolean[] val);
     /**
      * Writes an array of byte values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeInt8Vector(byte[] val);
     /**
      * Writes an array of short values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeInt16Vector(short[] val);
     /**
      * Writes an array of int values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeInt32Vector(int[] val);
     /**
      * Writes an array of long values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeInt64Vector(long[] val);
     /**
      * Writes an array of float values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeFloatVector(float[] val);
     /**
      * Writes an array of double values to the end of the parcel.
      * @param val to write
      */
+    @FastNative
     private native final void writeDoubleVector(double[] val);
     /**
      * Writes an array of String values to the end of the parcel.
@@ -171,6 +190,7 @@ public class HwParcel {
      *
      * @param val to write
      */
+    @FastNative
     private native final void writeStringVector(String[] val);
     /**
      * Writes an array of native handles to the end of the parcel.
@@ -179,6 +199,7 @@ public class HwParcel {
      *
      * @param val array of {@link NativeHandle} objects to write
      */
+    @FastNative
     private native final void writeNativeHandleVector(NativeHandle[] val);
 
     /**
@@ -299,6 +320,7 @@ public class HwParcel {
      * Write a hwbinder object to the end of the parcel.
      * @param binder value to write
      */
+    @FastNative
     public native final void writeStrongBinder(IHwBinder binder);
 
     /**
@@ -314,48 +336,56 @@ public class HwParcel {
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final boolean readBool();
     /**
      * Reads a byte value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final byte readInt8();
     /**
      * Reads a short value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final short readInt16();
     /**
      * Reads a int value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final int readInt32();
     /**
      * Reads a long value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final long readInt64();
     /**
      * Reads a float value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final float readFloat();
     /**
      * Reads a double value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final double readDouble();
     /**
      * Reads a String value from the current location in the parcel.
      * @return value parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final String readString();
     /**
      * Reads a native handle (without duplicating the underlying file
@@ -366,6 +396,7 @@ public class HwParcel {
      * @return a {@link NativeHandle} instance parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final @Nullable NativeHandle readNativeHandle();
     /**
      * Reads an embedded native handle (without duplicating the underlying
@@ -379,6 +410,7 @@ public class HwParcel {
      * @return a {@link NativeHandle} instance parsed from the parcel
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final @Nullable NativeHandle readEmbeddedNativeHandle(
             long parentHandle, long offset);
 
@@ -387,54 +419,63 @@ public class HwParcel {
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final boolean[] readBoolVectorAsArray();
     /**
      * Reads an array of byte values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final byte[] readInt8VectorAsArray();
     /**
      * Reads an array of short values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final short[] readInt16VectorAsArray();
     /**
      * Reads an array of int values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final int[] readInt32VectorAsArray();
     /**
      * Reads an array of long values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final long[] readInt64VectorAsArray();
     /**
      * Reads an array of float values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final float[] readFloatVectorAsArray();
     /**
      * Reads an array of double values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final double[] readDoubleVectorAsArray();
     /**
      * Reads an array of String values from the parcel.
      * @return array of parsed values
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final String[] readStringVectorAsArray();
     /**
      * Reads an array of native handles from the parcel.
      * @return array of {@link NativeHandle} objects
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     private native final NativeHandle[] readNativeHandleAsArray();
 
     /**
@@ -537,6 +578,7 @@ public class HwParcel {
      * @return binder object read from parcel or null if no binder can be read
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final IHwBinder readStrongBinder();
 
     /**
@@ -544,6 +586,7 @@ public class HwParcel {
      * @return blob of size expectedSize
      * @throws IllegalArgumentException if the parcel has no more data
      */
+    @FastNative
     public native final HwBlob readBuffer(long expectedSize);
 
     /**
@@ -559,6 +602,7 @@ public class HwParcel {
      * @throws NullPointerException if the transaction specified the blob to be null
      *    but nullable is false
      */
+    @FastNative
     public native final HwBlob readEmbeddedBuffer(
             long expectedSize, long parentHandle, long offset,
             boolean nullable);
@@ -567,26 +611,31 @@ public class HwParcel {
      * Write a buffer into the transaction.
      * @param blob blob to write into the parcel.
      */
+    @FastNative
     public native final void writeBuffer(HwBlob blob);
     /**
      * Write a status value into the blob.
      * @param status value to write
      */
+    @FastNative
     public native final void writeStatus(int status);
     /**
      * @throws IllegalArgumentException if a success vaue cannot be read
      * @throws RemoteException if success value indicates a transaction error
      */
+    @FastNative
     public native final void verifySuccess();
     /**
      * Should be called to reduce memory pressure when this object no longer needs
      * to be written to.
      */
+    @FastNative
     public native final void releaseTemporaryStorage();
     /**
      * Should be called when object is no longer needed to reduce possible memory
      * pressure if the Java GC does not get to this object in time.
      */
+    @FastNative
     public native final void release();
 
     /**
@@ -597,6 +646,7 @@ public class HwParcel {
     // Returns address of the "freeFunction".
     private static native final long native_init();
 
+    @FastNative
     private native final void native_setup(boolean allocate);
 
     static {
