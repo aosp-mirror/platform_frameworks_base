@@ -187,9 +187,24 @@ class ActivityMetricsLogger {
         private int startingWindowDelayMs = INVALID_DELAY;
         private int bindApplicationDelayMs = INVALID_DELAY;
         private int reason = APP_TRANSITION_TIMEOUT;
-        private boolean loggedWindowsDrawn;
+        private int numUndrawnActivities;
         private boolean loggedStartingWindowDrawn;
         private boolean launchTraceActive;
+
+        /**
+         * Remembers the latest launched activity to represent the final transition. This also
+         * increments the number of activities that should be drawn, so a consecutive launching
+         * sequence can be coalesced as one event.
+         */
+        void setLatestLaunchedActivity(ActivityRecord r) {
+            if (launchedActivity == r) {
+                return;
+            }
+            launchedActivity = r;
+            if (!r.noDisplay) {
+                numUndrawnActivities++;
+            }
+        }
     }
 
     final class WindowingModeTransitionInfoSnapshot {
@@ -400,7 +415,7 @@ class ActivityMetricsLogger {
             // the other attributes.
 
             // Coalesce multiple (trampoline) activities from a single sequence together.
-            info.launchedActivity = launchedActivity;
+            info.setLatestLaunchedActivity(launchedActivity);
             return;
         }
 
@@ -422,7 +437,7 @@ class ActivityMetricsLogger {
         // A new launch sequence [with the windowingMode] has begun.
         // Start tracking it.
         final WindowingModeTransitionInfo newInfo = new WindowingModeTransitionInfo();
-        newInfo.launchedActivity = launchedActivity;
+        newInfo.setLatestLaunchedActivity(launchedActivity);
         newInfo.currentTransitionProcessRunning = processRunning;
         newInfo.startResult = resultCode;
         mWindowingModeTransitionInfo.put(windowingMode, newInfo);
@@ -448,11 +463,11 @@ class ActivityMetricsLogger {
         if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn windowingMode=" + windowingMode);
 
         final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
-        if (info == null || info.loggedWindowsDrawn) {
+        if (info == null || info.numUndrawnActivities == 0) {
             return null;
         }
         info.windowsDrawnDelayMs = calculateDelay(timestampNs);
-        info.loggedWindowsDrawn = true;
+        info.numUndrawnActivities--;
         final WindowingModeTransitionInfoSnapshot infoSnapshot =
                 new WindowingModeTransitionInfoSnapshot(info);
         if (allWindowsDrawn() && mLoggedTransitionStarting) {
@@ -594,9 +609,10 @@ class ActivityMetricsLogger {
         }
     }
 
-    private boolean allWindowsDrawn() {
+    @VisibleForTesting
+    boolean allWindowsDrawn() {
         for (int index = mWindowingModeTransitionInfo.size() - 1; index >= 0; index--) {
-            if (!mWindowingModeTransitionInfo.valueAt(index).loggedWindowsDrawn) {
+            if (mWindowingModeTransitionInfo.valueAt(index).numUndrawnActivities != 0) {
                 return false;
             }
         }
