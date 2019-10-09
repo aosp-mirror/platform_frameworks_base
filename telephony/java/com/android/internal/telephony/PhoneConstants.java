@@ -159,7 +159,7 @@ public class PhoneConstants {
 
     public static final int RIL_CARD_MAX_APPS    = 8;
 
-    public static final int DEFAULT_CARD_INDEX   = 0;
+    public static final int DEFAULT_SLOT_INDEX   = 0;
 
     public static final int MAX_PHONE_COUNT_SINGLE_SIM = 1;
 
