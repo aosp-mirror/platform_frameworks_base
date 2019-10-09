@@ -22,17 +22,24 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.telephony.Rlog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.GsmAlphabet;
 
 import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * Various methods, useful for dealing with SIM data.
  */
 public class IccUtils {
     static final String LOG_TAG="IccUtils";
+
+    // 3GPP specification constants
+    // Spec reference TS 31.102 section 4.2.16
+    @VisibleForTesting
+    static final int FPLMN_BYTE_SIZE = 3;
 
     // A table mapping from a number to a hex character for fast encoding hex strings.
     private static final char[] HEX_CHARS = {
@@ -895,5 +902,28 @@ public class IccUtils {
             return (byte) (c - 0x57);
         }
         return 0;
+    }
+
+    /**
+     * Encode the Fplmns into byte array to write to EF.
+     *
+     * @param fplmns Array of fplmns to be serialized.
+     * @param dataLength the size of the EF file.
+     * @return the encoded byte array in the correct format for FPLMN file.
+     */
+    public static byte[] encodeFplmns(List<String> fplmns, int dataLength) {
+        byte[] serializedFplmns = new byte[dataLength];
+        int offset = 0;
+        for (String fplmn : fplmns) {
+            if (offset >= dataLength) break;
+            stringToBcdPlmn(fplmn, serializedFplmns, offset);
+            offset += FPLMN_BYTE_SIZE;
+        }
+        //pads to the length of the EF file.
+        while (offset < dataLength) {
+            // required by 3GPP TS 31.102 spec 4.2.16
+            serializedFplmns[offset++] = (byte) 0xff;
+        }
+        return serializedFplmns;
     }
 }
