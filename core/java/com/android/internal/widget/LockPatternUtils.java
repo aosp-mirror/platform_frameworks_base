@@ -59,9 +59,9 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
-import libcore.util.HexEncoding;
-
 import com.google.android.collect.Lists;
+
+import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -383,7 +383,7 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response = getLockSettings().verifyCredential(
-                    credential.getCredential(), credential.getType(), challenge, userId);
+                    credential, challenge, userId);
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return response.getPayload();
             } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
@@ -413,8 +413,7 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response = getLockSettings().checkCredential(
-                    credential.getCredential(), credential.getType(),
-                    userId, wrapCallback(progressCallback));
+                    credential, userId, wrapCallback(progressCallback));
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return true;
@@ -447,8 +446,7 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response =
-                    getLockSettings().verifyTiedProfileChallenge(
-                            credential.getCredential(), credential.getType(), challenge, userId);
+                    getLockSettings().verifyTiedProfileChallenge(credential, challenge, userId);
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return response.getPayload();
@@ -482,7 +480,7 @@ public class LockPatternUtils {
     public byte[] getPasswordHistoryHashFactor(@NonNull LockscreenCredential currentPassword,
             int userId) {
         try {
-            return getLockSettings().getHashFactor(currentPassword.getCredential(), userId);
+            return getLockSettings().getHashFactor(currentPassword, userId);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to get hash factor", e);
             return null;
@@ -689,9 +687,7 @@ public class LockPatternUtils {
 
         try {
             if (!getLockSettings().setLockCredential(
-                    newCredential.getCredential(), newCredential.getType(),
-                    savedCredential.getCredential(),
-                    newCredential.getQuality(), userHandle, allowUntrustedChange)) {
+                    newCredential, savedCredential, userHandle, allowUntrustedChange)) {
                 setKeyguardStoredPasswordQuality(currentQuality, userHandle);
                 return false;
             }
@@ -920,17 +916,17 @@ public class LockPatternUtils {
      *
      * @param userHandle Managed profile user id
      * @param enabled True if separate challenge is enabled
-     * @param managedUserPassword Managed profile previous password. Null when {@code enabled} is
+     * @param profilePassword Managed profile previous password. Null when {@code enabled} is
      *            true
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
-            LockscreenCredential managedUserPassword) {
+            LockscreenCredential profilePassword) {
         if (!isManagedProfile(userHandle)) {
             return;
         }
         try {
             getLockSettings().setSeparateProfileChallengeEnabled(userHandle, enabled,
-                    managedUserPassword.getCredential());
+                    profilePassword);
             reportEnabledTrustAgentsChanged(userHandle);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't update work profile challenge enabled");
@@ -1543,8 +1539,8 @@ public class LockPatternUtils {
      * @param userHandle The user who's lock credential to be changed
      * @return {@code true} if the operation is successful.
      */
-    public boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
-            byte[] token, int userHandle) {
+    public boolean setLockCredentialWithToken(@NonNull LockscreenCredential credential,
+            long tokenHandle, byte[] token, int userHandle) {
         if (!hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
@@ -1556,9 +1552,8 @@ public class LockPatternUtils {
         setKeyguardStoredPasswordQuality(credential.getQuality(), userHandle);
 
         try {
-            if (!localService.setLockCredentialWithToken(credential.getCredential(),
-                    credential.getType(),
-                    tokenHandle, token, credential.getQuality(), userHandle)) {
+            if (!localService.setLockCredentialWithToken(
+                    credential, tokenHandle, token, userHandle)) {
                 setKeyguardStoredPasswordQuality(currentQuality, userHandle);
                 return false;
             }

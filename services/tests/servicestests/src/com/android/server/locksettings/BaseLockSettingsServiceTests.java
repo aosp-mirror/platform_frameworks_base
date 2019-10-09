@@ -52,6 +52,7 @@ import android.test.AndroidTestCase;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.wm.WindowManagerInternal;
@@ -307,4 +308,22 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     protected static void assertArrayNotEquals(byte[] expected, byte[] actual) {
         assertFalse(Arrays.equals(expected, actual));
     }
+
+    protected LockscreenCredential newPassword(String password) {
+        return LockscreenCredential.createPasswordOrNone(password);
+    }
+
+    protected LockscreenCredential newPin(String pin) {
+        return LockscreenCredential.createPinOrNone(pin);
+    }
+
+    protected LockscreenCredential newPattern(String pattern) {
+        return LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
+                pattern.getBytes()));
+    }
+
+    protected LockscreenCredential nonePassword() {
+        return LockscreenCredential.createNone();
+    }
+
 }

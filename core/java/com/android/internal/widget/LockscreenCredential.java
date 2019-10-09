@@ -111,6 +111,18 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     }
 
     /**
+     * Creates a LockscreenCredential object representing a managed password for profile with
+     * unified challenge. This credentiall will have type {@code CREDENTIAL_TYPE_PASSWORD} for now.
+     * TODO: consider add a new credential type for this. This can then supersede the
+     * isLockTiedToParent argument in various places in LSS.
+     */
+    public static LockscreenCredential createManagedPassword(@NonNull byte[] password) {
+        return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
+                PASSWORD_QUALITY_ALPHABETIC,
+                Arrays.copyOf(password, password.length));
+    }
+
+    /**
      * Creates a LockscreenCredential object representing the given numeric PIN.
      */
     public static LockscreenCredential createPin(@NonNull CharSequence pin) {
@@ -140,18 +152,6 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             return createNone();
         } else {
             return createPin(pin);
-        }
-    }
-
-    /**
-     * Create a LockscreenCredential object based on raw credential and type
-     * TODO: Remove once LSS.setUserPasswordMetrics accepts a LockscreenCredential
-     */
-    public static LockscreenCredential createRaw(int type, byte[] credential) {
-        if (type == CREDENTIAL_TYPE_NONE) {
-            return createNone();
-        } else {
-            return new LockscreenCredential(type, PASSWORD_QUALITY_UNSPECIFIED, credential);
         }
     }
 
