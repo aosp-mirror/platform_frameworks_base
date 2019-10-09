@@ -7303,6 +7303,29 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void showImePostLayout(IBinder imeTargetWindowToken) {
+            synchronized (mGlobalLock) {
+                final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+                if (imeTarget == null) {
+                    return;
+                }
+                final DisplayContent displayContent = imeTarget.getDisplayContent();
+                if (displayContent == null) {
+                    Slog.w(TAG_WM, "Attempted to show IME on an IME target that does not exist: "
+                            + imeTarget.getName());
+                    return;
+                }
+                if (displayContent.isUntrustedVirtualDisplay()) {
+                    throw new SecurityException("Attempted to show IME on an untrusted "
+                            + "virtual display: " + displayContent.getDisplayId());
+                }
+
+                displayContent.getInsetsStateController().getImeSourceProvider()
+                        .scheduleShowImePostLayout(imeTarget);
+            }
+        }
+
+        @Override
         public boolean isUidAllowedOnDisplay(int displayId, int uid) {
             if (displayId == Display.DEFAULT_DISPLAY) {
                 return true;
@@ -7636,7 +7659,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // to do so because it seems possible to resume activities as part of a larger
             // transaction and it's too early to resume based on current order when performing
             // updateTopResumedActivityIfNeeded().
-            displayContent.mAcitvityDisplay.ensureActivitiesVisible(null /* starting */,
+            displayContent.mActivityDisplay.ensureActivitiesVisible(null /* starting */,
                     0 /* configChanges */, !PRESERVE_WINDOWS, true /* notifyClients */);
         }
     }

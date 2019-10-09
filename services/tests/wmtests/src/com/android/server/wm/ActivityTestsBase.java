@@ -42,7 +42,6 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
-import android.testing.DexmakerShareClassLoaderRule;
 import android.util.Pair;
 import android.view.DisplayInfo;
 
@@ -385,9 +384,10 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             intent.setFlags(mFlags);
 
             final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
-                    intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/);
+                    intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
+                    null /*taskDescription*/);
             spyOn(task);
-            task.userId = mUserId;
+            task.mUserId = mUserId;
 
             if (mStack != null) {
                 mStack.moveToFront("test");
@@ -395,8 +395,6 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 task.createTask(true, true);
                 spyOn(task.mTask);
             }
-
-            task.touchActiveTime();
 
             return task;
         }

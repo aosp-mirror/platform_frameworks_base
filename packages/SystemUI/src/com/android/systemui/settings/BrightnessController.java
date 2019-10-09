@@ -152,6 +152,20 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final Runnable mStartListeningRunnable = new Runnable() {
         @Override
         public void run() {
+            if (mListening) {
+                return;
+            }
+            mListening = true;
+
+            if (mVrManager != null) {
+                try {
+                    mVrManager.registerListener(mVrStateCallbacks);
+                    mIsVrModeEnabled = mVrManager.getVrModeState();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to register VR mode state listener: ", e);
+                }
+            }
+
             mBrightnessObserver.startObserving();
             mUserTracker.startTracking();
 
@@ -167,6 +181,19 @@ public class BrightnessController implements ToggleSlider.Listener {
     private final Runnable mStopListeningRunnable = new Runnable() {
         @Override
         public void run() {
+            if (!mListening) {
+                return;
+            }
+            mListening = false;
+
+            if (mVrManager != null) {
+                try {
+                    mVrManager.unregisterListener(mVrStateCallbacks);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Failed to unregister VR mode state listener: ", e);
+                }
+            }
+
             mBrightnessObserver.stopObserving();
             mUserTracker.stopTracking();
 
@@ -297,39 +324,12 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     public void registerCallbacks() {
-        if (mListening) {
-            return;
-        }
-
-        if (mVrManager != null) {
-            try {
-                mVrManager.registerListener(mVrStateCallbacks);
-                mIsVrModeEnabled = mVrManager.getVrModeState();
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to register VR mode state listener: ", e);
-            }
-        }
-
         mBackgroundHandler.post(mStartListeningRunnable);
-        mListening = true;
     }
 
     /** Unregister all call backs, both to and from the controller */
     public void unregisterCallbacks() {
-        if (!mListening) {
-            return;
-        }
-
-        if (mVrManager != null) {
-            try {
-                mVrManager.unregisterListener(mVrStateCallbacks);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to unregister VR mode state listener: ", e);
-            }
-        }
-
         mBackgroundHandler.post(mStopListeningRunnable);
-        mListening = false;
         mControlValueInitialized = false;
     }
 

@@ -170,6 +170,15 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-mms-sources",
+    srcs: [
+        "mms/java/**/*.java",
+        "mms/java/**/*.aidl",
+    ],
+    path: "mms/java",
+}
+
+filegroup {
     name: "framework-wifi-sources",
     srcs: [
         "wifi/java/**/*.java",
@@ -193,6 +202,7 @@ filegroup {
         ":framework-mca-filterfw-sources",
         ":framework-mca-filterpacks-sources",
         ":framework-mime-sources",
+        ":framework-mms-sources",
         ":framework-opengl-sources",
         ":framework-rs-sources",
         ":framework-sax-sources",
@@ -252,6 +262,7 @@ java_defaults {
             "media/mca/effect/java",
             "media/mca/filterfw/java",
             "media/mca/filterpacks/java",
+            "mms/java",
             "opengl/java",
             "rs/java",
             "sax/java",
@@ -415,7 +426,7 @@ java_library {
 
 java_library {
     name: "framework-annotation-proc",
-    defaults: ["framework-defaults"],
+    defaults: ["framework-aidl-export-defaults"],
     srcs: [":framework-all-sources"],
     installable: false,
     plugins: [
@@ -820,6 +831,7 @@ frameworks_base_subdirs = [
     "media/mca/filterfw/java",
     "media/mca/filterpacks/java",
     "drm/java",
+    "mms/java",
     "opengl/java",
     "sax/java",
     "telecomm/java",

@@ -119,7 +119,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         final byte[] serializedBytes = serializeToBytes(expected);
         final TaskRecord actual = restoreFromBytes(serializedBytes);
-        assertEquals(expected.taskId, actual.taskId);
+        assertEquals(expected.mTaskId, actual.mTaskId);
         assertEquals(expected.mLastNonFullscreenBounds, actual.mLastNonFullscreenBounds);
     }
 
@@ -132,7 +132,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testCopyBaseIntentForTaskInfo() {
         final TaskRecord task = createTaskRecord(1);
-        task.lastTaskDescription = new ActivityManager.TaskDescription();
+        task.mTaskDescription = new ActivityManager.TaskDescription();
         final TaskInfo info = task.getTaskInfo();
 
         // The intent of info should be a copy so assert that they are different instances.
@@ -648,9 +648,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         final TaskRecord task1 = getTestTask();
         final ActivityRecord activity1 = task1.getChildAt(0);
 
-        assertEquals(task0.taskId,
+        assertEquals(task0.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
-        assertEquals(task1.taskId,
+        assertEquals(task1.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity1.appToken,  false /* onlyRoot */));
     }
 
@@ -669,9 +669,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Add one more on top
         final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
 
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
                 ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
@@ -692,9 +692,9 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Add one more on top
         final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
 
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, true /* onlyRoot */));
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity1.appToken, true /* onlyRoot */));
         assertEquals("No task must be reported for activity that is above root", INVALID_TASK_ID,
                 ActivityRecord.getTaskForActivityLocked(activity2.appToken, true /* onlyRoot */));
@@ -718,11 +718,11 @@ public class TaskRecordTests extends ActivityTestsBase {
         // Add one more activity on top
         final ActivityRecord activity2 = new ActivityBuilder(mService).setTask(task).build();
 
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity0.appToken, false /* onlyRoot */));
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity1.appToken, false /* onlyRoot */));
-        assertEquals(task.taskId,
+        assertEquals(task.mTaskId,
                 ActivityRecord.getTaskForActivityLocked(activity2.appToken, false /* onlyRoot */));
     }
 
@@ -832,8 +832,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     private TaskRecord createTaskRecord(int taskId) {
         return new TaskRecord(mService, taskId, new Intent(), null, null, null,
                 ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
-                new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0, 0
-        );
+                new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0,
+                0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/);
     }
 
     private static class TestTaskRecordFactory extends TaskRecordFactory {

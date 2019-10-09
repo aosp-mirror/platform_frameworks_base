@@ -115,16 +115,16 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
                 ACTIVITY_TYPE_STANDARD, /* onTop */ true);
         mTestTask = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).setStack(stack)
                 .build();
-        mTestTask.userId = TEST_USER_ID;
+        mTestTask.mUserId = TEST_USER_ID;
         mTestTask.mLastNonFullscreenBounds = TEST_BOUNDS;
         mTestTask.hasBeenVisible = true;
 
         mTaskWithDifferentComponent = new TaskBuilder(mSupervisor)
                 .setComponent(ALTERNATIVE_COMPONENT).build();
-        mTaskWithDifferentComponent.userId = TEST_USER_ID;
+        mTaskWithDifferentComponent.mUserId = TEST_USER_ID;
 
         mTaskWithDifferentUser = new TaskBuilder(mSupervisor).setComponent(TEST_COMPONENT).build();
-        mTaskWithDifferentUser.userId = ALTERNATIVE_USER_ID;
+        mTaskWithDifferentUser.mUserId = ALTERNATIVE_USER_ID;
 
         mTarget = new LaunchParamsPersister(mPersisterQueue, mSupervisor, mUserFolderGetter);
 

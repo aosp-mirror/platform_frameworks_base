@@ -702,7 +702,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         ActivityRecord hist = mActivities.get(0);
         intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP, hist.packageName);
-        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().taskId);
+        intent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK, hist.getTaskRecord().mTaskId);
     }
 
     boolean shouldKillProcessForRemovedTask(TaskRecord tr) {
@@ -713,7 +713,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 return false;
             }
             final TaskRecord otherTask = activity.getTaskRecord();
-            if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
+            if (tr.mTaskId != otherTask.mTaskId && otherTask.inRecents) {
                 // Don't kill process(es) that has an activity in a different task that is
                 // also in recents.
                 return false;

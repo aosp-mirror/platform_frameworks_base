@@ -1735,13 +1735,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     /** @return {@code true} if the compatibility bounds is taking effect. */
-    boolean inSizeCompatMode() {
+    boolean hasSizeCompatBounds() {
         return mSizeCompatBounds != null;
     }
 
     @Override
     float getSizeCompatScale() {
-        return inSizeCompatMode() ? mSizeCompatScale : super.getSizeCompatScale();
+        return hasSizeCompatBounds() ? mSizeCompatScale : super.getSizeCompatScale();
     }
 
     @Override

@@ -154,13 +154,17 @@ public class KeyguardStateControllerImpl extends KeyguardUpdateMonitorCallback
     }
 
     private void notifyKeyguardChanged() {
+        Trace.beginSection("KeyguardStateController#notifyKeyguardChanged");
         // Copy the list to allow removal during callback.
         new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
+        Trace.endSection();
     }
 
     private void notifyUnlockedChanged() {
+        Trace.beginSection("KeyguardStateController#notifyUnlockedChanged");
         // Copy the list to allow removal during callback.
         new ArrayList<>(mCallbacks).forEach(Callback::onUnlockedChanged);
+        Trace.endSection();
     }
 
     @Override

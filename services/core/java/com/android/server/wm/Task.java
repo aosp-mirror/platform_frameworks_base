@@ -20,12 +20,8 @@ import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.EMPTY;
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
@@ -67,7 +63,9 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
 
     // TODO: Track parent marks like this in WindowContainer.
     TaskStack mStack;
+    /* Unique identifier for this task. */
     final int mTaskId;
+    /* User for which this task was created. */
     final int mUserId;
     private boolean mDeferRemoval = false;
 
@@ -101,6 +99,8 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     private boolean mDragResizing;
     private int mDragResizeMode;
 
+    // This represents the last resolved activity values for this task
+    // NOTE: This value needs to be persisted with each task
     private TaskDescription mTaskDescription;
 
     // If set to true, the task will report that it is not in the floating
@@ -135,26 +135,17 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
         mTaskRecord = taskRecord;
+        mTaskDescription = taskDescription;
+
+        // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
+        setOrientation(SCREEN_ORIENTATION_UNSET);
         if (mTaskRecord != null) {
             // This can be null when we call createTaskInStack in WindowTestUtils. Remove this after
             // unification.
             mTaskRecord.registerConfigurationChangeListener(this);
+        } else {
+            setBounds(getResolvedOverrideBounds());
         }
-        setBounds(getResolvedOverrideBounds());
-        mTaskDescription = taskDescription;
-
-        // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED) not unless
-        // set through the override configuration.
-        int orientation = SCREEN_ORIENTATION_UNSET;
-        switch (getResolvedOverrideConfiguration().orientation) {
-            case ORIENTATION_PORTRAIT:
-                orientation = SCREEN_ORIENTATION_PORTRAIT;
-                break;
-            case ORIENTATION_LANDSCAPE:
-                orientation = SCREEN_ORIENTATION_LANDSCAPE;
-                break;
-        }
-        setOrientation(orientation);
     }
 
     @Override

@@ -1618,7 +1618,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // because we don't support returning them across task boundaries. Also, to
                     // keep backwards compatibility we remove the task from recents when finishing
                     // task with root activity.
-                    res = mStackSupervisor.removeTaskByIdLocked(tr.taskId, false /* killProcess */,
+                    res = mStackSupervisor.removeTaskByIdLocked(tr.mTaskId, false /* killProcess */,
                             finishWithRootActivity, "finish-activity");
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
@@ -2233,7 +2233,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             final TaskRecord tr = mRootActivityContainer.anyTaskForId(id,
                     MATCH_TASK_IN_STACKS_OR_RECENT_TASKS);
             if (tr != null) {
-                return tr.lastTaskDescription;
+                return tr.mTaskDescription;
             }
         }
         return null;
@@ -3032,7 +3032,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             if (structure != null) {
                 // Pre-fill the task/activity component for all assist data receivers
-                structure.setTaskId(pae.activity.getTaskRecord().taskId);
+                structure.setTaskId(pae.activity.getTaskRecord().mTaskId);
                 structure.setActivityComponent(pae.activity.mActivityComponent);
                 structure.setHomeActivity(pae.isHome);
             }
@@ -3059,7 +3059,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Caller wants result sent back to them.
                 sendBundle = new Bundle();
                 sendBundle.putInt(ActivityTaskManagerInternal.ASSIST_TASK_ID,
-                        pae.activity.getTaskRecord().taskId);
+                        pae.activity.getTaskRecord().mTaskId);
                 sendBundle.putBinder(ActivityTaskManagerInternal.ASSIST_ACTIVITY_ID,
                         pae.activity.assistToken);
                 sendBundle.putBundle(ASSIST_KEY_DATA, pae.extras);
@@ -3155,11 +3155,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     stack.removeTask(task, "addAppTask", REMOVE_TASK_MODE_DESTROYING);
                     return INVALID_TASK_ID;
                 }
-                task.lastTaskDescription.copyFrom(description);
+                task.mTaskDescription.copyFrom(description);
 
                 // TODO: Send the thumbnail to WM to store it.
 
-                return task.taskId;
+                return task.mTaskId;
             }
         } finally {
             Binder.restoreCallingIdentity(callingIdent);
@@ -4967,8 +4967,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (lastTask != task) {
                     lastTask = task;
                     pw.print("TASK "); pw.print(lastTask.affinity);
-                    pw.print(" id="); pw.print(lastTask.taskId);
-                    pw.print(" userId="); pw.println(lastTask.userId);
+                    pw.print(" id="); pw.print(lastTask.mTaskId);
+                    pw.print(" userId="); pw.println(lastTask.mUserId);
                     if (dumpAll) {
                         lastTask.dump(pw, "  ");
                     }

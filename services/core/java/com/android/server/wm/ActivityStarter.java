@@ -1557,7 +1557,7 @@ class ActivityStarter {
         );
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.mUserId,
-                    mStartActivity.getTaskRecord().taskId);
+                    mStartActivity.getTaskRecord().mTaskId);
         }
         mStartActivity.logStartActivity(
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity.getTaskRecord());

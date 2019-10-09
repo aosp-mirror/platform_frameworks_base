@@ -224,6 +224,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
         mHandler.obtainMessage(H.ON_TASK_LIST_UPDATED).sendToTarget();
     }
 
+    @Override
+    public void onRecentTaskListFrozenChanged(boolean frozen) {
+        mHandler.obtainMessage(H.ON_TASK_LIST_FROZEN_UNFROZEN, frozen ? 1 : 0, 0 /* unused */)
+                .sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -247,6 +253,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_TASK_DISPLAY_CHANGED = 20;
         private static final int ON_TASK_LIST_UPDATED = 21;
         private static final int ON_SINGLE_TASK_DISPLAY_EMPTY = 22;
+        private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 23;
 
 
         public H(Looper looper) {
@@ -405,6 +412,12 @@ public class TaskStackChangeListeners extends TaskStackListener {
                     case ON_TASK_LIST_UPDATED: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onRecentTaskListUpdated();
+                        }
+                        break;
+                    }
+                    case ON_TASK_LIST_FROZEN_UNFROZEN: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onRecentTaskListFrozenChanged(msg.arg1 != 0);
                         }
                         break;
                     }

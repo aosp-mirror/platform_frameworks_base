@@ -721,8 +721,11 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeWriteFloat",          "(JF)V", (void*)android_os_Parcel_writeFloat},
     // @FastNative
     {"nativeWriteDouble",         "(JD)V", (void*)android_os_Parcel_writeDouble},
+    // @FastNative
     {"nativeWriteString",         "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeString},
+    // @FastNative
     {"nativeWriteStrongBinder",   "(JLandroid/os/IBinder;)V", (void*)android_os_Parcel_writeStrongBinder},
+    // @FastNative
     {"nativeWriteFileDescriptor", "(JLjava/io/FileDescriptor;)J", (void*)android_os_Parcel_writeFileDescriptor},
 
     {"nativeCreateByteArray",     "(J)[B", (void*)android_os_Parcel_createByteArray},
@@ -736,8 +739,11 @@ static const JNINativeMethod gParcelMethods[] = {
     {"nativeReadFloat",           "(J)F", (void*)android_os_Parcel_readFloat},
     // @CriticalNative
     {"nativeReadDouble",          "(J)D", (void*)android_os_Parcel_readDouble},
+    // @FastNative
     {"nativeReadString",          "(J)Ljava/lang/String;", (void*)android_os_Parcel_readString},
+    // @FastNative
     {"nativeReadStrongBinder",    "(J)Landroid/os/IBinder;", (void*)android_os_Parcel_readStrongBinder},
+    // @FastNative
     {"nativeReadFileDescriptor",  "(J)Ljava/io/FileDescriptor;", (void*)android_os_Parcel_readFileDescriptor},
 
     {"nativeCreate",              "()J", (void*)android_os_Parcel_create},

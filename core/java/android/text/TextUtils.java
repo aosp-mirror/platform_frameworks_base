@@ -36,6 +36,7 @@ import android.os.Parcelable;
 import android.sysprop.DisplayProperties;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.AccessibilityClickableSpan;
+import android.text.style.AccessibilityReplacementSpan;
 import android.text.style.AccessibilityURLSpan;
 import android.text.style.AlignmentSpan;
 import android.text.style.BackgroundColorSpan;
@@ -735,6 +736,8 @@ public class TextUtils {
     /** @hide */
     public static final int LINE_HEIGHT_SPAN = 28;
     /** @hide */
+    public static final int ACCESSIBILITY_REPLACEMENT_SPAN = 29;
+    /** @hide */
     public static final int LAST_SPAN = LINE_HEIGHT_SPAN;
 
     /**
@@ -860,7 +863,7 @@ public class TextUtils {
 
                 case LEADING_MARGIN_SPAN:
                     readSpan(p, sp, new LeadingMarginSpan.Standard(p));
-                break;
+                    break;
 
                 case URL_SPAN:
                     readSpan(p, sp, new URLSpan(p));
@@ -933,7 +936,11 @@ public class TextUtils {
                 case LINE_HEIGHT_SPAN:
                     readSpan(p, sp, new LineHeightSpan.Standard(p));
                     break;
-                    
+
+                case ACCESSIBILITY_REPLACEMENT_SPAN:
+                    readSpan(p, sp, new AccessibilityReplacementSpan(p));
+                    break;
+
                 default:
                     throw new RuntimeException("bogus span encoding " + kind);
                 }

@@ -221,7 +221,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         containerBounds.set(0, 0, 600, 800);
         mToken.onConfigurationChanged(newParentConfig);
 
-        assertTrue(mToken.inSizeCompatMode());
+        assertTrue(mToken.hasSizeCompatBounds());
         assertEquals(containerAppBounds, mToken.getBounds());
         assertEquals((float) containerAppBounds.width() / fixedBounds.width(),
                 mToken.getSizeCompatScale(), 0.0001f /* delta */);
@@ -231,7 +231,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         containerBounds.set(containerAppBounds);
         mToken.onConfigurationChanged(newParentConfig);
 
-        assertTrue(mToken.inSizeCompatMode());
+        assertTrue(mToken.hasSizeCompatBounds());
         // Don't scale up, so the bounds keep the same as the fixed width.
         assertEquals(fixedBounds.width(), mToken.getBounds().width());
         // Assert the position is horizontal center.
@@ -243,7 +243,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         containerBounds.set(0, 0, 1200, 2000);
         mToken.onConfigurationChanged(newParentConfig);
         // Assert don't use fixed bounds because the region is enough.
-        assertFalse(mToken.inSizeCompatMode());
+        assertFalse(mToken.hasSizeCompatBounds());
     }
 
     @Test

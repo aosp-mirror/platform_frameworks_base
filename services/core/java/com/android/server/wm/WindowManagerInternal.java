@@ -502,6 +502,13 @@ public abstract class WindowManagerInternal {
     public abstract boolean shouldShowIme(int displayId);
 
     /**
+     * Show IME on imeTargetWindow once IME has finished layout.
+     *
+     * @param imeTargetWindowToken token of the (IME target) window on which IME should be shown.
+     */
+    public abstract void showImePostLayout(IBinder imeTargetWindowToken);
+
+    /**
      * Tell window manager about a package that should not be running with high refresh rate
      * setting until removeNonHighRefreshRatePackage is called for the same package.
      *

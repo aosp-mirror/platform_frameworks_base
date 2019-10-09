@@ -422,7 +422,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         @Override
         void saveTask(TaskRecord task) {
-            final int userId = task.userId;
+            final int userId = task.mUserId;
             final ComponentName realActivity = task.realActivity;
             mTmpParams.mPreferredDisplayId = task.getStack().mDisplayId;
             mTmpParams.mWindowingMode = task.getWindowingMode();
@@ -436,7 +436,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         @Override
         void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams params) {
-            final int userId = task != null ? task.userId : activity.mUserId;
+            final int userId = task != null ? task.mUserId : activity.mUserId;
             final ComponentName name = task != null
                     ? task.realActivity : activity.mActivityComponent;
 

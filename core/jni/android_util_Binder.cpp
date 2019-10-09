@@ -697,6 +697,9 @@ BinderProxyNativeData* getBPNativeData(JNIEnv* env, jobject obj) {
 // same IBinder, and the original BinderProxy is still alive, return the same BinderProxy.
 jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
 {
+    // N.B. This function is called from a @FastNative JNI method, so don't take locks around
+    // calls to Java code or block the calling thread for a long time for any reason.
+
     if (val == NULL) return NULL;
 
     if (val->checkSubclass(&gBinderOffsets)) {
