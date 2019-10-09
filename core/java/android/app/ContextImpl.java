@@ -741,10 +741,19 @@ class ContextImpl extends Context {
     public File getCodeCacheDir() {
         synchronized (mSync) {
             if (mCodeCacheDir == null) {
-                mCodeCacheDir = new File(getDataDir(), "code_cache");
+                mCodeCacheDir = getCodeCacheDirBeforeBind(getDataDir());
             }
             return ensurePrivateCacheDirExists(mCodeCacheDir, XATTR_INODE_CODE_CACHE);
         }
+    }
+
+    /**
+     * Helper for getting code-cache dir potentially before application bind.
+     *
+     * @hide
+     */
+    static File getCodeCacheDirBeforeBind(File dataDir) {
+        return new File(dataDir, "code_cache");
     }
 
     @Override
