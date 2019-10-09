@@ -350,7 +350,7 @@ public class UserInfo implements Parcelable {
 
     @UnsupportedAppUsage
     public UserHandle getUserHandle() {
-        return new UserHandle(id);
+        return UserHandle.of(id);
     }
 
     @Override
