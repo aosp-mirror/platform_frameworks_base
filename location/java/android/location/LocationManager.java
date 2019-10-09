@@ -145,7 +145,7 @@ public class LocationManager {
      * Key used for an extra holding a boolean enabled/disabled status value when a provider
      * enabled/disabled event is broadcast using a PendingIntent.
      *
-     * @see #requestLocationUpdates(String, long, long, PendingIntent)
+     * @see #requestLocationUpdates(String, long, float, PendingIntent)
      */
     public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
 
@@ -153,7 +153,7 @@ public class LocationManager {
      * Key used for an extra holding a {@link Location} value when a location change is broadcast
      * using a PendingIntent.
      *
-     * @see #requestLocationUpdates(String, long, long, PendingIntent)
+     * @see #requestLocationUpdates(String, long, float, PendingIntent)
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
@@ -1256,44 +1256,46 @@ public class LocationManager {
     }
 
     /**
-     * Creates a mock location provider and adds it to the set of active providers.
+     * Creates a test location provider and adds it to the set of active providers. This provider
+     * will replace any provider with the same name that exists prior to this call.
      *
-     * @param name the provider name
+     * @param provider the provider name
      *
+     * @throws IllegalArgumentException if provider is null
      * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
      * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
      * allowed} for your app.
-     * @throws IllegalArgumentException if a provider with the given name already exists
      */
     public void addTestProvider(
-            @NonNull String name, boolean requiresNetwork, boolean requiresSatellite,
+            @NonNull String provider, boolean requiresNetwork, boolean requiresSatellite,
             boolean requiresCell, boolean hasMonetaryCost, boolean supportsAltitude,
             boolean supportsSpeed, boolean supportsBearing, int powerRequirement, int accuracy) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
         ProviderProperties properties = new ProviderProperties(requiresNetwork,
                 requiresSatellite, requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
                 supportsBearing, powerRequirement, accuracy);
-        if (name.matches(LocationProvider.BAD_CHARS_REGEX)) {
-            throw new IllegalArgumentException("provider name contains illegal character: " + name);
-        }
-
         try {
-            mService.addTestProvider(name, properties, mContext.getOpPackageName());
+            mService.addTestProvider(provider, properties, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Removes the mock location provider with the given name.
+     * Removes the test location provider with the given name or does nothing if no such test
+     * location provider exists.
      *
      * @param provider the provider name
      *
+     * @throws IllegalArgumentException if provider is null
      * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
      * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
      * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
      */
     public void removeTestProvider(@NonNull String provider) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
         try {
             mService.removeTestProvider(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1302,60 +1304,53 @@ public class LocationManager {
     }
 
     /**
-     * Sets a mock location for the given provider.
-     * <p>This location will be used in place of any actual location from the provider.
-     * The location object must have a minimum number of fields set to be
-     * considered a valid LocationProvider Location, as per documentation
-     * on {@link Location} class.
+     * Sets a new location for the given test provider. This location will be identiable as a mock
+     * location to all clients via {@link Location#isFromMockProvider()}.
+     *
+     * <p>The location object must have a minimum number of fields set to be considered valid, as
+     * per documentation on {@link Location} class.
      *
      * @param provider the provider name
-     * @param loc the mock location
+     * @param location the mock location
      *
      * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
      * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
      * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
-     * @throws IllegalArgumentException if the location is incomplete
+     * @throws IllegalArgumentException if the provider is null or not a test provider
+     * @throws IllegalArgumentException if the location is null or incomplete
      */
-    public void setTestProviderLocation(@NonNull String provider, @NonNull Location loc) {
-        if (!loc.isComplete()) {
+    public void setTestProviderLocation(@NonNull String provider, @NonNull Location location) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+        Preconditions.checkArgument(location != null, "invalid null location");
+
+        if (!location.isComplete()) {
             IllegalArgumentException e = new IllegalArgumentException(
-                    "Incomplete location object, missing timestamp or accuracy? " + loc);
+                    "Incomplete location object, missing timestamp or accuracy? " + location);
             if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN) {
-                // just log on old platform (for backwards compatibility)
                 Log.w(TAG, e);
-                loc.makeComplete();
+                location.makeComplete();
             } else {
-                // really throw it!
                 throw e;
             }
         }
 
         try {
-            mService.setTestProviderLocation(provider, loc, mContext.getOpPackageName());
+            mService.setTestProviderLocation(provider, location, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Removes any mock location associated with the given provider.
+     * Does nothing.
      *
-     * @param provider the provider name
-     *
-     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
-     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
-     * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
-     *
-     * @deprecated This function has always been a no-op, and may be removed in the future.
+     * @deprecated This method has always been a no-op, and may be removed in the future.
      */
     @Deprecated
     public void clearTestProviderLocation(@NonNull String provider) {}
 
     /**
-     * Sets a mock enabled value for the given provider.  This value will be used in place
-     * of any actual value from the provider.
+     * Sets the given test provider to be enabled or disabled.
      *
      * @param provider the provider name
      * @param enabled the mock enabled value
@@ -1363,9 +1358,11 @@ public class LocationManager {
      * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
      * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
      * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
+     * @throws IllegalArgumentException if provider is null or not a test provider
      */
     public void setTestProviderEnabled(@NonNull String provider, boolean enabled) {
+        Preconditions.checkArgument(provider != null, "invalid null provider");
+
         try {
             mService.setTestProviderEnabled(provider, enabled, mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1374,14 +1371,8 @@ public class LocationManager {
     }
 
     /**
-     * Removes any mock enabled value associated with the given provider.
-     *
-     * @param provider the provider name
-     *
-     * @throws SecurityException if {@link android.app.AppOpsManager#OPSTR_MOCK_LOCATION
-     * mock location app op} is not set to {@link android.app.AppOpsManager#MODE_ALLOWED
-     * allowed} for your app.
-     * @throws IllegalArgumentException if no provider with the given name exists
+     * Equivalent to calling {@link #setTestProviderEnabled(String, boolean)} to disable a test
+     * provider.
      *
      * @deprecated Use {@link #setTestProviderEnabled(String, boolean)} instead.
      */
