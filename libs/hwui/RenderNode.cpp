@@ -108,7 +108,7 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     output << std::endl;
 }
 
-int RenderNode::getDebugSize() {
+int RenderNode::getUsageSize() {
     int size = sizeof(RenderNode);
     if (mStagingDisplayList) {
         size += mStagingDisplayList->getUsedSize();
@@ -118,6 +118,18 @@ int RenderNode::getDebugSize() {
     }
     return size;
 }
+
+int RenderNode::getAllocatedSize() {
+    int size = sizeof(RenderNode);
+    if (mStagingDisplayList) {
+        size += mStagingDisplayList->getAllocatedSize();
+    }
+    if (mDisplayList && mDisplayList != mStagingDisplayList) {
+        size += mDisplayList->getAllocatedSize();
+    }
+    return size;
+}
+
 
 void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();

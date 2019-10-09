@@ -1380,7 +1380,22 @@ public final class RenderNode {
      * @return Approximate memory usage in bytes.
      */
     public @BytesLong long computeApproximateMemoryUsage() {
-        return nGetDebugSize(mNativeRenderNode);
+        return nGetUsageSize(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the approximate amount of memory allocated for the RenderNode for debug purposes.
+     * Does not include the memory allocated by any child RenderNodes nor any bitmaps, only the
+     * memory allocated for this RenderNode and any data it owns.
+     *
+     * The difference between this and {@link #computeApproximateMemoryUsage()} is this includes
+     * memory allocated but not used. In particular structures such as DisplayLists are similar
+     * to things like ArrayLists - they need to resize as commands are added to them. As such,
+     * memory used can be less than memory allocated.
+     *
+     * @hide */
+    public @BytesLong long computeApproximateMemoryAllocated() {
+        return nGetAllocatedSize(mNativeRenderNode);
     }
 
     /**
@@ -1485,7 +1500,8 @@ public final class RenderNode {
 
     private static native void nOutput(long renderNode);
 
-    private static native int nGetDebugSize(long renderNode);
+    private static native int nGetUsageSize(long renderNode);
+    private static native int nGetAllocatedSize(long renderNode);
 
     private static native void nRequestPositionUpdates(long renderNode,
             PositionUpdateListener callback);

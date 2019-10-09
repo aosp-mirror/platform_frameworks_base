@@ -47,6 +47,7 @@ class FunctorDrawable;
 class SkiaDisplayList {
 public:
     size_t getUsedSize() { return allocator.usedSize() + mDisplayList.usedSize(); }
+    size_t getAllocatedSize() { return allocator.allocatedSize() + mDisplayList.allocatedSize(); }
 
     ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the
