@@ -5104,4 +5104,90 @@ public class WifiManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Base class for scan results listener. Should be implemented by applications and set when
+     * calling {@link WifiManager#addScanResultsListener(Executor, ScanResultsListener)}.
+     */
+    public interface ScanResultsListener {
+
+        /**
+         * Called when new scan results available.
+         * Caller should use {@link WifiManager#getScanResults()} to get the scan results.
+         */
+        void onScanResultsAvailable();
+    }
+
+    private class ScanResultsListenerProxy extends IScanResultsListener.Stub {
+        private final Executor mExecutor;
+        private final ScanResultsListener mListener;
+
+        ScanResultsListenerProxy(Executor executor, ScanResultsListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onScanResultsAvailable() {
+            mExecutor.execute(mListener::onScanResultsAvailable);
+        }
+    }
+
+    /**
+     * Add a listener for Scan Results. See {@link ScanResultsListener}.
+     * Caller will receive the event when scan results are available.
+     * Caller should use {@link WifiManager#getScanResults()} to get the scan results.
+     * Caller can remove a previously registered listener using
+     * {@link WifiManager#removeScanResultsListener(ScanResultsListener)}
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#ACCESS_WIFI_STATE} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param executor  The executor to execute the listener of the {@code listener} object.
+     * @param listener listener for Scan Results events
+     */
+
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public void addScanResultsListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull ScanResultsListener listener) {
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        if (executor == null) throw new IllegalArgumentException("executor cannot be null");
+        Log.v(TAG, "addScanResultsListener: listener=" + listener + ", executor=" + executor);
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.registerScanResultsListener(
+                    new Binder(),
+                    new ScanResultsListenerProxy(executor, listener),
+                    mContext.getOpPackageName().hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow callers to remove a previously added listener. After calling this method,
+     * applications will no longer receive Scan Results events.
+     *
+     * @param listener listener to remove for Scan Results events
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public void removeScanResultsListener(@NonNull ScanResultsListener listener) {
+        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
+        Log.v(TAG, "removeScanResultsListener: listener=" + listener);
+
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.unregisterScanResultsListener(mContext.getOpPackageName().hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
