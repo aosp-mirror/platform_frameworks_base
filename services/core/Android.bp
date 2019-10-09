@@ -144,7 +144,8 @@ genrule {
     name: "services.core.json.gz",
     srcs: [":checked-protolog.json"],
     out: ["services.core.protolog.json.gz"],
-    cmd: "gzip < $(in) > $(out)",
+    cmd: "$(location minigzip) -c < $(in) > $(out)",
+    tools: ["minigzip"],
 }
 
 prebuilt_etc {
