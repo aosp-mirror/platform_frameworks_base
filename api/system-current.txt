@@ -24,7 +24,6 @@ package android {
     field public static final String BACKUP = "android.permission.BACKUP";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
-    field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
     field @Deprecated public static final String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final String BIND_CONTENT_CAPTURE_SERVICE = "android.permission.BIND_CONTENT_CAPTURE_SERVICE";
     field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
@@ -7213,14 +7212,6 @@ package android.telephony {
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setDefaultCarrierRestriction(int);
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setExcludedCarriers(@NonNull java.util.List<android.service.carrier.CarrierIdentifier>);
     method @NonNull public android.telephony.CarrierRestrictionRules.Builder setMultiSimPolicy(int);
-  }
-
-  public abstract class CellBroadcastService extends android.app.Service {
-    ctor public CellBroadcastService();
-    method @CallSuper public android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onCdmaCellBroadcastSms(int, byte[]);
-    method public abstract void onGsmCellBroadcastSms(int, byte[]);
-    field public static final String CELL_BROADCAST_SERVICE_INTERFACE = "android.telephony.CellBroadcastService";
   }
 
   public final class DataFailCause {
