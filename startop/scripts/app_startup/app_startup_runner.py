@@ -233,13 +233,17 @@ def execute_run_using_perfetto_trace(collector_info,
                                      simulate: bool,
                                      inodes_path: str,
                                      timeout: int,
-                                     compiler_type: CompilerType) -> DataFrame:
+                                     compiler_type: CompilerType,
+                                     requires_trace_collection: bool) -> DataFrame:
   """ Executes run based on perfetto trace. """
-  passed, perfetto_trace_file = run_perfetto_collector(collector_info,
-                                                       timeout,
-                                                       simulate)
-  if not passed:
-    raise RuntimeError('Cannot run perfetto collector!')
+  if requires_trace_collection:
+    passed, perfetto_trace_file = run_perfetto_collector(collector_info,
+                                                         timeout,
+                                                         simulate)
+    if not passed:
+      raise RuntimeError('Cannot run perfetto collector!')
+  else:
+    perfetto_trace_file = tempfile.NamedTemporaryFile()
 
   with perfetto_trace_file:
     for combos in run_combos:
@@ -271,7 +275,8 @@ def execute_run_combos(
     simulate: bool,
     inodes_path: str,
     timeout: int,
-    compiler_type: CompilerType):
+    compiler_type: CompilerType,
+    requires_trace_collection: bool):
   # nothing will work if the screen isn't unlocked first.
   cmd_utils.execute_arbitrary_command([_UNLOCK_SCREEN_SCRIPT],
                                       timeout,
@@ -284,7 +289,8 @@ def execute_run_combos(
                                                 simulate,
                                                 inodes_path,
                                                 timeout,
-                                                compiler_type)
+                                                compiler_type,
+                                                requires_trace_collection)
 
 def gather_results(commands: Iterable[Tuple[DataFrame]],
                    key_list: List[str], value_list: List[Tuple[str, ...]]):
@@ -369,11 +375,13 @@ def main():
                                                                       CollectorPackageInfo)
 
   print_utils.debug_print_gen("grouped run combinations: ", grouped_combos())
+  requires_trace_collection = any(i in _TRACING_READAHEADS for i in opts.readaheads)
   exec = execute_run_combos(grouped_combos(),
                             opts.simulate,
                             opts.inodes,
                             opts.timeout,
-                            opts.compiler_type)
+                            opts.compiler_type,
+                            requires_trace_collection)
 
   results = gather_results(exec, _COMBINATORIAL_OPTIONS, combos())
 
