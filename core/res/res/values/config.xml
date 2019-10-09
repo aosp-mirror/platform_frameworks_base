@@ -4304,11 +4304,11 @@
 
     <!-- Trigger a warning for notifications with RemoteView objects that are larger in bytes than
     this value (default 1MB)-->
-    <integer name="config_notificationWarnRemoteViewSizeBytes">1000000</integer>
+    <integer name="config_notificationWarnRemoteViewSizeBytes">2000000</integer>
 
     <!-- Strip notification RemoteView objects that are larger in bytes than this value (also log)
     (default 2MB) -->
-    <integer name="config_notificationStripRemoteViewSizeBytes">2000000</integer>
+    <integer name="config_notificationStripRemoteViewSizeBytes">5000000</integer>
 
     <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
          grants, even if the UICC claims that the app should be privileged. See b/138150105 -->
