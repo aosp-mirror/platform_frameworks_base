@@ -65,7 +65,6 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -109,6 +108,7 @@ import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -256,6 +256,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @GuardedBy("this")
     private CheckOpsDelegate mCheckOpsDelegate;
+
+    @GuardedBy("this")
+    private SparseArray<List<Integer>> mSwitchOpToOps;
 
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
@@ -1291,6 +1294,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         verifyIncomingOp(code);
         code = AppOpsManager.opToSwitch(code);
 
+        updatePermissionRevokedCompat(uid, code, mode);
+
         synchronized (this) {
             final int defaultMode = AppOpsManager.opToDefaultMode(code);
 
@@ -1390,6 +1395,86 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         notifyOpChangedSync(code, uid, null, mode);
+    }
+
+    private void updatePermissionRevokedCompat(int uid, int switchCode, int mode) {
+        PackageManager packageManager = mContext.getPackageManager();
+        String[] packageNames = packageManager.getPackagesForUid(uid);
+        if (ArrayUtils.isEmpty(packageNames)) {
+            return;
+        }
+        String packageName = packageNames[0];
+
+        List<Integer> ops = getSwitchOpToOps().get(switchCode);
+        int opsSize = CollectionUtils.size(ops);
+        for (int i = 0; i < opsSize; i++) {
+            int code = ops.get(i);
+
+            String permissionName = AppOpsManager.opToPermission(code);
+            if (permissionName == null) {
+                continue;
+            }
+
+            PermissionInfo permissionInfo;
+            try {
+                permissionInfo = packageManager.getPermissionInfo(permissionName, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            if (!permissionInfo.isRuntime()) {
+                continue;
+            }
+
+            UserHandle user = UserHandle.getUserHandleForUid(uid);
+            boolean isRevokedCompat;
+            if (permissionInfo.backgroundPermission != null) {
+                boolean isBackgroundRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+                long identity = Binder.clearCallingIdentity();
+                try {
+                    packageManager.updatePermissionFlags(permissionInfo.backgroundPermission,
+                            packageName, PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
+                            isBackgroundRevokedCompat
+                                    ? PackageManager.FLAG_PERMISSION_REVOKED_COMPAT : 0, user);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+
+                isRevokedCompat = mode != AppOpsManager.MODE_ALLOWED
+                        && mode != AppOpsManager.MODE_FOREGROUND;
+            } else {
+                isRevokedCompat = mode != AppOpsManager.MODE_ALLOWED;
+            }
+
+            long identity = Binder.clearCallingIdentity();
+            try {
+                packageManager.updatePermissionFlags(permissionName, packageName,
+                        PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, isRevokedCompat
+                                ? PackageManager.FLAG_PERMISSION_REVOKED_COMPAT : 0, user);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    @NonNull
+    private SparseArray<List<Integer>> getSwitchOpToOps() {
+        synchronized (this) {
+            if (mSwitchOpToOps == null) {
+                mSwitchOpToOps = new SparseArray<>();
+                for (int op = 0; op < _NUM_OP; op++) {
+                    int switchOp = AppOpsManager.opToSwitch(op);
+                    List<Integer> ops = mSwitchOpToOps.get(switchOp);
+                    if (ops == null) {
+                        ops = new ArrayList<>();
+                        mSwitchOpToOps.put(switchOp, ops);
+                    }
+                    ops.add(op);
+                }
+            }
+            return mSwitchOpToOps;
+        }
     }
 
     private void notifyOpChangedSync(int code, int uid, @NonNull String packageName, int mode) {
