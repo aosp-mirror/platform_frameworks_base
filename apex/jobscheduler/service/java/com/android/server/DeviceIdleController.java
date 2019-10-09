@@ -48,7 +48,6 @@ import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
@@ -3597,9 +3596,6 @@ public class DeviceIdleController extends SystemService
             try {
                 stream = mConfigFile.startWrite();
                 memStream.writeTo(stream);
-                stream.flush();
-                FileUtils.sync(stream);
-                stream.close();
                 mConfigFile.finishWrite(stream);
             } catch (IOException e) {
                 Slog.w(TAG, "Error writing config file", e);
