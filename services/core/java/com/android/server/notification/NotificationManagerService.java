@@ -1985,6 +1985,7 @@ public class NotificationManagerService extends SystemService {
             public void updateAutogroupSummary(String key, boolean needsOngoingFlag) {
                 synchronized (mNotificationLock) {
                     NotificationRecord r = mNotificationsByKey.get(key);
+                    if (r == null) return;
                     updateAutobundledSummaryFlags(r.getUser().getIdentifier(),
                             r.sbn.getPackageName(), needsOngoingFlag);
                 }
