@@ -25,7 +25,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
  */
 public final class Rule {
 
-    enum Effect {
+    public enum Effect {
         DENY
     }
 
