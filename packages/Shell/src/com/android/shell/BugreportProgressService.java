@@ -476,10 +476,10 @@ public class BugreportProgressService extends Service {
     }
 
     private static void addScreenshotToIntent(Intent intent, BugreportInfo info) {
-        final String screenshotFileName = info.name + ".png";
-        final File screenshotFile = new File(BUGREPORT_DIR, screenshotFileName);
-        final String screenshotFilePath = screenshotFile.getAbsolutePath();
-        if (screenshotFile.length() > 0) {
+        final File screenshotFile = info.screenshotFiles.isEmpty()
+                ? null : info.screenshotFiles.get(0);
+        if (screenshotFile != null && screenshotFile.length() > 0) {
+            final String screenshotFilePath = screenshotFile.getAbsolutePath();
             intent.putExtra(EXTRA_SCREENSHOT, screenshotFilePath);
         }
         return;
