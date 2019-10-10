@@ -58,13 +58,12 @@ public class SizeCompatModeActivityControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         doReturn(true).when(mMockButton).show();
 
-        mController = new SizeCompatModeActivityController(mMockAm) {
+        mController = new SizeCompatModeActivityController(mContext, mMockAm) {
             @Override
             RestartActivityButton createRestartButton(Context context) {
                 return mMockButton;
             };
         };
-        mController.mContext = mContext;
 
         ArgumentCaptor<TaskStackChangeListener> listenerCaptor =
                 ArgumentCaptor.forClass(TaskStackChangeListener.class);

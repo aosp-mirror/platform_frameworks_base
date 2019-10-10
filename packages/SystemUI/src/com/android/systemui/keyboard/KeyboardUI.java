@@ -117,6 +117,10 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
 
     private int mState;
 
+    public KeyboardUI(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         mContext = super.mContext;

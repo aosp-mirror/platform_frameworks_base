@@ -103,7 +103,8 @@ public class PowerUI extends SystemUI {
     private final BroadcastDispatcher mBroadcastDispatcher;
 
     @Inject
-    public PowerUI(BroadcastDispatcher broadcastDispatcher) {
+    public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher) {
+        super(context);
         mBroadcastDispatcher = broadcastDispatcher;
     }
 

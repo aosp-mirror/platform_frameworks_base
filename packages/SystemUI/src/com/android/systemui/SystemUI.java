@@ -26,8 +26,12 @@ import java.io.PrintWriter;
 import java.util.Map;
 
 public abstract class SystemUI implements SysUiServiceProvider {
-    public Context mContext;
+    protected final Context mContext;
     public Map<Class<?>, Object> mComponents;
+
+    public SystemUI(Context context) {
+        mContext = context;
+    }
 
     public abstract void start();
 

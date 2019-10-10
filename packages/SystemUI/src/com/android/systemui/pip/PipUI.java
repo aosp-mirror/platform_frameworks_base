@@ -19,6 +19,7 @@ package com.android.systemui.pip;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.UserHandle;
@@ -38,6 +39,10 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
     private BasePipManager mPipManager;
 
     private boolean mSupportsPip;
+
+    public PipUI(Context context) {
+        super(context);
+    }
 
     @Override
     public void start() {

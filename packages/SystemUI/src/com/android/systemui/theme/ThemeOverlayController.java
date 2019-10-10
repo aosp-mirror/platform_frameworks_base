@@ -61,6 +61,10 @@ public class ThemeOverlayController extends SystemUI {
     private ThemeOverlayManager mThemeManager;
     private UserManager mUserManager;
 
+    public ThemeOverlayController(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");

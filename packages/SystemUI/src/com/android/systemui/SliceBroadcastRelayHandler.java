@@ -39,6 +39,10 @@ public class SliceBroadcastRelayHandler extends SystemUI {
 
     private final ArrayMap<Uri, BroadcastRelay> mRelays = new ArrayMap<>();
 
+    public SliceBroadcastRelayHandler(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");

@@ -102,7 +102,7 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         when(mFragmentService.getFragmentHostManager(any())).thenReturn(mFragmentHostManager);
 
 
-        mScreenDecorations = new ScreenDecorations() {
+        mScreenDecorations = new ScreenDecorations(mContext) {
             @Override
             public void start() {
                 super.start();
@@ -126,7 +126,6 @@ public class ScreenDecorationsTest extends SysuiTestCase {
                 mTestableLooper.processAllMessages();
             }
         };
-        mScreenDecorations.mContext = mContext;
         mScreenDecorations.mComponents = mContext.getComponents();
         reset(mTunerService);
     }

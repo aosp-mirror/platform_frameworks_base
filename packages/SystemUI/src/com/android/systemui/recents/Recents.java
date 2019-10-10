@@ -17,6 +17,7 @@
 package com.android.systemui.recents;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.provider.Settings;
@@ -37,7 +38,8 @@ public class Recents extends SystemUI implements CommandQueue.Callbacks {
     private final RecentsImplementation mImpl;
 
     @Inject
-    public Recents(RecentsImplementation impl) {
+    public Recents(Context context, RecentsImplementation impl) {
+        super(context);
         mImpl = impl;
     }
 

@@ -32,6 +32,13 @@ import dagger.multibindings.IntoMap;
  */
 @Module(includes = {RecentsModule.class})
 public abstract class SystemUIBinder {
+
+    /** Inject into GarbageMonitor.Service. */
+    @Binds
+    @IntoMap
+    @ClassKey(GarbageMonitor.Service.class)
+    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
+
     /** Inject into KeyguardViewMediator. */
     @Binds
     @IntoMap
@@ -50,9 +57,4 @@ public abstract class SystemUIBinder {
     @ClassKey(Recents.class)
     public abstract SystemUI bindRecents(Recents sysui);
 
-    /** Inject into GarbageMonitor.Service. */
-    @Binds
-    @IntoMap
-    @ClassKey(GarbageMonitor.Service.class)
-    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
 }

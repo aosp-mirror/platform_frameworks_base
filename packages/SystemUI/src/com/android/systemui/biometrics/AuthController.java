@@ -172,12 +172,13 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
-    public AuthController() {
-        this(new Injector());
+    public AuthController(Context context) {
+        this(context, new Injector());
     }
 
     @VisibleForTesting
-    AuthController(Injector injector) {
+    AuthController(Context context, Injector injector) {
+        super(context);
         mInjector = injector;
     }
 
