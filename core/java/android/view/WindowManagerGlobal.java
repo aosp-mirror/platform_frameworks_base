@@ -604,26 +604,24 @@ public final class WindowManagerGlobal {
 
                 pw.println("\nView hierarchy:\n");
 
-                int viewsCount = 0;
-                int displayListsSize = 0;
-                int[] info = new int[2];
+                ViewRootImpl.GfxInfo totals = new ViewRootImpl.GfxInfo();
 
                 for (int i = 0; i < count; i++) {
                     ViewRootImpl root = mRoots.get(i);
-                    root.dumpGfxInfo(info);
+                    ViewRootImpl.GfxInfo info = root.getGfxInfo();
+                    totals.add(info);
 
                     String name = getWindowName(root);
-                    pw.printf("  %s\n  %d views, %.2f kB of display lists",
-                            name, info[0], info[1] / 1024.0f);
+                    pw.printf("  %s\n  %d views, %.2f kB of render nodes",
+                            name, info.viewCount, info.renderNodeMemoryUsage / 1024.f);
                     pw.printf("\n\n");
-
-                    viewsCount += info[0];
-                    displayListsSize += info[1];
                 }
 
-                pw.printf("\nTotal ViewRootImpl: %d\n", count);
-                pw.printf("Total Views:        %d\n", viewsCount);
-                pw.printf("Total DisplayList:  %.2f kB\n\n", displayListsSize / 1024.0f);
+                pw.printf("\nTotal %-15s: %d\n", "ViewRootImpl", count);
+                pw.printf("Total %-15s: %d\n", "attached Views", totals.viewCount);
+                pw.printf("Total %-15s: %.2f kB (used) / %.2f kB (capacity)\n\n", "RenderNode",
+                        totals.renderNodeMemoryUsage / 1024.0f,
+                        totals.renderNodeMemoryAllocated / 1024.0f);
             }
         } finally {
             pw.flush();

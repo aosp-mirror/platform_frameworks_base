@@ -52,9 +52,14 @@ static void android_view_RenderNode_output(JNIEnv* env, jobject clazz, jlong ren
     renderNode->output();
 }
 
-static jint android_view_RenderNode_getDebugSize(JNIEnv* env, jobject clazz, jlong renderNodePtr) {
+static jint android_view_RenderNode_getUsageSize(JNIEnv* env, jobject clazz, jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    return renderNode->getDebugSize();
+    return renderNode->getUsageSize();
+}
+
+static jint android_view_RenderNode_getAllocatedSize(JNIEnv* env, jobject clazz, jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    return renderNode->getAllocatedSize();
 }
 
 static jlong android_view_RenderNode_create(JNIEnv* env, jobject, jstring name) {
@@ -647,7 +652,8 @@ static const JNINativeMethod gMethods[] = {
     { "nCreate",               "(Ljava/lang/String;)J", (void*) android_view_RenderNode_create },
     { "nGetNativeFinalizer",   "()J",    (void*) android_view_RenderNode_getNativeFinalizer },
     { "nOutput",               "(J)V",    (void*) android_view_RenderNode_output },
-    { "nGetDebugSize",         "(J)I",    (void*) android_view_RenderNode_getDebugSize },
+    { "nGetUsageSize",         "(J)I",    (void*) android_view_RenderNode_getUsageSize },
+    { "nGetAllocatedSize",         "(J)I",    (void*) android_view_RenderNode_getAllocatedSize },
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
     { "nRequestPositionUpdates",   "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V", (void*) android_view_RenderNode_requestPositionUpdates },

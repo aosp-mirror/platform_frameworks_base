@@ -7297,26 +7297,42 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public void dumpGfxInfo(int[] info) {
-        info[0] = info[1] = 0;
-        if (mView != null) {
-            getGfxInfo(mView, info);
+    static final class GfxInfo {
+        public int viewCount;
+        public long renderNodeMemoryUsage;
+        public long renderNodeMemoryAllocated;
+
+        void add(GfxInfo other) {
+            viewCount += other.viewCount;
+            renderNodeMemoryUsage += other.renderNodeMemoryUsage;
+            renderNodeMemoryAllocated += other.renderNodeMemoryAllocated;
         }
     }
 
-    private static void getGfxInfo(View view, int[] info) {
-        RenderNode renderNode = view.mRenderNode;
-        info[0]++;
-        if (renderNode != null) {
-            info[1] += (int) renderNode.computeApproximateMemoryUsage();
+    GfxInfo getGfxInfo() {
+        GfxInfo info = new GfxInfo();
+        if (mView != null) {
+            appendGfxInfo(mView, info);
         }
+        return info;
+    }
 
+    private static void computeRenderNodeUsage(RenderNode node, GfxInfo info) {
+        if (node == null) return;
+        info.renderNodeMemoryUsage += node.computeApproximateMemoryUsage();
+        info.renderNodeMemoryAllocated += node.computeApproximateMemoryAllocated();
+    }
+
+    private static void appendGfxInfo(View view, GfxInfo info) {
+        info.viewCount++;
+        computeRenderNodeUsage(view.mRenderNode, info);
+        computeRenderNodeUsage(view.mBackgroundRenderNode, info);
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
 
             int count = group.getChildCount();
             for (int i = 0; i < count; i++) {
-                getGfxInfo(group.getChildAt(i), info);
+                appendGfxInfo(group.getChildAt(i), info);
             }
         }
     }

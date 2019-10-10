@@ -102,7 +102,8 @@ public:
     ANDROID_API void setStagingDisplayList(DisplayList* newData);
 
     ANDROID_API void output();
-    ANDROID_API int getDebugSize();
+    ANDROID_API int getUsageSize();
+    ANDROID_API int getAllocatedSize();
 
     bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
 
