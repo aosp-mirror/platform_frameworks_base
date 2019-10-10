@@ -56,20 +56,14 @@
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 #include "idmap2/Policies.h"
+#include "idmap2/ResourceMapping.h"
 
 namespace android::idmap2 {
 
 class Idmap;
 class Visitor;
 
-// use typedefs to let the compiler warn us about implicit casts
-typedef uint32_t ResourceId;  // 0xpptteeee
-typedef uint8_t PackageId;    // pp in 0xpptteeee
-typedef uint8_t TypeId;       // tt in 0xpptteeee
-typedef uint16_t EntryId;     // eeee in 0xpptteeee
-
 static constexpr const ResourceId kPadding = 0xffffffffu;
-
 static constexpr const EntryId kNoEntry = 0xffffu;
 
 // magic number: all idmap files start with this
@@ -155,7 +149,7 @@ class IdmapData {
     PackageId target_package_id_;
     uint16_t type_count_;
 
-    friend Idmap;
+    friend IdmapData;
     DISALLOW_COPY_AND_ASSIGN(Header);
   };
 
@@ -194,11 +188,14 @@ class IdmapData {
     uint16_t entry_offset_;
     std::vector<EntryId> entries_;
 
-    friend Idmap;
+    friend IdmapData;
     DISALLOW_COPY_AND_ASSIGN(TypeEntry);
   };
 
   static std::unique_ptr<const IdmapData> FromBinaryStream(std::istream& stream);
+
+  static Result<std::unique_ptr<const IdmapData>> FromResourceMapping(
+      const ResourceMapping& resource_mapping);
 
   inline const std::unique_ptr<const Header>& GetHeader() const {
     return header_;
@@ -232,9 +229,7 @@ class Idmap {
   // file is used; change this in the next version of idmap to use a named
   // package instead; also update FromApkAssets to take additional parameters:
   // the target and overlay package names
-  static Result<std::unique_ptr<const Idmap>> FromApkAssets(const std::string& target_apk_path,
-                                                            const ApkAssets& target_apk_assets,
-                                                            const std::string& overlay_apk_path,
+  static Result<std::unique_ptr<const Idmap>> FromApkAssets(const ApkAssets& target_apk_assets,
                                                             const ApkAssets& overlay_apk_assets,
                                                             const PolicyBitmask& fulfilled_policies,
                                                             bool enforce_overlayable);

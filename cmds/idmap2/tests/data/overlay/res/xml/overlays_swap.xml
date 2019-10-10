@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2018 The Android Open Source Project
+<!-- Copyright (C) 2019 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,16 +13,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<a>
-    <b type_string="fortytwo"
-       type_int_dec="42"
-       type_int_hex="0x2a"
-       type_int_boolean="true">
-
-        <c />
-    </b>
-
-    <d>
-        <e />
-    </d>
-</a>
+<overlay>
+    <item target="string/str1" value="@string/str4"/>
+    <item target="string/str3" value="@string/str1" />
+    <item target="string/str4" value="@string/str3" />
+    <item target="integer/int_not_in_target" value="@integer/int1" />
+</overlay>

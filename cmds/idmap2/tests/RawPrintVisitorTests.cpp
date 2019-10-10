@@ -38,9 +38,8 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+                                          /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap);
 
   std::stringstream stream;
@@ -50,7 +49,7 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000004: 00000001  version\n"), std::string::npos);
   ASSERT_NE(stream.str().find("00000008: 76a20829  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: 8635c2ed  overlay crc\n"), std::string::npos);
+  ASSERT_NE(stream.str().find("0000000c: c054fb26  overlay crc\n"), std::string::npos);
   ASSERT_NE(stream.str().find("0000021c: 00000000  0x7f010000 -> 0x7f010000 integer/int1\n"),
             std::string::npos);
 }

@@ -43,9 +43,8 @@ TEST(PrettyPrintVisitorTests, CreatePrettyPrintVisitor) {
   std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
   ASSERT_THAT(overlay_apk, NotNull());
 
-  const auto idmap =
-      Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path, *overlay_apk,
-                           PolicyFlags::POLICY_PUBLIC, /* enforce_overlayable */ true);
+  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
+                                          /* enforce_overlayable */ true);
   ASSERT_TRUE(idmap);
 
   std::stringstream stream;

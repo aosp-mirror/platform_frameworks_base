@@ -30,6 +30,7 @@
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
 #include "androidfw/AssetManager2.h"
+#include "idmap2/ResourceMapping.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
@@ -40,10 +41,6 @@
 namespace android::idmap2 {
 
 namespace {
-
-#define EXTRACT_TYPE(resid) ((0x00ff0000 & (resid)) >> 16)
-
-#define EXTRACT_ENTRY(resid) (0x0000ffff & (resid))
 
 class MatchingResources {
  public:
@@ -95,28 +92,6 @@ bool WARN_UNUSED ReadString(std::istream& stream, char out[kIdmapStringLength]) 
   }
   memcpy(out, buf, sizeof(buf));
   return true;
-}
-
-ResourceId NameToResid(const AssetManager2& am, const std::string& name) {
-  return am.GetResourceId(name);
-}
-
-// TODO(martenkongstad): scan for package name instead of assuming package at index 0
-//
-// idmap version 0x01 naively assumes that the package to use is always the first ResTable_package
-// in the resources.arsc blob. In most cases, there is only a single ResTable_package anyway, so
-// this assumption tends to work out. That said, the correct thing to do is to scan
-// resources.arsc for a package with a given name as read from the package manifest instead of
-// relying on a hard-coded index. This however requires storing the package name in the idmap
-// header, which in turn requires incrementing the idmap version. Because the initial version of
-// idmap2 is compatible with idmap, this will have to wait for now.
-const LoadedPackage* GetPackageAtIndex0(const LoadedArsc& loaded_arsc) {
-  const std::vector<std::unique_ptr<const LoadedPackage>>& packages = loaded_arsc.GetPackages();
-  if (packages.empty()) {
-    return nullptr;
-  }
-  int id = packages[0]->GetPackageId();
-  return loaded_arsc.GetPackageById(id);
 }
 
 Result<uint32_t> GetCrc(const ZipFile& zip) {
@@ -266,95 +241,57 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromBinaryStream(std::istream& strea
   return {std::move(idmap)};
 }
 
-std::string ConcatPolicies(const std::vector<std::string>& policies) {
-  std::string message;
-  for (const std::string& policy : policies) {
-    if (!message.empty()) {
-      message.append("|");
+Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
+    const ResourceMapping& resource_mapping) {
+  if (resource_mapping.GetTargetToOverlayMap().empty()) {
+    return Error("no resources were overlaid");
+  }
+
+  MatchingResources matching_resources;
+  for (const auto mapping : resource_mapping.GetTargetToOverlayMap()) {
+    if (mapping.second.data_type != Res_value::TYPE_REFERENCE) {
+      // The idmap format must change to support non-references.
+      continue;
     }
-    message.append(policy);
+
+    matching_resources.Add(mapping.first, mapping.second.data_value);
   }
 
-  return message;
+  // encode idmap data
+  std::unique_ptr<IdmapData> data(new IdmapData());
+  const auto types_end = matching_resources.Map().cend();
+  for (auto ti = matching_resources.Map().cbegin(); ti != types_end; ++ti) {
+    auto ei = ti->second.cbegin();
+    std::unique_ptr<IdmapData::TypeEntry> type(new IdmapData::TypeEntry());
+    type->target_type_id_ = EXTRACT_TYPE(ei->first);
+    type->overlay_type_id_ = EXTRACT_TYPE(ei->second);
+    type->entry_offset_ = EXTRACT_ENTRY(ei->first);
+    EntryId last_target_entry = kNoEntry;
+    for (; ei != ti->second.cend(); ++ei) {
+      if (last_target_entry != kNoEntry) {
+        int count = EXTRACT_ENTRY(ei->first) - last_target_entry - 1;
+        type->entries_.insert(type->entries_.end(), count, kNoEntry);
+      }
+      type->entries_.push_back(EXTRACT_ENTRY(ei->second));
+      last_target_entry = EXTRACT_ENTRY(ei->first);
+    }
+    data->type_entries_.push_back(std::move(type));
+  }
+
+  std::unique_ptr<IdmapData::Header> data_header(new IdmapData::Header());
+  data_header->target_package_id_ = resource_mapping.GetTargetPackageId();
+  data_header->type_count_ = data->type_entries_.size();
+  data->header_ = std::move(data_header);
+  return {std::move(data)};
 }
 
-Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
-                              const utils::OverlayManifestInfo& overlay_info,
-                              const PolicyBitmask& fulfilled_policies, const ResourceId& resid) {
-  static constexpr const PolicyBitmask sDefaultPolicies =
-      PolicyFlags::POLICY_ODM_PARTITION | PolicyFlags::POLICY_OEM_PARTITION |
-      PolicyFlags::POLICY_SYSTEM_PARTITION | PolicyFlags::POLICY_VENDOR_PARTITION |
-      PolicyFlags::POLICY_PRODUCT_PARTITION | PolicyFlags::POLICY_SIGNATURE;
-
-  // If the resource does not have an overlayable definition, allow the resource to be overlaid if
-  // the overlay is preinstalled or signed with the same signature as the target.
-  if (!target_package.DefinesOverlayable()) {
-    return (sDefaultPolicies & fulfilled_policies) != 0
-               ? Result<Unit>({})
-               : Error(
-                     "overlay must be preinstalled or signed with the same signature as the "
-                     "target");
-  }
-
-  const OverlayableInfo* overlayable_info = target_package.GetOverlayableInfo(resid);
-  if (overlayable_info == nullptr) {
-    // Do not allow non-overlayable resources to be overlaid.
-    return Error("resource has no overlayable declaration");
-  }
-
-  if (overlay_info.target_name != overlayable_info->name) {
-    // If the overlay supplies a target overlayable name, the resource must belong to the
-    // overlayable defined with the specified name to be overlaid.
-    return Error("<overlay> android:targetName '%s' does not match overlayable name '%s'",
-                 overlay_info.target_name.c_str(), overlayable_info->name.c_str());
-  }
-
-  // Enforce policy restrictions if the resource is declared as overlayable.
-  if ((overlayable_info->policy_flags & fulfilled_policies) == 0) {
-    return Error("overlay with policies '%s' does not fulfill any overlayable policies '%s'",
-                 ConcatPolicies(BitmaskToPolicies(fulfilled_policies)).c_str(),
-                 ConcatPolicies(BitmaskToPolicies(overlayable_info->policy_flags)).c_str());
-  }
-
-  return Result<Unit>({});
-}
-
-Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const std::string& target_apk_path,
-                                                          const ApkAssets& target_apk_assets,
-                                                          const std::string& overlay_apk_path,
+Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const ApkAssets& target_apk_assets,
                                                           const ApkAssets& overlay_apk_assets,
                                                           const PolicyBitmask& fulfilled_policies,
                                                           bool enforce_overlayable) {
   SYSTRACE << "Idmap::FromApkAssets";
-  AssetManager2 target_asset_manager;
-  if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true, false)) {
-    return Error("failed to create target asset manager");
-  }
-
-  AssetManager2 overlay_asset_manager;
-  if (!overlay_asset_manager.SetApkAssets({&overlay_apk_assets}, true, false)) {
-    return Error("failed to create overlay asset manager");
-  }
-
-  const LoadedArsc* target_arsc = target_apk_assets.GetLoadedArsc();
-  if (target_arsc == nullptr) {
-    return Error("failed to load target resources.arsc");
-  }
-
-  const LoadedArsc* overlay_arsc = overlay_apk_assets.GetLoadedArsc();
-  if (overlay_arsc == nullptr) {
-    return Error("failed to load overlay resources.arsc");
-  }
-
-  const LoadedPackage* target_pkg = GetPackageAtIndex0(*target_arsc);
-  if (target_pkg == nullptr) {
-    return Error("failed to load target package from resources.arsc");
-  }
-
-  const LoadedPackage* overlay_pkg = GetPackageAtIndex0(*overlay_arsc);
-  if (overlay_pkg == nullptr) {
-    return Error("failed to load overlay package from resources.arsc");
-  }
+  const std::string& target_apk_path = target_apk_assets.GetPath();
+  const std::string& overlay_apk_path = overlay_apk_assets.GetPath();
 
   const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_apk_path);
   if (!target_zip) {
@@ -364,11 +301,6 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const std::string& tar
   const std::unique_ptr<const ZipFile> overlay_zip = ZipFile::Open(overlay_apk_path);
   if (!overlay_zip) {
     return Error("failed to open overlay as zip");
-  }
-
-  auto overlay_info = utils::ExtractOverlayManifestInfo(overlay_apk_path);
-  if (!overlay_info) {
-    return overlay_info.GetError();
   }
 
   std::unique_ptr<IdmapHeader> header(new IdmapHeader());
@@ -395,7 +327,7 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const std::string& tar
   memcpy(header->target_path_, target_apk_path.data(), target_apk_path.size());
 
   if (overlay_apk_path.size() > sizeof(header->overlay_path_)) {
-    return Error("overlay apk path \"%s\" longer than maximum size %zu", target_apk_path.c_str(),
+    return Error("overlay apk path \"%s\" longer than maximum size %zu", overlay_apk_path.c_str(),
                  sizeof(header->target_path_));
   }
   memset(header->overlay_path_, 0, sizeof(header->overlay_path_));
@@ -404,70 +336,24 @@ Result<std::unique_ptr<const Idmap>> Idmap::FromApkAssets(const std::string& tar
   std::unique_ptr<Idmap> idmap(new Idmap());
   idmap->header_ = std::move(header);
 
-  // find the resources that exist in both packages
-  MatchingResources matching_resources;
-  const auto end = overlay_pkg->end();
-  for (auto iter = overlay_pkg->begin(); iter != end; ++iter) {
-    const ResourceId overlay_resid = *iter;
-    Result<std::string> name = utils::ResToTypeEntryName(overlay_asset_manager, overlay_resid);
-    if (!name) {
-      continue;
-    }
-    // prepend "<package>:" to turn name into "<package>:<type>/<name>"
-    const std::string full_name =
-        base::StringPrintf("%s:%s", target_pkg->GetPackageName().c_str(), name->c_str());
-    const ResourceId target_resid = NameToResid(target_asset_manager, full_name);
-    if (target_resid == 0) {
-      continue;
-    }
-
-    if (enforce_overlayable) {
-      Result<Unit> success =
-          CheckOverlayable(*target_pkg, *overlay_info, fulfilled_policies, target_resid);
-      if (!success) {
-        LOG(WARNING) << "overlay \"" << overlay_apk_path
-                     << "\" is not allowed to overlay resource \"" << full_name
-                     << "\": " << success.GetErrorMessage();
-        continue;
-      }
-    }
-
-    matching_resources.Add(target_resid, overlay_resid);
+  auto overlay_info = utils::ExtractOverlayManifestInfo(overlay_apk_path);
+  if (!overlay_info) {
+    return overlay_info.GetError();
   }
 
-  if (matching_resources.Map().empty()) {
-    return Error("overlay \"%s\" does not successfully overlay any resource",
-                 overlay_apk_path.c_str());
+  auto resource_mapping =
+      ResourceMapping::FromApkAssets(target_apk_assets, overlay_apk_assets, *overlay_info,
+                                     fulfilled_policies, enforce_overlayable);
+  if (!resource_mapping) {
+    return resource_mapping.GetError();
   }
 
-  // encode idmap data
-  std::unique_ptr<IdmapData> data(new IdmapData());
-  const auto types_end = matching_resources.Map().cend();
-  for (auto ti = matching_resources.Map().cbegin(); ti != types_end; ++ti) {
-    auto ei = ti->second.cbegin();
-    std::unique_ptr<IdmapData::TypeEntry> type(new IdmapData::TypeEntry());
-    type->target_type_id_ = EXTRACT_TYPE(ei->first);
-    type->overlay_type_id_ = EXTRACT_TYPE(ei->second);
-    type->entry_offset_ = EXTRACT_ENTRY(ei->first);
-    EntryId last_target_entry = kNoEntry;
-    for (; ei != ti->second.cend(); ++ei) {
-      if (last_target_entry != kNoEntry) {
-        int count = EXTRACT_ENTRY(ei->first) - last_target_entry - 1;
-        type->entries_.insert(type->entries_.end(), count, kNoEntry);
-      }
-      type->entries_.push_back(EXTRACT_ENTRY(ei->second));
-      last_target_entry = EXTRACT_ENTRY(ei->first);
-    }
-    data->type_entries_.push_back(std::move(type));
+  auto idmap_data = IdmapData::FromResourceMapping(*resource_mapping);
+  if (!idmap_data) {
+    return idmap_data.GetError();
   }
 
-  std::unique_ptr<IdmapData::Header> data_header(new IdmapData::Header());
-  data_header->target_package_id_ = target_pkg->GetPackageId();
-  data_header->type_count_ = data->type_entries_.size();
-  data->header_ = std::move(data_header);
-
-  idmap->data_.push_back(std::move(data));
-
+  idmap->data_.push_back(std::move(*idmap_data));
   return {std::move(idmap)};
 }
 
