@@ -129,7 +129,7 @@
     </style>
 
     <style name="TextAppearance.Keyguard.BottomArea">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">13sp</item>
         <item name="android:maxLines">1</item>
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:shadowColor">@color/keyguard_shadow_color</item>
