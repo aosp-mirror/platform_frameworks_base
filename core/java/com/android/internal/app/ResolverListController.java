@@ -35,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -230,22 +231,27 @@ public class ResolverListController {
         }
     }
 
-    @VisibleForTesting
-    @WorkerThread
-    public void sort(List<ResolverActivity.ResolvedComponentInfo> inputList) {
+    private void compute(List<ResolverActivity.ResolvedComponentInfo> inputList)
+            throws InterruptedException {
         if (mResolverComparator == null) {
             Log.d(TAG, "Comparator has already been destroyed; skipped.");
             return;
         }
+        final CountDownLatch finishComputeSignal = new CountDownLatch(1);
+        ComputeCallback callback = new ComputeCallback(finishComputeSignal);
+        mResolverComparator.setCallBack(callback);
+        mResolverComparator.compute(inputList);
+        finishComputeSignal.await();
+        isComputed = true;
+    }
+
+    @VisibleForTesting
+    @WorkerThread
+    public void sort(List<ResolverActivity.ResolvedComponentInfo> inputList) {
         try {
             long beforeRank = System.currentTimeMillis();
             if (!isComputed) {
-                final CountDownLatch finishComputeSignal = new CountDownLatch(1);
-                ComputeCallback callback = new ComputeCallback(finishComputeSignal);
-                mResolverComparator.setCallBack(callback);
-                mResolverComparator.compute(inputList);
-                finishComputeSignal.await();
-                isComputed = true;
+                compute(inputList);
             }
             Collections.sort(inputList, mResolverComparator);
 
@@ -258,6 +264,60 @@ public class ResolverListController {
         }
     }
 
+    @VisibleForTesting
+    @WorkerThread
+    public void topK(List<ResolverActivity.ResolvedComponentInfo> inputList, int k) {
+        if (inputList == null || inputList.isEmpty() || k <= 0) {
+            return;
+        }
+        if (inputList.size() <= k) {
+            // Fall into normal sort when number of ranked elements
+            // needed is not smaller than size of input list.
+            sort(inputList);
+        }
+        try {
+            long beforeRank = System.currentTimeMillis();
+            if (!isComputed) {
+                compute(inputList);
+            }
+
+            // Top of this heap has lowest rank.
+            PriorityQueue<ResolverActivity.ResolvedComponentInfo> minHeap = new PriorityQueue<>(k,
+                    (o1, o2) -> -mResolverComparator.compare(o1, o2));
+            final int size = inputList.size();
+            // Use this pointer to keep track of the position of next element
+            // to update in input list, starting from the last position.
+            int pointer = size - 1;
+            minHeap.addAll(inputList.subList(size - k, size));
+            for (int i = size - k - 1; i >= 0; --i) {
+                ResolverActivity.ResolvedComponentInfo ci = inputList.get(i);
+                if (-mResolverComparator.compare(ci, minHeap.peek()) > 0) {
+                    // When ranked higher than top of heap, remove top of heap,
+                    // update input list with it, add this new element to heap.
+                    inputList.set(pointer--, minHeap.poll());
+                    minHeap.add(ci);
+                } else {
+                    // When ranked no higher than top of heap, update input list
+                    // with this new element.
+                    inputList.set(pointer--, ci);
+                }
+            }
+
+            // Now we have top k elements in heap, update first
+            // k positions of input list with them.
+            while (!minHeap.isEmpty()) {
+                inputList.set(pointer--, minHeap.poll());
+            }
+
+            long afterRank = System.currentTimeMillis();
+            if (DEBUG) {
+                Log.d(TAG, "Time Cost for top " + k + " targets: "
+                        + Long.toString(afterRank - beforeRank));
+            }
+        } catch (InterruptedException e) {
+            Log.e(TAG, "Compute & greatestOf was interrupted: " + e);
+        }
+    }
 
     private static boolean isSameResolvedComponent(ResolveInfo a,
             ResolverActivity.ResolvedComponentInfo b) {
