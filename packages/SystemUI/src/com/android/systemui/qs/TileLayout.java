@@ -2,6 +2,7 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private boolean mListening;
     protected int mMaxAllowedRows = 3;
 
+    // Prototyping with less rows
+    private final boolean mLessRows;
+
     public TileLayout(Context context) {
         this(context, null);
     }
@@ -38,7 +42,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public TileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setFocusableInTouchMode(true);
+        mLessRows = Settings.System.getInt(context.getContentResolver(), "qs_less_rows", 0) != 0;
         updateResources();
+
     }
 
     @Override
@@ -89,6 +95,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
         mSidePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_layout_margin_side);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
+        if (mLessRows) mMaxAllowedRows = Math.max(1, mMaxAllowedRows - 1);
         if (mColumns != columns) {
             mColumns = columns;
             requestLayout();
