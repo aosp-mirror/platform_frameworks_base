@@ -1834,6 +1834,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 0x01000000;
 
         /**
+         * Flag to request creation of a BLAST (Buffer as LayerState) Layer.
+         * If not specified the client will receive a BufferQueue layer.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_USE_BLAST = 0x02000000;
+
+        /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
          * @hide

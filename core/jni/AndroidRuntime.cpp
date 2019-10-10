@@ -115,6 +115,7 @@ extern int register_android_util_MemoryIntArray(JNIEnv* env);
 extern int register_android_content_StringBlock(JNIEnv* env);
 extern int register_android_content_XmlBlock(JNIEnv* env);
 extern int register_android_content_res_ApkAssets(JNIEnv* env);
+extern int register_android_graphics_BLASTBufferQueue(JNIEnv* env);
 extern int register_android_view_DisplayEventReceiver(JNIEnv* env);
 extern int register_android_view_InputApplicationHandle(JNIEnv* env);
 extern int register_android_view_InputWindowHandle(JNIEnv* env);
@@ -1458,10 +1459,9 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_opengl_jni_GLES31),
     REG_JNI(register_android_opengl_jni_GLES31Ext),
     REG_JNI(register_android_opengl_jni_GLES32),
-
     REG_JNI(register_android_graphics_classes),
+    REG_JNI(register_android_graphics_BLASTBufferQueue),
     REG_JNI(register_android_graphics_GraphicBuffer),
-
     REG_JNI(register_android_database_CursorWindow),
     REG_JNI(register_android_database_SQLiteConnection),
     REG_JNI(register_android_database_SQLiteGlobal),
