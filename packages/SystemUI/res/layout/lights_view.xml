@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2017 The OmniROM Project
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 2 of the License, or
+  (at your option) any later version.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<com.android.systemui.statusbar.notification.NotificationLightsView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical"
+    android:layout_centerVertical="true">
+
+    <ImageView
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:layout_gravity="right"
+        android:id="@+id/notification_animation_right"
+        android:layout_width="150px"
+        android:layout_height="match_parent"
+        android:src="@drawable/aod_notification_light_right"/>
+     <ImageView
+        android:layout_alignParentLeft="true"
+        android:gravity="left"
+        android:layout_gravity="left"
+        android:id="@+id/notification_animation_left"
+        android:layout_width="150px"
+        android:layout_height="match_parent"
+        android:src="@drawable/aod_notification_light_left"/>
+
+</com.android.systemui.statusbar.notification.NotificationLightsView>
