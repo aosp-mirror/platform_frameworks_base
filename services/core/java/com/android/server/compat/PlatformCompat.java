@@ -105,6 +105,15 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         CompatConfig.get().dumpConfig(pw);
     }
 
+    /**
+     * Clears information stored about events reported on behalf of an app.
+     * To be called once upon app start or end. A second call would be a no-op.
+     * @param appInfo the app to reset
+     */
+    public void resetReporting(ApplicationInfo appInfo) {
+        mChangeReporter.resetReportedChanges(appInfo.uid);
+    }
+
     private ApplicationInfo getApplicationInfo(String packageName) {
         try {
             return mContext.getPackageManager().getApplicationInfo(packageName, 0);
