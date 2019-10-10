@@ -248,7 +248,6 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -6697,7 +6696,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 process.mIsImeProcess = true;
-                process.registerDisplayConfigurationListenerLocked(displayContent);
+                process.registerDisplayConfigurationListener(displayContent);
             }
         }
 

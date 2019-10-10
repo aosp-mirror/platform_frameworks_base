@@ -134,8 +134,8 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         resolveOverrideConfiguration(newParentConfig);
         mFullConfiguration.setTo(newParentConfig);
         mFullConfiguration.updateFrom(mResolvedOverrideConfiguration);
+        onMergedOverrideConfigurationChanged();
         if (!mResolvedTmpConfig.equals(mResolvedOverrideConfiguration)) {
-            onMergedOverrideConfigurationChanged();
             // This depends on the assumption that change-listeners don't do
             // their own override resolution. This way, dependent hierarchies
             // can stay properly synced-up with a primary hierarchy's constraints.
@@ -146,6 +146,10 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
                 mChangeListeners.get(i).onRequestedOverrideConfigurationChanged(
                         mResolvedOverrideConfiguration);
             }
+        }
+        for (int i = mChangeListeners.size() - 1; i >= 0; --i) {
+            mChangeListeners.get(i).onMergedOverrideConfigurationChanged(
+                    mMergedOverrideConfiguration);
         }
         if (forwardToChildren) {
             for (int i = getChildCount() - 1; i >= 0; --i) {
@@ -545,6 +549,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         }
         mChangeListeners.add(listener);
         listener.onRequestedOverrideConfigurationChanged(mResolvedOverrideConfiguration);
+        listener.onMergedOverrideConfigurationChanged(mMergedOverrideConfiguration);
     }
 
     void unregisterConfigurationChangeListener(ConfigurationContainerListener listener) {

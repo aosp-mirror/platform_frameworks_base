@@ -63,33 +63,33 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
 
         // Register to display 1 as a listener.
         TestDisplayContent testDisplayContent1 = createTestDisplayContentInContainer();
-        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
+        mWpc.registerDisplayConfigurationListener(testDisplayContent1);
         assertTrue(testDisplayContent1.containsListener(mWpc));
         assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
 
         // Move to display 2.
         TestDisplayContent testDisplayContent2 = createTestDisplayContentInContainer();
-        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent2);
+        mWpc.registerDisplayConfigurationListener(testDisplayContent2);
         assertFalse(testDisplayContent1.containsListener(mWpc));
         assertTrue(testDisplayContent2.containsListener(mWpc));
         assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
 
         // Null DisplayContent will not change anything.
-        mWpc.registerDisplayConfigurationListenerLocked(null);
+        mWpc.registerDisplayConfigurationListener(null);
         assertTrue(testDisplayContent2.containsListener(mWpc));
         assertEquals(testDisplayContent2.mDisplayId, mWpc.getDisplayId());
 
         // Unregister listener will remove the wpc from registered displays.
-        mWpc.unregisterDisplayConfigurationListenerLocked();
+        mWpc.unregisterDisplayConfigurationListener();
         assertFalse(testDisplayContent1.containsListener(mWpc));
         assertFalse(testDisplayContent2.containsListener(mWpc));
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
 
         // Unregistration still work even if the display was removed.
-        mWpc.registerDisplayConfigurationListenerLocked(testDisplayContent1);
+        mWpc.registerDisplayConfigurationListener(testDisplayContent1);
         assertEquals(testDisplayContent1.mDisplayId, mWpc.getDisplayId());
         mRootWindowContainer.removeChild(testDisplayContent1);
-        mWpc.unregisterDisplayConfigurationListenerLocked();
+        mWpc.unregisterDisplayConfigurationListener();
         assertEquals(INVALID_DISPLAY, mWpc.getDisplayId());
     }
 
@@ -140,7 +140,7 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
         // Register to a new display as a listener.
         final DisplayContent display = new TestDisplayContent.Builder(mService, 2000, 1000)
                 .setDensityDpi(300).setPosition(DisplayContent.POSITION_TOP).build();
-        wpc.registerDisplayConfigurationListenerLocked(display);
+        wpc.registerDisplayConfigurationListener(display);
 
         assertEquals(display.mDisplayId, wpc.getDisplayId());
         final Configuration expectedConfig = mService.mRootWindowContainer.getConfiguration();

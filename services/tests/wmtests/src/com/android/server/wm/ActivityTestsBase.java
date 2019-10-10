@@ -111,6 +111,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
         private int mConfigChanges;
         private int mLaunchedFromPid;
         private int mLaunchedFromUid;
+        private WindowProcessController mWpc;
 
         ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
@@ -201,6 +202,11 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
+        ActivityBuilder setUseProcess(WindowProcessController wpc) {
+            mWpc = wpc;
+            return this;
+        }
+
         ActivityRecord build() {
             try {
                 mService.deferWindowLayout();
@@ -263,10 +269,16 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 activity.setVisible(true);
             }
 
-            final WindowProcessController wpc = new WindowProcessController(mService,
-                    mService.mContext.getApplicationInfo(), mProcessName, mUid,
-                    UserHandle.getUserId(12345), mock(Object.class),
-                    mock(WindowProcessListener.class));
+            final WindowProcessController wpc;
+            if (mWpc != null) {
+                wpc = mWpc;
+            } else {
+                wpc = new WindowProcessController(mService,
+                        mService.mContext.getApplicationInfo(), mProcessName, mUid,
+                        UserHandle.getUserId(12345), mock(Object.class),
+                        mock(WindowProcessListener.class));
+                wpc.setThread(mock(IApplicationThread.class));
+            }
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
             doReturn(wpc).when(mService).getProcessController(

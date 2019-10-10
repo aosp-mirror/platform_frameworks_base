@@ -1673,6 +1673,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (root == this) {
             task.setRootProcess(proc);
         }
+        proc.addActivityIfNeeded(this);
     }
 
     boolean hasProcess() {
@@ -6901,7 +6902,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
 
-        setLastReportedConfiguration(mAtmService.getGlobalConfiguration(), newMergedOverrideConfig);
+        setLastReportedConfiguration(getProcessGlobalConfiguration(), newMergedOverrideConfig);
 
         if (mState == INITIALIZING) {
             // No need to relaunch or schedule new config for activity that hasn't been launched
@@ -6998,6 +6999,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         stopFreezingScreenLocked(false);
 
         return true;
+    }
+
+    /** Get process configuration, or global config if the process is not set. */
+    private Configuration getProcessGlobalConfiguration() {
+        return app != null ? app.getConfiguration() : mAtmService.getGlobalConfiguration();
     }
 
     /**
@@ -7112,7 +7118,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             startRelaunching();
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
                     pendingNewIntents, configChangeFlags,
-                    new MergedConfiguration(mAtmService.getGlobalConfiguration(),
+                    new MergedConfiguration(getProcessGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;

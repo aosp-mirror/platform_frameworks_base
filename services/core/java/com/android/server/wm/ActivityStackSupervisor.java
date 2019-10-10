@@ -848,8 +848,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             if (DEBUG_ALL) Slog.v(TAG, "Launching: " + r);
 
-            proc.addActivityIfNeeded(r);
-
             final LockTaskController lockTaskController = mService.getLockTaskController();
             if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
                     || task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV
