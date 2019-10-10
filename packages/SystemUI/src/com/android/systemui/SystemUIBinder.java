@@ -17,10 +17,12 @@
 package com.android.systemui;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.volume.VolumeUI;
 
 import dagger.Binds;
 import dagger.Module;
@@ -45,6 +47,12 @@ public abstract class SystemUIBinder {
     @ClassKey(KeyguardViewMediator.class)
     public abstract SystemUI bindKeyguardViewMediator(KeyguardViewMediator sysui);
 
+    /** Inject into PipUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(PipUI.class)
+    public abstract SystemUI bindPipUI(PipUI sysui);
+
     /** Inject into PowerUI. */
     @Binds
     @IntoMap
@@ -56,5 +64,11 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(Recents.class)
     public abstract SystemUI bindRecents(Recents sysui);
+
+    /** Inject into VolumeUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(VolumeUI.class)
+    public abstract SystemUI bindVolumeUI(VolumeUI sysui);
 
 }

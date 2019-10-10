@@ -23,12 +23,15 @@ import android.util.Log;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.qs.tiles.DndTile;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class VolumeUI extends SystemUI {
     private static final String TAG = "VolumeUI";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
@@ -38,8 +41,10 @@ public class VolumeUI extends SystemUI {
     private boolean mEnabled;
     private VolumeDialogComponent mVolumeComponent;
 
-    public VolumeUI(Context context) {
+    @Inject
+    public VolumeUI(Context context, VolumeDialogComponent volumeDialogComponent) {
         super(context);
+        mVolumeComponent = volumeDialogComponent;
     }
 
     @Override
@@ -50,8 +55,6 @@ public class VolumeUI extends SystemUI {
         mEnabled = enableVolumeUi || enableSafetyWarning;
         if (!mEnabled) return;
 
-        mVolumeComponent = SystemUIFactory.getInstance()
-                .createVolumeDialogComponent(this, mContext);
         mVolumeComponent.setEnableDialogs(enableVolumeUi, enableSafetyWarning);
         putComponent(VolumeComponent.class, getVolumeComponent());
         setDefaultVolumeController();

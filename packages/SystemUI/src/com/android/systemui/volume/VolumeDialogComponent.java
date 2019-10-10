@@ -27,7 +27,6 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
-import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginDependencyProvider;
@@ -40,9 +39,13 @@ import com.android.systemui.tuner.TunerService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Implementation of VolumeComponent backed by the new volume dialog.
  */
+@Singleton
 public class VolumeDialogComponent implements VolumeComponent, TunerService.Tunable,
         VolumeDialogControllerImpl.UserActivityListener{
 
@@ -54,12 +57,12 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public static final boolean DEFAULT_VOLUME_UP_TO_EXIT_SILENT = false;
     public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = false;
 
-    private final SystemUI mSysui;
     protected final Context mContext;
     private final VolumeDialogControllerImpl mController;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
             | ActivityInfo.CONFIG_ASSETS_PATHS | ActivityInfo.CONFIG_UI_MODE);
+    private final KeyguardViewMediator mKeyguardViewMediator;
     private VolumeDialog mDialog;
     private VolumePolicy mVolumePolicy = new VolumePolicy(
             DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT,  // volumeDownToEnterSilent
@@ -68,9 +71,10 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
             400    // vibrateToSilentDebounce
     );
 
-    public VolumeDialogComponent(SystemUI sysui, Context context) {
-        mSysui = sysui;
+    @Inject
+    public VolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator) {
         mContext = context;
+        mKeyguardViewMediator = keyguardViewMediator;
         mController = (VolumeDialogControllerImpl) Dependency.get(VolumeDialogController.class);
         mController.setUserActivityListener(this);
         // Allow plugins to reference the VolumeDialogController.
@@ -133,10 +137,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     @Override
     public void onUserActivity() {
-        final KeyguardViewMediator kvm = mSysui.getComponent(KeyguardViewMediator.class);
-        if (kvm != null) {
-            kvm.userActivity();
-        }
+        mKeyguardViewMediator.userActivity();
     }
 
     private void applyConfiguration() {
