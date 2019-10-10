@@ -63,7 +63,6 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 
 import static com.android.server.am.ActivityManagerService.ANR_TRACE_DIR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -3318,29 +3317,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     + " passed for userId " + userId);
         }
         return mRecentTasks.getTaskDescriptionIcon(filePath);
-    }
-
-    @Override
-    public void startInPlaceAnimationOnFrontMostApplication(Bundle opts) {
-        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(opts);
-        final ActivityOptions activityOptions = safeOptions != null
-                ? safeOptions.getOptions(mStackSupervisor)
-                : null;
-        if (activityOptions == null
-                || activityOptions.getAnimationType() != ActivityOptions.ANIM_CUSTOM_IN_PLACE
-                || activityOptions.getCustomInPlaceResId() == 0) {
-            throw new IllegalArgumentException("Expected in-place ActivityOption " +
-                    "with valid animation");
-        }
-        // Get top display of front most application.
-        final ActivityStack focusedStack = getTopDisplayFocusedStack();
-        if (focusedStack != null) {
-            final DisplayContent dc = focusedStack.getDisplay().mDisplayContent;
-            dc.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
-            dc.mAppTransition.overrideInPlaceAppTransition(activityOptions.getPackageName(),
-                    activityOptions.getCustomInPlaceResId());
-            dc.executeAppTransition();
-        }
     }
 
     @Override
