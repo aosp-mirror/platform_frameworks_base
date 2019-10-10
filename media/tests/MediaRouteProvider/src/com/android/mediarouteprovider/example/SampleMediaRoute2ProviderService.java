@@ -130,6 +130,33 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
         }
     }
 
+    @Override
+    public void onSetVolume(String routeId, int volume) {
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route == null) {
+            return;
+        }
+        volume = Math.min(volume, Math.max(0, route.getVolumeMax()));
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setVolume(volume)
+                .build());
+        publishRoutes();
+    }
+
+    @Override
+    public void onUpdateVolume(String routeId, int delta) {
+        MediaRoute2Info route = mRoutes.get(routeId);
+        if (route == null) {
+            return;
+        }
+        int volume = route.getVolume() + delta;
+        volume = Math.min(volume, Math.max(0, route.getVolumeMax()));
+        mRoutes.put(routeId, new MediaRoute2Info.Builder(route)
+                .setVolume(volume)
+                .build());
+        publishRoutes();
+    }
+
     void publishRoutes() {
         MediaRoute2ProviderInfo info = new MediaRoute2ProviderInfo.Builder()
                 .addRoutes(mRoutes.values())

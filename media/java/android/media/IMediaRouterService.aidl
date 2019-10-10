@@ -46,6 +46,8 @@ interface IMediaRouterService {
     void registerClient2(IMediaRouter2Client client, String packageName);
     void unregisterClient2(IMediaRouter2Client client);
     void sendControlRequest(IMediaRouter2Client client, in MediaRoute2Info route, in Intent request);
+    void requestSetVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int volume);
+    void requestUpdateVolume2(IMediaRouter2Client client, in MediaRoute2Info route, int direction);
     /**
      * Changes the selected route of the client.
      *
@@ -66,4 +68,9 @@ interface IMediaRouterService {
      */
     void selectClientRoute2(IMediaRouter2Manager manager, String packageName,
             in @nullable MediaRoute2Info route);
+
+    void requestSetVolume2Manager(IMediaRouter2Manager manager,
+            in MediaRoute2Info route, int volume);
+    void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
+            in MediaRoute2Info route, int direction);
 }

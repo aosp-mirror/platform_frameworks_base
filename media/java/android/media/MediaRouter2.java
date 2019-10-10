@@ -265,6 +265,54 @@ public class MediaRouter2 {
         }
     }
 
+    /**
+     * Requests a volume change for the route asynchronously.
+     * <p>
+     * It may have no effect if the route is currently not selected.
+     * </p>
+     *
+     * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
+     */
+    public void requestSetVolume(@NonNull MediaRoute2Info route, int volume) {
+        Objects.requireNonNull(route, "route must not be null");
+
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                mMediaRouterService.requestSetVolume2(client, route, volume);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to send control request.", ex);
+            }
+        }
+    }
+
+    /**
+     * Requests an incremental volume update  for the route asynchronously.
+     * <p>
+     * It may have no effect if the route is currently not selected.
+     * </p>
+     *
+     * @param delta The delta to add to the current volume.
+     */
+    public void requestUpdateVolume(@NonNull MediaRoute2Info route, int delta) {
+        Objects.requireNonNull(route, "route must not be null");
+
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                mMediaRouterService.requestUpdateVolume2(client, route, delta);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to send control request.", ex);
+            }
+        }
+    }
+
     @GuardedBy("mCallbackRecords")
     private int findCallbackRecordIndexLocked(Callback callback) {
         final int count = mCallbackRecords.size();
@@ -321,8 +369,19 @@ public class MediaRouter2 {
             if (!route.supportsControlCategory(controlCategories)) {
                 continue;
             }
+            MediaRoute2Info preRoute = findRouteById(route.getId());
+            if (!route.equals(preRoute)) {
+                notifyRouteChanged(route);
+            }
             outRoutes.add(route);
         }
+    }
+
+    MediaRoute2Info findRouteById(String id) {
+        for (MediaRoute2Info route : mRoutes) {
+            if (route.getId().equals(id)) return route;
+        }
+        return null;
     }
 
     void notifyRouteListChanged(List<MediaRoute2Info> routes) {
@@ -332,10 +391,18 @@ public class MediaRouter2 {
         }
     }
 
+    void notifyRouteChanged(MediaRoute2Info route) {
+        for (CallbackRecord record: mCallbackRecords) {
+            record.mExecutor.execute(
+                    () -> record.mCallback.onRouteChanged(route));
+        }
+    }
+
     /**
      * Interface for receiving events about media routing changes.
      */
     public static class Callback {
+        //TODO: clean up these callbacks
         /**
          * Called when a route is added.
          */
