@@ -19,6 +19,7 @@ package android.util;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemClock;
 
 import java.util.Objects;
@@ -30,14 +31,14 @@ import java.util.Objects;
  * If a suitable clock is used the reference time can be used to identify the age of a value or
  * ordering between values.
  *
- * <p>To read and write a timestamped value from / to a Parcel see
- * {@link #readFromParcel(Parcel, ClassLoader, Class)} and
- * {@link #writeToParcel(Parcel, TimestampedValue)}.
+ * <p>This class implements {@link Parcelable} for convenience but instances will only actually be
+ * parcelable if the value type held is {@code null}, {@link Parcelable}, or one of the other types
+ * supported by {@link Parcel#writeValue(Object)} / {@link Parcel#readValue(ClassLoader)}.
  *
  * @param <T> the type of the value with an associated timestamp
  * @hide
  */
-public final class TimestampedValue<T> {
+public final class TimestampedValue<T> implements Parcelable {
     private final long mReferenceTimeMillis;
     private final T mValue;
 
@@ -81,57 +82,43 @@ public final class TimestampedValue<T> {
     }
 
     /**
-     * Read a {@link TimestampedValue} from a parcel that was stored using
-     * {@link #writeToParcel(Parcel, TimestampedValue)}.
-     *
-     * <p>The marshalling/unmarshalling of the value relies upon {@link Parcel#writeValue(Object)}
-     * and {@link Parcel#readValue(ClassLoader)} and so this method can only be used with types
-     * supported by those methods.
-     *
-     * @param in the Parcel to read from
-     * @param classLoader the ClassLoader to pass to {@link Parcel#readValue(ClassLoader)}
-     * @param valueClass the expected type of the value, typically the same as {@code <T>} but can
-     *     also be a subclass
-     * @throws RuntimeException if the value read is not compatible with {@code valueClass} or the
-     *     object could not be read
-     */
-    @SuppressWarnings("unchecked")
-    @NonNull
-    public static <T> TimestampedValue<T> readFromParcel(
-            @NonNull Parcel in, @Nullable ClassLoader classLoader, Class<? extends T> valueClass) {
-        long referenceTimeMillis = in.readLong();
-        T value = (T) in.readValue(classLoader);
-        // Equivalent to static code: if (!(value.getClass() instanceof {valueClass})) {
-        if (value != null && !valueClass.isAssignableFrom(value.getClass())) {
-            throw new RuntimeException("Value was of type " + value.getClass()
-                    + " is not assignable to " + valueClass);
-        }
-        return new TimestampedValue<>(referenceTimeMillis, value);
-    }
-
-    /**
-     * Write a {@link TimestampedValue} to a parcel so that it can be read using
-     * {@link #readFromParcel(Parcel, ClassLoader, Class)}.
-     *
-     * <p>The marshalling/unmarshalling of the value relies upon {@link Parcel#writeValue(Object)}
-     * and {@link Parcel#readValue(ClassLoader)} and so this method can only be used with types
-     * supported by those methods.
-     *
-     * @param dest the Parcel
-     * @param timestampedValue the value
-     * @throws RuntimeException if the value could not be written to the Parcel
-     */
-    public static void writeToParcel(
-            @NonNull Parcel dest, @NonNull TimestampedValue<?> timestampedValue) {
-        dest.writeLong(timestampedValue.mReferenceTimeMillis);
-        dest.writeValue(timestampedValue.mValue);
-    }
-
-    /**
      * Returns the difference in milliseconds between two instance's reference times.
      */
     public static long referenceTimeDifference(
             @NonNull TimestampedValue<?> one, @NonNull TimestampedValue<?> two) {
         return one.mReferenceTimeMillis - two.mReferenceTimeMillis;
+    }
+
+    public static final @NonNull Parcelable.Creator<TimestampedValue<?>> CREATOR =
+            new Parcelable.ClassLoaderCreator<TimestampedValue<?>>() {
+
+                @Override
+                public TimestampedValue<?> createFromParcel(@NonNull Parcel source) {
+                    return createFromParcel(source, null);
+                }
+
+                @Override
+                public TimestampedValue<?> createFromParcel(
+                        @NonNull Parcel source, @Nullable ClassLoader classLoader) {
+                    long referenceTimeMillis = source.readLong();
+                    Object value = source.readValue(classLoader);
+                    return new TimestampedValue<>(referenceTimeMillis, value);
+                }
+
+                @Override
+                public TimestampedValue[] newArray(int size) {
+                    return new TimestampedValue[size];
+                }
+            };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeLong(mReferenceTimeMillis);
+        dest.writeValue(mValue);
     }
 }
