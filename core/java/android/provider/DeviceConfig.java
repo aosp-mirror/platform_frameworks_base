@@ -403,9 +403,37 @@ public final class DeviceConfig {
     @TestApi
     @RequiresPermission(READ_DEVICE_CONFIG)
     public static String getProperty(@NonNull String namespace, @NonNull String name) {
+        // Fetch all properties for the namespace at once and cache them in the local process, so we
+        // incur the cost of the IPC less often. Lookups happen much more frequently than updates,
+        // and we want to optimize the former.
+        return getProperties(namespace, name).getString(name, null);
+    }
+
+    /**
+     * Look up the values of multiple properties for a particular namespace. The lookup is atomic,
+     * such that the values of these properties cannot change between the time when the first is
+     * fetched and the time when the last is fetched.
+     *
+     * TODO: reference setProperties when it is added.
+     *
+     * @param namespace The namespace containing the properties to look up.
+     * @param names     The names of properties to look up, or empty to fetch all properties for the
+     *                  given namespace.
+     * @return {@link Properties} object containing the requested properties. This reflects the
+     *     state of these properties at the time of the lookup, and is not updated to reflect any
+     *     future changes. The keyset of this Properties object will contain only the intersection
+     *     of properties already set and properties requested via the names parameter. Properties
+     *     that are already set but were not requested will not be contained here. Properties that
+     *     are not set, but were requested will not be contained here either.
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @RequiresPermission(READ_DEVICE_CONFIG)
+    public static Properties getProperties(@NonNull String namespace, @NonNull String ... names) {
         ContentResolver contentResolver = ActivityThread.currentApplication().getContentResolver();
-        String compositeName = createCompositeName(namespace, name);
-        return Settings.Config.getString(contentResolver, compositeName);
+        return new Properties(namespace,
+                Settings.Config.getStrings(contentResolver, namespace, Arrays.asList(names)));
     }
 
     /**
