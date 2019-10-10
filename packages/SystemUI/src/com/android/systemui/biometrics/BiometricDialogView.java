@@ -499,6 +499,8 @@ public abstract class BiometricDialogView extends LinearLayout {
         if (newState == STATE_PENDING_CONFIRMATION || newState == STATE_AUTHENTICATED) {
             mNegativeButton.setText(R.string.cancel);
             mNegativeButton.setContentDescription(getResources().getString(R.string.cancel));
+        } else {
+            mNegativeButton.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
         }
 
         updateIcon(mState, newState);
