@@ -127,4 +127,57 @@ public class RuleEvaluatorTest {
 
         assertEquals(rule1, matchedRule);
     }
+
+    @Test
+    public void testMatchRules_validForm() {
+        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.AND, Arrays.asList(
+                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
+                        PACKAGE_NAME_1),
+                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
+                        AtomicFormula.Operator.EQ,
+                        APP_CERTIFICATE)));
+        Rule rule = new Rule(
+                openFormula, Rule.Effect.DENY);
+
+        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
+                APP_INSTALL_METADATA);
+
+        assertEquals(rule, matchedRule);
+    }
+
+    @Test
+    public void testMatchRules_ruleNotInDNF() {
+        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.OR, Arrays.asList(
+                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
+                        PACKAGE_NAME_1),
+                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
+                        AtomicFormula.Operator.EQ,
+                        APP_CERTIFICATE)));
+        Rule rule = new Rule(
+                openFormula, Rule.Effect.DENY);
+
+        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
+                APP_INSTALL_METADATA);
+
+        assertEquals(Rule.EMPTY, matchedRule);
+    }
+
+    @Test
+    public void testMatchRules_openFormulaWithNot() {
+        OpenFormula openSubFormula = new OpenFormula(OpenFormula.Connector.AND, Arrays.asList(
+                new AtomicFormula(AtomicFormula.Key.PACKAGE_NAME, AtomicFormula.Operator.EQ,
+                        PACKAGE_NAME_2),
+                new AtomicFormula(AtomicFormula.Key.APP_CERTIFICATE,
+                        AtomicFormula.Operator.EQ,
+                        APP_CERTIFICATE)));
+        OpenFormula openFormula = new OpenFormula(OpenFormula.Connector.NOT,
+                Collections.singletonList(openSubFormula));
+        Rule rule = new Rule(
+                openFormula, Rule.Effect.DENY);
+
+        Rule matchedRule = RuleEvaluator.evaluateRules(Collections.singletonList(rule),
+                APP_INSTALL_METADATA);
+
+        assertEquals(Rule.EMPTY, matchedRule);
+    }
 }

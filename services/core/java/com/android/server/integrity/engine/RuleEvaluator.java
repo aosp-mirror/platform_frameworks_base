@@ -37,6 +37,9 @@ final class RuleEvaluator {
     /**
      * Match the list of rules against an app install metadata.
      *
+     * <p>Rules must be in disjunctive normal form (DNF). A rule should contain AND'ed formulas
+     * only. All rules are OR'ed together by default.
+     *
      * @param rules              The list of rules to evaluate.
      * @param appInstallMetadata Metadata of the app to be installed, and to evaluate the rules
      *                           against.
@@ -45,7 +48,7 @@ final class RuleEvaluator {
      */
     static Rule evaluateRules(List<Rule> rules, AppInstallMetadata appInstallMetadata) {
         for (Rule rule : rules) {
-            if (isMatch(rule, appInstallMetadata)) {
+            if (isConjunctionOfFormulas(rule.getFormula()) && isMatch(rule, appInstallMetadata)) {
                 return rule;
             }
         }
@@ -98,5 +101,26 @@ final class RuleEvaluator {
         }
 
         return false;
+    }
+
+    private static boolean isConjunctionOfFormulas(Formula formula) {
+        if (formula == null) {
+            return false;
+        }
+        if (isAtomicFormula(formula)) {
+            return true;
+        }
+        OpenFormula openFormula = (OpenFormula) formula;
+        return openFormula.getConnector() == OpenFormula.Connector.AND
+                && openFormula.getFormulas().stream().allMatch(RuleEvaluator::isAtomicFormula);
+    }
+
+    private static boolean isAtomicFormula(Formula formula) {
+        if (formula instanceof AtomicFormula) {
+            return true;
+        }
+        OpenFormula openFormula = (OpenFormula) formula;
+        return openFormula.getConnector() == OpenFormula.Connector.NOT
+                && openFormula.getFormulas().get(0) instanceof AtomicFormula;
     }
 }
