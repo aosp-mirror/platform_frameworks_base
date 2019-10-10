@@ -183,19 +183,17 @@ public class ImsMmTelManager {
         /**
          * Notifies the framework when the IMS Provider is registered to the IMS network.
          *
-         * @param imsTransportType the radio access technology. Valid values are defined in
-         * {@link android.telephony.AccessNetworkConstants.TransportType}.
+         * @param imsTransportType the radio access technology.
          */
-        public void onRegistered(int imsTransportType) {
+        public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
         }
 
         /**
          * Notifies the framework when the IMS Provider is trying to register the IMS network.
          *
-         * @param imsTransportType the radio access technology. Valid values are defined in
-         * {@link android.telephony.AccessNetworkConstants.TransportType}.
+         * @param imsTransportType the radio access technology.
          */
-        public void onRegistering(int imsTransportType) {
+        public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType) {
         }
 
         /**
@@ -207,15 +205,14 @@ public class ImsMmTelManager {
         }
 
         /**
-         * A failure has occurred when trying to handover registration to another technology type,
-         * defined in {@link android.telephony.AccessNetworkConstants.TransportType}
+         * A failure has occurred when trying to handover registration to another technology type.
          *
-         * @param imsTransportType The
-         *         {@link android.telephony.AccessNetworkConstants.TransportType}
-         *         transport type that has failed to handover registration to.
+         * @param imsTransportType The transport type that has failed to handover registration to.
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
-        public void onTechnologyChangeFailed(int imsTransportType, @Nullable ImsReasonInfo info) {
+        public void onTechnologyChangeFailed(
+                @AccessNetworkConstants.TransportType int imsTransportType,
+                @Nullable ImsReasonInfo info) {
         }
 
         /**
