@@ -183,11 +183,9 @@ public class UserGridRecyclerView extends RecyclerView {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        filter.addAction(Intent.ACTION_USER_STOPPED);
-        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(
                 mUserUpdateReceiver,
-                UserHandle.ALL,
+                UserHandle.ALL, // Necessary because CarSystemUi lives in User 0
                 filter,
                 /* broadcastPermission= */ null,
                 /* scheduler= */ null);
