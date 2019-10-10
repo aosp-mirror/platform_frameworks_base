@@ -97,6 +97,14 @@ import java.lang.annotation.RetentionPolicy;
  * @attr ref android.R.styleable#GradientDrawablePadding_bottom
  */
 public class GradientDrawable extends Drawable {
+
+    /**
+     * Flag to determine if we should wrap negative gradient angle measurements
+     * for API levels that support it
+     * @hide
+     */
+    public static boolean sWrapNegativeAngleMeasurements = true;
+
     /**
      * Shape is a rectangle, possibly with rounded corners
      */
@@ -150,6 +158,9 @@ public class GradientDrawable extends Drawable {
 
     /** Radius is a fraction of the bounds size. */
     private static final int RADIUS_TYPE_FRACTION_PARENT = 2;
+
+    /** Default orientation for GradientDrawable **/
+    private static final Orientation DEFAULT_ORIENTATION = Orientation.TOP_BOTTOM;
 
     /** @hide */
     @IntDef({RADIUS_TYPE_PIXELS, RADIUS_TYPE_FRACTION, RADIUS_TYPE_FRACTION_PARENT})
@@ -207,7 +218,7 @@ public class GradientDrawable extends Drawable {
     }
 
     public GradientDrawable() {
-        this(new GradientState(Orientation.TOP_BOTTOM, null), null);
+        this(new GradientState(DEFAULT_ORIENTATION, null), null);
     }
 
     /**
@@ -1757,33 +1768,48 @@ public class GradientDrawable extends Drawable {
         }
 
         int angle = (int) a.getFloat(R.styleable.GradientDrawableGradient_angle, st.mAngle);
-        st.mAngle = ((angle % 360) + 360) % 360; // offset negative angle measures
 
-        switch (st.mAngle) {
-            case 0:
-                st.mOrientation = Orientation.LEFT_RIGHT;
-                break;
-            case 45:
-                st.mOrientation = Orientation.BL_TR;
-                break;
-            case 90:
-                st.mOrientation = Orientation.BOTTOM_TOP;
-                break;
-            case 135:
-                st.mOrientation = Orientation.BR_TL;
-                break;
-            case 180:
-                st.mOrientation = Orientation.RIGHT_LEFT;
-                break;
-            case 225:
-                st.mOrientation = Orientation.TR_BL;
-                break;
-            case 270:
-                st.mOrientation = Orientation.TOP_BOTTOM;
-                break;
-            case 315:
-                st.mOrientation = Orientation.TL_BR;
-                break;
+        // GradientDrawable historically has not parsed negative angle measurements and always
+        // stays on the default orientation for API levels older than Q.
+        // Only configure the orientation if the angle is greater than zero.
+        // Otherwise fallback on Orientation.TOP_BOTTOM
+        // In Android Q and later, actually wrap the negative angle measurement to the correct
+        // value
+        if (sWrapNegativeAngleMeasurements) {
+            st.mAngle = ((angle % 360) + 360) % 360; // offset negative angle measures
+        } else {
+            st.mAngle = angle % 360;
+        }
+
+        if (st.mAngle >= 0) {
+            switch (st.mAngle) {
+                case 0:
+                    st.mOrientation = Orientation.LEFT_RIGHT;
+                    break;
+                case 45:
+                    st.mOrientation = Orientation.BL_TR;
+                    break;
+                case 90:
+                    st.mOrientation = Orientation.BOTTOM_TOP;
+                    break;
+                case 135:
+                    st.mOrientation = Orientation.BR_TL;
+                    break;
+                case 180:
+                    st.mOrientation = Orientation.RIGHT_LEFT;
+                    break;
+                case 225:
+                    st.mOrientation = Orientation.TR_BL;
+                    break;
+                case 270:
+                    st.mOrientation = Orientation.TOP_BOTTOM;
+                    break;
+                case 315:
+                    st.mOrientation = Orientation.TL_BR;
+                    break;
+            }
+        } else {
+            st.mOrientation = DEFAULT_ORIENTATION;
         }
 
         final TypedValue tv = a.peekValue(R.styleable.GradientDrawableGradient_gradientRadius);
