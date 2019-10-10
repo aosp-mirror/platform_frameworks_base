@@ -725,7 +725,7 @@ public class FingerprintService extends BiometricServiceBase {
     public void onStart() {
         super.onStart();
         publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
-        SystemServerInitThreadPool.get().submit(this::getFingerprintDaemon, TAG + ".onStart");
+        SystemServerInitThreadPool.submit(this::getFingerprintDaemon, TAG + ".onStart");
     }
 
     @Override

@@ -162,7 +162,7 @@ public class PersistentDataBlockService extends SystemService {
     @Override
     public void onStart() {
         // Do init on a separate thread, will join in PHASE_ACTIVITY_MANAGER_READY
-        SystemServerInitThreadPool.get().submit(() -> {
+        SystemServerInitThreadPool.submit(() -> {
             mAllowedUid = getAllowedUid(UserHandle.USER_SYSTEM);
             enforceChecksumValidity();
             formatIfOemUnlockEnabled();

@@ -3134,7 +3134,7 @@ public class PackageManagerService extends IPackageManager.Stub
             List<String> deferPackages = reconcileAppsDataLI(StorageManager.UUID_PRIVATE_INTERNAL,
                     UserHandle.USER_SYSTEM, storageFlags, true /* migrateAppData */,
                     true /* onlyCoreApps */);
-            mPrepareAppDataFuture = SystemServerInitThreadPool.get().submit(() -> {
+            mPrepareAppDataFuture = SystemServerInitThreadPool.submit(() -> {
                 TimingsTraceLog traceLog = new TimingsTraceLog("SystemServerTimingAsync",
                         Trace.TRACE_TAG_PACKAGE_MANAGER);
                 traceLog.traceBegin("AppDataFixup");

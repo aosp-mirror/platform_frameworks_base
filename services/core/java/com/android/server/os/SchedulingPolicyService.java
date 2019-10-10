@@ -21,7 +21,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.ISchedulingPolicyService;
 import android.os.Process;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.server.SystemServerInitThreadPool;
@@ -64,7 +63,7 @@ public class SchedulingPolicyService extends ISchedulingPolicyService.Stub {
         // (Note that if mediaserver thinks we're in boosted state before the crash,
         // the state could go out of sync temporarily until mediaserver enables/disable
         // boost next time, but this won't be a big issue.)
-        SystemServerInitThreadPool.get().submit(() -> {
+        SystemServerInitThreadPool.submit(() -> {
             synchronized (mDeathRecipient) {
                 // only do this if we haven't already got a request to boost.
                 if (mBoostedPid == -1) {
