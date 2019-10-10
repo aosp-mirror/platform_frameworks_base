@@ -50,7 +50,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.service.sms.FinancialSmsService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
