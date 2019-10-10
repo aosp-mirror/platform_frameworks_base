@@ -3687,7 +3687,6 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
-
     <!-- The package name for the system telephony apps.
          This package must be trusted, as it will be granted with permissions with special telephony
          protection level. Note, framework by default support multiple telephony apps, each package
@@ -3695,6 +3694,13 @@
          Example: "com.android.phone,com.android.stk,com.android.providers.telephony"
      -->
     <string name="config_telephonyPackages" translatable="false">"com.android.phone,com.android.stk,com.android.providers.telephony,com.android.ons"</string>
+
+    <!-- The package name for the default system wifi app.
+         This package must be trusted, as it has the permissions to control wifi
+         connectivity on the device.
+         Example: "com.android.wifi"
+     -->
+    <string name="config_wifiPackage" translatable="false">"com.android.wifi"</string>
 
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.

@@ -359,6 +359,7 @@ applications that come with the platform
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.DUMP"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.INTERNAL_SYSTEM_WINDOW"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>

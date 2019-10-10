@@ -298,6 +298,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system telephony apps -->
         <flag name="telephony" value="0x400000" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the system wifi app-->
+        <flag name="wifi" value="0x800000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->

@@ -279,6 +279,9 @@ public final class BasePermission {
     public boolean isTelephony() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_TELEPHONY) != 0;
     }
+    public boolean isWifi() {
+        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_WIFI) != 0;
+    }
 
     public void transfer(@NonNull String origPackageName, @NonNull String newPackageName) {
         if (!origPackageName.equals(sourcePackageName)) {
