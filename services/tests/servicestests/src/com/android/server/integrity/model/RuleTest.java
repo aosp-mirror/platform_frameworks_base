@@ -19,6 +19,7 @@ package com.android.server.integrity.model;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
@@ -82,5 +83,21 @@ public class RuleTest {
 
         assertEquals(String.format("Rule: PACKAGE_NAME EQ %s AND APP_CERTIFICATE EQ %s, DENY",
                 PACKAGE_NAME, APP_CERTIFICATE), toString);
+    }
+
+    @Test
+    public void testEquals_trueCase() {
+        Rule rule1 = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
+        Rule rule2 = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
+
+        assertEquals(rule1, rule2);
+    }
+
+    @Test
+    public void testEquals_falseCase() {
+        Rule rule1 = new Rule(PACKAGE_NAME_ATOMIC_FORMULA, DENY_EFFECT);
+        Rule rule2 = new Rule(APP_CERTIFICATE_ATOMIC_FORMULA, DENY_EFFECT);
+
+        assertNotEquals(rule1, rule2);
     }
 }

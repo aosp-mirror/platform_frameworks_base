@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a complex formula consisting of other simple and complex formulas.
@@ -62,6 +63,24 @@ public final class OpenFormula extends Formula {
             sb.append(mFormulas.get(i).toString());
         }
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        OpenFormula that = (OpenFormula) o;
+        return mConnector == that.mConnector
+                && mFormulas.equals(that.mFormulas);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mConnector, mFormulas);
     }
 
     private void validateFormulas(Connector connector, List<Formula> formulas) {
