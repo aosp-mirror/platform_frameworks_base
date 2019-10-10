@@ -35,6 +35,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "core_jni_helpers.h"
@@ -80,6 +81,25 @@ static const ssize_t kProcReadMinHeapBufferSize = 4096;
 Mutex gKeyCreateMutex;
 static pthread_key_t gBgKey = -1;
 #endif
+
+/*
+ *  cpuset/sched aggregate profile mappings
+ */
+static const std::unordered_map<int, std::string> kCpusetProfileMap = {
+    {SP_DEFAULT, "CPUSET_SP_DEFAULT"}, {SP_BACKGROUND, "CPUSET_SP_BACKGROUND"},
+    {SP_FOREGROUND, "CPUSET_SP_FOREGROUND"},{SP_SYSTEM, "CPUSET_SP_SYSTEM"},
+    {SP_AUDIO_APP, "CPUSET_SP_FOREGROUND"}, {SP_AUDIO_SYS, "CPUSET_SP_FOREGROUND"},
+    {SP_TOP_APP, "CPUSET_SP_TOP_APP"}, {SP_RT_APP, "CPUSET_SP_DEFAULT"},
+    {SP_RESTRICTED, "CPUSET_SP_RESTRICTED"}
+};
+
+static const std::unordered_map<int, std::string> kSchedProfileMap = {
+    {SP_DEFAULT, "SCHED_SP_DEFAULT"}, {SP_BACKGROUND, "SCHED_SP_BACKGROUND"},
+    {SP_FOREGROUND, "SCHED_SP_FOREGROUND"}, {SP_SYSTEM, "SCHED_SP_DEFAULT"},
+    {SP_AUDIO_APP, "SCHED_SP_FOREGROUND"}, {SP_AUDIO_SYS, "SCHED_SP_FOREGROUND"},
+    {SP_TOP_APP, "SCHED_SP_TOP_APP"}, {SP_RT_APP, "SCHED_SP_RT_APP"},
+    {SP_RESTRICTED, "SCHED_SP_DEFAULT"}
+};
 
 // For both of these, err should be in the errno range (positive), not a status_t (negative)
 static void signalExceptionForError(JNIEnv* env, int err, int tid) {
@@ -206,8 +226,9 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
     if (!verifyGroup(env, grp)) {
         return;
     }
-    SchedPolicy sp = (SchedPolicy) grp;
-    int res = set_sched_policy(tid, sp);
+
+    int res = SetTaskProfiles(tid, {kSchedProfileMap.at(grp)}, true) ? 0 : -1;
+
     if (res != NO_ERROR) {
         signalExceptionForGroupError(env, -res, tid);
     }
@@ -219,14 +240,9 @@ void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int 
     if (!verifyGroup(env, grp)) {
         return;
     }
-    SchedPolicy sp = (SchedPolicy) grp;
-    int res = set_sched_policy(tid, sp);
 
-    if (res != NO_ERROR) {
-        signalExceptionForGroupError(env, -res, tid);
-    }
+    int res = SetTaskProfiles(tid, {kCpusetProfileMap.at(grp)}, true) ? 0 : -1;
 
-    res = set_cpuset_policy(tid, sp);
     if (res != NO_ERROR) {
         signalExceptionForGroupError(env, -res, tid);
     }
@@ -239,7 +255,11 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     char proc_path[255];
     struct dirent *de;
 
-    if ((grp == SP_FOREGROUND) || (grp > SP_MAX)) {
+    if (!verifyGroup(env, grp)) {
+        return;
+    }
+
+    if (grp == SP_FOREGROUND) {
         signalExceptionForGroupError(env, EINVAL, pid);
         return;
     }
@@ -249,10 +269,6 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         grp = SP_FOREGROUND;
         isDefault = true;
     }
-    if (!verifyGroup(env, grp)) {
-        return;
-    }
-    SchedPolicy sp = (SchedPolicy) grp;
 
     if (kDebugPolicy) {
         char cmdline[32];
@@ -268,7 +284,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             close(fd);
         }
 
-        if (sp == SP_BACKGROUND) {
+        if (grp == SP_BACKGROUND) {
             ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
         } else {
             ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
@@ -286,6 +302,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     while ((de = readdir(d))) {
         int t_pid;
         int t_pri;
+        int err;
 
         if (de->d_name[0] == '.')
             continue;
@@ -311,28 +328,16 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
                 // This task wants to stay at background
                 // update its cpuset so it doesn't only run on bg core(s)
-                if (cpusets_enabled()) {
-                    int err = set_cpuset_policy(t_pid, sp);
-                    if (err != NO_ERROR) {
-                        signalExceptionForGroupError(env, -err, t_pid);
-                        break;
-                    }
+                err = SetTaskProfiles(t_pid, {kCpusetProfileMap.at(grp)}, true) ? 0 : -1;
+                if (err != NO_ERROR) {
+                    signalExceptionForGroupError(env, -err, t_pid);
+                    break;
                 }
                 continue;
             }
         }
-        int err;
 
-        if (cpusets_enabled()) {
-            // set both cpuset and cgroup for general threads
-            err = set_cpuset_policy(t_pid, sp);
-            if (err != NO_ERROR) {
-                signalExceptionForGroupError(env, -err, t_pid);
-                break;
-            }
-        }
-
-        err = set_sched_policy(t_pid, sp);
+        err = SetTaskProfiles(t_pid, {kCpusetProfileMap.at(grp)}, true) ? 0 : -1;
         if (err != NO_ERROR) {
             signalExceptionForGroupError(env, -err, t_pid);
             break;

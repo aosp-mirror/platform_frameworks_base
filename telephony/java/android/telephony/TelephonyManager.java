@@ -6852,6 +6852,40 @@ public class TelephonyManager {
     }
 
     /**
+     * Replace the contents of the forbidden PLMN SIM file with the provided values.
+     * Passing an empty list will clear the contents of the EFfplmn file.
+     * If the provided list is shorter than the size of EFfplmn, then the list will be padded
+     * up to the file size with 'FFFFFF'. (required by 3GPP TS 31.102 spec 4.2.16)
+     * If the list is longer than the size of EFfplmn, then the file will be written from the
+     * beginning of the list up to the file size.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param fplmns a list of PLMNs to be forbidden.
+     *
+     * @return number of PLMNs that were successfully written to the SIM FPLMN list.
+     * This may be less than the number of PLMNs passed in where the SIM file does not have enough
+     * room for all of the values passed in. Return -1 in the event of an unexpected failure
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public int setForbiddenPlmns(@NonNull List<String> fplmns) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) return 0;
+            return telephony.setForbiddenPlmns(
+                    getSubId(), APPTYPE_USIM, fplmns, getOpPackageName());
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setForbiddenPlmns RemoteException: " + ex.getMessage());
+        } catch (NullPointerException ex) {
+            // This could happen before phone starts
+            Rlog.e(TAG, "setForbiddenPlmns NullPointerException: " + ex.getMessage());
+        }
+        return 0;
+    }
+
+    /**
      * Get P-CSCF address from PCO after data connection is established or modified.
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
      * @return array of P-CSCF address

@@ -1851,16 +1851,6 @@ public class AppStandbyController implements AppStandbyInternal {
      * Observe settings changes for {@link Global#APP_IDLE_CONSTANTS}.
      */
     private class SettingsObserver extends ContentObserver {
-        /**
-         * This flag has been used to disable app idle on older builds with bug b/26355386.
-         */
-        @Deprecated
-        private static final String KEY_IDLE_DURATION_OLD = "idle_duration";
-        @Deprecated
-        private static final String KEY_IDLE_DURATION = "idle_duration2";
-        @Deprecated
-        private static final String KEY_WALLCLOCK_THRESHOLD = "wallclock_threshold";
-
         private static final String KEY_PAROLE_INTERVAL = "parole_interval";
         private static final String KEY_PAROLE_WINDOW = "parole_window";
         private static final String KEY_PAROLE_DURATION = "parole_duration";
@@ -1995,7 +1985,7 @@ public class AppStandbyController implements AppStandbyInternal {
                                         : DEFAULT_EXEMPTED_SYNC_START_TIMEOUT);
 
                 mUnexemptedSyncScheduledTimeoutMillis = mParser.getDurationMillis(
-                        KEY_EXEMPTED_SYNC_SCHEDULED_DOZE_HOLD_DURATION,
+                        KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE
                                         : DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT); // TODO
 

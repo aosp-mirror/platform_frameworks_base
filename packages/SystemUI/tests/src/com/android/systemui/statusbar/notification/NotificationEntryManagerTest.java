@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -80,6 +81,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationData.K
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -146,7 +148,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         private final CountDownLatch mCountDownLatch;
 
         TestableNotificationEntryManager() {
-            super(new NotificationData(mock(NotificationSectionsFeatureManager.class)));
+            super(new NotificationData(mock(NotificationSectionsFeatureManager.class),
+                    mock(NotifLog.class)), mock(NotifLog.class));
             mCountDownLatch = new CountDownLatch(1);
         }
 
@@ -259,7 +262,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         NotificationRowBinderImpl notificationRowBinder =
                 new NotificationRowBinderImpl(mContext, true, /* allowLongPress */
-                        mock(KeyguardBypassController.class), mock(StatusBarStateController.class));
+                        mock(KeyguardBypassController.class),
+                        mock(StatusBarStateController.class),
+                        mock(NotifLog.class));
         notificationRowBinder.setUpWithPresenter(
                 mPresenter, mListContainer, mHeadsUpManager, mEntryManager, mBindCallback);
         notificationRowBinder.setNotificationClicker(mock(NotificationClicker.class));
@@ -350,7 +355,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         // Ensure that update callbacks happen in correct order
         InOrder order = inOrder(mEntryListener, notifData, mPresenter, mEntryListener);
         order.verify(mEntryListener).onPreEntryUpdated(mEntry);
-        order.verify(notifData).filterAndSort();
+        order.verify(notifData).filterAndSort(anyString());
         order.verify(mPresenter).updateNotificationViews();
         order.verify(mEntryListener).onPostEntryUpdated(mEntry);
 

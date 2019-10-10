@@ -506,9 +506,8 @@ class WindowStateAnimator {
                 flags |= SurfaceControl.OPAQUE;
             }
 
-            mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
-                    attrs.getTitle().toString(), width, height, format, flags, this,
-                    windowType, ownerUid);
+            mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
+                    height, format, flags, this, windowType, ownerUid);
             mSurfaceController.setColorSpaceAgnostic((attrs.privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC) != 0);
 

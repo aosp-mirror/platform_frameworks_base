@@ -109,6 +109,9 @@ import libcore.util.EmptyArray;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -144,10 +147,53 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @VisibleForTesting
     public static Clock sSystemClock = Clock.systemUTC();
+
+    private abstract static class MySimpleClock extends Clock {
+        private final ZoneId mZoneId;
+
+        MySimpleClock(ZoneId zoneId) {
+            this.mZoneId = zoneId;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return mZoneId;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return new MySimpleClock(zone) {
+                @Override
+                public long millis() {
+                    return MySimpleClock.this.millis();
+                }
+            };
+        }
+
+        @Override
+        public abstract long millis();
+
+        @Override
+        public Instant instant() {
+            return Instant.ofEpochMilli(millis());
+        }
+    }
+
     @VisibleForTesting
-    public static Clock sUptimeMillisClock = SystemClock.uptimeClock();
+    public static Clock sUptimeMillisClock = new MySimpleClock(ZoneOffset.UTC) {
+        @Override
+        public long millis() {
+            return SystemClock.uptimeMillis();
+        }
+    };
+
     @VisibleForTesting
-    public static Clock sElapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
+    public static Clock sElapsedRealtimeClock =  new MySimpleClock(ZoneOffset.UTC) {
+        @Override
+        public long millis() {
+            return SystemClock.elapsedRealtime();
+        }
+    };
 
     /** Global local for all job scheduler state. */
     final Object mLock = new Object();
@@ -2126,7 +2172,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     job.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw new RuntimeException(e);
         }
 
         if (service == null) {

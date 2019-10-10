@@ -350,9 +350,10 @@ static jobject getBitmapFromVideoFrame(
     return jBitmap;
 }
 
-static int getColorFormat(JNIEnv *env, jobject options) {
+static int getColorFormat(JNIEnv *env, jobject options,
+        int defaultPreferred = HAL_PIXEL_FORMAT_RGBA_8888) {
     if (options == NULL) {
-        return HAL_PIXEL_FORMAT_RGBA_8888;
+        return defaultPreferred;
     }
 
     ScopedLocalRef<jobject> inConfig(env, env->GetObjectField(options, fields.inPreferredConfig));
@@ -383,7 +384,8 @@ static SkColorType setOutColorType(JNIEnv *env, int colorFormat, jobject options
 }
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
-        JNIEnv *env, jobject thiz, jlong timeUs, jint option, jint dst_width, jint dst_height)
+        JNIEnv *env, jobject thiz, jlong timeUs, jint option,
+        jint dst_width, jint dst_height, jobject params)
 {
     ALOGV("getFrameAtTime: %lld us option: %d dst width: %d heigh: %d",
             (long long)timeUs, option, dst_width, dst_height);
@@ -392,10 +394,13 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
     }
+    // For getFrameAtTime family of calls, default to HAL_PIXEL_FORMAT_RGB_565
+    // to keep the behavior consistent with older releases
+    int colorFormat = getColorFormat(env, params, HAL_PIXEL_FORMAT_RGB_565);
 
     // Call native method to retrieve a video frame
     VideoFrame *videoFrame = NULL;
-    sp<IMemory> frameMemory = retriever->getFrameAtTime(timeUs, option);
+    sp<IMemory> frameMemory = retriever->getFrameAtTime(timeUs, option, colorFormat);
     // TODO: Using unsecurePointer() has some associated security pitfalls
     //       (see declaration for details).
     //       Either document why it is safe in this case or address the
@@ -408,7 +413,9 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
         return NULL;
     }
 
-    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, kRGB_565_SkColorType);
+    SkColorType outColorType = setOutColorType(env, colorFormat, params);
+
+    return getBitmapFromVideoFrame(env, videoFrame, dst_width, dst_height, outColorType);
 }
 
 static jobject android_media_MediaMetadataRetriever_getImageAtIndex(
@@ -739,7 +746,7 @@ static const JNINativeMethod nativeMethods[] = {
                 (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_setDataSource",   "(Landroid/media/MediaDataSource;)V",
                 (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
-        {"_getFrameAtTime", "(JIII)Landroid/graphics/Bitmap;",
+        {"_getFrameAtTime", "(JIIILandroid/media/MediaMetadataRetriever$BitmapParams;)Landroid/graphics/Bitmap;",
                 (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {
             "_getImageAtIndex",

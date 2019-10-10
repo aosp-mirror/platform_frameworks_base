@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -232,7 +233,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                     mock(ShadeController.class),
                     mock(NotificationLockscreenUserManager.class),
                     new NotificationEntryManager(new NotificationData(mock(
-                            NotificationSectionsFeatureManager.class))),
+                            NotificationSectionsFeatureManager.class), mock(NotifLog.class)),
+                            mock(NotifLog.class)),
                     mock(DozeLog.class));
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;

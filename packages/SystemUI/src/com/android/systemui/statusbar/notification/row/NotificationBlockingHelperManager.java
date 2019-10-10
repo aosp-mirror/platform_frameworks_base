@@ -139,7 +139,8 @@ public class NotificationBlockingHelperManager {
 
             mBlockingHelperRow.setBlockingHelperShowing(false);
             if (mBlockingHelperRow.isAttachedToWindow()) {
-                Dependency.get(NotificationEntryManager.class).updateNotifications();
+                Dependency.get(NotificationEntryManager.class).updateNotifications(
+                        "dismissCurrentBlockingHelper");
             }
             mBlockingHelperRow = null;
             return true;

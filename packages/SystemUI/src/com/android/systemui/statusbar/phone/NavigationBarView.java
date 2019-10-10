@@ -67,6 +67,7 @@ import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.assist.AssistHandleViewController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
@@ -75,6 +76,7 @@ import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.WindowManagerWrapper;
+import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
@@ -1198,6 +1200,19 @@ public class NavigationBarView extends FrameLayout implements
         // we're passing the insets onto the gesture handler since the back arrow is only
         // conditionally added and doesn't always get all the insets.
         mEdgeBackGestureHandler.setInsets(leftInset, rightInset);
+
+        // this allows assist handle to be drawn outside its bound so that it can align screen
+        // bottom by translating its y position.
+        final boolean shouldClip =
+                !isGesturalMode(mNavBarMode) || insets.getSystemWindowInsetBottom() == 0;
+        setClipChildren(shouldClip);
+        setClipToPadding(shouldClip);
+
+        AssistHandleViewController controller = Dependency.get(NavigationBarController.class)
+                .getAssistHandlerViewController();
+        if (controller != null) {
+            controller.setBottomOffset(insets.getSystemWindowInsetBottom());
+        }
         return super.onApplyWindowInsets(insets);
     }
 

@@ -24,6 +24,10 @@ import java.util.List;
 /**
  * Device policy manager local system service interface.
  *
+ * Maintenance note: if you need to expose information from DPMS to lower level services such as
+ * PM/UM/AM/etc, then exposing it from DevicePolicyManagerInternal is not safe because it may cause
+ * lock order inversion. Consider using {@link DevicePolicyCache} instead.
+ *
  * @hide Only for use within the system server.
  */
 public abstract class DevicePolicyManagerInternal {
@@ -79,6 +83,16 @@ public abstract class DevicePolicyManagerInternal {
      * @return true if the uid is an active admin with the given policy.
      */
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
+
+    /**
+     * Checks if an app with given uid is the active supervision admin.
+     *
+     * <p>This takes the DPMS lock. DO NOT call from PM/UM/AM with their lock held.
+     *
+     * @param uid App uid.
+     * @return true if the uid is the active supervision app.
+     */
+    public abstract boolean isActiveSupervisionApp(int uid);
 
     /**
      * Creates an intent to show the admin support dialog to say that an action is disallowed by

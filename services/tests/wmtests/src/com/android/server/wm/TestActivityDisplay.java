@@ -22,7 +22,10 @@ import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
+import static org.mockito.ArgumentMatchers.any;
 
 import android.hardware.display.DisplayManagerGlobal;
 import android.view.Display;
@@ -85,6 +88,10 @@ class TestActivityDisplay extends ActivityDisplay {
             displayRotation.setRotation(rotation);
             return true;
         }).when(displayRotation).updateRotationUnchecked(anyBoolean());
+
+        final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
+        spyOn(inputMonitor);
+        doNothing().when(inputMonitor).resumeDispatchingLw(any());
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")

@@ -11320,6 +11320,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
+        @Override
+        public boolean isActiveSupervisionApp(int uid) {
+            synchronized (getLockObject()) {
+                final ActiveAdmin admin = getActiveAdminWithPolicyForUidLocked(
+                        null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, uid);
+                if (admin == null) {
+                    return false;
+                }
+
+                final String supervisionString = mContext.getResources().getString(
+                        com.android.internal.R.string
+                                .config_defaultSupervisionProfileOwnerComponent);
+                if (supervisionString == null) {
+                    return false;
+                }
+
+                final ComponentName supervisorComponent = ComponentName.unflattenFromString(
+                        supervisionString);
+                return admin.info.getComponent().equals(supervisorComponent);
+            }
+        }
+
         private void notifyCrossProfileProvidersChanged(int userId, List<String> packages) {
             final List<OnCrossProfileWidgetProvidersChangeListener> listeners;
             synchronized (getLockObject()) {

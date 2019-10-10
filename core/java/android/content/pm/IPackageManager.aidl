@@ -686,6 +686,8 @@ interface IPackageManager {
 
     String getSystemCaptionsServicePackageName();
 
+    String getSetupWizardPackageName();
+
     String getIncidentReportApproverPackageName();
 
     boolean isPackageStateProtected(String packageName, int userId);

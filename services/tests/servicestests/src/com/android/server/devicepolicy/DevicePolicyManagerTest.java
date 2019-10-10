@@ -2650,6 +2650,21 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verifyStayOnWhilePluggedCleared(false);
     }
 
+    public void testIsActiveSupervisionApp() throws Exception {
+        when(mServiceContext.resources
+                .getString(R.string.config_defaultSupervisionProfileOwnerComponent))
+                .thenReturn(admin1.flattenToString());
+
+        final int PROFILE_USER = 15;
+        final int PROFILE_ADMIN = UserHandle.getUid(PROFILE_USER, 19436);
+        addManagedProfile(admin1, PROFILE_ADMIN, admin1);
+        mContext.binder.callingUid = PROFILE_ADMIN;
+
+        final DevicePolicyManagerInternal dpmi =
+                LocalServices.getService(DevicePolicyManagerInternal.class);
+        assertTrue(dpmi.isActiveSupervisionApp(PROFILE_ADMIN));
+    }
+
     // Test if lock timeout on managed profile is handled correctly depending on whether profile
     // uses separate challenge.
     public void testSetMaximumTimeToLockProfile() throws Exception {

@@ -117,6 +117,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -218,6 +219,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
+    @Mock private NotifLog mNotifLog;
 
     @Before
     public void setup() throws Exception {
@@ -339,7 +341,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationListener,
                 configurationController,
                 mStatusBarWindowController,
-                mStatusBarWindowViewControllerBuilder);
+                mStatusBarWindowViewControllerBuilder,
+                mNotifLog);
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mContext = mContext;
@@ -873,7 +876,7 @@ public class StatusBarTest extends SysuiTestCase {
     public static class TestableNotificationEntryManager extends NotificationEntryManager {
 
         public TestableNotificationEntryManager(NotificationData notificationData) {
-            super(notificationData);
+            super(notificationData, mock(NotifLog.class));
         }
 
         public void setUpForTest(NotificationPresenter presenter,

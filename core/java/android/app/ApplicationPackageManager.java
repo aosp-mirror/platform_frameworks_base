@@ -3169,6 +3169,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getSetupWizardPackageName() {
+        try {
+            return mPM.getSetupWizardPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getIncidentReportApproverPackageName() {
         try {
             return mPM.getIncidentReportApproverPackageName();

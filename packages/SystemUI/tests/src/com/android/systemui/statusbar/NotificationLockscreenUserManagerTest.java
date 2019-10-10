@@ -25,6 +25,7 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -99,7 +100,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Test
     public void testLockScreenShowNotificationsChangeUpdatesNotifications() {
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false);
-        verify(mEntryManager, times(1)).updateNotifications();
+        verify(mEntryManager, times(1)).updateNotifications(anyString());
     }
 
     @Test
@@ -138,7 +139,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     public void testSettingsObserverUpdatesNotifications() {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         mLockscreenUserManager.getSettingsObserverForTest().onChange(false);
-        verify(mEntryManager, times(1)).updateNotifications();
+        verify(mEntryManager, times(1)).updateNotifications(anyString());
     }
 
     @Test

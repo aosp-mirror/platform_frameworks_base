@@ -33,6 +33,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -91,7 +92,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BubbleControllerTest extends SysuiTestCase {
-
     @Mock
     private NotificationEntryManager mNotificationEntryManager;
     @Mock
@@ -223,13 +223,13 @@ public class BubbleControllerTest extends SysuiTestCase {
         mBubbleController.updateBubble(mRow.getEntry());
         assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         assertTrue(mBubbleController.hasBubbles());
-        verify(mNotificationEntryManager).updateNotifications();
+        verify(mNotificationEntryManager).updateNotifications(any());
         verify(mBubbleStateChangeListener).onHasBubblesChanged(true);
 
         mBubbleController.removeBubble(mRow.getEntry().key, BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
         assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
-        verify(mNotificationEntryManager, times(2)).updateNotifications();
+        verify(mNotificationEntryManager, times(2)).updateNotifications(anyString());
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
     }
 
@@ -257,16 +257,16 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Test
     public void testDismissStack() {
         mBubbleController.updateBubble(mRow.getEntry());
-        verify(mNotificationEntryManager, times(1)).updateNotifications();
+        verify(mNotificationEntryManager, times(1)).updateNotifications(any());
         assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         mBubbleController.updateBubble(mRow2.getEntry());
-        verify(mNotificationEntryManager, times(2)).updateNotifications();
+        verify(mNotificationEntryManager, times(2)).updateNotifications(any());
         assertNotNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().key));
         assertTrue(mBubbleController.hasBubbles());
 
         mBubbleController.dismissStack(BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mStatusBarWindowController.getBubblesShowing());
-        verify(mNotificationEntryManager, times(3)).updateNotifications();
+        verify(mNotificationEntryManager, times(3)).updateNotifications(any());
         assertNull(mBubbleData.getBubbleWithKey(mRow.getEntry().key));
         assertNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().key));
     }

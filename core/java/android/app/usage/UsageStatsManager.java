@@ -801,8 +801,8 @@ public final class UsageStatsManager {
      *                       {@link #EXTRA_TIME_USED}. Cannot be {@code null} unless the observer is
      *                       being registered with a {@code timeUsed} equal to or greater than
      *                       {@code timeLimit}.
-     * @throws SecurityException if the caller doesn't have both SUSPEND_APPS and OBSERVE_APP_USAGE
-     *                           permissions.
+     * @throws SecurityException if the caller is neither the active supervision app nor does it
+     *                           have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions.
      * @hide
      */
     @SystemApi
@@ -827,8 +827,8 @@ public final class UsageStatsManager {
      * an observer that was already unregistered or never registered will have no effect.
      *
      * @param observerId The id of the observer that was previously registered.
-     * @throws SecurityException if the caller doesn't have both SUSPEND_APPS and OBSERVE_APP_USAGE
-     *                           permissions.
+     * @throws SecurityException if the caller is neither the active supervision app nor does it
+     *                         have both SUSPEND_APPS and OBSERVE_APP_USAGE permissions.
      * @hide
      */
     @SystemApi

@@ -162,7 +162,6 @@ import android.content.pm.PackageBackwardCompatibility;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
-import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.ModuleInfoFlags;
@@ -3048,7 +3047,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Resolve protected action filters. Only the setup wizard is allowed to
             // have a high priority filter for these actions.
-            mSetupWizardPackage = getSetupWizardPackageName();
+            mSetupWizardPackage = getSetupWizardPackageNameImpl();
             mComponentResolver.fixProtectedFilterPriorities();
 
             mSystemTextClassifierPackage = getSystemTextClassifierPackageName();
@@ -6976,7 +6975,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param intent
      * @return A filtered list of resolved activities.
      */
-    private List<ResolveInfo> applyPostResolutionFilter(List<ResolveInfo> resolveInfos,
+    private List<ResolveInfo> applyPostResolutionFilter(@NonNull List<ResolveInfo> resolveInfos,
             String ephemeralPkgName, boolean allowDynamicSplits, int filterCallingUid,
             boolean resolveForStart, int userId, Intent intent) {
         final boolean blockInstant = intent.isWebIntent() && areWebInstantAppsDisabled(userId);
@@ -7633,6 +7632,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkgName == null) {
                 final List<ResolveInfo> result =
                         mComponentResolver.queryReceivers(intent, resolvedType, flags, userId);
+                if (result == null) {
+                    return Collections.emptyList();
+                }
                 return applyPostResolutionFilter(
                         result, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
                         intent);
@@ -7641,6 +7643,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (pkg != null) {
                 final List<ResolveInfo> result = mComponentResolver.queryReceivers(
                         intent, resolvedType, flags, pkg.receivers, userId);
+                if (result == null) {
+                    return Collections.emptyList();
+                }
                 return applyPostResolutionFilter(
                         result, instantAppPkgName, allowDynamicSplits, callingUid, false, userId,
                         intent);
@@ -7735,15 +7740,25 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
+                final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(intent,
+                        resolvedType, flags, userId);
+                if (resolveInfos == null) {
+                    return Collections.emptyList();
+                }
                 return applyPostServiceResolutionFilter(
-                        mComponentResolver.queryServices(intent, resolvedType, flags, userId),
+                        resolveInfos,
                         instantAppPkgName);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
+                final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(intent,
+                        resolvedType, flags, pkg.services,
+                        userId);
+                if (resolveInfos == null) {
+                    return Collections.emptyList();
+                }
                 return applyPostServiceResolutionFilter(
-                        mComponentResolver.queryServices(intent, resolvedType, flags, pkg.services,
-                                userId),
+                        resolveInfos,
                         instantAppPkgName);
             }
             return Collections.emptyList();
@@ -7853,15 +7868,25 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
+                final List<ResolveInfo> resolveInfos = mComponentResolver.queryProviders(intent,
+                        resolvedType, flags, userId);
+                if (resolveInfos == null) {
+                    return Collections.emptyList();
+                }
                 return applyPostContentProviderResolutionFilter(
-                        mComponentResolver.queryProviders(intent, resolvedType, flags, userId),
+                        resolveInfos,
                         instantAppPkgName);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
+                final List<ResolveInfo> resolveInfos = mComponentResolver.queryProviders(intent,
+                        resolvedType, flags,
+                        pkg.providers, userId);
+                if (resolveInfos == null) {
+                    return Collections.emptyList();
+                }
                 return applyPostContentProviderResolutionFilter(
-                        mComponentResolver.queryProviders(intent, resolvedType, flags,
-                                pkg.providers, userId),
+                        resolveInfos,
                         instantAppPkgName);
             }
             return Collections.emptyList();
@@ -19652,7 +19677,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 set, comp, userId);
     }
 
-    private @Nullable String getSetupWizardPackageName() {
+    private @Nullable String getSetupWizardPackageNameImpl() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_SETUP_WIZARD);
 
@@ -19757,6 +19782,14 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         return systemCaptionsServiceComponentName.getPackageName();
+    }
+
+    @Override
+    public String getSetupWizardPackageName() {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Non-system caller");
+        }
+        return mPmInternal.getSetupWizardPackageName();
     }
 
     public String getIncidentReportApproverPackageName() {

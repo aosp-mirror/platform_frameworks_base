@@ -82,6 +82,14 @@ public class NotifLog extends SysuiLog {
     }
 
     /**
+     * Logs a {@link NotifEvent} with a notification
+     * @return true if successfully logged, else false
+     */
+    public boolean log(@NotifEvent.EventType int eventType, StatusBarNotification sbn, String msg) {
+        return log(eventType, sbn, null, msg);
+    }
+
+    /**
      * Logs a {@link NotifEvent} with a ranking
      * @return true if successfully logged, else false
      */

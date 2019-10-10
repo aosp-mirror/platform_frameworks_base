@@ -381,6 +381,7 @@ public class BugreportProgressService extends Service {
 
     private final class BugreportCallbackImpl extends BugreportCallback {
 
+        @GuardedBy("mLock")
         private final BugreportInfo mInfo;
 
         BugreportCallbackImpl(BugreportInfo info) {
@@ -389,10 +390,12 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void onProgress(float progress) {
-            if (progress == 0) {
-                trackInfoWithId();
+            synchronized (mLock) {
+                if (progress == 0) {
+                    trackInfoWithIdLocked();
+                }
+                checkProgressUpdatedLocked(mInfo, (int) progress);
             }
-            checkProgressUpdated(mInfo, (int) progress);
         }
 
         /**
@@ -401,18 +404,21 @@ public class BugreportProgressService extends Service {
          */
         @Override
         public void onError(@BugreportErrorCode int errorCode) {
-            trackInfoWithId();
-            stopProgress(mInfo.id);
+            synchronized (mLock) {
+                trackInfoWithIdLocked();
+                stopProgressLocked(mInfo.id);
+            }
             Log.e(TAG, "Bugreport API callback onError() errorCode = " + errorCode);
             return;
         }
 
         @Override
         public void onFinished() {
-            // TODO: Make all callback functions lock protected.
             mInfo.renameBugreportFile();
             mInfo.renameScreenshots(mScreenshotsDir);
-            sendBugreportFinishedBroadcast();
+            synchronized (mLock) {
+                sendBugreportFinishedBroadcastLocked();
+            }
         }
 
         /**
@@ -421,7 +427,8 @@ public class BugreportProgressService extends Service {
          * when dumpstate calls one of the callback functions (onProgress, onFinished, onError)
          * after the id has been incremented.
          */
-        private void trackInfoWithId() {
+        @GuardedBy("mLock")
+        private void trackInfoWithIdLocked() {
             final int id = SystemProperties.getInt(PROPERTY_LAST_ID, 1);
             if (mBugreportInfos.get(id) == null) {
                 mInfo.id = id;
@@ -430,74 +437,75 @@ public class BugreportProgressService extends Service {
             return;
         }
 
-        private void sendBugreportFinishedBroadcast() {
+        @GuardedBy("mLock")
+        private void sendBugreportFinishedBroadcastLocked() {
             final String bugreportFilePath = mInfo.bugreportFile.getAbsolutePath();
             if (mInfo.bugreportFile.length() == 0) {
                 Log.e(TAG, "Bugreport file empty. File path = " + bugreportFilePath);
                 return;
             }
             if (mInfo.type == BugreportParams.BUGREPORT_MODE_REMOTE) {
-                sendRemoteBugreportFinishedBroadcast(bugreportFilePath, mInfo.bugreportFile);
+                sendRemoteBugreportFinishedBroadcast(mContext, bugreportFilePath,
+                        mInfo.bugreportFile);
             } else {
-                trackInfoWithId();
+                trackInfoWithIdLocked();
                 cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
                 intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
-                addScreenshotToIntent(intent);
+                addScreenshotToIntent(intent, mInfo);
                 mContext.sendBroadcast(intent, android.Manifest.permission.DUMP);
                 onBugreportFinished(mInfo.id);
             }
         }
+    }
 
-        private void sendRemoteBugreportFinishedBroadcast(String bugreportFileName,
-                File bugreportFile) {
-            cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE);
-            final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
-            final Uri bugreportUri = getUri(mContext, bugreportFile);
-            final String bugreportHash = generateFileHash(bugreportFileName);
-            if (bugreportHash == null) {
-                Log.e(TAG, "Error generating file hash for remote bugreport");
-                return;
-            }
-            intent.setDataAndType(bugreportUri, BUGREPORT_MIMETYPE);
-            intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
-            intent.putExtra(EXTRA_BUGREPORT, bugreportFileName);
-            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM,
-                    android.Manifest.permission.DUMP);
+    private static void sendRemoteBugreportFinishedBroadcast(Context context,
+            String bugreportFileName, File bugreportFile) {
+        cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE);
+        final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
+        final Uri bugreportUri = getUri(context, bugreportFile);
+        final String bugreportHash = generateFileHash(bugreportFileName);
+        if (bugreportHash == null) {
+            Log.e(TAG, "Error generating file hash for remote bugreport");
         }
+        intent.setDataAndType(bugreportUri, BUGREPORT_MIMETYPE);
+        intent.putExtra(DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH, bugreportHash);
+        intent.putExtra(EXTRA_BUGREPORT, bugreportFileName);
+        context.sendBroadcastAsUser(intent, UserHandle.SYSTEM,
+                android.Manifest.permission.DUMP);
+    }
 
-        private void addScreenshotToIntent(Intent intent) {
-            final File screenshotFile = mInfo.screenshotFiles.isEmpty()
-                    ? null : mInfo.screenshotFiles.get(0);
-            if (screenshotFile != null && screenshotFile.length() > 0) {
-                final String screenshotFilePath = screenshotFile.getAbsolutePath();
-                intent.putExtra(EXTRA_SCREENSHOT, screenshotFilePath);
-            }
-            return;
+    private static void addScreenshotToIntent(Intent intent, BugreportInfo info) {
+        final String screenshotFileName = info.name + ".png";
+        final File screenshotFile = new File(BUGREPORT_DIR, screenshotFileName);
+        final String screenshotFilePath = screenshotFile.getAbsolutePath();
+        if (screenshotFile.length() > 0) {
+            intent.putExtra(EXTRA_SCREENSHOT, screenshotFilePath);
         }
+        return;
+    }
 
-        private String generateFileHash(String fileName) {
-            String fileHash = null;
-            try {
-                MessageDigest md = MessageDigest.getInstance("SHA-256");
-                FileInputStream input = new FileInputStream(new File(fileName));
-                byte[] buffer = new byte[65536];
-                int size;
-                while ((size = input.read(buffer)) > 0) {
-                    md.update(buffer, 0, size);
-                }
-                input.close();
-                byte[] hashBytes = md.digest();
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.length; i++) {
-                    sb.append(String.format("%02x", hashBytes[i]));
-                }
-                fileHash = sb.toString();
-            } catch (IOException | NoSuchAlgorithmException e) {
-                Log.e(TAG, "generating file hash for bugreport file failed " + fileName, e);
+    private static String generateFileHash(String fileName) {
+        String fileHash = null;
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            FileInputStream input = new FileInputStream(new File(fileName));
+            byte[] buffer = new byte[65536];
+            int size;
+            while ((size = input.read(buffer)) > 0) {
+                md.update(buffer, 0, size);
             }
-            return fileHash;
+            input.close();
+            byte[] hashBytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hashBytes.length; i++) {
+                sb.append(String.format("%02x", hashBytes[i]));
+            }
+            fileHash = sb.toString();
+        } catch (IOException | NoSuchAlgorithmException e) {
+            Log.e(TAG, "generating file hash for bugreport file failed " + fileName, e);
         }
+        return fileHash;
     }
 
     static void cleanupOldFiles(final int minCount, final long minAge) {
@@ -852,7 +860,8 @@ public class BugreportProgressService extends Service {
     /**
      * Finalizes the progress on a given bugreport and cancel its notification.
      */
-    private void stopProgress(int id) {
+    @GuardedBy("mLock")
+    private void stopProgressLocked(int id) {
         if (mBugreportInfos.indexOfKey(id) < 0) {
             Log.w(TAG, "ID not watched: " + id);
         } else {
@@ -883,7 +892,9 @@ public class BugreportProgressService extends Service {
             }
             deleteScreenshots(info);
         }
-        stopProgress(id);
+        synchronized (mLock) {
+            stopProgressLocked(id);
+        }
     }
 
     /**
@@ -1178,7 +1189,9 @@ public class BugreportProgressService extends Service {
         if (!info.bugreportFile.exists() || !info.bugreportFile.canRead()) {
             Log.e(TAG, "Could not read bugreport file " + info.bugreportFile);
             Toast.makeText(context, R.string.bugreport_unreadable_text, Toast.LENGTH_LONG).show();
-            stopProgress(info.id);
+            synchronized (mLock) {
+                stopProgressLocked(info.id);
+            }
             return;
         }
 
@@ -1290,7 +1303,9 @@ public class BugreportProgressService extends Service {
         final Intent sendIntent = buildSendIntent(mContext, info);
         if (sendIntent == null) {
             Log.w(TAG, "Stopping progres on ID " + id + " because share intent could not be built");
-            stopProgress(id);
+            synchronized (mLock) {
+                stopProgressLocked(id);
+            }
             return;
         }
 
@@ -1313,9 +1328,10 @@ public class BugreportProgressService extends Service {
         } else {
             mContext.startActivity(notifIntent);
         }
-
-        // ... and stop watching this process.
-        stopProgress(id);
+        synchronized (mLock) {
+            // ... and stop watching this process.
+            stopProgressLocked(id);
+        }
     }
 
     static void sendShareIntent(Context context, Intent intent) {
@@ -2361,14 +2377,18 @@ public class BugreportProgressService extends Service {
                 // The right, long-term solution is to provide an onFinished() callback
                 // on IDumpstateListener and call it instead of using a broadcast.
                 Log.w(TAG, "Dumpstate process died:\n" + info);
-                stopProgress(info.id);
+                synchronized (mLock) {
+                    stopProgressLocked(info.id);
+                }
             }
             token.asBinder().unlinkToDeath(this, 0);
         }
 
         @Override
         public void onProgress(int progress) throws RemoteException {
-            checkProgressUpdated(info, progress);
+            synchronized (mLock) {
+                checkProgressUpdatedLocked(info, progress);
+            }
         }
 
         @Override
@@ -2387,7 +2407,8 @@ public class BugreportProgressService extends Service {
 
     }
 
-    private void checkProgressUpdated(BugreportInfo info, int progress) {
+    @GuardedBy("mLock")
+    private void checkProgressUpdatedLocked(BugreportInfo info, int progress) {
         if (progress > CAPPED_PROGRESS) {
             progress = CAPPED_PROGRESS;
         }

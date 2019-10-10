@@ -433,6 +433,14 @@
         -->
     </string-array>
 
+    <!-- Configuration of network interfaces that support WakeOnLAN -->
+    <string-array translatable="false" name="config_wakeonlan_supported_interfaces">
+        <!--
+        <item>wlan0</item>
+        <item>eth0</item>
+        -->
+    </string-array>
+
     <!-- Package name for the default CellBroadcastService module [DO NOT TRANSLATE] -->
     <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastreceiver
     </string>

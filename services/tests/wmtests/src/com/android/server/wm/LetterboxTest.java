@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,8 +49,8 @@ public class LetterboxTest {
     @Before
     public void setUp() throws Exception {
         mSurfaces = new SurfaceControlMocker();
-        mLetterbox = new Letterbox(mSurfaces, () -> mock(SurfaceControl.Transaction.class));
-        mTransaction = mock(SurfaceControl.Transaction.class);
+        mLetterbox = new Letterbox(mSurfaces, StubTransaction::new);
+        mTransaction = spy(StubTransaction.class);
     }
 
     @Test

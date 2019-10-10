@@ -33,6 +33,7 @@ import static com.android.server.wm.WindowContainerProto.VISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -54,9 +55,11 @@ import android.view.SurfaceSession;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
+import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.SurfaceAnimator.Animatable;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.function.Consumer;
@@ -122,6 +125,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     // TODO(b/132320879): Remove this from WindowContainers except DisplayContent.
     private final Transaction mPendingTransaction;
+
+    /**
+     * Windows that clients are waiting to have drawn.
+     */
+    final ArrayList<WindowState> mWaitingForDrawn = new ArrayList<>();
 
     /**
      * Applied as part of the animation pass in "prepareSurfaces".
@@ -1432,6 +1440,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             final Rect parentBounds = parent.getDisplayedBounds();
             outPos.offset(-parentBounds.left, -parentBounds.top);
         }
+    }
+
+    void waitForAllWindowsDrawn() {
+        final WindowManagerPolicy policy = mWmService.mPolicy;
+        forAllWindows(w -> {
+            final boolean keyguard = policy.isKeyguardHostWindow(w.mAttrs);
+            if (w.isVisibleLw() && (w.mAppToken != null || keyguard)) {
+                w.mWinAnimator.mDrawState = DRAW_PENDING;
+                // Force add to mResizingWindows.
+                w.resetLastContentInsets();
+                mWaitingForDrawn.add(w);
+            }
+        }, true /* traverseTopToBottom */);
     }
 
     Dimmer getDimmer() {

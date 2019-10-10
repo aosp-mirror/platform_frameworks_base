@@ -106,7 +106,7 @@ public class NotificationLockscreenUserManagerImpl implements
                     isCurrentProfile(getSendingUserId())) {
                 mUsersAllowingPrivateNotifications.clear();
                 updateLockscreenNotificationSetting();
-                getEntryManager().updateNotifications();
+                getEntryManager().updateNotifications("ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED");
             }
         }
     };
@@ -124,7 +124,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 updatePublicMode();
                 // The filtering needs to happen before the update call below in order to make sure
                 // the presenter has the updated notifications from the new user
-                getEntryManager().getNotificationData().filterAndSort();
+                getEntryManager().getNotificationData().filterAndSort("user switched");
                 mPresenter.onUserSwitched(mCurrentUserId);
 
                 for (UserChangedListener listener : mListeners) {
@@ -205,7 +205,8 @@ public class NotificationLockscreenUserManagerImpl implements
                 mUsersAllowingNotifications.clear();
                 // ... and refresh all the notifications
                 updateLockscreenNotificationSetting();
-                getEntryManager().updateNotifications();
+                getEntryManager().updateNotifications("LOCK_SCREEN_SHOW_NOTIFICATIONS,"
+                        + " or LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS change");
             }
         };
 
@@ -214,7 +215,8 @@ public class NotificationLockscreenUserManagerImpl implements
             public void onChange(boolean selfChange) {
                 updateLockscreenNotificationSetting();
                 if (mDeviceProvisionedController.isDeviceProvisioned()) {
-                    getEntryManager().updateNotifications();
+                    getEntryManager().updateNotifications("LOCK_SCREEN_ALLOW_REMOTE_INPUT"
+                            + " or ZEN_MODE change");
                 }
             }
         };
@@ -532,7 +534,7 @@ public class NotificationLockscreenUserManagerImpl implements
             setLockscreenPublicMode(isProfilePublic, userId);
             mUsersWithSeperateWorkChallenge.put(userId, needsSeparateChallenge);
         }
-        getEntryManager().updateNotifications();
+        getEntryManager().updateNotifications("NotificationLockscreenUserManager.updatePublicMode");
     }
 
     @Override

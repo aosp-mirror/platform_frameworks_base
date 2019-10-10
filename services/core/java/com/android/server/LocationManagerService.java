@@ -3064,11 +3064,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             try {
                 LocationProvider oldProvider = getLocationProviderLocked(name);
                 if (oldProvider != null) {
-                    if (oldProvider.isMock()) {
-                        throw new IllegalArgumentException(
-                                "Provider \"" + name + "\" already exists");
-                    }
-
                     removeProviderLocked(oldProvider);
                 }
 
@@ -3093,7 +3088,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             try {
                 LocationProvider testProvider = getLocationProviderLocked(name);
                 if (testProvider == null || !testProvider.isMock()) {
-                    throw new IllegalArgumentException("Provider \"" + name + "\" unknown");
+                    return;
                 }
 
                 removeProviderLocked(testProvider);

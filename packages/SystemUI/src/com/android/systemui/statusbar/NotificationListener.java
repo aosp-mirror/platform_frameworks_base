@@ -127,7 +127,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                         mEntryManager.removeNotification(key, rankingMap, UNDEFINED_DISMISS_REASON);
                     } else {
                         mEntryManager.getNotificationData()
-                                .updateRanking(rankingMap);
+                                .updateRanking(rankingMap, "onNotificationPosted");
                     }
                     return;
                 }

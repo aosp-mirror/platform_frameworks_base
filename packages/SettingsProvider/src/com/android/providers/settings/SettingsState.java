@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Build;
@@ -49,7 +48,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
 
@@ -1175,9 +1173,8 @@ final class SettingsState {
                 }
 
                 // If SetupWizard, done.
-                PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                        PackageManagerInternal.class);
-                if (packageName.equals(packageManagerInternal.getSetupWizardPackageName())) {
+                String setupWizPackage = context.getPackageManager().getSetupWizardPackageName();
+                if (packageName.equals(setupWizPackage)) {
                     sSystemUids.put(uid, uid);
                     return true;
                 }

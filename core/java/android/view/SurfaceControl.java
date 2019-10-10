@@ -181,7 +181,6 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSeverChildren(long transactionObj, long nativeObject);
     private static native void nativeSetOverrideScalingMode(long transactionObj, long nativeObject,
             int scalingMode);
-    private static native boolean nativeGetTransformToDisplayInverse(long nativeObject);
 
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
 
@@ -303,8 +302,8 @@ public final class SurfaceControl implements Parcelable {
     /**
      * Surface creation flag: Creates a Dim surface.
      * Everything behind this surface is dimmed by the amount specified
-     * in {@link #setAlpha}.  It is an error to lock a Dim surface, since it
-     * doesn't have a backing store.
+     * in {@link Transaction#setAlpha(SurfaceControl, float)}.  It is an error to lock a Dim
+     * surface, since it doesn't have a backing store.
      *
      * @hide
      */
@@ -740,20 +739,20 @@ public final class SurfaceControl implements Parcelable {
      * <p>
      * Good practice is to first create the surface with the {@link #HIDDEN} flag
      * specified, open a transaction, set the surface layer, layer stack, alpha,
-     * and position, call {@link #show} if appropriate, and close the transaction.
+     * and position, call {@link Transaction#show(SurfaceControl)} if appropriate, and close the
+     * transaction.
      * <p>
      * Bounds of the surface is determined by its crop and its buffer size. If the
      * surface has no buffer or crop, the surface is boundless and only constrained
      * by the size of its parent bounds.
      *
-     * @param session The surface session, must not be null.
-     * @param name The surface name, must not be null.
-     * @param w The surface initial width.
-     * @param h The surface initial height.
-     * @param flags The surface creation flags.  Should always include {@link #HIDDEN}
-     * in the creation flags.
+     * @param session  The surface session, must not be null.
+     * @param name     The surface name, must not be null.
+     * @param w        The surface initial width.
+     * @param h        The surface initial height.
+     * @param flags    The surface creation flags.  Should always include {@link #HIDDEN}
+     *                 in the creation flags.
      * @param metadata Initial metadata.
-     *
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
@@ -1014,27 +1013,9 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void deferTransactionUntil(Surface barrier, long frame) {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.deferTransactionUntilSurface(this, barrier, frame);
-        }
-    }
-
-    /**
-     * @hide
-     */
     public void reparentChildren(SurfaceControl newParent) {
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.reparentChildren(this, newParent);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void reparent(SurfaceControl newParent) {
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.reparent(this, newParent);
         }
     }
 
@@ -1060,30 +1041,11 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public static void setAnimationTransaction() {
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setAnimationTransaction();
-        }
-    }
-
-    /**
-     * @hide
-     */
     @UnsupportedAppUsage
     public void setLayer(int zorder) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.setLayer(this, zorder);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setRelativeLayer(SurfaceControl relativeTo, int zorder) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setRelativeLayer(this, relativeTo, zorder);
         }
     }
 
@@ -1183,50 +1145,10 @@ public final class SurfaceControl implements Parcelable {
     /**
      * @hide
      */
-    public void setColor(@Size(3) float[] color) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setColor(this, color);
-        }
-    }
-
-    /**
-     * @hide
-     */
     public void setMatrix(float dsdx, float dtdx, float dtdy, float dsdy) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
             sGlobalTransaction.setMatrix(this, dsdx, dtdx, dtdy, dsdy);
-        }
-    }
-
-    /**
-     * Sets the transform and position of a {@link SurfaceControl} from a 3x3 transformation matrix.
-     *
-     * @param matrix The matrix to apply.
-     * @param float9 An array of 9 floats to be used to extract the values from the matrix.
-     * @hide
-     */
-    public void setMatrix(Matrix matrix, float[] float9) {
-        checkNotReleased();
-        matrix.getValues(float9);
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setMatrix(this, float9[MSCALE_X], float9[MSKEW_Y],
-                    float9[MSKEW_X], float9[MSCALE_Y]);
-            sGlobalTransaction.setPosition(this, float9[MTRANS_X], float9[MTRANS_Y]);
-        }
-    }
-
-    /**
-     * Sets the color transform for the Surface.
-     * @param matrix A float array with 9 values represents a 3x3 transform matrix
-     * @param translation A float array with 3 values represents a translation vector
-     * @hide
-     */
-    public void setColorTransform(@Size(9) float[] matrix, @Size(3) float[] translation) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setColorTransform(this, matrix, translation);
         }
     }
 
@@ -1256,43 +1178,6 @@ public final class SurfaceControl implements Parcelable {
         checkNotReleased();
         synchronized (SurfaceControl.class) {
             sGlobalTransaction.setWindowCrop(this, crop);
-        }
-    }
-
-    /**
-     * Same as {@link SurfaceControl#setWindowCrop(Rect)} but sets the crop rect top left at 0, 0.
-     *
-     * @param width width of crop rect
-     * @param height height of crop rect
-     * @hide
-     */
-    public void setWindowCrop(int width, int height) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setWindowCrop(this, width, height);
-        }
-    }
-
-    /**
-     * Sets the corner radius of a {@link SurfaceControl}.
-     *
-     * @param cornerRadius Corner radius in pixels.
-     * @hide
-     */
-    public void setCornerRadius(float cornerRadius) {
-        checkNotReleased();
-        synchronized (SurfaceControl.class) {
-            sGlobalTransaction.setCornerRadius(this, cornerRadius);
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setLayerStack(int layerStack) {
-        checkNotReleased();
-        synchronized(SurfaceControl.class) {
-            sGlobalTransaction.setLayerStack(this, layerStack);
         }
     }
 
@@ -2302,6 +2187,12 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Sets the transform and position of a {@link SurfaceControl} from a 3x3 transformation
+         * matrix.
+         *
+         * @param sc     SurfaceControl to set matrix of
+         * @param matrix The matrix to apply.
+         * @param float9 An array of 9 floats to be used to extract the values from the matrix.
          * @hide
          */
         @UnsupportedAppUsage
@@ -2315,7 +2206,9 @@ public final class SurfaceControl implements Parcelable {
 
         /**
          * Sets the color transform for the Surface.
-         * @param matrix A float array with 9 values represents a 3x3 transform matrix
+         *
+         * @param sc          SurfaceControl to set color transform of
+         * @param matrix      A float array with 9 values represents a 3x3 transform matrix
          * @param translation A float array with 3 values represents a translation vector
          * @hide
          */
@@ -2339,6 +2232,13 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Bounds the surface and its children to the bounds specified. Size of the surface will be
+         * ignored and only the crop and buffer size will be used to determine the bounds of the
+         * surface. If no crop is specified and the surface has no buffer, the surface bounds is
+         * only constrained by the size of its parent bounds.
+         *
+         * @param sc   SurfaceControl to set crop of.
+         * @param crop Bounds of the crop to apply.
          * @hide
          */
         @UnsupportedAppUsage
@@ -2355,6 +2255,12 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Same as {@link Transaction#setWindowCrop(SurfaceControl, Rect)} but sets the crop rect
+         * top left at 0, 0.
+         *
+         * @param sc     SurfaceControl to set crop of.
+         * @param width  width of crop rect
+         * @param height height of crop rect
          * @hide
          */
         public Transaction setWindowCrop(SurfaceControl sc, int width, int height) {

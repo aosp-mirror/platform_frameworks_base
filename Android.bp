@@ -953,6 +953,7 @@ stubs_defaults {
         "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
+        ":core-current-stubs-source",
         ":core_public_api_files",
         ":updatable-media-srcs",
         "test-mock/src/**/*.java",
@@ -1017,6 +1018,7 @@ stubs_defaults {
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
+        ":core-current-stubs-source",
         ":core_public_api_files",
         ":updatable-media-srcs",
         ":jobscheduler-framework-source",
@@ -1570,3 +1572,14 @@ filegroup {
     ],
 }
 
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-cellbroadcast-shared-srcs",
+    srcs: [
+        "core/java/android/util/LocalLog.java",
+        "core/java/android/util/Slog.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+    ],
+}
