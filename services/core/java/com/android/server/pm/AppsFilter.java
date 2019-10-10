@@ -41,7 +41,7 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.FgThread;
-import com.android.server.compat.PlatformCompat;
+import com.android.server.compat.CompatConfig;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -131,24 +131,22 @@ public class AppsFilter {
 
     private static class FeatureConfigImpl implements FeatureConfig {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
-        private final PackageManagerService.Injector mInjector;
         private volatile boolean mFeatureEnabled = true;
+        private CompatConfig mCompatibility;
 
         private FeatureConfigImpl(PackageManagerService.Injector injector) {
-            mInjector = injector;
+            mCompatibility = injector.getCompatibility();
         }
 
         @Override
         public void onSystemReady() {
             mFeatureEnabled = DeviceConfig.getBoolean(
-                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME,
-                    true);
+                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME, true);
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
                     properties -> {
                         synchronized (FeatureConfigImpl.this) {
-                            mFeatureEnabled = properties.getBoolean(
-                                    FILTERING_ENABLED_NAME, true);
+                            mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME, true);
                         }
                     });
         }
@@ -160,12 +158,7 @@ public class AppsFilter {
 
         @Override
         public boolean packageIsEnabled(PackageParser.Package pkg) {
-            final PlatformCompat compatibility = mInjector.getCompatibility();
-            if (compatibility == null) {
-                Slog.wtf(TAG, "PlatformCompat is null");
-                return mFeatureEnabled;
-            }
-            return compatibility.isChangeEnabled(
+            return mCompatibility.isChangeEnabled(
                     PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
         }
     }
