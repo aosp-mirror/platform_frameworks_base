@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
@@ -79,6 +80,8 @@ public class Location implements Parcelable {
      *
      * @hide
      */
+    @TestApi
+    @SystemApi
     public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
 
     /**
@@ -1214,8 +1217,9 @@ public class Location implements Parcelable {
      * @param value the Location to attach
      * @hide
      */
-    @UnsupportedAppUsage
-    public void setExtraLocation(String key, Location value) {
+    @TestApi
+    @SystemApi
+    public void setExtraLocation(@Nullable String key, @Nullable Location value) {
         if (mExtras == null) {
             mExtras = new Bundle();
         }

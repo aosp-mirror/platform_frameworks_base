@@ -1088,6 +1088,8 @@ package android.location {
 
   public class Location implements android.os.Parcelable {
     method public void makeComplete();
+    method public void setExtraLocation(@Nullable String, @Nullable android.location.Location);
+    field public static final String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
   }
 
   public class LocationManager {
