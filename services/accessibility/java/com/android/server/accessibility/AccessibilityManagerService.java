@@ -198,7 +198,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final MainHandler mMainHandler;
 
-    private final GlobalActionPerformer mGlobalActionPerformer;
+    private final SystemActionPerformer mSystemActionPerformer;
 
     private MagnificationController mMagnificationController;
 
@@ -272,7 +272,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mSecurityPolicy = new AccessibilitySecurityPolicy(mContext, this);
         mMainHandler = new MainHandler(mContext.getMainLooper());
-        mGlobalActionPerformer = new GlobalActionPerformer(mContext, mWindowManagerService);
+        mSystemActionPerformer = new SystemActionPerformer(mContext, mWindowManagerService);
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
@@ -730,7 +730,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         synchronized (mLock) {
             mUiAutomationManager.registerUiTestAutomationServiceLocked(owner, serviceClient,
                     mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler,
-                    mSecurityPolicy, this, mWindowManagerService, mGlobalActionPerformer,
+                    mSecurityPolicy, this, mWindowManagerService, mSystemActionPerformer,
                     mA11yWindowManager, flags);
             onUserStateChangedLocked(getCurrentUserStateLocked());
         }
@@ -1450,7 +1450,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (service == null) {
                     service = new AccessibilityServiceConnection(userState, mContext, componentName,
                             installedService, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
-                            this, mWindowManagerService, mGlobalActionPerformer,
+                            this, mWindowManagerService, mSystemActionPerformer,
                             mA11yWindowManager);
                 } else if (userState.mBoundServices.contains(service)) {
                     continue;
@@ -2482,7 +2482,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     userState, mContext,
                     COMPONENT_NAME, info, sIdCounter++, mMainHandler, mLock, mSecurityPolicy,
                     AccessibilityManagerService.this, mWindowManagerService,
-                    mGlobalActionPerformer, mA11yWindowManager) {
+                    mSystemActionPerformer, mA11yWindowManager) {
                 @Override
                 public boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
                     return true;

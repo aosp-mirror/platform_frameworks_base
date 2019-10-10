@@ -75,7 +75,7 @@ public class AccessibilityServiceConnectionTest {
     @Mock AccessibilityWindowManager mMockA11yWindowManager;
     @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
-    @Mock GlobalActionPerformer mMockGlobalActionPerformer;
+    @Mock SystemActionPerformer mMockSystemActionPerformer;
     @Mock KeyEventDispatcher mMockKeyEventDispatcher;
     @Mock MagnificationController mMockMagnificationController;
     @Mock IBinder mMockIBinder;
@@ -104,7 +104,7 @@ public class AccessibilityServiceConnectionTest {
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
                 COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
-                mMockGlobalActionPerformer, mMockA11yWindowManager);
+                mMockSystemActionPerformer, mMockA11yWindowManager);
         when(mMockSecurityPolicy.canPerformGestures(mConnection)).thenReturn(true);
     }
 

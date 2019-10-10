@@ -87,7 +87,7 @@ class UiAutomationManager {
             AccessibilitySecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer,
+            SystemActionPerformer systemActionPerfomer,
             AccessibilityWindowManager awm, int flags) {
         synchronized (mLock) {
             accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
@@ -108,7 +108,7 @@ class UiAutomationManager {
             mSystemSupport = systemSupport;
             mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
                     mainHandler, mLock, securityPolicy, systemSupport, windowManagerInternal,
-                    globalActionPerfomer, awm);
+                    systemActionPerfomer, awm);
             mUiAutomationServiceOwner = owner;
             mUiAutomationFlags = flags;
             mUiAutomationServiceInfo = accessibilityServiceInfo;
@@ -226,9 +226,9 @@ class UiAutomationManager {
                 int id, Handler mainHandler, Object lock,
                 AccessibilitySecurityPolicy securityPolicy,
                 SystemSupport systemSupport, WindowManagerInternal windowManagerInternal,
-                GlobalActionPerformer globalActionPerfomer, AccessibilityWindowManager awm) {
+                SystemActionPerformer systemActionPerfomer, AccessibilityWindowManager awm) {
             super(context, COMPONENT_NAME, accessibilityServiceInfo, id, mainHandler, lock,
-                    securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer,
+                    securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer,
                     awm);
             mMainHandler = mainHandler;
         }
