@@ -2212,6 +2212,15 @@ class ContextImpl extends Context {
     }
 
     @Override
+    public Context createContextAsUser(UserHandle user) {
+        try {
+            return createPackageContextAsUser(getPackageName(), mFlags, user);
+        } catch (NameNotFoundException e) {
+            throw new IllegalStateException("Own package not found: package=" + getPackageName());
+        }
+    }
+
+    @Override
     public Context createContextForSplit(String splitName) throws NameNotFoundException {
         if (!mPackageInfo.getApplicationInfo().requestsIsolatedSplitLoading()) {
             // All Splits are always loaded.

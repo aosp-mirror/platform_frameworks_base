@@ -659,7 +659,8 @@ package android.content {
   }
 
   public abstract class Context {
-    method public android.content.Context createPackageContextAsUser(String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.Context createContextAsUser(@NonNull android.os.UserHandle);
+    method @NonNull public android.content.Context createPackageContextAsUser(@NonNull String, int, @NonNull android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract android.view.Display getDisplay();
     method public abstract int getDisplayId();
     method public android.os.UserHandle getUser();
