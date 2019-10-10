@@ -31,6 +31,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -48,6 +49,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -179,7 +181,7 @@ public final class ProcessStats implements Parcelable {
             {"proc", "pkg-proc", "pkg-svc", "pkg-asc", "pkg-all", "all"};
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 36;
+    private static final int PARCEL_VERSION = 38;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -195,6 +197,9 @@ public final class ProcessStats implements Parcelable {
     public final long[] mMemFactorDurations = new long[ADJ_COUNT];
     public int mMemFactor = STATE_NOTHING;
     public long mStartTime;
+
+    // Number of individual stats that have been aggregated to create this one.
+    public int mNumAggregated = 1;
 
     public long mTimePeriodStartClock;
     public long mTimePeriodStartRealtime;
@@ -347,6 +352,8 @@ public final class ProcessStats implements Parcelable {
         }
 
         mSysMemUsage.mergeStats(other.mSysMemUsage);
+
+        mNumAggregated += other.mNumAggregated;
 
         if (other.mTimePeriodStartClock < mTimePeriodStartClock) {
             mTimePeriodStartClock = other.mTimePeriodStartClock;
@@ -569,6 +576,7 @@ public final class ProcessStats implements Parcelable {
     }
 
     private void resetCommon() {
+        mNumAggregated = 1;
         mTimePeriodStartClock = System.currentTimeMillis();
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
@@ -845,6 +853,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
+        out.writeInt(mNumAggregated);
         out.writeLong(mTimePeriodStartClock);
         out.writeLong(mTimePeriodStartRealtime);
         out.writeLong(mTimePeriodEndRealtime);
@@ -1031,6 +1040,7 @@ public final class ProcessStats implements Parcelable {
 
         mIndexToCommonString = new ArrayList<String>();
 
+        mNumAggregated = in.readInt();
         mTimePeriodStartClock = in.readLong();
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = in.readLong();
@@ -1457,15 +1467,79 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
+    final class AssociationDumpContainer {
+        final AssociationState mState;
+        ArrayList<Pair<AssociationState.SourceKey, AssociationState.SourceDumpContainer>> mSources;
+        long mTotalTime;
+        long mActiveTime;
+
+        AssociationDumpContainer(AssociationState state) {
+            mState = state;
+        }
+    }
+
+    static final Comparator<AssociationDumpContainer> ASSOCIATION_COMPARATOR = (o1, o2) -> {
+        int diff = o1.mState.getProcessName().compareTo(o2.mState.getProcessName());
+        if (diff != 0) {
+            return diff;
+        }
+        if (o1.mActiveTime != o2.mActiveTime) {
+            return o1.mActiveTime > o2.mActiveTime ? -1 : 1;
+        }
+        if (o1.mTotalTime != o2.mTotalTime) {
+            return o1.mTotalTime > o2.mTotalTime ? -1 : 1;
+        }
+        diff = o1.mState.getName().compareTo(o2.mState.getName());
+        if (diff != 0) {
+            return diff;
+        }
+        return 0;
+    };
+
     public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
             boolean dumpDetails, boolean dumpAll, boolean activeOnly, int section) {
         long totalTime = DumpUtils.dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
-        boolean sepNeeded = false;
+        pw.print("          Start time: ");
+        pw.print(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimePeriodStartClock));
+        pw.println();
+        pw.print("        Total uptime: ");
+        TimeUtils.formatDuration(
+                (mRunning ? SystemClock.uptimeMillis() : mTimePeriodEndUptime)
+                        - mTimePeriodStartUptime, pw);
+        pw.println();
+        pw.print("  Total elapsed time: ");
+        TimeUtils.formatDuration(
+                (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
+                        - mTimePeriodStartRealtime, pw);
+        boolean partial = true;
+        if ((mFlags & FLAG_SHUTDOWN) != 0) {
+            pw.print(" (shutdown)");
+            partial = false;
+        }
+        if ((mFlags & FLAG_SYSPROPS) != 0) {
+            pw.print(" (sysprops)");
+            partial = false;
+        }
+        if ((mFlags & FLAG_COMPLETE) != 0) {
+            pw.print(" (complete)");
+            partial = false;
+        }
+        if (partial) {
+            pw.print(" (partial)");
+        }
+        if (mHasSwappedOutPss) {
+            pw.print(" (swapped-out-pss)");
+        }
+        pw.print(' ');
+        pw.print(mRuntime);
+        pw.println();
+        pw.print("     Aggregated over: ");
+        pw.println(mNumAggregated);
         if (mSysMemUsage.getKeyCount() > 0) {
+            pw.println();
             pw.println("System memory usage:");
             mSysMemUsage.dump(pw, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ);
-            sepNeeded = true;
         }
         boolean printedHeader = false;
         if ((section & REPORT_PKG_STATS) != 0) {
@@ -1485,8 +1559,8 @@ public final class ProcessStats implements Parcelable {
                         final int NASCS = pkgState.mAssociations.size();
                         final boolean pkgMatch = reqPackage == null || reqPackage.equals(pkgName);
                         boolean onlyAssociations = false;
+                        boolean procMatch = false;
                         if (!pkgMatch) {
-                            boolean procMatch = false;
                             for (int iproc = 0; iproc < NPROCS; iproc++) {
                                 ProcessState proc = pkgState.mProcesses.valueAt(iproc);
                                 if (reqPackage.equals(proc.getName())) {
@@ -1511,10 +1585,9 @@ public final class ProcessStats implements Parcelable {
                         }
                         if (NPROCS > 0 || NSRVS > 0 || NASCS > 0) {
                             if (!printedHeader) {
-                                if (sepNeeded) pw.println();
+                                pw.println();
                                 pw.println("Per-Package Stats:");
                                 printedHeader = true;
-                                sepNeeded = true;
                             }
                             pw.print("  * ");
                             pw.print(pkgName);
@@ -1597,6 +1670,8 @@ public final class ProcessStats implements Parcelable {
                             }
                         }
                         if ((section & REPORT_PKG_ASC_STATS) != 0) {
+                            ArrayList<AssociationDumpContainer> associations =
+                                    new ArrayList<>(NASCS);
                             for (int iasc = 0; iasc < NASCS; iasc++) {
                                 AssociationState asc = pkgState.mAssociations.valueAt(iasc);
                                 if (!pkgMatch && !reqPackage.equals(asc.getProcessName())) {
@@ -1604,6 +1679,18 @@ public final class ProcessStats implements Parcelable {
                                         continue;
                                     }
                                 }
+                                final AssociationDumpContainer cont =
+                                        new AssociationDumpContainer(asc);
+                                cont.mSources = asc.createSortedAssociations(now, totalTime);
+                                cont.mTotalTime = asc.getTotalDuration(now);
+                                cont.mActiveTime = asc.getActiveDuration(now);
+                                associations.add(cont);
+                            }
+                            Collections.sort(associations, ASSOCIATION_COMPARATOR);
+                            final int NCONT = associations.size();
+                            for (int iasc = 0; iasc < NCONT; iasc++) {
+                                final AssociationDumpContainer cont = associations.get(iasc);
+                                final AssociationState asc = cont.mState;
                                 if (activeOnly && !asc.isInUse()) {
                                     pw.print("      (Not active association: ");
                                     pw.print(pkgState.mAssociations.keyAt(iasc));
@@ -1615,13 +1702,15 @@ public final class ProcessStats implements Parcelable {
                                 } else {
                                     pw.print("      * Asc ");
                                 }
-                                pw.print(pkgState.mAssociations.keyAt(iasc));
+                                pw.print(cont.mState.getName());
                                 pw.println(":");
                                 pw.print("        Process: ");
                                 pw.println(asc.getProcessName());
                                 asc.dumpStats(pw, "        ", "          ", "    ",
-                                        now, totalTime, onlyAssociations ? reqPackage : null,
-                                        dumpDetails, dumpAll);
+                                        cont.mSources, now, totalTime,
+                                        onlyAssociations && !pkgMatch && !procMatch
+                                                && !asc.getProcessName().equals(reqPackage)
+                                                ? reqPackage : null, dumpDetails, dumpAll);
                             }
                         }
                     }
@@ -1651,10 +1740,7 @@ public final class ProcessStats implements Parcelable {
                         continue;
                     }
                     numShownProcs++;
-                    if (sepNeeded) {
-                        pw.println();
-                    }
-                    sepNeeded = true;
+                    pw.println();
                     if (!printedHeader) {
                         pw.println("Multi-Package Common Processes:");
                         printedHeader = true;
@@ -1684,11 +1770,7 @@ public final class ProcessStats implements Parcelable {
         }
 
         if (dumpAll) {
-            if (sepNeeded) {
-                pw.println();
-            }
-            sepNeeded = true;
-
+            pw.println();
             if (mTrackingAssociations.size() > 0) {
                 pw.println();
                 pw.println("Tracking associations:");
@@ -1734,9 +1816,7 @@ public final class ProcessStats implements Parcelable {
             }
         }
 
-        if (sepNeeded) {
-            pw.println();
-        }
+        pw.println();
         if (dumpSummary) {
             pw.println("Process summary:");
             dumpSummaryLocked(pw, reqPackage, now, activeOnly);
@@ -1860,41 +1940,6 @@ public final class ProcessStats implements Parcelable {
         pw.print(mExternalSlowPssCount);
         pw.print("x over ");
         TimeUtils.formatDuration(mExternalSlowPssTime, pw);
-        pw.println();
-        pw.println();
-        pw.print("          Start time: ");
-        pw.print(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimePeriodStartClock));
-        pw.println();
-        pw.print("        Total uptime: ");
-        TimeUtils.formatDuration(
-                (mRunning ? SystemClock.uptimeMillis() : mTimePeriodEndUptime)
-                        - mTimePeriodStartUptime, pw);
-        pw.println();
-        pw.print("  Total elapsed time: ");
-        TimeUtils.formatDuration(
-                (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
-                        - mTimePeriodStartRealtime, pw);
-        boolean partial = true;
-        if ((mFlags&FLAG_SHUTDOWN) != 0) {
-            pw.print(" (shutdown)");
-            partial = false;
-        }
-        if ((mFlags&FLAG_SYSPROPS) != 0) {
-            pw.print(" (sysprops)");
-            partial = false;
-        }
-        if ((mFlags&FLAG_COMPLETE) != 0) {
-            pw.print(" (complete)");
-            partial = false;
-        }
-        if (partial) {
-            pw.print(" (partial)");
-        }
-        if (mHasSwappedOutPss) {
-            pw.print(" (swapped-out-pss)");
-        }
-        pw.print(' ');
-        pw.print(mRuntime);
         pw.println();
     }
 

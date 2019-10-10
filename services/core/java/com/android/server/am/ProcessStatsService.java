@@ -1101,7 +1101,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
 
         boolean sepNeeded = false;
-        if (dumpAll || isCheckin) {
+        if ((dumpAll || isCheckin) && !currentOnly) {
             mWriteLock.lock();
             try {
                 ArrayList<String> files = getCommittedFiles(0, false, !isCheckin);
