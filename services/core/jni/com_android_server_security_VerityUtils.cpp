@@ -18,6 +18,7 @@
 
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include <utils/Log.h>
 
@@ -73,11 +74,13 @@ namespace android {
 namespace {
 
 int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath, jbyteArray signature) {
-    const char* path = env->GetStringUTFChars(filePath, nullptr);
-    ::android::base::unique_fd rfd(open(path, O_RDONLY | O_CLOEXEC));
-    env->ReleaseStringUTFChars(filePath, path);
+    ScopedUtfChars path(env, filePath);
+    if (path.c_str() == nullptr) {
+        return EINVAL;
+    }
+    ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
     if (rfd.get() < 0) {
-      return errno;
+        return errno;
     }
     ScopedByteArrayRO signature_bytes(env, signature);
     if (signature_bytes.get() == nullptr) {
@@ -94,7 +97,7 @@ int enableFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath, jbyteArra
     arg.sig_ptr = reinterpret_cast<uintptr_t>(signature_bytes.get());
 
     if (ioctl(rfd.get(), FS_IOC_ENABLE_VERITY, &arg) < 0) {
-      return errno;
+        return errno;
     }
     return 0;
 }
@@ -106,14 +109,16 @@ int measureFsverity(JNIEnv* env, jobject /* clazz */, jstring filePath) {
     fsverity_digest *data = reinterpret_cast<fsverity_digest *>(&bytes);
     data->digest_size = kSha256Bytes;  // the only input/output parameter
 
-    const char* path = env->GetStringUTFChars(filePath, nullptr);
-    ::android::base::unique_fd rfd(open(path, O_RDONLY | O_CLOEXEC));
-    env->ReleaseStringUTFChars(filePath, path);
+    ScopedUtfChars path(env, filePath);
+    if (path.c_str() == nullptr) {
+        return EINVAL;
+    }
+    ::android::base::unique_fd rfd(open(path.c_str(), O_RDONLY | O_CLOEXEC));
     if (rfd.get() < 0) {
-      return errno;
+        return errno;
     }
     if (ioctl(rfd.get(), FS_IOC_MEASURE_VERITY, data) < 0) {
-      return errno;
+        return errno;
     }
     return 0;
 }
