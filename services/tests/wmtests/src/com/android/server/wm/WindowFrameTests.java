@@ -255,6 +255,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
     @Test
     public void testLayoutNonfullscreenTask() {
+        removeGlobalMinSizeRestriction();
         final DisplayInfo displayInfo = mWm.getDefaultDisplayContentLocked().getDisplayInfo();
         final int logicalWidth = displayInfo.logicalWidth;
         final int logicalHeight = displayInfo.logicalHeight;
@@ -264,8 +265,8 @@ public class WindowFrameTests extends WindowTestsBase {
         WindowState w = createWindow();
         final Task task = w.getTask();
         // Use split-screen because it is non-fullscreen, but also not floating
-        task.mTaskRecord.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        task.mTaskRecord.setBounds(taskBounds);
+        task.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        task.setBounds(taskBounds);
         // The bounds we are requesting might be different from what the system resolved based on
         // other factors.
         final Rect resolvedTaskBounds = task.getBounds();
@@ -303,8 +304,8 @@ public class WindowFrameTests extends WindowTestsBase {
         final int insetTop = logicalHeight / 5;
         final int insetRight = insetLeft + (resolvedTaskBounds.right - resolvedTaskBounds.left);
         final int insetBottom = insetTop + (resolvedTaskBounds.bottom - resolvedTaskBounds.top);
-        task.mTaskRecord.setDisplayedBounds(resolvedTaskBounds);
-        task.mTaskRecord.setBounds(insetLeft, insetTop, insetRight, insetBottom);
+        task.setOverrideDisplayedBounds(resolvedTaskBounds);
+        task.setBounds(insetLeft, insetTop, insetRight, insetBottom);
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw();
         assertEquals(resolvedTaskBounds, w.getFrameLw());
@@ -477,7 +478,7 @@ public class WindowFrameTests extends WindowTestsBase {
         WindowState w = createWindow();
         final Task task = w.getTask();
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
-        task.mTaskRecord.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
 
         DisplayContent dc = mTestDisplayContent;
         dc.mInputMethodTarget = w;
@@ -499,7 +500,7 @@ public class WindowFrameTests extends WindowTestsBase {
         // First check that it only gets moved up enough to show window.
         final Rect winRect = new Rect(200, 200, 300, 500);
 
-        task.mTaskRecord.setBounds(winRect);
+        task.setBounds(winRect);
         w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
         w.computeFrameLw();
 
@@ -511,7 +512,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         // Now check that it won't get moved beyond the top and then has appropriate insets
         winRect.bottom = 600;
-        task.mTaskRecord.setBounds(winRect);
+        task.setBounds(winRect);
         w.setBounds(winRect);
         w.getWindowFrames().setFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
         w.computeFrameLw();

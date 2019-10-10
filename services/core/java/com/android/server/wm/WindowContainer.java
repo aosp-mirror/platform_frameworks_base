@@ -428,7 +428,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight += child.mTreeWeight;
             parent = parent.getParent();
         }
-        onChildPositionChanged();
+        onChildPositionChanged(child);
     }
 
     /**
@@ -454,7 +454,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight -= child.mTreeWeight;
             parent = parent.getParent();
         }
-        onChildPositionChanged();
+        onChildPositionChanged(child);
     }
 
     /**
@@ -583,7 +583,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (mChildren.peekLast() != child) {
                     mChildren.remove(child);
                     mChildren.add(child);
-                    onChildPositionChanged();
+                    onChildPositionChanged(child);
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_TOP, this /* child */,
@@ -594,7 +594,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 if (mChildren.peekFirst() != child) {
                     mChildren.remove(child);
                     mChildren.addFirst(child);
-                    onChildPositionChanged();
+                    onChildPositionChanged(child);
                 }
                 if (includingParents && getParent() != null) {
                     getParent().positionChildAt(POSITION_BOTTOM, this /* child */,
@@ -608,14 +608,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 //       doing this adjustment here and remove any adjustments in the callers.
                 mChildren.remove(child);
                 mChildren.add(position, child);
-                onChildPositionChanged();
+                onChildPositionChanged(child);
         }
     }
 
     /**
      * Notify that a child's position has changed. Possible changes are adding or removing a child.
      */
-    void onChildPositionChanged() { }
+    void onChildPositionChanged(WindowContainer child) { }
 
     /**
      * Update override configuration and recalculate full config.

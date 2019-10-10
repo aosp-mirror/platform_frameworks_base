@@ -79,8 +79,9 @@ public class TaskPositionerTests extends WindowTestsBase {
         // This should be the same calculation as the TaskPositioner uses.
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
+        removeGlobalMinSizeRestriction();
 
-        mPositioner = new TaskPositioner(mWm, mock(IActivityTaskManager.class));
+        mPositioner = new TaskPositioner(mWm, mWm.mAtmService);
         mPositioner.register(mDisplayContent);
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
@@ -493,10 +494,7 @@ public class TaskPositionerTests extends WindowTestsBase {
                         + ") " + Log.getStackTraceString(new Throwable()));
             }
         }
-        assertEquals("left", expected.left, actual.left);
-        assertEquals("right", expected.right, actual.right);
-        assertEquals("top", expected.top, actual.top);
-        assertEquals("bottom", expected.bottom, actual.bottom);
+        assertEquals(expected, actual);
     }
 
     @FlakyTest(bugId = 129492888)

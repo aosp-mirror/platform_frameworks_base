@@ -132,7 +132,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testCopyBaseIntentForTaskInfo() {
         final TaskRecord task = createTaskRecord(1);
-        task.mTaskDescription = new ActivityManager.TaskDescription();
+        task.setTaskDescription(new ActivityManager.TaskDescription());
         final TaskInfo info = task.getTaskInfo();
 
         // The intent of info should be a copy so assert that they are different instances.
@@ -348,10 +348,12 @@ public class TaskRecordTests extends ActivityTestsBase {
         TaskRecord task = stack.getChildAt(0);
         ActivityRecord root = task.getTopActivity();
 
-        final WindowContainer parentWindowContainer = mock(WindowContainer.class);
-        Mockito.doReturn(parentWindowContainer).when(task.mTask).getParent();
-        Mockito.doReturn(true).when(parentWindowContainer)
-                .handlesOrientationChangeFromDescendant();
+        final WindowContainer parentWindowContainer =
+                new WindowContainer(mSystemServicesTestRule.getWindowManagerService());
+        spyOn(parentWindowContainer);
+        parentWindowContainer.setBounds(fullScreenBounds);
+        doReturn(parentWindowContainer).when(task).getParent();
+        doReturn(true).when(parentWindowContainer).handlesOrientationChangeFromDescendant();
 
         // Setting app to fixed portrait fits within parent, but TaskRecord shouldn't adjust the
         // bounds because its parent says it will handle it at a later time.
@@ -433,7 +435,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         info.targetActivity = targetClassName;
 
         final TaskRecord task = TaskRecord.create(mService, 1 /* taskId */, info, intent,
-                null /* taskDescription */);
+                null /* taskDescription */, null /*stack*/);
         assertEquals("The alias activity component should be saved in task intent.", aliasClassName,
                 task.intent.getComponent().getClassName());
 
@@ -834,8 +836,9 @@ public class TaskRecordTests extends ActivityTestsBase {
     private TaskRecord createTaskRecord(int taskId) {
         return new TaskRecord(mService, taskId, new Intent(), null, null, null,
                 ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
-                new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0,
-                0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/);
+                0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0,
+                0, null /*ActivityInfo*/, null /*_voiceSession*/, null /*_voiceInteractor*/,
+                null /*stack*/);
     }
 
     private static class TestTaskRecordFactory extends TaskRecordFactory {
@@ -843,16 +846,16 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         @Override
         TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-                Intent intent,
-                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+                Intent intent, IVoiceInteractionSession voiceSession,
+                IVoiceInteractor voiceInteractor, ActivityStack stack) {
             mCreated = true;
             return null;
         }
 
         @Override
         TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
-                Intent intent,
-                ActivityManager.TaskDescription taskDescription) {
+                Intent intent, ActivityManager.TaskDescription taskDescription,
+                ActivityStack stack) {
             mCreated = true;
             return null;
         }
@@ -863,14 +866,14 @@ public class TaskRecordTests extends ActivityTestsBase {
                 ComponentName realActivity,
                 ComponentName origActivity, boolean rootWasReset, boolean autoRemoveRecents,
                 boolean askedCompatMode, int userId, int effectiveUid, String lastDescription,
-                ArrayList<ActivityRecord> activities, long lastTimeMoved,
+                long lastTimeMoved,
                 boolean neverRelinquishIdentity,
                 ActivityManager.TaskDescription lastTaskDescription,
                 int taskAffiliation, int prevTaskId, int nextTaskId, int taskAffiliationColor,
                 int callingUid, String callingPackage, int resizeMode,
                 boolean supportsPictureInPicture,
                 boolean realActivitySuspended, boolean userSetupComplete, int minWidth,
-                int minHeight) {
+                int minHeight, ActivityStack stack) {
             mCreated = true;
             return null;
         }

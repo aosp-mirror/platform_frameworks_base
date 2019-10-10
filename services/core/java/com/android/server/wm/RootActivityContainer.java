@@ -1265,8 +1265,7 @@ class RootActivityContainer extends ConfigurationContainer
                     : task.realActivity != null ? task.realActivity.flattenToString()
                     : task.getTopActivity() != null ? task.getTopActivity().packageName
                     : "unknown";
-            taskBounds[i] = new Rect();
-            task.getWindowContainerBounds(taskBounds[i]);
+            taskBounds[i] = mService.getTaskBounds(task.mTaskId);
             taskUserIds[i] = task.mUserId;
         }
         info.taskIds = taskIds;
@@ -1876,7 +1875,12 @@ class RootActivityContainer extends ConfigurationContainer
     ActivityStack getNextFocusableStack(@NonNull ActivityStack currentFocus,
             boolean ignoreCurrent) {
         // First look for next focusable stack on the same display
-        final ActivityDisplay preferredDisplay = currentFocus.getDisplay();
+        ActivityDisplay preferredDisplay = currentFocus.getDisplay();
+        if (preferredDisplay == null) {
+            // Stack is currently detached because it is being removed. Use the previous display it
+            // was on.
+            preferredDisplay = getActivityDisplay(currentFocus.mPrevDisplayId);
+        }
         final ActivityStack preferredFocusableStack = preferredDisplay.getNextFocusableStack(
                 currentFocus, ignoreCurrent);
         if (preferredFocusableStack != null) {

@@ -269,7 +269,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 // fullscreen value is normally read from resources in ctor, so for testing we need
                 // to set it somewhere else since we can't mock resources.
                 doReturn(true).when(activity).occludesParent();
-                activity.setTask(mTaskRecord);
+                mTaskRecord.addChild(activity);
                 // Make visible by default...
                 activity.setHidden(false);
             }
@@ -376,15 +376,13 @@ class ActivityTestsBase extends SystemServiceTestsBase {
 
             final TaskRecord task = new TaskRecord(mSupervisor.mService, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/,
-                    null /*taskDescription*/);
+                    null /*taskDescription*/, mStack);
             spyOn(task);
             task.mUserId = mUserId;
 
             if (mStack != null) {
                 mStack.moveToFront("test");
-                mStack.addTask(task, true, "creating test task");
-                task.createTask(true, true);
-                spyOn(task.mTask);
+                mStack.addChild(task, true, true);
             }
 
             return task;
