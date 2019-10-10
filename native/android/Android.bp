@@ -110,3 +110,36 @@ llndk_library {
     symbol_file: "libandroid_net.map.txt",
     unversioned: true,
 }
+
+
+// Aidl library for platform compat.
+cc_library_shared {
+    name: "lib-platform-compat-native-api",
+    cflags: [
+            "-Wall",
+            "-Werror",
+            "-Wno-missing-field-initializers",
+            "-Wno-unused-variable",
+            "-Wunused-parameter",
+        ],
+    shared_libs: [
+        "libbinder",
+         "libutils",
+    ],
+    aidl: {
+        local_include_dirs: ["aidl"],
+        export_aidl_headers: true,
+    },
+    srcs: [
+         ":platform-compat-native-aidl",
+    ],
+    export_include_dirs: ["aidl"],
+}
+
+filegroup {
+    name: "platform-compat-native-aidl",
+    srcs: [
+        "aidl/com/android/internal/compat/IPlatformCompatNative.aidl",
+    ],
+    path: "aidl",
+}
