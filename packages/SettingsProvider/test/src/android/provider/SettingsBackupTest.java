@@ -557,6 +557,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_WATCHDOG_ON,
                     Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     Settings.Global.CHARGING_STARTED_SOUND,
+                    Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
                     Settings.Global.WINDOW_ANIMATION_SCALE,
                     Settings.Global.WTF_IS_FATAL,
                     Settings.Global.ZEN_MODE,

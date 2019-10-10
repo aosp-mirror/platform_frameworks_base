@@ -3863,4 +3863,6 @@
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
 
+  <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
+
 </resources>

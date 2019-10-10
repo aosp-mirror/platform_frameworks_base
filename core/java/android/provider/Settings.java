@@ -8595,11 +8595,17 @@ public final class Settings {
         public static final String POWER_SOUNDS_ENABLED = "power_sounds_enabled";
 
         /**
-         * URI for the "wireless charging started" and "wired charging started" sound.
+         * URI for the "wireless charging started" sound.
          * @hide
          */
-        public static final String CHARGING_STARTED_SOUND =
+        public static final String WIRELESS_CHARGING_STARTED_SOUND =
                 "wireless_charging_started_sound";
+
+        /**
+         * URI for "wired charging started" sound.
+         * @hide
+         */
+        public static final String CHARGING_STARTED_SOUND = "charging_started_sound";
 
         /**
          * Whether to play a sound for charging events.

@@ -94,16 +94,16 @@ public class Notifier {
     private static final int MSG_PROFILE_TIMED_OUT = 5;
     private static final int MSG_WIRED_CHARGING_STARTED = 6;
 
-    private static final long[] WIRELESS_VIBRATION_TIME = {
+    private static final long[] CHARGING_VIBRATION_TIME = {
             40, 40, 40, 40, 40, 40, 40, 40, 40, // ramp-up sampling rate = 40ms
             40, 40, 40, 40, 40, 40, 40 // ramp-down sampling rate = 40ms
     };
-    private static final int[] WIRELESS_VIBRATION_AMPLITUDE = {
+    private static final int[] CHARGING_VIBRATION_AMPLITUDE = {
             1, 4, 11, 25, 44, 67, 91, 114, 123, // ramp-up amplitude (from 0 to 50%)
             103, 79, 55, 34, 17, 7, 2 // ramp-up amplitude
     };
-    private static final VibrationEffect WIRELESS_CHARGING_VIBRATION_EFFECT =
-            VibrationEffect.createWaveform(WIRELESS_VIBRATION_TIME, WIRELESS_VIBRATION_AMPLITUDE,
+    private static final VibrationEffect CHARGING_VIBRATION_EFFECT =
+            VibrationEffect.createWaveform(CHARGING_VIBRATION_TIME, CHARGING_VIBRATION_AMPLITUDE,
                     -1);
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -129,6 +129,10 @@ public class Notifier {
 
     // True if the device should suspend when the screen is off due to proximity.
     private final boolean mSuspendWhenScreenOffDueToProximityConfig;
+
+    // True if the device should show the wireless charging animation when the device
+    // begins charging wirelessly
+    private final boolean mShowWirelessChargingAnimationConfig;
 
     // The current interactive state.  This is set as soon as an interactive state
     // transition begins so as to capture the reason that it happened.  At some point
@@ -182,6 +186,8 @@ public class Notifier {
 
         mSuspendWhenScreenOffDueToProximityConfig = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_suspendWhenScreenOffDueToProximity);
+        mShowWirelessChargingAnimationConfig = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_showBuiltinWirelessChargingAnim);
 
         // Initialize interactive state for battery stats.
         try {
@@ -755,48 +761,50 @@ public class Notifier {
         }
     };
 
-    /**
-     * If enabled, plays a sound and/or vibration when wireless or non-wireless charging has started
-     */
-    private void playChargingStartedFeedback(@UserIdInt int userId) {
-        playChargingStartedVibration(userId);
+    private void playChargingStartedFeedback(@UserIdInt int userId, boolean wireless) {
+        if (!isChargingFeedbackEnabled(userId)) {
+            return;
+        }
+
+        // vibrate
+        final boolean vibrate = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
+        if (vibrate) {
+            mVibrator.vibrate(CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
+        }
+
+        // play sound
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.CHARGING_STARTED_SOUND);
-        if (isChargingFeedbackEnabled(userId) && soundPath != null) {
-            final Uri soundUri = Uri.parse("file://" + soundPath);
-            if (soundUri != null) {
-                final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                if (sfx != null) {
-                    sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                    sfx.play();
-                }
+                wireless ? Settings.Global.WIRELESS_CHARGING_STARTED_SOUND
+                        : Settings.Global.CHARGING_STARTED_SOUND);
+        final Uri soundUri = Uri.parse("file://" + soundPath);
+        if (soundUri != null) {
+            final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
+            if (sfx != null) {
+                sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                sfx.play();
             }
         }
     }
 
     private void showWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
-        playChargingStartedFeedback(userId);
-        if (mStatusBarManagerInternal != null) {
+        // play sounds + haptics
+        playChargingStartedFeedback(userId, true /* wireless */);
+
+        // show animation
+        if (mShowWirelessChargingAnimationConfig && mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
         }
         mSuspendBlocker.release();
     }
 
     private void showWiredChargingStarted(@UserIdInt int userId) {
-        playChargingStartedFeedback(userId);
+        playChargingStartedFeedback(userId, false /* wireless */);
         mSuspendBlocker.release();
     }
 
     private void lockProfile(@UserIdInt int userId) {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
-    }
-
-    private void playChargingStartedVibration(@UserIdInt int userId) {
-        final boolean vibrateEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
-        if (vibrateEnabled && isChargingFeedbackEnabled(userId)) {
-            mVibrator.vibrate(WIRELESS_CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
-        }
     }
 
     private boolean isChargingFeedbackEnabled(@UserIdInt int userId) {

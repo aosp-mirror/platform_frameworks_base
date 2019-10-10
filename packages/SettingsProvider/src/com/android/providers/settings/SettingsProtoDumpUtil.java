@@ -1347,6 +1347,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.CHARGING_STARTED_SOUND,
                 GlobalSettingsProto.Sounds.CHARGING_STARTED);
+        dumpSetting(s, p,
+                Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                GlobalSettingsProto.Sounds.WIRELESS_CHARGING_STARTED);
         p.end(soundsToken);
 
         final long soundTriggerToken = p.start(GlobalSettingsProto.SOUND_TRIGGER);

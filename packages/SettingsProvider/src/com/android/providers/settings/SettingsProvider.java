@@ -3197,7 +3197,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 183;
+            private static final int SETTINGS_VERSION = 184;
 
             private final int mUserId;
 
@@ -3836,23 +3836,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 155) {
-                    // Version 156: Set the default value for CHARGING_STARTED_SOUND.
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final String oldValue = globalSettings.getSettingLocked(
-                            Global.CHARGING_STARTED_SOUND).getValue();
-                    final String oldDefault = getContext().getResources().getString(
-                            R.string.def_wireless_charging_started_sound);
-                    if (TextUtils.equals(null, oldValue)
-                            || TextUtils.equals(oldValue, oldDefault)) {
-                        final String defaultValue = getContext().getResources().getString(
-                                R.string.def_charging_started_sound);
-                        if (!TextUtils.isEmpty(defaultValue)) {
-                            globalSettings.insertSettingLocked(
-                                    Settings.Global.CHARGING_STARTED_SOUND, defaultValue,
-                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
-
-                    }
+                    // Version 156: migrated to version 184
                     currentVersion = 156;
                 }
 
@@ -4405,6 +4389,48 @@ public class SettingsProvider extends ContentProvider {
                             true /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
 
                     currentVersion = 183;
+                }
+
+                if (currentVersion == 183) {
+                    // Version 184: Set default values for WIRELESS_CHARGING_STARTED_SOUND
+                    // and CHARGING_STARTED_SOUND
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+
+                    final String oldValueWireless = globalSettings.getSettingLocked(
+                            Global.WIRELESS_CHARGING_STARTED_SOUND).getValue();
+                    final String oldValueWired = globalSettings.getSettingLocked(
+                            Global.CHARGING_STARTED_SOUND).getValue();
+
+                    final String defaultValueWireless = getContext().getResources().getString(
+                            R.string.def_wireless_charging_started_sound);
+                    final String defaultValueWired = getContext().getResources().getString(
+                            R.string.def_charging_started_sound);
+
+                    // wireless charging sound
+                    if (oldValueWireless == null
+                            || TextUtils.equals(oldValueWireless, defaultValueWired)) {
+                        if (!TextUtils.isEmpty(defaultValueWireless)) {
+                            globalSettings.insertSettingLocked(
+                                    Global.WIRELESS_CHARGING_STARTED_SOUND, defaultValueWireless,
+                                    null /* tag */, true /* makeDefault */,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        } else if (!TextUtils.isEmpty(defaultValueWired)) {
+                            // if the wireless sound is empty, use the wired charging sound
+                            globalSettings.insertSettingLocked(
+                                    Global.WIRELESS_CHARGING_STARTED_SOUND, defaultValueWired,
+                                    null /* tag */, true /* makeDefault */,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    // wired charging sound
+                    if (oldValueWired == null && !TextUtils.isEmpty(defaultValueWired)) {
+                        globalSettings.insertSettingLocked(
+                                Global.CHARGING_STARTED_SOUND, defaultValueWired,
+                                null /* tag */, true /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 184;
                 }
 
                 // vXXX: Add new settings above this point.
