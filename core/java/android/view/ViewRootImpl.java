@@ -4530,6 +4530,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED = 32;
     private static final int MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED = 33;
     private static final int MSG_SHOW_INSETS = 34;
+    private static final int MSG_HIDE_INSETS = 35;
 
 
     final class ViewRootHandler extends Handler {
@@ -4596,6 +4597,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_LOCATION_IN_PARENT_DISPLAY_CHANGED";
                 case MSG_SHOW_INSETS:
                     return "MSG_SHOW_INSETS";
+                case MSG_HIDE_INSETS:
+                    return "MSG_HIDE_INSETS";
             }
             return super.getMessageName(message);
         }
@@ -4712,6 +4715,10 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 case MSG_SHOW_INSETS: {
                     mInsetsController.show(msg.arg1, msg.arg2 == 1);
+                    break;
+                }
+                case MSG_HIDE_INSETS: {
+                    mInsetsController.hide(msg.arg1, msg.arg2 == 1);
                     break;
                 }
                 case MSG_WINDOW_MOVED:
@@ -7513,6 +7520,10 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_SHOW_INSETS, types, fromIme ? 1 : 0).sendToTarget();
     }
 
+    private void hideInsets(@InsetType int types, boolean fromIme) {
+        mHandler.obtainMessage(MSG_HIDE_INSETS, types, fromIme ? 1 : 0).sendToTarget();
+    }
+
     public void dispatchMoved(int newX, int newY) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Window moved " + this + ": newX=" + newX + " newY=" + newY);
         if (mTranslator != null) {
@@ -8632,6 +8643,14 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.showInsets(types, fromIme);
+            }
+        }
+
+        @Override
+        public void hideInsets(@InsetType int types, boolean fromIme) {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.hideInsets(types, fromIme);
             }
         }
 

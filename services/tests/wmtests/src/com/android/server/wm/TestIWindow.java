@@ -115,4 +115,8 @@ public class TestIWindow extends IWindow.Stub {
     @Override
     public void showInsets(int types, boolean fromIme) throws RemoteException {
     }
+
+    @Override
+    public void hideInsets(int types, boolean fromIme) throws RemoteException {
+    }
 }
