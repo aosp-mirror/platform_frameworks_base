@@ -1028,8 +1028,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see MediaFormat#COLOR_STANDARD_BT601_PAL
      * @see MediaFormat#COLOR_STANDARD_BT601_NTSC
      * @see MediaFormat#COLOR_STANDARD_BT2020
-     *
-     * @hide
      */
     public static final int METADATA_KEY_COLOR_STANDARD = 35;
 
@@ -1040,8 +1038,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      * @see MediaFormat#COLOR_TRANSFER_SDR_VIDEO
      * @see MediaFormat#COLOR_TRANSFER_ST2084
      * @see MediaFormat#COLOR_TRANSFER_HLG
-     *
-     * @hide
      */
     public static final int METADATA_KEY_COLOR_TRANSFER = 36;
 
@@ -1050,8 +1046,6 @@ public class MediaMetadataRetriever implements AutoCloseable {
      *
      * @see MediaFormat#COLOR_RANGE_LIMITED
      * @see MediaFormat#COLOR_RANGE_FULL
-     *
-     * @hide
      */
     public static final int METADATA_KEY_COLOR_RANGE    = 37;
     // Add more here...

@@ -1559,7 +1559,14 @@ public abstract class Context {
      * @see Environment#getExternalStorageState(File)
      * @see Environment#isExternalStorageEmulated(File)
      * @see Environment#isExternalStorageRemovable(File)
+     * @deprecated These directories still exist and are scanned, but developers
+     *             are encouraged to migrate to inserting content into a
+     *             {@link MediaStore} collection directly, as any app can
+     *             contribute new media to {@link MediaStore} with no
+     *             permissions required, starting in
+     *             {@link android.os.Build.VERSION_CODES#Q}.
      */
+    @Deprecated
     public abstract File[] getExternalMediaDirs();
 
     /**
