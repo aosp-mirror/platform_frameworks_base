@@ -77,7 +77,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     TaskStack mStack;
     Task mTask;
-    AppWindowToken mToken;
+    ActivityRecord mToken;
 
     private final String mPackageName = getInstrumentation().getTargetContext().getPackageName();
 
@@ -410,7 +410,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     private AppWindowToken createTestAppWindowTokenForGivenTask(Task task) {
-        final AppWindowToken appToken =
+        final ActivityRecord appToken =
                 WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         task.addChild(appToken, 0);
         waitUntilHandlersIdle();

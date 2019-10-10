@@ -159,7 +159,7 @@ public class AppTransitionTests extends WindowTestsBase {
 
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final AppWindowToken token1 =
+        final ActivityRecord token1 =
                 WindowTestUtils.createTestAppWindowToken(dc1);
         task1.addChild(token1, 0);
 

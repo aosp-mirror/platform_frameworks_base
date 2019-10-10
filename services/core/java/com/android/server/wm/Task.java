@@ -58,7 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
-class Task extends WindowContainer<AppWindowToken> implements ConfigurationContainerListener{
+class Task extends WindowContainer<ActivityRecord> implements ConfigurationContainerListener{
     static final String TAG = TAG_WITH_CLASS_NAME ? "Task" : TAG_WM;
 
     // TODO: Track parent marks like this in WindowContainer.
@@ -170,14 +170,14 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     }
 
     @Override
-    void addChild(AppWindowToken wtoken, int position) {
+    void addChild(ActivityRecord child, int position) {
         position = getAdjustedAddPosition(position);
-        super.addChild(wtoken, position);
+        super.addChild(child, position);
         mDeferRemoval = false;
     }
 
     @Override
-    void positionChildAt(int position, AppWindowToken child, boolean includingParents) {
+    void positionChildAt(int position, ActivityRecord child, boolean includingParents) {
         position = getAdjustedAddPosition(position);
         super.positionChildAt(position, child, includingParents);
         mDeferRemoval = false;
@@ -279,13 +279,13 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
     }
 
     @Override
-    void removeChild(AppWindowToken token) {
-        if (!mChildren.contains(token)) {
+    void removeChild(ActivityRecord child) {
+        if (!mChildren.contains(child)) {
             Slog.e(TAG, "removeChild: token=" + this + " not found.");
             return;
         }
 
-        super.removeChild(token);
+        super.removeChild(child);
 
         if (mChildren.isEmpty()) {
             EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeAppToken: last token");
@@ -674,18 +674,18 @@ class Task extends WindowContainer<AppWindowToken> implements ConfigurationConta
         return null;
     }
 
-    void positionChildAtTop(AppWindowToken aToken) {
-        positionChildAt(aToken, POSITION_TOP);
+    void positionChildAtTop(ActivityRecord child) {
+        positionChildAt(child, POSITION_TOP);
     }
 
-    void positionChildAt(AppWindowToken aToken, int position) {
-        if (aToken == null) {
+    void positionChildAt(ActivityRecord child, int position) {
+        if (child == null) {
             Slog.w(TAG_WM,
                     "Attempted to position of non-existing app");
             return;
         }
 
-        positionChildAt(position, aToken, false /* includeParents */);
+        positionChildAt(position, child, false /* includeParents */);
     }
 
     void forceWindowsScaleable(boolean force) {

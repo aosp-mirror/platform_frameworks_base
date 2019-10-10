@@ -1420,7 +1420,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mReparenting = true;
 
         getParent().removeChild(this);
-        task.addChild(this, position);
+        task.addChild((ActivityRecord) this, position);
 
         mReparenting = false;
 
