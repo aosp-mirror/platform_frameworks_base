@@ -65,14 +65,14 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         } else {
             mClientChannel = channels[1];
         }
-        mService.mInputManager.registerInputChannel(mServerChannel, null);
+        mService.mInputManager.registerInputChannel(mServerChannel);
 
         mApplicationHandle = new InputApplicationHandle(new Binder());
         mApplicationHandle.name = name;
         mApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mWindowHandle = new InputWindowHandle(mApplicationHandle, null, displayId);
+        mWindowHandle = new InputWindowHandle(mApplicationHandle, displayId);
         mWindowHandle.name = name;
         mWindowHandle.token = mServerChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;

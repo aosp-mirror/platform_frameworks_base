@@ -256,7 +256,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         final InputChannel[] channels = InputChannel.openInputChannelPair(TAG);
         mServerChannel = channels[0];
         mClientChannel = channels[1];
-        mService.mInputManager.registerInputChannel(mServerChannel, null);
+        mService.mInputManager.registerInputChannel(mServerChannel);
 
         mInputEventReceiver = new WindowPositionerEventReceiver(
                 mClientChannel, mService.mAnimationHandler.getLooper(),
@@ -267,8 +267,7 @@ class TaskPositioner implements IBinder.DeathRecipient {
         mDragApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
-        mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
-                display.getDisplayId());
+        mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, display.getDisplayId());
         mDragWindowHandle.name = TAG;
         mDragWindowHandle.token = mServerChannel.getToken();
         mDragWindowHandle.layer = mService.getDragLayerLocked();
