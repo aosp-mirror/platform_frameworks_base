@@ -48,7 +48,7 @@ class SystemServerBenchmarks {
     // Time limit to run benchmarks in seconds
     public static final int TIME_LIMIT = 5;
 
-    static void initializeBenchmarks(BenchmarkRunner benchmarks, Activity parent) {
+    static void initializeBenchmarks(Activity parent, BenchmarkRunner benchmarks) {
         benchmarks.addBenchmark("Empty", () -> {
         });
 
