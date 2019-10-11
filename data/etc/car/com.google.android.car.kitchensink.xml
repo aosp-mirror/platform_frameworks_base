@@ -16,17 +16,30 @@
   -->
 <permissions>
     <privapp-permissions package="com.google.android.car.kitchensink">
+        <permission name="android.permission.ACCESS_NETWORK_STATE"/>
+        <permission name="android.permission.ACCESS_WIFI_STATE"/>
+        <permission name="android.permission.ACTIVITY_EMBEDDING"/>
+        <permission name="android.permission.INJECT_EVENTS"/>
+        <!-- use for CarServiceUnitTest and CarServiceTest -->
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <!-- use for CarServiceUnitTest -->
+        <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
         <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
         <permission name="android.permission.LOCATION_HARDWARE"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <!-- use for CarServiceTest -->
+        <permission name="android.permission.MEDIA_CONTENT_CONTROL"/>
         <permission name="android.permission.MODIFY_AUDIO_ROUTING"/>
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.PROVIDE_TRUST_AGENT"/>
+        <permission name="android.permission.OVERRIDE_WIFI_CONFIG"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_LOGS"/>
         <permission name="android.permission.REBOOT"/>
+        <!-- use for CarServiceTest -->
+        <permission name="android.permission.SET_ACTIVITY_WATCHER"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
 </permissions>
