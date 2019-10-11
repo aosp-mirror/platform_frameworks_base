@@ -345,9 +345,9 @@ public class AccessibilityShortcutControllerTest {
         accessibilityShortcutController.performAccessibilityShortcut();
         accessibilityShortcutController.performAccessibilityShortcut();
         verify(mToast).show();
-        assertEquals(WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+        assertEquals(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                 mLayoutParams.privateFlags
-                        & WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
+                        & WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
         verify(mAccessibilityManagerService, times(1)).performAccessibilityShortcut();
     }
 

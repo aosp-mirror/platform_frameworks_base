@@ -92,7 +92,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle("Application Error: " + mProc.info.processName);
         attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR
-                | WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                | WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
         if (mProc.isPersistent()) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);

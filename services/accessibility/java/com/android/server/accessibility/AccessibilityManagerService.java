@@ -1641,7 +1641,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
              mEnableTouchExplorationDialog.getWindow().setType(
                      WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
              mEnableTouchExplorationDialog.getWindow().getAttributes().privateFlags
-                     |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                     |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
              mEnableTouchExplorationDialog.setCanceledOnTouchOutside(true);
              mEnableTouchExplorationDialog.show();
         }

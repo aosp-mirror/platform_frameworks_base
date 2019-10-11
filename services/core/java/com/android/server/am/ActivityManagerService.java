@@ -8658,7 +8658,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         lp.format = v.getBackground().getOpacity();
         lp.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         ((WindowManager)mContext.getSystemService(
                 Context.WINDOW_SERVICE)).addView(v, lp);
     }

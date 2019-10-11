@@ -286,7 +286,7 @@ final class SaveUi {
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
-        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
+        window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
         window.setCloseOnTouchOutside(true);

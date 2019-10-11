@@ -580,7 +580,7 @@ public class AuthContainerView extends LinearLayout
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("BiometricPrompt");
         lp.token = windowToken;
         return lp;
