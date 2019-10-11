@@ -21,6 +21,7 @@ import android.os.UserHandle;
 /** @hide */
 interface IDeviceIdleController {
     void addPowerSaveWhitelistApp(String name);
+    int addPowerSaveWhitelistApps(in List<String> packageNames);
     void removePowerSaveWhitelistApp(String name);
     /* Removes an app from the system whitelist. Calling restoreSystemPowerWhitelistApp will add
     the app back into the system whitelist */

@@ -1741,6 +1741,7 @@ package android.os {
   }
 
   public class DeviceIdleManager {
+    method @RequiresPermission("android.permission.DEVICE_POWER") public int addPowerSaveWhitelistApps(@NonNull java.util.List<java.lang.String>);
     method @NonNull public String[] getSystemPowerWhitelist();
     method @NonNull public String[] getSystemPowerWhitelistExceptIdle();
   }
