@@ -53,7 +53,6 @@ public class WindowManagerWrapper {
     public static final int TRANSIT_WALLPAPER_INTRA_CLOSE =
             WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
     public static final int TRANSIT_TASK_OPEN_BEHIND = WindowManager.TRANSIT_TASK_OPEN_BEHIND;
-    public static final int TRANSIT_TASK_IN_PLACE = WindowManager.TRANSIT_TASK_IN_PLACE;
     public static final int TRANSIT_ACTIVITY_RELAUNCH = WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
     public static final int TRANSIT_DOCK_TASK_FROM_RECENTS =
             WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;

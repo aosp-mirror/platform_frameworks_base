@@ -33,7 +33,6 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CHANGE_WINDOWING_MODE;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
@@ -2257,8 +2256,7 @@ public class AppTransition implements Dump {
     static boolean isTaskTransit(int transit) {
         return isTaskOpenTransit(transit)
                 || transit == TRANSIT_TASK_CLOSE
-                || transit == TRANSIT_TASK_TO_BACK
-                || transit == TRANSIT_TASK_IN_PLACE;
+                || transit == TRANSIT_TASK_TO_BACK;
     }
 
     private static  boolean isTaskOpenTransit(int transit) {
