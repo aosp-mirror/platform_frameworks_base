@@ -53,6 +53,8 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.os.Environment.DIRECTORY_MOVIES;
+
 /**
  * A service which records the device screen and optionally microphone input.
  */
@@ -160,11 +162,15 @@ public class RecordingService extends Service {
 
                 // Move temp file to user directory
                 File recordDir = new File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),
+                        Environment.getExternalStoragePublicDirectory(DIRECTORY_MOVIES),
                         RECORD_DIR);
-                recordDir.mkdirs();
+                if (!recordDir.exists()) {
+                    if (!recordDir.mkdirs()) {
+                        Log.e(TAG,  "Failed to create video capture directory");
+                    }
+                }
 
-                String fileName = new SimpleDateFormat("'screen-'yyyyMMdd-HHmmss'.mp4'")
+                String fileName = new SimpleDateFormat("'screenrecord-'yyyyMMdd-HHmmss'.mp4'")
                         .format(new Date());
                 Path path = new File(recordDir, fileName).toPath();
 
@@ -248,9 +254,12 @@ public class RecordingService extends Service {
      */
     private void startRecording() {
         try {
-            mTempFile = File.createTempFile("temp", ".mp4");
-            Log.d(TAG, "Writing video output to: " + mTempFile.getAbsolutePath());
-
+            try {
+                mTempFile = File.createTempFile("temp", ".mp4");
+                Log.d(TAG, "Writing video output to: " + mTempFile.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             setTapsVisible(mShowTaps);
 
             // Set up media recorder
