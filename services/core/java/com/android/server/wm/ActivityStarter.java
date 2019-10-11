@@ -2430,7 +2430,7 @@ class ActivityStarter {
         if (mStartActivity.getTaskRecord() == null || mStartActivity.getTaskRecord() == parent) {
             parent.addActivityToTop(mStartActivity);
         } else {
-            mStartActivity.reparent(parent, parent.mActivities.size() /* top */, reason);
+            mStartActivity.reparent(parent, parent.getChildCount() /* top */, reason);
         }
     }
 
