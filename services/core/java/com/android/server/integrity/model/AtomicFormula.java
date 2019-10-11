@@ -22,6 +22,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.Nullable;
 import android.util.Slog;
 
+import java.util.Objects;
+
 /**
  * Represents a simple formula consisting of an app install metadata field and a value.
  *
@@ -130,11 +132,6 @@ public final class AtomicFormula extends Formula {
         return mBoolValue.toString();
     }
 
-    @Override
-    public String toString() {
-        return String.format("%s %s %s", mKey, mOperator, getValue());
-    }
-
     /**
      * Check if the formula is true when substituting its {@link Key} with the string value.
      *
@@ -186,6 +183,32 @@ public final class AtomicFormula extends Formula {
         }
         Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mBoolValue));
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", mKey, mOperator, getValue());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AtomicFormula that = (AtomicFormula) o;
+        return mKey == that.mKey
+                && mOperator == that.mOperator
+                && Objects.equals(mStringValue, that.mStringValue)
+                && Objects.equals(mIntValue, that.mIntValue)
+                && Objects.equals(mBoolValue, that.mBoolValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mKey, mOperator, mStringValue, mIntValue, mBoolValue);
     }
 
     private void validateOperator(Key key, Operator operator) {
