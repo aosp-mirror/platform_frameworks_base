@@ -119,9 +119,10 @@ std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
          {.puller = new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
         // system_elapsed_realtime
         {android::util::SYSTEM_ELAPSED_REALTIME,
-         {.pullTimeoutNs = NS_PER_SEC / 2,
-          .coolDownNs = NS_PER_SEC,
-          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME)}},
+         {.coolDownNs = NS_PER_SEC,
+          .puller = new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME),
+          .pullTimeoutNs = NS_PER_SEC / 2,
+         }},
         // system_uptime
         {android::util::SYSTEM_UPTIME,
          {.puller = new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
