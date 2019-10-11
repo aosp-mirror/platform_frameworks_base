@@ -405,6 +405,8 @@ filegroup {
 filegroup {
     name: "statsd_aidl",
     srcs: [
+        "core/java/android/os/IPullAtomCallback.aidl",
+        "core/java/android/os/IPullAtomResultReceiver.aidl",
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
         "core/java/android/os/IStatsPullerCallback.aidl",

@@ -13,24 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef STATS_EVENT_H
+#define STATS_EVENT_H
 
-package android.os;
+#include <binder/Parcel.h>
+#include <binder/Parcelable.h>
+#include <binder/Status.h>
+#include <vector>
 
-import android.os.StatsLogEventWrapper;
+namespace android {
+namespace util {
+class StatsEvent : public android::Parcelable {
+    public:
+        StatsEvent();
 
-/**
-  * DEPRECATED
-  * Binder interface to pull atoms for the stats service.
-  * {@hide}
-  */
-interface IStatsPullerCallback {
-    /**
-     * Pull data for the specified atom tag. Returns an array of StatsLogEventWrapper containing
-     * the data.
-     *
-     * Note: These pulled atoms should not have uid/attribution chain. Additionally, the event
-     * timestamps will be truncated to the nearest 5 minutes.
-     */
-    StatsLogEventWrapper[] pullData(int atomTag, long elapsedNanos, long wallClocknanos);
+        StatsEvent(StatsEvent&& in) = default;
 
-}
+        android::status_t writeToParcel(android::Parcel* out) const;
+
+        android::status_t readFromParcel(const android::Parcel* in);
+
+    private:
+        int mAtomTag;
+        std::vector<uint8_t> mBuffer;
+};
+} // Namespace util
+} // Namespace android
+
+#endif  // STATS_ EVENT_H

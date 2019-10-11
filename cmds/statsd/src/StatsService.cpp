@@ -1289,6 +1289,13 @@ Status StatsService::registerPullerCallback(int32_t atomTag,
     return Status::ok();
 }
 
+Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int64_t coolDownNs,
+                                    int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
+                                    const sp<android::os::IPullAtomCallback>& pullerCallback) {
+    VLOG("StatsService::registerPuller called.");
+    return Status::ok();
+}
+
 Status StatsService::unregisterPullerCallback(int32_t atomTag, const String16& packageName) {
     ENFORCE_DUMP_AND_USAGE_STATS(packageName);
 

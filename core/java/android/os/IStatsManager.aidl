@@ -17,6 +17,7 @@
 package android.os;
 
 import android.os.IStatsPullerCallback;
+import android.os.IPullAtomCallback;
 import android.os.ParcelFileDescriptor;
 
 /**
@@ -188,9 +189,17 @@ interface IStatsManager {
      * for the specified vendor atom tag.
      *
      * Requires Manifest.permission.DUMP and Manifest.permission.PACKAGE_USAGE_STATS
+     * @deprecated please use registerPullAtomCallback.
      */
     oneway void registerPullerCallback(int atomTag, IStatsPullerCallback pullerCallback,
                                        String packageName);
+
+   /**
+    * Registers a puller callback function that, when invoked, pulls the data
+    * for the specified atom tag.
+    */
+    oneway void registerPullAtomCallback(int uid, int atomTag, long coolDownNs, long timeoutNs,
+                           in int[] additiveFields, IPullAtomCallback pullerCallback);
 
    /**
     * Unregisters a puller callback function for the given vendor atom.
