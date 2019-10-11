@@ -52,7 +52,6 @@ import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.ViewStructure;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
@@ -852,6 +851,9 @@ public class Switch extends CompoundButton {
     public void setTextOn(CharSequence textOn) {
         mTextOn = textOn;
         requestLayout();
+        // Default state is derived from on/off-text, so state has to be updated when on/off-text
+        // are updated.
+        setDefaultStateDescritption();
     }
 
     /**
@@ -872,6 +874,9 @@ public class Switch extends CompoundButton {
     public void setTextOff(CharSequence textOff) {
         mTextOff = textOff;
         requestLayout();
+        // Default state is derived from on/off-text, so state has to be updated when on/off-text
+        // are updated.
+        setDefaultStateDescritption();
     }
 
     /**
@@ -1159,6 +1164,17 @@ public class Switch extends CompoundButton {
     @Override
     public void toggle() {
         setChecked(!isChecked());
+    }
+
+    /** @hide **/
+    @Override
+    @NonNull
+    protected CharSequence getButtonStateDescription() {
+        if (isChecked()) {
+            return mTextOn == null ? getResources().getString(R.string.capital_on) : mTextOn;
+        } else {
+            return mTextOff == null ? getResources().getString(R.string.capital_off) : mTextOff;
+        }
     }
 
     @Override
@@ -1511,23 +1527,6 @@ public class Switch extends CompoundButton {
             // The style of the label text is provided via the base TextView class. This is more
             // relevant than the style of the (optional) on/off text on the switch button itself,
             // so ignore the size/color/style stored this.mTextPaint.
-        }
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        CharSequence switchText = isChecked() ? mTextOn : mTextOff;
-        if (!TextUtils.isEmpty(switchText)) {
-            CharSequence oldText = info.getText();
-            if (TextUtils.isEmpty(oldText)) {
-                info.setText(switchText);
-            } else {
-                StringBuilder newText = new StringBuilder();
-                newText.append(oldText).append(' ').append(switchText);
-                info.setText(newText);
-            }
         }
     }
 
