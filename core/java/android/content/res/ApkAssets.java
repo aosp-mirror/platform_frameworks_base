@@ -16,7 +16,10 @@
 package android.content.res;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.content.res.loader.ResourcesProvider;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -36,9 +39,13 @@ import java.io.IOException;
  */
 public final class ApkAssets {
     @GuardedBy("this") private final long mNativePtr;
+
+    @Nullable
     @GuardedBy("this") private final StringBlock mStringBlock;
 
     @GuardedBy("this") private boolean mOpen = true;
+
+    private final boolean mForLoader;
 
     /**
      * Creates a new ApkAssets instance from the given path on disk.
@@ -48,7 +55,8 @@ public final class ApkAssets {
      * @throws IOException if a disk I/O error or parsing error occurred.
      */
     public static @NonNull ApkAssets loadFromPath(@NonNull String path) throws IOException {
-        return new ApkAssets(path, false /*system*/, false /*forceSharedLib*/, false /*overlay*/);
+        return new ApkAssets(path, false /*system*/, false /*forceSharedLib*/, false /*overlay*/,
+                false /*arscOnly*/, false /*forLoader*/);
     }
 
     /**
@@ -61,7 +69,8 @@ public final class ApkAssets {
      */
     public static @NonNull ApkAssets loadFromPath(@NonNull String path, boolean system)
             throws IOException {
-        return new ApkAssets(path, system, false /*forceSharedLib*/, false /*overlay*/);
+        return new ApkAssets(path, system, false /*forceSharedLib*/, false /*overlay*/,
+                false /*arscOnly*/, false /*forLoader*/);
     }
 
     /**
@@ -76,7 +85,8 @@ public final class ApkAssets {
      */
     public static @NonNull ApkAssets loadFromPath(@NonNull String path, boolean system,
             boolean forceSharedLibrary) throws IOException {
-        return new ApkAssets(path, system, forceSharedLibrary, false /*overlay*/);
+        return new ApkAssets(path, system, forceSharedLibrary, false /*overlay*/,
+                false /*arscOnly*/, false /*forLoader*/);
     }
 
     /**
@@ -96,7 +106,8 @@ public final class ApkAssets {
     public static @NonNull ApkAssets loadFromFd(@NonNull FileDescriptor fd,
             @NonNull String friendlyName, boolean system, boolean forceSharedLibrary)
             throws IOException {
-        return new ApkAssets(fd, friendlyName, system, forceSharedLibrary);
+        return new ApkAssets(fd, friendlyName, system, forceSharedLibrary, false /*arscOnly*/,
+                false /*forLoader*/);
     }
 
     /**
@@ -110,21 +121,90 @@ public final class ApkAssets {
      */
     public static @NonNull ApkAssets loadOverlayFromPath(@NonNull String idmapPath, boolean system)
             throws IOException {
-        return new ApkAssets(idmapPath, system, false /*forceSharedLibrary*/, true /*overlay*/);
+        return new ApkAssets(idmapPath, system, false /*forceSharedLibrary*/, true /*overlay*/,
+                false /*arscOnly*/, false /*forLoader*/);
     }
 
-    private ApkAssets(@NonNull String path, boolean system, boolean forceSharedLib, boolean overlay)
+    /**
+     * Creates a new ApkAssets instance from the given path on disk for use with a
+     * {@link ResourcesProvider}.
+     *
+     * @param path The path to an APK on disk.
+     * @return a new instance of ApkAssets.
+     * @throws IOException if a disk I/O error or parsing error occurred.
+     */
+    public static @NonNull ApkAssets loadApkForLoader(@NonNull String path)
             throws IOException {
+        return new ApkAssets(path, false /*system*/, false /*forceSharedLibrary*/,
+                false /*overlay*/, false /*arscOnly*/, true /*forLoader*/);
+    }
+
+    /**
+     * Creates a new ApkAssets instance from the given file descriptor for use with a
+     * {@link ResourcesProvider}.
+     *
+     * Performs a dup of the underlying fd, so you must take care of still closing
+     * the FileDescriptor yourself (and can do that whenever you want).
+     *
+     * @param fd The FileDescriptor of an open, readable APK.
+     * @return a new instance of ApkAssets.
+     * @throws IOException if a disk I/O error or parsing error occurred.
+     */
+    @NonNull
+    public static ApkAssets loadApkForLoader(@NonNull FileDescriptor fd) throws IOException {
+        return new ApkAssets(fd, TextUtils.emptyIfNull(fd.toString()),
+                false /*system*/, false /*forceSharedLib*/, false /*arscOnly*/, true /*forLoader*/);
+    }
+
+    /**
+     * Creates a new ApkAssets instance from the given file descriptor representing an ARSC
+     * for use with a {@link ResourcesProvider}.
+     *
+     * Performs a dup of the underlying fd, so you must take care of still closing
+     * the FileDescriptor yourself (and can do that whenever you want).
+     *
+     * @param fd The FileDescriptor of an open, readable .arsc.
+     * @return a new instance of ApkAssets.
+     * @throws IOException if a disk I/O error or parsing error occurred.
+     */
+    public static @NonNull ApkAssets loadArscForLoader(@NonNull FileDescriptor fd)
+            throws IOException {
+        return new ApkAssets(fd, TextUtils.emptyIfNull(fd.toString()),
+                false /*system*/, false /*forceSharedLib*/, true /*arscOnly*/, true /*forLoader*/);
+    }
+
+    /**
+     * Generates an entirely empty ApkAssets. Needed because the ApkAssets instance and presence
+     * is required for a lot of APIs, and it's easier to have a non-null reference rather than
+     * tracking a separate identifier.
+     */
+    @NonNull
+    public static ApkAssets loadEmptyForLoader() {
+        return new ApkAssets(true);
+    }
+
+    private ApkAssets(boolean forLoader) {
+        mForLoader = forLoader;
+        mNativePtr = nativeLoadEmpty(forLoader);
+        mStringBlock = null;
+    }
+
+    private ApkAssets(@NonNull String path, boolean system, boolean forceSharedLib, boolean overlay,
+            boolean arscOnly, boolean forLoader) throws IOException {
+        mForLoader = forLoader;
         Preconditions.checkNotNull(path, "path");
-        mNativePtr = nativeLoad(path, system, forceSharedLib, overlay);
+        mNativePtr = arscOnly ? nativeLoadArsc(path, forLoader)
+                : nativeLoad(path, system, forceSharedLib, overlay, forLoader);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
     }
 
     private ApkAssets(@NonNull FileDescriptor fd, @NonNull String friendlyName, boolean system,
-            boolean forceSharedLib) throws IOException {
+            boolean forceSharedLib, boolean arscOnly, boolean forLoader) throws IOException {
+        mForLoader = forLoader;
         Preconditions.checkNotNull(fd, "fd");
         Preconditions.checkNotNull(friendlyName, "friendlyName");
-        mNativePtr = nativeLoadFromFd(fd, friendlyName, system, forceSharedLib);
+        mNativePtr = arscOnly ? nativeLoadArscFromFd(fd, friendlyName, forLoader)
+                : nativeLoadFromFd(fd, friendlyName, system, forceSharedLib, forLoader);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
     }
 
@@ -136,9 +216,17 @@ public final class ApkAssets {
     }
 
     CharSequence getStringFromPool(int idx) {
+        if (mStringBlock == null) {
+            return null;
+        }
+
         synchronized (this) {
             return mStringBlock.get(idx);
         }
+    }
+
+    public boolean isForLoader() {
+        return mForLoader;
     }
 
     /**
@@ -192,18 +280,26 @@ public final class ApkAssets {
         synchronized (this) {
             if (mOpen) {
                 mOpen = false;
-                mStringBlock.close();
+                if (mStringBlock != null) {
+                    mStringBlock.close();
+                }
                 nativeDestroy(mNativePtr);
             }
         }
     }
 
-    private static native long nativeLoad(
-            @NonNull String path, boolean system, boolean forceSharedLib, boolean overlay)
+    private static native long nativeLoad(@NonNull String path, boolean system,
+            boolean forceSharedLib, boolean overlay, boolean forLoader)
             throws IOException;
     private static native long nativeLoadFromFd(@NonNull FileDescriptor fd,
-            @NonNull String friendlyName, boolean system, boolean forceSharedLib)
+            @NonNull String friendlyName, boolean system, boolean forceSharedLib,
+            boolean forLoader)
             throws IOException;
+    private static native long nativeLoadArsc(@NonNull String path, boolean forLoader)
+            throws IOException;
+    private static native long nativeLoadArscFromFd(@NonNull FileDescriptor fd,
+            @NonNull String friendlyName, boolean forLoader) throws IOException;
+    private static native long nativeLoadEmpty(boolean forLoader);
     private static native void nativeDestroy(long ptr);
     private static native @NonNull String nativeGetAssetPath(long ptr);
     private static native long nativeGetStringBlock(long ptr);

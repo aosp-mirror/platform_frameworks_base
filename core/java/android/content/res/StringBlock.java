@@ -47,6 +47,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.Closeable;
 import java.util.Arrays;
 
 /**
@@ -54,7 +55,7 @@ import java.util.Arrays;
  *
  * {@hide}
  */
-final class StringBlock {
+public final class StringBlock implements Closeable {
     private static final String TAG = "AssetManager";
     private static final boolean localLOGV = false;
 
@@ -175,6 +176,7 @@ final class StringBlock {
         }
     }
 
+    @Override
     public void close() {
         synchronized (this) {
             if (mOpen) {
@@ -517,7 +519,7 @@ final class StringBlock {
      *  of this newly creating StringBlock.
      */
     @UnsupportedAppUsage
-    StringBlock(long obj, boolean useSparse) {
+    public StringBlock(long obj, boolean useSparse) {
         mNative = obj;
         mUseSparse = useSparse;
         mOwnsNative = false;

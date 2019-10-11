@@ -382,7 +382,13 @@ class AssetManager2 {
       enum class Type {
         INITIAL,
         BETTER_MATCH,
-        OVERLAID
+        BETTER_MATCH_LOADER,
+        OVERLAID,
+        OVERLAID_LOADER,
+        SKIPPED,
+        SKIPPED_LOADER,
+        NO_ENTRY,
+        NO_ENTRY_LOADER,
       };
 
       // Marks what kind of override this step was.

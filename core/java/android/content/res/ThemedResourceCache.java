@@ -22,8 +22,8 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.Resources.Theme;
 import android.content.res.Resources.ThemeKey;
-import android.util.LongSparseArray;
 import android.util.ArrayMap;
+import android.util.LongSparseArray;
 
 import java.lang.ref.WeakReference;
 
@@ -233,5 +233,19 @@ abstract class ThemedResourceCache<T> {
     private boolean pruneEntryLocked(@Nullable T entry, @Config int configChanges) {
         return entry == null || (configChanges != 0
                 && shouldInvalidateEntry(entry, configChanges));
+    }
+
+    public synchronized void clear() {
+        if (mThemedEntries != null) {
+            mThemedEntries.clear();
+        }
+
+        if (mUnthemedEntries != null) {
+            mUnthemedEntries.clear();
+        }
+
+        if (mNullThemedEntries != null) {
+            mNullThemedEntries.clear();
+        }
     }
 }
