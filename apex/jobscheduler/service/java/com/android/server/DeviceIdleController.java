@@ -274,6 +274,7 @@ public class DeviceIdleController extends SystemService
     private IBatteryStats mBatteryStats;
     private ActivityManagerInternal mLocalActivityManager;
     private ActivityTaskManagerInternal mLocalActivityTaskManager;
+    private DeviceIdleInternal mLocalService;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
     private INetworkPolicyManager mNetworkPolicyManager;
@@ -288,6 +289,7 @@ public class DeviceIdleController extends SystemService
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
     private boolean mQuickDozeActivated;
+    private boolean mQuickDozeActivatedWhileIdling;
     private boolean mForceIdle;
     private boolean mNetworkConnected;
     private boolean mScreenOn;
@@ -299,6 +301,10 @@ public class DeviceIdleController extends SystemService
     private boolean mHasNetworkLocation;
     private Location mLastGenericLocation;
     private Location mLastGpsLocation;
+
+    /** Time in the elapsed realtime timebase when this listener last received a motion event. */
+    private long mLastMotionEventElapsed;
+
     // Current locked state of the screen
     private boolean mScreenLocked;
     private int mNumBlockingConstraints = 0;
@@ -548,6 +554,9 @@ public class DeviceIdleController extends SystemService
      */
     private ArrayMap<String, Integer> mRemovedFromSystemWhitelistApps = new ArrayMap<>();
 
+    private final ArraySet<DeviceIdleInternal.StationaryListener> mStationaryListeners =
+            new ArraySet<>();
+
     private static final int EVENT_NULL = 0;
     private static final int EVENT_NORMAL = 1;
     private static final int EVENT_LIGHT_IDLE = 2;
@@ -606,6 +615,22 @@ public class DeviceIdleController extends SystemService
         }
     };
 
+
+    private final AlarmManager.OnAlarmListener mMotionTimeoutAlarmListener = () -> {
+        synchronized (DeviceIdleController.this) {
+            if (!isStationaryLocked()) {
+                // If the device keeps registering motion, then the alarm should be
+                // rescheduled, so this shouldn't go off until the device is stationary.
+                // This case may happen in a race condition (alarm goes off right before
+                // motion is detected, but handleMotionDetectedLocked is called before
+                // we enter this block).
+                Slog.w(TAG, "motion timeout went off and device isn't stationary");
+                return;
+            }
+        }
+        postStationaryStatusUpdated();
+    };
+
     private final AlarmManager.OnAlarmListener mSensingTimeoutAlarmListener
             = new AlarmManager.OnAlarmListener() {
         @Override
@@ -655,11 +680,69 @@ public class DeviceIdleController extends SystemService
         }
     };
 
+    /** Post stationary status only to this listener. */
+    private void postStationaryStatus(DeviceIdleInternal.StationaryListener listener) {
+        mHandler.obtainMessage(MSG_REPORT_STATIONARY_STATUS, listener).sendToTarget();
+    }
+
+    /** Post stationary status to all registered listeners. */
+    private void postStationaryStatusUpdated() {
+        mHandler.sendEmptyMessage(MSG_REPORT_STATIONARY_STATUS);
+    }
+
+    private boolean isStationaryLocked() {
+        final long now = mInjector.getElapsedRealtime();
+        return mMotionListener.active
+                // Listening for motion for long enough and last motion was long enough ago.
+                && now - Math.max(mMotionListener.activatedTimeElapsed, mLastMotionEventElapsed)
+                        >= mConstants.MOTION_INACTIVE_TIMEOUT;
+    }
+
+    @VisibleForTesting
+    void registerStationaryListener(DeviceIdleInternal.StationaryListener listener) {
+        synchronized (this) {
+            if (!mStationaryListeners.add(listener)) {
+                // Listener already registered.
+                return;
+            }
+            postStationaryStatus(listener);
+            if (mMotionListener.active) {
+                if (!isStationaryLocked() && mStationaryListeners.size() == 1) {
+                    // First listener to be registered and the device isn't stationary, so we
+                    // need to register the alarm to report the device is stationary.
+                    scheduleMotionTimeoutAlarmLocked();
+                }
+            } else {
+                startMonitoringMotionLocked();
+                scheduleMotionTimeoutAlarmLocked();
+            }
+        }
+    }
+
+    private void unregisterStationaryListener(DeviceIdleInternal.StationaryListener listener) {
+        synchronized (this) {
+            if (mStationaryListeners.remove(listener) && mStationaryListeners.size() == 0
+                    // Motion detection is started when transitioning from INACTIVE to IDLE_PENDING
+                    // and so doesn't need to be on for ACTIVE or INACTIVE states.
+                    // Motion detection isn't needed when idling due to Quick Doze.
+                    && (mState == STATE_ACTIVE || mState == STATE_INACTIVE
+                            || mQuickDozeActivated)) {
+                maybeStopMonitoringMotionLocked();
+            }
+        }
+    }
+
     @VisibleForTesting
     final class MotionListener extends TriggerEventListener
             implements SensorEventListener {
 
         boolean active = false;
+
+        /**
+         * Time in the elapsed realtime timebase when this listener was activated. Only valid if
+         * {@link #active} is true.
+         */
+        long activatedTimeElapsed;
 
         public boolean isActive() {
             return active;
@@ -668,7 +751,6 @@ public class DeviceIdleController extends SystemService
         @Override
         public void onTrigger(TriggerEvent event) {
             synchronized (DeviceIdleController.this) {
-                active = false;
                 motionLocked();
             }
         }
@@ -676,8 +758,6 @@ public class DeviceIdleController extends SystemService
         @Override
         public void onSensorChanged(SensorEvent event) {
             synchronized (DeviceIdleController.this) {
-                mSensorManager.unregisterListener(this, mMotionSensor);
-                active = false;
                 motionLocked();
             }
         }
@@ -695,6 +775,7 @@ public class DeviceIdleController extends SystemService
             }
             if (success) {
                 active = true;
+                activatedTimeElapsed = mInjector.getElapsedRealtime();
             } else {
                 Slog.e(TAG, "Unable to register for " + mMotionSensor);
             }
@@ -1302,6 +1383,8 @@ public class DeviceIdleController extends SystemService
     private static final int MSG_REPORT_IDLE_OFF = 4;
     private static final int MSG_REPORT_ACTIVE = 5;
     private static final int MSG_TEMP_APP_WHITELIST_TIMEOUT = 6;
+    @VisibleForTesting
+    static final int MSG_REPORT_STATIONARY_STATUS = 7;
     private static final int MSG_FINISH_IDLE_OP = 8;
     private static final int MSG_REPORT_TEMP_APP_WHITELIST_CHANGED = 9;
     private static final int MSG_SEND_CONSTRAINT_MONITORING = 10;
@@ -1427,6 +1510,32 @@ public class DeviceIdleController extends SystemService
                     updatePreIdleFactor();
                     maybeDoImmediateMaintenance();
                 } break;
+                case MSG_REPORT_STATIONARY_STATUS: {
+                    final DeviceIdleInternal.StationaryListener newListener =
+                            (DeviceIdleInternal.StationaryListener) msg.obj;
+                    final DeviceIdleInternal.StationaryListener[] listeners;
+                    final boolean isStationary;
+                    synchronized (DeviceIdleController.this) {
+                        isStationary = isStationaryLocked();
+                        if (newListener == null) {
+                            // Only notify all listeners if we aren't directing to one listener.
+                            listeners = mStationaryListeners.toArray(
+                                    new DeviceIdleInternal.StationaryListener[
+                                            mStationaryListeners.size()]);
+                        } else {
+                            listeners = null;
+                        }
+                    }
+                    if (listeners != null) {
+                        for (DeviceIdleInternal.StationaryListener listener : listeners) {
+                            listener.onDeviceStationaryChanged(isStationary);
+                        }
+                    }
+                    if (newListener != null) {
+                        newListener.onDeviceStationaryChanged(isStationary);
+                    }
+                }
+                break;
             }
         }
     }
@@ -1679,6 +1788,16 @@ public class DeviceIdleController extends SystemService
         public int[] getPowerSaveTempWhitelistAppIds() {
             return DeviceIdleController.this.getAppIdTempWhitelistInternal();
         }
+
+        @Override
+        public void registerStationaryListener(StationaryListener listener) {
+            DeviceIdleController.this.registerStationaryListener(listener);
+        }
+
+        @Override
+        public void unregisterStationaryListener(StationaryListener listener) {
+            DeviceIdleController.this.unregisterStationaryListener(listener);
+        }
     }
 
     static class Injector {
@@ -1862,7 +1981,8 @@ public class DeviceIdleController extends SystemService
 
         mBinderService = new BinderService();
         publishBinderService(Context.DEVICE_IDLE_CONTROLLER, mBinderService);
-        publishLocalService(DeviceIdleInternal.class, new LocalService());
+        mLocalService = new LocalService();
+        publishLocalService(DeviceIdleInternal.class, mLocalService);
     }
 
     @Override
@@ -2593,6 +2713,8 @@ public class DeviceIdleController extends SystemService
     void updateQuickDozeFlagLocked(boolean enabled) {
         if (DEBUG) Slog.i(TAG, "updateQuickDozeFlagLocked: enabled=" + enabled);
         mQuickDozeActivated = enabled;
+        mQuickDozeActivatedWhileIdling =
+                mQuickDozeActivated && (mState == STATE_IDLE || mState == STATE_IDLE_MAINTENANCE);
         if (enabled) {
             // If Quick Doze is enabled, see if we should go straight into it.
             becomeInactiveIfAppropriateLocked();
@@ -2777,10 +2899,11 @@ public class DeviceIdleController extends SystemService
         mNextIdlePendingDelay = 0;
         mNextIdleDelay = 0;
         mIdleStartTime = 0;
+        mQuickDozeActivatedWhileIdling = false;
         cancelAlarmLocked();
         cancelSensingTimeoutAlarmLocked();
         cancelLocatingLocked();
-        stopMonitoringMotionLocked();
+        maybeStopMonitoringMotionLocked();
         mAnyMotionDetector.stop();
         updateActiveConstraintsLocked();
     }
@@ -3267,11 +3390,23 @@ public class DeviceIdleController extends SystemService
 
     void motionLocked() {
         if (DEBUG) Slog.d(TAG, "motionLocked()");
-        // The motion sensor will have been disabled at this point
+        mLastMotionEventElapsed = mInjector.getElapsedRealtime();
         handleMotionDetectedLocked(mConstants.MOTION_INACTIVE_TIMEOUT, "motion");
     }
 
     void handleMotionDetectedLocked(long timeout, String type) {
+        if (mStationaryListeners.size() > 0) {
+            postStationaryStatusUpdated();
+            scheduleMotionTimeoutAlarmLocked();
+        }
+        if (mQuickDozeActivated && !mQuickDozeActivatedWhileIdling) {
+            // Don't exit idle due to motion if quick doze is enabled.
+            // However, if the device started idling due to the normal progression (going through
+            // all the states) and then had quick doze activated, come out briefly on motion so the
+            // user can get slightly fresher content.
+            return;
+        }
+        maybeStopMonitoringMotionLocked();
         // The device is not yet active, so we want to go back to the pending idle
         // state to wait again for no motion.  Note that we only monitor for motion
         // after moving out of the inactive state, so no need to worry about that.
@@ -3323,10 +3458,15 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void stopMonitoringMotionLocked() {
-        if (DEBUG) Slog.d(TAG, "stopMonitoringMotionLocked()");
-        if (mMotionSensor != null && mMotionListener.active) {
+    /**
+     * Stops motion monitoring. Will not stop monitoring if there are registered stationary
+     * listeners.
+     */
+    private void maybeStopMonitoringMotionLocked() {
+        if (DEBUG) Slog.d(TAG, "maybeStopMonitoringMotionLocked()");
+        if (mMotionSensor != null && mMotionListener.active && mStationaryListeners.size() == 0) {
             mMotionListener.unregisterLocked();
+            cancelMotionTimeoutAlarmLocked();
         }
     }
 
@@ -3351,6 +3491,10 @@ public class DeviceIdleController extends SystemService
             locationManager.removeUpdates(mGpsLocationListener);
             mLocating = false;
         }
+    }
+
+    private void cancelMotionTimeoutAlarmLocked() {
+        mAlarmManager.cancel(mMotionTimeoutAlarmListener);
     }
 
     void cancelSensingTimeoutAlarmLocked() {
@@ -3391,6 +3535,14 @@ public class DeviceIdleController extends SystemService
         mNextLightAlarmTime = SystemClock.elapsedRealtime() + delay;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 mNextLightAlarmTime, "DeviceIdleController.light", mLightAlarmListener, mHandler);
+    }
+
+    private void scheduleMotionTimeoutAlarmLocked() {
+        if (DEBUG) Slog.d(TAG, "scheduleMotionAlarmLocked");
+        long nextMotionTimeoutAlarmTime =
+                mInjector.getElapsedRealtime() + mConstants.MOTION_INACTIVE_TIMEOUT;
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextMotionTimeoutAlarmTime,
+                "DeviceIdleController.motion", mMotionTimeoutAlarmListener, mHandler);
     }
 
     void scheduleSensingTimeoutAlarmLocked(long delay) {
@@ -4310,9 +4462,14 @@ public class DeviceIdleController extends SystemService
                 }
                 pw.println("  }");
             }
-            if (mUseMotionSensor) {
+            if (mUseMotionSensor || mStationaryListeners.size() > 0) {
                 pw.print("  mMotionActive="); pw.println(mMotionListener.active);
                 pw.print("  mNotMoving="); pw.println(mNotMoving);
+                pw.print("  mMotionListener.activatedTimeElapsed=");
+                pw.println(mMotionListener.activatedTimeElapsed);
+                pw.print("  mLastMotionEventElapsed="); pw.println(mLastMotionEventElapsed);
+                pw.print("  "); pw.print(mStationaryListeners.size());
+                pw.println(" stationary listeners registered");
             }
             pw.print("  mLocating="); pw.print(mLocating); pw.print(" mHasGps=");
                     pw.print(mHasGps); pw.print(" mHasNetwork=");

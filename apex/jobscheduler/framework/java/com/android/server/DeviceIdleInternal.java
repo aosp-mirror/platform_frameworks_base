@@ -49,4 +49,24 @@ public interface DeviceIdleInternal {
     int[] getPowerSaveWhitelistUserAppIds();
 
     int[] getPowerSaveTempWhitelistAppIds();
+
+    /**
+     * Listener to be notified when DeviceIdleController determines that the device has moved or is
+     * stationary.
+     */
+    interface StationaryListener {
+        void onDeviceStationaryChanged(boolean isStationary);
+    }
+
+    /**
+     * Registers a listener that will be notified when the system has detected that the device is
+     * stationary or in motion.
+     */
+    void registerStationaryListener(StationaryListener listener);
+
+    /**
+     * Unregisters a registered stationary listener from being notified when the system has detected
+     * that the device is stationary or in motion.
+     */
+    void unregisterStationaryListener(StationaryListener listener);
 }
