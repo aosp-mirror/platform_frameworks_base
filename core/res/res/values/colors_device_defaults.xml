@@ -47,7 +47,7 @@
     <color name="error_color_device_default_light">#ffd93025</color>
 
     <color name="list_divider_color_light">#ffdadce0</color>
-    <color name="list_divider_color_dark">#85ffffff</color>
+    <color name="list_divider_color_dark">#20ffffff</color>
     <color name="list_divider_opacity_device_default_light">@android:color/white</color>
     <color name="list_divider_opacity_device_default_dark">@android:color/white</color>
 
