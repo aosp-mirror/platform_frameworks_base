@@ -43,6 +43,7 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -530,7 +531,10 @@ public class NotificationPanelView extends PanelView implements
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mLastOrientation = getResources().getConfiguration().orientation;
         mPluginFrame = findViewById(R.id.plugin_frame);
-        mNPVPluginManager = new NPVPluginManager(mPluginFrame, mPluginManager);
+        if (Settings.System.getInt(
+                mContext.getContentResolver(), "npv_plugin_flag", 0) == 1) {
+            mNPVPluginManager = new NPVPluginManager(mPluginFrame, mPluginManager);
+        }
 
 
         initBottomArea();
@@ -767,7 +771,7 @@ public class NotificationPanelView extends PanelView implements
             mPluginFrame.setLayoutParams(lp);
         }
 
-        mNPVPluginManager.replaceFrameLayout(mPluginFrame);
+        if (mNPVPluginManager != null) mNPVPluginManager.replaceFrameLayout(mPluginFrame);
     }
 
     private void initBottomArea() {
@@ -797,8 +801,10 @@ public class NotificationPanelView extends PanelView implements
         int oldMaxHeight = mQsMaxExpansionHeight;
         if (mQs != null) {
             mQsMinExpansionHeight = mKeyguardShowing ? 0 : mQs.getQsMinExpansionHeight();
-            mNPVPluginManager.setYOffset(mQsMinExpansionHeight);
-            mQsMinExpansionHeight += mNPVPluginManager.getHeight();
+            if (mNPVPluginManager != null) {
+                mNPVPluginManager.setYOffset(mQsMinExpansionHeight);
+                mQsMinExpansionHeight += mNPVPluginManager.getHeight();
+            }
             mQsMaxExpansionHeight = mQs.getDesiredHeight();
             mNotificationStackScroller.setMaxTopPadding(
                     mQsMaxExpansionHeight + mQsNotificationTopPadding);
@@ -1904,9 +1910,11 @@ public class NotificationPanelView extends PanelView implements
                 mBarState != StatusBarState.KEYGUARD && (!mQsExpanded
                         || mQsExpansionFromOverscroll));
         updateEmptyShadeView();
-        mNPVPluginManager.changeVisibility((mBarState != StatusBarState.KEYGUARD)
-                ? View.VISIBLE
-                : View.INVISIBLE);
+        if (mNPVPluginManager != null) {
+            mNPVPluginManager.changeVisibility((mBarState != StatusBarState.KEYGUARD)
+                    ? View.VISIBLE
+                    : View.INVISIBLE);
+        }
         mQsNavbarScrim.setVisibility(mBarState == StatusBarState.SHADE && mQsExpanded
                 && !mStackScrollerOverscrolling && mQsScrimEnabled
                 ? View.VISIBLE
@@ -1964,7 +1972,9 @@ public class NotificationPanelView extends PanelView implements
         float qsExpansionFraction = getQsExpansionFraction();
         mQs.setQsExpansion(qsExpansionFraction, getHeaderTranslation());
         int heightDiff = mQs.getDesiredHeight() - mQs.getQsMinExpansionHeight();
-        mNPVPluginManager.setExpansion(qsExpansionFraction, getHeaderTranslation(), heightDiff);
+        if (mNPVPluginManager != null) {
+            mNPVPluginManager.setExpansion(qsExpansionFraction, getHeaderTranslation(), heightDiff);
+        }
         mNotificationStackScroller.setQsExpansionFraction(qsExpansionFraction);
     }
 
@@ -2385,7 +2395,7 @@ public class NotificationPanelView extends PanelView implements
                 appearAmount = mNotificationStackScroller.calculateAppearFractionBypass();
             }
             startHeight = -mQs.getQsMinExpansionHeight();
-            startHeight -= mNPVPluginManager.getHeight();
+            if (mNPVPluginManager != null) startHeight -= mNPVPluginManager.getHeight();
         }
         float translation = MathUtils.lerp(startHeight, 0,
                 Math.min(1.0f, appearAmount))
@@ -2529,7 +2539,7 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusBar.setListening(listening);
         if (mQs == null) return;
         mQs.setListening(listening);
-        mNPVPluginManager.setListening(listening);
+        if (mNPVPluginManager != null) mNPVPluginManager.setListening(listening);
     }
 
     @Override

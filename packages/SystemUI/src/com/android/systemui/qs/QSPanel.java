@@ -28,10 +28,12 @@ import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -49,6 +51,8 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.statusbar.phone.NPVPluginManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -98,6 +102,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private BrightnessMirrorController mBrightnessMirrorController;
     private View mDivider;
 
+    private FrameLayout mPluginFrame;
+    private final PluginManager mPluginManager;
+    private NPVPluginManager mNPVPluginManager;
+
     public QSPanel(Context context) {
         this(context, null);
     }
@@ -106,9 +114,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         this(context, attrs, null);
     }
 
+    public QSPanel(Context context, AttributeSet attrs, DumpController dumpController) {
+        this(context, attrs, dumpController, null);
+    }
+
     @Inject
     public QSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DumpController dumpController) {
+            DumpController dumpController, PluginManager pluginManager) {
         super(context, attrs);
         mContext = context;
 
@@ -136,6 +148,15 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mBrightnessController = new BrightnessController(getContext(),
                 findViewById(R.id.brightness_slider));
         mDumpController = dumpController;
+        mPluginManager = pluginManager;
+        if (mPluginManager != null && Settings.System.getInt(
+                mContext.getContentResolver(), "npv_plugin_flag", 0) == 2) {
+            mPluginFrame = (FrameLayout) LayoutInflater.from(mContext).inflate(
+                    R.layout.status_bar_expanded_plugin_frame, this, false);
+            addView(mPluginFrame);
+            mNPVPluginManager = new NPVPluginManager(mPluginFrame, mPluginManager);
+        }
+
     }
 
     protected void addDivider() {
@@ -377,6 +398,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mListening) {
             refreshAllTiles();
         }
+        if (mNPVPluginManager != null) mNPVPluginManager.setListening(listening);
     }
 
     public void setListening(boolean listening, boolean expanded) {
