@@ -65,7 +65,6 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.CallState;
-import android.telephony.Annotation.DataState;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
@@ -283,6 +282,21 @@ public class TelephonyManager {
     };
 
     /** @hide */
+    @IntDef(prefix = {"MODEM_COUNT_"},
+            value = {
+                    MODEM_COUNT_NO_MODEM,
+                    MODEM_COUNT_SINGLE_MODEM,
+                    MODEM_COUNT_DUAL_MODEM,
+                    MODEM_COUNT_TRI_MODEM
+            })
+    public @interface ModemCount {}
+
+    public static final int MODEM_COUNT_NO_MODEM     = 0;
+    public static final int MODEM_COUNT_SINGLE_MODEM = 1;
+    public static final int MODEM_COUNT_DUAL_MODEM   = 2;
+    public static final int MODEM_COUNT_TRI_MODEM    = 3;
+
+    /** @hide */
     @UnsupportedAppUsage
     public TelephonyManager(Context context) {
       this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
@@ -359,12 +373,26 @@ public class TelephonyManager {
     /**
      * Returns the number of phones available.
      * Returns 0 if none of voice, sms, data is not supported
-     * Returns 1 for Single standby mode (Single SIM functionality)
-     * Returns 2 for Dual standby mode.(Dual SIM functionality)
-     * Returns 3 for Tri standby mode.(Tri SIM functionality)
+     * Returns 1 for Single standby mode (Single SIM functionality).
+     * Returns 2 for Dual standby mode (Dual SIM functionality).
+     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     * @deprecated Use {@link #getActiveModemCount} instead.
      */
+    @Deprecated
     public int getPhoneCount() {
-        int phoneCount = 1;
+        return getActiveModemCount();
+    }
+
+    /**
+     * Returns the number of logical modems currently configured to be activated.
+     *
+     * Returns 0 if none of voice, sms, data is not supported
+     * Returns 1 for Single standby mode (Single SIM functionality).
+     * Returns 2 for Dual standby mode (Dual SIM functionality).
+     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     */
+    public @ModemCount int getActiveModemCount() {
+        int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
                 ConnectivityManager cm = mContext == null ? null : (ConnectivityManager) mContext
@@ -372,33 +400,30 @@ public class TelephonyManager {
                 // check for voice and data support, 0 if not supported
                 if (!isVoiceCapable() && !isSmsCapable() && cm != null
                         && !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)) {
-                    phoneCount = 0;
+                    modemCount = MODEM_COUNT_NO_MODEM;
                 } else {
-                    phoneCount = 1;
+                    modemCount = MODEM_COUNT_SINGLE_MODEM;
                 }
                 break;
             case DSDS:
             case DSDA:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+                modemCount = MODEM_COUNT_DUAL_MODEM;
                 break;
             case TSTS:
-                phoneCount = PhoneConstants.MAX_PHONE_COUNT_TRI_SIM;
+                modemCount = MODEM_COUNT_TRI_MODEM;
                 break;
         }
-        return phoneCount;
+        return modemCount;
     }
 
     /**
-     *
-     * Return how many phone / logical modem can be active simultaneously, in terms of device
+     * Return how many logical modem can be potentially active simultaneously, in terms of hardware
      * capability.
-     * For example, for a dual-SIM capable device, it always returns 2, even if only one logical
-     * modem / SIM is active (aka in single SIM mode).
-     *
-     * TODO: b/139642279 publicize and rename.
-     * @hide
+     * It might return different value from {@link #getActiveModemCount}. For example, for a
+     * dual-SIM capable device operating in single SIM mode (only one logical modem is turned on),
+     * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
-    public int getMaxPhoneCount() {
+    public @ModemCount int getSupportedModemCount() {
         // TODO: b/139642279 when turning on this feature, remove dependency of
         // PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE and always return result based on
         // PROPERTY_MAX_ACTIVE_MODEMS.
