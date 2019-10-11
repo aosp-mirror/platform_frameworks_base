@@ -17,6 +17,7 @@ package com.android.systemui.qs;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.admin.DevicePolicyEventLogger;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,11 +31,12 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.Log;
+import android.util.StatsLog;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,8 +47,6 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
-
-import static android.provider.Settings.ACTION_VPN_SETTINGS;
 
 public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
     protected static final String TAG = "QSSecurityFooter";
@@ -81,7 +81,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mFooterIcon = (ImageView) mRootView.findViewById(R.id.footer_icon);
         mFooterIconId = R.drawable.ic_info_outline;
         mContext = context;
-        mMainHandler = new Handler(Looper.getMainLooper());
+        mMainHandler = new Handler(Looper.myLooper());
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
@@ -96,6 +96,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     public void setListening(boolean listening) {
         if (listening) {
             mSecurityController.addCallback(mCallback);
+            refreshState();
         } else {
             mSecurityController.removeCallback(mCallback);
         }
@@ -120,6 +121,9 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
 
     private void handleClick() {
         showDeviceMonitoringDialog();
+        DevicePolicyEventLogger
+                .createEvent(StatsLog.DEVICE_POLICY_EVENT__EVENT_ID__DO_USER_INFO_CLICKED)
+                .write();
     }
 
     public void showDeviceMonitoringDialog() {
@@ -156,9 +160,9 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         int footerIconId = R.drawable.ic_info_outline;
         if (vpnName != null || vpnNameWorkProfile != null) {
             if (mSecurityController.isVpnBranded()) {
-                footerIconId = R.drawable.ic_qs_branded_vpn;
+                footerIconId = R.drawable.stat_sys_branded_vpn;
             } else {
-                footerIconId = R.drawable.ic_qs_vpn;
+                footerIconId = R.drawable.stat_sys_vpn_ic;
             }
         }
         if (mFooterIconId != footerIconId) {

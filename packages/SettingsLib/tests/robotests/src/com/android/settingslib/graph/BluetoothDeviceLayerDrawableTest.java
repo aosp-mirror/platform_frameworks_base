@@ -22,16 +22,16 @@ import android.content.Context;
 import android.graphics.drawable.VectorDrawable;
 
 import com.android.settingslib.R;
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class BluetoothDeviceLayerDrawableTest {
-    private static final int RES_ID = R.drawable.ic_bt_cellphone;
+    private static final int RES_ID = com.android.internal.R.drawable.ic_phone;
     private static final int BATTERY_LEVEL = 15;
     private static final float BATTERY_ICON_SCALE = 0.75f;
     private static final int BATTERY_ICON_PADDING_TOP = 6;
@@ -89,10 +89,9 @@ public class BluetoothDeviceLayerDrawableTest {
         BluetoothDeviceLayerDrawable twinDrawable =
                 (BluetoothDeviceLayerDrawable) drawable.getConstantState().newDrawable();
 
-        assertThat(twinDrawable.getDrawable(0)).isEqualTo(drawable.getDrawable(0));
-        assertThat(twinDrawable.getDrawable(1)).isEqualTo(drawable.getDrawable(1));
-        assertThat(twinDrawable.getLayerInsetTop(1)).isEqualTo(
-                drawable.getLayerInsetTop(1));
+        assertThat(twinDrawable.getDrawable(0)).isNotNull();
+        assertThat(twinDrawable.getDrawable(1)).isNotNull();
+        assertThat(twinDrawable.getLayerInsetTop(1)).isEqualTo(drawable.getLayerInsetTop(1));
     }
 
     @Test

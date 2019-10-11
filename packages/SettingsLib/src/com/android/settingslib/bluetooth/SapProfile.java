@@ -19,8 +19,8 @@ package com.android.settingslib.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.os.ParcelUuid;
@@ -40,7 +40,6 @@ final class SapProfile implements LocalBluetoothProfile {
     private BluetoothSap mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
 
@@ -58,7 +57,6 @@ final class SapProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothSap) proxy;
             // We just bound to the service, so refresh the UI for any connected SAP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -68,7 +66,7 @@ final class SapProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "SapProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(SapProfile.this,
                         BluetoothProfile.STATE_CONNECTED);
@@ -80,7 +78,6 @@ final class SapProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mProfileManager.callServiceDisconnectedListeners();
             mIsProfileReady=false;
         }
@@ -95,13 +92,11 @@ final class SapProfile implements LocalBluetoothProfile {
         return BluetoothProfile.SAP;
     }
 
-    SapProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    SapProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new SapServiceListener(),
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new SapServiceListener(),
                 BluetoothProfile.SAP);
     }
 
@@ -196,12 +191,12 @@ final class SapProfile implements LocalBluetoothProfile {
                 return R.string.bluetooth_sap_profile_summary_connected;
 
             default:
-                return Utils.getConnectionStateSummary(state);
+                return BluetoothUtils.getConnectionStateSummary(state);
         }
     }
 
     public int getDrawableResource(BluetoothClass btClass) {
-        return R.drawable.ic_bt_cellphone;
+        return com.android.internal.R.drawable.ic_phone;
     }
 
     protected void finalize() {

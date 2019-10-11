@@ -32,7 +32,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -40,16 +39,20 @@ import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import javax.inject.Inject;
+
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTileImpl<BooleanState> {
-    private final Icon mIcon =
-            ResourceIcon.get(R.drawable.ic_signal_airplane);
+    private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_airplane);
     private final GlobalSetting mSetting;
+    private final ActivityStarter mActivityStarter;
 
     private boolean mListening;
 
-    public AirplaneModeTile(QSHost host) {
+    @Inject
+    public AirplaneModeTile(QSHost host, ActivityStarter activityStarter) {
         super(host);
+        mActivityStarter = activityStarter;
 
         mSetting = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
             @Override
@@ -70,7 +73,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         MetricsLogger.action(mContext, getMetricsCategory(), !airplaneModeEnabled);
         if (!airplaneModeEnabled && Boolean.parseBoolean(
                 SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
-            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+            mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS), 0);
             return;
         }

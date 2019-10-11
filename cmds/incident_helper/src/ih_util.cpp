@@ -142,7 +142,7 @@ record_t parseRecordByColumns(const std::string& line, const std::vector<int>& i
     }
     if (lineSize - lastIndex > 0) {
         int beginning = lastIndex;
-        if (record.size() == indices.size()) {
+        if (record.size() == indices.size() && !record.empty()) {
             // We've already encountered all of the columns...put whatever is
             // left in the last column.
             record.pop_back();

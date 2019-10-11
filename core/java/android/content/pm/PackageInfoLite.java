@@ -118,7 +118,7 @@ public class PackageInfoLite implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    public static final Parcelable.Creator<PackageInfoLite> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PackageInfoLite> CREATOR
             = new Parcelable.Creator<PackageInfoLite>() {
         public PackageInfoLite createFromParcel(Parcel source) {
             return new PackageInfoLite(source);

@@ -254,6 +254,39 @@ public class MacAddressTest {
         }
     }
 
+    @Test
+    public void testMatches() {
+        // match 4 bytes prefix
+        assertTrue(MacAddress.fromString("aa:bb:cc:dd:ee:11").matches(
+                MacAddress.fromString("aa:bb:cc:dd:00:00"),
+                MacAddress.fromString("ff:ff:ff:ff:00:00")));
+
+        // match bytes 0,1,2 and 5
+        assertTrue(MacAddress.fromString("aa:bb:cc:dd:ee:11").matches(
+                MacAddress.fromString("aa:bb:cc:00:00:11"),
+                MacAddress.fromString("ff:ff:ff:00:00:ff")));
+
+        // match 34 bit prefix
+        assertTrue(MacAddress.fromString("aa:bb:cc:dd:ee:11").matches(
+                MacAddress.fromString("aa:bb:cc:dd:c0:00"),
+                MacAddress.fromString("ff:ff:ff:ff:c0:00")));
+
+        // fail to match 36 bit prefix
+        assertFalse(MacAddress.fromString("aa:bb:cc:dd:ee:11").matches(
+                MacAddress.fromString("aa:bb:cc:dd:40:00"),
+                MacAddress.fromString("ff:ff:ff:ff:f0:00")));
+
+        // match all 6 bytes
+        assertTrue(MacAddress.fromString("aa:bb:cc:dd:ee:11").matches(
+                MacAddress.fromString("aa:bb:cc:dd:ee:11"),
+                MacAddress.fromString("ff:ff:ff:ff:ff:ff")));
+
+        // match none of 6 bytes
+        assertTrue(MacAddress.fromString("aa:bb:cc:dd:ee:11").matches(
+                MacAddress.fromString("00:00:00:00:00:00"),
+                MacAddress.fromString("00:00:00:00:00:00")));
+    }
+
     /**
      * Tests that link-local address generation from MAC is valid.
      */

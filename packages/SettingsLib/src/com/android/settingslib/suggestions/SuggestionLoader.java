@@ -24,6 +24,12 @@ import com.android.settingslib.utils.AsyncLoader;
 
 import java.util.List;
 
+/**
+ * Framework loader is deprecated, use the compat version instead.
+ *
+ * @deprecated
+ */
+@Deprecated
 public class SuggestionLoader extends AsyncLoader<List<Suggestion>> {
 
     public static final int LOADER_ID_SUGGESTIONS = 42;

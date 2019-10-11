@@ -24,10 +24,14 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
  */
 public interface ConfigurationController extends CallbackController<ConfigurationListener> {
 
+    public void notifyThemeChanged();
+
     interface ConfigurationListener {
         default void onConfigChanged(Configuration newConfig) {}
         default void onDensityOrFontScaleChanged() {}
         default void onOverlayChanged() {}
+        default void onUiModeChanged() {}
+        default void onThemeChanged() {}
         default void onLocaleListChanged() {}
     }
 }

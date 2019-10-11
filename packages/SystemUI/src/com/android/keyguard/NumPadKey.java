@@ -54,7 +54,7 @@ public class NumPadKey extends ViewGroup {
             if (mTextView != null && mTextView.isEnabled()) {
                 mTextView.append(Character.forDigit(mDigit, 10));
             }
-            userActivity();;
+            userActivity();
         }
     };
 
@@ -118,7 +118,7 @@ public class NumPadKey extends ViewGroup {
 
         a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
         if (!a.hasValueOrEmpty(android.R.styleable.View_background)) {
-            setBackground(mContext.getDrawable(R.drawable.ripple_drawable));
+            setBackground(mContext.getDrawable(R.drawable.ripple_drawable_pin));
         }
         a.recycle();
         setContentDescription(mDigitText.getText().toString());

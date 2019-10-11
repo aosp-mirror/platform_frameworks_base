@@ -117,7 +117,7 @@ public final class DragAndDropPermissions implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<DragAndDropPermissions> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DragAndDropPermissions> CREATOR =
             new Parcelable.Creator<DragAndDropPermissions> () {
         @Override
         public DragAndDropPermissions createFromParcel(Parcel source) {

@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 
@@ -66,6 +67,7 @@ public class SearchIndexableResource extends SearchIndexableData {
         super(context);
     }
 
+    @NonNull
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();

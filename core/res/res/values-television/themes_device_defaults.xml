@@ -15,7 +15,20 @@
 -->
 <resources>
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Leanback.Dialog.Alert" />
+    <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.Leanback.Dialog.AppError" />
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Leanback.Light.Dialog.Alert" />
-    <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material.Autofill" />
-    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.Material.Autofill.Save" />
+
+    <!-- TODO(b/116457731): remove colorBackground from colors_material.xml if not used anymore -->
+    <style name="Theme.DeviceDefault.Autofill" parent="Theme.Material">
+        <item name="colorBackground">@color/autofill_background_material_dark</item>
+    </style>
+    <style name="Theme.DeviceDefault.Autofill.Save" parent="Theme.Material.Panel">
+        <item name="colorBackground">@color/autofill_background_material_dark</item>
+    </style>
+
+    <!-- TV always use dark mode -->
+    <style name="Theme.DeviceDefault.Autofill.Light" parent="Theme.DeviceDefault.Autofill"/>
+    <style name="Theme.DeviceDefault.Light.Autofill.Save" parent="Theme.DeviceDefault.Autofill.Save"/>
+
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.Leanback.Resolver" />
 </resources>

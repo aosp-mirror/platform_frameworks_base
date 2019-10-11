@@ -19,6 +19,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="unknown_user_label" msgid="4323896111737677955">"නොදනී"</string>
-    <string name="start_driving" msgid="864023351402918991">"රිය පැදවීම ආරම්භ කරන්න"</string>
+    <string name="car_guest" msgid="3738772168718508650">"අමුත්තා"</string>
+    <string name="start_guest_session" msgid="7055742120180595689">"අමුත්තා"</string>
+    <string name="car_add_user" msgid="5245196248349230898">"පරිශීලක එක් කරන්න"</string>
+    <string name="car_new_user" msgid="8142927244990323906">"නව පරිශීලක"</string>
+    <string name="user_add_user_message_setup" msgid="1791011504259527329">"ඔබ අලුත් පරිශීලකයෙක් එක් කරන විට, එම පුද්ගලයාට තමන්ගේ ඉඩ සකසා ගැනීමට අවශ්‍ය වේ."</string>
+    <string name="user_add_user_message_update" msgid="3383320289232716179">"සියලුම අනෙක් පරිශීලකයින් සඳහා ඕනෑම පරිශීලකයෙකුට යෙදුම් යාවත්කාලීන කළ හැක."</string>
 </resources>

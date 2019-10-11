@@ -14,8 +14,11 @@
 
 package com.android;
 
-import static org.junit.Assert.assertFalse;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
+import android.content.pm.PackageManager;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 import android.util.Log;
@@ -36,6 +39,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -72,9 +76,9 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
 
     @Test
     public void testAllClassInheritance() throws Throwable {
-        boolean anyClassWrong = false;
+        ArrayList<String> fails = new ArrayList<>();
         for (String className : getClassNamesFromClassPath()) {
-            Class<?> cls = Class.forName(className, false, this.getClass().getClassLoader());		
+            Class<?> cls = Class.forName(className, false, this.getClass().getClassLoader());
             if (!isTestClass(cls)) continue;
 
             boolean hasParent = false;
@@ -86,17 +90,15 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
             }
             boolean hasSize = hasSize(cls);
             if (!hasSize) {
-                anyClassWrong = true;
-                Log.e(TAG, cls.getName() + " does not have size annotation, such as @SmallTest");
+                fails.add(cls.getName() + " does not have size annotation, such as @SmallTest");
             }
             if (!hasParent) {
-                anyClassWrong = true;
-                Log.e(TAG, cls.getName() + " does not extend any of " + getClsStr());
+                fails.add(cls.getName() + " does not extend any of " + getClsStr());
             }
         }
 
-        assertFalse("All sysui test classes must have size and extend one of " + getClsStr(),
-                anyClassWrong);
+        assertThat("All sysui test classes must have size and extend one of " + getClsStr(),
+                fails, is(empty()));
     }
 
     private boolean hasSize(Class<?> cls) {
@@ -114,12 +116,26 @@ public class AAAPlusPlusVerifySysuiRequiredTestPropertiesTest extends SysuiTestC
         filter.add(new ExternalClassNameFilter());
         filter.add(s -> s.startsWith("com.android.systemui")
                 || s.startsWith("com.android.keyguard"));
+
+
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+            // If it's not automotive target, exclude automotive classes from the test.
+            excludeAutomotiveClasses(filter);
+        }
+
         try {
             return scanner.getClassPathEntries(filter);
         } catch (IOException e) {
             Log.e(TAG, "Failed to scan classes", e);
         }
         return Collections.emptyList();
+    }
+
+    private void excludeAutomotiveClasses(ChainedClassNameFilter filter) {
+        // Modifies the passed in filter.
+        filter.add(s -> !s.startsWith("com.android.systemui.statusbar.car."));
+        filter.add(s -> !s.startsWith("com.android.systemui.qs.car."));
+        filter.add(s -> !s.startsWith("com.android.systemui.car."));
     }
 
     private String getClsStr() {

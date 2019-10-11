@@ -333,6 +333,16 @@ public class RequestThreadManager {
         startPreview();
     }
 
+    private void disconnectCallbackSurfaces() {
+        for (Surface s : mCallbackOutputs) {
+            try {
+                LegacyCameraDevice.disconnectSurface(s);
+            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
+                Log.d(TAG, "Surface abandoned, skipping...", e);
+            }
+        }
+    }
+
     private void configureOutputs(Collection<Pair<Surface, Size>> outputs) {
         if (DEBUG) {
             String outputsStr = outputs == null ? "null" : (outputs.size() + " surfaces");
@@ -370,14 +380,8 @@ public class RequestThreadManager {
             mGLThreadManager.waitUntilIdle();
         }
         resetJpegSurfaceFormats(mCallbackOutputs);
+        disconnectCallbackSurfaces();
 
-        for (Surface s : mCallbackOutputs) {
-            try {
-                LegacyCameraDevice.disconnectSurface(s);
-            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-                Log.w(TAG, "Surface abandoned, skipping...", e);
-            }
-        }
         mPreviewOutputs.clear();
         mCallbackOutputs.clear();
         mJpegSurfaceIds.clear();
@@ -972,11 +976,11 @@ public class RequestThreadManager {
                         mGLThreadManager.quit();
                         mGLThreadManager = null;
                     }
+                    disconnectCallbackSurfaces();
                     if (mCamera != null) {
                         mCamera.release();
                         mCamera = null;
                     }
-                    resetJpegSurfaceFormats(mCallbackOutputs);
                     break;
                 case RequestHandlerThread.MSG_POKE_IDLE_HANDLER:
                     // OK: Ignore message.

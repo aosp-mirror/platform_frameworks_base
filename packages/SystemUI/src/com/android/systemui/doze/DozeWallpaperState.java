@@ -23,8 +23,8 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import java.io.PrintWriter;
@@ -38,18 +38,23 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final IWallpaperManager mWallpaperManagerService;
-    private boolean mIsAmbientMode;
     private final DozeParameters mDozeParameters;
+    private final BiometricUnlockController mBiometricUnlockController;
+    private boolean mIsAmbientMode;
 
-    public DozeWallpaperState(Context context) {
+    public DozeWallpaperState(Context context,
+            BiometricUnlockController biometricUnlockController) {
         this(IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE)),
+                biometricUnlockController,
                 DozeParameters.getInstance(context));
     }
 
     @VisibleForTesting
-    DozeWallpaperState(IWallpaperManager wallpaperManagerService, DozeParameters parameters) {
+    DozeWallpaperState(IWallpaperManager wallpaperManagerService,
+            BiometricUnlockController biometricUnlockController, DozeParameters parameters) {
         mWallpaperManagerService = wallpaperManagerService;
+        mBiometricUnlockController = biometricUnlockController;
         mDozeParameters = parameters;
     }
 
@@ -62,31 +67,34 @@ public class DozeWallpaperState implements DozeMachine.Part {
             case DOZE_AOD_PAUSING:
             case DOZE_AOD_PAUSED:
             case DOZE_REQUEST_PULSE:
-            case DOZE_PULSING:
             case DOZE_PULSE_DONE:
+            case DOZE_PULSING:
                 isAmbientMode = true;
                 break;
+            case DOZE_PULSING_BRIGHT:
             default:
                 isAmbientMode = false;
         }
-
         final boolean animated;
         if (isAmbientMode) {
             animated = mDozeParameters.shouldControlScreenOff();
         } else {
             boolean wakingUpFromPulse = oldState == DozeMachine.State.DOZE_PULSING
                     && newState == DozeMachine.State.FINISH;
-            animated = !mDozeParameters.getDisplayNeedsBlanking() || wakingUpFromPulse;
+            boolean fastDisplay = !mDozeParameters.getDisplayNeedsBlanking();
+            animated = (fastDisplay && !mBiometricUnlockController.unlockedByWakeAndUnlock())
+                    || wakingUpFromPulse;
         }
 
         if (isAmbientMode != mIsAmbientMode) {
             mIsAmbientMode = isAmbientMode;
             try {
+                long duration = animated ? StackStateAnimator.ANIMATION_DURATION_WAKEUP : 0L;
                 if (DEBUG) {
                     Log.i(TAG, "AOD wallpaper state changed to: " + mIsAmbientMode
-                            + ", animated: " + animated);
+                            + ", animationDuration: " + duration);
                 }
-                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, animated);
+                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, duration);
             } catch (RemoteException e) {
                 // Cannot notify wallpaper manager service, but it's fine, let's just skip it.
                 Log.w(TAG, "Cannot notify state to WallpaperManagerService: " + mIsAmbientMode);

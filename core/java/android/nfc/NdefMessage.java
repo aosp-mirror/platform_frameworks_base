@@ -16,11 +16,11 @@
 
 package android.nfc;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 
 /**
@@ -187,7 +187,7 @@ public final class NdefMessage implements Parcelable {
      * short record (SR) format and omit the identifier field when possible.
      *
      * @return NDEF Message in binary format
-     * @see getByteArrayLength
+     * @see #getByteArrayLength()
      */
     public byte[] toByteArray() {
         int length = getByteArrayLength();
@@ -213,7 +213,7 @@ public final class NdefMessage implements Parcelable {
         dest.writeTypedArray(mRecords, flags);
     }
 
-    public static final Parcelable.Creator<NdefMessage> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<NdefMessage> CREATOR =
             new Parcelable.Creator<NdefMessage>() {
         @Override
         public NdefMessage createFromParcel(Parcel in) {

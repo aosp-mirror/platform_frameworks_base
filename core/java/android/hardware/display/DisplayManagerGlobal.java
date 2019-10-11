@@ -16,10 +16,13 @@
 
 package android.hardware.display;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
+import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.projection.IMediaProjection;
@@ -80,12 +83,20 @@ public final class DisplayManagerGlobal {
             new ArrayList<DisplayListenerDelegate>();
 
     private final SparseArray<DisplayInfo> mDisplayInfoCache = new SparseArray<DisplayInfo>();
+    private final ColorSpace mWideColorSpace;
     private int[] mDisplayIdCache;
 
     private int mWifiDisplayScanNestCount;
 
     private DisplayManagerGlobal(IDisplayManager dm) {
         mDm = dm;
+        try {
+            mWideColorSpace =
+                    ColorSpace.get(
+                            ColorSpace.Named.values()[mDm.getPreferredWideGamutColorSpaceId()]);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -174,6 +185,21 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Check if specified UID's content is present on display and should be granted access to it.
+     *
+     * @param uid UID to be checked.
+     * @param displayId id of the display where presence of the content is checked.
+     * @return {@code true} if UID is present on display, {@code false} otherwise.
+     */
+    public boolean isUidPresentOnDisplay(int uid, int displayId) {
+        try {
+            return mDm.isUidPresentOnDisplay(uid, displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets information about a logical display.
      *
      * The display metrics may be adjusted to provide compatibility
@@ -220,7 +246,17 @@ public final class DisplayManagerGlobal {
         return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
     }
 
-    public void registerDisplayListener(DisplayListener listener, Handler handler) {
+    /**
+     * Register a listener for display-related changes.
+     *
+     * @param listener The listener that will be called when display changes occur.
+     * @param handler Handler for the thread that will be receiving the callbacks. May be null.
+     * If null, listener will use the handler for the current thread, and if still null,
+     * the handler for the main thread.
+     * If that is still null, a runtime exception will be thrown.
+     */
+    public void registerDisplayListener(@NonNull DisplayListener listener,
+            @Nullable Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -228,7 +264,8 @@ public final class DisplayManagerGlobal {
         synchronized (mLock) {
             int index = findDisplayListenerLocked(listener);
             if (index < 0) {
-                mDisplayListeners.add(new DisplayListenerDelegate(listener, handler));
+                Looper looper = getLooperForHandler(handler);
+                mDisplayListeners.add(new DisplayListenerDelegate(listener, looper));
                 registerCallbackIfNeededLocked();
             }
         }
@@ -247,6 +284,17 @@ public final class DisplayManagerGlobal {
                 mDisplayListeners.remove(index);
             }
         }
+    }
+
+    private static Looper getLooperForHandler(@Nullable Handler handler) {
+        Looper looper = handler != null ? handler.getLooper() : Looper.myLooper();
+        if (looper == null) {
+            looper = Looper.getMainLooper();
+        }
+        if (looper == null) {
+            throw new RuntimeException("Could not get Looper for the UI thread.");
+        }
+        return looper;
     }
 
     private int findDisplayListenerLocked(DisplayListener listener) {
@@ -394,17 +442,6 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    /**
-     * Set the level of color saturation to apply to the display.
-     */
-    public void setSaturationLevel(float level) {
-        try {
-            mDm.setSaturationLevel(level);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
             VirtualDisplay.Callback callback, Handler handler, String uniqueId) {
@@ -447,6 +484,7 @@ public final class DisplayManagerGlobal {
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
         try {
             mDm.setVirtualDisplaySurface(token, surface);
+            setVirtualDisplayState(token, surface != null);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -464,6 +502,14 @@ public final class DisplayManagerGlobal {
     public void releaseVirtualDisplay(IVirtualDisplayCallback token) {
         try {
             mDm.releaseVirtualDisplay(token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    void setVirtualDisplayState(IVirtualDisplayCallback token, boolean isOn) {
+        try {
+            mDm.setVirtualDisplayState(token, isOn);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -494,6 +540,17 @@ public final class DisplayManagerGlobal {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets the preferred wide gamut color space for all displays.
+     * The wide gamut color space is returned from composition pipeline
+     * based on hardware capability.
+     *
+     * @hide
+     */
+    public ColorSpace getPreferredWideGamutColorSpace() {
+        return mWideColorSpace;
     }
 
     /**
@@ -618,8 +675,8 @@ public final class DisplayManagerGlobal {
     private static final class DisplayListenerDelegate extends Handler {
         public final DisplayListener mListener;
 
-        public DisplayListenerDelegate(DisplayListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper(), null, true /*async*/);
+        DisplayListenerDelegate(DisplayListener listener, @NonNull Looper looper) {
+            super(looper, null, true /*async*/);
             mListener = listener;
         }
 

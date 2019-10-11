@@ -16,11 +16,11 @@
 
 package com.android.settingslib.bluetooth;
 
-import com.android.settingslib.R;
-
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+
+import com.android.settingslib.R;
 
 /**
  * OppProfile handles Bluetooth OPP.

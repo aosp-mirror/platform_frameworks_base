@@ -33,6 +33,11 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     private int mConfigChanges;
 
     @Override
+    public void preExecute(ClientTransactionHandler client, IBinder token) {
+        client.getActivitiesToBeDestroyed().put(token, this);
+    }
+
+    @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
@@ -87,7 +92,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         mConfigChanges = in.readInt();
     }
 
-    public static final Creator<DestroyActivityItem> CREATOR =
+    public static final @android.annotation.NonNull Creator<DestroyActivityItem> CREATOR =
             new Creator<DestroyActivityItem>() {
         public DestroyActivityItem createFromParcel(Parcel in) {
             return new DestroyActivityItem(in);

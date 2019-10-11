@@ -3,6 +3,8 @@ cc_library_shared {
 
     srcs: [
         "android_media_AudioEffect.cpp",
+        "android_media_SourceDefaultEffect.cpp",
+        "android_media_StreamDefaultEffect.cpp",
         "android_media_Visualizer.cpp",
     ],
 

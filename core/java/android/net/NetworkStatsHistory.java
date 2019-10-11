@@ -719,7 +719,7 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     @UnsupportedAppUsage
-    public static final Creator<NetworkStatsHistory> CREATOR = new Creator<NetworkStatsHistory>() {
+    public static final @android.annotation.NonNull Creator<NetworkStatsHistory> CREATOR = new Creator<NetworkStatsHistory>() {
         @Override
         public NetworkStatsHistory createFromParcel(Parcel in) {
             return new NetworkStatsHistory(in);

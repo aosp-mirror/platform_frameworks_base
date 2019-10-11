@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -127,7 +128,7 @@ public class ContextHubMessage implements Parcelable {
         out.writeByteArray(mData);
     }
 
-    public static final Parcelable.Creator<ContextHubMessage> CREATOR
+    public static final @NonNull Parcelable.Creator<ContextHubMessage> CREATOR
             = new Parcelable.Creator<ContextHubMessage>() {
         public ContextHubMessage createFromParcel(Parcel in) {
             return new ContextHubMessage(in);
@@ -138,6 +139,7 @@ public class ContextHubMessage implements Parcelable {
         }
     };
 
+    @NonNull
     @Override
     public String toString() {
         int length = mData.length;

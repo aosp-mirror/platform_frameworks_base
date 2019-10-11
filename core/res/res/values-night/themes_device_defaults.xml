@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!--
+===============================================================
+                        PLEASE READ
+===============================================================
+This file contains the themes that are the Device Defaults.
+If you want to edit themes to skin your device, do it here.
+We recommend that you do not edit themes.xml and instead edit
+this file.
+
+Editing this file instead of themes.xml will greatly simplify
+merges for future platform versions and CTS compliance will be
+easier.
+===============================================================
+                        PLEASE READ
+===============================================================
+ -->
+<resources>
+
+    <!-- The dark default theme for apps that target API level XX and higher.
+         <p>The DeviceDefault themes are aliases for a specific device’s native look and feel. The
+         DeviceDefault theme family and widget style family offer ways for you to target your app
+         to a device’s native theme with all device customizations intact.</p>
+         <p>For example, when you set your app's {@code targetSdkVersion} to XX or higher, this
+         theme is applied to your application by default. As such, your app might appear with the
+         {@link #Theme_Material Material} styles on one device, but with a different set of styles on
+         another device. This is great if you want your app to fit with the device's native look and
+         feel. If, however, you prefer to keep your UI style the same across all devices, you should
+         apply a specific theme such as {@link #Theme_Material Material} or one of your own design.
+         For more information, read <a
+         href="http://android-developers.blogspot.com/20XX/XX/material-everywhere.html">Material
+         Everywhere</a>.</p>
+         <p>Styles used by the DeviceDefault theme are named using the convention
+         Type.DeviceDefault.Etc (for example, {@code Widget.DeviceDefault.Button} and
+         {@code TextAppearance.DeviceDefault.Widget.PopupMenu.Large}).</p>
+          -->
+    <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
+    <style name="Theme.DeviceDefault.Settings" parent="Theme.DeviceDefault">
+        <item name="windowLightStatusBar">false</item>
+        <item name="navigationBarColor">@android:color/black</item>
+        <item name="windowLightNavigationBar">false</item>
+
+        <item name="colorPrimary">@color/primary_dark_device_default_settings</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorBackground">@color/primary_dark_device_default_settings</item>
+        <item name="colorEdgeEffect">@color/edge_effect_device_default_dark</item>
+
+        <item name="colorListDivider">@color/list_divider_color_dark</item>
+        <item name="opacityListDivider">@color/list_divider_opacity_device_default_dark</item>
+    </style>
+
+    <style name="Theme.DeviceDefault.Settings.DialogBase" parent="Theme.Material.BaseDialog">
+        <!-- Color palette -->
+        <item name="colorPrimary">@color/primary_dark_device_default_settings</item>
+        <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorSecondary">@color/secondary_device_default_settings</item>
+        <item name="colorAccent">@color/accent_device_default_dark</item>
+        <item name="colorError">@color/error_color_device_default_dark</item>
+
+        <!-- Dialog attributes -->
+        <item name="alertDialogTheme">@style/Theme.DeviceDefault.Dialog.Alert</item>
+    </style>
+
+    <!-- Theme for the dialog shown when an app crashes or ANRs. -->
+    <style name="Theme.DeviceDefault.Dialog.AppError" parent="Theme.DeviceDefault.Dialog.Alert" />
+    <style name="Theme.DeviceDefault.Dialog.Alert.DayNight" parent="Theme.DeviceDefault.Dialog.Alert" />
+
+    <style name="Theme.DeviceDefault.DayNight" parent="Theme.DeviceDefault" />
+
+    <style name="ThemeOverlay.DeviceDefault.Accent.DayNight"
+           parent="@style/ThemeOverlay.DeviceDefault.Accent" />
+
+    <style name="Theme.DeviceDefault.Resolver" parent="Theme.DeviceDefault.ResolverCommon">
+        <item name="windowLightNavigationBar">false</item>
+        <item name="colorBackgroundFloating">@android:color/GM2_grey_800</item>
+        <item name="textColorSecondary">@android:color/resolver_text_color_secondary_dark</item>
+    </style>
+</resources>

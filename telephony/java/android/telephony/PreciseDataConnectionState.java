@@ -158,7 +158,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         out.writeInt(mFailCause);
     }
 
-    public static final Parcelable.Creator<PreciseDataConnectionState> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<PreciseDataConnectionState> CREATOR
             = new Parcelable.Creator<PreciseDataConnectionState>() {
 
         public PreciseDataConnectionState createFromParcel(Parcel in) {
@@ -177,7 +177,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
 
         if (!(obj instanceof PreciseDataConnectionState)) {
             return false;
@@ -191,6 +191,7 @@ public final class PreciseDataConnectionState implements Parcelable {
                 && mState == other.mState;
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -314,7 +314,7 @@ public final class TvTrackInfo implements Parcelable {
         return Objects.hashCode(mId);
     }
 
-    public static final Parcelable.Creator<TvTrackInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<TvTrackInfo> CREATOR =
             new Parcelable.Creator<TvTrackInfo>() {
                 @Override
                 public TvTrackInfo createFromParcel(Parcel in) {
@@ -394,6 +394,7 @@ public final class TvTrackInfo implements Parcelable {
          *
          * @param encrypted The encryption status of the track.
          */
+        @NonNull
         public Builder setEncrypted(boolean encrypted) {
             mEncrypted = encrypted;
             return this;

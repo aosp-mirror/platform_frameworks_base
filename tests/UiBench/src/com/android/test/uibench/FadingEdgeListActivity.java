@@ -15,7 +15,7 @@
  */
 package com.android.test.uibench;
 
-import android.support.v4.app.ListFragment;
+import androidx.fragment.app.ListFragment;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 

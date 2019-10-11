@@ -20,8 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 /**
- * Handy class for starting a new thread that has a looper. The looper can then be 
- * used to create handler classes. Note that start() must still be called.
+ * A {@link Thread} that has a {@link Looper}.
+ * The {@link Looper} can then be used to create {@link Handler}s.
+ * <p>
+ * Note that just like with a regular {@link Thread}, {@link #start()} must still be called.
  */
 public class HandlerThread extends Thread {
     int mPriority;

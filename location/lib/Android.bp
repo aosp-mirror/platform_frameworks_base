@@ -17,10 +17,10 @@
 java_sdk_library {
     name: "com.android.location.provider",
     srcs: ["java/**/*.java"],
+    api_srcs: [":framework-all-sources"],
+    libs: [
+        "androidx.annotation_annotation",
+        "framework-all",
+    ],
     api_packages: ["com.android.location.provider"],
-    srcs_lib: "framework",
-    // TODO(b/70046217): remove core/java and android below. It was added to provide definitions for
-    // types like android.os.Bundle
-    srcs_lib_whitelist_dirs: ["core/java", "location/java"],
-    srcs_lib_whitelist_pkgs: ["android", "com.android.internal.location"],
 }

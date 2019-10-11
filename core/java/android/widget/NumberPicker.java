@@ -17,7 +17,11 @@
 package android.widget;
 
 import android.annotation.CallSuper;
+import android.annotation.ColorInt;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.annotation.Px;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.annotation.Widget;
@@ -30,6 +34,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -87,6 +92,16 @@ import java.util.Locale;
  * Long pressing on the lesser and greater values also allows for a quick change
  * of the current value. Tapping on the current value allows to type in a
  * desired value.
+ * </li>
+ * <li>
+ * If the current theme is derived from {@link android.R.style#Theme_Material}
+ * the widget presents the current value as a scrolling vertical selector with
+ * the selected value in the center and the previous and following numbers above
+ * and below, separated by a divider. The value is changed by flinging vertically.
+ * The thickness of the divider can be changed by using the
+ * {@link android.R.attr#selectionDividerHeight} attribute and the color of the
+ * divider can be changed by using the
+ * {@link android.R.attr#colorControlNormal} attribute.
  * </li>
  * </ul>
  * <p>
@@ -327,7 +342,7 @@ public class NumberPicker extends LinearLayout {
     /**
      * The {@link Paint} for drawing the selector.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final Paint mSelectorWheelPaint;
 
     /**
@@ -436,14 +451,14 @@ public class NumberPicker extends LinearLayout {
     /**
      * Divider for showing item to be selected while scrolling
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private final Drawable mSelectionDivider;
 
     /**
      * The height of the selection divider.
      */
-    @UnsupportedAppUsage
-    private final int mSelectionDividerHeight;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    private int mSelectionDividerHeight;
 
     /**
      * The current scroll state of the number picker.
@@ -626,6 +641,8 @@ public class NumberPicker extends LinearLayout {
         // process style attributes
         final TypedArray attributesArray = context.obtainStyledAttributes(
                 attrs, R.styleable.NumberPicker, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, R.styleable.NumberPicker,
+                attrs, attributesArray, defStyleAttr, defStyleRes);
         final int layoutResId = attributesArray.getResourceId(
                 R.styleable.NumberPicker_internalLayout, DEFAULT_LAYOUT_RESOURCE_ID);
 
@@ -1295,7 +1312,8 @@ public class NumberPicker extends LinearLayout {
      * Shows the soft input for its input text.
      */
     private void showSoftInput() {
-        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        InputMethodManager inputMethodManager =
+                getContext().getSystemService(InputMethodManager.class);
         if (inputMethodManager != null) {
             if (mHasSelectorWheel) {
                 mInputText.setVisibility(View.VISIBLE);
@@ -1309,7 +1327,8 @@ public class NumberPicker extends LinearLayout {
      * Hides the soft input if it is active for the input text.
      */
     private void hideSoftInput() {
-        InputMethodManager inputMethodManager = InputMethodManager.peekInstance();
+        InputMethodManager inputMethodManager =
+                getContext().getSystemService(InputMethodManager.class);
         if (inputMethodManager != null && inputMethodManager.isActive(mInputText)) {
             inputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
         }
@@ -1556,6 +1575,25 @@ public class NumberPicker extends LinearLayout {
         return mSelectorIndexToStringCache.get(getValue());
     }
 
+    /**
+     * Set the height for the divider that separates the currently selected value from the others.
+     * @param height The height to be set
+     */
+    public void setSelectionDividerHeight(@IntRange(from = 0) @Px int height) {
+        mSelectionDividerHeight = height;
+        invalidate();
+    }
+
+    /**
+     * Retrieve the height for the divider that separates the currently selected value from the
+     * others.
+     * @return The height of the divider
+     */
+    @Px
+    public int getSelectionDividerHeight() {
+        return mSelectionDividerHeight;
+    }
+
     @Override
     protected float getTopFadingEdgeStrength() {
         return TOP_AND_BOTTOM_FADING_EDGE_STRENGTH;
@@ -1682,6 +1720,44 @@ public class NumberPicker extends LinearLayout {
             mAccessibilityNodeProvider = new AccessibilityNodeProviderImpl();
         }
         return mAccessibilityNodeProvider;
+    }
+
+    /**
+     * Sets the text color for all the states (normal, selected, focused) to be the given color.
+     *
+     * @param color A color value in the form 0xAARRGGBB.
+     */
+    public void setTextColor(@ColorInt int color) {
+        mSelectorWheelPaint.setColor(color);
+        mInputText.setTextColor(color);
+        invalidate();
+    }
+
+    /**
+     * @return the text color.
+     */
+    @ColorInt
+    public int getTextColor() {
+        return mSelectorWheelPaint.getColor();
+    }
+
+    /**
+     * Sets the text size to the given value. This value must be > 0
+     *
+     * @param size The size in pixel units.
+     */
+    public void setTextSize(@FloatRange(from = 0.0, fromInclusive = false) float size) {
+        mSelectorWheelPaint.setTextSize(size);
+        mInputText.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        invalidate();
+    }
+
+    /**
+     * @return the size (in pixels) of the text size in this NumberPicker.
+     */
+    @FloatRange(from = 0.0, fromInclusive = false)
+    public float getTextSize() {
+        return mSelectorWheelPaint.getTextSize();
     }
 
     /**

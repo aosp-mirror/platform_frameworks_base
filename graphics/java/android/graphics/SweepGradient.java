@@ -17,33 +17,51 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 
 public class SweepGradient extends Shader {
-
-    private static final int TYPE_COLORS_AND_POSITIONS = 1;
-    private static final int TYPE_COLOR_START_AND_COLOR_END = 2;
-
-    /**
-     * Type of the LinearGradient: can be either TYPE_COLORS_AND_POSITIONS or
-     * TYPE_COLOR_START_AND_COLOR_END.
-     */
-    private int mType;
-
     @UnsupportedAppUsage
     private float mCx;
     @UnsupportedAppUsage
     private float mCy;
     @UnsupportedAppUsage
+    private float[] mPositions;
+
+    // @ColorInts are replaced by @ColorLongs, but these remain due to @UnsupportedAppUsage.
+    @UnsupportedAppUsage
+    @ColorInt
     private int[] mColors;
     @UnsupportedAppUsage
-    private float[] mPositions;
-    @UnsupportedAppUsage
+    @ColorInt
     private int mColor0;
     @UnsupportedAppUsage
+    @ColorInt
     private int mColor1;
+
+    @ColorLong
+    private final long[] mColorLongs;
+
+    /**
+     * A Shader that draws a sweep gradient around a center point.
+     *
+     * @param cx       The x-coordinate of the center
+     * @param cy       The y-coordinate of the center
+     * @param colors   The sRGB colors to be distributed between around the center.
+     *                 There must be at least 2 colors in the array.
+     * @param positions May be NULL. The relative position of
+     *                 each corresponding color in the colors array, beginning
+     *                 with 0 and ending with 1.0. If the values are not
+     *                 monotonic, the drawing may produce unexpected results.
+     *                 If positions is NULL, then the colors are automatically
+     *                 spaced evenly.
+     */
+    public SweepGradient(float cx, float cy, @NonNull @ColorInt int[] colors,
+            @Nullable float[] positions) {
+        this(cx, cy, convertColors(colors), positions, ColorSpace.get(ColorSpace.Named.SRGB));
+    }
 
     /**
      * A Shader that draws a sweep gradient around a center point.
@@ -58,21 +76,43 @@ public class SweepGradient extends Shader {
      *                 monotonic, the drawing may produce unexpected results.
      *                 If positions is NULL, then the colors are automatically
      *                 spaced evenly.
+     * @throws IllegalArgumentException if there are less than two colors, the colors do
+     *      not share the same {@link ColorSpace} or do not use a valid one, or {@code positions}
+     *      is not {@code null} and has a different length from {@code colors}.
      */
-    public SweepGradient(float cx, float cy,
-            @NonNull @ColorInt int colors[], @Nullable float positions[]) {
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
+    public SweepGradient(float cx, float cy, @NonNull @ColorLong long[] colors,
+            @Nullable float[] positions) {
+        this(cx, cy, colors.clone(), positions, detectColorSpace(colors));
+    }
+
+    /**
+     * Base constructor. Assumes @param colors is a copy that this object can hold onto,
+     * and all colors share @param colorSpace.
+     */
+    private SweepGradient(float cx, float cy, @NonNull @ColorLong long[] colors,
+            @Nullable float[] positions, ColorSpace colorSpace) {
+        super(colorSpace);
+
         if (positions != null && colors.length != positions.length) {
             throw new IllegalArgumentException(
                     "color and position arrays must be of equal length");
         }
-        mType = TYPE_COLORS_AND_POSITIONS;
         mCx = cx;
         mCy = cy;
-        mColors = colors.clone();
+        mColorLongs = colors;
         mPositions = positions != null ? positions.clone() : null;
+    }
+
+    /**
+     * A Shader that draws a sweep gradient around a center point.
+     *
+     * @param cx       The x-coordinate of the center
+     * @param cy       The y-coordinate of the center
+     * @param color0   The sRGB color to use at the start of the sweep
+     * @param color1   The sRGB color to use at the end of the sweep
+     */
+    public SweepGradient(float cx, float cy, @ColorInt int color0, @ColorInt int color1) {
+        this(cx, cy, Color.pack(color0), Color.pack(color1));
     }
 
     /**
@@ -82,45 +122,21 @@ public class SweepGradient extends Shader {
      * @param cy       The y-coordinate of the center
      * @param color0   The color to use at the start of the sweep
      * @param color1   The color to use at the end of the sweep
+     *
+     * @throws IllegalArgumentException if the colors do
+     *      not share the same {@link ColorSpace} or do not use a valid one.
      */
-    public SweepGradient(float cx, float cy, @ColorInt int color0, @ColorInt int color1) {
-        mType = TYPE_COLOR_START_AND_COLOR_END;
-        mCx = cx;
-        mCy = cy;
-        mColor0 = color0;
-        mColor1 = color1;
-        mColors = null;
-        mPositions = null;
+    public SweepGradient(float cx, float cy, @ColorLong long color0, @ColorLong long color1) {
+        this(cx, cy, new long[] {color0, color1}, null);
     }
 
     @Override
     long createNativeInstance(long nativeMatrix) {
-        if (mType == TYPE_COLORS_AND_POSITIONS) {
-            return nativeCreate1(nativeMatrix, mCx, mCy, mColors, mPositions);
-        } else { // TYPE_COLOR_START_AND_COLOR_END
-            return nativeCreate2(nativeMatrix, mCx, mCy, mColor0, mColor1);
-        }
+        return nativeCreate(nativeMatrix, mCx, mCy, mColorLongs, mPositions,
+                colorSpace().getNativeInstance());
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final SweepGradient copy;
-        if (mType == TYPE_COLORS_AND_POSITIONS) {
-            copy = new SweepGradient(mCx, mCy, mColors.clone(),
-                    mPositions != null ? mPositions.clone() : null);
-        } else { // TYPE_COLOR_START_AND_COLOR_END
-            copy = new SweepGradient(mCx, mCy, mColor0, mColor1);
-        }
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
-    private static native long nativeCreate1(long matrix, float x, float y,
-            int colors[], float positions[]);
-    private static native long nativeCreate2(long matrix, float x, float y,
-            int color0, int color1);
+    private static native long nativeCreate(long matrix, float x, float y,
+            long[] colors, float[] positions, long colorSpaceHandle);
 }
 

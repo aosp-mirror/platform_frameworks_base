@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.app.PendingIntent;
 import android.hardware.location.NanoAppMessage;
 
 /**

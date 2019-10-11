@@ -24,6 +24,6 @@
     <option name="test-tag" value="ActivityManagerPerfTests"/>
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">
         <option name="package" value="com.android.frameworks.perftests.amtests"/>
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner"/>
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner"/>
     </test>
 </configuration>

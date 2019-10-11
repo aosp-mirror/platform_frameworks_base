@@ -292,7 +292,7 @@ public final class SparseRectFArray implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<SparseRectFArray> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<SparseRectFArray> CREATOR =
             new Parcelable.Creator<SparseRectFArray>() {
                 @Override
                 public SparseRectFArray createFromParcel(Parcel source) {

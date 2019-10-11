@@ -21,14 +21,15 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.UserHandle;
-import androidx.preference.SwitchPreference;
-import androidx.core.content.res.TypedArrayUtils;
-import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceViewHolder;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.core.content.res.TypedArrayUtils;
+import androidx.preference.PreferenceManager;
+import androidx.preference.PreferenceViewHolder;
+import androidx.preference.SwitchPreference;
 
 /**
  * Version of SwitchPreference that can be disabled by a device admin

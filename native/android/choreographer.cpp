@@ -24,6 +24,7 @@
 #include <android/choreographer.h>
 #include <androidfw/DisplayEventDispatcher.h>
 #include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
 #include <utils/Looper.h>
 #include <utils/Mutex.h>
 #include <utils/Timers.h>
@@ -36,6 +37,7 @@ static inline const char* toString(bool value) {
 
 struct FrameCallback {
     AChoreographer_frameCallback callback;
+    AChoreographer_frameCallback64 callback64;
     void* data;
     nsecs_t dueTime;
 
@@ -49,8 +51,8 @@ struct FrameCallback {
 
 class Choreographer : public DisplayEventDispatcher, public MessageHandler {
 public:
-    void postFrameCallback(AChoreographer_frameCallback cb, void* data);
-    void postFrameCallbackDelayed(AChoreographer_frameCallback cb, void* data, nsecs_t delay);
+    void postFrameCallbackDelayed(AChoreographer_frameCallback cb,
+                                  AChoreographer_frameCallback64 cb64, void* data, nsecs_t delay);
 
     enum {
         MSG_SCHEDULE_CALLBACKS = 0,
@@ -67,8 +69,10 @@ private:
     explicit Choreographer(const sp<Looper>& looper);
     Choreographer(const Choreographer&) = delete;
 
-    virtual void dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t count);
-    virtual void dispatchHotplug(nsecs_t timestamp, int32_t id, bool connected);
+    void dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId, uint32_t count) override;
+    void dispatchHotplug(nsecs_t timestamp, PhysicalDisplayId displayId, bool connected) override;
+    void dispatchConfigChanged(nsecs_t timestamp, PhysicalDisplayId displayId,
+                               int32_t configId) override;
 
     void scheduleCallbacks();
 
@@ -104,14 +108,10 @@ Choreographer::Choreographer(const sp<Looper>& looper) :
     DisplayEventDispatcher(looper), mLooper(looper), mThreadId(std::this_thread::get_id()) {
 }
 
-void Choreographer::postFrameCallback(AChoreographer_frameCallback cb, void* data) {
-    postFrameCallbackDelayed(cb, data, 0);
-}
-
 void Choreographer::postFrameCallbackDelayed(
-        AChoreographer_frameCallback cb, void* data, nsecs_t delay) {
+        AChoreographer_frameCallback cb, AChoreographer_frameCallback64 cb64, void* data, nsecs_t delay) {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
-    FrameCallback callback{cb, data, now + delay};
+    FrameCallback callback{cb, cb64, data, now + delay};
     {
         AutoMutex _l{mLock};
         mCallbacks.push(callback);
@@ -139,13 +139,10 @@ void Choreographer::scheduleCallbacks() {
     }
 }
 
-
-void Choreographer::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t) {
-    if (id != ISurfaceComposer::eDisplayIdMain) {
-        ALOGV("choreographer %p ~ ignoring vsync signal for non-main display (id=%d)", this, id);
-        scheduleVsync();
-        return;
-    }
+// TODO(b/74619554): The PhysicalDisplayId is ignored because SF only emits VSYNC events for the
+// internal display and DisplayEventReceiver::requestNextVsync only allows requesting VSYNC for
+// the internal display implicitly.
+void Choreographer::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId, uint32_t) {
     std::vector<FrameCallback> callbacks{};
     {
         AutoMutex _l{mLock};
@@ -156,13 +153,25 @@ void Choreographer::dispatchVsync(nsecs_t timestamp, int32_t id, uint32_t) {
         }
     }
     for (const auto& cb : callbacks) {
-        cb.callback(timestamp, cb.data);
+        if (cb.callback64 != nullptr) {
+            cb.callback64(timestamp, cb.data);
+        } else if (cb.callback != nullptr) {
+            cb.callback(timestamp, cb.data);
+        }
     }
 }
 
-void Choreographer::dispatchHotplug(nsecs_t, int32_t id, bool connected) {
-    ALOGV("choreographer %p ~ received hotplug event (id=%" PRId32 ", connected=%s), ignoring.",
-            this, id, toString(connected));
+void Choreographer::dispatchHotplug(nsecs_t, PhysicalDisplayId displayId, bool connected) {
+    ALOGV("choreographer %p ~ received hotplug event (displayId=%"
+            ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ", connected=%s), ignoring.",
+            this, displayId, toString(connected));
+}
+
+void Choreographer::dispatchConfigChanged(nsecs_t, PhysicalDisplayId displayId,
+                                          int32_t configId) {
+    ALOGV("choreographer %p ~ received config changed event (displayId=%"
+            ANDROID_PHYSICAL_DISPLAY_ID_FORMAT ", configId=%s), ignoring.",
+            this, displayId, toString(configId));
 }
 
 void Choreographer::handleMessage(const Message& message) {
@@ -196,10 +205,21 @@ AChoreographer* AChoreographer_getInstance() {
 
 void AChoreographer_postFrameCallback(AChoreographer* choreographer,
         AChoreographer_frameCallback callback, void* data) {
-    AChoreographer_to_Choreographer(choreographer)->postFrameCallback(callback, data);
+    AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
+            callback, nullptr, data, 0);
 }
 void AChoreographer_postFrameCallbackDelayed(AChoreographer* choreographer,
         AChoreographer_frameCallback callback, void* data, long delayMillis) {
     AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
-            callback, data, ms2ns(delayMillis));
+            callback, nullptr, data, ms2ns(delayMillis));
+}
+void AChoreographer_postFrameCallback64(AChoreographer* choreographer,
+        AChoreographer_frameCallback64 callback, void* data) {
+    AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
+            nullptr, callback, data, 0);
+}
+void AChoreographer_postFrameCallbackDelayed64(AChoreographer* choreographer,
+        AChoreographer_frameCallback64 callback, void* data, uint32_t delayMillis) {
+    AChoreographer_to_Choreographer(choreographer)->postFrameCallbackDelayed(
+            nullptr, callback, data, ms2ns(delayMillis));
 }

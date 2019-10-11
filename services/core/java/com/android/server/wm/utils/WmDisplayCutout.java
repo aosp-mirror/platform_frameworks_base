@@ -81,11 +81,24 @@ public class WmDisplayCutout {
      * @hide
      */
     public WmDisplayCutout calculateRelativeTo(Rect frame) {
+        if (mFrameSize == null) {
+            return this;
+        }
+        final int insetRight = mFrameSize.getWidth() - frame.right;
+        final int insetBottom = mFrameSize.getHeight() - frame.bottom;
+        if (frame.left == 0 && frame.top == 0 && insetRight == 0 && insetBottom == 0) {
+            return this;
+        }
+        if (frame.left >= mInner.getSafeInsetLeft()
+                && frame.top >= mInner.getSafeInsetTop()
+                && insetRight >= mInner.getSafeInsetRight()
+                && insetBottom >= mInner.getSafeInsetBottom()) {
+            return NO_CUTOUT;
+        }
         if (mInner.isEmpty()) {
             return this;
         }
-        return inset(frame.left, frame.top,
-                mFrameSize.getWidth() - frame.right, mFrameSize.getHeight() - frame.bottom);
+        return inset(frame.left, frame.top, insetRight, insetBottom);
     }
 
     /**
@@ -169,5 +182,10 @@ public class WmDisplayCutout {
     @Override
     public int hashCode() {
         return Objects.hash(mInner, mFrameSize);
+    }
+
+    @Override
+    public String toString() {
+        return "WmDisplayCutout{" + mInner + ", mFrameSize=" + mFrameSize + '}';
     }
 }

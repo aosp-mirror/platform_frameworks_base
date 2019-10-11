@@ -20,6 +20,7 @@ import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -193,6 +194,8 @@ class UsbProfileGroupSettingsManager {
 
     MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
+    private final UsbHandlerManager mUsbHandlerManager;
+
     private final MtpNotificationManager mMtpNotificationManager;
 
     /**
@@ -201,9 +204,11 @@ class UsbProfileGroupSettingsManager {
      * @param context The context of the service
      * @param user The parent profile
      * @param settingsManager The settings manager of the service
+     * @param usbResolveActivityManager The resovle activity manager of the service
      */
     UsbProfileGroupSettingsManager(@NonNull Context context, @NonNull UserHandle user,
-            @NonNull UsbSettingsManager settingsManager) {
+            @NonNull UsbSettingsManager settingsManager,
+            @NonNull UsbHandlerManager usbResolveActivityManager) {
         if (DEBUG) Slog.v(TAG, "Creating settings for " + user);
 
         Context parentUserContext;
@@ -238,6 +243,8 @@ class UsbProfileGroupSettingsManager {
                 parentUserContext,
                 device -> resolveActivity(createDeviceAttachedIntent(device),
                         device, false /* showMtpNotification */));
+
+        mUsbHandlerManager = usbResolveActivityManager;
     }
 
     /**
@@ -445,38 +452,38 @@ class UsbProfileGroupSettingsManager {
         });
     }
 
-    // Checks to see if a package matches a device or accessory.
-    // Only one of device and accessory should be non-null.
-    private boolean packageMatchesLocked(ResolveInfo info, String metaDataName,
-            UsbDevice device, UsbAccessory accessory) {
-        if (isForwardMatch(info)) {
-            return true;
-        }
-
+    /**
+     * Get {@link DeviceFilter} for all devices an activity should be launched for.
+     *
+     * @param pm The package manager used to get the device filter files
+     * @param info The {@link ResolveInfo} for the activity that can handle usb device attached
+     *             events
+     *
+     * @return The list of {@link DeviceFilter} the activity should be called for or {@code null} if
+     *         none
+     */
+    @Nullable
+    static ArrayList<DeviceFilter> getDeviceFilters(@NonNull PackageManager pm,
+            @NonNull ResolveInfo info) {
+        ArrayList<DeviceFilter> filters = null;
         ActivityInfo ai = info.activityInfo;
 
         XmlResourceParser parser = null;
         try {
-            parser = ai.loadXmlMetaData(mPackageManager, metaDataName);
+            parser = ai.loadXmlMetaData(pm, UsbManager.ACTION_USB_DEVICE_ATTACHED);
             if (parser == null) {
                 Slog.w(TAG, "no meta-data for " + info);
-                return false;
+                return null;
             }
 
             XmlUtils.nextElement(parser);
             while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
                 String tagName = parser.getName();
-                if (device != null && "usb-device".equals(tagName)) {
-                    DeviceFilter filter = DeviceFilter.read(parser);
-                    if (filter.matches(device)) {
-                        return true;
+                if ("usb-device".equals(tagName)) {
+                    if (filters == null) {
+                        filters = new ArrayList<>(1);
                     }
-                }
-                else if (accessory != null && "usb-accessory".equals(tagName)) {
-                    AccessoryFilter filter = AccessoryFilter.read(parser);
-                    if (filter.matches(accessory)) {
-                        return true;
-                    }
+                    filters.add(DeviceFilter.read(parser));
                 }
                 XmlUtils.nextElement(parser);
             }
@@ -485,6 +492,84 @@ class UsbProfileGroupSettingsManager {
         } finally {
             if (parser != null) parser.close();
         }
+        return filters;
+    }
+
+    /**
+     * Get {@link AccessoryFilter} for all accessories an activity should be launched for.
+     *
+     * @param pm The package manager used to get the accessory filter files
+     * @param info The {@link ResolveInfo} for the activity that can handle usb accessory attached
+     *             events
+     *
+     * @return The list of {@link AccessoryFilter} the activity should be called for or {@code null}
+     *         if none
+     */
+    static @Nullable ArrayList<AccessoryFilter> getAccessoryFilters(@NonNull PackageManager pm,
+            @NonNull ResolveInfo info) {
+        ArrayList<AccessoryFilter> filters = null;
+        ActivityInfo ai = info.activityInfo;
+
+        XmlResourceParser parser = null;
+        try {
+            parser = ai.loadXmlMetaData(pm, UsbManager.ACTION_USB_ACCESSORY_ATTACHED);
+            if (parser == null) {
+                Slog.w(TAG, "no meta-data for " + info);
+                return null;
+            }
+
+            XmlUtils.nextElement(parser);
+            while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                String tagName = parser.getName();
+                if ("usb-accessory".equals(tagName)) {
+                    if (filters == null) {
+                        filters = new ArrayList<>(1);
+                    }
+                    filters.add(AccessoryFilter.read(parser));
+                }
+                XmlUtils.nextElement(parser);
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Unable to load component info " + info.toString(), e);
+        } finally {
+            if (parser != null) parser.close();
+        }
+        return filters;
+    }
+
+    // Checks to see if a package matches a device or accessory.
+    // Only one of device and accessory should be non-null.
+    private boolean packageMatchesLocked(ResolveInfo info, UsbDevice device,
+            UsbAccessory accessory) {
+        if (isForwardMatch(info)) {
+            return true;
+        }
+
+        if (device != null) {
+            ArrayList<DeviceFilter> deviceFilters = getDeviceFilters(mPackageManager, info);
+            if (deviceFilters != null) {
+                int numDeviceFilters = deviceFilters.size();
+                for (int i = 0; i < numDeviceFilters; i++) {
+                    if (deviceFilters.get(i).matches(device)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (accessory != null) {
+            ArrayList<AccessoryFilter> accessoryFilters = getAccessoryFilters(mPackageManager,
+                    info);
+            if (accessoryFilters != null) {
+                int numAccessoryFilters = accessoryFilters.size();
+                for (int i = 0; i < numAccessoryFilters; i++) {
+                    if (accessoryFilters.get(i).matches(accessory)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
@@ -502,8 +587,8 @@ class UsbProfileGroupSettingsManager {
         ArrayList<ResolveInfo> resolveInfos = new ArrayList<>();
         int numProfiles = profiles.size();
         for (int i = 0; i < numProfiles; i++) {
-            resolveInfos.addAll(mPackageManager.queryIntentActivitiesAsUser(intent,
-                    PackageManager.GET_META_DATA, profiles.get(i).id));
+            resolveInfos.addAll(mSettingsManager.getSettingsForUser(profiles.get(i).id)
+                    .queryIntentActivities(intent));
         }
 
         return resolveInfos;
@@ -629,7 +714,7 @@ class UsbProfileGroupSettingsManager {
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
             ResolveInfo resolveInfo = resolveInfos.get(i);
-            if (packageMatchesLocked(resolveInfo, intent.getAction(), device, null)) {
+            if (packageMatchesLocked(resolveInfo, device, null)) {
                 matches.add(resolveInfo);
             }
         }
@@ -644,7 +729,7 @@ class UsbProfileGroupSettingsManager {
         int count = resolveInfos.size();
         for (int i = 0; i < count; i++) {
             ResolveInfo resolveInfo = resolveInfos.get(i);
-            if (packageMatchesLocked(resolveInfo, intent.getAction(), null, accessory)) {
+            if (packageMatchesLocked(resolveInfo, null, accessory)) {
                 matches.add(resolveInfo);
             }
         }
@@ -685,7 +770,7 @@ class UsbProfileGroupSettingsManager {
         final Intent intent = createDeviceAttachedIntent(device);
 
         // Send broadcast to running activity with registered intent
-        mContext.sendBroadcast(intent);
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(ActivityManager.getCurrentUser()));
 
         ApplicationInfo appInfo;
         try {
@@ -752,23 +837,8 @@ class UsbProfileGroupSettingsManager {
         // don't show the resolver activity if there are no choices available
         if (matches.size() == 0) {
             if (accessory != null) {
-                String uri = accessory.getUri();
-                if (uri != null && uri.length() > 0) {
-                    // display URI to user
-                    Intent dialogIntent = new Intent();
-                    dialogIntent.setClassName("com.android.systemui",
-                            "com.android.systemui.usb.UsbAccessoryUriActivity");
-                    dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    dialogIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-                    dialogIntent.putExtra("uri", uri);
-                    try {
-                        mContext.startActivityAsUser(dialogIntent, mParentUser);
-                    } catch (ActivityNotFoundException e) {
-                        Slog.e(TAG, "unable to start UsbAccessoryUriActivity");
-                    }
-                }
+                mUsbHandlerManager.showUsbAccessoryUriActivity(accessory, mParentUser);
             }
-
             // do nothing
             return;
         }
@@ -797,37 +867,10 @@ class UsbProfileGroupSettingsManager {
                 Slog.e(TAG, "startActivity failed", e);
             }
         } else {
-            Intent resolverIntent = new Intent();
-            resolverIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            UserHandle user;
-
             if (matches.size() == 1) {
-                ResolveInfo rInfo = matches.get(0);
-
-                // start UsbConfirmActivity if there is only one choice
-                resolverIntent.setClassName("com.android.systemui",
-                        "com.android.systemui.usb.UsbConfirmActivity");
-                resolverIntent.putExtra("rinfo", rInfo);
-                user = UserHandle.getUserHandleForUid(rInfo.activityInfo.applicationInfo.uid);
-
-                if (device != null) {
-                    resolverIntent.putExtra(UsbManager.EXTRA_DEVICE, device);
-                } else {
-                    resolverIntent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-                }
+                mUsbHandlerManager.confirmUsbHandler(matches.get(0), device, accessory);
             } else {
-                user = mParentUser;
-
-                // start UsbResolverActivity so user can choose an activity
-                resolverIntent.setClassName("com.android.systemui",
-                        "com.android.systemui.usb.UsbResolverActivity");
-                resolverIntent.putParcelableArrayListExtra("rlist", matches);
-                resolverIntent.putExtra(Intent.EXTRA_INTENT, intent);
-            }
-            try {
-                mContext.startActivityAsUser(resolverIntent, user);
-            } catch (ActivityNotFoundException e) {
-                Slog.e(TAG, "unable to start activity " + resolverIntent, e);
+                mUsbHandlerManager.selectUsbHandler(matches, mParentUser, intent);
             }
         }
     }

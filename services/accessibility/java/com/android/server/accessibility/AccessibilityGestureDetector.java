@@ -145,7 +145,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
 
     private final Listener mListener;
     private final Context mContext;  // Retained for on-demand construction of GestureDetector.
-    protected GestureDetector mGestureDetector;  // Double-tap detector. Visible for test.
+    private final GestureDetector mGestureDetector;  // Double-tap detector.
 
     // Indicates that a single tap has occurred.
     private boolean mFirstTapDetected;
@@ -216,10 +216,34 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // cancelled.
     private static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 300;
 
+    /**
+     * Construct the gesture detector for {@link TouchExplorer}.
+     *
+     * @see #AccessibilityGestureDetector(Context, Listener, GestureDetector)
+     */
     AccessibilityGestureDetector(Context context, Listener listener) {
+        this(context, listener, null);
+    }
+
+    /**
+     * Construct the gesture detector for {@link TouchExplorer}.
+     *
+     * @param context A context handle for accessing resources.
+     * @param listener A listener to callback with gesture state or information.
+     * @param detector The gesture detector to handle touch event. If null the default one created
+     *                 in place, or for testing purpose.
+     */
+    AccessibilityGestureDetector(Context context, Listener listener, GestureDetector detector) {
         mListener = listener;
         mContext = context;
 
+        // Break the circular dependency between constructors and let the class to be testable
+        if (detector == null) {
+            mGestureDetector = new GestureDetector(context, this);
+        } else {
+            mGestureDetector = detector;
+        }
+        mGestureDetector.setOnDoubleTapListener(this);
         mGestureDetectionThreshold = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 1,
                 context.getResources().getDisplayMetrics()) * GESTURE_CONFIRM_MM;
 
@@ -235,32 +259,23 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
      * callback on mListener is called, and the return value of the callback is
      * passed to the caller.
      *
-     * @param event The raw motion event.  It's important that this be the raw
+     * @param event The transformed motion event to be handled.
+     * @param rawEvent The raw motion event.  It's important that this be the raw
      * event, before any transformations have been applied, so that measurements
      * can be made in physical units.
      * @param policyFlags Policy flags for the event.
      *
      * @return true if the event is consumed, else false
      */
-    public boolean onMotionEvent(MotionEvent event, int policyFlags) {
-
-        // Construct GestureDetector double-tap detector on demand, so that testable sub-class
-        // can use mock GestureDetector.
-        // TODO: Break the circular dependency between GestureDetector's constructor and
-        // AccessibilityGestureDetector's constructor. Construct GestureDetector in TouchExplorer,
-        // using a GestureDetector listener owned by TouchExplorer, which passes double-tap state
-        // information to AccessibilityGestureDetector.
-        if (mGestureDetector == null) {
-            mGestureDetector = new GestureDetector(mContext, this);
-            mGestureDetector.setOnDoubleTapListener(this);
-        }
-
-        final float x = event.getX();
-        final float y = event.getY();
-        final long time = event.getEventTime();
+    public boolean onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        // The accessibility gesture detector is interested in the movements in physical space,
+        // so it uses the rawEvent to ignore magnification and other transformations.
+        final float x = rawEvent.getX();
+        final float y = rawEvent.getY();
+        final long time = rawEvent.getEventTime();
 
         mPolicyFlags = policyFlags;
-        switch (event.getActionMasked()) {
+        switch (rawEvent.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mDoubleTapDetected = false;
                 mSecondFingerDoubleTap = false;
@@ -311,7 +326,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                         // timeout, cancel gesture detection.
                         if (timeDelta > threshold) {
                             cancelGesture();
-                            return mListener.onGestureCancelled(event, policyFlags);
+                            return mListener.onGestureCancelled(rawEvent, policyFlags);
                         }
                     }
 
@@ -327,7 +342,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
 
             case MotionEvent.ACTION_UP:
                 if (mDoubleTapDetected) {
-                    return finishDoubleTap(event, policyFlags);
+                    return finishDoubleTap(rawEvent, policyFlags);
                 }
                 if (mGestureStarted) {
                     final float dX = Math.abs(x - mPreviousGestureX);
@@ -335,7 +350,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                     if (dX >= mMinPixelsBetweenSamplesX || dY >= mMinPixelsBetweenSamplesY) {
                         mStrokeBuffer.add(new GesturePoint(x, y, time));
                     }
-                    return recognizeGesture(event, policyFlags);
+                    return recognizeGesture(rawEvent, policyFlags);
                 }
                 break;
 
@@ -344,7 +359,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 // recognizing a gesture.
                 cancelGesture();
 
-                if (event.getPointerCount() == 2) {
+                if (rawEvent.getPointerCount() == 2) {
                     // If this was the second finger, attempt to recognize double
                     // taps on it.
                     mSecondFingerDoubleTap = true;
@@ -360,7 +375,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 // If we're detecting taps on the second finger, see if we
                 // should finish the double tap.
                 if (mSecondFingerDoubleTap && mDoubleTapDetected) {
-                    return finishDoubleTap(event, policyFlags);
+                    return finishDoubleTap(rawEvent, policyFlags);
                 }
                 break;
 
@@ -372,7 +387,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         // If we're detecting taps on the second finger, map events from the
         // finger to the first finger.
         if (mSecondFingerDoubleTap) {
-            MotionEvent newEvent = mapSecondPointerToFirstPointer(event);
+            MotionEvent newEvent = mapSecondPointerToFirstPointer(rawEvent);
             if (newEvent == null) {
                 return false;
             }
@@ -385,7 +400,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
             return false;
         }
 
-        // Pass the event on to the standard gesture detector.
+        // Pass the transformed event on to the standard gesture detector.
         return mGestureDetector.onTouchEvent(event);
     }
 

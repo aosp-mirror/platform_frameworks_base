@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -43,7 +44,7 @@ import java.util.regex.Pattern;
  */
 @SystemApi
 public final class PhoneNumberRange implements Parcelable {
-    public static final Creator<PhoneNumberRange> CREATOR = new Creator<PhoneNumberRange>() {
+    public static final @android.annotation.NonNull Creator<PhoneNumberRange> CREATOR = new Creator<PhoneNumberRange>() {
         @Override
         public PhoneNumberRange createFromParcel(Parcel in) {
             return new PhoneNumberRange(in);
@@ -104,7 +105,7 @@ public final class PhoneNumberRange implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PhoneNumberRange that = (PhoneNumberRange) o;
@@ -119,6 +120,7 @@ public final class PhoneNumberRange implements Parcelable {
         return Objects.hash(mCountryCode, mPrefix, mLowerBound, mUpperBound);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "PhoneNumberRange{"

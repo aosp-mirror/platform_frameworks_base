@@ -18,12 +18,12 @@ package android.widget.focus;
 
 import android.graphics.Rect;
 import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.util.InternalSelectionView;
 import android.view.KeyEvent;
 import android.widget.ListView;
 
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * TODO: extract base test case that launches {@link ListOfInternalSelectionViews} with

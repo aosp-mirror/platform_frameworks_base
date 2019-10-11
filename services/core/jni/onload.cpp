@@ -26,8 +26,6 @@ namespace android {
 int register_android_server_AlarmManagerService(JNIEnv* env);
 int register_android_server_BatteryStatsService(JNIEnv* env);
 int register_android_server_ConsumerIrService(JNIEnv *env);
-int register_android_server_InputApplicationHandle(JNIEnv* env);
-int register_android_server_InputWindowHandle(JNIEnv* env);
 int register_android_server_InputManager(JNIEnv* env);
 int register_android_server_LightsService(JNIEnv* env);
 int register_android_server_PowerManagerService(JNIEnv* env);
@@ -56,6 +54,9 @@ int register_android_server_GraphicsStatsService(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
 int register_android_server_net_NetworkStatsFactory(JNIEnv* env);
 int register_android_server_net_NetworkStatsService(JNIEnv* env);
+int register_android_server_security_VerityUtils(JNIEnv* env);
+int register_android_server_am_AppCompactor(JNIEnv* env);
+int register_android_server_am_LowMemDetector(JNIEnv* env);
 };
 
 using namespace android;
@@ -75,8 +76,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_broadcastradio_Tuner(vm, env);
     register_android_server_PowerManagerService(env);
     register_android_server_SerialService(env);
-    register_android_server_InputApplicationHandle(env);
-    register_android_server_InputWindowHandle(env);
     register_android_server_InputManager(env);
     register_android_server_LightsService(env);
     register_android_server_AlarmManagerService(env);
@@ -105,5 +104,8 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_hardware_display_DisplayViewport(env);
     register_android_server_net_NetworkStatsFactory(env);
     register_android_server_net_NetworkStatsService(env);
+    register_android_server_security_VerityUtils(env);
+    register_android_server_am_AppCompactor(env);
+    register_android_server_am_LowMemDetector(env);
     return JNI_VERSION_1_4;
 }

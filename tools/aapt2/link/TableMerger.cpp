@@ -21,6 +21,7 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
+#include "trace/TraceBuffer.h"
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
@@ -38,6 +39,7 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
 }
 
 bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
+  TRACE_CALL();
   // We allow adding new resources if this is not an overlay, or if the options allow overlays
   // to add new resources.
   return MergeImpl(src, table, overlay, options_.auto_add_overlay || !overlay /*allow_new*/);
@@ -56,7 +58,7 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table, bool overla
       // valid. This is because un-mangled references are mangled, then looked up at resolution
       // time. Also, when linking, we convert references with no package name to use the compilation
       // package name.
-      error |= !DoMerge(src, table, package.get(), false /*mangle*/, overlay, allow_new);
+      error |= !DoMerge(src, package.get(), false /*mangle*/, overlay, allow_new);
     }
   }
   return !error;
@@ -76,7 +78,7 @@ bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_n
 
     bool mangle = package_name != context_->GetCompilationPackage();
     merged_packages_.insert(package->name);
-    error |= !DoMerge(src, table, package.get(), mangle, false /*overlay*/, true /*allow_new*/);
+    error |= !DoMerge(src, package.get(), mangle, false /*overlay*/, true /*allow_new*/);
   }
   return !error;
 }
@@ -101,8 +103,18 @@ static bool MergeType(IAaptContext* context, const Source& src, ResourceTableTyp
   return true;
 }
 
-static bool MergeEntry(IAaptContext* context, const Source& src, bool overlay,
-                       ResourceEntry* dst_entry, ResourceEntry* src_entry) {
+static bool MergeEntry(IAaptContext* context, const Source& src,
+                       ResourceEntry* dst_entry, ResourceEntry* src_entry,
+                       bool strict_visibility) {
+  if (strict_visibility
+      && dst_entry->visibility.level != Visibility::Level::kUndefined
+      && src_entry->visibility.level != dst_entry->visibility.level) {
+      context->GetDiagnostics()->Error(
+          DiagMessage(src) << "cannot merge resource '" << dst_entry->name << "' with conflicting visibilities: "
+                           << "public and private");
+    return false;
+  }
+
   // Copy over the strongest visibility.
   if (src_entry->visibility.level > dst_entry->visibility.level) {
     // Only copy the ID if the source is public, or else the ID is meaningless.
@@ -124,17 +136,33 @@ static bool MergeEntry(IAaptContext* context, const Source& src, bool overlay,
     dst_entry->allow_new = std::move(src_entry->allow_new);
   }
 
-  if (src_entry->overlayable) {
-    if (dst_entry->overlayable && !overlay) {
-      context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable.value().source)
-                                       << "duplicate overlayable declaration for resource '"
-                                       << src_entry->name << "'");
-      context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable.value().source)
-                                       << "previous declaration here");
-      return false;
+  if (src_entry->overlayable_item) {
+    if (dst_entry->overlayable_item) {
+      CHECK(src_entry->overlayable_item.value().overlayable != nullptr);
+      Overlayable* src_overlayable = src_entry->overlayable_item.value().overlayable.get();
+
+      CHECK(dst_entry->overlayable_item.value().overlayable != nullptr);
+      Overlayable* dst_overlayable = dst_entry->overlayable_item.value().overlayable.get();
+
+      if (src_overlayable->name != dst_overlayable->name
+          || src_overlayable->actor != dst_overlayable->actor
+          || src_entry->overlayable_item.value().policies !=
+             dst_entry->overlayable_item.value().policies) {
+
+        // Do not allow a resource with an overlayable declaration to have that overlayable
+        // declaration redefined.
+        context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable_item.value().source)
+                                             << "duplicate overlayable declaration for resource '"
+                                             << src_entry->name << "'");
+        context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable_item.value().source)
+                                             << "previous declaration here");
+        return false;
+      }
     }
-    dst_entry->overlayable = std::move(src_entry->overlayable);
+
+    dst_entry->overlayable_item = std::move(src_entry->overlayable_item);
   }
+
   return true;
 }
 
@@ -160,7 +188,7 @@ static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Val
     }
   }
   // Delegate to the default handler.
-  return ResourceTable::ResolveValueCollision(existing, incoming);
+  return ResourceTable::ResolveValueCollision(existing, incoming, true /* overlay */);
 }
 
 static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
@@ -178,15 +206,11 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
   if (overlay) {
     collision_result = ResolveMergeCollision(dst_value, src_value, pool);
   } else {
-    collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value);
+    collision_result = ResourceTable::ResolveValueCollision(dst_value, src_value,
+                                                            false /* overlay */);
   }
 
   if (collision_result == CollisionResult::kConflict) {
-    if (overlay) {
-      return CollisionResult::kTakeNew;
-    }
-
-    // Error!
     context->GetDiagnostics()->Error(DiagMessage(src_value->GetSource())
                                      << "resource '" << res_name << "' has a conflicting value for "
                                      << "configuration (" << src_config_value->config << ")");
@@ -197,9 +221,8 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
   return collision_result;
 }
 
-bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
-                          ResourceTablePackage* src_package, bool mangle_package, bool overlay,
-                          bool allow_new_resources) {
+bool TableMerger::DoMerge(const Source& src, ResourceTablePackage* src_package, bool mangle_package,
+                          bool overlay, bool allow_new_resources) {
   bool error = false;
 
   for (auto& src_type : src_package->types) {
@@ -234,7 +257,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
         continue;
       }
 
-      if (!MergeEntry(context_, src, overlay, dst_entry, src_entry.get())) {
+      if (!MergeEntry(context_, src, dst_entry, src_entry.get(), options_.strict_visibility)) {
         error = true;
         continue;
       }
@@ -271,8 +294,17 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
           dst_config_value->value = std::move(new_file_ref);
 
         } else {
+          Maybe<std::string> original_comment = (dst_config_value->value)
+              ? dst_config_value->value->GetComment() : Maybe<std::string>();
+
           dst_config_value->value = std::unique_ptr<Value>(
               src_config_value->value->Clone(&master_table_->string_pool));
+
+          // Keep the comment from the original resource and ignore all comments from overlaying
+          // resources
+          if (overlay && original_comment) {
+            dst_config_value->value->SetComment(original_comment.value());
+          }
         }
       }
     }
@@ -312,8 +344,7 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);
 
-  return DoMerge(file->GetSource(), &table, pkg, false /*mangle*/, overlay /*overlay*/,
-                 true /*allow_new*/);
+  return DoMerge(file->GetSource(), pkg, false /*mangle*/, overlay /*overlay*/, true /*allow_new*/);
 }
 
 }  // namespace aapt

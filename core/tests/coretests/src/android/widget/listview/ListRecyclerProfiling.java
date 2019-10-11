@@ -18,11 +18,11 @@ package android.widget.listview;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.ImageButton;
-import android.view.ViewDebug;
 import android.view.View;
+import android.view.ViewDebug;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
+import android.widget.ListView;
 
 import com.android.frameworks.coretests.R;
 

@@ -39,22 +39,26 @@ public class TestableInstrumentation extends AndroidJUnitRunner {
 
     @Override
     public void onCreate(Bundle arguments) {
-        sManager = new MainLooperManager();
-        Log.setWtfHandler((tag, what, system) -> {
-            if (system) {
-                Log.e(TAG, "WTF!!", what);
-            } else {
-                // These normally kill the app, but we don't want that in a test, instead we want
-                // it to throw.
-                throw new RuntimeException(what);
-            }
-        });
+        if (TestableLooper.HOLD_MAIN_THREAD) {
+            sManager = new MainLooperManager();
+            Log.setWtfHandler((tag, what, system) -> {
+                if (system) {
+                    Log.e(TAG, "WTF!!", what);
+                } else {
+                    // These normally kill the app, but we don't want that in a test, instead we want
+                    // it to throw.
+                    throw new RuntimeException(what);
+                }
+            });
+        }
         super.onCreate(arguments);
     }
 
     @Override
     public void finish(int resultCode, Bundle results) {
-        sManager.destroy();
+        if (TestableLooper.HOLD_MAIN_THREAD) {
+            sManager.destroy();
+        }
         super.finish(resultCode, results);
     }
 

@@ -293,6 +293,7 @@ package android.test.mock {
     method @Deprecated public int getColor(int) throws android.content.res.Resources.NotFoundException;
     method @Deprecated public android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
     method @Deprecated public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
+    method @Deprecated public android.graphics.Movie getMovie(int) throws android.content.res.Resources.NotFoundException;
     method @Deprecated public void updateConfiguration(android.content.res.Configuration, android.util.DisplayMetrics);
   }
 

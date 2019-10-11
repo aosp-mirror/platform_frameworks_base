@@ -17,6 +17,8 @@
 package android.net.metrics;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -104,7 +106,7 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<NetworkEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<NetworkEvent> CREATOR
         = new Parcelable.Creator<NetworkEvent>() {
         public NetworkEvent createFromParcel(Parcel in) {
             return new NetworkEvent(in);
@@ -115,6 +117,7 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
         }
     };
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("NetworkEvent(%s, %dms)",
@@ -122,7 +125,7 @@ public final class NetworkEvent implements IpConnectivityLog.Event {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null || !(obj.getClass().equals(NetworkEvent.class))) return false;
         final NetworkEvent other = (NetworkEvent) obj;
         return eventType == other.eventType

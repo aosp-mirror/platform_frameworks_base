@@ -24,7 +24,6 @@ import com.android.systemui.Dumpable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Collection;
 
 /**

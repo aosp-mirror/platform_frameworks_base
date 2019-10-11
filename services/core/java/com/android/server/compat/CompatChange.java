@@ -118,12 +118,6 @@ public final class CompatChange {
      * @return {@code true} if the change should be enabled for the package.
      */
     boolean isEnabled(ApplicationInfo app) {
-        if (app.isSystemApp()) {
-            // All changes are enabled for system apps, and we do not support overrides.
-            // Compatibility issues for system apps should be addressed in the app itself when
-            // the compatibility change is made.
-            return true;
-        }
         if (mPackageOverrides != null && mPackageOverrides.containsKey(app.packageName)) {
             return mPackageOverrides.get(app.packageName);
         }

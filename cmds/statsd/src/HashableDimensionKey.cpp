@@ -65,8 +65,6 @@ bool filterValues(const vector<Matcher>& matcherFields, const vector<FieldValue>
     for (const auto& value : values) {
         for (size_t i = 0; i < matcherFields.size(); ++i) {
             const auto& matcher = matcherFields[i];
-            // TODO: potential optimization here to break early because all fields are naturally
-            // sorted.
             if (value.mField.matches(matcher)) {
                 output->addValue(value);
                 output->mutableValue(num_matches)->mField.setTag(value.mField.getTag());

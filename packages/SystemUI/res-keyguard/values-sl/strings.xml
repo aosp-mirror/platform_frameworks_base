@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Dotaknite se za vnos gesla"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Vnesite geslo za odklepanje"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Vnesite kodo PIN za odklepanje"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Vnesite kodo PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Vnesite vzorec"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Vnesite geslo"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Napačna koda PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Neveljavna kartica"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Akumulator napolnjen"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Polnjenje"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Hitro polnjenje"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Počasno polnjenje"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Popolnoma napolnjen"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • brezžično polnjenje"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • polnjenje"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • hitro polnjenje"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • počasno polnjenje"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Priključite napajalnik."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Če želite odkleniti, pritisnite meni."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Omrežje je zaklenjeno"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Kartica SIM je zaklenjena s kodo PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Odklepanje kartice SIM …"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Območje za kodo PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Geslo naprave"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Območje za kodo PIN kartice SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Območje za kodo PUK kartice SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Naslednji alarm je nastavljen za <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Digitalne kartice e-SIM zaradi napake ni mogoče onemogočiti."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Tipka Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Pozabljen vzorec"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Napačen vzorec"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Napačno geslo"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Napačen vzorec"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Napačno geslo"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Napačna koda PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one">Poskusite znova čez <xliff:g id="NUMBER">%d</xliff:g> sekundo.</item>
@@ -148,8 +153,9 @@
       <item quantity="few">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ure. Potrdite geslo.</item>
       <item quantity="other">Naprava ni bila odklenjena <xliff:g id="NUMBER_1">%d</xliff:g> ur. Potrdite geslo.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ni prepoznano"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Ni prepoznano"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Ni prepoznano"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus.</item>
       <item quantity="two">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa.</item>
       <item quantity="few">Vnesite kodo PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse.</item>
@@ -161,4 +167,86 @@
       <item quantity="few">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
       <item quantity="other">Kartica SIM je zdaj onemogočena. Če želite nadaljevati, vnesite kodo PUK. Na voljo imate še <xliff:g id="_NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna. Za podrobnosti se obrnite na operaterja.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Ura je"</annotation>\n"^1\n^2</item>
+      <item quantity="two">"<annotation name="color">"Ura je"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"Ura je"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Ura je"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Dvanajst"</item>
+    <item msgid="7389464214252023751">"Ena"</item>
+    <item msgid="8803180377002008046">"Dve"</item>
+    <item msgid="8614897059944644719">"Tri"</item>
+    <item msgid="2293058674782619556">"Štiri"</item>
+    <item msgid="4815402358455041664">"Pet"</item>
+    <item msgid="3325754778509665687">"Šest"</item>
+    <item msgid="5805551341866280575">"Sedem"</item>
+    <item msgid="203334816668238610">"Osem"</item>
+    <item msgid="4828052671464488923">"Devet"</item>
+    <item msgid="2233497913571137419">"Deset"</item>
+    <item msgid="5621554266768657830">"Enajst"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985"></item>
+    <item msgid="8837126587669001578">"Ena"</item>
+    <item msgid="4294343372940455660">"Dve"</item>
+    <item msgid="7129166637707421536">"Tri"</item>
+    <item msgid="7579404865008788673">"Štiri"</item>
+    <item msgid="3873924689207380586">"Pet"</item>
+    <item msgid="4849565597850069377">"Šest"</item>
+    <item msgid="4404219424523572364">"Sedem"</item>
+    <item msgid="8740481214764087329">"Osem"</item>
+    <item msgid="1713216865806811237">"Devet"</item>
+    <item msgid="3508406095411245038">"Deset"</item>
+    <item msgid="7161996337755311711">"Enajst"</item>
+    <item msgid="4044549963329624197">"Dvanajst"</item>
+    <item msgid="333373157917379088">"Trinajst"</item>
+    <item msgid="2631202907124819385">"Štirinajst"</item>
+    <item msgid="6472396076858033453">"Petnajst"</item>
+    <item msgid="8656981856181581643">"Šestnajst"</item>
+    <item msgid="7289026608562030619">"Sedemnajst"</item>
+    <item msgid="3881477602692646573">"Osemnajst"</item>
+    <item msgid="3358129827772984226">"Devetnajst"</item>
+    <item msgid="3308575407402865807">"Dvajset"</item>
+    <item msgid="5346560955382229629">"Enaindvajset\n"</item>
+    <item msgid="226750304761473436">"Dvaindvajset\n"</item>
+    <item msgid="616811325336838734">"Triindvajset\n"</item>
+    <item msgid="616346116869053440">"Štiriindvajset\n"</item>
+    <item msgid="4642996410384042830">"Petindvajset\n"</item>
+    <item msgid="7506092849993571465">"Šestindvajset\n"</item>
+    <item msgid="1915078191101042031">"Sedemindvajset\n"</item>
+    <item msgid="4292378641900520252">"Osemindvajset\n"</item>
+    <item msgid="5339513901773103696">"Devetindvajset\n"</item>
+    <item msgid="3574673250891657607">"Trideset"</item>
+    <item msgid="5796923836589110940">"Enaintrideset\n"</item>
+    <item msgid="5859323597571702052">"Dvaintrideset\n"</item>
+    <item msgid="5133326723148876507">"Triintrideset\n"</item>
+    <item msgid="2693999494655663096">"Štiriintrideset\n"</item>
+    <item msgid="3316754944962836197">"Petintrideset\n"</item>
+    <item msgid="816891008836796723">"Šestintrideset\n"</item>
+    <item msgid="9158890488666520078">"Sedemintrideset\n"</item>
+    <item msgid="1894769703213894011">"Osemintrideset\n"</item>
+    <item msgid="5638820345598572399">"Devetintrideset\n"</item>
+    <item msgid="8838304023017895439">"Štirideset"</item>
+    <item msgid="1834742948932559597">"Enainštirideset\n"</item>
+    <item msgid="6573707308847773944">"Dvainštirideset\n"</item>
+    <item msgid="2450149950652678001">"Triinštirideset\n"</item>
+    <item msgid="2874667401318178036">"Štiriinštirides.\n"</item>
+    <item msgid="3391101532763048862">"Petinštirideset\n"</item>
+    <item msgid="1671489330863254362">"Šestinštirideset\n"</item>
+    <item msgid="5916017359554531038">"Sedeminštirides.\n"</item>
+    <item msgid="8205413177993059967">"Oseminštirideset\n"</item>
+    <item msgid="6607867415142171302">"Devetinštirides.\n"</item>
+    <item msgid="8358850748472089162">"Petdeset"</item>
+    <item msgid="3551313125255080234">"Enainpetdeset\n"</item>
+    <item msgid="1559678130725716542">"Dvainpetdeset\n"</item>
+    <item msgid="431441994725492377">"Triinpetdeset\n"</item>
+    <item msgid="6345774640539623024">"Štiriinpetdeset\n"</item>
+    <item msgid="8018192990793931120">"Petinpetdeset\n"</item>
+    <item msgid="6187650843754604534">"Šestinpetdeset\n"</item>
+    <item msgid="8727240174015993259">"Sedeminpetdeset\n"</item>
+    <item msgid="848339003778952950">"Oseminpetdeset\n"</item>
+    <item msgid="5798985802835423618">"Devetinpetdeset\n"</item>
+  </string-array>
 </resources>

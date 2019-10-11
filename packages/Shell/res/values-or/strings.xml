@@ -17,57 +17,31 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"ଶେଲ୍‍"</string>
-    <!-- no translation found for bugreport_notification_channel (2574150205913861141) -->
-    <skip />
-    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_title (4423539949559634214) -->
-    <skip />
-    <!-- no translation found for bugreport_updating_wait (3322151947853929470) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (1223616207145252689) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (5758325479058638893) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (2343263822812016950) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_pending_screenshot_text (1474435374470177193) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm (5917407234515812495) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_dont_repeat (6179945398364357318) -->
-    <skip />
+    <string name="bugreport_notification_channel" msgid="2574150205913861141">"ବଗ୍ ରିପୋର୍ଟ"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ବଗ୍‍ ରିପୋର୍ଟ <xliff:g id="ID">#%d</xliff:g> ତିଆରି କରାଯାଉଛି"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"ବଗ୍‍ ରିପୋର୍ଟ <xliff:g id="ID">#%d</xliff:g> କ୍ୟାପଚର୍‍ କରାଗଲା"</string>
+    <string name="bugreport_updating_title" msgid="4423539949559634214">"ବଗ୍‍ ରିପୋର୍ଟରେ ବିବରଣୀ ଯୋଡ଼ାଯାଉଛି"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"ଦୟାକରି ଅପେକ୍ଷା କରନ୍ତୁ…"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"ଅଳ୍ପ ସମୟ ମଧ୍ୟରେ ଫୋନ୍‌ରେ ବଗ୍‍ ରିପୋର୍ଟ ଦେଖାଯିବ"</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"ଆପଣଙ୍କ ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରିବାକୁ ଚୟନ କରନ୍ତୁ"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"ଆପଣଙ୍କ ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"ଗୋଟିଏ ସ୍କ୍ରୀନଶଟ୍‍ ସହିତ ଆପଣଙ୍କ ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରିବାକୁ ଚୟନ କରନ୍ତୁ କିମ୍ବା ସ୍କ୍ରୀନଶଟ୍‍ ସମାପ୍ତ ହେବାକୁ ଅପେକ୍ଷା କରନ୍ତୁ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"ସ୍କ୍ରୀନଶଟ୍‍ ବିନା ଆପଣଙ୍କ ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ କିମ୍ବା ସ୍କ୍ରୀନଶଟ୍‍ ସମାପ୍ତ ହେବା ପାଇଁ ଅପେକ୍ଷା କରନ୍ତୁ"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"ସ୍କ୍ରୀନଶଟ୍‍ ବିନା ଆପଣଙ୍କ ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ କିମ୍ବା ସ୍କ୍ରୀନଶଟ୍‍ ସମାପ୍ତ ହେବା ପାଇଁ ଅପେକ୍ଷା କରନ୍ତୁ"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"ବଗ୍‍ ରିପୋର୍ଟରେ ସିଷ୍ଟମର ବିଭିନ୍ନ ଲଗ୍‍ ଫାଇଲ୍‌ରୁ ଆସିଥିବା ଡାଟା ରହିଛି, ଯେଉଁଥିରେ ଆପଣଙ୍କ ସମ୍ବେଦନଶୀଳ ଡାଟା (ଯେପରିକି ଆପ୍‌-ବ୍ୟବହାର ଓ ଲୋକେଶନ୍‍ ଡାଟା) ରହିଥାଇପାରେ। ଆପଣ ବିଶ୍ୱାସ କରୁଥିବା ଲୋକ ତଥା ଆପ୍‍ ସହ ଏପରି ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରନ୍ତୁ।"</string>
+    <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ବଗ୍ ରିପୋର୍ଟ"</string>
-    <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
-    <skip />
-    <!-- no translation found for bugreport_add_details_to_zip_failed (1302931926486712371) -->
-    <skip />
-    <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
-    <skip />
-    <!-- no translation found for bugreport_info_action (2158204228510576227) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
-    <skip />
-    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
-    <skip />
-    <!-- no translation found for bugreport_info_name (4414036021935139527) -->
-    <skip />
-    <!-- no translation found for bugreport_info_title (2306030793918239804) -->
-    <skip />
-    <!-- no translation found for bugreport_info_description (5072835127481627722) -->
-    <skip />
-    <!-- no translation found for save (4781509040564835759) -->
-    <skip />
-    <!-- no translation found for bugreport_intent_chooser_title (7605709494790894076) -->
-    <skip />
+    <string name="bugreport_unreadable_text" msgid="586517851044535486">"ବଗ୍‍ ରିପୋର୍ଟ ଫାଇଲ୍‍ ପଢ଼ାଯାଇପାରିଲା ନାହିଁ"</string>
+    <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ଜିପ୍‍ ଫାଇଲରେ ବଗ୍‍ ରିପୋର୍ଟ ବିବରଣୀ ଯୋଡ଼ାଯାଇପାରିଲା ନାହିଁ"</string>
+    <string name="bugreport_unnamed" msgid="2800582406842092709">"ବେନାମୀ"</string>
+    <string name="bugreport_info_action" msgid="2158204228510576227">"ବିବରଣୀ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ସ୍କ୍ରୀନ୍‌ଶଟ୍‌"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ସଫଳତାପୂର୍ବକ ସ୍କ୍ରୀନଶଟ୍‍ ନିଆଗଲା"</string>
+    <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ସ୍କ୍ରୀନ୍‍ଶଟ୍‍ ନିଆଯାଇପାରିଲା ନାହିଁ।"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ବଗ୍‍ ରିପୋର୍ଟ <xliff:g id="ID">#%d</xliff:g>ର ବିବରଣୀ"</string>
+    <string name="bugreport_info_name" msgid="4414036021935139527">"ଫାଇଲ୍ ନାମ"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"ବଗ୍‍ର ନାମ"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"ବଗ୍‍ର ସଂକ୍ଷିପ୍ତ ବିବରଣୀ"</string>
+    <string name="save" msgid="4781509040564835759">"ସେଭ୍‌ କରନ୍ତୁ"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"ବଗ୍‍ ରିପୋର୍ଟ ଶେୟାର୍‍ କରନ୍ତୁ"</string>
 </resources>

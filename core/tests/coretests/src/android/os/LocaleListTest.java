@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.os;
 
-import android.test.suitebuilder.annotation.SmallTest;
-
-import java.util.Locale;
+import androidx.test.filters.SmallTest;
 
 import junit.framework.TestCase;
+
+import java.util.Locale;
 
 public class LocaleListTest extends TestCase {
     @SmallTest

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.internal.os;
 
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
@@ -24,18 +25,21 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.os.BatteryStats;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Display;
 
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.util.ArrayUtils;
 
 import org.junit.Before;
@@ -51,7 +55,7 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 public class BatteryStatsImplTest {
     @Mock
-    private KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader;
+    private KernelCpuUidFreqTimeReader mKernelUidCpuFreqTimeReader;
     @Mock
     private KernelSingleUidTimeReader mKernelSingleUidTimeReader;
 
@@ -64,7 +68,7 @@ public class BatteryStatsImplTest {
         when(mKernelUidCpuFreqTimeReader.allUidTimesAvailable()).thenReturn(true);
         when(mKernelSingleUidTimeReader.singleUidCpuTimesAvailable()).thenReturn(true);
         mBatteryStatsImpl = new MockBatteryStatsImpl()
-                .setKernelUidCpuFreqTimeReader(mKernelUidCpuFreqTimeReader)
+                .setKernelCpuUidFreqTimeReader(mKernelUidCpuFreqTimeReader)
                 .setKernelSingleUidTimeReader(mKernelSingleUidTimeReader);
     }
 
@@ -300,6 +304,113 @@ public class BatteryStatsImplTest {
             timesA[i] = expected[i] - timesB[i];
         }
         assertArrayEquals(expected, mBatteryStatsImpl.addCpuTimes(timesA, timesB));
+    }
+
+    @Test
+    public void testMulticastWakelockAcqRel() {
+        final int testUid = 10032;
+        final int acquireTimeMs = 1000;
+        final int releaseTimeMs = 1005;
+        final int currentTimeMs = 1011;
+
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // Create a Uid Object
+        final BatteryStats.Uid u = mBatteryStatsImpl.getUidStatsLocked(testUid);
+        assertNotNull(u);
+
+        // Acquire and release the lock
+        u.noteWifiMulticastEnabledLocked(acquireTimeMs);
+        u.noteWifiMulticastDisabledLocked(releaseTimeMs);
+
+        // Get the total acquisition time
+        long totalTime = u.getWifiMulticastTime(currentTimeMs*1000,
+                BatteryStats.STATS_SINCE_CHARGED);
+        assertEquals("Miscalculations of Multicast wakelock acquisition time",
+                (releaseTimeMs - acquireTimeMs) * 1000, totalTime);
+    }
+
+    @Test
+    public void testMulticastWakelockAcqNoRel() {
+        final int testUid = 10032;
+        final int acquireTimeMs = 1000;
+        final int currentTimeMs = 1011;
+
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // Create a Uid Object
+        final BatteryStats.Uid u = mBatteryStatsImpl.getUidStatsLocked(testUid);
+        assertNotNull(u);
+
+        // Acquire the lock
+        u.noteWifiMulticastEnabledLocked(acquireTimeMs);
+
+        // Get the total acquisition time
+        long totalTime =  u.getWifiMulticastTime(currentTimeMs*1000,
+                BatteryStats.STATS_SINCE_CHARGED);
+        assertEquals("Miscalculations of Multicast wakelock acquisition time",
+                (currentTimeMs - acquireTimeMs) * 1000, totalTime);
+    }
+
+    @Test
+    public void testMulticastWakelockAcqAcqRelRel() {
+        final int testUid = 10032;
+        final int acquireTimeMs_1 = 1000;
+        final int acquireTimeMs_2 = 1002;
+
+        final int releaseTimeMs_1 = 1005;
+        final int releaseTimeMs_2 = 1009;
+        final int currentTimeMs = 1011;
+
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // Create a Uid Object
+        final BatteryStats.Uid u = mBatteryStatsImpl.getUidStatsLocked(testUid);
+        assertNotNull(u);
+
+        // Acquire and release the lock (twice in nested way)
+        u.noteWifiMulticastEnabledLocked(acquireTimeMs_1);
+        u.noteWifiMulticastEnabledLocked(acquireTimeMs_2);
+
+        u.noteWifiMulticastDisabledLocked(releaseTimeMs_1);
+        u.noteWifiMulticastDisabledLocked(releaseTimeMs_2);
+
+        // Get the total acquisition time
+        long totalTime =  u.getWifiMulticastTime(currentTimeMs*1000,
+                BatteryStats.STATS_SINCE_CHARGED);
+        assertEquals("Miscalculations of Multicast wakelock acquisition time",
+                (releaseTimeMs_2 - acquireTimeMs_1) * 1000, totalTime);
+    }
+
+    @Test
+    public void testMulticastWakelockAcqRelAcqRel() {
+        final int testUid = 10032;
+        final int acquireTimeMs_1 = 1000;
+        final int acquireTimeMs_2 = 1005;
+
+        final int releaseTimeMs_1 = 1002;
+        final int releaseTimeMs_2 = 1009;
+        final int currentTimeMs = 1011;
+
+        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+
+        // Create a Uid Object
+        final BatteryStats.Uid u = mBatteryStatsImpl.getUidStatsLocked(testUid);
+        assertNotNull(u);
+
+        // Acquire and release the lock (twice)
+        u.noteWifiMulticastEnabledLocked(acquireTimeMs_1);
+        u.noteWifiMulticastDisabledLocked(releaseTimeMs_1);
+
+        u.noteWifiMulticastEnabledLocked(acquireTimeMs_2);
+        u.noteWifiMulticastDisabledLocked(releaseTimeMs_2);
+
+        // Get the total acquisition time
+        long totalTime =  u.getWifiMulticastTime(currentTimeMs*1000,
+                BatteryStats.STATS_SINCE_CHARGED);
+        assertEquals("Miscalculations of Multicast wakelock acquisition time",
+                ((releaseTimeMs_1 - acquireTimeMs_1) + (releaseTimeMs_2 - acquireTimeMs_2))
+                * 1000, totalTime);
     }
 
     private void addIsolatedUid(int parentUid, int childUid) {

@@ -1,0 +1,18 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsUsesLibraryHostTestCases"
+    },
+    {
+      "name": "CtsClassloaderSplitsHostTestCases"
+    },
+    {
+      "name": "CtsCompilationTestCases"
+    }
+  ],
+  "imports": [
+    {
+      "path": "frameworks/base/core/java/android/content/pm"
+    }
+  ]
+}

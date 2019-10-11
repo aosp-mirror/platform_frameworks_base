@@ -16,11 +16,6 @@
 
 package android.os;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.MessageQueue.IdleHandler;
-
 abstract class TestHandlerThread {
     private boolean mDone = false;
     private boolean mSuccess = false;

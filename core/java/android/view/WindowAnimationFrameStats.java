@@ -81,7 +81,7 @@ public final class WindowAnimationFrameStats extends FrameStats implements Parce
         return builder.toString();
     }
 
-    public static final Creator<WindowAnimationFrameStats> CREATOR =
+    public static final @android.annotation.NonNull Creator<WindowAnimationFrameStats> CREATOR =
             new Creator<WindowAnimationFrameStats>() {
                 @Override
                 public WindowAnimationFrameStats createFromParcel(Parcel parcel) {

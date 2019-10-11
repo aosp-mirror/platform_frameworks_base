@@ -43,6 +43,9 @@ struct TableFlattenerOptions {
 
   // Set of whitelisted resource names to avoid altering in key stringpool
   std::set<std::string> whitelisted_resources;
+
+  // Map from original resource paths to shortened resource paths.
+  std::map<std::string, std::string> shortened_path_map;
 };
 
 class TableFlattener : public IResourceTableConsumer {

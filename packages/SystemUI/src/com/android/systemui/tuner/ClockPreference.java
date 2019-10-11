@@ -14,10 +14,11 @@
 package com.android.systemui.tuner;
 
 import android.content.Context;
-import androidx.preference.DropDownPreference;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+
+import androidx.preference.DropDownPreference;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.StatusBarIconController;

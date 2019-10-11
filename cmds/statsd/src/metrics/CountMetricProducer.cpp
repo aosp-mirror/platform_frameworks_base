@@ -49,6 +49,8 @@ const int FIELD_ID_TIME_BASE = 9;
 const int FIELD_ID_BUCKET_SIZE = 10;
 const int FIELD_ID_DIMENSION_PATH_IN_WHAT = 11;
 const int FIELD_ID_DIMENSION_PATH_IN_CONDITION = 12;
+const int FIELD_ID_IS_ACTIVE = 14;
+
 // for CountMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for CountMetricData
@@ -66,9 +68,8 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
-                                         const int64_t startTimeNs)
-    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
-    // TODO: evaluate initial conditions. and set mConditionMet.
+                                         const int64_t timeBaseNs, const int64_t startTimeNs)
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard) {
     if (metric.has_bucket()) {
         mBucketSizeNs =
                 TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
@@ -100,6 +101,10 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
     }
 
     mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
+
+    flushIfNeededLocked(startTimeNs);
+    // Adjust start for partial bucket
+    mCurrentBucketStartTimeNs = startTimeNs;
 
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
@@ -134,12 +139,13 @@ void CountMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
 
 
 void CountMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
-    flushIfNeededLocked(dumpTimeNs);
     mPastBuckets.clear();
 }
 
 void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             const bool erase_data,
+                                             const DumpLatency dumpLatency,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     if (include_current_partial_bucket) {
@@ -147,10 +153,13 @@ void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     } else {
         flushIfNeededLocked(dumpTimeNs);
     }
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
+    protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_IS_ACTIVE, isActiveLocked());
+
+
     if (mPastBuckets.empty()) {
         return;
     }
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TIME_BASE, (long long)mTimeBaseNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_BUCKET_SIZE, (long long)mBucketSizeNs);
 
@@ -227,18 +236,21 @@ void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
 
     protoOutput->end(protoToken);
 
-    mPastBuckets.clear();
+    if (erase_data) {
+        mPastBuckets.clear();
+    }
 }
 
 void CountMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
+    StatsdStats::getInstance().noteBucketDropped(mMetricId);
     mPastBuckets.clear();
 }
 
 void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
-    mCondition = conditionMet;
+    mCondition = conditionMet ? ConditionState::kTrue : ConditionState::kFalse;
 }
 
 bool CountMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
@@ -291,7 +303,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
         if (prev != mCurrentFullCounters->end()) {
             countWholeBucket += prev->second;
         }
-        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey,
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, mMetricId, eventKey,
                                          countWholeBucket);
     }
 
@@ -307,16 +319,18 @@ void CountMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
         return;
     }
 
-    flushCurrentBucketLocked(eventTimeNs);
     // Setup the bucket start time and number.
     int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
-    mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    int64_t nextBucketNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
+    flushCurrentBucketLocked(eventTimeNs, nextBucketNs);
+
     mCurrentBucketNum += numBucketsForward;
     VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);
 }
 
-void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
+                                                   const int64_t& nextBucketStartTimeNs) {
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
     CountBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
@@ -358,9 +372,11 @@ void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
         }
     }
 
+    StatsdStats::getInstance().noteBucketCount(mMetricId);
     // Only resets the counters, but doesn't setup the times nor numbers.
     // (Do not clear since the old one is still referenced in mAnomalyTrackers).
     mCurrentSlicedCounter = std::make_shared<DimToValMap>();
+    mCurrentBucketStartTimeNs = nextBucketStartTimeNs;
 }
 
 // Rough estimate of CountMetricProducer buffer stored. This number will be

@@ -8,7 +8,7 @@ android_test {
     ],
     platform_apis: true,
     static_libs: [
-        "android-support-test",
+        "androidx.test.rules",
         "core-test-rules",
         "guava",
         "mockito-target-minus-junit4",

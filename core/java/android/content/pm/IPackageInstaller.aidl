@@ -42,12 +42,17 @@ interface IPackageInstaller {
     ParceledListSlice getAllSessions(int userId);
     ParceledListSlice getMySessions(String installerPackageName, int userId);
 
+    ParceledListSlice getStagedSessions();
+
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 
     @UnsupportedAppUsage
     void uninstall(in VersionedPackage versionedPackage, String callerPackageName, int flags,
             in IntentSender statusReceiver, int userId);
+
+    void installExistingPackage(String packageName, int installFlags, int installReason,
+            in IntentSender statusReceiver, int userId, in List<String> whiteListedPermissions);
 
     void setPermissionsResult(int sessionId, boolean accepted);
 }

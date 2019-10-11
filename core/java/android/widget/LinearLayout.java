@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewHierarchyEncoder;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
@@ -189,7 +190,7 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
                 equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
         }, formatToHexString = true)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mGravity = Gravity.START | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")
@@ -263,6 +264,8 @@ public class LinearLayout extends ViewGroup {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.LinearLayout, defStyleAttr, defStyleRes);
+        saveAttributeDataForStyleable(context, com.android.internal.R.styleable.LinearLayout,
+                attrs, a, defStyleAttr, defStyleRes);
 
         int index = a.getInt(com.android.internal.R.styleable.LinearLayout_orientation, -1);
         if (index >= 0) {
@@ -342,6 +345,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#LinearLayout_divider
      */
+    @InspectableProperty(name = "divider")
     public Drawable getDividerDrawable() {
         return mDivider;
     }
@@ -526,6 +530,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @return true when widgets are baseline-aligned, false otherwise
      */
+    @InspectableProperty
     public boolean isBaselineAligned() {
         return mBaselineAligned;
     }
@@ -554,6 +559,7 @@ public class LinearLayout extends ViewGroup {
      *
      * @attr ref android.R.styleable#LinearLayout_measureWithLargestChild
      */
+    @InspectableProperty(name = "measureWithLargestChild")
     public boolean isMeasureWithLargestChildEnabled() {
         return mUseLargestChild;
     }
@@ -633,6 +639,7 @@ public class LinearLayout extends ViewGroup {
      *   part of a larger layout that is baseline aligned, or -1 if none has
      *   been set.
      */
+    @InspectableProperty
     public int getBaselineAlignedChildIndex() {
         return mBaselineAlignedChildIndex;
     }
@@ -686,6 +693,7 @@ public class LinearLayout extends ViewGroup {
      *         a number lower than or equals to 0.0f if not weight sum is
      *         to be used.
      */
+    @InspectableProperty
     public float getWeightSum() {
         return mWeightSum;
     }
@@ -1841,6 +1849,10 @@ public class LinearLayout extends ViewGroup {
      * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
      */
     @OrientationMode
+    @InspectableProperty(enumMapping = {
+            @InspectableProperty.EnumEntry(value = HORIZONTAL, name = "horizontal"),
+            @InspectableProperty.EnumEntry(value = VERTICAL, name = "vertical")
+    })
     public int getOrientation() {
         return mOrientation;
     }
@@ -1877,6 +1889,7 @@ public class LinearLayout extends ViewGroup {
      * @return the current gravity.
      * @see #setGravity
      */
+    @InspectableProperty(valueType = InspectableProperty.ValueType.GRAVITY)
     public int getGravity() {
         return mGravity;
     }
@@ -1974,6 +1987,7 @@ public class LinearLayout extends ViewGroup {
          * will be pro-rated among all views whose weight is greater than 0.
          */
         @ViewDebug.ExportedProperty(category = "layout")
+        @InspectableProperty(name = "layout_weight")
         public float weight;
 
         /**
@@ -1997,6 +2011,9 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
             @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
         })
+        @InspectableProperty(
+                name = "layout_gravity",
+                valueType = InspectableProperty.ValueType.GRAVITY)
         public int gravity = -1;
 
         /**

@@ -52,7 +52,7 @@ public class ForcedResizableInfoActivity extends Activity implements OnTouchList
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.forced_resizable_activity);
-        TextView tv = (TextView) findViewById(com.android.internal.R.id.message);
+        TextView tv = findViewById(com.android.internal.R.id.message);
         int reason = getIntent().getIntExtra(EXTRA_FORCED_RESIZEABLE_REASON, -1);
         String text;
         switch (reason) {

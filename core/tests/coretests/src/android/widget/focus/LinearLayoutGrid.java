@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
 import com.android.frameworks.coretests.R;
 
 public class LinearLayoutGrid extends Activity {

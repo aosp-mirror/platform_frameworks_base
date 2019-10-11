@@ -17,21 +17,13 @@
 package android.graphics;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 
+
 public class LinearGradient extends Shader {
-
-    private static final int TYPE_COLORS_AND_POSITIONS = 1;
-    private static final int TYPE_COLOR_START_AND_COLOR_END = 2;
-
-    /**
-     * Type of the LinearGradient: can be either TYPE_COLORS_AND_POSITIONS or
-     * TYPE_COLOR_START_AND_COLOR_END.
-     */
-    private int mType;
-
     @UnsupportedAppUsage
     private float mX0;
     @UnsupportedAppUsage
@@ -41,16 +33,43 @@ public class LinearGradient extends Shader {
     @UnsupportedAppUsage
     private float mY1;
     @UnsupportedAppUsage
-    private int[] mColors;
-    @UnsupportedAppUsage
     private float[] mPositions;
     @UnsupportedAppUsage
+    private TileMode mTileMode;
+
+    // @ColorInts are replaced by @ColorLongs, but these remain due to @UnsupportedAppUsage.
+    @UnsupportedAppUsage
+    @ColorInt
+    private int[] mColors;
+    @UnsupportedAppUsage
+    @ColorInt
     private int mColor0;
     @UnsupportedAppUsage
+    @ColorInt
     private int mColor1;
 
-    @UnsupportedAppUsage
-    private TileMode mTileMode;
+    @ColorLong
+    private final long[] mColorLongs;
+
+
+    /**
+     * Create a shader that draws a linear gradient along a line.
+     *
+     * @param x0           The x-coordinate for the start of the gradient line
+     * @param y0           The y-coordinate for the start of the gradient line
+     * @param x1           The x-coordinate for the end of the gradient line
+     * @param y1           The y-coordinate for the end of the gradient line
+     * @param colors       The sRGB colors to be distributed along the gradient line
+     * @param positions    May be null. The relative positions [0..1] of
+     *                     each corresponding color in the colors array. If this is null,
+     *                     the the colors are distributed evenly along the gradient line.
+     * @param tile         The Shader tiling mode
+     */
+    public LinearGradient(float x0, float y0, float x1, float y1, @NonNull @ColorInt int[] colors,
+            @Nullable float[] positions, @NonNull TileMode tile) {
+        this(x0, y0, x1, y1, convertColors(colors), positions, tile,
+                ColorSpace.get(ColorSpace.Named.SRGB));
+    }
 
     /**
      * Create a shader that draws a linear gradient along a line.
@@ -64,23 +83,52 @@ public class LinearGradient extends Shader {
      *                     each corresponding color in the colors array. If this is null,
      *                     the the colors are distributed evenly along the gradient line.
      * @param tile         The Shader tiling mode
-    */
-    public LinearGradient(float x0, float y0, float x1, float y1, @NonNull @ColorInt int colors[],
-            @Nullable float positions[], @NonNull TileMode tile) {
-        if (colors.length < 2) {
-            throw new IllegalArgumentException("needs >= 2 number of colors");
-        }
+     *
+     * @throws IllegalArgumentException if there are less than two colors, the colors do
+     *      not share the same {@link ColorSpace} or do not use a valid one, or {@code positions}
+     *      is not {@code null} and has a different length from {@code colors}.
+     */
+    public LinearGradient(float x0, float y0, float x1, float y1, @NonNull @ColorLong long[] colors,
+            @Nullable float[] positions, @NonNull TileMode tile) {
+        this(x0, y0, x1, y1, colors.clone(), positions, tile, detectColorSpace(colors));
+    }
+
+    /**
+     * Base constructor. Assumes @param colors is a copy that this object can hold onto,
+     * and all colors share @param colorSpace.
+     */
+    private LinearGradient(float x0, float y0, float x1, float y1,
+            @NonNull @ColorLong long[] colors, @Nullable float[] positions, @NonNull TileMode tile,
+            @NonNull ColorSpace colorSpace) {
+        super(colorSpace);
+
         if (positions != null && colors.length != positions.length) {
             throw new IllegalArgumentException("color and position arrays must be of equal length");
         }
-        mType = TYPE_COLORS_AND_POSITIONS;
         mX0 = x0;
         mY0 = y0;
         mX1 = x1;
         mY1 = y1;
-        mColors = colors.clone();
+        mColorLongs = colors;
         mPositions = positions != null ? positions.clone() : null;
         mTileMode = tile;
+    }
+
+    /**
+     * Create a shader that draws a linear gradient along a line.
+     *
+     * @param x0       The x-coordinate for the start of the gradient line
+     * @param y0       The y-coordinate for the start of the gradient line
+     * @param x1       The x-coordinate for the end of the gradient line
+     * @param y1       The y-coordinate for the end of the gradient line
+     * @param color0   The sRGB color at the start of the gradient line.
+     * @param color1   The sRGB color at the end of the gradient line.
+     * @param tile     The Shader tiling mode
+     */
+    public LinearGradient(float x0, float y0, float x1, float y1,
+            @ColorInt int color0, @ColorInt int color1,
+            @NonNull TileMode tile) {
+        this(x0, y0, x1, y1, Color.pack(color0), Color.pack(color1), tile);
     }
 
     /**
@@ -93,51 +141,23 @@ public class LinearGradient extends Shader {
      * @param color0   The color at the start of the gradient line.
      * @param color1   The color at the end of the gradient line.
      * @param tile     The Shader tiling mode
-    */
+     *
+     * @throws IllegalArgumentException if the colors do
+     *      not share the same {@link ColorSpace} or do not use a valid one.
+     */
     public LinearGradient(float x0, float y0, float x1, float y1,
-            @ColorInt int color0, @ColorInt int color1,
+            @ColorLong long color0, @ColorLong long color1,
             @NonNull TileMode tile) {
-        mType = TYPE_COLOR_START_AND_COLOR_END;
-        mX0 = x0;
-        mY0 = y0;
-        mX1 = x1;
-        mY1 = y1;
-        mColor0 = color0;
-        mColor1 = color1;
-        mColors = null;
-        mPositions = null;
-        mTileMode = tile;
+        this(x0, y0, x1, y1, new long[] {color0, color1}, null, tile);
     }
 
     @Override
     long createNativeInstance(long nativeMatrix) {
-        if (mType == TYPE_COLORS_AND_POSITIONS) {
-            return nativeCreate1(nativeMatrix, mX0, mY0, mX1, mY1,
-                    mColors, mPositions, mTileMode.nativeInt);
-        } else { // TYPE_COLOR_START_AND_COLOR_END
-            return nativeCreate2(nativeMatrix, mX0, mY0, mX1, mY1,
-                    mColor0, mColor1, mTileMode.nativeInt);
-        }
+        return nativeCreate(nativeMatrix, mX0, mY0, mX1, mY1,
+                mColorLongs, mPositions, mTileMode.nativeInt,
+                colorSpace().getNativeInstance());
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    protected Shader copy() {
-        final LinearGradient copy;
-        if (mType == TYPE_COLORS_AND_POSITIONS) {
-            copy = new LinearGradient(mX0, mY0, mX1, mY1, mColors.clone(),
-                    mPositions != null ? mPositions.clone() : null, mTileMode);
-        } else { // TYPE_COLOR_START_AND_COLOR_END
-            copy = new LinearGradient(mX0, mY0, mX1, mY1, mColor0, mColor1, mTileMode);
-        }
-        copyLocalMatrix(copy);
-        return copy;
-    }
-
-    private native long nativeCreate1(long matrix, float x0, float y0, float x1, float y1,
-            int colors[], float positions[], int tileMode);
-    private native long nativeCreate2(long matrix, float x0, float y0, float x1, float y1,
-            int color0, int color1, int tileMode);
+    private native long nativeCreate(long matrix, float x0, float y0, float x1, float y1,
+            long[] colors, float[] positions, int tileMode, long colorSpaceHandle);
 }

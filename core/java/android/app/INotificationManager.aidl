@@ -45,7 +45,7 @@ interface INotificationManager
 
     void clearData(String pkg, int uid, boolean fromApp);
     @UnsupportedAppUsage
-    void enqueueToast(String pkg, ITransientNotification callback, int duration);
+    void enqueueToast(String pkg, ITransientNotification callback, int duration, int displayId);
     @UnsupportedAppUsage
     void cancelToast(String pkg, ITransientNotification callback);
     void finishToken(String pkg, ITransientNotification callback);
@@ -70,6 +70,18 @@ interface INotificationManager
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
 
+    List<String> getAllowedAssistantAdjustments(String pkg);
+    void allowAssistantAdjustment(String adjustmentType);
+    void disallowAssistantAdjustment(String adjustmentType);
+
+    boolean shouldHideSilentStatusIcons(String callingPkg);
+    void setHideSilentStatusIcons(boolean hide);
+
+    void setBubblesAllowed(String pkg, int uid, boolean allowed);
+    boolean areBubblesAllowed(String pkg);
+    boolean areBubblesAllowedForPackage(String pkg, int uid);
+    boolean hasUserApprovedBubblesForPackage(String pkg, int uid);
+
     void createNotificationChannelGroups(String pkg, in ParceledListSlice channelGroupList);
     void createNotificationChannels(String pkg, in ParceledListSlice channelsList);
     void createNotificationChannelsForPackage(String pkg, int uid, in ParceledListSlice channelsList);
@@ -78,10 +90,10 @@ interface INotificationManager
     NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(String pkg, int uid, String groupId, boolean includeDeleted);
     void updateNotificationChannelGroupForPackage(String pkg, int uid, in NotificationChannelGroup group);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
-    NotificationChannel getNotificationChannel(String pkg, String channelId);
+    NotificationChannel getNotificationChannel(String callingPkg, int userId, String pkg, String channelId);
     NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, String channelId);
-    ParceledListSlice getNotificationChannels(String pkg);
+    ParceledListSlice getNotificationChannels(String callingPkg, String targetPkg, int userId);
     ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getDeletedChannelCount(String pkg, int uid);
@@ -90,13 +102,17 @@ interface INotificationManager
     NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
-    ParceledListSlice getRecentNotifyingAppsForUser(int userId);
     int getBlockedAppCount(int userId);
     boolean areChannelsBypassingDnd();
+    int getAppsBypassingDndCount(int uid);
+    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
+    boolean isPackagePaused(String pkg);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
+    @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    @UnsupportedAppUsage
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
@@ -117,6 +133,7 @@ interface INotificationManager
 
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
     ParceledListSlice getSnoozedNotificationsFromListener(in INotificationListener token, int trim);
+    void clearRequestedListenerHints(in INotificationListener token);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
@@ -147,11 +164,14 @@ interface INotificationManager
     void setNotificationAssistantAccessGrantedForUser(in ComponentName assistant, int userId, boolean enabled);
     List<String> getEnabledNotificationListenerPackages();
     List<ComponentName> getEnabledNotificationListeners(int userId);
+    ComponentName getAllowedNotificationAssistantForUser(int userId);
+    ComponentName getAllowedNotificationAssistant();
 
     @UnsupportedAppUsage
     int getZenMode();
     @UnsupportedAppUsage
     ZenModeConfig getZenModeConfig();
+    NotificationManager.Policy getConsolidatedNotificationPolicy();
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     boolean isNotificationPolicyAccessGranted(String pkg);
@@ -167,9 +187,17 @@ interface INotificationManager
     boolean removeAutomaticZenRule(String id);
     boolean removeAutomaticZenRules(String packageName);
     int getRuleInstanceCount(in ComponentName owner);
+    void setAutomaticZenRuleState(String id, in Condition condition);
 
     byte[] getBackupPayload(int user);
     void applyRestore(in byte[] payload, int user);
 
     ParceledListSlice getAppActiveNotifications(String callingPkg, int userId);
+
+    void setNotificationDelegate(String callingPkg, String delegate);
+    String getNotificationDelegate(String callingPkg);
+    boolean canNotifyAsPackage(String callingPkg, String targetPkg, int userId);
+
+    void setPrivateNotificationsAllowed(boolean allow);
+    boolean getPrivateNotificationsAllowed();
 }

@@ -243,6 +243,7 @@ public class MbmsDownloadSession implements AutoCloseable {
     };
 
     private AtomicReference<IMbmsDownloadService> mService = new AtomicReference<>(null);
+    private ServiceConnection mServiceConnection;
     private final InternalDownloadSessionCallback mInternalCallback;
     private final Map<DownloadStatusListener, InternalDownloadStatusListener>
             mInternalDownloadStatusListeners = new HashMap<>();
@@ -318,56 +319,66 @@ public class MbmsDownloadSession implements AutoCloseable {
     }
 
     private int bindAndInitialize() {
-        return MbmsUtils.startBinding(mContext, MBMS_DOWNLOAD_SERVICE_ACTION,
-                new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder service) {
-                        IMbmsDownloadService downloadService =
-                                IMbmsDownloadService.Stub.asInterface(service);
-                        int result;
-                        try {
-                            result = downloadService.initialize(mSubscriptionId, mInternalCallback);
-                        } catch (RemoteException e) {
-                            Log.e(LOG_TAG, "Service died before initialization");
-                            sIsInitialized.set(false);
-                            return;
-                        } catch (RuntimeException e) {
-                            Log.e(LOG_TAG, "Runtime exception during initialization");
-                            sendErrorToApp(
-                                    MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
-                                    e.toString());
-                            sIsInitialized.set(false);
-                            return;
-                        }
-                        if (result == MbmsErrors.UNKNOWN) {
-                            // Unbind and throw an obvious error
-                            close();
-                            throw new IllegalStateException("Middleware must not return an"
-                                    + " unknown error code");
-                        }
-                        if (result != MbmsErrors.SUCCESS) {
-                            sendErrorToApp(result, "Error returned during initialization");
-                            sIsInitialized.set(false);
-                            return;
-                        }
-                        try {
-                            downloadService.asBinder().linkToDeath(mDeathRecipient, 0);
-                        } catch (RemoteException e) {
-                            sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
-                                    "Middleware lost during initialization");
-                            sIsInitialized.set(false);
-                            return;
-                        }
-                        mService.set(downloadService);
-                    }
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                IMbmsDownloadService downloadService =
+                        IMbmsDownloadService.Stub.asInterface(service);
+                int result;
+                try {
+                    result = downloadService.initialize(mSubscriptionId, mInternalCallback);
+                } catch (RemoteException e) {
+                    Log.e(LOG_TAG, "Service died before initialization");
+                    sIsInitialized.set(false);
+                    return;
+                } catch (RuntimeException e) {
+                    Log.e(LOG_TAG, "Runtime exception during initialization");
+                    sendErrorToApp(
+                            MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+                            e.toString());
+                    sIsInitialized.set(false);
+                    return;
+                }
+                if (result == MbmsErrors.UNKNOWN) {
+                    // Unbind and throw an obvious error
+                    close();
+                    throw new IllegalStateException("Middleware must not return an"
+                            + " unknown error code");
+                }
+                if (result != MbmsErrors.SUCCESS) {
+                    sendErrorToApp(result, "Error returned during initialization");
+                    sIsInitialized.set(false);
+                    return;
+                }
+                try {
+                    downloadService.asBinder().linkToDeath(mDeathRecipient, 0);
+                } catch (RemoteException e) {
+                    sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
+                            "Middleware lost during initialization");
+                    sIsInitialized.set(false);
+                    return;
+                }
+                mService.set(downloadService);
+            }
 
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {
-                        Log.w(LOG_TAG, "bindAndInitialize: Remote service disconnected");
-                        sIsInitialized.set(false);
-                        mService.set(null);
-                    }
-                });
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.w(LOG_TAG, "bindAndInitialize: Remote service disconnected");
+                sIsInitialized.set(false);
+                mService.set(null);
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                Log.w(LOG_TAG, "bindAndInitialize: Remote service returned null");
+                sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST,
+                        "Middleware service binding returned null");
+                sIsInitialized.set(false);
+                mService.set(null);
+                mContext.unbindService(this);
+            }
+        };
+        return MbmsUtils.startBinding(mContext, MBMS_DOWNLOAD_SERVICE_ACTION, mServiceConnection);
     }
 
     /**
@@ -965,17 +976,19 @@ public class MbmsDownloadSession implements AutoCloseable {
     public void close() {
         try {
             IMbmsDownloadService downloadService = mService.get();
-            if (downloadService == null) {
+            if (downloadService == null || mServiceConnection == null) {
                 Log.i(LOG_TAG, "Service already dead");
                 return;
             }
             downloadService.dispose(mSubscriptionId);
+            mContext.unbindService(mServiceConnection);
         } catch (RemoteException e) {
             // Ignore
             Log.i(LOG_TAG, "Remote exception while disposing of service");
         } finally {
             mService.set(null);
             sIsInitialized.set(false);
+            mServiceConnection = null;
             mInternalCallback.stop();
         }
     }

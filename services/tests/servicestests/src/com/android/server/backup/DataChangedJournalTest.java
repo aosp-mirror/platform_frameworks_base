@@ -37,6 +37,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 @SmallTest
 @Presubmit
@@ -48,7 +49,7 @@ public class DataChangedJournalTest {
 
     @Rule public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
 
-    @Mock private DataChangedJournal.Consumer mConsumer;
+    @Mock private Consumer<String> mConsumer;
 
     private File mFile;
     private DataChangedJournal mJournal;

@@ -18,9 +18,10 @@
 
 #include "DeferredLayerUpdater.h"
 #include "Readback.h"
+#include "ShaderCache.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
-#include "VkLayer.h"
+#include "VkInteropFunctorDrawable.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
 
@@ -41,40 +42,37 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
-        : SkiaPipeline(thread), mVkManager(thread.vulkanManager()) {}
+        : SkiaPipeline(thread), mVkManager(thread.vulkanManager()) {
+    thread.renderState().registerContextCallback(this);
+}
+
+SkiaVulkanPipeline::~SkiaVulkanPipeline() {
+    mRenderThread.renderState().removeContextCallback(this);
+}
 
 MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
     return MakeCurrentResult::AlreadyCurrent;
 }
 
 Frame SkiaVulkanPipeline::getFrame() {
-    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
-                        "drawRenderNode called on a context with no surface!");
-
-    SkSurface* backBuffer = mVkManager.getBackbufferSurface(mVkSurface);
-    if (backBuffer == nullptr) {
-        SkDebugf("failed to get backbuffer");
-        return Frame(-1, -1, 0);
-    }
-
-    Frame frame(backBuffer->width(), backBuffer->height(), mVkManager.getAge(mVkSurface));
-    return frame;
+    LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr, "getFrame() called on a context with no surface!");
+    return mVkManager.dequeueNextBuffer(mVkSurface);
 }
 
 bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-                              const FrameBuilder::LightGeometry& lightGeometry,
+                              const LightGeometry& lightGeometry,
                               LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
-                              bool opaque, bool wideColorGamut,
-                              const BakedOpRenderer::LightInfo& lightInfo,
+                              bool opaque, const LightInfo& lightInfo,
                               const std::vector<sp<RenderNode>>& renderNodes,
                               FrameInfoVisualizer* profiler) {
-    sk_sp<SkSurface> backBuffer = mVkSurface->getBackBufferSurface();
+    sk_sp<SkSurface> backBuffer = mVkSurface->getCurrentSkSurface();
     if (backBuffer.get() == nullptr) {
         return false;
     }
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut, contentDrawBounds,
-                backBuffer);
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, contentDrawBounds, backBuffer,
+                mVkSurface->getCurrentPreTransform());
+    ShaderCache::get().onVkFrameFlushed(mRenderThread.getGrContext());
     layerUpdateQueue->clear();
 
     // Draw visual debugging features
@@ -103,41 +101,33 @@ bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
     currentFrameInfo->markSwapBuffers();
 
     if (*requireSwap) {
-        mVkManager.swapBuffers(mVkSurface);
+        mVkManager.swapBuffers(mVkSurface, screenDirty);
     }
 
     return *requireSwap;
 }
 
-bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) {
-    // TODO: implement copyLayerInto for vulkan.
-    return false;
-}
-
-static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
-                          bool blend) {
-    return new VkLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
-}
-
 DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
-    mVkManager.initialize();
+    mRenderThread.requireVkContext();
 
-    return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::Vulkan);
+    return new DeferredLayerUpdater(mRenderThread.renderState());
 }
 
 void SkiaVulkanPipeline::onStop() {}
 
-bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
-                                    ColorMode colorMode) {
+bool SkiaVulkanPipeline::setSurface(ANativeWindow* surface, SwapBehavior swapBehavior,
+                                    ColorMode colorMode, uint32_t extraBuffers) {
     if (mVkSurface) {
         mVkManager.destroySurface(mVkSurface);
         mVkSurface = nullptr;
     }
 
+    setSurfaceColorProperties(colorMode);
     if (surface) {
-        // TODO: handle color mode
-        mVkSurface = mVkManager.createSurface(surface);
+        mRenderThread.requireVkContext();
+        mVkSurface =
+                mVkManager.createSurface(surface, colorMode, mSurfaceColorSpace, mSurfaceColorType,
+                                         mRenderThread.getGrContext(), extraBuffers);
     }
 
     return mVkSurface != nullptr;
@@ -152,27 +142,20 @@ bool SkiaVulkanPipeline::isContextReady() {
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
-    // TODO: we currently don't support OpenGL WebView's
-    DrawGlInfo::Mode mode = DrawGlInfo::kModeProcessNoContext;
-    (*functor)(mode, nullptr);
+    VkInteropFunctorDrawable::vkInvokeFunctor(functor);
 }
 
 sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,
                                                          SkBitmap& skBitmap) {
-    // TODO: implement this function for Vulkan pipeline
-    // code below is a hack to avoid crashing because of missing HW Bitmap support
-    sp<GraphicBuffer> buffer = new GraphicBuffer(
-            skBitmap.info().width(), skBitmap.info().height(), PIXEL_FORMAT_RGBA_8888,
-            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
-                    GraphicBuffer::USAGE_SW_READ_NEVER,
-            std::string("SkiaVulkanPipeline::allocateHardwareBitmap pid [") +
-                    std::to_string(getpid()) + "]");
-    status_t error = buffer->initCheck();
-    if (error < 0) {
-        ALOGW("SkiaVulkanPipeline::allocateHardwareBitmap() failed in GraphicBuffer.create()");
-        return nullptr;
+    LOG_ALWAYS_FATAL("Unimplemented");
+    return nullptr;
+}
+
+void SkiaVulkanPipeline::onContextDestroyed() {
+    if (mVkSurface) {
+        mVkManager.destroySurface(mVkSurface);
+        mVkSurface = nullptr;
     }
-    return sk_sp<Bitmap>(new Bitmap(buffer.get(), skBitmap.info()));
 }
 
 } /* namespace skiapipeline */

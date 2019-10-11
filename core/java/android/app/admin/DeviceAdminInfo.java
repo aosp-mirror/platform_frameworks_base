@@ -75,12 +75,10 @@ public final class DeviceAdminInfo implements Parcelable {
      * that the user can select, via {@link DevicePolicyManager#setPasswordQuality}
      * and {@link DevicePolicyManager#setPasswordMinimumLength}.
      *
-     * <p>To control this policy, the device admin must have a "limit-password"
-     * tag in the "uses-policies" section of its meta-data.
-     *
-     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
-     * only be possible for a device owner or profile owner to enforce constraints on user
-     * passwords.
+     * <p>To control this policy, the device admin must be a device owner or profile owner,
+     * and must have a "limit-password" tag in the "uses-policies" section of its meta-data.
+     * If used by a device owner, the policy only affects the primary user and its profiles,
+     * but not any secondary users on the device.
      */
     public static final int USES_POLICY_LIMIT_PASSWORD = 0;
 
@@ -140,11 +138,10 @@ public final class DeviceAdminInfo implements Parcelable {
      * A type of policy that this device admin can use: force the user to
      * change their password after an administrator-defined time limit.
      *
-     * <p>To control this policy, the device admin must have an "expire-password"
-     * tag in the "uses-policies" section of its meta-data.
-     *
-     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
-     * only be possible for a device owner or profile owner to enforce password expiry.
+     * <p>To control this policy, the device admin must be a device owner or profile owner,
+     * and must have an "expire-password" tag in the "uses-policies" section of its meta-data.
+     * If used by a device owner, the policy only affects the primary user and its profiles,
+     * but not any secondary users on the device.
      */
     public static final int USES_POLICY_EXPIRE_PASSWORD = 6;
 
@@ -159,23 +156,19 @@ public final class DeviceAdminInfo implements Parcelable {
     /**
      * A type of policy that this device admin can use: disables use of all device cameras.
      *
-     * <p>To control this policy, the device admin must have a "disable-camera"
-     * tag in the "uses-policies" section of its meta-data.
-     *
-     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
-     * only be possible for a device owner or profile owner to disable use of the camera.
+     * <p>To control this policy, the device admin must be a device owner or profile owner,
+     * and must have a "disable-camera" tag in the "uses-policies" section of its meta-data.
+     * If used by a device owner, the policy affects all users on the device.
      */
     public static final int USES_POLICY_DISABLE_CAMERA = 8;
 
     /**
      * A type of policy that this device admin can use: disables use of keyguard features.
      *
-     * <p>To control this policy, the device admin must have a "disable-keyguard-features"
-     * tag in the "uses-policies" section of its meta-data.
-     *
-     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
-     * only be possible for a device owner or profile owner to disable use of keyguard
-     * features.
+     * <p>To control this policy, the device admin must be a device owner or profile owner,
+     * and must have a "disable-keyguard-features" tag in the "uses-policies" section of its
+     * meta-data.  If used by a device owner, the policy only affects the primary user and
+     * its profiles, but not any secondary users on the device.
      */
     public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9;
 
@@ -532,7 +525,7 @@ public final class DeviceAdminInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<DeviceAdminInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<DeviceAdminInfo> CREATOR =
             new Parcelable.Creator<DeviceAdminInfo>() {
         public DeviceAdminInfo createFromParcel(Parcel source) {
             return new DeviceAdminInfo(source);

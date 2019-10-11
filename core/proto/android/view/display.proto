@@ -22,6 +22,8 @@ option java_multiple_files = true;
 message DisplayProto {
     enum ColorMode {
         COLOR_MODE_INVALID = -1;
+        // The default or native gamut of the display.
+        COLOR_MODE_DEFAULT = 0;
         COLOR_MODE_BT601_625 = 1;
         COLOR_MODE_BT601_625_UNADJUSTED = 2;
         COLOR_MODE_BT601_525 = 3;

@@ -18,18 +18,30 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <com.android.systemui.CornerHandleView
+        android:id="@+id/assist_hint_left"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="left|top"
+        android:visibility="gone"/>
+    <com.android.systemui.CornerHandleView
+        android:id="@+id/assist_hint_right"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="right|bottom"
+        android:visibility="gone"/>
     <ImageView
         android:id="@+id/left"
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:layout_gravity="left|top"
         android:tint="#ff000000"
-        android:src="@drawable/rounded" />
+        android:src="@drawable/rounded"/>
     <ImageView
         android:id="@+id/right"
         android:layout_width="12dp"
         android:layout_height="12dp"
         android:tint="#ff000000"
         android:layout_gravity="right|bottom"
-        android:src="@drawable/rounded" />
+        android:src="@drawable/rounded"/>
 </com.android.systemui.RegionInterceptingFrameLayout>

@@ -226,6 +226,25 @@ TEST(CollationTest, FailOnBadBinaryFieldAtom) {
     EXPECT_TRUE(errorCount > 0);
 }
 
+TEST(CollationTest, PassOnWhitelistedAtom) {
+    Atoms atoms;
+    int errorCount = collate_atoms(ListedAtoms::descriptor(), &atoms);
+    EXPECT_EQ(errorCount, 0);
+    EXPECT_EQ(atoms.decls.size(), 2ul);
+}
+
+TEST(CollationTest, RecogniseWhitelistedAtom) {
+    Atoms atoms;
+    collate_atoms(ListedAtoms::descriptor(), &atoms);
+    for (const auto& atomDecl : atoms.decls) {
+        if (atomDecl.code == 1) {
+            EXPECT_TRUE(atomDecl.whitelisted);
+        } else {
+            EXPECT_FALSE(atomDecl.whitelisted);
+        }
+    }
+}
+
 TEST(CollationTest, PassOnLogFromModuleAtom) {
     Atoms atoms;
     int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);

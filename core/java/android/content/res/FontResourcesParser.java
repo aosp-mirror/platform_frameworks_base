@@ -76,6 +76,10 @@ public class FontResourcesParser {
 
     // A class represents font element in xml file which points a file in resource.
     public static final class FontFileResourceEntry {
+        public static final int RESOLVE_BY_FONT_TABLE = Typeface.RESOLVE_BY_FONT_TABLE;
+        public static final int UPRIGHT = 0;
+        public static final int ITALIC = 1;
+
         private final @NonNull String mFileName;
         private int mWeight;
         private int mItalic;
@@ -216,7 +220,7 @@ public class FontResourcesParser {
         int weight = array.getInt(R.styleable.FontFamilyFont_fontWeight,
                 Typeface.RESOLVE_BY_FONT_TABLE);
         int italic = array.getInt(R.styleable.FontFamilyFont_fontStyle,
-                Typeface.RESOLVE_BY_FONT_TABLE);
+                FontFileResourceEntry.RESOLVE_BY_FONT_TABLE);
         String variationSettings = array.getString(
                 R.styleable.FontFamilyFont_fontVariationSettings);
         int ttcIndex = array.getInt(R.styleable.FontFamilyFont_ttcIndex, 0);

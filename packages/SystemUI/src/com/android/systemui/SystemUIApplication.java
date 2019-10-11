@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.Trace;
@@ -34,9 +36,9 @@ import android.util.TimingsTraceLog;
 
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.util.NotificationChannels;
 
 import java.util.HashMap;
@@ -170,7 +172,11 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
             Class cls;
             try {
                 cls = Class.forName(clsName);
-                mServices[i] = (SystemUI) cls.newInstance();
+                Object o = cls.newInstance();
+                if (o instanceof SystemUI.Injector) {
+                    o = ((SystemUI.Injector) o).apply(this);
+                }
+                mServices[i] = (SystemUI) o;
             } catch(ClassNotFoundException ex){
                 throw new RuntimeException(ex);
             } catch (IllegalAccessException ex) {
@@ -194,35 +200,64 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                 mServices[i].onBootCompleted();
             }
         }
+        Dependency.get(InitController.class).executePostInitTasks();
         log.traceEnd();
+        final Handler mainHandler = new Handler(Looper.getMainLooper());
         Dependency.get(PluginManager.class).addPluginListener(
                 new PluginListener<OverlayPlugin>() {
-                    private ArraySet<OverlayPlugin> mOverlays;
+                    private ArraySet<OverlayPlugin> mOverlays = new ArraySet<>();
 
                     @Override
                     public void onPluginConnected(OverlayPlugin plugin, Context pluginContext) {
-                        StatusBar statusBar = getComponent(StatusBar.class);
-                        if (statusBar != null) {
-                            plugin.setup(statusBar.getStatusBarWindow(),
-                                    statusBar.getNavigationBarView());
-                        }
-                        // Lazy init.
-                        if (mOverlays == null) mOverlays = new ArraySet<>();
-                        if (plugin.holdStatusBarOpen()) {
-                            mOverlays.add(plugin);
-                            Dependency.get(StatusBarWindowManager.class).setStateListener(b ->
-                                    mOverlays.forEach(o -> o.setCollapseDesired(b)));
-                            Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
-                                    mOverlays.size() != 0);
-
-                        }
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                StatusBar statusBar = getComponent(StatusBar.class);
+                                if (statusBar != null) {
+                                    plugin.setup(statusBar.getStatusBarWindow(),
+                                            statusBar.getNavigationBarView(), new Callback(plugin));
+                                }
+                            }
+                        });
                     }
 
                     @Override
                     public void onPluginDisconnected(OverlayPlugin plugin) {
-                        mOverlays.remove(plugin);
-                        Dependency.get(StatusBarWindowManager.class).setForcePluginOpen(
-                                mOverlays.size() != 0);
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mOverlays.remove(plugin);
+                                Dependency.get(StatusBarWindowController.class).setForcePluginOpen(
+                                        mOverlays.size() != 0);
+                            }
+                        });
+                    }
+
+                    class Callback implements OverlayPlugin.Callback {
+                        private final OverlayPlugin mPlugin;
+
+                        Callback(OverlayPlugin plugin) {
+                            mPlugin = plugin;
+                        }
+
+                        @Override
+                        public void onHoldStatusBarOpenChange() {
+                            if (mPlugin.holdStatusBarOpen()) {
+                                mOverlays.add(mPlugin);
+                            } else {
+                                mOverlays.remove(mPlugin);
+                            }
+                            mainHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Dependency.get(StatusBarWindowController.class)
+                                            .setStateListener(b -> mOverlays.forEach(
+                                                    o -> o.setCollapseDesired(b)));
+                                    Dependency.get(StatusBarWindowController.class)
+                                            .setForcePluginOpen(mOverlays.size() != 0);
+                                }
+                            });
+                        }
                     }
                 }, OverlayPlugin.class, true /* Allow multiple plugins */);
 

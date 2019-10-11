@@ -104,7 +104,7 @@ public class PeriodicSync implements Parcelable {
         dest.writeLong(flexTime);
     }
 
-    public static final Creator<PeriodicSync> CREATOR = new Creator<PeriodicSync>() {
+    public static final @android.annotation.NonNull Creator<PeriodicSync> CREATOR = new Creator<PeriodicSync>() {
         @Override
         public PeriodicSync createFromParcel(Parcel source) {
             return new PeriodicSync(source);

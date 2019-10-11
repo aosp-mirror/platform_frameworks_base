@@ -33,11 +33,11 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -383,7 +383,8 @@ public abstract class AccessibilityService extends Service {
         void init(int connectionId, IBinder windowToken);
         boolean onGesture(int gestureId);
         boolean onKeyEvent(KeyEvent event);
-        void onMagnificationChanged(@NonNull Region region,
+        /** Magnification changed callbacks for different displays */
+        void onMagnificationChanged(int displayId, @NonNull Region region,
                 float scale, float centerX, float centerY);
         void onSoftKeyboardShowModeChanged(int showMode);
         void onPerformGestureResult(int sequence, boolean completedSuccessfully);
@@ -400,12 +401,48 @@ public abstract class AccessibilityService extends Service {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "SHOW_MODE_" }, value = {
             SHOW_MODE_AUTO,
-            SHOW_MODE_HIDDEN
+            SHOW_MODE_HIDDEN,
+            SHOW_MODE_IGNORE_HARD_KEYBOARD
     })
     public @interface SoftKeyboardShowMode {}
 
+    /**
+     * Allow the system to control when the soft keyboard is shown.
+     * @see SoftKeyboardController
+     */
     public static final int SHOW_MODE_AUTO = 0;
+
+    /**
+     * Never show the soft keyboard.
+     * @see SoftKeyboardController
+     */
     public static final int SHOW_MODE_HIDDEN = 1;
+
+    /**
+     * Allow the soft keyboard to be shown, even if a hard keyboard is connected
+     * @see SoftKeyboardController
+     */
+    public static final int SHOW_MODE_IGNORE_HARD_KEYBOARD = 2;
+
+    /**
+     * Mask used to cover the show modes supported in public API
+     * @hide
+     */
+    public static final int SHOW_MODE_MASK = 0x03;
+
+    /**
+     * Bit used to hold the old value of the hard IME setting to restore when a service is shut
+     * down.
+     * @hide
+     */
+    public static final int SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE = 0x20000000;
+
+    /**
+     * Bit for show mode setting to indicate that the user has overridden the hard keyboard
+     * behavior.
+     * @hide
+     */
+    public static final int SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN = 0x40000000;
 
     private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
@@ -417,7 +454,9 @@ public abstract class AccessibilityService extends Service {
 
     private WindowManager mWindowManager;
 
-    private MagnificationController mMagnificationController;
+    /** List of magnification controllers, mapping from displayId -> MagnificationController. */
+    private final SparseArray<MagnificationController> mMagnificationControllers =
+            new SparseArray<>(0);
     private SoftKeyboardController mSoftKeyboardController;
     private AccessibilityButtonController mAccessibilityButtonController;
 
@@ -448,8 +487,10 @@ public abstract class AccessibilityService extends Service {
      * client code.
      */
     private void dispatchServiceConnected() {
-        if (mMagnificationController != null) {
-            mMagnificationController.onServiceConnected();
+        synchronized (mLock) {
+            for (int i = 0; i < mMagnificationControllers.size(); i++) {
+                mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
+            }
         }
         if (mSoftKeyboardController != null) {
             mSoftKeyboardController.onServiceConnected();
@@ -617,11 +658,34 @@ public abstract class AccessibilityService extends Service {
      */
     @NonNull
     public final MagnificationController getMagnificationController() {
+        return getMagnificationController(Display.DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Returns the magnification controller of specified logical display, which may be used to
+     * query and modify the state of display magnification.
+     * <p>
+     * <strong>Note:</strong> In order to control magnification, your service
+     * must declare the capability by setting the
+     * {@link android.R.styleable#AccessibilityService_canControlMagnification}
+     * property in its meta-data. For more information, see
+     * {@link #SERVICE_META_DATA}.
+     *
+     * @param displayId The logic display id, use {@link Display#DEFAULT_DISPLAY} for
+     *                  default display.
+     * @return the magnification controller
+     *
+     * @hide
+     */
+    @NonNull
+    public final MagnificationController getMagnificationController(int displayId) {
         synchronized (mLock) {
-            if (mMagnificationController == null) {
-                mMagnificationController = new MagnificationController(this, mLock);
+            MagnificationController controller = mMagnificationControllers.get(displayId);
+            if (controller == null) {
+                controller = new MagnificationController(this, mLock, displayId);
+                mMagnificationControllers.put(displayId, controller);
             }
-            return mMagnificationController;
+            return controller;
         }
     }
 
@@ -730,11 +794,14 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
-    private void onMagnificationChanged(@NonNull Region region, float scale,
+    private void onMagnificationChanged(int displayId, @NonNull Region region, float scale,
             float centerX, float centerY) {
-        if (mMagnificationController != null) {
-            mMagnificationController.dispatchMagnificationChanged(
-                    region, scale, centerX, centerY);
+        MagnificationController controller;
+        synchronized (mLock) {
+            controller = mMagnificationControllers.get(displayId);
+        }
+        if (controller != null) {
+            controller.dispatchMagnificationChanged(region, scale, centerX, centerY);
         }
     }
 
@@ -759,6 +826,7 @@ public abstract class AccessibilityService extends Service {
      */
     public static final class MagnificationController {
         private final AccessibilityService mService;
+        private final int mDisplayId;
 
         /**
          * Map of listeners to their handlers. Lazily created when adding the
@@ -767,19 +835,19 @@ public abstract class AccessibilityService extends Service {
         private ArrayMap<OnMagnificationChangedListener, Handler> mListeners;
         private final Object mLock;
 
-        MagnificationController(@NonNull AccessibilityService service, @NonNull Object lock) {
+        MagnificationController(@NonNull AccessibilityService service, @NonNull Object lock,
+                int displayId) {
             mService = service;
             mLock = lock;
+            mDisplayId = displayId;
         }
 
         /**
          * Called when the service is connected.
          */
-        void onServiceConnected() {
-            synchronized (mLock) {
-                if (mListeners != null && !mListeners.isEmpty()) {
-                    setMagnificationCallbackEnabled(true);
-                }
+        void onServiceConnectedLocked() {
+            if (mListeners != null && !mListeners.isEmpty()) {
+                setMagnificationCallbackEnabled(true);
             }
         }
 
@@ -856,7 +924,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    connection.setMagnificationCallbackEnabled(enabled);
+                    connection.setMagnificationCallbackEnabled(mDisplayId, enabled);
                 } catch (RemoteException re) {
                     throw new RuntimeException(re);
                 }
@@ -917,7 +985,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationScale();
+                    return connection.getMagnificationScale(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain scale", re);
                     re.rethrowFromSystemServer();
@@ -946,7 +1014,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationCenterX();
+                    return connection.getMagnificationCenterX(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain center X", re);
                     re.rethrowFromSystemServer();
@@ -975,7 +1043,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationCenterY();
+                    return connection.getMagnificationCenterY(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain center Y", re);
                     re.rethrowFromSystemServer();
@@ -1009,7 +1077,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.getMagnificationRegion();
+                    return connection.getMagnificationRegion(mDisplayId);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to obtain magnified region", re);
                     re.rethrowFromSystemServer();
@@ -1038,7 +1106,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.resetMagnification(animate);
+                    return connection.resetMagnification(mDisplayId, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to reset", re);
                     re.rethrowFromSystemServer();
@@ -1055,7 +1123,7 @@ public abstract class AccessibilityService extends Service {
          * called) or the service has been disconnected, this method will have
          * no effect and return {@code false}.
          *
-         * @param scale the magnification scale to set, must be >= 1 and <= 5
+         * @param scale the magnification scale to set, must be >= 1 and <= 8
          * @param animate {@code true} to animate from the current scale or
          *                {@code false} to set the scale immediately
          * @return {@code true} on success, {@code false} on failure
@@ -1066,7 +1134,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.setMagnificationScaleAndCenter(
+                    return connection.setMagnificationScaleAndCenter(mDisplayId,
                             scale, Float.NaN, Float.NaN, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set scale", re);
@@ -1098,7 +1166,7 @@ public abstract class AccessibilityService extends Service {
                             mService.mConnectionId);
             if (connection != null) {
                 try {
-                    return connection.setMagnificationScaleAndCenter(
+                    return connection.setMagnificationScaleAndCenter(mDisplayId,
                             Float.NaN, centerX, centerY, animate);
                 } catch (RemoteException re) {
                     Log.w(LOG_TAG, "Failed to set center", re);
@@ -1151,7 +1219,27 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Used to control and query the soft keyboard show mode.
+     * Used to control, query, and listen for changes to the soft keyboard show mode.
+     * <p>
+     * Accessibility services may request to override the decisions normally made about whether or
+     * not the soft keyboard is shown.
+     * <p>
+     * If multiple services make conflicting requests, the last request is honored. A service may
+     * register a listener to find out if the mode has changed under it.
+     * <p>
+     * If the user takes action to override the behavior behavior requested by an accessibility
+     * service, the user's request takes precendence, the show mode will be reset to
+     * {@link AccessibilityService#SHOW_MODE_AUTO}, and services will no longer be able to control
+     * that aspect of the soft keyboard's behavior.
+     * <p>
+     * Note: Because soft keyboards are independent apps, the framework does not have total control
+     * over their behavior. They may choose to show themselves, or not, without regard to requests
+     * made here. So the framework will make a best effort to deliver the behavior requested, but
+     * cannot guarantee success.
+     *
+     * @see AccessibilityService#SHOW_MODE_AUTO
+     * @see AccessibilityService#SHOW_MODE_HIDDEN
+     * @see AccessibilityService#SHOW_MODE_IGNORE_HARD_KEYBOARD
      */
     public static final class SoftKeyboardController {
         private final AccessibilityService mService;
@@ -1221,7 +1309,8 @@ public abstract class AccessibilityService extends Service {
          * @param listener the listener to remove, must be non-null
          * @return {@code true} if the listener was removed, {@code false} otherwise
          */
-        public boolean removeOnShowModeChangedListener(@NonNull OnShowModeChangedListener listener) {
+        public boolean removeOnShowModeChangedListener(
+                @NonNull OnShowModeChangedListener listener) {
             if (mListeners == null) {
                 return false;
             }
@@ -1293,32 +1382,32 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
-         * Returns the show mode of the soft keyboard. The default show mode is
-         * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
-         * focused. An AccessibilityService can also request the show mode
-         * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
+         * Returns the show mode of the soft keyboard.
          *
          * @return the current soft keyboard show mode
+         *
+         * @see AccessibilityService#SHOW_MODE_AUTO
+         * @see AccessibilityService#SHOW_MODE_HIDDEN
+         * @see AccessibilityService#SHOW_MODE_IGNORE_HARD_KEYBOARD
          */
         @SoftKeyboardShowMode
         public int getShowMode() {
-           try {
-               return Settings.Secure.getInt(mService.getContentResolver(),
-                       Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
-           } catch (Settings.SettingNotFoundException e) {
-               Log.v(LOG_TAG, "Failed to obtain the soft keyboard mode", e);
-               // The settings hasn't been changed yet, so it's value is null. Return the default.
-               return 0;
-           }
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getSoftKeyboardShowMode();
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to set soft keyboard behavior", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            return SHOW_MODE_AUTO;
         }
 
         /**
-         * Sets the soft keyboard show mode. The default show mode is
-         * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
-         * focused. An AccessibilityService can also request the show mode
-         * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown. The
-         * The lastto this method will be honored, regardless of any previous calls (including those
-         * made by other AccessibilityServices).
+         * Sets the soft keyboard show mode.
          * <p>
          * <strong>Note:</strong> If the service is not yet connected (e.g.
          * {@link AccessibilityService#onServiceConnected()} has not yet been called) or the
@@ -1326,6 +1415,10 @@ public abstract class AccessibilityService extends Service {
          *
          * @param showMode the new show mode for the soft keyboard
          * @return {@code true} on success
+         *
+         * @see AccessibilityService#SHOW_MODE_AUTO
+         * @see AccessibilityService#SHOW_MODE_HIDDEN
+         * @see AccessibilityService#SHOW_MODE_IGNORE_HARD_KEYBOARD
          */
         public boolean setShowMode(@SoftKeyboardShowMode int showMode) {
            final IAccessibilityServiceConnection connection =
@@ -1564,9 +1657,10 @@ public abstract class AccessibilityService extends Service {
             }
 
             @Override
-            public void onMagnificationChanged(@NonNull Region region,
+            public void onMagnificationChanged(int displayId, @NonNull Region region,
                     float scale, float centerX, float centerY) {
-                AccessibilityService.this.onMagnificationChanged(region, scale, centerX, centerY);
+                AccessibilityService.this.onMagnificationChanged(displayId, region, scale,
+                        centerX, centerY);
             }
 
             @Override
@@ -1669,13 +1763,15 @@ public abstract class AccessibilityService extends Service {
             mCaller.sendMessage(message);
         }
 
-        public void onMagnificationChanged(@NonNull Region region,
+        /** Magnification changed callbacks for different displays */
+        public void onMagnificationChanged(int displayId, @NonNull Region region,
                 float scale, float centerX, float centerY) {
             final SomeArgs args = SomeArgs.obtain();
             args.arg1 = region;
             args.arg2 = scale;
             args.arg3 = centerX;
             args.arg4 = centerY;
+            args.argi1 = displayId;
 
             final Message message = mCaller.obtainMessageO(DO_ON_MAGNIFICATION_CHANGED, args);
             mCaller.sendMessage(message);
@@ -1805,7 +1901,10 @@ public abstract class AccessibilityService extends Service {
                         final float scale = (float) args.arg2;
                         final float centerX = (float) args.arg3;
                         final float centerY = (float) args.arg4;
-                        mCallback.onMagnificationChanged(region, scale, centerX, centerY);
+                        final int displayId = args.argi1;
+                        args.recycle();
+                        mCallback.onMagnificationChanged(displayId, region, scale,
+                                centerX, centerY);
                     }
                 } return;
 

@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Angiv adgangskoden for at låse op"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Angiv pinkoden for at låse op"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Angiv din pinkode"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Angiv dit mønster"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Angiv din adgangskode"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Angiv dit mønster"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Angiv din adgangskode"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Forkert pinkode."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Ugyldigt kort."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Opladet"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Fuldt opladet"</string>
     <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Trådløs opladning"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Oplader hurtigt"</string>
@@ -62,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"eSIM kan ikke deaktiveres på grund af en fejl."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Har du glemt mønsteret?"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Forkert mønster"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Forkert adgangskode"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Forkert mønster"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Forkert adgangskode"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Forkert pinkode"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one">Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekund.</item>
@@ -119,14 +119,14 @@
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"Skift indtastningsmetode"</string>
     <string name="airplane_mode" msgid="3807209033737676010">"Flytilstand"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"Du skal angive et mønster, når du har genstartet enheden"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Der skal indtastes en pinkode efter genstart af enheden"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Der skal indtastes en adgangskode efter genstart af enheden"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"Der skal angives en pinkode efter genstart af enheden"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"Der skal angives en adgangskode efter genstart af enheden"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"Der kræves et mønster som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"Der kræves en pinkode som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"Der kræves en adgangskode som ekstra beskyttelse"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"Du skal angive et mønster, når du skifter profil"</string>
-    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Der skal indtastes en pinkode, når du skifter profil"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Der skal indtastes en adgangskode, når du skifter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"Der skal angives en pinkode, når du skifter profil"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"Der skal angives en adgangskode, når du skifter profil"</string>
     <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Enheden er blevet låst af administratoren"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"Enheden blev låst manuelt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
@@ -141,7 +141,8 @@
       <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> time siden. Bekræft adgangskoden.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ikke genkendt"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Ikke genkendt"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Ikke genkendt"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
       <item quantity="other">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
@@ -150,4 +151,84 @@
       <item quantity="one">SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
       <item quantity="other">SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Du har <xliff:g id="_NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver permanent ubrugeligt. Kontakt dit mobilselskab for at få flere oplysninger.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Den er"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Den er"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Tolv"</item>
+    <item msgid="7389464214252023751">"Et"</item>
+    <item msgid="8803180377002008046">"To"</item>
+    <item msgid="8614897059944644719">"Tre"</item>
+    <item msgid="2293058674782619556">"Fire"</item>
+    <item msgid="4815402358455041664">"Fem"</item>
+    <item msgid="3325754778509665687">"Seks"</item>
+    <item msgid="5805551341866280575">"Syv"</item>
+    <item msgid="203334816668238610">"Otte"</item>
+    <item msgid="4828052671464488923">"Ni"</item>
+    <item msgid="2233497913571137419">"Ti"</item>
+    <item msgid="5621554266768657830">"Elleve"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"-"</item>
+    <item msgid="8837126587669001578">"Et"</item>
+    <item msgid="4294343372940455660">"To"</item>
+    <item msgid="7129166637707421536">"Tre"</item>
+    <item msgid="7579404865008788673">"Fire"</item>
+    <item msgid="3873924689207380586">"Fem"</item>
+    <item msgid="4849565597850069377">"Seks"</item>
+    <item msgid="4404219424523572364">"Syv"</item>
+    <item msgid="8740481214764087329">"Otte"</item>
+    <item msgid="1713216865806811237">"Ni"</item>
+    <item msgid="3508406095411245038">"Ti"</item>
+    <item msgid="7161996337755311711">"Elleve"</item>
+    <item msgid="4044549963329624197">"Tolv"</item>
+    <item msgid="333373157917379088">"Tretten"</item>
+    <item msgid="2631202907124819385">"Fjorten"</item>
+    <item msgid="6472396076858033453">"Femten"</item>
+    <item msgid="8656981856181581643">"Seksten"</item>
+    <item msgid="7289026608562030619">"Sytten"</item>
+    <item msgid="3881477602692646573">"Atten"</item>
+    <item msgid="3358129827772984226">"Nitten"</item>
+    <item msgid="3308575407402865807">"Tyve"</item>
+    <item msgid="5346560955382229629">"Enogtyve\n"</item>
+    <item msgid="226750304761473436">"Toogtyve\n"</item>
+    <item msgid="616811325336838734">"Treogtyve\n"</item>
+    <item msgid="616346116869053440">"Fireogtyve\n"</item>
+    <item msgid="4642996410384042830">"Femogtyve\n"</item>
+    <item msgid="7506092849993571465">"Seksogtyve\n"</item>
+    <item msgid="1915078191101042031">"Syvogtyve\n"</item>
+    <item msgid="4292378641900520252">"Otteogtyve\n"</item>
+    <item msgid="5339513901773103696">"Niogtyve\n"</item>
+    <item msgid="3574673250891657607">"Tredive"</item>
+    <item msgid="5796923836589110940">"Enogtredive\n"</item>
+    <item msgid="5859323597571702052">"Toogtredive\n"</item>
+    <item msgid="5133326723148876507">"Treogtredive\n"</item>
+    <item msgid="2693999494655663096">"Fireogtredive\n"</item>
+    <item msgid="3316754944962836197">"Femogtredive\n"</item>
+    <item msgid="816891008836796723">"Seksogtredive\n"</item>
+    <item msgid="9158890488666520078">"Syvogtredive\n"</item>
+    <item msgid="1894769703213894011">"Otteogtredive\n"</item>
+    <item msgid="5638820345598572399">"Niogtredive\n"</item>
+    <item msgid="8838304023017895439">"Fyrre"</item>
+    <item msgid="1834742948932559597">"Enogfyrre\n"</item>
+    <item msgid="6573707308847773944">"Toogfyrre\n"</item>
+    <item msgid="2450149950652678001">"Treogfyrre\n"</item>
+    <item msgid="2874667401318178036">"Fireogfyrre\n"</item>
+    <item msgid="3391101532763048862">"Femogfyrre\n"</item>
+    <item msgid="1671489330863254362">"Seksogfyrre\n"</item>
+    <item msgid="5916017359554531038">"Syvogfyrre\n"</item>
+    <item msgid="8205413177993059967">"Otteogfyrre\n"</item>
+    <item msgid="6607867415142171302">"Niogfyrre\n"</item>
+    <item msgid="8358850748472089162">"Halvtreds"</item>
+    <item msgid="3551313125255080234">"Enoghalvtreds\n"</item>
+    <item msgid="1559678130725716542">"Tooghalvtreds\n"</item>
+    <item msgid="431441994725492377">"Treoghalvtreds\n"</item>
+    <item msgid="6345774640539623024">"Fireoghalvtreds\n"</item>
+    <item msgid="8018192990793931120">"Femoghalvtreds\n"</item>
+    <item msgid="6187650843754604534">"Seksoghalvtreds\n"</item>
+    <item msgid="8727240174015993259">"Syvoghalvtreds\n"</item>
+    <item msgid="848339003778952950">"Otteoghalvtreds\n"</item>
+    <item msgid="5798985802835423618">"Nioghalvtreds\n"</item>
+  </string-array>
 </resources>

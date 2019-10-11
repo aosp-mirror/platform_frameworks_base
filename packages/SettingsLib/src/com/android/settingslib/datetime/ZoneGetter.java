@@ -20,9 +20,6 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.icu.text.TimeZoneFormat;
 import android.icu.text.TimeZoneNames;
-import androidx.annotation.VisibleForTesting;
-import androidx.core.text.BidiFormatter;
-import androidx.core.text.TextDirectionHeuristicsCompat;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -31,13 +28,20 @@ import android.text.style.TtsSpan;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.VisibleForTesting;
+import androidx.core.text.BidiFormatter;
+import androidx.core.text.TextDirectionHeuristicsCompat;
+
 import com.android.settingslib.R;
 
+import libcore.timezone.CountryTimeZones;
+import libcore.timezone.CountryTimeZones.TimeZoneMapping;
 import libcore.timezone.TimeZoneFinder;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -381,12 +385,26 @@ public class ZoneGetter {
 
             // Create a lookup of local zone IDs.
             final List<String> zoneIds = lookupTimeZoneIdsByCountry(locale.getCountry());
-            localZoneIds = new HashSet<>(zoneIds);
+            localZoneIds = zoneIds != null ? new HashSet<>(zoneIds) : new HashSet<>();
         }
 
         @VisibleForTesting
         public List<String> lookupTimeZoneIdsByCountry(String country) {
-            return TimeZoneFinder.getInstance().lookupTimeZoneIdsByCountry(country);
+            final CountryTimeZones countryTimeZones =
+                    TimeZoneFinder.getInstance().lookupCountryTimeZones(country);
+            if (countryTimeZones == null) {
+                return null;
+            }
+            final List<TimeZoneMapping> mappings = countryTimeZones.getTimeZoneMappings();
+            return extractTimeZoneIds(mappings);
+        }
+
+        private static List<String> extractTimeZoneIds(List<TimeZoneMapping> timeZoneMappings) {
+            final List<String> zoneIds = new ArrayList<>(timeZoneMappings.size());
+            for (TimeZoneMapping timeZoneMapping : timeZoneMappings) {
+                zoneIds.add(timeZoneMapping.timeZoneId);
+            }
+            return Collections.unmodifiableList(zoneIds);
         }
     }
 }

@@ -47,3 +47,5 @@
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
+
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/app/WAPPushManager)

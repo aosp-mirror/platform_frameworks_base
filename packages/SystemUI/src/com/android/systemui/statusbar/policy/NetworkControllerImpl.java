@@ -17,9 +17,14 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
 import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
+import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -50,6 +55,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -73,7 +79,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 /** Platform implementation of the network controller. **/
+@Singleton
 public class NetworkControllerImpl extends BroadcastReceiver
         implements NetworkController, DemoMode, DataUsageController.NetworkNameProvider,
         ConfigurationChangedReceiver, Dumpable {
@@ -98,16 +109,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final SubscriptionDefaults mSubDefaults;
     private final DataSaverController mDataSaverController;
     private final CurrentUserTracker mUserTracker;
+    private final Object mLock = new Object();
     private Config mConfig;
 
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onActiveDataSubscriptionIdChanged(int subId) {
-            mActiveMobileDataSubscription = subId;
-            doUpdateMobileControllers();
-        }
-    };
-
+    private PhoneStateListener mPhoneStateListener;
     private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     // Subcontrollers.
@@ -163,7 +168,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     /**
      * Construct this controller object and register for updates.
      */
-    public NetworkControllerImpl(Context context, Looper bgLooper,
+    @Inject
+    public NetworkControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
             DeviceProvisionedController deviceProvisionedController) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
@@ -268,6 +274,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
         // TODO: Move off of the deprecated CONNECTIVITY_ACTION broadcast and rely on callbacks
         // exclusively for status bar icons.
         mConnectivityManager.registerDefaultNetworkCallback(callback, mReceiverHandler);
+        // Register the listener on our bg looper
+        mPhoneStateListener = new PhoneStateListener(bgLooper) {
+            @Override
+            public void onActiveDataSubscriptionIdChanged(int subId) {
+                mActiveMobileDataSubscription = subId;
+                doUpdateMobileControllers();
+            }
+        };
     }
 
     public DataSaverController getDataSaverController() {
@@ -363,6 +377,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public String getMobileDataNetworkName() {
         MobileSignalController controller = getDataController();
         return controller != null ? controller.getState().networkNameData : "";
+    }
+
+    @Override
+    public int getNumberSubscriptions() {
+        return mMobileSignalControllers.size();
     }
 
     public boolean isEmergencyOnly() {
@@ -584,7 +603,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             updateNoSims();
             return;
         }
-        setCurrentSubscriptions(subscriptions);
+        synchronized (mLock) {
+            setCurrentSubscriptionsLocked(subscriptions);
+        }
         updateNoSims();
         recalculateEmergency();
     }
@@ -612,8 +633,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return false;
     }
 
+    @GuardedBy("mLock")
     @VisibleForTesting
-    void setCurrentSubscriptions(List<SubscriptionInfo> subscriptions) {
+    public void setCurrentSubscriptionsLocked(List<SubscriptionInfo> subscriptions) {
         Collections.sort(subscriptions, new Comparator<SubscriptionInfo>() {
             @Override
             public int compare(SubscriptionInfo lhs, SubscriptionInfo rhs) {
@@ -640,8 +662,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 cachedControllers.remove(subId);
             } else {
                 MobileSignalController controller = new MobileSignalController(mContext, mConfig,
-                        mHasMobileDataFeature, mPhone, mCallbackHandler,
-                        this, subscriptions.get(i), mSubDefaults, mReceiverHandler.getLooper());
+                        mHasMobileDataFeature, mPhone.createForSubscriptionId(subId),
+                        mCallbackHandler, this, subscriptions.get(i),
+                        mSubDefaults, mReceiverHandler.getLooper());
                 controller.setUserSetupComplete(mUserSetup);
                 mMobileSignalControllers.put(subId, controller);
                 if (subscriptions.get(i).getSimSlotIndex() == 0) {
@@ -712,6 +735,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         Locale current = mContext.getResources().getConfiguration().locale;
         if (!current.equals(mLocale)) {
             mLocale = current;
+            mWifiSignalController.refreshLocale();
             notifyAllListeners();
         }
     }
@@ -896,20 +920,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 if (activity != null) {
                     switch (activity) {
                         case "inout":
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_INOUT);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_INOUT);
                             break;
                         case "in":
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_IN);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_IN);
                             break;
                         case "out":
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_OUT);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_OUT);
                             break;
                         default:
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_NONE);
                             break;
                     }
                 } else {
-                    mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
+                    mWifiSignalController.setActivity(DATA_ACTIVITY_NONE);
                 }
                 String ssid = args.getString("ssid");
                 if (ssid != null) {
@@ -975,6 +999,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             datatype.equals("lte") ? TelephonyIcons.LTE :
                             datatype.equals("lte+") ? TelephonyIcons.LTE_PLUS :
                             datatype.equals("dis") ? TelephonyIcons.DATA_DISABLED :
+                            datatype.equals("not") ? TelephonyIcons.NOT_DEFAULT_DATA :
                             TelephonyIcons.UNKNOWN;
                 }
                 if (args.containsKey("roam")) {
@@ -986,6 +1011,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
                             : Math.min(Integer.parseInt(level),
                                     SignalStrength.NUM_SIGNAL_STRENGTH_BINS);
                     controller.getState().connected = controller.getState().level >= 0;
+                }
+                if (args.containsKey("inflate")) {
+                    for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+                        mMobileSignalControllers.valueAt(i).mInflateSignalStrengths =
+                                "true".equals(args.getString("inflate"));
+                    }
                 }
                 String activity = args.getString("activity");
                 if (activity != null) {
@@ -1025,7 +1056,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         SubscriptionInfo info = new SubscriptionInfo(id, "", simSlotIndex, "", "", 0, 0, "", 0,
                 null, null, null, "", false, null, null);
         MobileSignalController controller = new MobileSignalController(mContext,
-                mConfig, mHasMobileDataFeature, mPhone, mCallbackHandler, this, info,
+                mConfig, mHasMobileDataFeature,
+                mPhone.createForSubscriptionId(info.getSubscriptionId()), mCallbackHandler, this, info,
                 mSubDefaults, mReceiverHandler.getLooper());
         mMobileSignalControllers.put(id, controller);
         controller.getState().userSetup = true;
@@ -1108,7 +1140,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     res.getBoolean(com.android.internal.R.bool.config_alwaysUseCdmaRssi);
             config.hspaDataDistinguishable =
                     res.getBoolean(R.bool.config_hspa_data_distinguishable);
-            config.inflateSignalStrengths = res.getBoolean(R.bool.config_inflateSignalStrength);
+            config.inflateSignalStrengths = res.getBoolean(
+                    com.android.internal.R.bool.config_inflateSignalStrength);
 
             CarrierConfigManager configMgr = (CarrierConfigManager)
                     context.getSystemService(Context.CARRIER_CONFIG_SERVICE);

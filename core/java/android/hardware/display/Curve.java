@@ -37,7 +37,7 @@ public final class Curve implements Parcelable {
         return mY;
     }
 
-    public static final Creator<Curve> CREATOR = new Creator<Curve>() {
+    public static final @android.annotation.NonNull Creator<Curve> CREATOR = new Creator<Curve>() {
         public Curve createFromParcel(Parcel in) {
             float[] x = in.createFloatArray();
             float[] y = in.createFloatArray();
@@ -58,5 +58,19 @@ public final class Curve implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[");
+        final int size = mX.length;
+        for (int i = 0; i < size; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+            sb.append("(").append(mX[i]).append(", ").append(mY[i]).append(")");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

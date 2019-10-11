@@ -29,6 +29,8 @@ namespace statsd {
 class SubsystemSleepStatePuller : public StatsPuller {
 public:
     SubsystemSleepStatePuller();
+
+private:
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 

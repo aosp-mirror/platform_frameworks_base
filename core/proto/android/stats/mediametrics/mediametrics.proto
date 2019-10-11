@@ -1,0 +1,234 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.stats.mediametrics;
+
+/**
+ * Track how we arbitrate between microphone/input requests.
+ * Logged from
+ *   frameworks/av/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiopolicy.cpp
+ * Next Tag: 10
+ */
+message AudioPolicyData {
+    optional int32 status = 1;
+    optional string request_source = 2;
+    optional string request_package = 3;
+    optional int32 request_session = 4;
+    optional string request_device = 5;
+    optional string active_source = 6;
+    optional string active_package = 7;
+    optional int32 active_session = 8;
+    optional string active_device = 9;
+}
+
+/**
+ * Track properties of audio recording
+ * Logged from
+ *   frameworks/av/media/libaudioclient/AudioRecord.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiorecord.cpp
+ * Next Tag: 16
+ */
+message AudioRecordData {
+    optional string encoding = 1;
+    optional string source = 2;
+    optional int32 latency = 3;
+    optional int32 samplerate = 4;
+    optional int32 channels = 5;
+    optional int64 created_millis = 6;
+    optional int64 duration_millis = 7;
+    optional int32 count = 8;
+    optional int32 error_code = 9;
+    optional string error_function = 10;
+    optional int32 port_id = 11;
+    optional int32 frame_count = 12;
+    optional string attributes = 13;
+    optional int64 channel_mask = 14;
+    optional int64 start_count = 15;
+
+}
+
+/**
+ * Track audio thread performance data
+ * Logged from
+ *   frameworks/av/media/libnblog/ReportPerformance.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiothread.cpp
+ * Next Tag: 28
+ */
+message AudioThreadData {
+    optional string type = 1;
+    optional int32 framecount = 2;
+    optional int32 samplerate = 3;
+    optional string work_millis_hist = 4;
+    optional string latency_millis_hist = 5;
+    optional string warmup_millis_hist = 6;
+    optional int64 underruns = 7;
+    optional int64 overruns = 8;
+    optional int64 active_millis = 9;
+    optional int64 duration_millis = 10;
+
+    optional int32 id = 11;
+    optional int32 port_id = 12;
+    optional int32 sample_rate = 13;
+    optional int64 channel_mask = 14;
+    optional string encoding = 15;
+    optional int32 frame_count = 16;
+    optional string output_device = 17;
+    optional string input_device = 18;
+    optional double io_jitter_mean_millis = 19;
+    optional double io_jitter_stddev_millis = 20;
+    optional double process_time_mean_millis = 21;
+    optional double process_time_stddev_millis = 22;
+    optional double timestamp_jitter_mean_millis = 23;
+    optional double timestamp_jitter_stddev_millis = 24;
+    optional double latency_mean_millis = 25;
+    optional double latency_stddev_millis = 26;
+
+}
+
+/**
+ * Track audio track playback data
+ * Logged from
+ *   frameworks/av/media/libaudioclient/AudioTrack.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_audiotrack.cpp
+ * Next Tag: 12
+ */
+message AudioTrackData {
+    optional string stream_type = 1;
+    optional string content_type = 2;
+    optional string track_usage = 3;
+    optional int32 sample_rate = 4;
+    optional int64 channel_mask = 5;
+
+    optional int32 underrun_frames = 6;
+    optional int32 startup_glitch = 7;
+
+    optional int32 port_id = 8;
+    optional string encoding = 9;
+    optional int32 frame_count = 10;
+    optional string attributes = 11;
+
+
+}
+
+/**
+ * Track Media Codec usage
+ * Logged from:
+ *   frameworks/av/media/libstagefright/MediaCodec.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_codec.cpp
+ * Next Tag: 21
+ */
+message CodecData {
+    optional string codec = 1;
+    optional string mime = 2;
+    optional string mode = 3;
+    optional int32 encoder = 4;
+    optional int32 secure = 5;
+    optional int32 width = 6;
+    optional int32 height = 7;
+    optional int32 rotation = 8;
+    optional int32 crypto = 9;
+    optional int32 profile = 10;
+    optional int32 level = 11;
+    optional int32 max_width = 12;
+    optional int32 max_height = 13;
+    optional int32 error_code = 14;
+    optional string error_state = 15;
+    optional int64 latency_max = 16;
+    optional int64 latency_min = 17;
+    optional int64 latency_avg = 18;
+    optional int64 latency_count = 19;
+    optional int64 latency_unknown = 20;
+}
+
+/**
+ * Track Media Extractor (pulling video/audio streams out of containers) usage
+ * Logged from:
+ *   frameworks/av/media/libstagefright/RemoteMediaExtractor.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_extractor.cpp
+ * Next Tag: 4
+ */
+message ExtractorData {
+    optional string format = 1;
+    optional string mime = 2;
+    optional int32 tracks = 3;
+}
+
+/**
+ * Track Media Player usage
+ * this handles both nuplayer and nuplayer2
+ * Logged from:
+ *   frameworks/av/media/libmediaplayerservice/nuplayer/NuPlayerDriver.cpp
+ *   frameworks/av/media/libmediaplayer2/nuplayer2/NuPlayer2Driver.cpp
+ *   frameworks/av/services/mediaanalytics/statsd_nuplayer.cpp
+ * Next Tag: 21
+ */
+message NuPlayerData {
+    optional string whichPlayer = 1;
+
+    optional string video_mime = 2;
+    optional string video_codec = 3;
+    optional int32 width = 4;
+    optional int32 height = 5;
+    optional int64 frames = 6;
+    optional int64 frames_dropped = 7;
+    optional double framerate = 8;
+    optional string audio_mime = 9;
+    optional string audio_codec = 10;
+    optional int64 duration_millis = 11;
+    optional int64 playing_millis = 12;
+    optional int32 error = 13;
+    optional int32 error_code = 14;
+    optional string error_state = 15;
+    optional string data_source_type = 16;
+    optional int64 rebuffering_millis = 17;
+    optional int32 rebuffers = 18;
+    optional int32 rebuffer_at_exit = 19;
+    optional int64 frames_dropped_startup = 20;
+}
+
+/**
+ * Track information about recordings (e.g. camcorder)
+ * Logged from
+ *   frameworks/av/media/libmediaplayerservice/StagefrightRecorder.cpp
+ *   frameworks/av/services/mediaanalytics/if_statsd.cpp
+ * Next Tag: 22
+ */
+message RecorderData {
+    optional string audio_mime = 1;
+    optional string video_mime = 2;
+    optional int32 video_profile = 3;
+    optional int32 video_level = 4;
+    optional int32 width = 5;
+    optional int32 height = 6;
+    optional int32 rotation = 7;
+    optional int32 framerate = 8;
+    optional int32 capture_fps = 9;
+    optional double capture_fps_enable = 10;
+    optional int64 duration_millis = 11;
+    optional int64 paused_millis = 12;
+    optional int32 paused_count = 13;
+    optional int32 audio_bitrate = 14;
+    optional int32 audio_channels = 15;
+    optional int32 audio_samplerate = 16;
+    optional int32 movie_timescale = 17;
+    optional int32 audio_timescale = 18;
+    optional int32 video_timescale = 19;
+    optional int32 video_bitrate = 20;
+    optional int32 iframe_interval = 21;
+}

@@ -58,7 +58,7 @@ public class TaskKeyLruCache<V> extends TaskKeyCache<V> {
     }
 
     /** Trims the cache to a specific size */
-    final void trimToSize(int cacheSize) {
+    public final void trimToSize(int cacheSize) {
         mCache.trimToSize(cacheSize);
     }
 

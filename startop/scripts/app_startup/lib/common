@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if [[ -z $ANDROID_BUILD_TOP ]]; then
+  echo "Please run source build/envsetup.sh first" >&2
+  exit 1
+fi
+
+source $ANDROID_BUILD_TOP/build/envsetup.sh
+
+verbose_print() {
+  if [[ "$verbose" == "y" ]]; then
+    echo "$@" >&2
+  fi
+}
+
+remote_pidof() {
+  local procname="$1"
+  adb shell ps | grep "$procname" | awk '{print $2;}'
+}
+
+remote_pkill() {
+  local procname="$1"
+  shift
+
+  local the_pids=$(remote_pidof "$procname")
+  local pid
+
+  for pid in $the_pids; do
+    verbose_print adb shell kill "$@" "$pid"
+    adb shell kill "$@" "$pid"
+  done
+}
+
+get_activity_name() {
+  local package="$1"
+  local action_key="android.intent.action.MAIN:"
+
+  # Example query-activities output being parsed:
+  #
+  #  Activity #14:
+  #    priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true
+  #    com.google.android.videos/com.google.android.youtube.videos.EntryPoint
+  #  Activity #15:
+  #    priority=0 preferredOrder=0 match=0x108000 specificIndex=-1 isDefault=true
+  #    com.google.android.youtube/.app.honeycomb.Shell$HomeActivity
+
+  # Given package 'com.google.android.youtube' return '.app.honeycomb.Shell$HomeActivity'
+
+  local activity_line="$(adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | grep "$package/")"
+  IFS="/" read -a array <<< "$activity_line"
+  local activity_name="${array[1]}"
+  echo "$activity_name"
+}

@@ -16,10 +16,12 @@
 #ifndef PAINT_UTILS_H
 #define PAINT_UTILS_H
 
+#include <GLES2/gl2.h>
 #include <utils/Blur.h>
 
 #include <SkColorFilter.h>
 #include <SkDrawLooper.h>
+#include <SkPaint.h>
 #include <SkShader.h>
 
 namespace android {

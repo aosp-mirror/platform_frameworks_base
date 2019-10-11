@@ -288,7 +288,7 @@ public final class IpPrefix implements Parcelable {
     /**
      * Implement the Parcelable interface.
      */
-    public static final Creator<IpPrefix> CREATOR =
+    public static final @android.annotation.NonNull Creator<IpPrefix> CREATOR =
             new Creator<IpPrefix>() {
                 public IpPrefix createFromParcel(Parcel in) {
                     byte[] address = in.createByteArray();

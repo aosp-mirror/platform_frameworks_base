@@ -193,7 +193,7 @@ public class LowpanChannelInfo implements Parcelable {
     }
 
     /** Implement the Parcelable interface. */
-    public static final Creator<LowpanChannelInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<LowpanChannelInfo> CREATOR =
             new Creator<LowpanChannelInfo>() {
 
                 public LowpanChannelInfo createFromParcel(Parcel in) {

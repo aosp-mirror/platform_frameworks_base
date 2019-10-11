@@ -22,12 +22,18 @@
 #include "anomaly/AlarmMonitor.h"
 #include "config/ConfigManager.h"
 #include "external/StatsPullerManager.h"
+#include "logd/LogEventQueue.h"
 #include "packages/UidMap.h"
+#include "shell/ShellSubscriber.h"
 #include "statscompanion_util.h"
 
+#include <android/frameworks/stats/1.0/IStats.h>
+#include <android/frameworks/stats/1.0/types.h>
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
+#include <android/os/IStatsManager.h>
 #include <binder/IResultReceiver.h>
+#include <binder/ParcelFileDescriptor.h>
 #include <utils/Looper.h>
 
 #include <deque>
@@ -36,6 +42,7 @@
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
+using namespace android::frameworks::stats::V1_0;
 using namespace android::os;
 using namespace std;
 
@@ -43,18 +50,22 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsService : public BnStatsManager, public LogListener, public IBinder::DeathRecipient {
+using android::hardware::Return;
+
+class StatsService : public BnStatsManager,
+                     public IStats,
+                     public IBinder::DeathRecipient {
 public:
-    StatsService(const sp<Looper>& handlerLooper);
+    StatsService(const sp<Looper>& handlerLooper, std::shared_ptr<LogEventQueue> queue);
     virtual ~StatsService();
 
     /** The anomaly alarm registered with AlarmManager won't be updated by less than this. */
-    // TODO: Consider making this configurable. And choose a good number.
     const uint32_t MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS = 5;
 
     virtual status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
     virtual status_t dump(int fd, const Vector<String16>& args);
-    virtual status_t command(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+    virtual status_t command(int inFd, int outFd, int err, Vector<String8>& args,
+                             sp<IResultReceiver> resultReceiver);
 
     virtual Status systemRunning();
     virtual Status statsCompanionReady();
@@ -62,9 +73,9 @@ public:
     virtual Status informPollAlarmFired();
     virtual Status informAlarmForSubscriberTriggeringFired();
 
-    virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
-                                    const vector<String16>& app);
-    virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version);
+    virtual Status informAllUidData(const ParcelFileDescriptor& fd);
+    virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version,
+                                    const String16& version_string, const String16& installer);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
     virtual Status informDeviceShutdown();
 
@@ -79,9 +90,9 @@ public:
     void Terminate();
 
     /**
-     * Called by LogReader when there's a log event to process.
+     * Test ONLY interface. In real world, StatsService reads from LogEventQueue.
      */
-    virtual void OnLogEvent(LogEvent* event, bool reconnectionStarts);
+    virtual void OnLogEvent(LogEvent* event);
 
     /**
      * Binder call for clients to request data for this configuration key.
@@ -120,6 +131,17 @@ public:
                                             const String16& packageName) override;
 
     /**
+     * Binder call to let clients register the active configs changed operation.
+     */
+    virtual Status setActiveConfigsChangedOperation(const sp<android::IBinder>& intentSender,
+                                                    const String16& packageName,
+                                                    vector<int64_t>* output) override;
+
+    /**
+     * Binder call to remove the active configs changed operation for the specified package..
+     */
+    virtual Status removeActiveConfigsChangedOperation(const String16& packageName) override;
+    /**
      * Binder call to allow clients to remove the specified configuration.
      */
     virtual Status removeConfiguration(int64_t key,
@@ -149,6 +171,97 @@ public:
      */
     virtual Status sendAppBreadcrumbAtom(int32_t label, int32_t state) override;
 
+    /**
+     * Binder call to register a callback function for a vendor pulled atom.
+     * Note: this atom must NOT have uid as a field.
+     */
+    virtual Status registerPullerCallback(int32_t atomTag,
+        const sp<android::os::IStatsPullerCallback>& pullerCallback,
+        const String16& packageName) override;
+
+    /**
+     * Binder call to unregister any existing callback function for a vendor pulled atom.
+     */
+    virtual Status unregisterPullerCallback(int32_t atomTag, const String16& packageName) override;
+
+    /**
+     * Binder call to log BinaryPushStateChanged atom.
+     */
+    virtual Status sendBinaryPushStateChangedAtom(
+            const android::String16& trainNameIn,
+            const int64_t trainVersionCodeIn,
+            const int options,
+            const int32_t state,
+            const std::vector<int64_t>& experimentIdsIn) override;
+
+    /**
+     * Binder call to log WatchdogRollbackOccurred atom.
+     */
+    virtual Status sendWatchdogRollbackOccurredAtom(
+            const int32_t rollbackTypeIn,
+            const android::String16& packageNameIn,
+            const int64_t packageVersionCodeIn) override;
+
+    /**
+     * Binder call to get registered experiment IDs.
+     */
+    virtual Status getRegisteredExperimentIds(std::vector<int64_t>* expIdsOut);
+
+    /**
+     * Binder call to get SpeakerImpedance atom.
+     */
+    virtual Return<void> reportSpeakerImpedance(const SpeakerImpedance& speakerImpedance) override;
+
+    /**
+     * Binder call to get HardwareFailed atom.
+     */
+    virtual Return<void> reportHardwareFailed(const HardwareFailed& hardwareFailed) override;
+
+    /**
+     * Binder call to get PhysicalDropDetected atom.
+     */
+    virtual Return<void> reportPhysicalDropDetected(
+            const PhysicalDropDetected& physicalDropDetected) override;
+
+    /**
+     * Binder call to get ChargeCyclesReported atom.
+     */
+    virtual Return<void> reportChargeCycles(const ChargeCycles& chargeCycles) override;
+
+    /**
+     * Binder call to get BatteryHealthSnapshot atom.
+     */
+    virtual Return<void> reportBatteryHealthSnapshot(
+            const BatteryHealthSnapshotArgs& batteryHealthSnapshotArgs) override;
+
+    /**
+     * Binder call to get SlowIo atom.
+     */
+    virtual Return<void> reportSlowIo(const SlowIo& slowIo) override;
+
+    /**
+     * Binder call to get BatteryCausedShutdown atom.
+     */
+    virtual Return<void> reportBatteryCausedShutdown(
+            const BatteryCausedShutdown& batteryCausedShutdown) override;
+
+    /**
+     * Binder call to get UsbPortOverheatEvent atom.
+     */
+    virtual Return<void> reportUsbPortOverheatEvent(
+            const UsbPortOverheatEvent& usbPortOverheatEvent) override;
+
+    /**
+     * Binder call to get Speech DSP state atom.
+     */
+    virtual Return<void> reportSpeechDspStat(
+            const SpeechDspStat& speechDspStat) override;
+
+    /**
+     * Binder call to get vendor atom.
+     */
+    virtual Return<void> reportVendorAtom(const VendorAtom& vendorAtom) override;
+
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;
 
@@ -165,75 +278,112 @@ private:
                                          uint32_t serial);
 
     /**
-     * Text or proto output of dumpsys.
+     * Proto output of statsd report data dumpsys, wrapped in a StatsDataDumpProto.
      */
-    void dump_impl(FILE* out, bool verbose, bool proto);
+    void dumpIncidentSection(int outFd);
+
+    /**
+     * Text or proto output of statsdStats dumpsys.
+     */
+    void dumpStatsdStats(int outFd, bool verbose, bool proto);
 
     /**
      * Print usage information for the commands
      */
-    void print_cmd_help(FILE* out);
+    void print_cmd_help(int out);
+
+    /* Runs on its dedicated thread to process pushed stats event from socket. */
+    void readLogs();
 
     /**
      * Trigger a broadcast.
      */
-    status_t cmd_trigger_broadcast(FILE* out, Vector<String8>& args);
+    status_t cmd_trigger_broadcast(int outFd, Vector<String8>& args);
+
+
+    /**
+     * Trigger an active configs changed broadcast.
+     */
+    status_t cmd_trigger_active_config_broadcast(int outFd, Vector<String8>& args);
 
     /**
      * Handle the config sub-command.
      */
-    status_t cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
+    status_t cmd_config(int inFd, int outFd, int err, Vector<String8>& args);
 
     /**
      * Prints some basic stats to std out.
      */
-    status_t cmd_print_stats(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_stats(int outFd, const Vector<String8>& args);
 
     /**
      * Print the event log.
      */
-    status_t cmd_dump_report(FILE* out, FILE* err, const Vector<String8>& args);
+    status_t cmd_dump_report(int outFd, const Vector<String8>& args);
 
     /**
      * Print the mapping of uids to package names.
      */
-    status_t cmd_print_uid_map(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_uid_map(int outFd, const Vector<String8>& args);
 
     /**
      * Flush the data to disk.
      */
-    status_t cmd_write_data_to_disk(FILE* out);
+    status_t cmd_write_data_to_disk(int outFd);
 
     /**
      * Write an AppBreadcrumbReported event to the StatsLog buffer, as if calling
      * StatsLog.write(APP_BREADCRUMB_REPORTED).
      */
-    status_t cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& args);
+    status_t cmd_log_app_breadcrumb(int outFd, const Vector<String8>& args);
+
+    /**
+     * Write an BinaryPushStateChanged event, as if calling StatsLog.logBinaryPushStateChanged().
+     */
+    status_t cmd_log_binary_push(int outFd, const Vector<String8>& args);
 
     /**
      * Print contents of a pulled metrics source.
      */
-    status_t cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_pulled_metrics(int outFd, const Vector<String8>& args);
 
     /**
      * Removes all configs stored on disk and on memory.
      */
-    status_t cmd_remove_all_configs(FILE* out);
+    status_t cmd_remove_all_configs(int outFd);
 
     /*
      * Dump memory usage by statsd.
      */
-    status_t cmd_dump_memory_info(FILE* out);
+    status_t cmd_dump_memory_info(int outFd);
 
     /*
      * Clear all puller cached data
      */
-    status_t cmd_clear_puller_cache(FILE* out);
+    status_t cmd_clear_puller_cache(int outFd);
 
     /**
      * Print all stats logs received to logcat.
      */
-    status_t cmd_print_logs(FILE* out, const Vector<String8>& args);
+    status_t cmd_print_logs(int outFd, const Vector<String8>& args);
+
+    /**
+     * Writes the value of args[uidArgIndex] into uid.
+     * Returns whether the uid is reasonable (type uid_t) and whether
+     * 1. it is equal to the calling uid, or
+     * 2. the device is mEngBuild, or
+     * 3. the caller is AID_ROOT and the uid is AID_SHELL (i.e. ROOT can impersonate SHELL).
+     */
+    bool getUidFromArgs(const Vector<String8>& args, size_t uidArgIndex, int32_t& uid);
+
+    /**
+     * Writes the value of uidSting into uid.
+     * Returns whether the uid is reasonable (type uid_t) and whether
+     * 1. it is equal to the calling uid, or
+     * 2. the device is mEngBuild, or
+     * 3. the caller is AID_ROOT and the uid is AID_SHELL (i.e. ROOT can impersonate SHELL).
+     */
+     bool getUidFromString(const char* uidString, int32_t& uid);
 
     /**
      * Adds a configuration after checking permissions and obtaining UID from binder call.
@@ -251,9 +401,9 @@ private:
     sp<UidMap> mUidMap;
 
     /**
-     * Fetches external metrics.
+     * Fetches external metrics
      */
-    StatsPullerManager mStatsPullerManager;
+    sp<StatsPullerManager> mPullerManager;
 
     /**
      * Tracks the configurations that have been passed to statsd.
@@ -280,9 +430,15 @@ private:
      */
     bool mEngBuild;
 
+    sp<ShellSubscriber> mShellSubscriber;
+
+    std::shared_ptr<LogEventQueue> mEventQueue;
+
+    FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_invalid);
+    FRIEND_TEST(StatsServiceTest, TestGetUidFromArgs);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade);
     FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval);

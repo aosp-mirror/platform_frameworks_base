@@ -17,12 +17,12 @@
 package android.view;
 
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.MediumTest;
+
 import com.android.frameworks.coretests.R;
 
 /**

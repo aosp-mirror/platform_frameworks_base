@@ -16,16 +16,19 @@
 
 package android.os;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
-import android.hardware.vibrator.V1_2.Effect;
+import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
 import android.util.MathUtils;
 
-import com.android.internal.annotations.VisibleForTesting;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -53,7 +56,6 @@ public abstract class VibrationEffect implements Parcelable {
      * A click effect.
      *
      * @see #get(int)
-     * @hide
      */
     public static final int EFFECT_CLICK = Effect.CLICK;
 
@@ -61,14 +63,12 @@ public abstract class VibrationEffect implements Parcelable {
      * A double click effect.
      *
      * @see #get(int)
-     * @hide
      */
     public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
      * A tick effect.
      * @see #get(int)
-     * @hide
      */
     public static final int EFFECT_TICK = Effect.TICK;
 
@@ -77,6 +77,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_THUD = Effect.THUD;
 
     /**
@@ -84,15 +85,39 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_POP = Effect.POP;
 
     /**
      * A heavy click effect.
      * @see #get(int)
-     * @hide
      */
     public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
 
+    /**
+     * A texture effect meant to replicate soft ticks.
+     *
+     * Unlike normal effects, texture effects are meant to be called repeatedly, generally in
+     * response to some motion, in order to replicate the feeling of some texture underneath the
+     * user's fingers.
+     *
+     * @see #get(int)
+     * @hide
+     */
+    @TestApi
+    public static final int EFFECT_TEXTURE_TICK = Effect.TEXTURE_TICK;
+
+    /** {@hide} */
+    @TestApi
+    public static final int EFFECT_STRENGTH_LIGHT = EffectStrength.LIGHT;
+
+    /** {@hide} */
+    @TestApi
+    public static final int EFFECT_STRENGTH_MEDIUM = EffectStrength.MEDIUM;
+
+    /** {@hide} */
+    @TestApi
+    public static final int EFFECT_STRENGTH_STRONG = EffectStrength.STRONG;
 
     /**
      * Ringtone patterns. They may correspond with the device's ringtone audio, or may just be a
@@ -101,7 +126,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(Uri, Context)
      * @hide
      */
-    @VisibleForTesting
+    @TestApi
     public static final int[] RINGTONES = {
         Effect.RINGTONE_1,
         Effect.RINGTONE_2,
@@ -119,6 +144,16 @@ public abstract class VibrationEffect implements Parcelable {
         Effect.RINGTONE_14,
         Effect.RINGTONE_15
     };
+
+    /** @hide */
+    @IntDef(prefix = { "EFFECT_" }, value = {
+            EFFECT_TICK,
+            EFFECT_CLICK,
+            EFFECT_HEAVY_CLICK,
+            EFFECT_DOUBLE_CLICK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EffectType {}
 
     /** @hide to prevent subclassing from outside of the framework */
     public VibrationEffect() { }
@@ -203,6 +238,28 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Create a predefined vibration effect.
+     *
+     * Predefined effects are a set of common vibration effects that should be identical, regardless
+     * of the app they come from, in order to provide a cohesive experience for users across
+     * the entire device. They also may be custom tailored to the device hardware in order to
+     * provide a better experience than you could otherwise build using the generic building
+     * blocks.
+     *
+     * This will fallback to a generic pattern if one exists and there does not exist a
+     * hardware-specific implementation of the effect.
+     *
+     * @param effectId The ID of the effect to perform:
+     *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
+     *
+     * @return The desired effect.
+     */
+    @NonNull
+    public static VibrationEffect createPredefined(@EffectType int effectId) {
+        return get(effectId, true);
+    }
+
+    /**
      * Get a predefined vibration effect.
      *
      * Predefined effects are a set of common vibration effects that should be identical, regardless
@@ -220,6 +277,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The desired effect.
      * @hide
      */
+    @TestApi
     public static VibrationEffect get(int effectId) {
         return get(effectId, true);
     }
@@ -246,6 +304,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The desired effect.
      * @hide
      */
+    @TestApi
     public static VibrationEffect get(int effectId, boolean fallback) {
         VibrationEffect effect = new Prebaked(effectId, fallback);
         effect.validate();
@@ -268,20 +327,28 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     @Nullable
     public static VibrationEffect get(Uri uri, Context context) {
+        final ContentResolver cr = context.getContentResolver();
+        Uri uncanonicalUri = cr.uncanonicalize(uri);
+        if (uncanonicalUri == null) {
+            // If we already had an uncanonical URI, it's possible we'll get null back here. In
+            // this case, just use the URI as passed in since it wasn't canonicalized in the first
+            // place.
+            uncanonicalUri = uri;
+        }
         String[] uris = context.getResources().getStringArray(
                 com.android.internal.R.array.config_ringtoneEffectUris);
         for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
             if (uris[i] == null) {
                 continue;
             }
-            ContentResolver cr = context.getContentResolver();
             Uri mappedUri = cr.uncanonicalize(Uri.parse(uris[i]));
             if (mappedUri == null) {
                 continue;
             }
-            if (mappedUri.equals(uri)) {
+            if (mappedUri.equals(uncanonicalUri)) {
                 return get(RINGTONES[i]);
             }
         }
@@ -305,6 +372,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public abstract long getDuration();
 
     /**
@@ -313,12 +381,14 @@ public abstract class VibrationEffect implements Parcelable {
      * This assumes that the previous value was in the range [0, MAX_AMPLITUDE]
      * @hide
      */
+    @TestApi
     protected static int scale(int amplitude, float gamma, int maxAmplitude) {
         float val = MathUtils.pow(amplitude / (float) MAX_AMPLITUDE, gamma);
         return (int) (val * maxAmplitude);
     }
 
     /** @hide */
+    @TestApi
     public static class OneShot extends VibrationEffect implements Parcelable {
         private final long mDuration;
         private final int mAmplitude;
@@ -346,11 +416,17 @@ public abstract class VibrationEffect implements Parcelable {
          * Scale the amplitude of this effect.
          *
          * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect
+         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
          *
          * @return A {@link OneShot} effect with the same timing but scaled amplitude.
          */
-        public VibrationEffect scale(float gamma, int maxAmplitude) {
+        public OneShot scale(float gamma, int maxAmplitude) {
+            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
             int newAmplitude = scale(mAmplitude, gamma, maxAmplitude);
             return new OneShot(mDuration, newAmplitude);
         }
@@ -417,7 +493,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mAmplitude);
         }
 
-        public static final Parcelable.Creator<OneShot> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<OneShot> CREATOR =
             new Parcelable.Creator<OneShot>() {
                 @Override
                 public OneShot createFromParcel(Parcel in) {
@@ -433,6 +509,7 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public static class Waveform extends VibrationEffect implements Parcelable {
         private final long[] mTimings;
         private final int[] mAmplitudes;
@@ -478,12 +555,18 @@ public abstract class VibrationEffect implements Parcelable {
          * Scale the Waveform with the given gamma and new max amplitude.
          *
          * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect
+         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
          *
          * @return A {@link Waveform} effect with the same timings and repeat index
          *         but scaled amplitude.
          */
-        public VibrationEffect scale(float gamma, int maxAmplitude) {
+        public Waveform scale(float gamma, int maxAmplitude) {
+            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
             if (gamma == 1.0f && maxAmplitude == MAX_AMPLITUDE) {
                 // Just return a copy of the original if there's no scaling to be done.
                 return new Waveform(mTimings, mAmplitudes, mRepeat);
@@ -598,7 +681,7 @@ public abstract class VibrationEffect implements Parcelable {
         }
 
 
-        public static final Parcelable.Creator<Waveform> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<Waveform> CREATOR =
             new Parcelable.Creator<Waveform>() {
                 @Override
                 public Waveform createFromParcel(Parcel in) {
@@ -614,6 +697,7 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public static class Prebaked extends VibrationEffect implements Parcelable {
         private final int mEffectId;
         private final boolean mFallback;
@@ -682,6 +766,7 @@ public abstract class VibrationEffect implements Parcelable {
                 case EFFECT_CLICK:
                 case EFFECT_DOUBLE_CLICK:
                 case EFFECT_TICK:
+                case EFFECT_TEXTURE_TICK:
                 case EFFECT_THUD:
                 case EFFECT_POP:
                 case EFFECT_HEAVY_CLICK:
@@ -734,7 +819,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mEffectStrength);
         }
 
-        public static final Parcelable.Creator<Prebaked> CREATOR =
+        public static final @NonNull Parcelable.Creator<Prebaked> CREATOR =
             new Parcelable.Creator<Prebaked>() {
                 @Override
                 public Prebaked createFromParcel(Parcel in) {
@@ -749,7 +834,7 @@ public abstract class VibrationEffect implements Parcelable {
             };
     }
 
-    public static final Parcelable.Creator<VibrationEffect> CREATOR =
+    public static final @NonNull Parcelable.Creator<VibrationEffect> CREATOR =
             new Parcelable.Creator<VibrationEffect>() {
                 @Override
                 public VibrationEffect createFromParcel(Parcel in) {

@@ -44,8 +44,8 @@ void LayerProperties::reset() {
 }
 
 bool LayerProperties::setColorFilter(SkColorFilter* filter) {
-    if (mColorFilter == filter) return false;
-    SkRefCnt_SafeAssign(mColorFilter, filter);
+    if (mColorFilter.get() == filter) return false;
+    mColorFilter = sk_ref_sp(filter);
     return true;
 }
 
@@ -62,7 +62,7 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     setOpaque(other.opaque());
     setAlpha(other.alpha());
     setXferMode(other.xferMode());
-    setColorFilter(other.colorFilter());
+    setColorFilter(other.getColorFilter());
     return *this;
 }
 

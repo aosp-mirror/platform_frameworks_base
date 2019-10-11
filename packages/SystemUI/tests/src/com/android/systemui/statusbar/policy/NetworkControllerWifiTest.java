@@ -87,15 +87,15 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
                 WifiIcons.QS_WIFI_SIGNAL_STRENGTH[1][testLevel], testSsid);
 
         // Set to different activity state first to ensure a callback happens.
-        setWifiActivity(WifiManager.DATA_ACTIVITY_IN);
+        setWifiActivity(WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN);
 
-        setWifiActivity(WifiManager.DATA_ACTIVITY_NONE);
+        setWifiActivity(WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE);
         verifyLastQsDataDirection(false, false);
-        setWifiActivity(WifiManager.DATA_ACTIVITY_IN);
+        setWifiActivity(WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN);
         verifyLastQsDataDirection(true, false);
-        setWifiActivity(WifiManager.DATA_ACTIVITY_OUT);
+        setWifiActivity(WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT);
         verifyLastQsDataDirection(false, true);
-        setWifiActivity(WifiManager.DATA_ACTIVITY_INOUT);
+        setWifiActivity(WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT);
         verifyLastQsDataDirection(true, true);
     }
 

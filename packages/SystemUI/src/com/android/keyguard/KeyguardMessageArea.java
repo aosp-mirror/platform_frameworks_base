@@ -16,21 +16,33 @@
 
 package com.android.keyguard;
 
+import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
+
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.statusbar.policy.ConfigurationController;
+
 import java.lang.ref.WeakReference;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
-class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
+public class KeyguardMessageArea extends TextView implements SecurityMessageDisplay,
+        ConfigurationController.ConfigurationListener {
     /** Handler token posted with accessibility announcement runnables. */
     private static final Object ANNOUNCE_TOKEN = new Object();
 
@@ -42,42 +54,87 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     private static final int DEFAULT_COLOR = -1;
 
     private final Handler mHandler;
-    private final int mDefaultColor;
+    private final ConfigurationController mConfigurationController;
 
+    private ColorStateList mDefaultColorState;
     private CharSequence mMessage;
-    private int mNextMessageColor = DEFAULT_COLOR;
+    private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
+    private boolean mBouncerVisible;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
             setSelected(false);
-        };
+        }
+
         public void onStartedWakingUp() {
             setSelected(true);
-        };
+        }
+
+        @Override
+        public void onKeyguardBouncerChanged(boolean bouncer) {
+            mBouncerVisible = bouncer;
+            update();
+        }
     };
 
     public KeyguardMessageArea(Context context) {
-        this(context, null);
+        super(context, null);
+        throw new IllegalStateException("This constructor should never be invoked");
     }
 
-    public KeyguardMessageArea(Context context, AttributeSet attrs) {
-        this(context, attrs, KeyguardUpdateMonitor.getInstance(context));
+    @Inject
+    public KeyguardMessageArea(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
+            ConfigurationController configurationController) {
+        this(context, attrs, KeyguardUpdateMonitor.getInstance(context), configurationController);
     }
 
-    public KeyguardMessageArea(Context context, AttributeSet attrs, KeyguardUpdateMonitor monitor) {
+    public KeyguardMessageArea(Context context, AttributeSet attrs, KeyguardUpdateMonitor monitor,
+            ConfigurationController configurationController) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
 
         monitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
+        mConfigurationController = configurationController;
+        onThemeChanged();
+    }
 
-        mDefaultColor = getCurrentTextColor();
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mConfigurationController.addCallback(this);
+        onThemeChanged();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mConfigurationController.removeCallback(this);
+    }
+
+    @Override
+    public void setNextMessageColor(ColorStateList colorState) {
+        mNextMessageColorState = colorState;
+    }
+
+    @Override
+    public void onThemeChanged() {
+        TypedArray array = mContext.obtainStyledAttributes(new int[] {
+                R.attr.wallpaperTextColor
+        });
+        ColorStateList newTextColors = ColorStateList.valueOf(array.getColor(0, Color.RED));
+        array.recycle();
+        mDefaultColorState = newTextColors;
         update();
     }
 
     @Override
-    public void setNextMessageColor(int color) {
-        mNextMessageColor = color;
+    public void onDensityOrFontScaleChanged() {
+        TypedArray array = mContext.obtainStyledAttributes(R.style.Keyguard_TextView, new int[] {
+                android.R.attr.textSize
+        });
+        setTextSize(TypedValue.COMPLEX_UNIT_PX, array.getDimensionPixelSize(0, 0));
+        array.recycle();
     }
 
     @Override
@@ -107,9 +164,11 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
         setMessage(message);
     }
 
-    public static SecurityMessageDisplay findSecurityMessageDisplay(View v) {
-        KeyguardMessageArea messageArea = (KeyguardMessageArea) v.findViewById(
-                R.id.keyguard_message_area);
+    public static KeyguardMessageArea findSecurityMessageDisplay(View v) {
+        KeyguardMessageArea messageArea = v.findViewById(R.id.keyguard_message_area);
+        if (messageArea == null) {
+            messageArea = v.getRootView().findViewById(R.id.keyguard_message_area);
+        }
         if (messageArea == null) {
             throw new RuntimeException("Can't find keyguard_message_area in " + v.getClass());
         }
@@ -137,14 +196,14 @@ class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
 
     private void update() {
         CharSequence status = mMessage;
-        setVisibility(TextUtils.isEmpty(status) ? INVISIBLE : VISIBLE);
+        setVisibility(TextUtils.isEmpty(status) || !mBouncerVisible ? INVISIBLE : VISIBLE);
         setText(status);
-        int color = mDefaultColor;
-        if (mNextMessageColor != DEFAULT_COLOR) {
-            color = mNextMessageColor;
-            mNextMessageColor = DEFAULT_COLOR;
+        ColorStateList colorState = mDefaultColorState;
+        if (mNextMessageColorState.getDefaultColor() != DEFAULT_COLOR) {
+            colorState = mNextMessageColorState;
+            mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
         }
-        setTextColor(color);
+        setTextColor(colorState);
     }
 
 

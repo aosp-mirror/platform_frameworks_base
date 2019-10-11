@@ -15,7 +15,7 @@
  */
 package com.android.test.uibench;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.test.uibench.recyclerview.RvArrayAdapter;
 import com.android.test.uibench.recyclerview.RvCompatListActivity;

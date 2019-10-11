@@ -44,6 +44,23 @@ public class OemLockManager {
     }
 
     /**
+     * Returns a vendor specific name for the OEM lock.
+     *
+     * This value is used to identify the security protocol used by locks.
+     *
+     * @return The name of the OEM lock or {@code null} if failed to get the name.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE)
+    @Nullable
+    public String getLockName() {
+        try {
+            return mService.getLockName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets whether the carrier has allowed this device to be OEM unlocked.
      *
      * Depending on the implementation, the validity of the request might need to be proved. This

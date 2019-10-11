@@ -21,6 +21,7 @@ import static com.android.server.content.SyncLogger.logSafe;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
+import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -32,10 +33,6 @@ import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -46,6 +43,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
@@ -57,6 +55,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IntPair;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -371,7 +370,7 @@ public class SyncStorageEngine {
 
         /** Called when a sync is needed on an account(s) due to some change in state. */
         public void onSyncRequest(EndPoint info, int reason, Bundle extras,
-                @SyncExemption int syncExemptionFlag);
+                @SyncExemption int syncExemptionFlag, int callingUid, int callingPid);
     }
 
     interface PeriodicSyncAddedListener {
@@ -521,10 +520,6 @@ public class SyncStorageEngine {
         readAccountInfoLocked();
         readStatusLocked();
         readStatisticsLocked();
-        readAndDeleteLegacyAccountInfoLocked();
-        writeAccountInfoLocked();
-        writeStatusLocked();
-        writeStatisticsLocked();
 
         if (mLogger.enabled()) {
             final int size = mAuthorities.size();
@@ -595,9 +590,10 @@ public class SyncStorageEngine {
         return mSyncRandomOffset;
     }
 
-    public void addStatusChangeListener(int mask, ISyncStatusObserver callback) {
+    public void addStatusChangeListener(int mask, int userId, ISyncStatusObserver callback) {
         synchronized (mAuthorities) {
-            mChangeListeners.register(callback, mask);
+            final long cookie = IntPair.of(userId, mask);
+            mChangeListeners.register(callback, cookie);
         }
     }
 
@@ -629,14 +625,16 @@ public class SyncStorageEngine {
         }
     }
 
-    void reportChange(int which) {
+    void reportChange(int which, int callingUserId) {
         ArrayList<ISyncStatusObserver> reports = null;
         synchronized (mAuthorities) {
             int i = mChangeListeners.beginBroadcast();
             while (i > 0) {
                 i--;
-                Integer mask = (Integer)mChangeListeners.getBroadcastCookie(i);
-                if ((which & mask.intValue()) == 0) {
+                final long cookie = (long) mChangeListeners.getBroadcastCookie(i);
+                final int userId = IntPair.first(cookie);
+                final int mask = IntPair.second(cookie);
+                if ((which & mask) == 0 || callingUserId != userId) {
                     continue;
                 }
                 if (reports == null) {
@@ -687,7 +685,7 @@ public class SyncStorageEngine {
     }
 
     public void setSyncAutomatically(Account account, int userId, String providerName,
-            boolean sync, @SyncExemption int syncExemptionFlag, int callingUid) {
+            boolean sync, @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Slog.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
                     + ", user " + userId + " -> " + sync);
@@ -696,7 +694,9 @@ public class SyncStorageEngine {
                 " user=", userId,
                 " authority=", providerName,
                 " value=", Boolean.toString(sync),
-                " callingUid=", callingUid);
+                " cuid=", callingUid,
+                " cpid=", callingPid
+        );
         synchronized (mAuthorities) {
             AuthorityInfo authority =
                     getOrCreateAuthorityLocked(
@@ -722,9 +722,9 @@ public class SyncStorageEngine {
         if (sync) {
             requestSync(account, userId, SyncOperation.REASON_SYNC_AUTO, providerName,
                     new Bundle(),
-                    syncExemptionFlag);
+                    syncExemptionFlag, callingUid, callingPid);
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, userId);
         queueBackup();
     }
 
@@ -754,9 +754,9 @@ public class SyncStorageEngine {
     }
 
     public void setIsSyncable(Account account, int userId, String providerName, int syncable,
-            int callingUid) {
+            int callingUid, int callingPid) {
         setSyncableStateForEndPoint(new EndPoint(account, providerName, userId), syncable,
-                callingUid);
+                callingUid, callingPid);
     }
 
     /**
@@ -765,10 +765,12 @@ public class SyncStorageEngine {
      * @param target target to set value for.
      * @param syncable 0 indicates unsyncable, <0 unknown, >0 is active/syncable.
      */
-    private void setSyncableStateForEndPoint(EndPoint target, int syncable, int callingUid) {
+    private void setSyncableStateForEndPoint(EndPoint target, int syncable,
+            int callingUid, int callingPid) {
         AuthorityInfo aInfo;
         mLogger.log("Set syncable ", target, " value=", Integer.toString(syncable),
-                " callingUid=", callingUid);
+                " cuid=", callingUid,
+                " cpid=", callingPid);
         synchronized (mAuthorities) {
             aInfo = getOrCreateAuthorityLocked(target, -1, false);
             if (syncable < AuthorityInfo.NOT_INITIALIZED) {
@@ -788,9 +790,9 @@ public class SyncStorageEngine {
         }
         if (syncable == AuthorityInfo.SYNCABLE) {
             requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle(),
-                    ContentResolver.SYNC_EXEMPTION_NONE);
+                    ContentResolver.SYNC_EXEMPTION_NONE, callingUid, callingPid);
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, target.userId);
     }
 
     public Pair<Long, Long> getBackoff(EndPoint info) {
@@ -836,7 +838,7 @@ public class SyncStorageEngine {
             }
         }
         if (changed) {
-            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, info.userId);
         }
     }
 
@@ -874,7 +876,7 @@ public class SyncStorageEngine {
     }
 
     public void clearAllBackoffsLocked() {
-        boolean changed = false;
+        final ArraySet<Integer> changedUserIds = new ArraySet<>();
         synchronized (mAuthorities) {
             // Clear backoff for all sync adapters.
             for (AccountInfo accountInfo : mAccounts.values()) {
@@ -891,14 +893,14 @@ public class SyncStorageEngine {
                         }
                         authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
                         authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
-                        changed = true;
+                        changedUserIds.add(accountInfo.accountAndUser.userId);
                     }
                 }
             }
         }
 
-        if (changed) {
-            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        for (int i = changedUserIds.size() - 1; i > 0; i--) {
+            reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, changedUserIds.valueAt(i));
         }
     }
 
@@ -924,7 +926,7 @@ public class SyncStorageEngine {
             }
             authority.delayUntil = delayUntil;
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, info.userId);
     }
 
     /**
@@ -950,9 +952,10 @@ public class SyncStorageEngine {
     }
 
     public void setMasterSyncAutomatically(boolean flag, int userId,
-            @SyncExemption int syncExemptionFlag, int callingUid) {
+            @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         mLogger.log("Set master enabled=", flag, " user=", userId,
-                " caller=" + callingUid);
+                " cuid=", callingUid,
+                " cpid=", callingPid);
         synchronized (mAuthorities) {
             Boolean auto = mMasterSyncAutomatically.get(userId);
             if (auto != null && auto.equals(flag)) {
@@ -964,9 +967,9 @@ public class SyncStorageEngine {
         if (flag) {
             requestSync(null, userId, SyncOperation.REASON_MASTER_SYNC_AUTO, null,
                     new Bundle(),
-                    syncExemptionFlag);
+                    syncExemptionFlag, callingUid, callingPid);
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, userId);
         mContext.sendBroadcast(ContentResolver.ACTION_SYNC_CONN_STATUS_CHANGED);
         queueBackup();
     }
@@ -1017,14 +1020,14 @@ public class SyncStorageEngine {
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = pendingValue;
         }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING, info.userId);
     }
 
     /**
      * Called when the set of account has changed, given the new array of
      * active accounts.
      */
-    public void doDatabaseCleanup(Account[] accounts, int userId) {
+    public void removeStaleAccounts(@Nullable Account[] currentAccounts, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Slog.v(TAG, "Updating for new accounts...");
@@ -1033,8 +1036,11 @@ public class SyncStorageEngine {
             Iterator<AccountInfo> accIt = mAccounts.values().iterator();
             while (accIt.hasNext()) {
                 AccountInfo acc = accIt.next();
-                if (!ArrayUtils.contains(accounts, acc.accountAndUser.account)
-                        && acc.accountAndUser.userId == userId) {
+                if (acc.accountAndUser.userId != userId) {
+                    continue; // Irrelevant user.
+                }
+                if ((currentAccounts == null)
+                        || !ArrayUtils.contains(currentAccounts, acc.accountAndUser.account)) {
                     // This account no longer exists...
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Slog.v(TAG, "Account removed: " + acc.accountAndUser);
@@ -1104,7 +1110,7 @@ public class SyncStorageEngine {
                     activeSyncContext.mStartTime);
             getCurrentSyncs(authorityInfo.target.userId).add(syncInfo);
         }
-        reportActiveChange();
+        reportActiveChange(activeSyncContext.mSyncOperation.target.userId);
         return syncInfo;
     }
 
@@ -1121,14 +1127,14 @@ public class SyncStorageEngine {
             getCurrentSyncs(userId).remove(syncInfo);
         }
 
-        reportActiveChange();
+        reportActiveChange(userId);
     }
 
     /**
      * To allow others to send active change reports, to poke clients.
      */
-    public void reportActiveChange() {
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE);
+    public void reportActiveChange(int userId) {
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE, userId);
     }
 
     /**
@@ -1163,12 +1169,12 @@ public class SyncStorageEngine {
             if (Log.isLoggable(TAG, Log.VERBOSE)) Slog.v(TAG, "returning historyId " + id);
         }
 
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS, op.target.userId);
         return id;
     }
 
     public void stopSyncEvent(long historyId, long elapsedTime, String resultMessage,
-                              long downstreamActivity, long upstreamActivity) {
+                              long downstreamActivity, long upstreamActivity, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Slog.v(TAG, "stopSyncEvent: historyId=" + historyId);
@@ -1308,7 +1314,7 @@ public class SyncStorageEngine {
             }
         }
 
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
+        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS, userId);
     }
 
     /**
@@ -1592,7 +1598,6 @@ public class SyncStorageEngine {
             readAccountInfoLocked();
             readStatusLocked();
             readStatisticsLocked();
-            readAndDeleteLegacyAccountInfoLocked();
             writeAccountInfoLocked();
             writeStatusLocked();
             writeStatisticsLocked();
@@ -2009,146 +2014,6 @@ public class SyncStorageEngine {
         }
     }
 
-    static int getIntColumn(Cursor c, String name) {
-        return c.getInt(c.getColumnIndex(name));
-    }
-
-    static long getLongColumn(Cursor c, String name) {
-        return c.getLong(c.getColumnIndex(name));
-    }
-
-    /**
-     * TODO Remove it. It's super old code that was used to migrate the information from a sqlite
-     * database that we used a long time ago, and is no longer relevant.
-     */
-    private void readAndDeleteLegacyAccountInfoLocked() {
-        // Look for old database to initialize from.
-        File file = mContext.getDatabasePath("syncmanager.db");
-        if (!file.exists()) {
-            return;
-        }
-        String path = file.getPath();
-        SQLiteDatabase db = null;
-        try {
-            db = SQLiteDatabase.openDatabase(path, null,
-                    SQLiteDatabase.OPEN_READONLY);
-        } catch (SQLiteException e) {
-        }
-
-        if (db != null) {
-            final boolean hasType = db.getVersion() >= 11;
-
-            // Copy in all of the status information, as well as accounts.
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Slog.v(TAG_FILE, "Reading legacy sync accounts db");
-            }
-            SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-            qb.setTables("stats, status");
-            HashMap<String,String> map = new HashMap<String,String>();
-            map.put("_id", "status._id as _id");
-            map.put("account", "stats.account as account");
-            if (hasType) {
-                map.put("account_type", "stats.account_type as account_type");
-            }
-            map.put("authority", "stats.authority as authority");
-            map.put("totalElapsedTime", "totalElapsedTime");
-            map.put("numSyncs", "numSyncs");
-            map.put("numSourceLocal", "numSourceLocal");
-            map.put("numSourcePoll", "numSourcePoll");
-            map.put("numSourceServer", "numSourceServer");
-            map.put("numSourceUser", "numSourceUser");
-            map.put("lastSuccessSource", "lastSuccessSource");
-            map.put("lastSuccessTime", "lastSuccessTime");
-            map.put("lastFailureSource", "lastFailureSource");
-            map.put("lastFailureTime", "lastFailureTime");
-            map.put("lastFailureMesg", "lastFailureMesg");
-            map.put("pending", "pending");
-            qb.setProjectionMap(map);
-            qb.appendWhere("stats._id = status.stats_id");
-            Cursor c = qb.query(db, null, null, null, null, null, null);
-            while (c.moveToNext()) {
-                String accountName = c.getString(c.getColumnIndex("account"));
-                String accountType = hasType
-                        ? c.getString(c.getColumnIndex("account_type")) : null;
-                if (accountType == null) {
-                    accountType = "com.google";
-                }
-                String authorityName = c.getString(c.getColumnIndex("authority"));
-                AuthorityInfo authority =
-                        this.getOrCreateAuthorityLocked(
-                                new EndPoint(new Account(accountName, accountType),
-                                        authorityName,
-                                        0 /* legacy is single-user */)
-                                , -1,
-                                false);
-                if (authority != null) {
-                    int i = mSyncStatus.size();
-                    boolean found = false;
-                    SyncStatusInfo st = null;
-                    while (i > 0) {
-                        i--;
-                        st = mSyncStatus.valueAt(i);
-                        if (st.authorityId == authority.ident) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        st = new SyncStatusInfo(authority.ident);
-                        mSyncStatus.put(authority.ident, st);
-                    }
-                    st.totalStats.totalElapsedTime = getLongColumn(c, "totalElapsedTime");
-                    st.totalStats.numSyncs = getIntColumn(c, "numSyncs");
-                    st.totalStats.numSourceLocal = getIntColumn(c, "numSourceLocal");
-                    st.totalStats.numSourcePoll = getIntColumn(c, "numSourcePoll");
-                    st.totalStats.numSourceOther = getIntColumn(c, "numSourceServer");
-                    st.totalStats.numSourceUser = getIntColumn(c, "numSourceUser");
-                    st.totalStats.numSourcePeriodic = 0;
-                    st.lastSuccessSource = getIntColumn(c, "lastSuccessSource");
-                    st.lastSuccessTime = getLongColumn(c, "lastSuccessTime");
-                    st.lastFailureSource = getIntColumn(c, "lastFailureSource");
-                    st.lastFailureTime = getLongColumn(c, "lastFailureTime");
-                    st.lastFailureMesg = c.getString(c.getColumnIndex("lastFailureMesg"));
-                    st.pending = getIntColumn(c, "pending") != 0;
-                }
-            }
-
-            c.close();
-
-            // Retrieve the settings.
-            qb = new SQLiteQueryBuilder();
-            qb.setTables("settings");
-            c = qb.query(db, null, null, null, null, null, null);
-            while (c.moveToNext()) {
-                String name = c.getString(c.getColumnIndex("name"));
-                String value = c.getString(c.getColumnIndex("value"));
-                if (name == null) continue;
-                if (name.equals("listen_for_tickles")) {
-                    setMasterSyncAutomatically(value == null || Boolean.parseBoolean(value), 0,
-                            ContentResolver.SYNC_EXEMPTION_NONE, SyncLogger.CALLING_UID_SELF);
-                } else if (name.startsWith("sync_provider_")) {
-                    String provider = name.substring("sync_provider_".length(),
-                            name.length());
-                    int i = mAuthorities.size();
-                    while (i > 0) {
-                        i--;
-                        AuthorityInfo authority = mAuthorities.valueAt(i);
-                        if (authority.target.provider.equals(provider)) {
-                            authority.enabled = value == null || Boolean.parseBoolean(value);
-                            authority.syncable = 1;
-                        }
-                    }
-                }
-            }
-
-            c.close();
-
-            db.close();
-
-            (new File(path)).delete();
-        }
-    }
-
     public static final int STATUS_FILE_END = 0;
     public static final int STATUS_FILE_ITEM = 100;
 
@@ -2222,11 +2087,11 @@ public class SyncStorageEngine {
     }
 
     private void requestSync(AuthorityInfo authorityInfo, int reason, Bundle extras,
-            @SyncExemption int syncExemptionFlag) {
+            @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         if (android.os.Process.myUid() == android.os.Process.SYSTEM_UID
                 && mSyncRequestListener != null) {
             mSyncRequestListener.onSyncRequest(authorityInfo.target, reason, extras,
-                    syncExemptionFlag);
+                    syncExemptionFlag, callingUid, callingPid);
         } else {
             SyncRequest.Builder req =
                     new SyncRequest.Builder()
@@ -2238,7 +2103,7 @@ public class SyncStorageEngine {
     }
 
     private void requestSync(Account account, int userId, int reason, String authority,
-            Bundle extras, @SyncExemption int syncExemptionFlag) {
+            Bundle extras, @SyncExemption int syncExemptionFlag, int callingUid, int callingPid) {
         // If this is happening in the system process, then call the syncrequest listener
         // to make a request back to the SyncManager directly.
         // If this is probably a test instance, then call back through the ContentResolver
@@ -2247,7 +2112,7 @@ public class SyncStorageEngine {
                 && mSyncRequestListener != null) {
             mSyncRequestListener.onSyncRequest(
                     new EndPoint(account, authority, userId),
-                    reason, extras, syncExemptionFlag);
+                    reason, extras, syncExemptionFlag, callingUid, callingPid);
         } else {
             ContentResolver.requestSync(account, authority, extras);
         }

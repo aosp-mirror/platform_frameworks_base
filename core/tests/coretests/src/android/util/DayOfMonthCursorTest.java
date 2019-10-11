@@ -16,10 +16,11 @@
 
 package android.util;
 
+import androidx.test.filters.SmallTest;
+
 import junit.framework.TestCase;
 
 import java.util.Calendar;
-import android.test.suitebuilder.annotation.SmallTest;
 
 /**
  * Unit tests for {@link DayOfMonthCursor}.

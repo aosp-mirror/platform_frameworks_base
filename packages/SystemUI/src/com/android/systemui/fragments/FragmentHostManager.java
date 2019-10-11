@@ -28,10 +28,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.Dependency;
@@ -40,6 +41,8 @@ import com.android.systemui.util.leak.LeakDetector;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -51,18 +54,19 @@ public class FragmentHostManager {
     private final View mRootView;
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
             ActivityInfo.CONFIG_FONT_SCALE | ActivityInfo.CONFIG_LOCALE
-                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
+                | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS
+                | ActivityInfo.CONFIG_UI_MODE);
     private final FragmentService mManager;
     private final ExtensionFragmentManager mPlugins = new ExtensionFragmentManager();
 
     private FragmentController mFragments;
     private FragmentLifecycleCallbacks mLifecycleCallbacks;
 
-    FragmentHostManager(Context context, FragmentService manager, View rootView) {
-        mContext = context;
+    FragmentHostManager(FragmentService manager, View rootView) {
+        mContext = rootView.getContext();
         mManager = manager;
         mRootView = rootView;
-        mConfigChanges.applyNewConfig(context.getResources());
+        mConfigChanges.applyNewConfig(mContext.getResources());
         createFragmentHost(null);
     }
 
@@ -152,10 +156,7 @@ public class FragmentHostManager {
      */
     protected void onConfigurationChanged(Configuration newConfig) {
         if (mConfigChanges.applyNewConfig(mContext.getResources())) {
-            // Save the old state.
-            Parcelable p = destroyFragmentHost();
-            // Generate a new fragment host and restore its state.
-            createFragmentHost(p);
+            reloadFragments();
         } else {
             mFragments.dispatchConfigurationChanged(newConfig);
         }
@@ -184,6 +185,13 @@ public class FragmentHostManager {
         mFragments.dispatchDestroy();
     }
 
+    /**
+     * Creates a fragment that requires injection.
+     */
+    public <T> T create(Class<T> fragmentCls) {
+        return (T) mPlugins.instantiate(mContext, fragmentCls.getName(), null);
+    }
+
     public interface FragmentListener {
         void onFragmentViewCreated(String tag, Fragment fragment);
 
@@ -200,6 +208,17 @@ public class FragmentHostManager {
             // TODO: Some auto handling here?
             throw e;
         }
+    }
+
+    public static void removeAndDestroy(View view) {
+        Dependency.get(FragmentService.class).removeAndDestroy(view);
+    }
+
+    public void reloadFragments() {
+        // Save the old state.
+        Parcelable p = destroyFragmentHost();
+        // Generate a new fragment host and restore its state.
+        createFragmentHost(p);
     }
 
     class HostCallbacks extends FragmentHostCallback<FragmentHostManager> {
@@ -278,23 +297,39 @@ public class FragmentHostManager {
             reloadFragments();
         }
 
-        private void reloadFragments() {
-            // Save the old state.
-            Parcelable p = destroyFragmentHost();
-            // Generate a new fragment host and restore its state.
-            createFragmentHost(p);
-        }
-
         Fragment instantiate(Context context, String className, Bundle arguments) {
             Context extensionContext = mExtensionLookup.get(className);
             if (extensionContext != null) {
-                Fragment f = Fragment.instantiate(extensionContext, className, arguments);
+                Fragment f = instantiateWithInjections(extensionContext, className, arguments);
                 if (f instanceof Plugin) {
                     ((Plugin) f).onCreate(mContext, extensionContext);
                 }
                 return f;
             }
-            return Fragment.instantiate(context, className, arguments);
+            return instantiateWithInjections(context, className, arguments);
+        }
+
+        private Fragment instantiateWithInjections(Context context, String className,
+                Bundle args) {
+            Method method = mManager.getInjectionMap().get(className);
+            if (method != null) {
+                try {
+                    Fragment f = (Fragment) method.invoke(mManager.getFragmentCreator());
+                    // Setup the args, taken from Fragment#instantiate.
+                    if (args != null) {
+                        args.setClassLoader(f.getClass().getClassLoader());
+                        f.setArguments(args);
+                    }
+                    return f;
+                } catch (IllegalAccessException e) {
+                    throw new Fragment.InstantiationException("Unable to instantiate " + className,
+                            e);
+                } catch (InvocationTargetException e) {
+                    throw new Fragment.InstantiationException("Unable to instantiate " + className,
+                            e);
+                }
+            }
+            return Fragment.instantiate(context, className, args);
         }
     }
 

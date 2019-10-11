@@ -458,30 +458,22 @@ void Tree::drawStaging(Canvas* outCanvas) {
         mStagingCache.dirty = false;
     }
 
-    SkPaint tmpPaint;
-    SkPaint* paint = updatePaint(&tmpPaint, &mStagingProperties);
+    SkPaint paint;
+    getPaintFor(&paint, mStagingProperties);
     outCanvas->drawBitmap(*mStagingCache.bitmap, 0, 0, mStagingCache.bitmap->width(),
                           mStagingCache.bitmap->height(), mStagingProperties.getBounds().left(),
                           mStagingProperties.getBounds().top(),
                           mStagingProperties.getBounds().right(),
-                          mStagingProperties.getBounds().bottom(), paint);
+                          mStagingProperties.getBounds().bottom(), &paint);
 }
 
-SkPaint* Tree::getPaint() {
-    return updatePaint(&mPaint, &mProperties);
-}
-
-// Update the given paint with alpha and color filter. Return nullptr if no color filter is
-// specified and root alpha is 1. Otherwise, return updated paint.
-SkPaint* Tree::updatePaint(SkPaint* outPaint, TreeProperties* prop) {
-    if (prop->getRootAlpha() == 1.0f && prop->getColorFilter() == nullptr) {
-        return nullptr;
-    } else {
-        outPaint->setColorFilter(sk_ref_sp(prop->getColorFilter()));
-        outPaint->setFilterQuality(kLow_SkFilterQuality);
-        outPaint->setAlpha(prop->getRootAlpha() * 255);
-        return outPaint;
+void Tree::getPaintFor(SkPaint* outPaint, const TreeProperties &prop) const {
+    // HWUI always draws VD with bilinear filtering.
+    outPaint->setFilterQuality(kLow_SkFilterQuality);
+    if (prop.getColorFilter() != nullptr) {
+        outPaint->setColorFilter(sk_ref_sp(prop.getColorFilter()));
     }
+    outPaint->setAlpha(prop.getRootAlpha() * 255);
 }
 
 Bitmap& Tree::getBitmapUpdateIfDirty() {
@@ -554,12 +546,34 @@ void Tree::Cache::clear() {
     mAtlasKey = INVALID_ATLAS_KEY;
 }
 
-void Tree::draw(SkCanvas* canvas, const SkRect& bounds) {
+void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) {
+    if (canvas->quickReject(bounds)) {
+        // The RenderNode is on screen, but the AVD is not.
+        return;
+    }
+
+    // Update the paint for any animatable properties
+    SkPaint paint = inPaint;
+    paint.setAlpha(mProperties.getRootAlpha() * 255);
+
+    if (canvas->getGrContext() == nullptr) {
+        // Recording to picture, don't use the SkSurface which won't work off of renderthread.
+        Bitmap& bitmap = getBitmapUpdateIfDirty();
+        SkBitmap skiaBitmap;
+        bitmap.getSkBitmap(&skiaBitmap);
+
+        int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
+        int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
+        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
+                               &paint, SkCanvas::kFast_SrcRectConstraint);
+        return;
+    }
+
     SkRect src;
     sk_sp<SkSurface> vdSurface = mCache.getSurface(&src);
     if (vdSurface) {
-        canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src,
-                bounds, getPaint(), SkCanvas::kFast_SrcRectConstraint);
+        canvas->drawImageRect(vdSurface->makeImageSnapshot().get(), src, bounds, &paint,
+                              SkCanvas::kFast_SrcRectConstraint);
     } else {
         // Handle the case when VectorDrawableAtlas has been destroyed, because of memory pressure.
         // We render the VD into a temporary standalone buffer and mark the frame as dirty. Next
@@ -570,8 +584,8 @@ void Tree::draw(SkCanvas* canvas, const SkRect& bounds) {
 
         int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
         int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
-        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight),
-                bounds, getPaint(), SkCanvas::kFast_SrcRectConstraint);
+        canvas->drawBitmapRect(skiaBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
+                               &paint, SkCanvas::kFast_SrcRectConstraint);
         mCache.clear();
         markDirty();
     }
@@ -597,12 +611,7 @@ void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {
 
 bool Tree::allocateBitmapIfNeeded(Cache& cache, int width, int height) {
     if (!canReuseBitmap(cache.bitmap.get(), width, height)) {
-#ifndef ANDROID_ENABLE_LINEAR_BLENDING
-        sk_sp<SkColorSpace> colorSpace = nullptr;
-#else
-        sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-#endif
-        SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType, colorSpace);
+        SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType);
         cache.bitmap = Bitmap::allocateHeapBitmap(info);
         return true;
     }
@@ -621,7 +630,81 @@ void Tree::onPropertyChanged(TreeProperties* prop) {
     }
 }
 
-};  // namespace VectorDrawable
+class MinMaxAverage {
+public:
+    void add(float sample) {
+        if (mCount == 0) {
+            mMin = sample;
+            mMax = sample;
+        } else {
+            mMin = std::min(mMin, sample);
+            mMax = std::max(mMax, sample);
+        }
+        mTotal += sample;
+        mCount++;
+    }
 
-};  // namespace uirenderer
-};  // namespace android
+    float average() { return mTotal / mCount; }
+
+    float min() { return mMin; }
+
+    float max() { return mMax; }
+
+    float delta() { return mMax - mMin; }
+
+private:
+    float mMin = 0.0f;
+    float mMax = 0.0f;
+    float mTotal = 0.0f;
+    int mCount = 0;
+};
+
+BitmapPalette Tree::computePalette() {
+    // TODO Cache this and share the code with Bitmap.cpp
+
+    ATRACE_CALL();
+
+    // TODO: This calculation of converting to HSV & tracking min/max is probably overkill
+    // Experiment with something simpler since we just want to figure out if it's "color-ful"
+    // and then the average perceptual lightness.
+
+    MinMaxAverage hue, saturation, value;
+    int sampledCount = 0;
+
+    // Sample a grid of 100 pixels to get an overall estimation of the colors in play
+    mRootNode->forEachFillColor([&](SkColor color) {
+        if (SkColorGetA(color) < 75) {
+            return;
+        }
+        sampledCount++;
+        float hsv[3];
+        SkColorToHSV(color, hsv);
+        hue.add(hsv[0]);
+        saturation.add(hsv[1]);
+        value.add(hsv[2]);
+    });
+
+    if (sampledCount == 0) {
+        ALOGV("VectorDrawable is mostly translucent");
+        return BitmapPalette::Unknown;
+    }
+
+    ALOGV("samples = %d, hue [min = %f, max = %f, avg = %f]; saturation [min = %f, max = %f, avg = "
+          "%f]; value [min = %f, max = %f, avg = %f]",
+          sampledCount, hue.min(), hue.max(), hue.average(), saturation.min(), saturation.max(),
+          saturation.average(), value.min(), value.max(), value.average());
+
+    if (hue.delta() <= 20 && saturation.delta() <= .1f) {
+        if (value.average() >= .5f) {
+            return BitmapPalette::Light;
+        } else {
+            return BitmapPalette::Dark;
+        }
+    }
+    return BitmapPalette::Unknown;
+}
+
+}  // namespace VectorDrawable
+
+}  // namespace uirenderer
+}  // namespace android

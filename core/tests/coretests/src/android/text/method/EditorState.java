@@ -21,8 +21,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;

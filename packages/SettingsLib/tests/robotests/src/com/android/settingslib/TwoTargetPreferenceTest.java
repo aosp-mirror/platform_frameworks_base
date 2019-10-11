@@ -19,23 +19,27 @@ package com.android.settingslib;
 import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_DEFAULT;
 import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_MEDIUM;
 import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_SMALL;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
 import android.content.Context;
-import androidx.preference.PreferenceViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+
+import androidx.preference.PreferenceViewHolder;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class TwoTargetPreferenceTest {
 
     private PreferenceViewHolder mViewHolder;

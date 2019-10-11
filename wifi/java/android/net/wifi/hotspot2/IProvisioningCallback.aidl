@@ -32,5 +32,10 @@ oneway interface IProvisioningCallback
      * Service to manager callback providing Provisioning status
      */
     void onProvisioningStatus(int status);
+
+    /**
+     * Service to manager callback providing completion of Provisioning/Remediation flow
+     */
+    void onProvisioningComplete();
 }
 

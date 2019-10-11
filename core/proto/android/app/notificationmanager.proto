@@ -15,12 +15,11 @@
  */
 
 syntax = "proto2";
-option java_package = "android.app";
 option java_multiple_files = true;
 
 package android.app;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 /**
  * An android.app.NotificationManager.Policy object.
@@ -42,9 +41,10 @@ message PolicyProto {
         REPEAT_CALLERS = 5;
         // Alarms are prioritized.
         ALARMS = 6;
-        // Media, system, game (catch-all for non-never suppressible sounds) are
-        // prioritized.
-        MEDIA_SYSTEM_OTHER = 7;
+        // Media, game, voice navigation are prioritized.
+        MEDIA = 7;
+        // System (catch-all for non-never suppressible sounds) are prioritized.
+        SYSTEM = 8;
     }
     repeated Category priority_categories = 1;
 
@@ -64,10 +64,32 @@ message PolicyProto {
         // Whether notifications suppressed by DND should not interrupt visually
         // (e.g. with notification lights or by turning the screen on) when the
         // screen is off.
-        SCREEN_OFF = 1;
+        // FULL_SCREEN_INTENT, AMBIENT, and LIGHTS should be used instead.
+        SCREEN_OFF = 1 [deprecated = true];
         // Whether notifications suppressed by DND should not interrupt visually
         // when the screen is on (e.g. by peeking onto the screen).
-        SCREEN_ON = 2;
+        // PEEK should be used instead of ON.
+        SCREEN_ON = 2 [deprecated = true];
+        // Whether full screen intents} from notifications intercepted by DND
+        // are blocked.
+        FULL_SCREEN_INTENT = 3;
+        // Whether lights from notifications intercepted by DND are blocked.
+        LIGHTS = 4;
+        // Whether notifications intercepted by DND are prevented from peeking.
+        PEEK = 5;
+        // Whether notifications intercepted by DND are prevented from
+        // appearing in the status bar, on devices that support status bars.
+        STATUS_BAR = 6;
+        // Whether badges from notifications intercepted by DND are blocked on
+        // devices that support badging.
+        BADGE = 7;
+        // Whether notification intercepted by DND are prevented from appearing
+        // on ambient displays on devices that support ambient display.
+        AMBIENT = 8;
+        // Whether notification intercepted by DND are prevented from appearing
+        // in notification list views like the notification shade or lockscreen
+        // on devices that support those views.
+        NOTIFICATION_LIST = 9;
     }
     repeated SuppressedVisualEffect suppressed_visual_effects = 4;
 }

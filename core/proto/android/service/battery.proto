@@ -21,7 +21,7 @@ option java_multiple_files = true;
 option java_outer_classname = "BatteryServiceProto";
 
 import "frameworks/base/core/proto/android/os/enums.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message BatteryServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;

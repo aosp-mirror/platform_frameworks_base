@@ -21,13 +21,13 @@ option java_multiple_files = true;
 option java_outer_classname = "PrintServiceProto";
 
 import "frameworks/base/core/proto/android/content/component_name.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message PrintServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Each user has a separate printer state
-    repeated PrintUserStateProto userStates = 1;
+    repeated PrintUserStateProto user_states = 1;
 }
 
 message PrintUserStateProto {
@@ -74,7 +74,8 @@ message PrintSpoolerInternalStateProto {
     // Print jobs
     repeated PrintJobInfoProto print_jobs = 1;
 
-    // Files used by these print jobs
+    // Files used by these print jobs. These are auto-generated UUIDs that are
+    // only valid while the print job is processed.
     repeated string print_job_files = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     // Approved print services
@@ -125,7 +126,7 @@ message PrinterInfoProto {
     // The status of the printer
     optional Status status = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
-    // The description of the printer
+    // The description of the printer, set by the user.
     optional string description = 4;
 
     // The capabilities of the printer
@@ -310,7 +311,7 @@ message PrintDocumentInfoProto {
     // Type of content (see PrintDocumentInfo.ContentType)
     optional int32 content_type = 3;
 
-    // The size of the the document
+    // The size of the document
     optional int64 data_size = 4;
 }
 

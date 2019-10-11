@@ -43,9 +43,9 @@ struct AwDrawGLInfo {
   // Input: tells the draw function what action to perform.
   enum Mode {
     kModeDraw = 0,
-    kModeProcess,
-    kModeProcessNoContext,
-    kModeSync,
+    kModeProcess = 1,
+    kModeProcessNoContext = 2,
+    kModeSync = 3,
   } mode;
 
   // Input: current clip rect in surface coordinates. Reflects the current state
@@ -93,9 +93,9 @@ typedef void (AwDrawGLFunction)(long view_context,
                                 AwDrawGLInfo* draw_info,
                                 void* spare);
 enum AwMapMode {
-  MAP_READ_ONLY,
-  MAP_WRITE_ONLY,
-  MAP_READ_WRITE,
+  MAP_READ_ONLY = 0,
+  MAP_WRITE_ONLY = 1,
+  MAP_READ_WRITE = 2,
 };
 
 // Called to create a GraphicBuffer

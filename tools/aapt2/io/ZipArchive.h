@@ -66,6 +66,7 @@ class ZipFileCollection : public IFileCollection {
 
   io::IFile* FindFile(const android::StringPiece& path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
+  char GetDirSeparator() override;
 
   ~ZipFileCollection() override;
 

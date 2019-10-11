@@ -16,12 +16,13 @@
 package com.android.server.notification;
 
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEGATIVE;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_NEUTRAL;
-import static android.service.notification.NotificationListenerService.Ranking
-        .USER_SENTIMENT_POSITIVE;
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -29,6 +30,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -46,21 +48,23 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.StatusBarNotification;
-import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiServiceTestCase;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,35 +72,25 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationRecordTest extends UiServiceTestCase {
 
     private final Context mMockContext = mock(Context.class);
-    @Mock PackageManager mPm;
+    @Mock private PackageManager mPm;
 
     private final String pkg = PKG_N_MR1;
     private final int uid = 9583;
-    private final String pkg2 = PKG_O;
-    private final int uid2 = 1111111;
     private final int id1 = 1;
-    private final int id2 = 2;
     private final String tag1 = "tag1";
-    private final String tag2 = "tag2";
     private final String channelId = "channel";
-    NotificationChannel channel =
+    private NotificationChannel channel =
             new NotificationChannel(channelId, "test", NotificationManager.IMPORTANCE_DEFAULT);
-    private final String channelIdLong =
-            "give_a_developer_a_string_argument_and_who_knows_what_they_will_pass_in_there";
-    final String groupId = "group";
-    final String groupIdOverride = "other_group";
-    private final String groupIdLong =
-            "0|com.foo.bar|g:content://com.foo.bar.ui/account%3A-0000000/account/";
-    NotificationChannel channelLongId =
-            new NotificationChannel(channelIdLong, "long", NotificationManager.IMPORTANCE_DEFAULT);
-    NotificationChannel defaultChannel =
+    private final String groupId = "group";
+    private NotificationChannel defaultChannel =
             new NotificationChannel(NotificationChannel.DEFAULT_CHANNEL_ID, "test",
                     NotificationManager.IMPORTANCE_UNSPECIFIED);
     private android.os.UserHandle mUser = UserHandle.of(ActivityManager.getCurrentUser());
@@ -179,7 +173,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     //
 
     @Test
-    public void testSound_default_preUpgradeUsesNotification() throws Exception {
+    public void testSound_default_preUpgradeUsesNotification() {
         defaultChannel.setSound(null, null);
         // pre upgrade, default sound.
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
@@ -192,7 +186,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSound_custom_preUpgradeUsesNotification() throws Exception {
+    public void testSound_custom_preUpgradeUsesNotification() {
         defaultChannel.setSound(null, null);
         // pre upgrade, custom sound.
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
@@ -205,7 +199,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSound_default_userLocked_preUpgrade() throws Exception {
+    public void testSound_default_userLocked_preUpgrade() {
         defaultChannel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
         // pre upgrade, default sound.
@@ -219,19 +213,19 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSound_noSound_preUpgrade() throws Exception {
+    public void testSound_noSound_preUpgrade() {
         // pre upgrade, default sound.
         StatusBarNotification sbn = getNotification(PKG_N_MR1, false /* noisy */,
                 false /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertEquals(null, record.getSound());
+        assertNull(record.getSound());
         assertEquals(Notification.AUDIO_ATTRIBUTES_DEFAULT, record.getAudioAttributes());
     }
 
     @Test
-    public void testSound_default_upgradeUsesChannel() throws Exception {
+    public void testSound_default_upgradeUsesChannel() {
         channel.setSound(CUSTOM_SOUND, CUSTOM_ATTRIBUTES);
         // post upgrade, default sound.
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
@@ -244,7 +238,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testVibration_default_preUpgradeUsesNotification() throws Exception {
+    public void testVibration_default_preUpgradeUsesNotification() {
         defaultChannel.enableVibration(false);
         // pre upgrade, default vibration.
         StatusBarNotification sbn = getNotification(PKG_N_MR1, false /* noisy */,
@@ -256,7 +250,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testVibration_custom_preUpgradeUsesNotification() throws Exception {
+    public void testVibration_custom_preUpgradeUsesNotification() {
         defaultChannel.enableVibration(false);
         // pre upgrade, custom vibration.
         StatusBarNotification sbn = getNotification(PKG_N_MR1, false /* noisy */,
@@ -268,7 +262,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testVibration_custom_userLocked_preUpgrade() throws Exception {
+    public void testVibration_custom_userLocked_preUpgrade() {
         defaultChannel.enableVibration(true);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_VIBRATION);
         // pre upgrade, custom vibration.
@@ -277,11 +271,11 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertTrue(!Objects.equals(CUSTOM_VIBRATION, record.getVibration()));
+        assertTrue(!Arrays.equals(CUSTOM_VIBRATION, record.getVibration()));
     }
 
     @Test
-    public void testVibration_custom_upgradeUsesChannel() throws Exception {
+    public void testVibration_custom_upgradeUsesChannel() {
         channel.enableVibration(true);
         // post upgrade, custom vibration.
         StatusBarNotification sbn = getNotification(PKG_O, false /* noisy */,
@@ -293,7 +287,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testImportance_preUpgrade() throws Exception {
+    public void testImportance_preUpgrade() {
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
@@ -302,19 +296,19 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testImportance_locked_preUpgrade() throws Exception {
-        defaultChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
+    public void testImportance_locked_preUpgrade() {
+        defaultChannel.setImportance(IMPORTANCE_LOW);
         defaultChannel.lockFields(USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertEquals(NotificationManager.IMPORTANCE_LOW, record.getImportance());
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
     }
 
     @Test
-    public void testImportance_locked_unspecified_preUpgrade() throws Exception {
+    public void testImportance_locked_unspecified_preUpgrade() {
         defaultChannel.setImportance(NotificationManager.IMPORTANCE_UNSPECIFIED);
         defaultChannel.lockFields(USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
@@ -326,7 +320,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testImportance_upgrade() throws Exception {
+    public void testImportance_upgrade() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
@@ -335,7 +329,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLights_preUpgrade_noLight() throws Exception {
+    public void testLights_preUpgrade_noLight() {
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
@@ -345,7 +339,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
 
     @Test
-    public void testLights_preUpgrade() throws Exception {
+    public void testLights_preUpgrade() {
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 true /* lights */, false /* defaultLights */, null /* group */);
@@ -354,7 +348,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLights_locked_preUpgrade() throws Exception {
+    public void testLights_locked_preUpgrade() {
         defaultChannel.enableLights(true);
         defaultChannel.lockFields(NotificationChannel.USER_LOCKED_LIGHTS);
         StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
@@ -362,11 +356,11 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 true /* lights */, false /* defaultLights */, null /* group */);
 
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
-        assertFalse(CUSTOM_LIGHT.equals(record.getLight()));
+        assertNotEquals(CUSTOM_LIGHT, record.getLight());
     }
 
     @Test
-    public void testLights_upgrade_defaultLights() throws Exception {
+    public void testLights_upgrade_defaultLights() {
         int defaultLightColor = mMockContext.getResources().getColor(
                 com.android.internal.R.color.config_defaultNotificationColor);
         int defaultLightOn = mMockContext.getResources().getInteger(
@@ -384,7 +378,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLights_upgrade() throws Exception {
+    public void testLights_upgrade() {
         int defaultLightOn = mMockContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultNotificationLedOn);
         int defaultLightOff = mMockContext.getResources().getInteger(
@@ -400,7 +394,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLights_upgrade_noLight() throws Exception {
+    public void testLights_upgrade_noLight() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
@@ -409,77 +403,164 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testLogmakerShortChannel() throws Exception {
+    public void testLogMaker() {
+        long timestamp = 1000L;
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        final LogMaker logMaker = record.getLogMaker();
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+
+        assertNull(logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX));
         assertEquals(channelId,
                 (String) logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID));
         assertEquals(channel.getImportance(),
                 logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        assertEquals(record.getLifespanMs(timestamp),
+                (int) logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS));
+        assertEquals(record.getFreshnessMs(timestamp),
+                (int) logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS));
+        assertEquals(record.getExposureMs(timestamp),
+                (int) logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS));
+        assertEquals(record.getInterruptionMs(timestamp),
+                (int) logMaker.getTaggedData(MetricsEvent.NOTIFICATION_SINCE_INTERRUPTION_MILLIS));
+        // If no importance calculation has been run, no explanation is available.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertNull(logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
-    public void testLogmakerLongChannel() throws Exception {
-        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
-        true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-        false /* lights */, false /*defaultLights */, null /* group */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channelLongId);
-        final String loggedId = (String)
-            record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_ID);
-        assertEquals(channelIdLong.substring(0,10), loggedId.substring(0, 10));
-    }
-
-    @Test
-    public void testLogmakerNoGroup() throws Exception {
-        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
-                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /*defaultLights */, null /* group */);
-        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        assertNull(record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
-    }
-
-    @Test
-    public void testLogmakerShortGroup() throws Exception {
+    public void testLogMakerImportanceApp() {
+        long timestamp = 1000L;
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /* defaultLights */, groupId /* group */);
+                false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        assertEquals(groupId,
-                record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
+
+        record.calculateImportance();  // This importance calculation will yield 'app'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // The additional information is only populated if the initial importance is overridden.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertNull(logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
-    public void testLogmakerLongGroup() throws Exception {
+    public void testLogMakerImportanceAsst() {
+        long timestamp = 1000L;
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /* defaultLights */, groupIdLong /* group */);
+                false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        final String loggedId = (String)
-                record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID);
-        assertEquals(groupIdLong.substring(0,10), loggedId.substring(0, 10));
+        Bundle signals = new Bundle();
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        record.addAdjustment(new Adjustment(PKG_O, KEY_IMPORTANCE, signals, "", uid));
+        record.applyAdjustments();
+        record.calculateImportance();  // This importance calculation will yield 'asst'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_ASST,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the assistant-set importance
+        assertEquals(IMPORTANCE_LOW,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // Initial importance is populated so we know what it was, since it didn't get used.
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
+                logMaker.getTaggedData(
+                        MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        // This field is populated whenever mImportanceExplanationCode is.
+        assertEquals(IMPORTANCE_LOW,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
-    public void testLogmakerOverrideGroup() throws Exception {
+    public void testLogMakerImportanceSystem() {
+        long timestamp = 1000L;
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
-                false /* lights */, false /* defaultLights */, groupId /* group */);
+                false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
-        assertEquals(groupId,
-                record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
-        record.setOverrideGroupKey(groupIdOverride);
-        assertEquals(groupIdOverride,
-                record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
-        record.setOverrideGroupKey(null);
-        assertEquals(groupId,
-                record.getLogMaker().getTaggedData(MetricsEvent.FIELD_NOTIFICATION_GROUP_ID));
+        record.setSystemImportance(IMPORTANCE_HIGH);
+        record.calculateImportance();  // This importance calculation will yield 'system'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the system-set importance
+        assertEquals(IMPORTANCE_HIGH,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // Initial importance is populated so we know what it was, since it didn't get used.
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_APP,
+                logMaker.getTaggedData(
+                        MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
     }
 
     @Test
-    public void testNotificationStats() throws Exception {
+    public void testLogMakerImportanceUser() {
+        long timestamp = 1000L;
+        channel.lockFields(channel.USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.calculateImportance();  // This importance calculation will yield 'user'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_USER,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the user-set importance
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // The additional information is only populated if the initial importance is overridden.
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertNull(logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        assertNull(logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testLogMakerImportanceMulti() {
+        long timestamp = 1000L;
+        channel.lockFields(channel.USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        // Add all 3 ways of overriding the app-set importance of the notification
+        Bundle signals = new Bundle();
+        signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        record.addAdjustment(new Adjustment(PKG_O, KEY_IMPORTANCE, signals, "", uid));
+        record.applyAdjustments();
+        record.setSystemImportance(IMPORTANCE_HIGH);
+        record.calculateImportance();  // This importance calculation will yield 'system'
+        final LogMaker logMaker = record.getLogMaker(timestamp);
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_EXPLANATION));
+        // Therefore this is the system-set importance
+        assertEquals(IMPORTANCE_HIGH,
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_CHANNEL_IMPORTANCE));
+        // Initial importance is populated so we know what it was, since it didn't get used.
+        assertEquals(channel.getImportance(),
+                logMaker.getTaggedData(MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL));
+        assertEquals(MetricsEvent.IMPORTANCE_EXPLANATION_USER, logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_INITIAL_EXPLANATION));
+        // Assistant importance is populated so we know what it was, since it didn't get used.
+        assertEquals(IMPORTANCE_LOW, logMaker.getTaggedData(
+                MetricsEvent.FIELD_NOTIFICATION_IMPORTANCE_ASST));
+    }
+
+    @Test
+    public void testNotificationStats() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
@@ -522,7 +603,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUserSentiment() throws Exception {
+    public void testUserSentiment() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
@@ -540,7 +621,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUserSentiment_appImportanceUpdatesSentiment() throws Exception {
+    public void testUserSentiment_appImportanceUpdatesSentiment() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
@@ -552,7 +633,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUserSentiment_appImportanceBlocksNegativeSentimentUpdate() throws Exception {
+    public void testUserSentiment_appImportanceBlocksNegativeSentimentUpdate() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
@@ -568,7 +649,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUserSentiment_userLocked() throws Exception {
+    public void testUserSentiment_userLocked() {
         channel.lockFields(USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
@@ -587,17 +668,17 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testAppImportance_returnsCorrectly() throws Exception {
+    public void testAppImportance_returnsCorrectly() {
         StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
                 true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
                 false /* lights */, false /* defaultLights */, groupId /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
         record.setIsAppImportanceLocked(true);
-        assertEquals(true, record.getIsAppImportanceLocked());
+        assertTrue(record.getIsAppImportanceLocked());
 
         record.setIsAppImportanceLocked(false);
-        assertEquals(false, record.getIsAppImportanceLocked());
+        assertFalse(record.getIsAppImportanceLocked());
     }
 
     @Test
@@ -607,10 +688,10 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
-        assertEquals(false, record.isInterruptive());
+        assertFalse(record.isInterruptive());
 
         record.setTextChanged(true);
-        assertEquals(false, record.isInterruptive());
+        assertFalse(record.isInterruptive());
     }
 
     @Test
@@ -620,11 +701,11 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
-        assertEquals(false, record.isInterruptive());
+        assertFalse(record.isInterruptive());
 
         record.setTextChanged(true);
         record.setSeen();
-        assertEquals(true, record.isInterruptive());
+        assertTrue(record.isInterruptive());
     }
 
     @Test
@@ -634,17 +715,18 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 false /* lights */, false /* defaultLights */, null /* group */);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
 
-        assertEquals(false, record.isInterruptive());
+        assertFalse(record.isInterruptive());
 
         record.setTextChanged(false);
         record.setSeen();
-        assertEquals(false, record.isInterruptive());
+        assertFalse(record.isInterruptive());
     }
 
     @Test
-    public void testCalculateGrantableUris_PappProvided() throws RemoteException {
+    public void testCalculateGrantableUris_PappProvided() {
         IActivityManager am = mock(IActivityManager.class);
-        when(am.checkGrantUriPermission(anyInt(), eq(null), any(),
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
                 anyInt(), anyInt())).thenThrow(new SecurityException());
 
         Notification n = mock(Notification.class);
@@ -653,6 +735,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 new StatusBarNotification(PKG_P, PKG_P, id1, tag1, uid, uid, n, mUser, null, uid);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         record.mAm = am;
+        record.mUgmInternal = ugm;
 
         try {
             record.calculateGrantableUris();
@@ -663,10 +746,11 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCalculateGrantableUris_PuserOverridden() throws RemoteException {
+    public void testCalculateGrantableUris_PuserOverridden() {
         IActivityManager am = mock(IActivityManager.class);
-        when(am.checkGrantUriPermission(anyInt(), eq(null), any(),
-                anyInt(), anyInt())).thenThrow(SecurityException.class);
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
+                anyInt(), anyInt())).thenThrow(new SecurityException());
 
         channel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
         Notification n = mock(Notification.class);
@@ -680,10 +764,11 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCalculateGrantableUris_prePappProvided() throws RemoteException {
+    public void testCalculateGrantableUris_prePappProvided() {
         IActivityManager am = mock(IActivityManager.class);
-        when(am.checkGrantUriPermission(anyInt(), eq(null), any(),
-                anyInt(), anyInt())).thenThrow(SecurityException.class);
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
+                anyInt(), anyInt())).thenThrow(new SecurityException());
 
         Notification n = mock(Notification.class);
         when(n.getChannelId()).thenReturn(channel.getId());
@@ -694,5 +779,224 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         record.calculateGrantableUris();
         // should not throw
+    }
+
+    @Test
+    public void testSmartActions() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        assertNull(record.getSystemGeneratedSmartActions());
+
+        ArrayList<Notification.Action> smartActions = new ArrayList<>();
+        smartActions.add(new Notification.Action.Builder(
+                Icon.createWithResource(getContext(), R.drawable.btn_default),
+                "text", null).build());
+        record.setSystemGeneratedSmartActions(smartActions);
+        assertEquals(smartActions, record.getSystemGeneratedSmartActions());
+    }
+
+    @Test
+    public void testUpdateNotificationChannel() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(channel.getImportance(), record.getImportance());
+
+        record.updateNotificationChannel(
+                new NotificationChannel(channelId, "", channel.getImportance() - 1));
+
+        assertEquals(channel.getImportance() - 1, record.getImportance());
+    }
+
+    @Test
+    public void testCalculateImportance_systemImportance() {
+        channel.setImportance(IMPORTANCE_HIGH);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setSystemImportance(IMPORTANCE_LOW);
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+
+        record = new NotificationRecord(mMockContext, sbn, channel);
+        channel.lockFields(USER_LOCKED_IMPORTANCE);
+
+        record.setSystemImportance(IMPORTANCE_LOW);
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+    }
+
+    @Test
+    public void testCalculateImportance_asstImportance() {
+        channel.setImportance(IMPORTANCE_HIGH);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setAssistantImportance(IMPORTANCE_LOW);
+        record.calculateImportance();
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+
+        // assistant ignored if user expressed preference
+        record = new NotificationRecord(mMockContext, sbn, channel);
+        channel.lockFields(USER_LOCKED_IMPORTANCE);
+
+        record.setAssistantImportance(IMPORTANCE_LOW);
+        record.calculateImportance();
+        assertEquals(channel.getImportance(), record.getImportance());
+    }
+
+    @Test
+    public void testCalculateImportance_asstImportanceChannelUpdate() {
+        channel.setImportance(IMPORTANCE_HIGH);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setAssistantImportance(IMPORTANCE_LOW);
+        record.calculateImportance();
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+
+        record.updateNotificationChannel(
+                new NotificationChannel(channelId, "", IMPORTANCE_DEFAULT));
+
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+    }
+
+    @Test
+    public void testSetContactAffinity() {
+        channel.setImportance(IMPORTANCE_LOW);
+        channel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setContactAffinity(1.0f);
+
+        assertEquals(1.0f, record.getContactAffinity());
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
+    }
+
+    @Test
+    public void testSetDidNotAudiblyAlert() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setAudiblyAlerted(false);
+
+        assertEquals(-1, record.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testSetAudiblyAlerted() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setAudiblyAlerted(true);
+
+        assertNotEquals(-1, record.getLastAudiblyAlertedMs());
+    }
+
+    @Test
+    public void testIsNewEnoughForAlerting_new() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertTrue(record.isNewEnoughForAlerting(record.mUpdateTimeMs));
+    }
+
+    @Test
+    public void testIsNewEnoughForAlerting_old() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertFalse(record.isNewEnoughForAlerting(record.mUpdateTimeMs + (1000 * 60 * 60)));
+    }
+
+    @Test
+    public void testIgnoreImportanceAdjustmentsForOemLockedChannels() {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        channel.setImportanceLockedByOEM(true);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                PKG_O, record.getKey(), bundle, "", record.getUserId());
+
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        record.calculateImportance();
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+    }
+
+    @Test
+    public void testIgnoreImportanceAdjustmentsForDefaultAppLockedChannels() {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        channel.setImportanceLockedByCriticalDeviceFunction(true);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                PKG_O, record.getKey(), bundle, "", record.getUserId());
+
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        record.calculateImportance();
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+    }
+
+    @Test
+    public void testApplyImportanceAdjustmentsForNonOemDefaultAppLockedChannels() {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        channel.setImportanceLockedByOEM(false);
+
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        assertEquals(IMPORTANCE_DEFAULT, record.getImportance());
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+        Adjustment adjustment = new Adjustment(
+                PKG_O, record.getKey(), bundle, "", record.getUserId());
+
+        record.addAdjustment(adjustment);
+        record.applyAdjustments();
+        record.calculateImportance();
+
+        assertEquals(IMPORTANCE_LOW, record.getImportance());
     }
 }

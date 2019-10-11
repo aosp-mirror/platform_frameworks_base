@@ -21,7 +21,6 @@ import android.text.BoringLayout;
 import android.util.AttributeSet;
 import android.widget.EditText;
 
-
 /**
  * A special EditText that sets {@link #isFailed()} to true as its internal makeNewLayout() method is called
  * with a width lower than 0. This is used to fail the unit test in

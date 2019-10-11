@@ -16,6 +16,7 @@
 
 package android.net.metrics;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -93,7 +94,7 @@ public final class DhcpErrorEvent implements IpConnectivityLog.Event {
     }
 
     /** @hide */
-    public static final Parcelable.Creator<DhcpErrorEvent> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<DhcpErrorEvent> CREATOR
         = new Parcelable.Creator<DhcpErrorEvent>() {
         public DhcpErrorEvent createFromParcel(Parcel in) {
             return new DhcpErrorEvent(in);
@@ -108,6 +109,7 @@ public final class DhcpErrorEvent implements IpConnectivityLog.Event {
         return (0xFFFF0000 & errorCode) | (0xFF & option);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format("DhcpErrorEvent(%s)", Decoder.constants.get(errorCode));

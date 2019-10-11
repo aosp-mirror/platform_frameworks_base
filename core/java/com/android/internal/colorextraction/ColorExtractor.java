@@ -53,11 +53,13 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     protected WallpaperColors mLockColors;
 
     public ColorExtractor(Context context) {
-        this(context, new Tonal(context), true /* immediately */);
+        this(context, new Tonal(context), true /* immediately */,
+                context.getSystemService(WallpaperManager.class));
     }
 
     @VisibleForTesting
-    public ColorExtractor(Context context, ExtractionType extractionType, boolean immediately) {
+    public ColorExtractor(Context context, ExtractionType extractionType, boolean immediately,
+            WallpaperManager wallpaperManager) {
         mContext = context;
         mExtractionType = extractionType;
 
@@ -72,7 +74,6 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
         mOnColorsChangedListeners = new ArrayList<>();
 
-        WallpaperManager wallpaperManager = mContext.getSystemService(WallpaperManager.class);
         if (wallpaperManager == null) {
             Log.w(TAG, "Can't listen to color changes!");
         } else {
@@ -110,7 +111,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         }
     }
 
-    private void extractWallpaperColors() {
+    protected void extractWallpaperColors() {
         GradientColors[] systemColors = mGradientColors.get(WallpaperManager.FLAG_SYSTEM);
         GradientColors[] lockColors = mGradientColors.get(WallpaperManager.FLAG_LOCK);
         extractInto(mSystemColors,
@@ -245,6 +246,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
     public static class GradientColors {
         private int mMainColor;
         private int mSecondaryColor;
+        private int[] mColorPalette;
         private boolean mSupportsDarkText;
 
         public void setMainColor(int mainColor) {
@@ -255,6 +257,10 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
             mSecondaryColor = secondaryColor;
         }
 
+        public void setColorPalette(int[] colorPalette) {
+            mColorPalette = colorPalette;
+        }
+
         public void setSupportsDarkText(boolean supportsDarkText) {
             mSupportsDarkText = supportsDarkText;
         }
@@ -262,6 +268,7 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
         public void set(GradientColors other) {
             mMainColor = other.mMainColor;
             mSecondaryColor = other.mSecondaryColor;
+            mColorPalette = other.mColorPalette;
             mSupportsDarkText = other.mSupportsDarkText;
         }
 
@@ -271,6 +278,10 @@ public class ColorExtractor implements WallpaperManager.OnColorsChangedListener 
 
         public int getSecondaryColor() {
             return mSecondaryColor;
+        }
+
+        public int[] getColorPalette() {
+            return mColorPalette;
         }
 
         public boolean supportsDarkText() {

@@ -16,6 +16,8 @@
 */
 
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+#include <nativehelper/ScopedUtfChars.h>
 #include "jni.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
@@ -98,31 +100,45 @@ static void android_os_fileobserver_observe(JNIEnv* env, jobject object, jint fd
 #endif
 }
 
-static jint android_os_fileobserver_startWatching(JNIEnv* env, jobject object, jint fd, jstring pathString, jint mask)
+static void android_os_fileobserver_startWatching(JNIEnv* env, jobject object, jint fd,
+                                                       jobjectArray pathStrings, jint mask,
+                                                       jintArray wfdArray)
 {
-    int res = -1;
+    ScopedIntArrayRW wfds(env, wfdArray);
+    if (wfds.get() == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", "Failed to get ScopedIntArrayRW");
+    }
 
 #if defined(__linux__)
 
     if (fd >= 0)
     {
-        const char* path = env->GetStringUTFChars(pathString, NULL);
+        size_t count = wfds.size();
+        for (jsize i = 0; i < count; ++i) {
+            jstring pathString = (jstring) env->GetObjectArrayElement(pathStrings, i);
 
-        res = inotify_add_watch(fd, path, mask);
+            ScopedUtfChars path(env, pathString);
 
-        env->ReleaseStringUTFChars(pathString, path);
+            wfds[i] = inotify_add_watch(fd, path.c_str(), mask);
+        }
     }
 
 #endif
-
-    return res;
 }
 
-static void android_os_fileobserver_stopWatching(JNIEnv* env, jobject object, jint fd, jint wfd)
+static void android_os_fileobserver_stopWatching(JNIEnv* env, jobject object,
+                                                 jint fd, jintArray wfdArray)
 {
 #if defined(__linux__)
 
-    inotify_rm_watch((int)fd, (uint32_t)wfd);
+    ScopedIntArrayRO wfds(env, wfdArray);
+    if (wfds.get() == nullptr) {
+        jniThrowException(env, "java/lang/IllegalStateException", "Failed to get ScopedIntArrayRO");
+    }
+    size_t count = wfds.size();
+    for (size_t i = 0; i < count; ++i) {
+        inotify_rm_watch((int)fd, (uint32_t)wfds[i]);
+    }
 
 #endif
 }
@@ -131,8 +147,8 @@ static const JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     { "init", "()I", (void*)android_os_fileobserver_init },
     { "observe", "(I)V", (void*)android_os_fileobserver_observe },
-    { "startWatching", "(ILjava/lang/String;I)I", (void*)android_os_fileobserver_startWatching },
-    { "stopWatching", "(II)V", (void*)android_os_fileobserver_stopWatching }
+    { "startWatching", "(I[Ljava/lang/String;I[I)V", (void*)android_os_fileobserver_startWatching },
+    { "stopWatching", "(I[I)V", (void*)android_os_fileobserver_stopWatching }
 
 };
 

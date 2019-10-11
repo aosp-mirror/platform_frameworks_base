@@ -30,7 +30,7 @@ package android.net.wifi.aware;
 public class IdentityChangedListener {
     /**
      * @param mac The MAC address of the Aware discovery interface. The application must have the
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} to get the actual MAC address,
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} to get the actual MAC address,
      *            otherwise all 0's will be provided.
      */
     public void onIdentityChanged(byte[] mac) {

@@ -16,12 +16,15 @@
 
 package com.android.systemui.util.leak;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import androidx.core.content.FileProvider;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
 
 import com.android.systemui.Dependency;
 
@@ -46,10 +49,11 @@ public class DumpTruck {
     private static final String FILEPROVIDER_PATH = "leak";
 
     private static final String TAG = "DumpTruck";
-    private static final int BUFSIZ = 512 * 1024; // 512K
+    private static final int BUFSIZ = 1024 * 1024; // 1MB
 
     private final Context context;
     private Uri hprofUri;
+    private long pss;
     final StringBuilder body = new StringBuilder();
 
     public DumpTruck(Context context) {
@@ -88,6 +92,7 @@ public class DumpTruck {
                             .append(info.currentPss)
                             .append(" uss=")
                             .append(info.currentUss);
+                    pss = info.currentPss;
                 }
             }
             if (pid == myPid) {
@@ -113,6 +118,7 @@ public class DumpTruck {
             if (DumpTruck.zipUp(zipfile, paths)) {
                 final File pathFile = new File(zipfile);
                 hprofUri = FileProvider.getUriForFile(context, FILEPROVIDER_AUTHORITY, pathFile);
+                Log.v(TAG, "Heap dump accessible at URI: " + hprofUri);
             }
         } catch (IOException e) {
             Log.e(TAG, "unable to zip up heapdumps", e);
@@ -137,16 +143,27 @@ public class DumpTruck {
      * @return share intent
      */
     public Intent createShareIntent() {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        Intent shareIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "SystemUI memory dump");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT,
+                String.format("SystemUI memory dump (pss=%dM)", pss / 1024));
 
         shareIntent.putExtra(Intent.EXTRA_TEXT, body.toString());
 
         if (hprofUri != null) {
+            final ArrayList<Uri> uriList = new ArrayList<>();
+            uriList.add(hprofUri);
             shareIntent.setType("application/zip");
-            shareIntent.putExtra(Intent.EXTRA_STREAM, hprofUri);
+            shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uriList);
+
+            // Include URI in ClipData also, so that grantPermission picks it up.
+            // We don't use setData here because some apps interpret this as "to:".
+            ClipData clipdata = new ClipData(new ClipDescription("content",
+                    new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}),
+                    new ClipData.Item(hprofUri));
+            shareIntent.setClipData(clipdata);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         }
         return shareIntent;
     }

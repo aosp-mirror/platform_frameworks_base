@@ -22,6 +22,7 @@ import android.os.LocaleList;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IllformedLocaleException;
@@ -32,7 +33,7 @@ public class LocaleStore {
     private static final HashMap<String, LocaleInfo> sLocaleCache = new HashMap<>();
     private static boolean sFullyInitialized = false;
 
-    public static class LocaleInfo {
+    public static class LocaleInfo implements Serializable {
         private static final int SUGGESTION_TYPE_NONE = 0;
         private static final int SUGGESTION_TYPE_SIM = 1 << 0;
         private static final int SUGGESTION_TYPE_CFG = 1 << 1;

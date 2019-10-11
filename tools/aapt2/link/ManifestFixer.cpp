@@ -21,6 +21,7 @@
 #include "android-base/logging.h"
 
 #include "ResourceUtils.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
@@ -283,19 +284,14 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
       }
     }
 
-    if (el->FindAttribute("", "platformBuildVersionCode") == nullptr) {
-      auto versionCode = el->FindAttribute(xml::kSchemaAndroid, "versionCode");
-      if (versionCode != nullptr) {
-        el->attributes.push_back(xml::Attribute{"", "platformBuildVersionCode",
-                                                versionCode->value});
+    if (options_.version_code_major_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "versionCodeMajor");
       }
-    }
-
-    if (el->FindAttribute("", "platformBuildVersionName") == nullptr) {
-      auto versionName = el->FindAttribute(xml::kSchemaAndroid, "versionName");
-      if (versionName != nullptr) {
-        el->attributes.push_back(xml::Attribute{"", "platformBuildVersionName",
-                                                versionName->value});
+      if (el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor") == nullptr) {
+        el->attributes.push_back(
+            xml::Attribute{xml::kSchemaAndroid, "versionCodeMajor",
+                           options_.version_code_major_default.value()});
       }
     }
 
@@ -371,6 +367,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   application_action["uses-library"].Action(RequiredNameIsNotEmpty);
   application_action["library"].Action(RequiredNameIsNotEmpty);
+  application_action["profileable"];
 
   xml::XmlNodeAction& static_library_action = application_action["static-library"];
   static_library_action.Action(RequiredNameIsJavaPackage);
@@ -381,6 +378,10 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredAndroidAttribute("version"));
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
   uses_static_library_action["additional-certificate"];
+
+  xml::XmlNodeAction& uses_package_action = application_action["uses-package"];
+  uses_package_action.Action(RequiredNameIsJavaPackage);
+  uses_package_action["additional-certificate"];
 
   if (options_.debug_mode) {
     application_action.Action([&](xml::Element* el) -> bool {
@@ -452,6 +453,7 @@ static bool RenameManifestPackage(const StringPiece& package_override, xml::Elem
 }
 
 bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
+  TRACE_CALL();
   xml::Element* root = xml::FindRootElement(doc->root.get());
   if (!root || !root->namespace_uri.empty() || root->name != "manifest") {
     context->GetDiagnostics()->Error(DiagMessage(doc->file.source)
@@ -474,8 +476,14 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
 
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
-
     attr->value = options_.compile_sdk_version.value();
+
+    attr = root->FindOrCreateAttribute("", "platformBuildVersionCode");
+
+    // Make sure we un-compile the value if it was set to something else.
+    attr->compiled_value = {};
+    attr->value = options_.compile_sdk_version.value();
+
   }
 
   if (options_.compile_sdk_version_codename) {
@@ -484,7 +492,12 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
 
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
+    attr->value = options_.compile_sdk_version_codename.value();
 
+    attr = root->FindOrCreateAttribute("", "platformBuildVersionName");
+
+    // Make sure we un-compile the value if it was set to something else.
+    attr->compiled_value = {};
     attr->value = options_.compile_sdk_version_codename.value();
   }
 

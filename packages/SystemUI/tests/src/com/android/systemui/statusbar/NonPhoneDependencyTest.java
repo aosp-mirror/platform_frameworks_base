@@ -17,22 +17,29 @@
 package com.android.systemui.statusbar;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.when;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.phone.StatusBarWindowManager;
+import com.android.systemui.statusbar.notification.NotificationEntryListener;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
+import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -46,24 +53,29 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@Ignore("b/118400112")
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
-    @Mock private NotificationEntryManager.Callback mEntryManagerCallback;
+    @Mock
+    private NotificationEntryListener mEntryListener;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private RemoteInputController.Delegate mDelegate;
-    @Mock private NotificationInfo.CheckSaveListener mCheckSaveListener;
-    @Mock private NotificationGutsManager.OnSettingsClickListener mOnClickListener;
     @Mock private NotificationRemoteInputManager.Callback mRemoteInputManagerCallback;
+    @Mock private CheckSaveListener mCheckSaveListener;
+    @Mock private OnSettingsClickListener mOnSettingsClickListener;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+               new Handler(TestableLooper.get(this).getLooper()));
     }
 
     @Test
+    @Ignore("b/118400112")
     public void testNotificationManagementCodeHasNoDependencyOnStatusBarWindowManager() {
+        mDependency.injectMockDependency(ShadeController.class);
         NotificationEntryManager entryManager = Dependency.get(NotificationEntryManager.class);
         NotificationGutsManager gutsManager = Dependency.get(NotificationGutsManager.class);
         NotificationListener notificationListener = Dependency.get(NotificationListener.class);
@@ -75,23 +87,19 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 Dependency.get(NotificationLockscreenUserManager.class);
         NotificationViewHierarchyManager viewHierarchyManager =
                 Dependency.get(NotificationViewHierarchyManager.class);
-
-        when(mPresenter.getNotificationLockscreenUserManager()).thenReturn(lockscreenUserManager);
-        when(mPresenter.getGroupManager()).thenReturn(
-                Dependency.get(NotificationGroupManager.class));
-
-        entryManager.setUpWithPresenter(mPresenter, mListContainer, mEntryManagerCallback,
-                mHeadsUpManager);
-        gutsManager.setUpWithPresenter(mPresenter, entryManager, mListContainer,
-                mCheckSaveListener, mOnClickListener);
-        notificationLogger.setUpWithEntryManager(entryManager, mListContainer);
-        mediaManager.setUpWithPresenter(mPresenter, entryManager);
-        remoteInputManager.setUpWithPresenter(mPresenter, entryManager, mRemoteInputManagerCallback,
+        Dependency.get(InitController.class).executePostInitTasks();
+        entryManager.setUpWithPresenter(mPresenter, mListContainer, mHeadsUpManager);
+        entryManager.addNotificationEntryListener(mEntryListener);
+        gutsManager.setUpWithPresenter(mPresenter, mListContainer,
+                mCheckSaveListener, mOnSettingsClickListener);
+        notificationLogger.setUpWithContainer(mListContainer);
+        mediaManager.setUpWithPresenter(mPresenter);
+        remoteInputManager.setUpWithCallback(mRemoteInputManagerCallback,
                 mDelegate);
-        lockscreenUserManager.setUpWithPresenter(mPresenter, entryManager);
-        viewHierarchyManager.setUpWithPresenter(mPresenter, entryManager, mListContainer);
-        notificationListener.setUpWithPresenter(mPresenter, entryManager);
+        lockscreenUserManager.setUpWithPresenter(mPresenter);
+        viewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
 
-        assertFalse(mDependency.hasInstantiatedDependency(StatusBarWindowManager.class));
+        TestableLooper.get(this).processAllMessages();
+        assertFalse(mDependency.hasInstantiatedDependency(StatusBarWindowController.class));
     }
 }

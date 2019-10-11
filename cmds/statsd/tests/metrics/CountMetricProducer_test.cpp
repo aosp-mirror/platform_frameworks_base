@@ -37,6 +37,19 @@ namespace statsd {
 
 const ConfigKey kConfigKey(0, 12345);
 
+TEST(CountMetricProducerTest, TestFirstBucket) {
+    CountMetric metric;
+    metric.set_id(1);
+    metric.set_bucket(ONE_MINUTE);
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      5, 600 * NS_PER_SEC + NS_PER_SEC/2);
+    EXPECT_EQ(600500000000, countProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(10, countProducer.mCurrentBucketNum);
+    EXPECT_EQ(660000000005, countProducer.getCurrentBucketEndTimeNs());
+}
+
 TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
@@ -56,8 +69,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      bucketStartTimeNs);
-    countProducer.setBucketSize(60 * NS_PER_SEC);
+                                      bucketStartTimeNs, bucketStartTimeNs);
 
     // 2 events in bucket 1.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
@@ -119,8 +131,7 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
-    countProducer.setBucketSize(60 * NS_PER_SEC);
+    CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs, bucketStartTimeNs);
 
     countProducer.onConditionChanged(true, bucketStartTimeNs);
     countProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
@@ -181,8 +192,7 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     EXPECT_CALL(*wizard, query(_, key2, _, _, _, _)).WillOnce(Return(ConditionState::kTrue));
 
     CountMetricProducer countProducer(kConfigKey, metric, 1 /*condition tracker index*/, wizard,
-                                      bucketStartTimeNs);
-    countProducer.setBucketSize(60 * NS_PER_SEC);
+                                      bucketStartTimeNs, bucketStartTimeNs);
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     countProducer.flushIfNeededLocked(bucketStartTimeNs + 1);
@@ -221,8 +231,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
     event1.init();
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, wizard,
-                                      bucketStartTimeNs);
-    countProducer.setBucketSize(60 * NS_PER_SEC);
+                                      bucketStartTimeNs, bucketStartTimeNs);
 
     sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
@@ -280,8 +289,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
     event1.init();
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, wizard,
-                                      bucketStartTimeNs);
-    countProducer.setBucketSize(60 * NS_PER_SEC);
+                                      bucketStartTimeNs, bucketStartTimeNs);
 
     // Bucket is flushed yet.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
@@ -337,8 +345,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      bucketStartTimeNs);
-    countProducer.setBucketSize(60 * NS_PER_SEC);
+                                      bucketStartTimeNs, bucketStartTimeNs);
 
     sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert, alarmMonitor);
 

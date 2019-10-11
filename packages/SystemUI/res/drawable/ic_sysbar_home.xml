@@ -14,13 +14,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval"
-    android:useLevel="false">
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="28"
+    android:viewportHeight="28">
 
-    <solid android:color="?attr/singleToneColor" />
-
-    <size
-        android:height="14dp"
-        android:width="14dp" />
-</shape>
+    <path
+        android:fillColor="?attr/singleToneColor"
+        android:pathData="M 14 7 C 17.8659932488 7 21 10.1340067512 21 14 C 21 17.8659932488 17.8659932488 21 14 21 C 10.1340067512 21 7 17.8659932488 7 14 C 7 10.1340067512 10.1340067512 7 14 7 Z" />
+</vector>

@@ -973,7 +973,8 @@ public abstract class AbstractAccountAuthenticator {
      *
      * @param response to send the result back to the AccountManager, will never be null.
      * @param account the account to check, will never be null
-     * @param statusToken a String of token to check if update of credentials is suggested.
+     * @param statusToken a String of token which can be used to check the status of locally
+     *            stored credentials and if update of credentials is suggested
      * @return a Bundle result or null if the result is to be returned via the response. The result
      *         will contain either:
      *         <ul>

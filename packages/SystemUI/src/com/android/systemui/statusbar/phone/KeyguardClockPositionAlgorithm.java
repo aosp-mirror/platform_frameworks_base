@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.statusbar.notification.NotificationUtils.interpolate;
 
 import android.content.res.Resources;
@@ -29,10 +30,6 @@ import com.android.systemui.R;
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
  */
 public class KeyguardClockPositionAlgorithm {
-
-    private static final long MILLIS_PER_MINUTES = 1000 * 60;
-    private static final float BURN_IN_PREVENTION_PERIOD_Y = 521;
-    private static final float BURN_IN_PREVENTION_PERIOD_X = 83;
 
     /**
      * How much the clock height influences the shade position.
@@ -55,6 +52,21 @@ public class KeyguardClockPositionAlgorithm {
      * Height of {@link KeyguardStatusView}.
      */
     private int mKeyguardStatusHeight;
+
+    /**
+     * Preferred Y position of clock.
+     */
+    private int mClockPreferredY;
+
+    /**
+     * Whether or not there is a custom clock face on keyguard.
+     */
+    private boolean mHasCustomClock;
+
+    /**
+     * Whether or not the NSSL contains any visible notifications.
+     */
+    private boolean mHasVisibleNotifs;
 
     /**
      * Height of notification stack: Sum of height of each notification.
@@ -93,29 +105,11 @@ public class KeyguardClockPositionAlgorithm {
     private int mBurnInPreventionOffsetY;
 
     /**
-     * Clock vertical padding when pulsing.
-     */
-    private int mPulsingPadding;
-
-    /**
      * Doze/AOD transition amount.
      */
     private float mDarkAmount;
 
-    /**
-     * If keyguard will require a password or just fade away.
-     */
-    private boolean mCurrentlySecure;
-
-    /**
-     * Dozing and receiving a notification (AOD notification.)
-     */
-    private boolean mPulsing;
-
-    /**
-     * Distance in pixels between the top of the screen and the first view of the bouncer.
-     */
-    private int mBouncerTop;
+    private float mEmptyDragAmount;
 
     /**
      * Refreshes the dimension values.
@@ -123,37 +117,40 @@ public class KeyguardClockPositionAlgorithm {
     public void loadDimens(Resources res) {
         mClockNotificationsMargin = res.getDimensionPixelSize(
                 R.dimen.keyguard_clock_notifications_margin);
-        mContainerTopPadding = res.getDimensionPixelSize(
-                R.dimen.keyguard_clock_top_margin);
+        // Consider the lock icon when determining the minimum top padding between the status bar
+        // and top of the clock.
+        mContainerTopPadding = Math.max(res.getDimensionPixelSize(
+                R.dimen.keyguard_clock_top_margin),
+                res.getDimensionPixelSize(R.dimen.keyguard_lock_height)
+                        + res.getDimensionPixelSize(R.dimen.keyguard_lock_padding)
+                        + res.getDimensionPixelSize(R.dimen.keyguard_clock_lock_margin));
         mBurnInPreventionOffsetX = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_x);
         mBurnInPreventionOffsetY = res.getDimensionPixelSize(
                 R.dimen.burn_in_prevention_offset_y);
-        mPulsingPadding = res.getDimensionPixelSize(
-                R.dimen.widget_pulsing_bottom_padding);
     }
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
-            float panelExpansion, int parentHeight,
-            int keyguardStatusHeight, float dark, boolean secure, boolean pulsing,
-            int bouncerTop) {
+            float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
+            boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
         mPanelExpansion = panelExpansion;
         mHeight = parentHeight;
         mKeyguardStatusHeight = keyguardStatusHeight;
+        mClockPreferredY = clockPreferredY;
+        mHasCustomClock = hasCustomClock;
+        mHasVisibleNotifs = hasVisibleNotifs;
         mDarkAmount = dark;
-        mCurrentlySecure = secure;
-        mPulsing = pulsing;
-        mBouncerTop = bouncerTop;
+        mEmptyDragAmount = emptyDragAmount;
     }
 
     public void run(Result result) {
         final int y = getClockY();
         result.clockY = y;
         result.clockAlpha = getClockAlpha(y);
-        result.stackScrollerPadding = y + (mPulsing ? 0 : mKeyguardStatusHeight);
+        result.stackScrollerPadding = y + mKeyguardStatusHeight;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
@@ -163,6 +160,15 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getMaxClockY() {
         return mHeight / 2 - mKeyguardStatusHeight - mClockNotificationsMargin;
+    }
+
+    private int getPreferredClockY() {
+        return mClockPreferredY;
+    }
+
+    private int getExpandedPreferredClockY() {
+        return (mHasCustomClock && !mHasVisibleNotifs) ? getPreferredClockY()
+                : getExpandedClockPosition();
     }
 
     /**
@@ -191,21 +197,19 @@ public class KeyguardClockPositionAlgorithm {
 
     private int getClockY() {
         // Dark: Align the bottom edge of the clock at about half of the screen:
-        float clockYDark = getMaxClockY() + burnInPreventionOffsetY();
-        if (mPulsing) {
-            clockYDark -= mPulsingPadding;
-        }
+        float clockYDark = (mHasCustomClock ? getPreferredClockY() : getMaxClockY())
+                + burnInPreventionOffsetY();
+        clockYDark = MathUtils.max(0, clockYDark);
 
-        float clockYRegular = getExpandedClockPosition();
-        boolean hasEnoughSpace = mMinTopMargin + mKeyguardStatusHeight < mBouncerTop;
-        float clockYTarget = mCurrentlySecure && hasEnoughSpace ?
-                mMinTopMargin : -mKeyguardStatusHeight;
+        float clockYRegular = getExpandedPreferredClockY();
+        float clockYBouncer = -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
         float shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(mPanelExpansion);
-        final float clockY = MathUtils.lerp(clockYTarget, clockYRegular, shadeExpansion);
+        float clockY = MathUtils.lerp(clockYBouncer, clockYRegular, shadeExpansion);
+        clockYDark = MathUtils.lerp(clockYBouncer, clockYDark, shadeExpansion);
 
-        return (int) MathUtils.lerp(clockY, clockYDark, mDarkAmount);
+        return (int) (MathUtils.lerp(clockY, clockYDark, mDarkAmount) + mEmptyDragAmount);
     }
 
     /**
@@ -217,43 +221,19 @@ public class KeyguardClockPositionAlgorithm {
      * @return Alpha from 0 to 1.
      */
     private float getClockAlpha(int y) {
-        float alphaKeyguard;
-        if (mCurrentlySecure) {
-            alphaKeyguard = 1;
-        } else {
-            alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedClockPosition()));
-            alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
-        }
+        float alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedPreferredClockY()));
+        alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }
 
     private float burnInPreventionOffsetY() {
-        return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
-                mBurnInPreventionOffsetY * 2,
-                BURN_IN_PREVENTION_PERIOD_Y)
+        return getBurnInOffset(mBurnInPreventionOffsetY * 2, false /* xAxis */)
                 - mBurnInPreventionOffsetY;
     }
 
     private float burnInPreventionOffsetX() {
-        return zigzag(System.currentTimeMillis() / MILLIS_PER_MINUTES,
-                mBurnInPreventionOffsetX * 2,
-                BURN_IN_PREVENTION_PERIOD_X)
+        return getBurnInOffset(mBurnInPreventionOffsetX * 2, true /* xAxis */)
                 - mBurnInPreventionOffsetX;
-    }
-
-    /**
-     * Implements a continuous, piecewise linear, periodic zig-zag function
-     *
-     * Can be thought of as a linear approximation of abs(sin(x)))
-     *
-     * @param period period of the function, ie. zigzag(x + period) == zigzag(x)
-     * @param amplitude maximum value of the function
-     * @return a value between 0 and amplitude
-     */
-    private float zigzag(float x, float amplitude, float period) {
-        float xprime = (x % period) / (period / 2);
-        float interpolationAmount = (xprime <= 1) ? xprime : (2 - xprime);
-        return interpolate(0, amplitude, interpolationAmount);
     }
 
     public static class Result {

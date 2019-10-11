@@ -17,11 +17,12 @@
 syntax = "proto2";
 package android.view;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 
-/* represents DisplayInfo */
+// Represents DisplayInfo. Describes the characteristics of a particular
+// logical display.
 message DisplayInfoProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -29,5 +30,7 @@ message DisplayInfoProto {
     optional int32 logical_height = 2;
     optional int32 app_width = 3;
     optional int32 app_height = 4;
-    optional string name = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    // The human-readable name of the display.
+    // Eg: "Built-in Screen"
+    optional string name = 5;
 }

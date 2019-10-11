@@ -1321,10 +1321,10 @@ nAllocationGenerateMipmaps(JNIEnv *_env, jobject _this, jlong con, jlong alloc)
 
 static jlong
 nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, jint mip,
-                            jobject jbitmap, jint usage)
+                            jlong bitmapPtr, jint usage)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
@@ -1335,10 +1335,10 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
 
 static jlong
 nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, jlong type,
-                                        jint mip, jobject jbitmap, jint usage)
+                                        jint mip, jlong bitmapPtr, jint usage)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateTyped((RsContext)con,
@@ -1349,10 +1349,10 @@ nAllocationCreateBitmapBackedAllocation(JNIEnv *_env, jobject _this, jlong con, 
 
 static jlong
 nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, jint mip,
-                                jobject jbitmap, jint usage)
+                                jlong bitmapPtr, jint usage)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
@@ -1362,10 +1362,10 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
 }
 
 static void
-nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobject jbitmap)
+nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jlong bitmapPtr)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
     int w = bitmap.width();
     int h = bitmap.height();
 
@@ -1376,10 +1376,10 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, j
 }
 
 static void
-nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jobject jbitmap)
+nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jlong bitmapPtr)
 {
     SkBitmap bitmap;
-    GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
+    bitmap::toBitmap(bitmapPtr).getSkBitmap(&bitmap);
 
     void* ptr = bitmap.getPixels();
     rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.computeByteSize());
@@ -2866,13 +2866,13 @@ static const JNINativeMethod methods[] = {
 {"rsnTypeCreate",                    "(JJIIIZZI)J",                           (void*)nTypeCreate },
 {"rsnTypeGetNativeData",             "(JJ[J)V",                               (void*)nTypeGetNativeData },
 
-{"rsnAllocationCreateTyped",         "(JJIIJ)J",                               (void*)nAllocationCreateTyped },
-{"rsnAllocationCreateFromBitmap",    "(JJILandroid/graphics/Bitmap;I)J",      (void*)nAllocationCreateFromBitmap },
-{"rsnAllocationCreateBitmapBackedAllocation",    "(JJILandroid/graphics/Bitmap;I)J",      (void*)nAllocationCreateBitmapBackedAllocation },
-{"rsnAllocationCubeCreateFromBitmap","(JJILandroid/graphics/Bitmap;I)J",      (void*)nAllocationCubeCreateFromBitmap },
+{"rsnAllocationCreateTyped",         "(JJIIJ)J",                              (void*)nAllocationCreateTyped },
+{"rsnAllocationCreateFromBitmap",    "(JJIJI)J",                              (void*)nAllocationCreateFromBitmap },
+{"rsnAllocationCreateBitmapBackedAllocation",    "(JJIJI)J",                  (void*)nAllocationCreateBitmapBackedAllocation },
+{"rsnAllocationCubeCreateFromBitmap","(JJIJI)J",                              (void*)nAllocationCubeCreateFromBitmap },
 
-{"rsnAllocationCopyFromBitmap",      "(JJLandroid/graphics/Bitmap;)V",        (void*)nAllocationCopyFromBitmap },
-{"rsnAllocationCopyToBitmap",        "(JJLandroid/graphics/Bitmap;)V",        (void*)nAllocationCopyToBitmap },
+{"rsnAllocationCopyFromBitmap",      "(JJJ)V",                                (void*)nAllocationCopyFromBitmap },
+{"rsnAllocationCopyToBitmap",        "(JJJ)V",                                (void*)nAllocationCopyToBitmap },
 
 {"rsnAllocationSyncAll",             "(JJI)V",                                (void*)nAllocationSyncAll },
 {"rsnAllocationSetupBufferQueue",    "(JJI)V",                                (void*)nAllocationSetupBufferQueue },

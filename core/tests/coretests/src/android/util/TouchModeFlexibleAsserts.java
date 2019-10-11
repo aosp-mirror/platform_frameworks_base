@@ -16,11 +16,11 @@
 
 package android.util;
 
-import junit.framework.Assert;
-
 import android.test.InstrumentationTestCase;
 import android.test.TouchUtils;
 import android.view.View;
+
+import junit.framework.Assert;
 
 /**
  * When entering touch mode via touch, the tests can be flaky.  These asserts

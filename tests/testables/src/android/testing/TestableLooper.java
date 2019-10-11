@@ -40,6 +40,12 @@ import java.util.Map;
  */
 public class TestableLooper {
 
+    /**
+     * Whether to hold onto the main thread through all tests in an attempt to
+     * catch crashes.
+     */
+    public static final boolean HOLD_MAIN_THREAD = false;
+
     private Looper mLooper;
     private MessageQueue mQueue;
     private MessageHandler mMessageHandler;
@@ -78,7 +84,7 @@ public class TestableLooper {
      */
     public void destroy() {
         mQueueWrapper.release();
-        if (mLooper == Looper.getMainLooper()) {
+        if (HOLD_MAIN_THREAD && mLooper == Looper.getMainLooper()) {
             TestableInstrumentation.releaseMain();
         }
     }
@@ -200,7 +206,7 @@ public class TestableLooper {
     }
 
     private static TestLooperManager acquireLooperManager(Looper l) {
-        if (l == Looper.getMainLooper()) {
+        if (HOLD_MAIN_THREAD && l == Looper.getMainLooper()) {
             TestableInstrumentation.acquireMain();
         }
         return InstrumentationRegistry.getInstrumentation().acquireLooperManager(l);
@@ -292,7 +298,7 @@ public class TestableLooper {
                 if (set) {
                     mTestableLooper.mQueueWrapper.release();
                     mTestableLooper.mQueueWrapper = null;
-                    if (mLooper == Looper.getMainLooper()) {
+                    if (HOLD_MAIN_THREAD && mLooper == Looper.getMainLooper()) {
                         TestableInstrumentation.releaseMain();
                     }
                 }

@@ -475,6 +475,11 @@ def parse_ucd(ucd_path):
     _emoji_sequences = remove_emoji_exclude(_emoji_sequences, exclusions)
     _emoji_zwj_sequences = remove_emoji_exclude(_emoji_zwj_sequences, exclusions)
     _emoji_variation_sequences = remove_emoji_variation_exclude(_emoji_variation_sequences, exclusions)
+    # Unicode 12.0 adds Basic_Emoji in emoji-sequences.txt. We ignore them here since we are already
+    # checking the emoji presentations with emoji-variation-sequences.txt.
+    # Please refer to http://unicode.org/reports/tr51/#def_basic_emoji_set .
+    _emoji_sequences = {k: v for k, v in _emoji_sequences.iteritems() if not v == 'Basic_Emoji' }
+
 
 def remove_emoji_variation_exclude(source, items):
     return source.difference(items.keys())
@@ -484,11 +489,6 @@ def remove_emoji_exclude(source, items):
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
-
-UNSUPPORTED_FLAGS = frozenset({
-    flag_sequence('BL'), flag_sequence('BQ'), flag_sequence('MQ'),
-    flag_sequence('RE'), flag_sequence('TF'),
-})
 
 EQUIVALENT_FLAGS = {
     flag_sequence('BV'): flag_sequence('NO'),
@@ -542,56 +542,6 @@ SAME_FLAG_MAPPINGS = [
 ]
 
 ZWJ = 0x200D
-FEMALE_SIGN = 0x2640
-MALE_SIGN = 0x2642
-
-GENDER_DEFAULTS = [
-    (0x26F9, MALE_SIGN), # PERSON WITH BALL
-    (0x1F3C3, MALE_SIGN), # RUNNER
-    (0x1F3C4, MALE_SIGN), # SURFER
-    (0x1F3CA, MALE_SIGN), # SWIMMER
-    (0x1F3CB, MALE_SIGN), # WEIGHT LIFTER
-    (0x1F3CC, MALE_SIGN), # GOLFER
-    (0x1F46E, MALE_SIGN), # POLICE OFFICER
-    (0x1F46F, FEMALE_SIGN), # WOMAN WITH BUNNY EARS
-    (0x1F471, MALE_SIGN), # PERSON WITH BLOND HAIR
-    (0x1F473, MALE_SIGN), # MAN WITH TURBAN
-    (0x1F477, MALE_SIGN), # CONSTRUCTION WORKER
-    (0x1F481, FEMALE_SIGN), # INFORMATION DESK PERSON
-    (0x1F482, MALE_SIGN), # GUARDSMAN
-    (0x1F486, FEMALE_SIGN), # FACE MASSAGE
-    (0x1F487, FEMALE_SIGN), # HAIRCUT
-    (0x1F575, MALE_SIGN), # SLEUTH OR SPY
-    (0x1F645, FEMALE_SIGN), # FACE WITH NO GOOD GESTURE
-    (0x1F646, FEMALE_SIGN), # FACE WITH OK GESTURE
-    (0x1F647, MALE_SIGN), # PERSON BOWING DEEPLY
-    (0x1F64B, FEMALE_SIGN), # HAPPY PERSON RAISING ONE HAND
-    (0x1F64D, FEMALE_SIGN), # PERSON FROWNING
-    (0x1F64E, FEMALE_SIGN), # PERSON WITH POUTING FACE
-    (0x1F6A3, MALE_SIGN), # ROWBOAT
-    (0x1F6B4, MALE_SIGN), # BICYCLIST
-    (0x1F6B5, MALE_SIGN), # MOUNTAIN BICYCLIST
-    (0x1F6B6, MALE_SIGN), # PEDESTRIAN
-    (0x1F926, FEMALE_SIGN), # FACE PALM
-    (0x1F937, FEMALE_SIGN), # SHRUG
-    (0x1F938, MALE_SIGN), # PERSON DOING CARTWHEEL
-    (0x1F939, MALE_SIGN), # JUGGLING
-    (0x1F93C, MALE_SIGN), # WRESTLERS
-    (0x1F93D, MALE_SIGN), # WATER POLO
-    (0x1F93E, MALE_SIGN), # HANDBALL
-    (0x1F9D6, FEMALE_SIGN), # PERSON IN STEAMY ROOM
-    (0x1F9D7, FEMALE_SIGN), # PERSON CLIMBING
-    (0x1F9D8, FEMALE_SIGN), # PERSON IN LOTUS POSITION
-    (0x1F9D9, FEMALE_SIGN), # MAGE
-    (0x1F9DA, FEMALE_SIGN), # FAIRY
-    (0x1F9DB, FEMALE_SIGN), # VAMPIRE
-    (0x1F9DC, FEMALE_SIGN), # MERPERSON
-    (0x1F9DD, FEMALE_SIGN), # ELF
-    (0x1F9DE, FEMALE_SIGN), # GENIE
-    (0x1F9DF, FEMALE_SIGN), # ZOMBIE
-    (0X1F9B8, FEMALE_SIGN), # SUPERVILLAIN
-    (0x1F9B9, FEMALE_SIGN), # SUPERHERO
-]
 
 def is_fitzpatrick_modifier(cp):
     return 0x1F3FB <= cp <= 0x1F3FF
@@ -645,9 +595,6 @@ def compute_expected_emoji():
     for first, second in SAME_FLAG_MAPPINGS:
         equivalent_emoji[first] = second
 
-    # Remove unsupported flags
-    all_sequences.difference_update(UNSUPPORTED_FLAGS)
-
     # Add all tag characters used in flags
     sequence_pieces.update(range(0xE0030, 0xE0039 + 1))
     sequence_pieces.update(range(0xE0061, 0xE007A + 1))
@@ -665,13 +612,6 @@ def compute_expected_emoji():
     equivalent_emoji.update(EQUIVALENT_FLAGS)
     equivalent_emoji.update(LEGACY_ANDROID_EMOJI)
     equivalent_emoji.update(ZWJ_IDENTICALS)
-
-    for ch, gender in GENDER_DEFAULTS:
-        equivalent_emoji[(ch, ZWJ, gender)] = ch
-        for skin_tone in range(0x1F3FB, 0x1F3FF+1):
-            skin_toned = (ch, skin_tone, ZWJ, gender)
-            if skin_toned in all_emoji:
-                equivalent_emoji[skin_toned] = (ch, skin_tone)
 
     for seq in _emoji_variation_sequences:
         equivalent_emoji[seq] = seq[0]

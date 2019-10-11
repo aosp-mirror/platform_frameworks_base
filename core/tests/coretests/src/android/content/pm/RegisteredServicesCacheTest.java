@@ -16,16 +16,16 @@
 
 package android.content.pm;
 
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
-import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+
+import androidx.test.filters.LargeTest;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -189,36 +189,6 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         assertEquals(0, cache.getPersistentServicesSize(u1));
     }
 
-    /**
-     * Check that an optimization to skip a call to PackageManager handles an invalidated cache.
-     *
-     * We added an optimization in generateServicesMap to only query PackageManager for packages
-     * that have been changed, because if a package is unchanged, we have already cached the
-     * services info for it, so we can save a query to PackageManager (and save some memory).
-     * However, if invalidateCache was called, we cannot optimize, and must do a full query.
-     * The initial optimization was buggy because it failed to check for an invalidated cache, and
-     * only scanned the changed packages, given in the ACTION_PACKAGE_CHANGED intent (b/122912184).
-     */
-    public void testParseServiceInfoOptimizationHandlesInvalidatedCache() {
-        TestServicesCache cache = new TestServicesCache();
-        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
-        cache.addServiceForQuerying(U0, r2, newServiceInfo(t2, UID2));
-        assertEquals(2, cache.getAllServicesSize(U0));
-
-        // simulate the client of the cache invalidating it
-        cache.invalidateCache(U0);
-
-        // there should be 0 services (userServices.services == null ) at this point, but we don't
-        // call getAllServicesSize since that would force a full scan of packages,
-        // instead we trigger a package change in a package that is in the list of services
-        Intent intent = new Intent(Intent.ACTION_PACKAGE_CHANGED);
-        intent.putExtra(Intent.EXTRA_UID, UID1);
-        cache.handlePackageEvent(intent, U0);
-
-        // check that the optimization does a full query and caches both services
-        assertEquals(2, cache.getAllServicesSize(U0));
-    }
-
     private static RegisteredServicesCache.ServiceInfo<TestServiceType> newServiceInfo(
             TestServiceType type, int uid) {
         final ComponentInfo info = new ComponentInfo();
@@ -296,11 +266,6 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
                 map = new HashMap<>();
                 mServices.put(userId, map);
             }
-            // in actual cases, resolveInfo should always have a serviceInfo, since we specifically
-            // query for intent services
-            resolveInfo.serviceInfo = new android.content.pm.ServiceInfo();
-            resolveInfo.serviceInfo.applicationInfo =
-                new ApplicationInfo(serviceInfo.componentInfo.applicationInfo);
             map.put(resolveInfo, serviceInfo);
         }
 
@@ -338,11 +303,6 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         @Override
         public void onUserRemoved(int userId) {
             super.onUserRemoved(userId);
-        }
-
-        @Override
-        public void handlePackageEvent(Intent intent, int userId) {
-            super.handlePackageEvent(intent, userId);
         }
     }
 

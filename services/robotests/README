@@ -1,0 +1,23 @@
+This folder is for Robolectric tests inside the platform.
+
+To add a test class annotate it as follows:
+
+@RunWith(FrameworkRobolectricTestRunner.class)
+@Config(manifest = Config.NONE, sdk = 26)
+@SystemLoaderClasses({ClassUnderTest.class, DependencyClasses.class})
+@SystemLoaderPackages({"com.android.server.yourmodule"})
+
+Robolectric loads some classes that it decides from versioned jars of the framework. Since we are
+part of the framework some of our classes get loaded from these jars. This is NOT what we want, we
+want to test against what we wrote in the tree. Because of this we use a custom test runner,
+FrameworkRobolectricTestRunner, that bypasses these jars and loads certain classes from the system
+class loader.
+
+To specify which classes to load use either @SystemLoaderClasses or @SystemLoaderPackages. In
+practice:
+* You MUST put the class under test here.
+* If you encounter any exceptions that might be caused by a different version of the class being
+loaded, such as NoSuchMethodException, put the class involved in the exception in this annotation
+and try again.
+
+Check Android.mk file for more info.

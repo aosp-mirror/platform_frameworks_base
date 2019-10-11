@@ -19,11 +19,11 @@ package android.widget.focus;
 import android.app.Activity;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.InternalSelectionView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.util.InternalSelectionView;
 
 /**
  * A list of {@link InternalSelectionView}s paramatarized by the number of items,

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -29,6 +30,9 @@ import com.android.internal.util.Preconditions;
  * autofilled.
  */
 public final class SaveCallback {
+
+    private static final String TAG = "SaveCallback";
+
     private final ISaveCallback mCallback;
     private boolean mCalled;
 
@@ -79,27 +83,30 @@ public final class SaveCallback {
         }
     }
 
+
+
+
     /**
      * Notifies the Android System that an
      * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} could not be handled
      * by the service.
      *
-     * <p>This method should only be called when the service could not handle the request right away
-     * and could not recover or retry it. If the service could retry or recover, it could keep
-     * the {@link SaveRequest} and call {@link #onSuccess()} instead.
+     * <p>This method is just used for logging purposes, the Android System won't call the service
+     * again in case of failures&mdash;if you need to recover from the failure, just save the
+     * {@link SaveRequest} and try again later.
      *
-     * <p><b>Note:</b> The Android System displays an UI with the supplied error message; if
-     * you prefer to show your own message, call {@link #onSuccess()} or
-     * {@link #onSuccess(IntentSender)} instead.
+     * <p><b>Note: </b>for apps targeting {@link android.os.Build.VERSION_CODES#Q} or higher, this
+     * method just logs the message on {@code logcat}; for apps targetting older SDKs, it also
+     * displays the message to user using a {@link android.widget.Toast}.
      *
-     * @param message error message to be displayed to the user. <b>Note: </b> this message is
-     * displayed on {@code logcat} logs and should not contain PII (Personally Identifiable
-     * Information, such as username or email address).
+     * @param message error message. <b>Note: </b> this message should <b>not</b> contain PII
+     * (Personally Identifiable Information, such as username or email address).
      *
      * @throws IllegalStateException if this method, {@link #onSuccess()},
      * or {@link #onSuccess(IntentSender)} was already called.
      */
     public void onFailure(CharSequence message) {
+        Log.w(TAG, "onFailure(): " + message);
         assertNotCalled();
         mCalled = true;
         try {

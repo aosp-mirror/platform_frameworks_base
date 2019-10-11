@@ -15,21 +15,19 @@
  */
 package com.android.systemui.statusbar.policy;
 
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AsyncChannel;
 import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
@@ -37,10 +35,8 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 
 import java.util.Objects;
 
-
 public class WifiSignalController extends
         SignalController<WifiSignalController.WifiState, SignalController.IconGroup> {
-    private final AsyncChannel mWifiChannel;
     private final boolean mHasMobileData;
     private final WifiStatusTracker mWifiTracker;
 
@@ -57,11 +53,8 @@ public class WifiSignalController extends
                 connectivityManager, this::handleStatusUpdated);
         mWifiTracker.setListening(true);
         mHasMobileData = hasMobileData;
-        Handler handler = new WifiHandler(Looper.getMainLooper());
-        mWifiChannel = new AsyncChannel();
-        Messenger wifiMessenger = wifiManager.getWifiServiceMessenger();
-        if (wifiMessenger != null) {
-            mWifiChannel.connect(context, handler, wifiMessenger);
+        if (wifiManager != null) {
+            wifiManager.registerTrafficStateCallback(new WifiTrafficStateCallback(), null);
         }
         // WiFi only has one state.
         mCurrentState.iconGroup = mLastState.iconGroup = new IconGroup(
@@ -80,6 +73,10 @@ public class WifiSignalController extends
     @Override
     protected WifiState cleanState() {
         return new WifiState();
+    }
+
+    void refreshLocale() {
+        mWifiTracker.refreshLocale();
     }
 
     @Override
@@ -124,39 +121,20 @@ public class WifiSignalController extends
 
     @VisibleForTesting
     void setActivity(int wifiActivity) {
-        mCurrentState.activityIn = wifiActivity == WifiManager.DATA_ACTIVITY_INOUT
-                || wifiActivity == WifiManager.DATA_ACTIVITY_IN;
-        mCurrentState.activityOut = wifiActivity == WifiManager.DATA_ACTIVITY_INOUT
-                || wifiActivity == WifiManager.DATA_ACTIVITY_OUT;
+        mCurrentState.activityIn = wifiActivity == DATA_ACTIVITY_INOUT
+                || wifiActivity == DATA_ACTIVITY_IN;
+        mCurrentState.activityOut = wifiActivity == DATA_ACTIVITY_INOUT
+                || wifiActivity == DATA_ACTIVITY_OUT;
         notifyListenersIfNecessary();
     }
 
     /**
      * Handler to receive the data activity on wifi.
      */
-    private class WifiHandler extends Handler {
-        WifiHandler(Looper looper) {
-            super(looper);
-        }
-
+    private class WifiTrafficStateCallback implements WifiManager.TrafficStateCallback {
         @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
-                    if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        mWifiChannel.sendMessage(Message.obtain(this,
-                                AsyncChannel.CMD_CHANNEL_FULL_CONNECTION));
-                    } else {
-                        Log.e(mTag, "Failed to connect to wifi");
-                    }
-                    break;
-                case WifiManager.DATA_ACTIVITY_NOTIFICATION:
-                    setActivity(msg.arg1);
-                    break;
-                default:
-                    // Ignore
-                    break;
-            }
+        public void onStateChanged(int state) {
+            setActivity(state);
         }
     }
 

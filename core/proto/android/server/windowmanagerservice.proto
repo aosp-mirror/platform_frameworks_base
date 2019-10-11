@@ -24,9 +24,10 @@ import "frameworks/base/core/proto/android/server/appwindowthumbnail.proto";
 import "frameworks/base/core/proto/android/server/surfaceanimator.proto";
 import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
+import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server.wm;
 
@@ -44,15 +45,14 @@ message WindowManagerServiceDumpProto {
     optional bool display_frozen = 6;
     optional int32 rotation = 7;
     optional int32 last_orientation = 8;
-    optional AppTransitionProto app_transition = 9;
 }
 
-/* represents DisplayContent */
+/* represents RootWindowContainer object */
 message RootWindowContainerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
-    repeated DisplayProto displays = 2;
+    repeated DisplayContentProto displays = 2;
     /* window references in top down z order */
     repeated IdentifierProto windows = 3;
 }
@@ -97,7 +97,7 @@ message KeyguardServiceDelegateProto {
 message WindowManagerPolicyProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 last_system_ui_flags = 1;
+    optional int32 last_system_ui_flags = 1 [deprecated=true];
     enum UserRotationMode {
         USER_ROTATION_FREE = 0;
         USER_ROTATION_LOCKED = 1;
@@ -108,18 +108,18 @@ message WindowManagerPolicyProto {
     optional bool screen_on_fully = 5;
     optional bool keyguard_draw_complete = 6;
     optional bool window_manager_draw_complete = 7;
-    optional string focused_app_token = 8;
-    optional IdentifierProto focused_window = 9;
-    optional IdentifierProto top_fullscreen_opaque_window = 10;
-    optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11;
+    optional string focused_app_token = 8 [deprecated=true];
+    optional IdentifierProto focused_window = 9 [deprecated=true];
+    optional IdentifierProto top_fullscreen_opaque_window = 10 [deprecated=true];
+    optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11 [deprecated=true];
     optional bool keyguard_occluded = 12;
     optional bool keyguard_occluded_changed = 13;
     optional bool keyguard_occluded_pending = 14;
-    optional bool force_status_bar = 15;
-    optional bool force_status_bar_from_keyguard = 16;
-    optional BarControllerProto status_bar = 17;
-    optional BarControllerProto navigation_bar = 18;
-    optional WindowOrientationListenerProto orientation_listener = 19;
+    optional bool force_status_bar = 15 [deprecated=true];
+    optional bool force_status_bar_from_keyguard = 16 [deprecated=true];
+    optional BarControllerProto status_bar = 17 [deprecated=true];
+    optional BarControllerProto navigation_bar = 18 [deprecated=true];
+    optional WindowOrientationListenerProto orientation_listener = 19 [deprecated=true];
     optional KeyguardServiceDelegateProto keyguard_delegate = 20;
 }
 
@@ -134,36 +134,12 @@ message AppTransitionProto {
         APP_STATE_TIMEOUT = 3;
     }
     optional AppState app_transition_state = 1;
-    /* definitions for constants found in {@link com.android.server.wm.AppTransition} */
-    enum TransitionType {
-        TRANSIT_NONE = 0;
-        TRANSIT_UNSET = -1;
-        TRANSIT_ACTIVITY_OPEN = 6;
-        TRANSIT_ACTIVITY_CLOSE = 7;
-        TRANSIT_TASK_OPEN = 8;
-        TRANSIT_TASK_CLOSE = 9;
-        TRANSIT_TASK_TO_FRONT = 10;
-        TRANSIT_TASK_TO_BACK = 11;
-        TRANSIT_WALLPAPER_CLOSE = 12;
-        TRANSIT_WALLPAPER_OPEN = 13;
-        TRANSIT_WALLPAPER_INTRA_OPEN = 14;
-        TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
-        TRANSIT_TASK_OPEN_BEHIND = 16;
-        TRANSIT_TASK_IN_PLACE = 17;
-        TRANSIT_ACTIVITY_RELAUNCH = 18;
-        TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
-        TRANSIT_KEYGUARD_GOING_AWAY = 20;
-        TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
-        TRANSIT_KEYGUARD_OCCLUDE = 22;
-        TRANSIT_KEYGUARD_UNOCCLUDE = 23;
-        TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
-        TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
-    }
-    optional TransitionType last_used_app_transition = 2;
+
+    optional .android.view.TransitionTypeEnum last_used_app_transition = 2;
 }
 
-/* represents DisplayContent */
-message DisplayProto {
+/* represents DisplayContent object */
+message DisplayContentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
@@ -180,6 +156,12 @@ message DisplayProto {
     optional int32 rotation = 11;
     optional ScreenRotationAnimationProto screen_rotation_animation = 12;
     optional DisplayFramesProto display_frames = 13;
+    optional int32 surface_size = 14 [deprecated=true];
+    optional string focused_app = 15;
+    optional AppTransitionProto app_transition = 16;
+    repeated IdentifierProto opening_apps = 17;
+    repeated IdentifierProto closing_apps = 18;
+    repeated IdentifierProto changing_apps = 19;
 }
 
 /* represents DisplayFrames */
@@ -232,8 +214,10 @@ message TaskProto {
     repeated AppWindowTokenProto app_window_tokens = 3;
     optional bool fills_parent = 4;
     optional .android.graphics.RectProto bounds = 5;
-    optional .android.graphics.RectProto temp_inset_bounds = 6;
+    optional .android.graphics.RectProto displayed_bounds = 6;
     optional bool defer_removal = 7;
+    optional int32 surface_width = 8;
+    optional int32 surface_height = 9;
 }
 
 /* represents AppWindowToken */
@@ -284,15 +268,17 @@ message WindowStateProto {
 
     optional WindowContainerProto window_container = 1;
     optional IdentifierProto identifier = 2;
+    // Unique identifier of a DisplayContent stack.
     optional int32 display_id = 3;
+    // Unique identifier for the task stack.
     optional int32 stack_id = 4;
     optional .android.view.WindowLayoutParamsProto attributes = 5;
     optional .android.graphics.RectProto given_content_insets = 6;
-    optional .android.graphics.RectProto frame = 7;
-    optional .android.graphics.RectProto containing_frame = 8;
-    optional .android.graphics.RectProto parent_frame = 9;
-    optional .android.graphics.RectProto content_frame = 10;
-    optional .android.graphics.RectProto content_insets = 11;
+    optional .android.graphics.RectProto frame = 7 [deprecated=true];
+    optional .android.graphics.RectProto containing_frame = 8 [deprecated=true];
+    optional .android.graphics.RectProto parent_frame = 9 [deprecated=true];
+    optional .android.graphics.RectProto content_frame = 10 [deprecated=true];
+    optional .android.graphics.RectProto content_insets = 11 [deprecated=true];
     optional .android.graphics.RectProto surface_insets = 12;
     optional WindowStateAnimatorProto animator = 13;
     optional bool animating_exit = 14;
@@ -304,23 +290,25 @@ message WindowStateProto {
     optional int32 system_ui_visibility = 21;
     optional bool has_surface = 22;
     optional bool is_ready_for_display = 23;
-    optional .android.graphics.RectProto display_frame = 24;
-    optional .android.graphics.RectProto overscan_frame = 25;
-    optional .android.graphics.RectProto visible_frame = 26;
-    optional .android.graphics.RectProto decor_frame = 27;
-    optional .android.graphics.RectProto outset_frame = 28;
-    optional .android.graphics.RectProto overscan_insets = 29;
-    optional .android.graphics.RectProto visible_insets = 30;
-    optional .android.graphics.RectProto stable_insets = 31;
-    optional .android.graphics.RectProto outsets = 32;
-    optional .android.view.DisplayCutoutProto cutout = 33;
+    optional .android.graphics.RectProto display_frame = 24 [deprecated=true];
+    optional .android.graphics.RectProto overscan_frame = 25 [deprecated=true];
+    optional .android.graphics.RectProto visible_frame = 26 [deprecated=true];
+    optional .android.graphics.RectProto decor_frame = 27 [deprecated=true];
+    optional .android.graphics.RectProto outset_frame = 28 [deprecated=true];
+    optional .android.graphics.RectProto overscan_insets = 29 [deprecated=true];
+    optional .android.graphics.RectProto visible_insets = 30 [deprecated=true];
+    optional .android.graphics.RectProto stable_insets = 31 [deprecated=true];
+    optional .android.graphics.RectProto outsets = 32 [deprecated=true];
+    optional .android.view.DisplayCutoutProto cutout = 33 [deprecated=true];
     optional bool remove_on_exit = 34;
     optional bool destroying = 35;
     optional bool removed = 36;
     optional bool is_on_screen = 37;
     optional bool is_visible = 38;
-    optional bool pending_forced_seamless_rotation = 39;
-    optional int64 finished_forced_seamless_rotation_frame = 40;
+    optional bool pending_seamless_rotation = 39;
+    optional int64 finished_seamless_rotation_frame = 40;
+    optional WindowFramesProto window_frames = 41;
+    optional bool force_seamless_rotation = 42;
 }
 
 message IdentifierProto {
@@ -328,6 +316,8 @@ message IdentifierProto {
 
     optional int32 hash_code = 1;
     optional int32 user_id = 2;
+    // Either a component name/string (eg: "com.android.settings/.FallbackHome")
+    // or a window title ("NavigationBar").
     optional string title = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
@@ -381,4 +371,25 @@ message ConfigurationContainerProto {
     optional .android.content.ConfigurationProto override_configuration = 1;
     optional .android.content.ConfigurationProto full_configuration = 2;
     optional .android.content.ConfigurationProto merged_override_configuration = 3;
+}
+
+/* represents WindowFrames */
+message WindowFramesProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional .android.graphics.RectProto containing_frame = 1;
+    optional .android.graphics.RectProto content_frame = 2;
+    optional .android.graphics.RectProto decor_frame = 3;
+    optional .android.graphics.RectProto display_frame = 4;
+    optional .android.graphics.RectProto frame = 5;
+    optional .android.graphics.RectProto outset_frame = 6;
+    optional .android.graphics.RectProto overscan_frame = 7;
+    optional .android.graphics.RectProto parent_frame = 8;
+    optional .android.graphics.RectProto visible_frame = 9;
+    optional .android.view.DisplayCutoutProto cutout = 10;
+    optional .android.graphics.RectProto content_insets = 11;
+    optional .android.graphics.RectProto overscan_insets = 12;
+    optional .android.graphics.RectProto visible_insets = 13;
+    optional .android.graphics.RectProto stable_insets = 14;
+    optional .android.graphics.RectProto outsets = 15;
 }

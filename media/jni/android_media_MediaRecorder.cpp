@@ -664,15 +664,11 @@ android_media_MediaRecorder_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // build and return the Bundle
-    MediaAnalyticsItem *item = new MediaAnalyticsItem;
+    std::unique_ptr<MediaAnalyticsItem> item(MediaAnalyticsItem::create());
     item->readFromParcel(reply);
-    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item.get(), NULL);
 
-    // housekeeping
-    delete item;
-    item = NULL;
     return mybundle;
-
 }
 
 static jboolean
@@ -763,6 +759,58 @@ android_media_MediaRecord_getActiveMicrophones(JNIEnv *env,
     }
     return jStatus;
 }
+
+static jint android_media_MediaRecord_setPreferredMicrophoneDirection(
+        JNIEnv *env, jobject thiz, jint direction) {
+    ALOGV("setPreferredMicrophoneDirection(%d)", direction);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_JAVA_NO_INIT;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    status_t status =
+        mr->setPreferredMicrophoneDirection(static_cast<audio_microphone_direction_t>(direction));
+    if (status != NO_ERROR) {
+        jStatus = nativeToJavaStatus(status);
+    }
+
+    return jStatus;
+}
+
+static jint  android_media_MediaRecord_setPreferredMicrophoneFieldDimension(
+        JNIEnv *env, jobject thiz, jfloat zoom) {
+    ALOGV("setPreferredMicrophoneFieldDimension(%f)", zoom);
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_JAVA_NO_INIT;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    status_t status = mr->setPreferredMicrophoneFieldDimension(zoom);
+    if (status != NO_ERROR) {
+        jStatus = nativeToJavaStatus(status);
+    }
+
+    return jStatus;
+
+}
+
+static jint android_media_MediaRecord_getPortId(JNIEnv *env,  jobject thiz) {
+    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
+    if (mr == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jint)AUDIO_PORT_HANDLE_NONE;
+    }
+
+    audio_port_handle_t portId;
+    process_media_recorder_call(env, mr->getPortId(&portId),
+                                "java/lang/RuntimeException", "getPortId failed.");
+    return (jint)portId;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -801,6 +849,11 @@ static const JNINativeMethod gMethods[] = {
     {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaRecorder_enableDeviceCallback},
 
     {"native_getActiveMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_MediaRecord_getActiveMicrophones},
+    {"native_getPortId", "()I", (void *)android_media_MediaRecord_getPortId},
+    {"native_setPreferredMicrophoneDirection", "(I)I",
+            (void *)android_media_MediaRecord_setPreferredMicrophoneDirection},
+    {"native_setPreferredMicrophoneFieldDimension", "(F)I",
+            (void *)android_media_MediaRecord_setPreferredMicrophoneFieldDimension},
 };
 
 // This function only registers the native methods, and is called from

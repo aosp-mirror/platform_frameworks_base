@@ -27,6 +27,7 @@
 #include "androidfw/ConfigDescription.h"
 
 #include "ResourceTable.h"
+#include "trace/TraceBuffer.h"
 #include "util/Util.h"
 
 using ::android::ConfigDescription;
@@ -154,8 +155,15 @@ static void MarkNonPreferredDensitiesAsClaimed(
   }
 }
 bool TableSplitter::VerifySplitConstraints(IAaptContext* context) {
+  TRACE_CALL();
   bool error = false;
   for (size_t i = 0; i < split_constraints_.size(); i++) {
+    if (split_constraints_[i].configs.size() == 0) {
+      // For now, treat this as a warning. We may consider aborting processing.
+      context->GetDiagnostics()->Warn(DiagMessage()
+                                       << "no configurations for constraint '"
+                                       << split_constraints_[i].name << "'");
+    }
     for (size_t j = i + 1; j < split_constraints_.size(); j++) {
       for (const ConfigDescription& config : split_constraints_[i].configs) {
         if (split_constraints_[j].configs.find(config) != split_constraints_[j].configs.end()) {
@@ -242,6 +250,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
             if (!split_entry->id) {
               split_entry->id = entry->id;
               split_entry->visibility = entry->visibility;
+              split_entry->overlayable_item = entry->overlayable_item;
             }
 
             // Copy the selected values into the new Split Entry.

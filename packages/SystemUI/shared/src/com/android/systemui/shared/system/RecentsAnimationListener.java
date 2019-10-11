@@ -29,5 +29,5 @@ public interface RecentsAnimationListener {
     /**
      * Called when the animation into Recents was canceled. This call is made on the binder thread.
      */
-    void onAnimationCanceled();
+    void onAnimationCanceled(boolean deferredWithScreenshot);
 }

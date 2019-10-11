@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- application name [CHAR LIMIT=32] -->
+    <string name="app_name">Dynamic System Updates</string>
+
+    <!-- notification channel name [CHAR LIMIT=32] -->
+    <string name="notification_channel_name">Dynamic System Updates</string>
+
+    <!-- password page title [CHAR LIMIT=32] -->
+    <string name="keyguard_title">Dynamic System Updates</string>
+
+    <!-- password page description [CHAR LIMIT=128] -->
+    <string name="keyguard_description">Please enter your password and continue to Dynamic System Updates</string>
+
+    <!-- Displayed on notification: Dynamic System is ready [CHAR LIMIT=128] -->
+    <string name="notification_install_completed">Dynamic system is ready. To start using it, restart your device.</string>
+    <!-- Displayed on notification: Dynamic System Updates is in progress [CHAR LIMIT=128] -->
+    <string name="notification_install_inprogress">Install in progress</string>
+    <!-- Displayed on notification: Dynamic System installation failed [CHAR LIMIT=128] -->
+    <string name="notification_install_failed">Install failed</string>
+    <!-- Displayed on notification: We are running in Dynamic System [CHAR LIMIT=128] -->
+    <string name="notification_dynsystem_in_use">Currently running a dynamic system. Restart to use the original Android version.</string>
+
+    <!-- Action on notification: Cancel installation [CHAR LIMIT=16] -->
+    <string name="notification_action_cancel">Cancel</string>
+    <!-- Action on notification: Discard installation [CHAR LIMIT=16] -->
+    <string name="notification_action_discard">Discard</string>
+    <!-- Action on notification: Uninstall Dynamic System [CHAR LIMIT=16] -->
+    <string name="notification_action_uninstall">Uninstall</string>
+    <!-- Action on notification: Restart to Dynamic System [CHAR LIMIT=16] -->
+    <string name="notification_action_reboot_to_dynsystem">Restart</string>
+
+    <!-- Toast when installed Dynamic System is discarded [CHAR LIMIT=64] -->
+    <string name="toast_dynsystem_discarded">Discarded dynamic system</string>
+    <!-- Toast when we fail to launch into Dynamic System [CHAR LIMIT=64] -->
+    <string name="toast_failed_to_reboot_to_dynsystem">Can\u2019t restart or load dynamic system</string>
+
+</resources>

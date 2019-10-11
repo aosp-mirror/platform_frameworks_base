@@ -7,7 +7,7 @@ android_app {
     certificate: "platform",
 
     static_libs: [
-        "android-support-v4",
+        "androidx.legacy_legacy-support-v4",
         "setup-wizard-lib",
     ],
 

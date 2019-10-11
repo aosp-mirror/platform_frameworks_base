@@ -20,14 +20,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
 import com.android.frameworks.coretests.R;
-
 
 /**
  * Tests views with popupWindows becoming invisible

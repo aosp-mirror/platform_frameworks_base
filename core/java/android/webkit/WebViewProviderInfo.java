@@ -46,7 +46,7 @@ public final class WebViewProviderInfo implements Parcelable {
     }
 
     // aidl stuff
-    public static final Parcelable.Creator<WebViewProviderInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<WebViewProviderInfo> CREATOR =
         new Parcelable.Creator<WebViewProviderInfo>() {
             public WebViewProviderInfo createFromParcel(Parcel in) {
                 return new WebViewProviderInfo(in);

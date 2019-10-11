@@ -15,22 +15,29 @@
  */
 package android.hardware.radio.tests.functional;
 
+import static org.junit.Assert.*;
+import static org.junit.Assume.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertThrows;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Log;
 
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,19 +48,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.*;
-import static org.junit.Assume.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.atMost;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.testng.Assert.assertThrows;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A test for broadcast radio API.
@@ -121,10 +119,9 @@ public class RadioTunerTest {
     }
 
     private void resetCallback() {
-        verify(mCallback, atLeast(0)).onMetadataChanged(any());
-        verify(mCallback, atLeast(0)).onProgramInfoChanged(any());
-        verify(mCallback, atLeast(0)).onProgramListChanged();
-        verifyNoMoreInteractions(mCallback);
+        verify(mCallback, never()).onError(anyInt());
+        verify(mCallback, never()).onTuneFailed(anyInt(), any());
+        verify(mCallback, never()).onControlChanged(anyBoolean());
         Mockito.reset(mCallback);
     }
 

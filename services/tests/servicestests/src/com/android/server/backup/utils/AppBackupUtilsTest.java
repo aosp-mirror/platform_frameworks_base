@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -29,13 +30,13 @@ import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 import android.os.Process;
+import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.backup.BackupManagerService;
-import com.android.server.backup.testutils.PackageManagerStub;
+import com.android.server.backup.UserBackupManagerService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,13 +54,15 @@ public class AppBackupUtilsTest {
     private static final Signature SIGNATURE_3 = generateSignature((byte) 3);
     private static final Signature SIGNATURE_4 = generateSignature((byte) 4);
 
-    private PackageManagerStub mPackageManagerStub;
     private PackageManagerInternal mMockPackageManagerInternal;
+
+    private int mUserId;
 
     @Before
     public void setUp() throws Exception {
-        mPackageManagerStub = new PackageManagerStub();
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
+
+        mUserId = UserHandle.USER_SYSTEM;
     }
 
     @Test
@@ -71,7 +74,7 @@ public class AppBackupUtilsTest {
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isFalse();
     }
@@ -86,7 +89,7 @@ public class AppBackupUtilsTest {
         applicationInfo.packageName = TEST_PACKAGE_NAME;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isFalse();
     }
@@ -97,10 +100,10 @@ public class AppBackupUtilsTest {
         applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         applicationInfo.uid = Process.SYSTEM_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
-        applicationInfo.packageName = BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+        applicationInfo.packageName = UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isFalse();
     }
@@ -113,12 +116,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.SYSTEM_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
-
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isTrue();
     }
@@ -131,12 +133,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = null;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
-
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isTrue();
     }
@@ -149,12 +150,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
-
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isTrue();
     }
@@ -167,12 +167,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.SYSTEM_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
-
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isFalse();
     }
@@ -185,12 +184,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = null;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
-
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isFalse();
     }
@@ -203,14 +201,48 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
-
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
-                mPackageManagerStub);
+                mMockPackageManagerInternal, mUserId);
 
         assertThat(isEligible).isFalse();
+    }
+
+    @Test
+    public void appIsDisabled_stateDefaultManifestEnabled_returnsFalse() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+        applicationInfo.enabled = true;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
+
+        boolean isDisabled =
+                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+
+        assertThat(isDisabled).isFalse();
+    }
+
+    @Test
+    public void appIsDisabled_stateDefaultManifestDisabled_returnsTrue() throws Exception {
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 0;
+        applicationInfo.uid = Process.FIRST_APPLICATION_UID;
+        applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
+        applicationInfo.packageName = TEST_PACKAGE_NAME;
+        applicationInfo.enabled = false;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
+
+
+        boolean isDisabled =
+                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
+
+        assertThat(isDisabled).isTrue();
     }
 
     @Test
@@ -220,11 +252,12 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
 
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
-        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+        boolean isDisabled =
+                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
 
         assertThat(isDisabled).isFalse();
     }
@@ -236,11 +269,12 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
 
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 
-        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+        boolean isDisabled =
+                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
 
         assertThat(isDisabled).isTrue();
     }
@@ -252,11 +286,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER);
 
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
-
-        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+        boolean isDisabled =
+                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
 
         assertThat(isDisabled).isTrue();
     }
@@ -268,11 +302,11 @@ public class AppBackupUtilsTest {
         applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
         applicationInfo.packageName = TEST_PACKAGE_NAME;
+        when(mMockPackageManagerInternal.getApplicationEnabledState(TEST_PACKAGE_NAME, mUserId))
+                .thenReturn(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED);
 
-        PackageManagerStub.sApplicationEnabledSetting =
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
-
-        boolean isDisabled = AppBackupUtils.appIsDisabled(applicationInfo, mPackageManagerStub);
+        boolean isDisabled =
+                AppBackupUtils.appIsDisabled(applicationInfo, mMockPackageManagerInternal, mUserId);
 
         assertThat(isDisabled).isTrue();
     }
@@ -402,7 +436,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -421,7 +454,6 @@ public class AppBackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -503,7 +535,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -525,7 +556,6 @@ public class AppBackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -549,7 +579,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {signature1Copy, signature2Copy},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -572,7 +601,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -594,7 +622,6 @@ public class AppBackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -620,8 +647,7 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
-                        new int[] {0, 0}));
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2}));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know signature1Copy is in history, and we want to assume it has
@@ -648,8 +674,7 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
-                        new int[] {0, 0}));
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2}));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know signature1Copy is in history, but we want to assume it does not have

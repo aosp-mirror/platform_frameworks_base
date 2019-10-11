@@ -1,0 +1,1 @@
+Main-class: com.android.statsd.shelltools.localdrive.LocalDrive

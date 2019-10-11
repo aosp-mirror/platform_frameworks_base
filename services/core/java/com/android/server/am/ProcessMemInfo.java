@@ -24,6 +24,7 @@ public class ProcessMemInfo {
     final String adjType;
     final String adjReason;
     long pss;
+    long swapPss;
     long memtrack;
 
     public ProcessMemInfo(String _name, int _pid, int _oomAdj, int _procState,

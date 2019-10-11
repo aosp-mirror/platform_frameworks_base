@@ -58,6 +58,7 @@ public:
     int numChannels() { return mNumChannels; }
     int sampleRate() { return mSampleRate; }
     audio_format_t format() { return mFormat; }
+    audio_channel_mask_t channelMask() { return mChannelMask; }
     size_t size() { return mSize; }
     int state() { return mState; }
     uint8_t* data() { return static_cast<uint8_t*>(mData->pointer()); }
@@ -68,18 +69,19 @@ public:
 private:
     void init();
 
-    size_t              mSize;
-    volatile int32_t    mRefCount;
-    uint16_t            mSampleID;
-    uint16_t            mSampleRate;
-    uint8_t             mState;
-    uint8_t             mNumChannels;
-    audio_format_t      mFormat;
-    int                 mFd;
-    int64_t             mOffset;
-    int64_t             mLength;
-    sp<IMemory>         mData;
-    sp<MemoryHeapBase>  mHeap;
+    size_t               mSize;
+    volatile int32_t     mRefCount;
+    uint16_t             mSampleID;
+    uint16_t             mSampleRate;
+    uint8_t              mState;
+    uint8_t              mNumChannels;
+    audio_format_t       mFormat;
+    audio_channel_mask_t mChannelMask;
+    int                  mFd;
+    int64_t              mOffset;
+    int64_t              mLength;
+    sp<IMemory>          mData;
+    sp<MemoryHeapBase>   mHeap;
 };
 
 // stores pending events for stolen channels

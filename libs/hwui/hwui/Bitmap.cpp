@@ -15,11 +15,11 @@
  */
 #include "Bitmap.h"
 
-#include "Caches.h"
-#include "renderthread/EglManager.h"
+#include "HardwareBitmapUploader.h"
+#include "Properties.h"
 #include "renderthread/RenderProxy.h"
-#include "renderthread/RenderThread.h"
 #include "utils/Color.h"
+#include <utils/Trace.h>
 
 #include <sys/mman.h>
 
@@ -32,19 +32,18 @@
 
 #include <SkCanvas.h>
 #include <SkImagePriv.h>
-#include <SkToSRGBColorFilter.h>
+
+#include <SkHighContrastFilter.h>
+#include <limits>
 
 namespace android {
 
+// returns true if rowBytes * height can be represented by a positive int32_t value
+// and places that value in size.
 static bool computeAllocationSize(size_t rowBytes, int height, size_t* size) {
-    int32_t rowBytes32 = SkToS32(rowBytes);
-    int64_t bigSize = (int64_t)height * rowBytes32;
-    if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
-        return false;  // allocation will be too large
-    }
-
-    *size = sk_64_asS32(bigSize);
-    return true;
+    return 0 <= height && height <= std::numeric_limits<size_t>::max() &&
+           !__builtin_mul_overflow(rowBytes, (size_t)height, size) &&
+           *size <= std::numeric_limits<int32_t>::max();
 }
 
 typedef sk_sp<Bitmap> (*AllocPixelRef)(size_t allocSize, const SkImageInfo& info, size_t rowBytes);
@@ -76,31 +75,6 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(SkBitmap* bitmap) {
     return allocateBitmap(bitmap, &Bitmap::allocateAshmemBitmap);
 }
 
-static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
-    void* addr = calloc(size, 1);
-    if (!addr) {
-        return nullptr;
-    }
-    return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes));
-}
-
-sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(SkBitmap& bitmap) {
-    return uirenderer::renderthread::RenderProxy::allocateHardwareBitmap(bitmap);
-}
-
-sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap) {
-    return allocateBitmap(bitmap, &android::allocateHeapBitmap);
-}
-
-sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
-    size_t size;
-    if (!computeAllocationSize(info.minRowBytes(), info.height(), &size)) {
-        LOG_ALWAYS_FATAL("trying to allocate too large bitmap");
-        return nullptr;
-    }
-    return android::allocateHeapBitmap(size, info, info.minRowBytes());
-}
-
 sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
     // Create new ashmem region with read/write priv
     int fd = ashmem_create_region("bitmap", size);
@@ -122,6 +96,31 @@ sk_sp<Bitmap> Bitmap::allocateAshmemBitmap(size_t size, const SkImageInfo& info,
     return sk_sp<Bitmap>(new Bitmap(addr, fd, size, info, rowBytes));
 }
 
+sk_sp<Bitmap> Bitmap::allocateHardwareBitmap(const SkBitmap& bitmap) {
+    return uirenderer::HardwareBitmapUploader::allocateHardwareBitmap(bitmap);
+}
+
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(SkBitmap* bitmap) {
+    return allocateBitmap(bitmap, &Bitmap::allocateHeapBitmap);
+}
+
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(const SkImageInfo& info) {
+    size_t size;
+    if (!computeAllocationSize(info.minRowBytes(), info.height(), &size)) {
+        LOG_ALWAYS_FATAL("trying to allocate too large bitmap");
+        return nullptr;
+    }
+    return allocateHeapBitmap(size, info, info.minRowBytes());
+}
+
+sk_sp<Bitmap> Bitmap::allocateHeapBitmap(size_t size, const SkImageInfo& info, size_t rowBytes) {
+    void* addr = calloc(size, 1);
+    if (!addr) {
+        return nullptr;
+    }
+    return sk_sp<Bitmap>(new Bitmap(addr, size, info, rowBytes));
+}
+
 void FreePixelRef(void* addr, void* context) {
     auto pixelRef = (SkPixelRef*)context;
     pixelRef->unref();
@@ -133,16 +132,37 @@ sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, SkPixelRef& pixelRef) 
                                     pixelRef.rowBytes()));
 }
 
-sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer) {
-    PixelFormat format = graphicBuffer->getPixelFormat();
-    if (!graphicBuffer.get() ||
-        (format != PIXEL_FORMAT_RGBA_8888 && format != PIXEL_FORMAT_RGBA_FP16)) {
+
+sk_sp<Bitmap> Bitmap::createFrom(sp<GraphicBuffer> graphicBuffer, SkColorType colorType,
+                                 sk_sp<SkColorSpace> colorSpace, SkAlphaType alphaType,
+                                 BitmapPalette palette) {
+    SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
+                                         colorType, alphaType, colorSpace);
+    return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info, palette));
+}
+
+sk_sp<Bitmap> Bitmap::createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
+                                 size_t size, bool readOnly) {
+    if (info.colorType() == kUnknown_SkColorType) {
+        LOG_ALWAYS_FATAL("unknown bitmap configuration");
         return nullptr;
     }
-    SkImageInfo info = SkImageInfo::Make(graphicBuffer->getWidth(), graphicBuffer->getHeight(),
-                                         kRGBA_8888_SkColorType, kPremul_SkAlphaType,
-                                         SkColorSpace::MakeSRGB());
-    return sk_sp<Bitmap>(new Bitmap(graphicBuffer.get(), info));
+
+    if (!addr) {
+        // Map existing ashmem region if not already mapped.
+        int flags = readOnly ? (PROT_READ) : (PROT_READ | PROT_WRITE);
+        size = ashmem_get_size_region(fd);
+        addr = mmap(NULL, size, flags, MAP_SHARED, fd, 0);
+        if (addr == MAP_FAILED) {
+            return nullptr;
+        }
+    }
+
+    sk_sp<Bitmap> bitmap(new Bitmap(addr, fd, size, info, rowBytes));
+    if (readOnly) {
+        bitmap->setImmutable();
+    }
+    return bitmap;
 }
 
 void Bitmap::setColorSpace(sk_sp<SkColorSpace> colorSpace) {
@@ -197,18 +217,18 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info
     mPixelStorage.ashmem.size = mappedSize;
 }
 
-Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
+Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette)
         : SkPixelRef(info.width(), info.height(), nullptr,
                      bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride())
         , mInfo(validateAlpha(info))
-        , mPixelStorageType(PixelStorageType::Hardware) {
+        , mPixelStorageType(PixelStorageType::Hardware)
+        , mPalette(palette)
+        , mPaletteGenerationId(getGenerationID()) {
     mPixelStorage.hardware.buffer = buffer;
     buffer->incStrong(buffer);
     setImmutable();  // HW bitmaps are always immutable
-    if (uirenderer::Properties::isSkiaEnabled()) {
-        mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
-                                                  mInfo.alphaType(), mInfo.refColorSpace());
-    }
+    mImage = SkImage::MakeFromAHardwareBuffer(reinterpret_cast<AHardwareBuffer*>(buffer),
+                                              mInfo.alphaType(), mInfo.refColorSpace());
 }
 
 Bitmap::~Bitmap() {
@@ -231,8 +251,6 @@ Bitmap::~Bitmap() {
             mPixelStorage.hardware.buffer = nullptr;
             break;
     }
-
-    android::uirenderer::renderthread::RenderProxy::onBitmapDestroyed(getStableID());
 }
 
 bool Bitmap::hasHardwareMipMap() const {
@@ -269,6 +287,8 @@ size_t Bitmap::getAllocationByteCount() const {
     switch (mPixelStorageType) {
         case PixelStorageType::Heap:
             return mPixelStorage.heap.size;
+        case PixelStorageType::Ashmem:
+            return mPixelStorage.ashmem.size;
         default:
             return rowBytes() * height();
     }
@@ -287,21 +307,9 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 }
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
-    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
-        if (uirenderer::Properties::isSkiaEnabled()) {
-            outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
-                                                     info().colorType(), info().alphaType(),
-                                                     nullptr));
-        } else {
-            outBitmap->allocPixels(info());
-        }
-        uirenderer::renderthread::RenderProxy::copyGraphicBufferInto(graphicBuffer(), outBitmap);
-        if (mInfo.colorSpace()) {
-            sk_sp<SkPixelRef> pixelRef = sk_ref_sp(outBitmap->pixelRef());
-            outBitmap->setInfo(mInfo);
-            outBitmap->setPixelRef(std::move(pixelRef), 0, 0);
-        }
+        outBitmap->allocPixels(mInfo);
+        uirenderer::renderthread::RenderProxy::copyHWBitmapInto(this, outBitmap);
         return;
     }
     outBitmap->setInfo(mInfo, rowBytes());
@@ -320,24 +328,102 @@ GraphicBuffer* Bitmap::graphicBuffer() {
     return nullptr;
 }
 
-sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
+sk_sp<SkImage> Bitmap::makeImage() {
     sk_sp<SkImage> image = mImage;
     if (!image) {
-        SkASSERT(!(isHardware() && uirenderer::Properties::isSkiaEnabled()));
+        SkASSERT(!isHardware());
         SkBitmap skiaBitmap;
         skiaBitmap.setInfo(info(), rowBytes());
         skiaBitmap.setPixelRef(sk_ref_sp(this), 0, 0);
-        skiaBitmap.setHasHardwareMipMap(mHasHardwareMipMap);
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
     }
-    if (uirenderer::Properties::isSkiaEnabled() && image->colorSpace() != nullptr &&
-        !image->colorSpace()->isSRGB()) {
-        *outputColorFilter = SkToSRGBColorFilter::Make(image->refColorSpace());
-    }
     return image;
+}
+
+class MinMaxAverage {
+public:
+    void add(float sample) {
+        if (mCount == 0) {
+            mMin = sample;
+            mMax = sample;
+        } else {
+            mMin = std::min(mMin, sample);
+            mMax = std::max(mMax, sample);
+        }
+        mTotal += sample;
+        mCount++;
+    }
+
+    float average() { return mTotal / mCount; }
+
+    float min() { return mMin; }
+
+    float max() { return mMax; }
+
+    float delta() { return mMax - mMin; }
+
+private:
+    float mMin = 0.0f;
+    float mMax = 0.0f;
+    float mTotal = 0.0f;
+    int mCount = 0;
+};
+
+BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, size_t rowBytes) {
+    ATRACE_CALL();
+
+    SkPixmap pixmap{info, addr, rowBytes};
+
+    // TODO: This calculation of converting to HSV & tracking min/max is probably overkill
+    // Experiment with something simpler since we just want to figure out if it's "color-ful"
+    // and then the average perceptual lightness.
+
+    MinMaxAverage hue, saturation, value;
+    int sampledCount = 0;
+
+    // Sample a grid of 100 pixels to get an overall estimation of the colors in play
+    const int x_step = std::max(1, pixmap.width() / 10);
+    const int y_step = std::max(1, pixmap.height() / 10);
+    for (int x = 0; x < pixmap.width(); x += x_step) {
+        for (int y = 0; y < pixmap.height(); y += y_step) {
+            SkColor color = pixmap.getColor(x, y);
+            if (!info.isOpaque() && SkColorGetA(color) < 75) {
+                continue;
+            }
+
+            sampledCount++;
+            float hsv[3];
+            SkColorToHSV(color, hsv);
+            hue.add(hsv[0]);
+            saturation.add(hsv[1]);
+            value.add(hsv[2]);
+        }
+    }
+
+    // TODO: Tune the coverage threshold
+    if (sampledCount < 5) {
+        ALOGV("Not enough samples, only found %d for image sized %dx%d, format = %d, alpha = %d",
+              sampledCount, info.width(), info.height(), (int)info.colorType(),
+              (int)info.alphaType());
+        return BitmapPalette::Unknown;
+    }
+
+    ALOGV("samples = %d, hue [min = %f, max = %f, avg = %f]; saturation [min = %f, max = %f, avg = "
+          "%f]",
+          sampledCount, hue.min(), hue.max(), hue.average(), saturation.min(), saturation.max(),
+          saturation.average());
+
+    if (hue.delta() <= 20 && saturation.delta() <= .1f) {
+        if (value.average() >= .5f) {
+            return BitmapPalette::Light;
+        } else {
+            return BitmapPalette::Dark;
+        }
+    }
+    return BitmapPalette::Unknown;
 }
 
 }  // namespace android

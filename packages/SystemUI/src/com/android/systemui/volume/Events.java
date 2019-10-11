@@ -53,8 +53,10 @@ public class Events {
     public static final int EVENT_TOUCH_LEVEL_DONE = 16;  // (stream|int) (level|bool)
     public static final int EVENT_ZEN_CONFIG_CHANGED = 17; // (allow/disallow|string)
     public static final int EVENT_RINGER_TOGGLE = 18; // (ringer_mode)
-    public static final int EVENT_SHOW_OVERHEAT_ALARM = 19; // (reason|int) (keyguard|bool)
-    public static final int EVENT_DISMISS_OVERHEAT_ALARM = 20; // (reason|int) (keyguard|bool)
+    public static final int EVENT_SHOW_USB_OVERHEAT_ALARM = 19; // (reason|int) (keyguard|bool)
+    public static final int EVENT_DISMISS_USB_OVERHEAT_ALARM = 20; // (reason|int) (keyguard|bool)
+    public static final int EVENT_ODI_CAPTIONS_CLICK = 21;
+    public static final int EVENT_ODI_CAPTIONS_TOOLTIP_CLICK = 22;
 
     private static final String[] EVENT_TAGS = {
             "show_dialog",
@@ -76,8 +78,10 @@ public class Events {
             "touch_level_done",
             "zen_mode_config_changed",
             "ringer_toggle",
-            "show_overheat_alarm",
-            "dismiss_overheat_alarm"
+            "show_usb_overheat_alarm",
+            "dismiss_usb_overheat_alarm",
+            "odi_captions_click",
+            "odi_captions_tooltip_click"
     };
 
     public static final int DISMISS_REASON_UNKNOWN = 0;
@@ -89,6 +93,7 @@ public class Events {
     public static final int DISMISS_REASON_DONE_CLICKED = 6;
     public static final int DISMISS_STREAM_GONE = 7;
     public static final int DISMISS_REASON_OUTPUT_CHOOSER = 8;
+    public static final int DISMISS_REASON_USB_OVERHEAD_ALARM_CHANGED = 9;
     public static final String[] DISMISS_REASONS = {
             "unknown",
             "touch_outside",
@@ -98,18 +103,19 @@ public class Events {
             "settings_clicked",
             "done_clicked",
             "a11y_stream_changed",
-            "output_chooser"
+            "output_chooser",
+            "usb_temperature_below_threshold"
     };
 
     public static final int SHOW_REASON_UNKNOWN = 0;
     public static final int SHOW_REASON_VOLUME_CHANGED = 1;
     public static final int SHOW_REASON_REMOTE_VOLUME_CHANGED = 2;
-    public static final int SHOW_REASON_OVERHEAD_ALARM_CHANGED = 3;
+    public static final int SHOW_REASON_USB_OVERHEAD_ALARM_CHANGED = 3;
     public static final String[] SHOW_REASONS = {
         "unknown",
         "volume_changed",
         "remote_volume_changed",
-        "overheat_alarm_changed"
+        "usb_temperature_above_threshold"
     };
 
     public static final int ICON_STATE_UNKNOWN = 0;
@@ -187,18 +193,18 @@ public class Events {
                 case EVENT_SUPPRESSOR_CHANGED:
                     sb.append(list[0]).append(' ').append(list[1]);
                     break;
-                case EVENT_SHOW_OVERHEAT_ALARM:
+                case EVENT_SHOW_USB_OVERHEAT_ALARM:
                     MetricsLogger.visible(context, MetricsEvent.POWER_OVERHEAT_ALARM);
-                    MetricsLogger.histogram(context, "show_overheat_alarm",
+                    MetricsLogger.histogram(context, "show_usb_overheat_alarm",
                             (Boolean) list[1] ? 1 : 0);
                     sb.append(SHOW_REASONS[(Integer) list[0]]).append(" keyguard=").append(list[1]);
                     break;
-                case EVENT_DISMISS_OVERHEAT_ALARM:
+                case EVENT_DISMISS_USB_OVERHEAT_ALARM:
                     MetricsLogger.hidden(context, MetricsEvent.POWER_OVERHEAT_ALARM);
-                    MetricsLogger.histogram(context, "dismiss_overheat_alarm",
+                    MetricsLogger.histogram(context, "dismiss_usb_overheat_alarm",
                             (Boolean) list[1] ? 1 : 0);
-                    sb.append(DISMISS_REASONS[(Integer) list[0]]).append(" keyguard=").append(
-                            list[1]);
+                    sb.append(DISMISS_REASONS[(Integer) list[0]])
+                        .append(" keyguard=").append(list[1]);
                     break;
                 default:
                     sb.append(Arrays.asList(list));

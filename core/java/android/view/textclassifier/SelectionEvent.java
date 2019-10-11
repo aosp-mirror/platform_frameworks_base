@@ -24,6 +24,7 @@ import android.os.Parcelable;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -115,7 +116,7 @@ public final class SelectionEvent implements Parcelable {
     /** Unknown invocation method */
     public static final int INVOCATION_UNKNOWN = 0;
 
-    private static final String NO_SIGNATURE = "";
+    static final String NO_SIGNATURE = "";
 
     private final int mAbsoluteStart;
     private final int mAbsoluteEnd;
@@ -374,8 +375,10 @@ public final class SelectionEvent implements Parcelable {
 
     /**
      * Sets the event type.
+     * @hide
      */
-    void setEventType(@EventType int eventType) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void setEventType(@EventType int eventType) {
         mEventType = eventType;
     }
 
@@ -416,8 +419,10 @@ public final class SelectionEvent implements Parcelable {
 
     /**
      * Sets the {@link TextClassificationContext} for this event.
+     * @hide
      */
-    void setTextClassificationSessionContext(TextClassificationContext context) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void setTextClassificationSessionContext(TextClassificationContext context) {
         mPackageName = context.getPackageName();
         mWidgetType = context.getWidgetType();
         mWidgetVersion = context.getWidgetVersion();
@@ -432,8 +437,10 @@ public final class SelectionEvent implements Parcelable {
 
     /**
      * Sets the invocationMethod for this event.
+     * @hide
      */
-    void setInvocationMethod(@InvocationMethod int invocationMethod) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void setInvocationMethod(@InvocationMethod int invocationMethod) {
         mInvocationMethod = invocationMethod;
     }
 
@@ -495,7 +502,9 @@ public final class SelectionEvent implements Parcelable {
         return mEventIndex;
     }
 
-    SelectionEvent setEventIndex(int index) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public SelectionEvent setEventIndex(int index) {
         mEventIndex = index;
         return this;
     }
@@ -508,7 +517,9 @@ public final class SelectionEvent implements Parcelable {
         return mSessionId;
     }
 
-    SelectionEvent setSessionId(TextClassificationSessionId id) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public SelectionEvent setSessionId(@Nullable TextClassificationSessionId id) {
         mSessionId = id;
         return this;
     }
@@ -521,7 +532,9 @@ public final class SelectionEvent implements Parcelable {
         return mStart;
     }
 
-    SelectionEvent setStart(int start) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public SelectionEvent setStart(int start) {
         mStart = start;
         return this;
     }
@@ -534,7 +547,9 @@ public final class SelectionEvent implements Parcelable {
         return mEnd;
     }
 
-    SelectionEvent setEnd(int end) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public SelectionEvent setEnd(int end) {
         mEnd = end;
         return this;
     }
@@ -547,7 +562,9 @@ public final class SelectionEvent implements Parcelable {
         return mSmartStart;
     }
 
-    SelectionEvent setSmartStart(int start) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public SelectionEvent setSmartStart(int start) {
         this.mSmartStart = start;
         return this;
     }
@@ -560,7 +577,9 @@ public final class SelectionEvent implements Parcelable {
         return mSmartEnd;
     }
 
-    SelectionEvent setSmartEnd(int end) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public SelectionEvent setSmartEnd(int end) {
         mSmartEnd = end;
         return this;
     }
@@ -643,7 +662,7 @@ public final class SelectionEvent implements Parcelable {
                 mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }
 
-    public static final Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
+    public static final @android.annotation.NonNull Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
         @Override
         public SelectionEvent createFromParcel(Parcel in) {
             return new SelectionEvent(in);

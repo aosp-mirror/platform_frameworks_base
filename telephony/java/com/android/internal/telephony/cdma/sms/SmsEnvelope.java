@@ -17,6 +17,8 @@
 package com.android.internal.telephony.cdma.sms;
 
 
+import android.telephony.cdma.CdmaSmsCbProgramData;
+
 import com.android.internal.telephony.cdma.sms.CdmaSmsSubaddress;
 
 public final class SmsEnvelope {
@@ -39,6 +41,9 @@ public final class SmsEnvelope {
     static public final int TELESERVICE_WEMT              = 0x1005;
     static public final int TELESERVICE_SCPT              = 0x1006;
 
+    /** Carriers specific Teleservice IDs. */
+    public static final int TELESERVICE_FDEA_WAP = 0xFDEA; // 65002
+
     /**
      * The following are defined as extensions to the standard teleservices
      */
@@ -52,12 +57,18 @@ public final class SmsEnvelope {
     //...
 
     // CMAS alert service category assignments, see 3GPP2 C.R1001 table 9.3.3-1
-    public static final int SERVICE_CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT  = 0x1000;
-    public static final int SERVICE_CATEGORY_CMAS_EXTREME_THREAT            = 0x1001;
-    public static final int SERVICE_CATEGORY_CMAS_SEVERE_THREAT             = 0x1002;
-    public static final int SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY = 0x1003;
-    public static final int SERVICE_CATEGORY_CMAS_TEST_MESSAGE              = 0x1004;
-    public static final int SERVICE_CATEGORY_CMAS_LAST_RESERVED_VALUE       = 0x10ff;
+    public static final int SERVICE_CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT  =
+            CdmaSmsCbProgramData.CATEGORY_CMAS_PRESIDENTIAL_LEVEL_ALERT;
+    public static final int SERVICE_CATEGORY_CMAS_EXTREME_THREAT            =
+            CdmaSmsCbProgramData.CATEGORY_CMAS_EXTREME_THREAT;
+    public static final int SERVICE_CATEGORY_CMAS_SEVERE_THREAT             =
+            CdmaSmsCbProgramData.CATEGORY_CMAS_SEVERE_THREAT;
+    public static final int SERVICE_CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY =
+            CdmaSmsCbProgramData.CATEGORY_CMAS_CHILD_ABDUCTION_EMERGENCY;
+    public static final int SERVICE_CATEGORY_CMAS_TEST_MESSAGE              =
+            CdmaSmsCbProgramData.CATEGORY_CMAS_TEST_MESSAGE;
+    public static final int SERVICE_CATEGORY_CMAS_LAST_RESERVED_VALUE       =
+            CdmaSmsCbProgramData.CATEGORY_CMAS_LAST_RESERVED_VALUE;
 
     /**
      * Provides the type of a SMS message like point to point, broadcast or acknowledge

@@ -60,6 +60,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 
+import com.android.server.wm.ActivityTaskManagerInternal;
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
@@ -104,6 +105,7 @@ public final class PinnerService extends SystemService {
     public @interface AppKey {}
 
     private final Context mContext;
+    private final ActivityTaskManagerInternal mAtmInternal;
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
     private final UserManager mUserManager;
@@ -165,6 +167,7 @@ public final class PinnerService extends SystemService {
         }
         mPinnerHandler = new PinnerHandler(BackgroundThread.get().getLooper());
 
+        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAm = ActivityManager.getService();
 
@@ -389,7 +392,7 @@ public final class PinnerService extends SystemService {
     }
 
     private ApplicationInfo getHomeInfo(int userHandle) {
-        Intent intent = mAmInternal.getHomeIntent();
+        Intent intent = mAtmInternal.getHomeIntent();
         return getApplicationInfoForIntent(intent, userHandle, false);
     }
 

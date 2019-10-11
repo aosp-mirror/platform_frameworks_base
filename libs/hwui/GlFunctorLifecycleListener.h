@@ -28,5 +28,5 @@ public:
     virtual void onGlFunctorReleased(Functor* functor) = 0;
 };
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

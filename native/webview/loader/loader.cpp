@@ -26,6 +26,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/prctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -58,13 +59,15 @@ jboolean DoReserveAddressSpace(jlong size) {
           vsize, strerror(errno));
     return JNI_FALSE;
   }
+  prctl(PR_SET_VMA, PR_SET_VMA_ANON_NAME, addr, vsize, "libwebview reservation");
   gReservedAddress = addr;
   gReservedSize = vsize;
   ALOGV("Reserved %zd bytes at %p", vsize, addr);
   return JNI_TRUE;
 }
 
-jboolean DoCreateRelroFile(const char* lib, const char* relro) {
+jboolean DoCreateRelroFile(JNIEnv* env, const char* lib, const char* relro,
+                           jobject clazzLoader) {
   // Try to unlink the old file, since if this is being called, the old one is
   // obsolete.
   if (unlink(relro) != 0 && errno != ENOENT) {
@@ -82,11 +85,20 @@ jboolean DoCreateRelroFile(const char* lib, const char* relro) {
     ALOGE("Failed to create temporary file %s: %s", relro_tmp, strerror(errno));
     return JNI_FALSE;
   }
+  android_namespace_t* ns =
+      android::FindNamespaceByClassLoader(env, clazzLoader);
+  if (ns == NULL) {
+    ALOGE("Failed to find classloader namespace");
+    return JNI_FALSE;
+  }
   android_dlextinfo extinfo;
-  extinfo.flags = ANDROID_DLEXT_RESERVED_ADDRESS | ANDROID_DLEXT_WRITE_RELRO;
+  extinfo.flags = ANDROID_DLEXT_RESERVED_ADDRESS | ANDROID_DLEXT_WRITE_RELRO |
+                  ANDROID_DLEXT_USE_NAMESPACE |
+                  ANDROID_DLEXT_RESERVED_ADDRESS_RECURSIVE;
   extinfo.reserved_addr = gReservedAddress;
   extinfo.reserved_size = gReservedSize;
   extinfo.relro_fd = tmp_fd;
+  extinfo.library_namespace = ns;
   void* handle = android_dlopen_ext(lib, RTLD_NOW, &extinfo);
   int close_result = close(tmp_fd);
   if (handle == NULL) {
@@ -120,7 +132,8 @@ jint DoLoadWithRelroFile(JNIEnv* env, const char* lib, const char* relro,
   }
   android_dlextinfo extinfo;
   extinfo.flags = ANDROID_DLEXT_RESERVED_ADDRESS | ANDROID_DLEXT_USE_RELRO |
-                  ANDROID_DLEXT_USE_NAMESPACE;
+                  ANDROID_DLEXT_USE_NAMESPACE |
+                  ANDROID_DLEXT_RESERVED_ADDRESS_RECURSIVE;
   extinfo.reserved_addr = gReservedAddress;
   extinfo.reserved_size = gReservedSize;
   extinfo.relro_fd = relro_fd;
@@ -143,13 +156,14 @@ jboolean ReserveAddressSpace(JNIEnv*, jclass, jlong size) {
   return DoReserveAddressSpace(size);
 }
 
-jboolean CreateRelroFile(JNIEnv* env, jclass, jstring lib, jstring relro) {
+jboolean CreateRelroFile(JNIEnv* env, jclass, jstring lib, jstring relro,
+                         jobject clazzLoader) {
   jboolean ret = JNI_FALSE;
   const char* lib_utf8 = env->GetStringUTFChars(lib, NULL);
   if (lib_utf8 != NULL) {
     const char* relro_utf8 = env->GetStringUTFChars(relro, NULL);
     if (relro_utf8 != NULL) {
-      ret = DoCreateRelroFile(lib_utf8, relro_utf8);
+      ret = DoCreateRelroFile(env, lib_utf8, relro_utf8, clazzLoader);
       env->ReleaseStringUTFChars(relro, relro_utf8);
     }
     env->ReleaseStringUTFChars(lib, lib_utf8);
@@ -179,7 +193,7 @@ const JNINativeMethod kJniMethods[] = {
   { "nativeReserveAddressSpace", "(J)Z",
       reinterpret_cast<void*>(ReserveAddressSpace) },
   { "nativeCreateRelroFile",
-      "(Ljava/lang/String;Ljava/lang/String;)Z",
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)Z",
       reinterpret_cast<void*>(CreateRelroFile) },
   { "nativeLoadWithRelroFile",
       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/ClassLoader;)I",

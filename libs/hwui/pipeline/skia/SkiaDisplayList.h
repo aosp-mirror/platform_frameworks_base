@@ -16,32 +16,37 @@
 
 #pragma once
 
-#include "DisplayList.h"
-#include "hwui/AnimatedImageDrawable.h"
-#include "GLFunctorDrawable.h"
+#include "FunctorDrawable.h"
+#include "RecordingCanvas.h"
 #include "RenderNodeDrawable.h"
+#include "TreeInfo.h"
+#include "hwui/AnimatedImageDrawable.h"
+#include "utils/LinearAllocator.h"
+#include "utils/Pair.h"
 
-#include <SkLiteDL.h>
-#include <SkLiteRecorder.h>
 #include <deque>
 
 namespace android {
 namespace uirenderer {
 
+namespace renderthread {
+class CanvasContext;
+}
+
 class Outline;
+
+namespace VectorDrawable {
+class Tree;
+}
+typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 namespace skiapipeline {
 
-/**
- * This class is intended to be self contained, but still subclasses from
- * DisplayList to make it easier to support switching between the two at
- * runtime.  The downside of this inheritance is that we pay for the overhead
- * of the parent class construction/destruction without any real benefit.
- */
-class SkiaDisplayList : public DisplayList {
+class SkiaDisplayList {
 public:
-    SkiaDisplayList() { SkASSERT(projectionReceiveIndex == -1); }
-    virtual ~SkiaDisplayList() {
+    size_t getUsedSize() { return allocator.usedSize() + mDisplayList.usedSize(); }
+
+    ~SkiaDisplayList() {
         /* Given that we are using a LinearStdAllocator to store some of the
          * SkDrawable contents we must ensure that any other object that is
          * holding a reference to those drawables is destroyed prior to their
@@ -64,33 +69,33 @@ public:
      * that creates them. Allocator dtor invokes all SkDrawable dtors.
      */
     template <class T, typename... Params>
-    SkDrawable* allocateDrawable(Params&&... params) {
+    T* allocateDrawable(Params&&... params) {
         return allocator.create<T>(std::forward<Params>(params)...);
     }
-
-    bool isSkiaDL() const override { return true; }
 
     /**
      * Returns true if the DisplayList does not have any recorded content
      */
-    bool isEmpty() const override { return mDisplayList.empty(); }
+    bool isEmpty() const { return mDisplayList.empty(); }
 
     /**
      * Returns true if this list directly contains a GLFunctor drawing command.
      */
-    bool hasFunctor() const override { return !mChildFunctors.empty(); }
+    bool hasFunctor() const { return !mChildFunctors.empty(); }
 
     /**
      * Returns true if this list directly contains a VectorDrawable drawing command.
      */
-    bool hasVectorDrawables() const override { return !mVectorDrawables.empty(); }
+    bool hasVectorDrawables() const { return !mVectorDrawables.empty(); }
+
+    bool hasText() const { return mDisplayList.hasText(); }
 
     /**
      * Attempts to reset and reuse this DisplayList.
      *
      * @return true if the displayList will be reused and therefore should not be deleted
      */
-    bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context) override;
+    bool reuseDisplayList(RenderNode* node, renderthread::CanvasContext* context);
 
     /**
      * ONLY to be called by RenderNode::syncDisplayList so that we can notify any
@@ -99,7 +104,7 @@ public:
      * NOTE: This function can be folded into RenderNode when we no longer need
      *       to subclass from DisplayList
      */
-    void syncContents() override;
+    void syncContents(const WebViewSyncData& data);
 
     /**
      * ONLY to be called by RenderNode::prepareTree in order to prepare this
@@ -116,25 +121,27 @@ public:
 
     bool prepareListAndChildren(
             TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
-            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) override;
+            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn);
 
     /**
      *  Calls the provided function once for each child of this DisplayList
      */
-    void updateChildren(std::function<void(RenderNode*)> updateFn) override;
+    void updateChildren(std::function<void(RenderNode*)> updateFn);
 
     /**
      *  Returns true if there is a child render node that is a projection receiver.
      */
     inline bool containsProjectionReceiver() const { return mProjectionReceiver; }
 
-    void attachRecorder(SkLiteRecorder* recorder, const SkIRect& bounds) {
+    void attachRecorder(RecordingCanvas* recorder, const SkIRect& bounds) {
         recorder->reset(&mDisplayList, bounds);
     }
 
     void draw(SkCanvas* canvas) { mDisplayList.draw(canvas); }
 
-    void output(std::ostream& output, uint32_t level) override;
+    void output(std::ostream& output, uint32_t level);
+
+    LinearAllocator allocator;
 
     /**
      * We use std::deque here because (1) we need to iterate through these
@@ -142,11 +149,21 @@ public:
      * cannot relocate.
      */
     std::deque<RenderNodeDrawable> mChildNodes;
-    std::deque<GLFunctorDrawable> mChildFunctors;
+    std::deque<FunctorDrawable*> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
-    std::vector<VectorDrawableRoot*> mVectorDrawables;
+private:
+    std::vector<Pair<VectorDrawableRoot*, SkMatrix>> mVectorDrawables;
+public:
+    void appendVD(VectorDrawableRoot* r) {
+        appendVD(r, SkMatrix::I());
+    }
+
+    void appendVD(VectorDrawableRoot* r, const SkMatrix& mat) {
+        mVectorDrawables.push_back(Pair<VectorDrawableRoot*, SkMatrix>(r, mat));
+    }
+
     std::vector<AnimatedImageDrawable*> mAnimatedImages;
-    SkLiteDL mDisplayList;
+    DisplayListData mDisplayList;
 
     // mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection
     // receiver. It is set at record time and used at both prepare and draw tree traversals to
@@ -159,14 +176,14 @@ public:
     // node is drawn.
     const Outline* mProjectedOutline = nullptr;
 
-    // mProjectedReceiverParentMatrix is valid when render node tree is traversed during the draw
-    // pass. Render nodes that have a child receiver node, will store their matrix in
-    // mProjectedReceiverParentMatrix. Child receiver node will set the matrix and then clip with
-    // the
-    // outline of their parent.
-    SkMatrix mProjectedReceiverParentMatrix;
+    // mParentMatrix is set and valid when render node tree is traversed during the draw
+    // pass. Render nodes, which draw in a order different than recording order (e.g. nodes with a
+    // child receiver node or Z elevation), can use mParentMatrix to calculate the final transform
+    // without replaying the matrix transform OPs from the display list.
+    // Child receiver node will set the matrix and then clip with the outline of their parent.
+    SkMatrix mParentMatrix;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

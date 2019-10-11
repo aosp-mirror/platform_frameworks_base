@@ -12,3 +12,18 @@ prebuilt_etc {
     sub_dir: "permissions",
     product_specific: true,
 }
+
+java_library {
+    name: "com.android.test.libs.system_ext",
+    installable: true,
+    system_ext_specific: true,
+    srcs: ["system_ext/java/**/*.java"],
+    required: ["com.android.test.libs.system_ext.xml"],
+}
+
+prebuilt_etc {
+    name: "com.android.test.libs.system_ext.xml",
+    src: "system_ext/com.android.test.libs.system_ext.xml",
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

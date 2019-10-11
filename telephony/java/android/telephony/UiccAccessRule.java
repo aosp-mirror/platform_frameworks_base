@@ -15,6 +15,7 @@
  */
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.pm.PackageInfo;
@@ -47,7 +48,7 @@ public final class UiccAccessRule implements Parcelable {
 
     private static final int ENCODING_VERSION = 1;
 
-    public static final Creator<UiccAccessRule> CREATOR = new Creator<UiccAccessRule>() {
+    public static final @android.annotation.NonNull Creator<UiccAccessRule> CREATOR = new Creator<UiccAccessRule>() {
         @Override
         public UiccAccessRule createFromParcel(Parcel in) {
             return new UiccAccessRule(in);
@@ -213,7 +214,7 @@ public final class UiccAccessRule implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -236,6 +237,7 @@ public final class UiccAccessRule implements Parcelable {
         return result;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "cert: " + IccUtils.bytesToHexString(mCertificateHash) + " pkg: " +

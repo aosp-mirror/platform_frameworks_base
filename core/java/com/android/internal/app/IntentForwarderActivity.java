@@ -22,24 +22,28 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
 import android.widget.Toast;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -60,10 +64,14 @@ public class IntentForwarderActivity extends Activity  {
     public static String FORWARD_INTENT_TO_MANAGED_PROFILE
             = "com.android.internal.app.ForwardIntentToManagedProfile";
 
-    private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEME
+    private static final Set<String> ALLOWED_TEXT_MESSAGE_SCHEMES
             = new HashSet<>(Arrays.asList("sms", "smsto", "mms", "mmsto"));
 
+    private static final String TEL_SCHEME = "tel";
+
     private Injector mInjector;
+
+    private MetricsLogger mMetricsLogger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,9 +85,17 @@ public class IntentForwarderActivity extends Activity  {
         if (className.equals(FORWARD_INTENT_TO_PARENT)) {
             userMessageId = com.android.internal.R.string.forward_intent_to_owner;
             targetUserId = getProfileParent();
+
+            getMetricsLogger().write(
+                    new LogMaker(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE)
+                    .setSubtype(MetricsEvent.PARENT_PROFILE));
         } else if (className.equals(FORWARD_INTENT_TO_MANAGED_PROFILE)) {
             userMessageId = com.android.internal.R.string.forward_intent_to_work;
             targetUserId = getManagedProfile();
+
+            getMetricsLogger().write(
+                    new LogMaker(MetricsEvent.ACTION_SWITCH_SHARE_PROFILE)
+                    .setSubtype(MetricsEvent.MANAGED_PROFILE));
         } else {
             Slog.wtf(TAG, IntentForwarderActivity.class.getName() + " cannot be called directly");
             userMessageId = -1;
@@ -99,6 +115,7 @@ public class IntentForwarderActivity extends Activity  {
                 // At this point, innerIntent is not null. Otherwise, canForward would have returned
                 // false.
                 innerIntent.prepareToLeaveUser(callingUserId);
+                innerIntent.fixUris(callingUserId);
             } else {
                 newIntent.prepareToLeaveUser(callingUserId);
             }
@@ -106,14 +123,14 @@ public class IntentForwarderActivity extends Activity  {
             final ResolveInfo ri = mInjector.resolveActivityAsUser(newIntent, MATCH_DEFAULT_ONLY,
                     targetUserId);
             try {
-                startActivityAsCaller(newIntent, null, false, targetUserId);
+                startActivityAsCaller(newIntent, null, null, false, targetUserId);
             } catch (RuntimeException e) {
                 int launchedFromUid = -1;
                 String launchedFromPackage = "?";
                 try {
-                    launchedFromUid = ActivityManager.getService().getLaunchedFromUid(
+                    launchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
                             getActivityToken());
-                    launchedFromPackage = ActivityManager.getService().getLaunchedFromPackage(
+                    launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
                             getActivityToken());
                 } catch (RemoteException ignored) {
                 }
@@ -145,13 +162,21 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private boolean isTextMessageIntent(Intent intent) {
-        return Intent.ACTION_SENDTO.equals(intent.getAction()) && intent.getData() != null
-            && ALLOWED_TEXT_MESSAGE_SCHEME.contains(intent.getData().getScheme());
+        return (Intent.ACTION_SENDTO.equals(intent.getAction()) || isViewActionIntent(intent))
+                && ALLOWED_TEXT_MESSAGE_SCHEMES.contains(intent.getScheme());
     }
 
     private boolean isDialerIntent(Intent intent) {
         return Intent.ACTION_DIAL.equals(intent.getAction())
-            || Intent.ACTION_CALL.equals(intent.getAction());
+                || Intent.ACTION_CALL.equals(intent.getAction())
+                || Intent.ACTION_CALL_PRIVILEGED.equals(intent.getAction())
+                || Intent.ACTION_CALL_EMERGENCY.equals(intent.getAction())
+                || (isViewActionIntent(intent) && TEL_SCHEME.equals(intent.getScheme()));
+    }
+
+    private boolean isViewActionIntent(Intent intent) {
+        return Intent.ACTION_VIEW.equals(intent.getAction())
+                && intent.hasCategory(Intent.CATEGORY_BROWSABLE);
     }
 
     private boolean isTargetResolverOrChooserActivity(ActivityInfo activityInfo) {
@@ -246,6 +271,13 @@ public class IntentForwarderActivity extends Activity  {
         // Apps should not be allowed to target a specific package/ component in the target user.
         intent.setPackage(null);
         intent.setComponent(null);
+    }
+
+    protected MetricsLogger getMetricsLogger() {
+        if (mMetricsLogger == null) {
+            mMetricsLogger = new MetricsLogger();
+        }
+        return mMetricsLogger;
     }
 
     @VisibleForTesting

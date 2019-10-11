@@ -14,11 +14,13 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.VoiceInteractionSession;
@@ -33,11 +35,16 @@ import android.widget.ImageView;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.ConfigurationChangedReceiver;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.assist.ui.DefaultUiController;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
@@ -46,9 +53,61 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
  */
 public class AssistManager implements ConfigurationChangedReceiver {
 
+    /**
+     * Controls the UI for showing Assistant invocation progress.
+     */
+    public interface UiController {
+        /**
+         * Updates the invocation progress.
+         *
+         * @param type     one of INVOCATION_TYPE_GESTURE, INVOCATION_TYPE_ACTIVE_EDGE,
+         *                 INVOCATION_TYPE_VOICE, INVOCATION_TYPE_QUICK_SEARCH_BAR,
+         *                 INVOCATION_HOME_BUTTON_LONG_PRESS
+         * @param progress a float between 0 and 1 inclusive. 0 represents the beginning of the
+         *                 gesture; 1 represents the end.
+         */
+        void onInvocationProgress(int type, float progress);
+
+        /**
+         * Called when an invocation gesture completes.
+         *
+         * @param velocity the speed of the invocation gesture, in pixels per millisecond. For
+         *                 drags, this is 0.
+         */
+        void onGestureCompletion(float velocity);
+
+        /**
+         * Called with the Bundle from VoiceInteractionSessionListener.onSetUiHints.
+         */
+        void processBundle(Bundle hints);
+
+        /**
+         * Hides the UI.
+         */
+        void hide();
+    }
+
     private static final String TAG = "AssistManager";
+
+    // Note that VERBOSE logging may leak PII (e.g. transcription contents).
+    private static final boolean VERBOSE = false;
+
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
+    private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
+    private static final String INVOCATION_PHONE_STATE_KEY = "invocation_phone_state";
+    public static final String INVOCATION_TYPE_KEY = "invocation_type";
+
+    public static final int INVOCATION_TYPE_GESTURE = 1;
+    public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
+    public static final int INVOCATION_TYPE_VOICE = 3;
+    public static final int INVOCATION_TYPE_QUICK_SEARCH_BAR = 4;
+    public static final int INVOCATION_HOME_BUTTON_LONG_PRESS = 5;
+
+    public static final int DISMISS_REASON_INVOCATION_CANCELLED = 1;
+    public static final int DISMISS_REASON_TAP = 2;
+    public static final int DISMISS_REASON_BACK = 3;
+    public static final int DISMISS_REASON_TIMEOUT = 4;
 
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
@@ -57,6 +116,9 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private final WindowManager mWindowManager;
     private final AssistDisclosure mAssistDisclosure;
     private final InterestingConfigChanges mInterestingConfigChanges;
+    private final PhoneStateMonitor mPhoneStateMonitor;
+    private final AssistHandleBehaviorController mHandleController;
+    private final UiController mUiController;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -66,16 +128,16 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
 
-        @Override
-        public void onFailed() throws RemoteException {
-            mView.post(mHideRunnable);
-        }
+                @Override
+                public void onFailed() throws RemoteException {
+                    mView.post(mHideRunnable);
+                }
 
-        @Override
-        public void onShown() throws RemoteException {
-            mView.post(mHideRunnable);
-        }
-    };
+                @Override
+                public void onShown() throws RemoteException {
+                    mView.post(mHideRunnable);
+                }
+            };
 
     private Runnable mHideRunnable = new Runnable() {
         @Override
@@ -91,6 +153,9 @@ public class AssistManager implements ConfigurationChangedReceiver {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = new AssistUtils(context);
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
+        mPhoneStateMonitor = new PhoneStateMonitor(context);
+        mHandleController =
+                new AssistHandleBehaviorController(context, mAssistUtils, new Handler());
 
         registerVoiceInteractionSessionListener();
         mInterestingConfigChanges = new InterestingConfigChanges(ActivityInfo.CONFIG_ORIENTATION
@@ -98,21 +163,49 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
         onConfigurationChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
+
+        mUiController = new DefaultUiController(mContext);
+
+        OverviewProxyService overviewProxy = Dependency.get(OverviewProxyService.class);
+        overviewProxy.addCallback(new OverviewProxyService.OverviewProxyListener() {
+            @Override
+            public void onAssistantProgress(float progress) {
+                // Progress goes from 0 to 1 to indicate how close the assist gesture is to
+                // completion.
+                onInvocationProgress(INVOCATION_TYPE_GESTURE, progress);
+            }
+
+            @Override
+            public void onAssistantGestureCompletion(float velocity) {
+                onGestureCompletion(velocity);
+            }
+        });
     }
 
     protected void registerVoiceInteractionSessionListener() {
         mAssistUtils.registerVoiceInteractionSessionListener(
                 new IVoiceInteractionSessionListener.Stub() {
-            @Override
-            public void onVoiceSessionShown() throws RemoteException {
-                Log.v(TAG, "Voice open");
-            }
+                    @Override
+                    public void onVoiceSessionShown() throws RemoteException {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Voice open");
+                        }
+                    }
 
-            @Override
-            public void onVoiceSessionHidden() throws RemoteException {
-                Log.v(TAG, "Voice closed");
-            }
-        });
+                    @Override
+                    public void onVoiceSessionHidden() throws RemoteException {
+                        if (VERBOSE) {
+                            Log.v(TAG, "Voice closed");
+                        }
+                    }
+
+                    @Override
+                    public void onSetUiHints(Bundle hints) {
+                        if (VERBOSE) {
+                            Log.v(TAG, "UI hints received");
+                        }
+                    }
+                });
     }
 
     public void onConfigurationChanged(Configuration newConfiguration) {
@@ -139,7 +232,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     }
 
     protected boolean shouldShowOrb() {
-        return true;
+        return false;
     }
 
     public void startAssist(Bundle args) {
@@ -155,7 +248,37 @@ public class AssistManager implements ConfigurationChangedReceiver {
                     ? TIMEOUT_SERVICE
                     : TIMEOUT_ACTIVITY);
         }
+
+        if (args == null) {
+            args = new Bundle();
+        }
+        int invocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
+        if (invocationType == INVOCATION_TYPE_GESTURE) {
+            mHandleController.onAssistantGesturePerformed();
+        }
+        int phoneState = mPhoneStateMonitor.getPhoneState();
+        args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
+        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.uptimeMillis());
+        // Logs assistant start with invocation type.
+        MetricsLogger.action(
+                new LogMaker(MetricsEvent.ASSISTANT)
+                        .setType(MetricsEvent.TYPE_OPEN)
+                        .setSubtype(toLoggingSubType(invocationType, phoneState)));
         startAssistInternal(args, assistComponent, isService);
+    }
+
+    /** Called when the user is performing an assistant invocation action (e.g. Active Edge) */
+    public void onInvocationProgress(int type, float progress) {
+        mUiController.onInvocationProgress(type, progress);
+    }
+
+    /**
+     * Called when the user has invoked the assistant with the incoming velocity, in pixels per
+     * millisecond. For invocations without a velocity (e.g. slow drag), the velocity is set to
+     * zero.
+     */
+    public void onGestureCompletion(float velocity) {
+        mUiController.onGestureCompletion(velocity);
     }
 
     public void hideAssist() {
@@ -202,13 +325,14 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
         // Close Recent Apps if needed
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).animateCollapsePanels(
-                CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL);
+                CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL | CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
+                false /* force */);
 
         boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
 
         final SearchManager searchManager =
-            (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+                (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
         if (searchManager == null) {
             return;
         }
@@ -260,10 +384,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
         return mAssistUtils.isSessionRunning();
     }
 
-    public void destroy() {
-        mWindowManager.removeViewImmediate(mView);
-    }
-
     private void maybeSwapSearchIcon(@NonNull ComponentName assistComponent, boolean isService) {
         replaceDrawable(mView.getOrb().getLogo(), assistComponent, ASSIST_ICON_METADATA_NAME,
                 isService);
@@ -277,7 +397,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 // Look for the search icon specified in the activity meta-data
                 Bundle metaData = isService
                         ? packageManager.getServiceInfo(
-                                component, PackageManager.GET_META_DATA).metaData
+                        component, PackageManager.GET_META_DATA).metaData
                         : packageManager.getActivityInfo(
                                 component, PackageManager.GET_META_DATA).metaData;
                 if (metaData != null) {
@@ -290,8 +410,10 @@ public class AssistManager implements ConfigurationChangedReceiver {
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Log.v(TAG, "Assistant component "
-                        + component.flattenToShortString() + " not found");
+                if (VERBOSE) {
+                    Log.v(TAG, "Assistant component "
+                            + component.flattenToShortString() + " not found");
+                }
             } catch (Resources.NotFoundException nfe) {
                 Log.w(TAG, "Failed to swap drawable from "
                         + component.flattenToShortString(), nfe);
@@ -300,9 +422,18 @@ public class AssistManager implements ConfigurationChangedReceiver {
         v.setImageDrawable(null);
     }
 
+    protected AssistHandleBehaviorController getHandleBehaviorController() {
+        return mHandleController;
+    }
+
+    @Nullable
+    public ComponentName getAssistInfoForUser(int userId) {
+        return mAssistUtils.getAssistComponentForUser(userId);
+    }
+
     @Nullable
     private ComponentName getAssistInfo() {
-        return mAssistUtils.getAssistComponentForUser(KeyguardUpdateMonitor.getCurrentUser());
+        return getAssistInfoForUser(KeyguardUpdateMonitor.getCurrentUser());
     }
 
     public void showDisclosure() {
@@ -311,5 +442,20 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
     public void onLockscreenShown() {
         mAssistUtils.onLockscreenShown();
+    }
+
+    /** Returns the logging flags for the given Assistant invocation type. */
+    public int toLoggingSubType(int invocationType) {
+        return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
+    }
+
+    private int toLoggingSubType(int invocationType, int phoneState) {
+        // Note that this logic will break if the number of Assistant invocation types exceeds 7.
+        // There are currently 5 invocation types, but we will be migrating to the new logging
+        // framework in the next update.
+        int subType = mHandleController.areHandlesShowing() ? 0 : 1;
+        subType |= invocationType << 1;
+        subType |= phoneState << 4;
+        return subType;
     }
 }

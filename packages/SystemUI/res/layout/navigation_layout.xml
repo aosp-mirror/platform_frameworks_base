@@ -22,7 +22,8 @@
     android:layout_marginStart="@dimen/rounded_corner_content_padding"
     android:layout_marginEnd="@dimen/rounded_corner_content_padding"
     android:paddingStart="@dimen/nav_content_padding"
-    android:paddingEnd="@dimen/nav_content_padding">
+    android:paddingEnd="@dimen/nav_content_padding"
+    android:id="@+id/horizontal">
 
     <com.android.systemui.statusbar.phone.NearestTouchFrame
         android:id="@+id/nav_buttons"

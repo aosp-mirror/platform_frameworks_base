@@ -33,37 +33,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <RelativeLayout
+            <include
+                layout="@layout/keyguard_clock_switch"
                 android:id="@+id/keyguard_clock_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|top">
-                <TextClock
-                    android:id="@+id/clock_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_centerHorizontal="true"
-                    android:layout_alignParentTop="true"
-                    android:letterSpacing="0.03"
-                    android:textColor="?attr/wallpaperTextColor"
-                    android:singleLine="true"
-                    style="@style/widget_big_thin"
-                    android:format12Hour="@string/keyguard_widget_12_hours_format"
-                    android:format24Hour="@string/keyguard_widget_24_hours_format" />
-                <View
-                    android:id="@+id/clock_separator"
-                    android:layout_width="@dimen/widget_separator_width"
-                    android:layout_height="@dimen/widget_separator_thickness"
-                    android:layout_below="@id/clock_view"
-                    android:background="#f00"
-                    android:layout_centerHorizontal="true" />
-                <include layout="@layout/keyguard_status_area"
-                         android:id="@+id/keyguard_status_area"
-                         android:layout_width="match_parent"
-                         android:layout_height="wrap_content"
-                         android:layout_below="@id/clock_separator" />
-            </RelativeLayout>
+                android:layout_height="wrap_content" />
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

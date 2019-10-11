@@ -16,21 +16,20 @@
 
 package com.android.systemui.stackdivider;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+
 import android.content.res.Configuration;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.IDockedStackListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
-import com.android.systemui.recents.misc.SystemServicesProxy;
-
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,7 +37,9 @@ import java.io.PrintWriter;
 /**
  * Controls the docked stack divider.
  */
-public class Divider extends SystemUI {
+public class Divider extends SystemUI implements DividerView.DividerCallbacks {
+    private static final String TAG = "Divider";
+
     private DividerWindowManager mWindowManager;
     private DividerView mView;
     private final DividerState mDividerState = new DividerState();
@@ -55,10 +56,13 @@ public class Divider extends SystemUI {
         update(mContext.getResources().getConfiguration());
         putComponent(Divider.class, this);
         mDockDividerVisibilityListener = new DockDividerVisibilityListener();
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        ssp.registerDockedStackListener(mDockDividerVisibilityListener);
+        try {
+            WindowManagerGlobal.getWindowManagerService().registerDockedStackListener(
+                    mDockDividerVisibilityListener);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to register docked stack listener", e);
+        }
         mForcedResizableController = new ForcedResizableInfoActivityController(mContext);
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -82,7 +86,7 @@ public class Divider extends SystemUI {
     private void addDivider(Configuration configuration) {
         mView = (DividerView)
                 LayoutInflater.from(mContext).inflate(R.layout.docked_stack_divider, null);
-        mView.injectDependencies(mWindowManager, mDividerState);
+        mView.injectDependencies(mWindowManager, mDividerState, this);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
         mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
         final int size = mContext.getResources().getDimensionPixelSize(
@@ -156,15 +160,61 @@ public class Divider extends SystemUI {
         mWindowManager.setTouchable((mHomeStackResizable || !mMinimized) && !mAdjustedForIme);
     }
 
+    public void onRecentsActivityStarting() {
+        if (mView != null) {
+            mView.onRecentsActivityStarting();
+        }
+    }
+
     /**
-     * Workaround for b/62528361, at the time RecentsDrawnEvent is sent, it may happen before a
+     * Workaround for b/62528361, at the time recents has drawn, it may happen before a
      * configuration change to the Divider, and internally, the event will be posted to the
      * subscriber, or DividerView, which has been removed and prevented from resizing. Instead,
      * register the event handler here and proxy the event to the current DividerView.
      */
-    public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
+    public void onRecentsDrawn() {
         if (mView != null) {
             mView.onRecentsDrawn();
+        }
+    }
+
+    public void onUndockingTask() {
+        if (mView != null) {
+            mView.onUndockingTask();
+        }
+    }
+
+    public void onDockedFirstAnimationFrame() {
+        if (mView != null) {
+            mView.onDockedFirstAnimationFrame();
+        }
+    }
+
+    public void onDockedTopTask() {
+        if (mView != null) {
+            mView.onDockedTopTask();
+        }
+    }
+
+    public void onAppTransitionFinished() {
+        mForcedResizableController.onAppTransitionFinished();
+    }
+
+    @Override
+    public void onDraggingStart() {
+        mForcedResizableController.onDraggingStart();
+    }
+
+    @Override
+    public void onDraggingEnd() {
+        mForcedResizableController.onDraggingEnd();
+    }
+
+    @Override
+    public void growRecents() {
+        Recents recents = getComponent(Recents.class);
+        if (recents != null) {
+            recents.growRecents();
         }
     }
 

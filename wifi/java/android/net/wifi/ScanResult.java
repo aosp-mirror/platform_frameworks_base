@@ -86,9 +86,9 @@ public class ScanResult implements Parcelable {
     public static final int PROTOCOL_WPA = 1;
     /**
      * @hide
-     * Security protocol type: WPA version 2, also called RSN.
+     * Security protocol type: RSN, for WPA version 2, and version 3.
      */
-    public static final int PROTOCOL_WPA2 = 2;
+    public static final int PROTOCOL_RSN = 2;
     /**
      * @hide
      * Security protocol type:
@@ -138,7 +138,31 @@ public class ScanResult implements Parcelable {
      * Used for Hotspot 2.0.
      */
     public static final int KEY_MGMT_OSEN = 7;
-
+     /**
+     * @hide
+     * Security key management scheme: SAE.
+     */
+    public static final int KEY_MGMT_SAE = 8;
+    /**
+     * @hide
+     * Security key management scheme: OWE.
+     */
+    public static final int KEY_MGMT_OWE = 9;
+    /**
+     * @hide
+     * Security key management scheme: SUITE_B_192.
+     */
+    public static final int KEY_MGMT_EAP_SUITE_B_192 = 10;
+    /**
+     * @hide
+     * Security key management scheme: FT_SAE.
+     */
+    public static final int KEY_MGMT_FT_SAE = 11;
+    /**
+     * @hide
+     * Security key management scheme: OWE in transition mode.
+     */
+    public static final int KEY_MGMT_OWE_TRANSITION = 12;
     /**
      * @hide
      * No cipher suite.
@@ -159,6 +183,11 @@ public class ScanResult implements Parcelable {
      * Cipher suite: CCMP
      */
     public static final int CIPHER_CCMP = 3;
+    /**
+     * @hide
+     * Cipher suite: GCMP
+     */
+    public static final int CIPHER_GCMP_256 = 4;
 
     /**
      * The detected signal level in dBm, also known as the RSSI.
@@ -732,7 +761,7 @@ public class ScanResult implements Parcelable {
 
     /** Implement the Parcelable interface {@hide} */
     @UnsupportedAppUsage
-    public static final Creator<ScanResult> CREATOR =
+    public static final @android.annotation.NonNull Creator<ScanResult> CREATOR =
         new Creator<ScanResult>() {
             public ScanResult createFromParcel(Parcel in) {
                 WifiSsid wifiSsid = null;

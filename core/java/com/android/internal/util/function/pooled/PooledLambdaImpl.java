@@ -24,9 +24,19 @@ import android.util.Pools;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.HeptConsumer;
+import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HeptPredicate;
 import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.HexPredicate;
+import com.android.internal.util.function.NonaConsumer;
+import com.android.internal.util.function.NonaFunction;
+import com.android.internal.util.function.NonaPredicate;
+import com.android.internal.util.function.OctConsumer;
+import com.android.internal.util.function.OctFunction;
+import com.android.internal.util.function.OctPredicate;
 import com.android.internal.util.function.QuadConsumer;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuadPredicate;
@@ -38,6 +48,7 @@ import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.TriPredicate;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -51,12 +62,12 @@ import java.util.function.Supplier;
  * @hide
  */
 final class PooledLambdaImpl<R> extends OmniFunction<Object,
-        Object, Object, Object, Object, Object, R> {
+        Object, Object, Object, Object, Object, Object, Object, Object, R> {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PooledLambdaImpl";
 
-    private static final int MAX_ARGS = 5;
+    private static final int MAX_ARGS = 9;
 
     private static final int MAX_POOL_SIZE = 50;
 
@@ -122,7 +133,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     /**
      * Bit schema:
-     * AAAABCDEEEEEEFFFFFF
+     * AAAAAAAAABCDEEEEEEFFFFFF
      *
      * Where:
      * A - whether {@link #mArgs arg} at corresponding index was specified at
@@ -158,17 +169,19 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     @Override
-    R invoke(Object a1, Object a2, Object a3, Object a4, Object a5, Object a6) {
+    R invoke(Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7,
+            Object a8, Object a9) {
         checkNotRecycled();
         if (DEBUG) {
             Log.i(LOG_TAG, this + ".invoke("
                     + commaSeparateFirstN(
-                            new Object[] { a1, a2, a3, a4, a5, a6 },
+                            new Object[] { a1, a2, a3, a4, a5, a6, a7, a8, a9 },
                             LambdaType.decodeArgCount(getFlags(MASK_EXPOSED_AS)))
                     + ")");
         }
-        final boolean notUsed = fillInArg(a1) && fillInArg(a2) && fillInArg(a3)
-                && fillInArg(a4) && fillInArg(a5) && fillInArg(a6);
+        final boolean notUsed = fillInArg(a1) && fillInArg(a2) && fillInArg(a3) && fillInArg(a4)
+                && fillInArg(a5) && fillInArg(a6) && fillInArg(a7) && fillInArg(a8)
+                && fillInArg(a9);
         int argCount = LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE));
         if (argCount != LambdaType.MASK_ARG_COUNT) {
             for (int i = 0; i < argCount; i++) {
@@ -332,7 +345,70 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                                 popArg(2), popArg(3), popArg(4), popArg(5));
                     }
                 }
-            }
+            } break;
+
+            case 7: {
+                switch (returnType) {
+                    case LambdaType.ReturnType.VOID: {
+                        ((HeptConsumer) mFunc).accept(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6));
+                        return null;
+                    }
+                    case LambdaType.ReturnType.BOOLEAN: {
+                        return (R) (Object) ((HeptPredicate) mFunc).test(popArg(0),
+                                popArg(1), popArg(2), popArg(3),
+                                popArg(4), popArg(5), popArg(6));
+                    }
+                    case LambdaType.ReturnType.OBJECT: {
+                        return (R) ((HeptFunction) mFunc).apply(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6));
+                    }
+                }
+            } break;
+
+            case 8: {
+                switch (returnType) {
+                    case LambdaType.ReturnType.VOID: {
+                        ((OctConsumer) mFunc).accept(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6), popArg(7));
+                        return null;
+                    }
+                    case LambdaType.ReturnType.BOOLEAN: {
+                        return (R) (Object) ((OctPredicate) mFunc).test(popArg(0),
+                                popArg(1), popArg(2), popArg(3),
+                                popArg(4), popArg(5), popArg(6), popArg(7));
+                    }
+                    case LambdaType.ReturnType.OBJECT: {
+                        return (R) ((OctFunction) mFunc).apply(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6), popArg(7));
+                    }
+                }
+            } break;
+
+            case 9: {
+                switch (returnType) {
+                    case LambdaType.ReturnType.VOID: {
+                        ((NonaConsumer) mFunc).accept(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4), popArg(5),
+                                popArg(6), popArg(7), popArg(8));
+                        return null;
+                    }
+                    case LambdaType.ReturnType.BOOLEAN: {
+                        return (R) (Object) ((NonaPredicate) mFunc).test(popArg(0),
+                                popArg(1), popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6), popArg(7), popArg(8));
+                    }
+                    case LambdaType.ReturnType.OBJECT: {
+                        return (R) ((NonaFunction) mFunc).apply(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4), popArg(5),
+                                popArg(6), popArg(7), popArg(8));
+                    }
+                }
+            } break;
         }
         throw new IllegalStateException("Unknown function type: " + LambdaType.toString(funcType));
     }
@@ -358,13 +434,15 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         if (isConstSupplier()) {
             sb.append(getFuncTypeAsString()).append("(").append(doInvoke()).append(")");
         } else {
-            if (mFunc instanceof PooledLambdaImpl) {
-                sb.append(mFunc);
+            Object func = mFunc;
+            if (func instanceof PooledLambdaImpl) {
+                sb.append(func);
             } else {
-                sb.append(getFuncTypeAsString()).append("@").append(hashCodeHex(mFunc));
+                sb.append(getFuncTypeAsString()).append("@").append(hashCodeHex(func));
             }
             sb.append("(");
-            sb.append(commaSeparateFirstN(mArgs, LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE))));
+            sb.append(commaSeparateFirstN(mArgs,
+                    LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE))));
             sb.append(")");
         }
         return sb.toString();
@@ -376,11 +454,11 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     private static String hashCodeHex(Object o) {
-        return Integer.toHexString(o.hashCode());
+        return Integer.toHexString(Objects.hashCode(o));
     }
 
     private String getFuncTypeAsString() {
-        if (isRecycled()) throw new IllegalStateException();
+        if (isRecycled()) return "<recycled>";
         if (isConstSupplier()) return "supplier";
         String name = LambdaType.toString(getFlags(MASK_EXPOSED_AS));
         if (name.endsWith("Consumer")) return "consumer";
@@ -388,15 +466,15 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         if (name.endsWith("Predicate")) return "predicate";
         if (name.endsWith("Supplier")) return "supplier";
         if (name.endsWith("Runnable")) return "runnable";
-        throw new IllegalStateException("Don't know the string representation of " + name);
+        return name;
     }
 
     /**
      * Internal non-typesafe factory method for {@link PooledLambdaImpl}
      */
     static <E extends PooledLambda> E acquire(Pool pool, Object func,
-            int fNumArgs, int numPlaceholders, int fReturnType,
-            Object a, Object b, Object c, Object d, Object e, Object f) {
+            int fNumArgs, int numPlaceholders, int fReturnType, Object a, Object b, Object c,
+            Object d, Object e, Object f, Object g, Object h, Object i) {
         PooledLambdaImpl r = acquire(pool);
         if (DEBUG) {
             Log.i(LOG_TAG,
@@ -411,9 +489,12 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                             + ", d = " + d
                             + ", e = " + e
                             + ", f = " + f
+                            + ", g = " + g
+                            + ", h = " + h
+                            + ", i = " + i
                             + ")");
         }
-        r.mFunc = func;
+        r.mFunc = Preconditions.checkNotNull(func);
         r.setFlags(MASK_FUNC_TYPE, LambdaType.encode(fNumArgs, fReturnType));
         r.setFlags(MASK_EXPOSED_AS, LambdaType.encode(numPlaceholders, fReturnType));
         if (ArrayUtils.size(r.mArgs) < fNumArgs) r.mArgs = new Object[fNumArgs];
@@ -423,6 +504,9 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         setIfInBounds(r.mArgs, 3, d);
         setIfInBounds(r.mArgs, 4, e);
         setIfInBounds(r.mArgs, 5, f);
+        setIfInBounds(r.mArgs, 6, g);
+        setIfInBounds(r.mArgs, 7, h);
+        setIfInBounds(r.mArgs, 8, i);
         return (E) r;
     }
 
@@ -448,13 +532,14 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     @Override
-    public OmniFunction<Object, Object, Object, Object, Object, Object, R> negate() {
+    public OmniFunction<Object, Object, Object, Object, Object, Object, Object, Object, Object,
+            R> negate() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <V> OmniFunction<Object, Object, Object, Object, Object, Object, V> andThen(
-            Function<? super R, ? extends V> after) {
+    public <V> OmniFunction<Object, Object, Object, Object, Object, Object, Object, Object, Object,
+            V> andThen(Function<? super R, ? extends V> after) {
         throw new UnsupportedOperationException();
     }
 
@@ -474,7 +559,8 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     @Override
-    public OmniFunction<Object, Object, Object, Object, Object, Object, R> recycleOnUse() {
+    public OmniFunction<Object, Object, Object, Object, Object, Object, Object, Object, Object,
+            R> recycleOnUse() {
         if (DEBUG) Log.i(LOG_TAG, this + ".recycleOnUse()");
         mFlags |= FLAG_RECYCLE_ON_USE;
         return this;
@@ -519,10 +605,10 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
      * Contract for encoding a supported lambda type in {@link #MASK_BIT_COUNT} bits
      */
     static class LambdaType {
-        public static final int MASK_ARG_COUNT = 0b111;
-        public static final int MASK_RETURN_TYPE = 0b111000;
+        public static final int MASK_ARG_COUNT = 0b1111;
+        public static final int MASK_RETURN_TYPE = 0b1110000;
         public static final int MASK = MASK_ARG_COUNT | MASK_RETURN_TYPE;
-        public static final int MASK_BIT_COUNT = 6;
+        public static final int MASK_BIT_COUNT = 7;
 
         static int encode(int argCount, int returnType) {
             return mask(MASK_ARG_COUNT, argCount) | mask(MASK_RETURN_TYPE, returnType);
@@ -551,13 +637,17 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         private static String argCountPrefix(int argCount) {
             switch (argCount) {
                 case MASK_ARG_COUNT: return "";
+                case 0: return "";
                 case 1: return "";
                 case 2: return "Bi";
                 case 3: return "Tri";
                 case 4: return "Quad";
                 case 5: return "Quint";
                 case 6: return "Hex";
-                default: throw new IllegalArgumentException("" + argCount);
+                case 7: return "Hept";
+                case 8: return "Oct";
+                case 9: return "Nona";
+                default: return "" + argCount + "arg";
             }
         }
 

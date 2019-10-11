@@ -589,6 +589,15 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
+     * If the print job is actively processed, i.e. the device needs to stay on.
+     *
+     * @hide
+     */
+    public boolean shouldStayAwake() {
+        return mCanceling || mState == STATE_STARTED || mState == STATE_QUEUED;
+    }
+
+    /**
      * Gets whether this job has a given advanced (printer specific) print
      * option.
      *
@@ -872,7 +881,7 @@ public final class PrintJobInfo implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<PrintJobInfo> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<PrintJobInfo> CREATOR =
             new Creator<PrintJobInfo>() {
         @Override
         public PrintJobInfo createFromParcel(Parcel parcel) {

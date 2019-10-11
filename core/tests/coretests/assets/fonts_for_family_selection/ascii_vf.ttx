@@ -1,0 +1,1942 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<ttFont sfntVersion="\x00\x01\x00\x00" ttLibVersion="3.0">
+
+  <GlyphOrder>
+    <GlyphID id="0" name=".notdef"/>
+    <GlyphID id="1" name="a"/>
+    <GlyphID id="2" name="b"/>
+    <GlyphID id="3" name="c"/>
+    <GlyphID id="4" name="d"/>
+    <GlyphID id="5" name="e"/>
+    <GlyphID id="6" name="f"/>
+    <GlyphID id="7" name="g"/>
+    <GlyphID id="8" name="h"/>
+    <GlyphID id="9" name="i"/>
+    <GlyphID id="10" name="j"/>
+    <GlyphID id="11" name="k"/>
+    <GlyphID id="12" name="l"/>
+    <GlyphID id="13" name="m"/>
+    <GlyphID id="14" name="n"/>
+    <GlyphID id="15" name="o"/>
+    <GlyphID id="16" name="p"/>
+    <GlyphID id="17" name="q"/>
+    <GlyphID id="18" name="r"/>
+    <GlyphID id="19" name="s"/>
+    <GlyphID id="20" name="t"/>
+    <GlyphID id="21" name="u"/>
+    <GlyphID id="22" name="v"/>
+    <GlyphID id="23" name="w"/>
+    <GlyphID id="24" name="x"/>
+    <GlyphID id="25" name="y"/>
+    <GlyphID id="26" name="z"/>
+  </GlyphOrder>
+
+  <head>
+    <tableVersion value="1.0"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0x640cdb2f"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="50"/>
+    <created value="Thu Feb 22 10:04:28 2018"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="7"/>
+    <fontDirectionHint value="2"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="100"/>
+    <descent value="0"/>
+    <lineGap value="0"/>
+    <caretSlopeRise value="1"/>
+    <caretSlopeRun value="0"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+  </hhea>
+
+  <maxp>
+    <tableVersion value="0x10000"/>
+    <maxZones value="0"/>
+    <maxTwilightPoints value="0"/>
+    <maxStorage value="0"/>
+    <maxFunctionDefs value="0"/>
+    <maxInstructionDefs value="0"/>
+    <maxStackElements value="0"/>
+    <maxSizeOfInstructions value="0"/>
+    <maxComponentElements value="0"/>
+  </maxp>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="3"/>
+    <xAvgCharWidth value="594"/>
+    <usWeightClass value="100"/>
+    <usWidthClass value="5"/>
+    <fsType value="00000000 00001000"/>
+    <ySubscriptXSize value="650"/>
+    <ySubscriptYSize value="600"/>
+    <ySubscriptXOffset value="0"/>
+    <ySubscriptYOffset value="75"/>
+    <ySuperscriptXSize value="650"/>
+    <ySuperscriptYSize value="600"/>
+    <ySuperscriptXOffset value="0"/>
+    <ySuperscriptYOffset value="350"/>
+    <yStrikeoutSize value="50"/>
+    <yStrikeoutPosition value="300"/>
+    <sFamilyClass value="0"/>
+    <panose>
+      <bFamilyType value="0"/>
+      <bSerifStyle value="0"/>
+      <bWeight value="5"/>
+      <bProportion value="0"/>
+      <bContrast value="0"/>
+      <bStrokeVariation value="0"/>
+      <bArmStyle value="0"/>
+      <bLetterForm value="0"/>
+      <bMidline value="0"/>
+      <bXHeight value="0"/>
+    </panose>
+    <ulUnicodeRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulUnicodeRange2 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="UKWN"/>
+    <fsSelection value="00000000 01000000"/>
+    <usFirstCharIndex value="32"/>
+    <usLastCharIndex value="122"/>
+    <sTypoAscender value="800"/>
+    <sTypoDescender value="-200"/>
+    <sTypoLineGap value="200"/>
+    <usWinAscent value="1000"/>
+    <usWinDescent value="200"/>
+    <ulCodePageRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="500"/>
+    <sCapHeight value="700"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="0"/>
+  </OS_2>
+
+  <hmtx>
+    <mtx name=".notdef" width="50" lsb="93"/>
+    <mtx name="a" width="50" lsb="0"/>
+    <mtx name="b" width="50" lsb="0"/>
+    <mtx name="c" width="50" lsb="0"/>
+    <mtx name="d" width="50" lsb="0"/>
+    <mtx name="e" width="50" lsb="0"/>
+    <mtx name="f" width="50" lsb="0"/>
+    <mtx name="g" width="50" lsb="0"/>
+    <mtx name="h" width="50" lsb="0"/>
+    <mtx name="i" width="50" lsb="0"/>
+    <mtx name="j" width="50" lsb="0"/>
+    <mtx name="k" width="50" lsb="0"/>
+    <mtx name="l" width="50" lsb="0"/>
+    <mtx name="m" width="50" lsb="0"/>
+    <mtx name="n" width="50" lsb="0"/>
+    <mtx name="o" width="50" lsb="0"/>
+    <mtx name="p" width="50" lsb="0"/>
+    <mtx name="q" width="50" lsb="0"/>
+    <mtx name="r" width="50" lsb="0"/>
+    <mtx name="s" width="50" lsb="0"/>
+    <mtx name="t" width="50" lsb="0"/>
+    <mtx name="u" width="50" lsb="0"/>
+    <mtx name="v" width="50" lsb="0"/>
+    <mtx name="w" width="50" lsb="0"/>
+    <mtx name="x" width="50" lsb="0"/>
+    <mtx name="y" width="50" lsb="0"/>
+    <mtx name="z" width="50" lsb="0"/>
+  </hmtx>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0">
+        <map code="0x0061" name="a" /> <!-- a -->
+        <map code="0x0062" name="b" /> <!-- b -->
+        <map code="0x0063" name="c" /> <!-- c -->
+        <map code="0x0064" name="d" /> <!-- d -->
+        <map code="0x0065" name="e" /> <!-- e -->
+        <map code="0x0066" name="f" /> <!-- f -->
+        <map code="0x0067" name="g" /> <!-- g -->
+        <map code="0x0068" name="h" /> <!-- h -->
+        <map code="0x0069" name="i" /> <!-- i -->
+        <map code="0x006A" name="j" /> <!-- j -->
+        <map code="0x006B" name="k" /> <!-- k -->
+        <map code="0x006C" name="l" /> <!-- l -->
+        <map code="0x006D" name="m" /> <!-- m -->
+        <map code="0x006E" name="n" /> <!-- n -->
+        <map code="0x006F" name="o" /> <!-- o -->
+        <map code="0x0070" name="p" /> <!-- p -->
+        <map code="0x0071" name="q" /> <!-- q -->
+        <map code="0x0072" name="r" /> <!-- r -->
+        <map code="0x0073" name="s" /> <!-- s -->
+        <map code="0x0074" name="t" /> <!-- t -->
+        <map code="0x0075" name="u" /> <!-- u -->
+        <map code="0x0076" name="v" /> <!-- v -->
+        <map code="0x0077" name="w" /> <!-- w -->
+        <map code="0x0078" name="x" /> <!-- x -->
+        <map code="0x0079" name="y" /> <!-- y -->
+        <map code="0x007A" name="z" /> <!-- z -->
+    </cmap_format_4>
+  </cmap>
+
+  <loca>
+    <!-- The 'loca' table will be calculated by the compiler -->
+  </loca>
+
+  <glyf>
+    <TTGlyph name=".notdef" xMin="0" yMin="0" xMax="0" yMax="0" />
+    <TTGlyph name="a" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="b" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="c" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="d" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="e" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="f" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="g" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="h" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="i" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="j" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="k" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="l" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="m" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="n" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="o" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="p" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="q" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="r" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="s" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="t" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="u" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="v" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="w" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="x" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="y" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+    <TTGlyph name="z" xMin="0" yMin="0" xMax="50" yMax="50">
+      <contour>
+        <pt x="0" y="0" on="1"/>
+        <pt x="50" y="25" on="1"/>
+        <pt x="0" y="50" on="1"/>
+      </contour>
+      <instructions />
+    </TTGlyph>
+  </glyf>
+
+  <fvar>
+    <Axis>
+      <!-- Weight axis but no effects to the glyph. -->
+      <AxisTag>wght</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>400.0</DefaultValue>
+      <MaxValue>1000.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <!-- Italic axis but no effects to the glyph. -->
+      <AxisTag>ital</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asca</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascb</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascc</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascd</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asce</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascf</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascg</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asch</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asci</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascj</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asck</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascl</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascm</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascn</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asco</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascp</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascq</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascr</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascs</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Asct</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascu</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascv</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascw</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascx</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascy</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+    <Axis>
+      <AxisTag>Ascz</AxisTag>
+      <Flags>0x0</Flags>
+      <MinValue>0.0</MinValue>
+      <DefaultValue>0.0</DefaultValue>
+      <MaxValue>1.0</MaxValue>
+      <AxisNameID>256</AxisNameID>
+    </Axis>
+  </fvar>
+
+  <HVAR>
+    <Version value="0x00010000"/>
+    <VarStore Format="1">
+      <Format value="1" />
+      <VarRegionList>
+        <Region index="0">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="1">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="2">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="3">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="4">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="5">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="6">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="7">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="8">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="9">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="10">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="11">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="12">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="13">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="14">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="15">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="16">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="17">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="18">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="19">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="20">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="21">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="22">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="23">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="24">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="25">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+        <Region index="26">
+          <VarRegionAxis index="0"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="1"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="2"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="3"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="4"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="5"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="6"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="7"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="8"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="9"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="10"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="11"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="12"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="13"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="14"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="15"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="16"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="17"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="18"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="19"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="20"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="21"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="22"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="23"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="24"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="25"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="26"><StartCoord value="0" /><PeakCoord value="0" /><EndCoord value="1" /></VarRegionAxis>
+          <VarRegionAxis index="27"><StartCoord value="1" /><PeakCoord value="1" /><EndCoord value="1" /></VarRegionAxis>
+        </Region>
+      </VarRegionList>
+      <VarData index="0">
+        <NumShorts value="0" />
+        <VarRegionIndex index="0" value="0" />
+        <VarRegionIndex index="1" value="1" />
+        <VarRegionIndex index="2" value="2" />
+        <VarRegionIndex index="3" value="3" />
+        <VarRegionIndex index="4" value="4" />
+        <VarRegionIndex index="5" value="5" />
+        <VarRegionIndex index="6" value="6" />
+        <VarRegionIndex index="7" value="7" />
+        <VarRegionIndex index="8" value="8" />
+        <VarRegionIndex index="9" value="9" />
+        <VarRegionIndex index="10" value="10" />
+        <VarRegionIndex index="11" value="11" />
+        <VarRegionIndex index="12" value="12" />
+        <VarRegionIndex index="13" value="13" />
+        <VarRegionIndex index="14" value="14" />
+        <VarRegionIndex index="15" value="15" />
+        <VarRegionIndex index="16" value="16" />
+        <VarRegionIndex index="17" value="17" />
+        <VarRegionIndex index="18" value="18" />
+        <VarRegionIndex index="19" value="19" />
+        <VarRegionIndex index="20" value="20" />
+        <VarRegionIndex index="21" value="21" />
+        <VarRegionIndex index="22" value="22" />
+        <VarRegionIndex index="23" value="23" />
+        <VarRegionIndex index="24" value="24" />
+        <VarRegionIndex index="25" value="25" />
+        <VarRegionIndex index="26" value="26" />
+        <Item index="0" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="1" value="[0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="2" value="[0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="3" value="[0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="4" value="[0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="5" value="[0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="6" value="[0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="7" value="[0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="8" value="[0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="9" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="10" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="11" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="12" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="13" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="14" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="15" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="16" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="17" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="18" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="19" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0]" />
+        <Item index="20" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0]" />
+        <Item index="21" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0]" />
+        <Item index="22" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0]" />
+        <Item index="23" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0]" />
+        <Item index="24" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0]" />
+        <Item index="25" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0]" />
+        <Item index="26" value="[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100]" />
+      </VarData>
+    </VarStore>
+    <AdvWidthMap>
+      <Map index="0" outer="0" inner="0" />
+      <Map index="1" outer="0" inner="1" />
+      <Map index="2" outer="0" inner="2" />
+      <Map index="3" outer="0" inner="3" />
+      <Map index="4" outer="0" inner="4" />
+      <Map index="5" outer="0" inner="5" />
+      <Map index="6" outer="0" inner="6" />
+      <Map index="7" outer="0" inner="7" />
+      <Map index="8" outer="0" inner="8" />
+      <Map index="9" outer="0" inner="9" />
+      <Map index="10" outer="0" inner="10" />
+      <Map index="11" outer="0" inner="11" />
+      <Map index="12" outer="0" inner="12" />
+      <Map index="13" outer="0" inner="13" />
+      <Map index="14" outer="0" inner="14" />
+      <Map index="15" outer="0" inner="15" />
+      <Map index="16" outer="0" inner="16" />
+      <Map index="17" outer="0" inner="17" />
+      <Map index="18" outer="0" inner="18" />
+      <Map index="19" outer="0" inner="19" />
+      <Map index="20" outer="0" inner="20" />
+      <Map index="21" outer="0" inner="21" />
+      <Map index="22" outer="0" inner="22" />
+      <Map index="23" outer="0" inner="23" />
+      <Map index="24" outer="0" inner="24" />
+      <Map index="25" outer="0" inner="25" />
+      <Map index="26" outer="0" inner="26" />
+    </AdvWidthMap>
+  </HVAR>
+
+  <gvar>
+    <version value="1" />
+    <reserved value="0" />
+    <glyphVariations glyph="a">
+      <tuple>
+        <coord axis="Asca" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="b">
+      <tuple>
+        <coord axis="Ascb" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="c">
+      <tuple>
+        <coord axis="Ascc" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="d">
+      <tuple>
+        <coord axis="Ascd" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="e">
+      <tuple>
+        <coord axis="Asce" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="f">
+      <tuple>
+        <coord axis="Ascf" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="g">
+      <tuple>
+        <coord axis="Ascg" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="h">
+      <tuple>
+        <coord axis="Asch" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="i">
+      <tuple>
+        <coord axis="Asci" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="j">
+      <tuple>
+        <coord axis="Ascj" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="k">
+      <tuple>
+        <coord axis="Asck" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="l">
+      <tuple>
+        <coord axis="Ascl" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="m">
+      <tuple>
+        <coord axis="Ascm" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="n">
+      <tuple>
+        <coord axis="Ascn" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="o">
+      <tuple>
+        <coord axis="Asco" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="p">
+      <tuple>
+        <coord axis="Ascp" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="q">
+      <tuple>
+        <coord axis="Ascq" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="r">
+      <tuple>
+        <coord axis="Ascr" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="s">
+      <tuple>
+        <coord axis="Ascs" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="t">
+      <tuple>
+        <coord axis="Asct" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="u">
+      <tuple>
+        <coord axis="Ascu" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="v">
+      <tuple>
+        <coord axis="Ascv" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="w">
+      <tuple>
+        <coord axis="Ascw" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="x">
+      <tuple>
+        <coord axis="Ascx" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="y">
+      <tuple>
+        <coord axis="Ascy" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+    <glyphVariations glyph="z">
+      <tuple>
+        <coord axis="Ascz" value="1.0" />
+        <delta pt="0" x="0" y="0" />
+        <delta pt="1" x="100" y="0" />
+        <delta pt="2" x="0" y="0" />
+        <!-- deltas for phantom points -->
+        <delta pt="3" x="0" y="0" />  <!-- (left, 0) -->
+        <delta pt="4" x="100" y="0" />  <!-- (right, 0) -->
+        <delta pt="5" x="0" y="0" />  <!-- (0, top) -->
+        <delta pt="6" x="0" y="0" />  <!-- (0, bottom) -->
+      </tuple>
+    </glyphVariations>
+  </gvar>
+
+  <name>
+    <namerecord nameID="0" platformID="3" platEncID="1" langID="0x409">
+      Copyright (C) 2018 The Android Open Source Project
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      Sample Font
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      Sample Font
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      SampleFont-Regular
+    </namerecord>
+    <namerecord nameID="13" platformID="3" platEncID="1" langID="0x409">
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+      limitations under the License.
+    </namerecord>
+    <namerecord nameID="14" platformID="3" platEncID="1" langID="0x409">
+      http://www.apache.org/licenses/LICENSE-2.0
+    </namerecord>
+    <namerecord nameID="256" platformID="3" platEncID="1" langID="0x409">
+      3 em signal
+    </namerecord>
+  </name>
+
+  <post>
+    <formatType value="3.0"/>
+    <italicAngle value="0.0"/>
+    <underlinePosition value="-75"/>
+    <underlineThickness value="50"/>
+    <isFixedPitch value="0"/>
+    <minMemType42 value="0"/>
+    <maxMemType42 value="0"/>
+    <minMemType1 value="0"/>
+    <maxMemType1 value="0"/>
+  </post>
+
+</ttFont>

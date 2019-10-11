@@ -15,40 +15,28 @@
  */
 package android.net;
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IIpClientCallbacks;
 import android.net.util.SharedLog;
 import android.os.Binder;
-import android.os.Build;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.text.format.DateUtils;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -60,26 +48,11 @@ public class NetworkStackClient {
     private static final String TAG = NetworkStackClient.class.getSimpleName();
 
     private static final int NETWORKSTACK_TIMEOUT_MS = 10_000;
-    private static final String IN_PROCESS_SUFFIX = ".InProcess";
-    private static final String PREFS_FILE = "NetworkStackClientPrefs.xml";
-    private static final String PREF_KEY_LAST_CRASH_TIME = "lastcrash_time";
-    private static final String CONFIG_MIN_CRASH_INTERVAL_MS = "min_crash_interval";
-    private static final String CONFIG_MIN_UPTIME_BEFORE_CRASH_MS = "min_uptime_before_crash";
-    private static final String CONFIG_ALWAYS_RATELIMIT_NETWORKSTACK_CRASH =
-            "always_ratelimit_networkstack_crash";
-
-    // Even if the network stack is lost, do not crash the system more often than this.
-    // Connectivity would be broken, but if the user needs the device for something urgent
-    // (like calling emergency services) we should not bootloop the device.
-    // This is the default value: the actual value can be adjusted via device config.
-    private static final long DEFAULT_MIN_CRASH_INTERVAL_MS = 6 * DateUtils.HOUR_IN_MILLIS;
-
-    // Even if the network stack is lost, do not crash the system server if it was less than
-    // this much after boot. This avoids bootlooping the device, and crashes should address very
-    // infrequent failures, not failures on boot.
-    private static final long DEFAULT_MIN_UPTIME_BEFORE_CRASH_MS = 30 * DateUtils.MINUTE_IN_MILLIS;
 
     private static NetworkStackClient sInstance;
+
+    @NonNull
+    private final Dependencies mDependencies;
 
     @NonNull
     @GuardedBy("mPendingNetStackRequests")
@@ -93,27 +66,54 @@ public class NetworkStackClient {
 
     private volatile boolean mWasSystemServerInitialized = false;
 
-    @GuardedBy("mHealthListeners")
-    private final ArraySet<NetworkStackHealthListener> mHealthListeners = new ArraySet<>();
-
     private interface NetworkStackCallback {
         void onNetworkStackConnected(INetworkStackConnector connector);
     }
 
-    /**
-     * Callback interface for severe failures of the NetworkStack.
-     *
-     * <p>Useful for health monitors such as PackageWatchdog.
-     */
-    public interface NetworkStackHealthListener {
-        /**
-         * Called when there is a severe failure of the network stack.
-         * @param packageName Package name of the network stack.
-         */
-        void onNetworkStackFailure(@NonNull String packageName);
+    @VisibleForTesting
+    protected NetworkStackClient(@NonNull Dependencies dependencies) {
+        mDependencies = dependencies;
     }
 
-    private NetworkStackClient() { }
+    private NetworkStackClient() {
+        this(new DependenciesImpl());
+    }
+
+    @VisibleForTesting
+    protected interface Dependencies {
+        void addToServiceManager(@NonNull IBinder service);
+        void checkCallerUid();
+        ConnectivityModuleConnector getConnectivityModuleConnector();
+    }
+
+    private static class DependenciesImpl implements Dependencies {
+        @Override
+        public void addToServiceManager(@NonNull IBinder service) {
+            ServiceManager.addService(Context.NETWORK_STACK_SERVICE, service,
+                    false /* allowIsolated */, DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+        }
+
+        @Override
+        public void checkCallerUid() {
+            final int caller = Binder.getCallingUid();
+            // This is a client lib so "caller" is the current UID in most cases. The check is done
+            // here in the caller's process just to provide a nicer error message to clients; more
+            // generic checks are also done in NetworkStackService.
+            // See PermissionUtil in NetworkStack for the actual check on the service side - the
+            // checks here should be kept in sync with PermissionUtil.
+            if (caller != Process.SYSTEM_UID
+                    && caller != Process.NETWORK_STACK_UID
+                    && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)) {
+                throw new SecurityException(
+                        "Only the system server should try to bind to the network stack.");
+            }
+        }
+
+        @Override
+        public ConnectivityModuleConnector getConnectivityModuleConnector() {
+            return ConnectivityModuleConnector.getInstance();
+        }
+    }
 
     /**
      * Get the NetworkStackClient singleton instance.
@@ -123,15 +123,6 @@ public class NetworkStackClient {
             sInstance = new NetworkStackClient();
         }
         return sInstance;
-    }
-
-    /**
-     * Add a {@link NetworkStackHealthListener} to listen to network stack health events.
-     */
-    public void registerHealthListener(@NonNull NetworkStackHealthListener listener) {
-        synchronized (mHealthListeners) {
-            mHealthListeners.add(listener);
-        }
     }
 
     /**
@@ -195,39 +186,18 @@ public class NetworkStackClient {
         });
     }
 
-    private class NetworkStackConnection implements ServiceConnection {
-        @NonNull
-        private final Context mContext;
-        @NonNull
-        private final String mPackageName;
-
-        private NetworkStackConnection(@NonNull Context context, @NonNull String packageName) {
-            mContext = context;
-            mPackageName = packageName;
-        }
-
+    private class NetworkStackConnection implements
+            ConnectivityModuleConnector.ModuleServiceCallback {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public void onModuleServiceConnected(IBinder service) {
             logi("Network stack service connected");
             registerNetworkStackService(service);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            // onServiceDisconnected is not being called on device shutdown, so this method being
-            // called always indicates a bad state for the system server.
-            // This code path is only run by the system server: only the system server binds
-            // to the NetworkStack as a service. Other processes get the NetworkStack from
-            // the ServiceManager.
-            maybeCrashWithTerribleFailure("Lost network stack", mContext, mPackageName);
         }
     }
 
     private void registerNetworkStackService(@NonNull IBinder service) {
         final INetworkStackConnector connector = INetworkStackConnector.Stub.asInterface(service);
-
-        ServiceManager.addService(Context.NETWORK_STACK_SERVICE, service, false /* allowIsolated */,
-                DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+        mDependencies.addToServiceManager(service);
         log("Network stack service registered");
 
         final ArrayList<NetworkStackCallback> requests;
@@ -259,171 +229,11 @@ public class NetworkStackClient {
      * connector will then be delivered asynchronously to clients that requested it before it was
      * started.
      */
-    public void start(Context context) {
-        log("Starting network stack");
-
-        final PackageManager pm = context.getPackageManager();
-
-        // Try to bind in-process if the device was shipped with an in-process version
-        Intent intent = getNetworkStackIntent(pm, true /* inSystemProcess */);
-
-        // Otherwise use the updatable module version
-        if (intent == null) {
-            intent = getNetworkStackIntent(pm, false /* inSystemProcess */);
-            log("Starting network stack process");
-        } else {
-            log("Starting network stack in-process");
-        }
-
-        if (intent == null) {
-            maybeCrashWithTerribleFailure("Could not resolve the network stack", context, null);
-            return;
-        }
-
-        final String packageName = intent.getComponent().getPackageName();
-
-        // Start the network stack. The service will be added to the service manager in
-        // NetworkStackConnection.onServiceConnected().
-        if (!context.bindServiceAsUser(intent, new NetworkStackConnection(context, packageName),
-                Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT, UserHandle.SYSTEM)) {
-            maybeCrashWithTerribleFailure(
-                    "Could not bind to network stack in-process, or in app with " + intent,
-                    context, packageName);
-            return;
-        }
-
+    public void start() {
+        mDependencies.getConnectivityModuleConnector().startModuleService(
+                INetworkStackConnector.class.getName(), PERMISSION_MAINLINE_NETWORK_STACK,
+                new NetworkStackConnection());
         log("Network stack service start requested");
-    }
-
-    @Nullable
-    private Intent getNetworkStackIntent(@NonNull PackageManager pm, boolean inSystemProcess) {
-        final String baseAction = INetworkStackConnector.class.getName();
-        final Intent intent =
-                new Intent(inSystemProcess ? baseAction + IN_PROCESS_SUFFIX : baseAction);
-        final ComponentName comp = intent.resolveSystemService(pm, 0);
-
-        if (comp == null) {
-            return null;
-        }
-        intent.setComponent(comp);
-
-        int uid = -1;
-        try {
-            uid = pm.getPackageUidAsUser(comp.getPackageName(), UserHandle.USER_SYSTEM);
-        } catch (PackageManager.NameNotFoundException e) {
-            logWtf("Network stack package not found", e);
-            // Fall through
-        }
-
-        final int expectedUid = inSystemProcess ? Process.SYSTEM_UID : Process.NETWORK_STACK_UID;
-        if (uid != expectedUid) {
-            throw new SecurityException("Invalid network stack UID: " + uid);
-        }
-
-        if (!inSystemProcess) {
-            checkNetworkStackPermission(pm, comp);
-        }
-
-        return intent;
-    }
-
-    private void checkNetworkStackPermission(
-            @NonNull PackageManager pm, @NonNull ComponentName comp) {
-        final int hasPermission =
-                pm.checkPermission(PERMISSION_MAINLINE_NETWORK_STACK, comp.getPackageName());
-        if (hasPermission != PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "Network stack does not have permission " + PERMISSION_MAINLINE_NETWORK_STACK);
-        }
-    }
-
-    private void maybeCrashWithTerribleFailure(@NonNull String message,
-            @NonNull Context context, @Nullable String packageName) {
-        logWtf(message, null);
-        // Called DeviceConfig to minimize merge conflicts
-        final DeviceConfigStub DeviceConfig = new DeviceConfigStub(context);
-        // uptime is monotonic even after a framework restart
-        final long uptime = SystemClock.elapsedRealtime();
-        final long now = System.currentTimeMillis();
-        final long minCrashIntervalMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_CONNECTIVITY,
-                CONFIG_MIN_CRASH_INTERVAL_MS, DEFAULT_MIN_CRASH_INTERVAL_MS);
-        final long minUptimeBeforeCrash = DeviceConfig.getLong(DeviceConfig.NAMESPACE_CONNECTIVITY,
-                CONFIG_MIN_UPTIME_BEFORE_CRASH_MS, DEFAULT_MIN_UPTIME_BEFORE_CRASH_MS);
-        final boolean alwaysRatelimit = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CONNECTIVITY,
-                CONFIG_ALWAYS_RATELIMIT_NETWORKSTACK_CRASH, false);
-
-        final SharedPreferences prefs = getSharedPreferences(context);
-        final long lastCrashTime = tryGetLastCrashTime(prefs);
-
-        // Only crash if there was enough time since boot, and (if known) enough time passed since
-        // the last crash.
-        // time and lastCrashTime may be unreliable if devices have incorrect clock time, but they
-        // are only used to limit the number of crashes compared to only using the time since boot,
-        // which would also be OK behavior by itself.
-        // - If lastCrashTime is incorrectly more than the current time, only look at uptime
-        // - If it is much less than current time, only look at uptime
-        // - If current time is during the next few hours after last crash time, don't crash.
-        //   Considering that this only matters if last boot was some time ago, it's likely that
-        //   time will be set correctly. Otherwise, not crashing is not a big problem anyway. Being
-        //   in this last state would also not last for long since the window is only a few hours.
-        final boolean alwaysCrash = Build.IS_DEBUGGABLE && !alwaysRatelimit;
-        final boolean justBooted = uptime < minUptimeBeforeCrash;
-        final boolean haveLastCrashTime = (lastCrashTime != 0) && (lastCrashTime < now);
-        final boolean haveKnownRecentCrash =
-                haveLastCrashTime && (now < lastCrashTime + minCrashIntervalMs);
-        if (alwaysCrash || (!justBooted && !haveKnownRecentCrash)) {
-            // The system is not bound to its network stack (for example due to a crash in the
-            // network stack process): better crash rather than stay in a bad state where all
-            // networking is broken.
-            // Using device-encrypted SharedPreferences as DeviceConfig does not have a synchronous
-            // API to persist settings before a crash.
-            tryWriteLastCrashTime(prefs, now);
-            throw new IllegalStateException(message);
-        }
-
-        // Here the system crashed recently already. Inform listeners that something is
-        // definitely wrong.
-        if (packageName != null) {
-            final ArraySet<NetworkStackHealthListener> listeners;
-            synchronized (mHealthListeners) {
-                listeners = new ArraySet<>(mHealthListeners);
-            }
-            for (NetworkStackHealthListener listener : listeners) {
-                listener.onNetworkStackFailure(packageName);
-            }
-        }
-    }
-
-    @Nullable
-    private SharedPreferences getSharedPreferences(@NonNull Context context) {
-        try {
-            final File prefsFile = new File(
-                    Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM), PREFS_FILE);
-            return context.createDeviceProtectedStorageContext()
-                    .getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
-        } catch (Throwable e) {
-            logWtf("Error loading shared preferences", e);
-            return null;
-        }
-    }
-
-    private long tryGetLastCrashTime(@Nullable SharedPreferences prefs) {
-        if (prefs == null) return 0L;
-        try {
-            return prefs.getLong(PREF_KEY_LAST_CRASH_TIME, 0L);
-        } catch (Throwable e) {
-            logWtf("Error getting last crash time", e);
-            return 0L;
-        }
-    }
-
-    private void tryWriteLastCrashTime(@Nullable SharedPreferences prefs, long value) {
-        if (prefs == null) return;
-        try {
-            prefs.edit().putLong(PREF_KEY_LAST_CRASH_TIME, value).commit();
-        } catch (Throwable e) {
-            logWtf("Error writing last crash time", e);
-        }
     }
 
     /**
@@ -486,16 +296,7 @@ public class NetworkStackClient {
     }
 
     private void requestConnector(@NonNull NetworkStackCallback request) {
-        // TODO: PID check.
-        final int caller = Binder.getCallingUid();
-        if (caller != Process.SYSTEM_UID
-                && caller != Process.NETWORK_STACK_UID
-                && !UserHandle.isSameApp(caller, Process.BLUETOOTH_UID)
-                && !UserHandle.isSameApp(caller, Process.PHONE_UID)) {
-            // Don't even attempt to obtain the connector and give a nice error message
-            throw new SecurityException(
-                    "Only the system server should try to bind to the network stack.");
-        }
+        mDependencies.checkCallerUid();
 
         if (!mWasSystemServerInitialized) {
             // The network stack is not being started in this process, e.g. this process is not
@@ -526,6 +327,8 @@ public class NetworkStackClient {
     public void dump(PrintWriter pw) {
         // dump is thread-safe on SharedLog
         mLog.dump(null, pw, null);
+        // dump connectivity module connector logs.
+        ConnectivityModuleConnector.getInstance().dump(pw);
 
         final int requestsQueueLength;
         synchronized (mPendingNetStackRequests) {
@@ -534,37 +337,5 @@ public class NetworkStackClient {
 
         pw.println();
         pw.println("pendingNetStackRequests length: " + requestsQueueLength);
-    }
-
-    /**
-     * Stub class to replicate DeviceConfig behavior with minimal merge conflicts.
-     */
-    private class DeviceConfigStub {
-        private final Context mContext;
-
-        // Namespace is actually unused, but is here to replicate the final API.
-        private static final String NAMESPACE_CONNECTIVITY = "connectivity";
-
-        private DeviceConfigStub(Context context) {
-            mContext = context;
-        }
-
-        private long getLong(
-                @NonNull String namespace, @NonNull String key, long defaultVal) {
-            // Temporary solution until DeviceConfig is available
-            try {
-                return Settings.Global.getLong(
-                        mContext.getContentResolver(), TAG + "_" + key, defaultVal);
-            } catch (Throwable e) {
-                logWtf("Could not obtain setting " + key, e);
-                return defaultVal;
-            }
-        }
-
-        private boolean getBoolean(
-                @NonNull String namespace, @NonNull String key, boolean defaultVal) {
-            // Temporary solution until DeviceConfig is available
-            return getLong(namespace, key, defaultVal ? 1 : 0) != 0;
-        }
     }
 }

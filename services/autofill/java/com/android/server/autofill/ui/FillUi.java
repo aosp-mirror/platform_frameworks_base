@@ -19,27 +19,22 @@ import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
-import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 
-import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.view.ContextThemeWrapper;
-import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,7 +49,6 @@ import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -63,6 +57,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.server.UiThread;
+import com.android.server.autofill.AutofillManagerService;
 import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
@@ -76,7 +71,10 @@ import java.util.stream.Collectors;
 final class FillUi {
     private static final String TAG = "FillUi";
 
-    private static final int THEME_ID = com.android.internal.R.style.Theme_DeviceDefault_Autofill;
+    private static final int THEME_ID_LIGHT =
+            com.android.internal.R.style.Theme_DeviceDefault_Light_Autofill;
+    private static final int THEME_ID_DARK =
+            com.android.internal.R.style.Theme_DeviceDefault_Autofill;
 
     private static final TypedValue sTempTypedValue = new TypedValue();
 
@@ -120,6 +118,8 @@ final class FillUi {
 
     private boolean mDestroyed;
 
+    private final int mThemeId;
+
     public static boolean isFullScreen(Context context) {
         if (sFullScreenMode != null) {
             if (sVerbose) Slog.v(TAG, "forcing full-screen mode to " + sFullScreenMode);
@@ -131,10 +131,13 @@ final class FillUi {
     FillUi(@NonNull Context context, @NonNull FillResponse response,
            @NonNull AutofillId focusedViewId, @NonNull @Nullable String filterText,
            @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
-           @NonNull Drawable serviceIcon, @NonNull Callback callback) {
+           @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
+        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
         mFullScreen = isFullScreen(context);
-        mContext = new ContextThemeWrapper(context, THEME_ID);
+        mContext = new ContextThemeWrapper(context, mThemeId);
+
         final LayoutInflater inflater = LayoutInflater.from(mContext);
 
         final RemoteViews headerPresentation = response.getHeader();
@@ -148,6 +151,7 @@ final class FillUi {
         } else {
             decor = (ViewGroup) inflater.inflate(R.layout.autofill_dataset_picker, null);
         }
+        decor.setClipToOutline(true);
         final TextView titleView = decor.findViewById(R.id.autofill_dataset_title);
         if (titleView != null) {
             titleView.setText(mContext.getString(R.string.autofill_window_title, serviceLabel));
@@ -188,8 +192,8 @@ final class FillUi {
             }
         });
 
-        if (sVisibleDatasetsMaxCount > 0) {
-            mVisibleDatasetsMaxCount = sVisibleDatasetsMaxCount;
+        if (AutofillManagerService.getVisibleDatasetsMaxCount() > 0) {
+            mVisibleDatasetsMaxCount = AutofillManagerService.getVisibleDatasetsMaxCount();
             if (sVerbose) {
                 Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
             }
@@ -198,15 +202,11 @@ final class FillUi {
                     .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
         }
 
-        final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
-            @Override
-            public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                    Intent fillInIntent) {
-                if (pendingIntent != null) {
-                    mCallback.startIntentSender(pendingIntent.getIntentSender());
-                }
-                return true;
+        final RemoteViews.OnClickHandler interceptionHandler = (view, pendingIntent, r) -> {
+            if (pendingIntent != null) {
+                mCallback.startIntentSender(pendingIntent.getIntentSender());
             }
+            return true;
         };
 
         if (response.getAuthentication() != null) {
@@ -219,8 +219,8 @@ final class FillUi {
             ViewGroup container = decor.findViewById(R.id.autofill_dataset_picker);
             final View content;
             try {
-                response.getPresentation().setApplyTheme(THEME_ID);
-                content = response.getPresentation().apply(mContext, decor, interceptionHandler);
+                content = response.getPresentation().applyWithTheme(
+                        mContext, decor, interceptionHandler, mThemeId);
                 container.addView(content);
             } catch (RuntimeException e) {
                 callback.onCanceled();
@@ -260,8 +260,7 @@ final class FillUi {
             RemoteViews.OnClickHandler clickBlocker = null;
             if (headerPresentation != null) {
                 clickBlocker = newClickBlocker();
-                headerPresentation.setApplyTheme(THEME_ID);
-                mHeader = headerPresentation.apply(mContext, null, clickBlocker);
+                mHeader = headerPresentation.applyWithTheme(mContext, null, clickBlocker, mThemeId);
                 final LinearLayout headerContainer =
                         decor.findViewById(R.id.autofill_dataset_header);
                 if (sVerbose) Slog.v(TAG, "adding header");
@@ -278,8 +277,8 @@ final class FillUi {
                     if (clickBlocker == null) { // already set for header
                         clickBlocker = newClickBlocker();
                     }
-                    footerPresentation.setApplyTheme(THEME_ID);
-                    mFooter = footerPresentation.apply(mContext, null, clickBlocker);
+                    mFooter = footerPresentation.applyWithTheme(
+                            mContext, null, clickBlocker, mThemeId);
                     // Footer not supported on some platform e.g. TV
                     if (sVerbose) Slog.v(TAG, "adding footer");
                     footerContainer.addView(mFooter);
@@ -305,8 +304,8 @@ final class FillUi {
                     final View view;
                     try {
                         if (sVerbose) Slog.v(TAG, "setting remote view for " + focusedViewId);
-                        presentation.setApplyTheme(THEME_ID);
-                        view = presentation.apply(mContext, null, interceptionHandler);
+                        view = presentation.applyWithTheme(
+                                mContext, null, interceptionHandler, mThemeId);
                     } catch (RuntimeException e) {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
@@ -364,13 +363,9 @@ final class FillUi {
      * Creates a remoteview interceptor used to block clicks.
      */
     private RemoteViews.OnClickHandler newClickBlocker() {
-        return new RemoteViews.OnClickHandler() {
-            @Override
-            public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                    Intent fillInIntent) {
-                if (sVerbose) Slog.v(TAG, "Ignoring click on " + view);
-                return true;
-            }
+        return (view, pendingIntent, response) -> {
+            if (sVerbose) Slog.v(TAG, "Ignoring click on " + view);
+            return true;
         };
     }
 
@@ -679,7 +674,7 @@ final class FillUi {
                 // WM throws an ISE if mContentView was added twice; this should never happen -
                 // since show() and hide() are always called in the UIThread - but when it does,
                 // it should not crash the system.
-                Slog.e(TAG, "Exception showing window " + params, e);
+                Slog.wtf(TAG, "Exception showing window " + params, e);
                 mCallback.onDestroy();
             }
         }
@@ -735,6 +730,18 @@ final class FillUi {
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
         pw.print(prefix); pw.print("mContentHeight: "); pw.println(mContentHeight);
         pw.print(prefix); pw.print("mDestroyed: "); pw.println(mDestroyed);
+        pw.print(prefix); pw.print("theme id: "); pw.print(mThemeId);
+        switch (mThemeId) {
+            case THEME_ID_DARK:
+                pw.println(" (dark)");
+                break;
+            case THEME_ID_LIGHT:
+                pw.println(" (light)");
+                break;
+            default:
+                pw.println("(UNKNOWN_MODE)");
+                break;
+        }
         if (mWindow != null) {
             pw.print(prefix); pw.print("mWindow: ");
             final String prefix2 = prefix + "  ";
