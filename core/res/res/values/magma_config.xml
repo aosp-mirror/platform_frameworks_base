@@ -56,4 +56,10 @@
     <!-- Whether to allow process with media UID to access CameraServiceProxy -->
     <bool name="config_allowMediaUidForCameraServiceProxy">false</bool>
 
+    <!-- Default number of max cached processes -->
+    <integer name="config_defaultMaxCachedProcesses">32</integer>
+
+    <!-- Default number of processes before start trimming. 0 = calc from config_defaultMaxCachedProcesses -->
+    <integer name="config_defaultTrimCachedProcesses">0</integer>
+
 </resources>

@@ -78,7 +78,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_MEMORY_INFO_THROTTLE_TIME = "memory_info_throttle_time";
     static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
 
-    private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
+    private static int DEFAULT_MAX_CACHED_PROCESSES;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
     private static final long DEFAULT_FGSERVICE_MIN_REPORT_TIME = 3*1000;
@@ -259,6 +259,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     private int mOverrideMaxCachedProcesses = -1;
+    private int mDefaultTrimCachedProcesses;
 
     // The maximum number of cached processes we will keep around before killing them.
     // NOTE: this constant is *only* a control to not let us go too crazy with
@@ -334,6 +335,10 @@ final class ActivityManagerConstants extends ContentObserver {
                 MIN_AUTOMATIC_HEAP_DUMP_PSS_THRESHOLD_BYTES,
                 context.getResources().getInteger(
                         com.android.internal.R.integer.config_debugSystemServerPssThresholdBytes));
+        DEFAULT_MAX_CACHED_PROCESSES = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultMaxCachedProcesses);
+        mDefaultTrimCachedProcesses = context.getResources().getInteger(
+                com.android.internal.R.integer.config_defaultTrimCachedProcesses);
     }
 
     public void start(ContentResolver resolver) {
@@ -511,7 +516,11 @@ final class ActivityManagerConstants extends ContentObserver {
         // additional enforced limit.
         final int rawMaxEmptyProcesses = computeEmptyProcessLimit(MAX_CACHED_PROCESSES);
         CUR_TRIM_EMPTY_PROCESSES = rawMaxEmptyProcesses/2;
-        CUR_TRIM_CACHED_PROCESSES = (MAX_CACHED_PROCESSES-rawMaxEmptyProcesses)/3;
+        if (mDefaultTrimCachedProcesses != 0) {
+            CUR_TRIM_CACHED_PROCESSES = mDefaultTrimCachedProcesses;
+        } else {
+            CUR_TRIM_CACHED_PROCESSES = (CUR_MAX_CACHED_PROCESSES-rawMaxEmptyProcesses)/3;
+        }
     }
 
     void dump(PrintWriter pw) {

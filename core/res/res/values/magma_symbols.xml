@@ -51,4 +51,10 @@
     <!-- Whether to allow process with media UID to access CameraServiceProxy -->
     <java-symbol type="bool" name="config_allowMediaUidForCameraServiceProxy" />
 
+    <!-- Default number of max cached processes -->
+    <java-symbol type="integer" name="config_defaultMaxCachedProcesses" />
+
+    <!-- Default number of processes before start trimming -->
+    <java-symbol type="integer" name="config_defaultTrimCachedProcesses" />
+
 </resources>
