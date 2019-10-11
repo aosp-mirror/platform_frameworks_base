@@ -152,7 +152,9 @@ public class NavigationBarController implements Callbacks {
             //                    Dependency problem.
             AutoHideController autoHideController = isOnDefaultDisplay
                     ? Dependency.get(AutoHideController.class)
-                    : new AutoHideController(context, mHandler);
+                    : new AutoHideController(context, mHandler,
+                            Dependency.get(NotificationRemoteInputManager.class),
+                            Dependency.get(IWindowManager.class));
             navBar.setAutoHideController(autoHideController);
             navBar.restoreSystemUiVisibilityState();
             mNavigationBars.append(displayId, navBar);

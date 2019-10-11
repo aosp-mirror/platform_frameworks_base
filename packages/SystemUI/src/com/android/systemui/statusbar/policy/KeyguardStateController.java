@@ -146,7 +146,7 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     /** **/
     default void notifyKeyguardDoneFading() {}
     /** **/
-    default void notifyKeyguardState(boolean showing, boolean methodSecure, boolean occluded) {}
+    default void notifyKeyguardState(boolean showing, boolean occluded) {}
 
     /**
      * Callback for authentication events.

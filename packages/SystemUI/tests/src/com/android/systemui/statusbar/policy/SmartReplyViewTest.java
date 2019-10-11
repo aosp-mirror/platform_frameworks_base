@@ -52,6 +52,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
@@ -115,6 +116,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         });
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
         mDependency.injectMockDependency(ShadeController.class);
+        mDependency.injectMockDependency(NotificationRemoteInputManager.class);
         mDependency.injectTestDependency(ActivityStarter.class, mActivityStarter);
         mDependency.injectTestDependency(SmartReplyConstants.class, mConstants);
 

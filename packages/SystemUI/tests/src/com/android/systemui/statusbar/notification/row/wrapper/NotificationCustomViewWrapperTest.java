@@ -44,7 +44,7 @@ public class NotificationCustomViewWrapperTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        mRow = new NotificationTestHelper(mContext).createRow();
+        mRow = new NotificationTestHelper(mContext, mDependency).createRow();
     }
 
     @Test

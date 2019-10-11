@@ -158,7 +158,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         mStatusBarWindowController.add(mStatusBarView, 120 /* height */);
 
         // Need notifications for bubbles
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
         mRow = mNotificationTestHelper.createBubble(mDeleteIntent);
         mRow2 = mNotificationTestHelper.createBubble(mDeleteIntent);
         mNonBubbleNotifRow = mNotificationTestHelper.createRow();

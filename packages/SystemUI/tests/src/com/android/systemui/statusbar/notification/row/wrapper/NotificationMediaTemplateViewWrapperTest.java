@@ -94,7 +94,7 @@ public class NotificationMediaTemplateViewWrapperTest extends SysuiTestCase {
         mNotif = builder.build();
         assertTrue(mNotif.hasMediaSession());
 
-        mRow = new NotificationTestHelper(mContext).createRow(mNotif);
+        mRow = new NotificationTestHelper(mContext, mDependency).createRow(mNotif);
 
         RemoteViews views = new RemoteViews(mContext.getPackageName(),
                 com.android.internal.R.layout.notification_template_material_big_media);

@@ -70,7 +70,7 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 mBypassController,
                 new NotificationSectionsFeatureManager(new DeviceConfigProxy(), mContext));
         com.android.systemui.util.Assert.sMainLooper = TestableLooper.get(this).getLooper();
-        NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
+        NotificationTestHelper testHelper = new NotificationTestHelper(getContext(), mDependency);
         mFirst = testHelper.createRow();
         mFirst.setHeadsUpAnimatingAwayListener(animatingAway
                 -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mFirst, animatingAway));
@@ -150,7 +150,8 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 createSection(mFirst, mSecond),
                 createSection(null, null)
         });
-        ExpandableNotificationRow row = new NotificationTestHelper(getContext()).createRow();
+        ExpandableNotificationRow row = new NotificationTestHelper(getContext(), mDependency)
+                .createRow();
         NotificationEntry entry = mock(NotificationEntry.class);
         when(entry.getRow()).thenReturn(row);
 

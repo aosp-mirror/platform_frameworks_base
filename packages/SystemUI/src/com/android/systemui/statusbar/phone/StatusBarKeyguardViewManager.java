@@ -33,6 +33,8 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.WindowManagerGlobal;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -60,8 +62,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import androidx.annotation.VisibleForTesting;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
@@ -301,8 +301,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void show(Bundle options) {
         mShowing = true;
         mStatusBarWindowController.setKeyguardShowing(true);
-        mKeyguardStateController.notifyKeyguardState(
-                mShowing, mKeyguardStateController.isMethodSecure(),
+        mKeyguardStateController.notifyKeyguardState(mShowing,
                 mKeyguardStateController.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
         StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
@@ -545,7 +544,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
         mKeyguardStateController.notifyKeyguardState(mShowing,
-                mKeyguardStateController.isMethodSecure(), mKeyguardStateController.isOccluded());
+                mKeyguardStateController.isOccluded());
         launchPendingWakeupAction();
 
         if (Dependency.get(KeyguardUpdateMonitor.class).needsSlowUnlockTransition()) {

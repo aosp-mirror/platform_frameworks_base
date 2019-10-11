@@ -88,7 +88,7 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectMockDependency(BubbleController.class);
 
-        mHelper = new NotificationTestHelper(mContext);
+        mHelper = new NotificationTestHelper(mContext, mDependency);
 
         mBlockingHelperManager = new NotificationBlockingHelperManager(mContext);
         // By default, have the shade visible/expanded.

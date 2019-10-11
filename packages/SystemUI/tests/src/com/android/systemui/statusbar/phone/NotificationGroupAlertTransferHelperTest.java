@@ -33,6 +33,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -71,6 +72,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
     @Before
     public void setup() {
+        mDependency.injectMockDependency(BubbleController.class);
         mHeadsUpManager = new HeadsUpManager(mContext) {};
 
         when(mNotificationEntryManager.getPendingNotificationsIterator())

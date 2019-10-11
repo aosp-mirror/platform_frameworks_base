@@ -473,8 +473,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private NotificationIconAreaController mIconAreaController;
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final Rect mTmpRect = new Rect();
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
@@ -497,8 +496,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private NotificationPanelView mNotificationPanel;
     private final ShadeController mShadeController = Dependency.get(ShadeController.class);
 
-    private final NotificationGutsManager
-            mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
+    private final NotificationGutsManager mNotificationGutsManager;
     private final NotificationSectionsManager mSectionsManager;
     private boolean mAnimateBottomOnLayout;
     private float mLastSentAppear;
@@ -518,6 +516,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             HeadsUpManagerPhone headsUpManager,
             KeyguardBypassController keyguardBypassController,
             FalsingManager falsingManager,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            NotificationGutsManager notificationGutsManager,
             NotificationSectionsFeatureManager sectionsFeatureManager) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
@@ -526,6 +526,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         mRoundnessManager = notificationRoundnessManager;
 
+        mLockscreenUserManager = notificationLockscreenUserManager;
+        mNotificationGutsManager = notificationGutsManager;
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(mRoundnessManager);
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);

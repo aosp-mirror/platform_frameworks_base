@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import com.google.android.collect.Lists;
 
@@ -83,6 +84,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);
+        mDependency.injectMockDependency(KeyguardStateController.class);
 
         mContext.addMockSystemService(UserManager.class, mUserManager);
         mCurrentUserId = ActivityManager.getCurrentUser();

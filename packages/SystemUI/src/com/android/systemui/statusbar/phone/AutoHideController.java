@@ -29,7 +29,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -68,12 +67,14 @@ public class AutoHideController implements CommandQueue.Callbacks {
     };
 
     @Inject
-    public AutoHideController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler) {
+    public AutoHideController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler,
+            NotificationRemoteInputManager notificationRemoteInputManager,
+            IWindowManager iWindowManager) {
         mCommandQueue = SysUiServiceProvider.getComponent(context, CommandQueue.class);
         mCommandQueue.addCallback(this);
         mHandler = handler;
-        mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
-        mWindowManagerService = Dependency.get(IWindowManager.class);
+        mRemoteInputManager = notificationRemoteInputManager;
+        mWindowManagerService = iWindowManager;
 
         mDisplayId = context.getDisplayId();
     }

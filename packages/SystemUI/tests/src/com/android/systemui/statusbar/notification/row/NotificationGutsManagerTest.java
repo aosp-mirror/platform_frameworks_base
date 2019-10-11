@@ -62,6 +62,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -118,9 +119,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 mDeviceProvisionedController);
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mHandler = Handler.createAsync(mTestableLooper.getLooper());
         mContext.putComponent(StatusBar.class, mStatusBar);
-        mHelper = new NotificationTestHelper(mContext);
+        mHelper = new NotificationTestHelper(mContext, mDependency);
 
         mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,

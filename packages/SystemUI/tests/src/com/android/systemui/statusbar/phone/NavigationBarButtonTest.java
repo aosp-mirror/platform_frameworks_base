@@ -35,7 +35,10 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,6 +66,9 @@ public class NavigationBarButtonTest extends SysuiTestCase {
                 (SysuiTestableContext) mContext.createDisplayContext(display);
         context.putComponent(CommandQueue.class, mock(CommandQueue.class));
 
+        mDependency.injectMockDependency(AssistManager.class);
+        mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(KeyguardStateController.class);
         mNavBar = new NavigationBarView(context, null);
     }
 

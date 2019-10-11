@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
@@ -461,8 +462,11 @@ public class NotificationPanelView extends PanelView implements
             ShadeController shadeController,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
+            KeyguardStateController keyguardStateController,
+            StatusBarStateController statusBarStateController,
             DozeLog dozeLog) {
-        super(context, attrs, falsingManager, dozeLog);
+        super(context, attrs, falsingManager, dozeLog, keyguardStateController,
+                (SysuiStatusBarStateController) statusBarStateController);
         setWillNotDraw(!DEBUG);
         mInjectionInflationController = injectionInflationController;
         mFalsingManager = falsingManager;

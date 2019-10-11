@@ -52,7 +52,7 @@ import org.mockito.MockitoAnnotations;
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
