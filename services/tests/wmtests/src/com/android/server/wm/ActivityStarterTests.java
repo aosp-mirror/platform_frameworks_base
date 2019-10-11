@@ -1006,4 +1006,18 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setOutActivity(outActivity).execute();
         assertThat(outActivity[0].inSplitScreenSecondaryWindowingMode()).isTrue();
     }
+
+    @Test
+    public void testActivityStart_expectAddedToRecentTask() {
+        RecentTasks recentTasks = mock(RecentTasks.class);
+        mService.mStackSupervisor.setRecentTasks(recentTasks);
+        doReturn(true).when(recentTasks).isCallerRecents(anyInt());
+
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+
+        starter.setReason("testAddToTaskListOnActivityStart")
+                .execute();
+
+        verify(recentTasks, times(1)).add(any());
+    }
 }
