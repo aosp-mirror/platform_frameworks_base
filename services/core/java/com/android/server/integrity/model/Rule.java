@@ -78,8 +78,8 @@ public final class Rule {
             return false;
         }
         Rule that = (Rule) o;
-        return mFormula.equals(that.mFormula)
-                && mEffect == that.mEffect;
+        return Objects.equals(mFormula, that.mFormula)
+                && Objects.equals(mEffect, that.mEffect);
     }
 
     @Override
