@@ -23,55 +23,55 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
- * Keeps track of all {@link AppWindowToken} that are animating and makes sure all animations are
+ * Keeps track of all {@link ActivityRecord} that are animating and makes sure all animations are
  * finished at the same time such that we don't run into issues with z-ordering: An activity A
  * that has a shorter animation that is above another activity B with a longer animation in the same
  * task, the animation layer would put the B on top of A, but from the hierarchy, A needs to be on
  * top of B. Thus, we defer reparenting A to the original hierarchy such that it stays on top of B
  * until B finishes animating.
  */
-class AnimatingAppWindowTokenRegistry {
+class AnimatingActivityRegistry {
 
-    private ArraySet<AppWindowToken> mAnimatingTokens = new ArraySet<>();
-    private ArrayMap<AppWindowToken, Runnable> mFinishedTokens = new ArrayMap<>();
+    private ArraySet<ActivityRecord> mAnimatingActivities = new ArraySet<>();
+    private ArrayMap<ActivityRecord, Runnable> mFinishedTokens = new ArrayMap<>();
 
     private ArrayList<Runnable> mTmpRunnableList = new ArrayList<>();
 
     private boolean mEndingDeferredFinish;
 
     /**
-     * Notifies that an {@link AppWindowToken} has started animating.
+     * Notifies that an {@link ActivityRecord} has started animating.
      */
-    void notifyStarting(AppWindowToken token) {
-        mAnimatingTokens.add(token);
+    void notifyStarting(ActivityRecord token) {
+        mAnimatingActivities.add(token);
     }
 
     /**
-     * Notifies that an {@link AppWindowToken} has finished animating.
+     * Notifies that an {@link ActivityRecord} has finished animating.
      */
-    void notifyFinished(AppWindowToken token) {
-        mAnimatingTokens.remove(token);
-        mFinishedTokens.remove(token);
+    void notifyFinished(ActivityRecord activity) {
+        mAnimatingActivities.remove(activity);
+        mFinishedTokens.remove(activity);
 
-        // If we were the last token, make sure the end all deferred finishes.
-        if (mAnimatingTokens.isEmpty()) {
+        // If we were the last activity, make sure the end all deferred finishes.
+        if (mAnimatingActivities.isEmpty()) {
             endDeferringFinished();
         }
     }
 
     /**
-     * Called when an {@link AppWindowToken} is about to finish animating.
+     * Called when an {@link ActivityRecord} is about to finish animating.
      *
      * @param endDeferFinishCallback Callback to run when defer finish should be ended.
      * @return {@code true} if finishing the animation should be deferred, {@code false} otherwise.
      */
-    boolean notifyAboutToFinish(AppWindowToken token, Runnable endDeferFinishCallback) {
-        final boolean removed = mAnimatingTokens.remove(token);
+    boolean notifyAboutToFinish(ActivityRecord activity, Runnable endDeferFinishCallback) {
+        final boolean removed = mAnimatingActivities.remove(activity);
         if (!removed) {
             return false;
         }
 
-        if (mAnimatingTokens.isEmpty()) {
+        if (mAnimatingActivities.isEmpty()) {
 
             // If no animations are animating anymore, finish all others.
             endDeferringFinished();
@@ -79,7 +79,7 @@ class AnimatingAppWindowTokenRegistry {
         } else {
 
             // Otherwise let's put it into the pending list of to be finished animations.
-            mFinishedTokens.put(token, endDeferFinishCallback);
+            mFinishedTokens.put(activity, endDeferFinishCallback);
             return true;
         }
     }
@@ -110,10 +110,10 @@ class AnimatingAppWindowTokenRegistry {
     }
 
     void dump(PrintWriter pw, String header, String prefix) {
-        if (!mAnimatingTokens.isEmpty() || !mFinishedTokens.isEmpty()) {
+        if (!mAnimatingActivities.isEmpty() || !mFinishedTokens.isEmpty()) {
             pw.print(prefix); pw.println(header);
             prefix = prefix + "  ";
-            pw.print(prefix); pw.print("mAnimatingTokens="); pw.println(mAnimatingTokens);
+            pw.print(prefix); pw.print("mAnimatingActivities="); pw.println(mAnimatingActivities);
             pw.print(prefix); pw.print("mFinishedTokens="); pw.println(mFinishedTokens);
         }
     }

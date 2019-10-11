@@ -136,7 +136,7 @@ class TaskSnapshotSurface implements StartingSurface {
     private final int mOrientationOnCreation;
     private final SurfaceControl.Transaction mTransaction;
 
-    static TaskSnapshotSurface create(WindowManagerService service, AppWindowToken token,
+    static TaskSnapshotSurface create(WindowManagerService service, ActivityRecord activity,
             TaskSnapshot snapshot) {
 
         final WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -159,23 +159,24 @@ class TaskSnapshotSurface implements StartingSurface {
         final int windowPrivateFlags;
         final int currentOrientation;
         synchronized (service.mGlobalLock) {
-            final WindowState mainWindow = token.findMainWindow();
-            final Task task = token.getTask();
+            final WindowState mainWindow = activity.findMainWindow();
+            final Task task = activity.getTask();
             if (task == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for token="
-                        + token);
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find task for activity="
+                        + activity);
                 return null;
             }
-            final AppWindowToken topFullscreenToken = token.getTask().getTopFullscreenAppToken();
-            if (topFullscreenToken == null) {
+            final ActivityRecord topFullscreenActivity =
+                    activity.getTask().getTopFullscreenActivity();
+            if (topFullscreenActivity == null) {
                 Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find top fullscreen for task="
                         + task);
                 return null;
             }
-            final WindowState topFullscreenWindow = topFullscreenToken.getTopFullscreenWindow();
+            final WindowState topFullscreenWindow = topFullscreenActivity.getTopFullscreenWindow();
             if (mainWindow == null || topFullscreenWindow == null) {
-                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for token="
-                        + token);
+                Slog.w(TAG, "TaskSnapshotSurface.create: Failed to find main window for activity="
+                        + activity);
                 return null;
             }
             sysUiVis = topFullscreenWindow.getSystemUiVisibility();
@@ -191,7 +192,7 @@ class TaskSnapshotSurface implements StartingSurface {
                     | FLAG_NOT_FOCUSABLE
                     | FLAG_NOT_TOUCHABLE;
             layoutParams.privateFlags = windowPrivateFlags & PRIVATE_FLAG_INHERITS;
-            layoutParams.token = token.token;
+            layoutParams.token = activity.token;
             layoutParams.width = LayoutParams.MATCH_PARENT;
             layoutParams.height = LayoutParams.MATCH_PARENT;
             layoutParams.systemUiVisibility = sysUiVis;
@@ -207,7 +208,7 @@ class TaskSnapshotSurface implements StartingSurface {
         }
         try {
             final int res = session.addToDisplay(window, window.mSeq, layoutParams,
-                    View.GONE, token.getDisplayContent().getDisplayId(), tmpFrame, tmpRect, tmpRect,
+                    View.GONE, activity.getDisplayContent().getDisplayId(), tmpFrame, tmpRect, tmpRect,
                     tmpRect, tmpCutout, null, mTmpInsetsState);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);

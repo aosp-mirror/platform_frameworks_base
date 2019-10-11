@@ -172,7 +172,7 @@ class TaskPositioningController {
         // on top (eg. a dialog window).
         WindowState transferFocusFromWin = win;
         if (displayContent.mCurrentFocus != null && displayContent.mCurrentFocus != win
-                && displayContent.mCurrentFocus.mAppToken == win.mAppToken) {
+                && displayContent.mCurrentFocus.mActivityRecord == win.mActivityRecord) {
             transferFocusFromWin = displayContent.mCurrentFocus;
         }
         if (!mInputManager.transferTouchFocus(

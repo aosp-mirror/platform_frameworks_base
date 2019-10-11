@@ -200,22 +200,22 @@ class WindowTestsBase extends SystemServiceTestsBase {
                 return WindowTestUtils.createTestWindowToken(type, dc);
             }
 
-            return createAppWindowToken(dc, windowingMode, activityType);
+            return createActivityRecord(dc, windowingMode, activityType);
         }
     }
 
-    ActivityRecord createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
-        return createTestAppWindowToken(dc, windowingMode, activityType);
+    ActivityRecord createActivityRecord(DisplayContent dc, int windowingMode, int activityType) {
+        return createTestActivityRecord(dc, windowingMode, activityType);
     }
 
-    ActivityRecord createTestAppWindowToken(DisplayContent dc, int
+    ActivityRecord createTestActivityRecord(DisplayContent dc, int
             windowingMode, int activityType) {
         final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord appWindowToken =
-                WindowTestUtils.createTestAppWindowToken(dc);
-        task.addChild(appWindowToken, 0);
-        return appWindowToken;
+        final ActivityRecord activity =
+                WindowTestUtils.createTestActivityRecord(dc);
+        task.addChild(activity, 0);
+        return activity;
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
@@ -244,9 +244,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     WindowState createAppWindow(Task task, int type, String name) {
         synchronized (mWm.mGlobalLock) {
-            final ActivityRecord token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-            task.addChild(token, 0);
-            return createWindow(null, type, token, name);
+            final ActivityRecord activity =
+                    WindowTestUtils.createTestActivityRecord(mDisplayContent);
+            task.addChild(activity, 0);
+            return createWindow(null, type, activity, name);
         }
     }
 

@@ -54,7 +54,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* reducedResolution */));
-        mCache.onAppRemoved(window.mAppToken);
+        mCache.onAppRemoved(window.mActivityRecord);
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* reducedResolution */));
     }
@@ -65,7 +65,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* reducedResolution */));
-        mCache.onAppDied(window.mAppToken);
+        mCache.onAppDied(window.mActivityRecord);
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
                 false /* restoreFromDisk */, false /* reducedResolution */));
     }

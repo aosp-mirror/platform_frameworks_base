@@ -57,9 +57,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTranslucentOpen() {
-        final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+        final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
+        final ActivityRecord translucentOpening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         translucentOpening.setOccludesParent(false);
         translucentOpening.setHidden(true);
@@ -72,9 +72,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTranslucentClose() {
-        final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+        final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final AppWindowToken translucentClosing = createAppWindowToken(mDisplayContent,
+        final ActivityRecord translucentClosing = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         translucentClosing.setOccludesParent(false);
         mDisplayContent.mClosingApps.add(translucentClosing);
@@ -85,9 +85,9 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testChangeIsNotOverwritten() {
-        final AppWindowToken behind = createAppWindowToken(mDisplayContent,
+        final ActivityRecord behind = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
+        final ActivityRecord translucentOpening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         translucentOpening.setOccludesParent(false);
         translucentOpening.setHidden(true);
@@ -101,10 +101,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTransitWithinTask() {
-        final ActivityRecord opening = createAppWindowToken(mDisplayContent,
+        final ActivityRecord opening = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
         opening.setOccludesParent(false);
-        final ActivityRecord closing = createAppWindowToken(mDisplayContent,
+        final ActivityRecord closing = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
         closing.setOccludesParent(false);
         final Task task = opening.getTask();

@@ -39,11 +39,11 @@ import org.mockito.MockitoAnnotations;
  * Tests for the {@link TaskStack} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:AnimatingAppWindowTokenRegistryTest
+ *  atest FrameworksServicesTests:AnimatingActivityRegistryTest
  */
 @SmallTest
 @Presubmit
-public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
+public class AnimatingActivityRegistryTest extends WindowTestsBase {
 
     @Mock
     AnimationAdapter mAdapter;
@@ -60,22 +60,22 @@ public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
 
     @Test
     public void testDeferring() {
-        final AppWindowToken window1 = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity1 = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final AppWindowToken window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
-                "window2").mAppToken;
-        final AnimatingAppWindowTokenRegistry registry =
-                window1.getStack().getAnimatingAppWindowTokenRegistry();
+        final ActivityRecord activity2 = createAppWindow(activity1.getTask(), ACTIVITY_TYPE_STANDARD,
+                "activity2").mActivityRecord;
+        final AnimatingActivityRegistry registry =
+                activity1.getStack().getAnimatingActivityRegistry();
 
-        window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
-        window2.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
-        assertTrue(window1.isSelfAnimating());
-        assertTrue(window2.isSelfAnimating());
+        activity1.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */);
+        activity2.startAnimation(activity1.getPendingTransaction(), mAdapter, false /* hidden */);
+        assertTrue(activity1.isSelfAnimating());
+        assertTrue(activity2.isSelfAnimating());
 
         // Make sure that first animation finish is deferred, second one is not deferred, and first
         // one gets cancelled.
-        assertTrue(registry.notifyAboutToFinish(window1, mMockEndDeferFinishCallback1));
-        assertFalse(registry.notifyAboutToFinish(window2, mMockEndDeferFinishCallback2));
+        assertTrue(registry.notifyAboutToFinish(activity1, mMockEndDeferFinishCallback1));
+        assertFalse(registry.notifyAboutToFinish(activity2, mMockEndDeferFinishCallback2));
         verify(mMockEndDeferFinishCallback1).run();
         verifyZeroInteractions(mMockEndDeferFinishCallback2);
     }
@@ -83,12 +83,12 @@ public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testContainerRemoved() {
-        final AppWindowToken window1 = createAppWindowToken(mDisplayContent,
+        final ActivityRecord window1 = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final AppWindowToken window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
-                "window2").mAppToken;
-        final AnimatingAppWindowTokenRegistry registry =
-                window1.getStack().getAnimatingAppWindowTokenRegistry();
+        final ActivityRecord window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
+                "window2").mActivityRecord;
+        final AnimatingActivityRegistry registry =
+                window1.getStack().getAnimatingActivityRegistry();
 
         window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
         window2.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);

@@ -48,14 +48,14 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetClosingApps_closing() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
-        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
-        final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
-        closingApps.add(closingWindow.mAppToken);
+        final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
+        closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
         mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(1, closingTasks.size());
-        assertEquals(closingWindow.mAppToken.getTask(), closingTasks.valueAt(0));
+        assertEquals(closingWindow.mActivityRecord.getTask(), closingTasks.valueAt(0));
     }
 
     @Test
@@ -64,12 +64,12 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
                 "closingWindow");
         final WindowState openingWindow = createAppWindow(closingWindow.getTask(),
                 FIRST_APPLICATION_WINDOW, "openingWindow");
-        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
-        openingWindow.mAppToken.commitVisibility(null, true /* visible */, TRANSIT_UNSET,
+        openingWindow.mActivityRecord.commitVisibility(null, true /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
-        final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
-        closingApps.add(closingWindow.mAppToken);
+        final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
+        closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
         mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
@@ -79,13 +79,13 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetClosingApps_skipClosingAppsSnapshotTasks() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
-        closingWindow.mAppToken.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
+        closingWindow.mActivityRecord.commitVisibility(null, false /* visible */, TRANSIT_UNSET,
                 true /* performLayout */, false /* isVoiceInteraction */);
-        final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
-        closingApps.add(closingWindow.mAppToken);
+        final ArraySet<ActivityRecord> closingApps = new ArraySet<>();
+        closingApps.add(closingWindow.mActivityRecord);
         final ArraySet<Task> closingTasks = new ArraySet<>();
         mWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
-                Sets.newArraySet(closingWindow.mAppToken.getTask()));
+                Sets.newArraySet(closingWindow.mActivityRecord.getTask()));
         mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }
@@ -94,7 +94,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
     public void testGetSnapshotMode() {
         final WindowState disabledWindow = createWindow(null,
                 FIRST_APPLICATION_WINDOW, mDisplayContent, "disabledWindow");
-        disabledWindow.mAppToken.setDisablePreviewScreenshots(true);
+        disabledWindow.mActivityRecord.setDisablePreviewScreenshots(true);
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
 

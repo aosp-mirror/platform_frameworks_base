@@ -660,7 +660,7 @@ public class DockedStackDividerController {
         checkMinimizeChanged(false /* animate */);
     }
 
-    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps, int appTransition) {
+    void notifyAppTransitionStarting(ArraySet<ActivityRecord> openingApps, int appTransition) {
         final boolean wasMinimized = mMinimizedDock;
         checkMinimizeChanged(true /* animate */);
 
@@ -685,10 +685,10 @@ public class DockedStackDividerController {
     /**
      * @return true if {@param apps} contains an activity in the docked stack, false otherwise.
      */
-    private boolean containsAppInDockedStack(ArraySet<AppWindowToken> apps) {
+    private boolean containsAppInDockedStack(ArraySet<ActivityRecord> apps) {
         for (int i = apps.size() - 1; i >= 0; i--) {
-            final AppWindowToken token = apps.valueAt(i);
-            if (token.getTask() != null && token.inSplitScreenPrimaryWindowingMode()) {
+            final ActivityRecord activity = apps.valueAt(i);
+            if (activity.getTask() != null && activity.inSplitScreenPrimaryWindowingMode()) {
                 return true;
             }
         }
@@ -722,7 +722,7 @@ public class DockedStackDividerController {
         final RecentsAnimationController recentsAnim = mService.getRecentsAnimationController();
         final boolean minimizedForRecentsAnimation = recentsAnim != null &&
                 recentsAnim.isSplitScreenMinimized();
-        boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
+        boolean homeVisible = homeTask.getTopVisibleActivity() != null;
         if (homeVisible && topSecondaryStack != null) {
             // Home should only be considered visible if it is greater or equal to the top secondary
             // stack in terms of z-order.

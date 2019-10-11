@@ -427,8 +427,8 @@ class DragState {
     private boolean targetWindowSupportsGlobalDrag(WindowState targetWin) {
         // Global drags are limited to system windows, and windows for apps that are targeting N and
         // above.
-        return targetWin.mAppToken == null
-                || targetWin.mAppToken.mTargetSdk >= Build.VERSION_CODES.N;
+        return targetWin.mActivityRecord == null
+                || targetWin.mActivityRecord.mTargetSdk >= Build.VERSION_CODES.N;
     }
 
     /* helper - send a ACTION_DRAG_STARTED event only if the window has not
