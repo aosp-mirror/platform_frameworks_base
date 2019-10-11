@@ -16,13 +16,12 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.view.Display.TYPE_BUILT_IN;
@@ -3130,9 +3129,10 @@ public class DisplayPolicy {
         final int dockedVisibility = updateLightStatusBarLw(0 /* vis */,
                 mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
         mService.getStackBounds(
-                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, mNonDockedStackBounds);
-        mService.getStackBounds(
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, mDockedStackBounds);
+        mService.getStackBounds(mDockedStackBounds.isEmpty()
+                        ? WINDOWING_MODE_FULLSCREEN : WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+                ACTIVITY_TYPE_UNDEFINED, mNonDockedStackBounds);
         final Pair<Integer, Boolean> result =
                 updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int visibility = result.first;
