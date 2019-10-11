@@ -449,7 +449,14 @@ class UserSystemPackageInstaller {
     }
 
     void dump(PrintWriter pw) {
-        for (int i = 0; i < mWhitelitsedPackagesForUserTypes.size(); i++) {
+        pw.print("Whitelisted packages per user type");
+        final int size = mWhitelitsedPackagesForUserTypes.size();
+        if (size == 0) {
+            pw.println(": N/A");
+            return;
+        }
+        pw.println(" (" + size + " packages)");
+        for (int i = 0; i < size; i++) {
             final String pkgName = mWhitelitsedPackagesForUserTypes.keyAt(i);
             final String whitelistedUserTypes =
                     UserInfo.flagsToString(mWhitelitsedPackagesForUserTypes.valueAt(i));
