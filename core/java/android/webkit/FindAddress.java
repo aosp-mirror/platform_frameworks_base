@@ -154,7 +154,7 @@ class FindAddress {
 
     // A house number component is "one" or a number, optionally
     // followed by a single alphabetic character, or
-    private static final String HOUSE_COMPONENT = "(?:one|\\d+([a-z](?=[^a-z]|$)|st|nd|rd|th)?)";
+    private static final String HOUSE_COMPONENT = "(?:one|[0-9]+([a-z](?=[^a-z]|$)|st|nd|rd|th)?)";
 
     // House numbers are a repetition of |HOUSE_COMPONENT|, separated by -, and followed by
     // a delimiter character.
@@ -253,10 +253,10 @@ class FindAddress {
             Pattern.CASE_INSENSITIVE);
 
     private static final Pattern sSuffixedNumberRe =
-            Pattern.compile("(\\d+)(st|nd|rd|th)", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("([0-9]+)(st|nd|rd|th)", Pattern.CASE_INSENSITIVE);
 
     private static final Pattern sZipCodeRe =
-            Pattern.compile("(?:\\d{5}(?:-\\d{4})?)" + WORD_END, Pattern.CASE_INSENSITIVE);
+            Pattern.compile("(?:[0-9]{5}(?:-[0-9]{4})?)" + WORD_END, Pattern.CASE_INSENSITIVE);
 
     private static boolean checkHouseNumber(String houseNumber) {
         // Make sure that there are at most 5 digits.
