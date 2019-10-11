@@ -17,13 +17,8 @@
 package com.android.server.job.restrictions;
 
 import android.app.job.JobParameters;
-import android.content.Context;
-import android.os.IThermalService;
-import android.os.IThermalStatusListener;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.Temperature;
-import android.util.Slog;
+import android.os.PowerManager;
+import android.os.PowerManager.OnThermalStatusChangedListener;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
@@ -36,31 +31,29 @@ public class ThermalStatusRestriction extends JobRestriction {
 
     private volatile boolean mIsThermalRestricted = false;
 
+    private PowerManager mPowerManager;
+
     public ThermalStatusRestriction(JobSchedulerService service) {
         super(service, JobParameters.REASON_DEVICE_THERMAL);
     }
 
     @Override
     public void onSystemServicesReady() {
-        final IThermalService thermalService = IThermalService.Stub.asInterface(
-                ServiceManager.getService(Context.THERMAL_SERVICE));
-        if (thermalService != null) {
-            try {
-                thermalService.registerThermalStatusListener(new IThermalStatusListener.Stub() {
-                    @Override
-                    public void onStatusChange(int status) {
-                        final boolean shouldBeActive = status >= Temperature.THROTTLING_SEVERE;
-                        if (mIsThermalRestricted == shouldBeActive) {
-                            return;
-                        }
-                        mIsThermalRestricted = shouldBeActive;
-                        mService.onControllerStateChanged();
-                    }
-                });
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to register thermal callback.", e);
+        mPowerManager = mService.getContext().getSystemService(PowerManager.class);
+        // Use MainExecutor
+        mPowerManager.addThermalStatusListener(new OnThermalStatusChangedListener() {
+            @Override
+            public void onThermalStatusChanged(int status) {
+                // This is called on the main thread. Do not do any slow operations in it.
+                // mService.onControllerStateChanged() will just post a message, which is okay.
+                final boolean shouldBeActive = status >= PowerManager.THERMAL_STATUS_SEVERE;
+                if (mIsThermalRestricted == shouldBeActive) {
+                    return;
+                }
+                mIsThermalRestricted = shouldBeActive;
+                mService.onControllerStateChanged();
             }
-        }
+        });
     }
 
     @Override
