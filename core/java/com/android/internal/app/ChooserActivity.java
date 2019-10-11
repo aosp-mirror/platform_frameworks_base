@@ -2576,6 +2576,34 @@ public class ChooserActivity extends ResolverActivity {
             }
         }
 
+        /**
+         * Rather than fully sorting the input list, this sorting task will put the top k elements
+         * in the head of input list and fill the tail with other elements in undetermined order.
+         */
+        @Override
+        AsyncTask<List<ResolvedComponentInfo>,
+                Void,
+                List<ResolvedComponentInfo>> createSortingTask() {
+            return new AsyncTask<List<ResolvedComponentInfo>,
+                    Void,
+                    List<ResolvedComponentInfo>>() {
+                @Override
+                protected List<ResolvedComponentInfo> doInBackground(
+                        List<ResolvedComponentInfo>... params) {
+                    mResolverListController.topK(params[0],
+                            getMaxRankedTargets());
+                    return params[0];
+                }
+
+                @Override
+                protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
+                    processSortedList(sortedComponents);
+                    bindProfileView();
+                    notifyDataSetChanged();
+                }
+            };
+        }
+
         @Override
         public void onListRebuilt() {
             updateAlphabeticalList();

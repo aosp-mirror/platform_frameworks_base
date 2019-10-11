@@ -1618,7 +1618,7 @@ public class ResolverActivity extends Activity {
         private final List<ResolveInfo> mBaseResolveList;
         protected ResolveInfo mLastChosen;
         private DisplayResolveInfo mOtherProfile;
-        private ResolverListController mResolverListController;
+        ResolverListController mResolverListController;
         private int mPlaceholderCount;
         private boolean mAllTargetsAreBrowsers = false;
 
@@ -1779,27 +1779,7 @@ public class ResolverActivity extends Activity {
                         --placeholderCount;
                     }
                     setPlaceholderCount(placeholderCount);
-                    AsyncTask<List<ResolvedComponentInfo>,
-                            Void,
-                            List<ResolvedComponentInfo>> sortingTask =
-                            new AsyncTask<List<ResolvedComponentInfo>,
-                                    Void,
-                                    List<ResolvedComponentInfo>>() {
-                        @Override
-                        protected List<ResolvedComponentInfo> doInBackground(
-                                List<ResolvedComponentInfo>... params) {
-                            mResolverListController.sort(params[0]);
-                            return params[0];
-                        }
-
-                        @Override
-                        protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
-                            processSortedList(sortedComponents);
-                            bindProfileView();
-                            notifyDataSetChanged();
-                        }
-                    };
-                    sortingTask.execute(currentResolveList);
+                    createSortingTask().execute(currentResolveList);
                     postListReadyRunnable();
                     return false;
                 } else {
@@ -1812,8 +1792,29 @@ public class ResolverActivity extends Activity {
             }
         }
 
+        AsyncTask<List<ResolvedComponentInfo>,
+                Void,
+                List<ResolvedComponentInfo>> createSortingTask() {
+            return new AsyncTask<List<ResolvedComponentInfo>,
+                    Void,
+                    List<ResolvedComponentInfo>>() {
+                @Override
+                protected List<ResolvedComponentInfo> doInBackground(
+                        List<ResolvedComponentInfo>... params) {
+                    mResolverListController.sort(params[0]);
+                    return params[0];
+                }
 
-        private void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
+                @Override
+                protected void onPostExecute(List<ResolvedComponentInfo> sortedComponents) {
+                    processSortedList(sortedComponents);
+                    bindProfileView();
+                    notifyDataSetChanged();
+                }
+            };
+        }
+
+        void processSortedList(List<ResolvedComponentInfo> sortedComponents) {
             int N;
             if (sortedComponents != null && (N = sortedComponents.size()) != 0) {
                 mAllTargetsAreBrowsers = mUseLayoutForBrowsables;
