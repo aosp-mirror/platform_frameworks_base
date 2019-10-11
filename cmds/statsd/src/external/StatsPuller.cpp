@@ -40,8 +40,9 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
     int64_t elapsedTimeNs = getElapsedRealtimeNs();
     StatsdStats::getInstance().notePull(mTagId);
-    const bool shouldUseCache = elapsedTimeNs - mLastPullTimeNs <
-                                StatsPullerManager::kAllPullAtomInfo.at(mTagId).coolDownNs;
+    const bool shouldUseCache =
+            elapsedTimeNs - mLastPullTimeNs <
+            StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).coolDownNs;
     if (shouldUseCache) {
         if (mHasGoodData) {
             (*data) = mCachedData;
@@ -63,7 +64,8 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     const int64_t pullDurationNs = getElapsedRealtimeNs() - elapsedTimeNs;
     StatsdStats::getInstance().notePullTime(mTagId, pullDurationNs);
     const bool pullTimeOut =
-            pullDurationNs > StatsPullerManager::kAllPullAtomInfo.at(mTagId).pullTimeoutNs;
+            pullDurationNs >
+            StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).pullTimeoutNs;
     if (pullTimeOut) {
         // Something went wrong. Discard the data.
         clearCacheLocked();
@@ -100,7 +102,7 @@ int StatsPuller::clearCacheLocked() {
 
 int StatsPuller::ClearCacheIfNecessary(int64_t timestampNs) {
     if (timestampNs - mLastPullTimeNs >
-        StatsPullerManager::kAllPullAtomInfo.at(mTagId).coolDownNs) {
+        StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).coolDownNs) {
         return clearCache();
     } else {
         return 0;

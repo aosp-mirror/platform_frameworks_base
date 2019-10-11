@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-#pragma once
+#include "PullResultReceiver.h"
 
-#include <android/os/IPullAtomCallback.h>
-#include <utils/String16.h>
-
-#include "StatsPuller.h"
+using namespace android::binder;
+using namespace android::util;
+using namespace std;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsCallbackPuller : public StatsPuller {
-public:
-    explicit StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback);
+PullResultReceiver::PullResultReceiver(
+        std::function<void(int32_t, bool, const vector<android::util::StatsEvent>&)> pullFinishCb)
+    : pullFinishCallback(std::move(pullFinishCb)) {
+}
 
-private:
-    bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
-    const sp<IPullAtomCallback> mCallback;
-};
+Status PullResultReceiver::pullFinished(int32_t atomTag, bool success,
+                                        const vector<StatsEvent>& output) {
+    pullFinishCallback(atomTag, success, output);
+    return Status::ok();
+}
+
+PullResultReceiver::~PullResultReceiver() {
+}
 
 }  // namespace statsd
 }  // namespace os

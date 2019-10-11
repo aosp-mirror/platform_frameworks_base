@@ -17,21 +17,27 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include <android/os/IStatsPullerCallback.h>
-
 #include "StatsCallbackPuller.h"
+
+#include <android/os/IPullAtomCallback.h>
+#include <android/util/StatsEvent.h>
+
+#include "PullResultReceiver.h"
+#include "StatsPullerManager.h"
 #include "logd/LogEvent.h"
 #include "stats_log_util.h"
 
 using namespace android::binder;
+using namespace android::util;
+using namespace std;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IStatsPullerCallback>& callback) :
-        StatsPuller(tagId), mCallback(callback) {
-        VLOG("StatsCallbackPuller created for tag %d", tagId);
+StatsCallbackPuller::StatsCallbackPuller(int tagId, const sp<IPullAtomCallback>& callback)
+    : StatsPuller(tagId), mCallback(callback) {
+    VLOG("StatsCallbackPuller created for tag %d", tagId);
 }
 
 bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
@@ -40,20 +46,57 @@ bool StatsCallbackPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
         ALOGW("No callback registered");
         return false;
     }
-    int64_t wallClockTimeNs = getWallClockNs();
-    int64_t elapsedTimeNs = getElapsedRealtimeNs();
-    vector<StatsLogEventWrapper> returned_value;
-    Status status = mCallback->pullData(mTagId, elapsedTimeNs, wallClockTimeNs, &returned_value);
+
+    // Shared variables needed in the result receiver.
+    shared_ptr<mutex> cv_mutex = make_shared<mutex>();
+    shared_ptr<condition_variable> cv = make_shared<condition_variable>();
+    shared_ptr<bool> pullFinish = make_shared<bool>(false);
+    shared_ptr<bool> pullSuccess = make_shared<bool>(false);
+    shared_ptr<vector<shared_ptr<LogEvent>>> sharedData =
+            make_shared<vector<shared_ptr<LogEvent>>>();
+
+    sp<PullResultReceiver> resultReceiver = new PullResultReceiver(
+            [cv_mutex, cv, pullFinish, pullSuccess, sharedData](
+                    int32_t atomTag, bool success, const vector<StatsEvent>& output) {
+                // This is the result of the pull, executing in a statsd binder thread.
+                // The pull could have taken a long time, and we should only modify
+                // data (the output param) if the pointer is in scope and the pull did not time out.
+                {
+                    lock_guard<mutex> lk(*cv_mutex);
+                    // TODO: fill the shared vector of LogEvents once StatsEvent is complete.
+                    *pullSuccess = success;
+                    *pullFinish = true;
+                }
+                cv->notify_one();
+            });
+
+    // Initiate the pull.
+    Status status = mCallback->onPullAtom(mTagId, resultReceiver);
     if (!status.isOk()) {
-        ALOGW("StatsCallbackPuller::pull failed for %d", mTagId);
         return false;
     }
-    data->clear();
-    for (const StatsLogEventWrapper& it: returned_value) {
-        LogEvent::createLogEvents(it, *data);
+
+    {
+        unique_lock<mutex> unique_lk(*cv_mutex);
+        int64_t pullTimeoutNs =
+                StatsPullerManager::kAllPullAtomInfo.at({.atomTag = mTagId}).pullTimeoutNs;
+        // Wait until the pull finishes, or until the pull timeout.
+        cv->wait_for(unique_lk, chrono::nanoseconds(pullTimeoutNs),
+                     [pullFinish] { return *pullFinish; });
+        if (!*pullFinish) {
+            // Note: The parent stats puller will also note that there was a timeout and that the
+            // cache should be cleared. Once we migrate all pullers to this callback, we could
+            // consolidate the logic.
+            return true;
+        } else {
+            // Only copy the data if we did not timeout and the pull was successful.
+            if (pullSuccess) {
+                *data = std::move(*sharedData);
+            }
+            VLOG("StatsCallbackPuller::pull succeeded for %d", mTagId);
+            return *pullSuccess;
+        }
     }
-    VLOG("StatsCallbackPuller::pull succeeded for %d", mTagId);
-    return true;
 }
 
 }  // namespace statsd
