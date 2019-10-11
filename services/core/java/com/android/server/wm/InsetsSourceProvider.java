@@ -241,6 +241,10 @@ class InsetsSourceProvider {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
+            // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
+            t.setAlpha(animationLeash, 1 /* alpha */);
+            t.hide(animationLeash);
+
             mCapturedLeash = animationLeash;
             final Rect frame = mWin.getWindowFrames().mFrame;
             t.setPosition(mCapturedLeash, frame.left, frame.top);
