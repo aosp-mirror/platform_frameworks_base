@@ -417,7 +417,9 @@ java_library {
     srcs: [
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/UnsupportedAppUsage.java",
-        ":unsupportedappusage_annotation_files",
+    ],
+    static_libs: [
+        "art.module.api.annotations",
     ],
 
     sdk_version: "core_current",
@@ -925,6 +927,7 @@ stubs_defaults {
         "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
+        ":core-current-stubs-source",
         ":core_public_api_files",
         ":updatable-media-srcs",
         "test-mock/src/**/*.java",
@@ -988,6 +991,7 @@ stubs_defaults {
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
+        ":core-current-stubs-source",
         ":core_public_api_files",
         ":updatable-media-srcs",
     ],

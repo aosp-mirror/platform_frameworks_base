@@ -579,6 +579,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // the set of network types that can only be enabled by system/sig apps
     private List mProtectedNetworks;
 
+    private Set<String> mWolSupportedInterfaces;
+
     private TelephonyManager mTelephonyManager;
 
     private KeepaliveTracker mKeepaliveTracker;
@@ -1054,6 +1056,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (DBG) loge("Ignoring protectedNetwork " + p);
             }
         }
+
+        mWolSupportedInterfaces = new ArraySet(
+                mContext.getResources().getStringArray(
+                        com.android.internal.R.array.config_wakeonlan_supported_interfaces));
 
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
@@ -3268,7 +3274,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkRequestInfo nri = mNetworkRequests.get(request);
 
         if (nri != null) {
-            if (Process.SYSTEM_UID != callingUid && nri.mUid != callingUid) {
+            if (Process.SYSTEM_UID != callingUid && Process.NETWORK_STACK_UID != callingUid
+                    && nri.mUid != callingUid) {
                 log(String.format("UID %d attempted to %s for unowned request %s",
                         callingUid, requestedOperation, nri));
                 return null;
@@ -5599,6 +5606,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             updateProxy(newLp, oldLp);
         }
+
+        updateWakeOnLan(newLp);
+
         // TODO - move this check to cover the whole function
         if (!Objects.equals(newLp, oldLp)) {
             synchronized (networkAgent) {
@@ -5767,6 +5777,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (needsFiltering) {
             mPermissionMonitor.onVpnUidRangesAdded(newIface, ranges, vpnAppUid);
         }
+    }
+
+    private void updateWakeOnLan(@NonNull LinkProperties lp) {
+        lp.setWakeOnLanSupported(mWolSupportedInterfaces.contains(lp.getInterfaceName()));
     }
 
     private int getNetworkPermission(NetworkCapabilities nc) {
