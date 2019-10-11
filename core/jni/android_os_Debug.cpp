@@ -139,8 +139,8 @@ static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
         "nativePrivateClean", "nativeSharedClean", "nativeSwappedOut", "nativeSwappedOutPss" }
 };
 
-jfieldID otherStats_field;
-jfieldID hasSwappedOutPss_field;
+static jfieldID otherStats_field;
+static jfieldID hasSwappedOutPss_field;
 
 struct stats_t {
     int pss;

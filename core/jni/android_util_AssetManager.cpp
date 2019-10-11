@@ -108,7 +108,7 @@ static struct arraymap_offsets_t {
   jmethodID put;
 } gArrayMapOffsets;
 
-jclass g_stringClass = nullptr;
+static jclass g_stringClass = nullptr;
 
 // ----------------------------------------------------------------------------
 
