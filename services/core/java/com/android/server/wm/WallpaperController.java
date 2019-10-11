@@ -162,7 +162,8 @@ class WallpaperController {
 
         final RecentsAnimationController recentsAnimationController =
                 mService.getRecentsAnimationController();
-        final boolean animationWallpaper = w.mActivityRecord != null && w.mActivityRecord.getAnimation() != null
+        final boolean animationWallpaper = w.mActivityRecord != null
+                && w.mActivityRecord.getAnimation() != null
                 && w.mActivityRecord.getAnimation().getShowWallpaper();
         final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0
                 || animationWallpaper;

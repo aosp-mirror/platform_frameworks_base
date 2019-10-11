@@ -71,6 +71,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1867,5 +1868,12 @@ public class TaskStack extends WindowContainer<Task> implements
 
     AnimatingActivityRegistry getAnimatingActivityRegistry() {
         return mAnimatingActivityRegistry;
+    }
+
+    @Override
+    RemoteAnimationTarget createRemoteAnimationTarget(
+            RemoteAnimationController.RemoteAnimationRecord record) {
+        final Task task = getTopChild();
+        return task != null ? task.createRemoteAnimationTarget(record) : null;
     }
 }

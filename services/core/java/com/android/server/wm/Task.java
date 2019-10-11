@@ -51,6 +51,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -646,6 +647,18 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         return getAppAnimationLayer(ANIMATION_LAYER_HOME);
     }
 
+    boolean shouldAnimate() {
+        // Don't animate while the task runs recents animation but only if we are in the mode
+        // where we cancel with deferred screenshot, which means that the controller has
+        // transformed the task.
+        final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
+        if (controller != null && controller.isAnimatingTask(this)
+                && controller.shouldDeferCancelUntilNextTransition()) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     SurfaceControl.Builder makeSurface() {
         return super.makeSurface().setMetadata(METADATA_TASK_ID, mTaskId);
@@ -659,6 +672,22 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             }
         }
         return false;
+    }
+
+    /**
+     * @return {@code true} if changing app transition is running.
+     */
+    @Override
+    boolean isChangingAppTransition() {
+        final ActivityRecord activity = getTopVisibleActivity();
+        return activity != null && getDisplayContent().mChangingApps.contains(activity);
+    }
+
+    @Override
+    RemoteAnimationTarget createRemoteAnimationTarget(
+            RemoteAnimationController.RemoteAnimationRecord record) {
+        final ActivityRecord activity = getTopVisibleActivity();
+        return activity != null ? activity.createRemoteAnimationTarget(record) : null;
     }
 
     WindowState getTopVisibleAppMainWindow() {

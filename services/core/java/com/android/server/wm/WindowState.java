@@ -5404,4 +5404,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         return mKeyInterceptionInfo;
     }
+
+    @Override
+    void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
+            Rect outSurfaceInsets) {
+        // Containing frame will usually cover the whole screen, including dialog windows.
+        // For freeform workspace windows it will not cover the whole screen and it also
+        // won't exactly match the final freeform window frame (e.g. when overlapping with
+        // the status bar). In that case we need to use the final frame.
+        if (inFreeformWindowingMode()) {
+            outFrame.set(getFrameLw());
+        } else if (isLetterboxedAppWindow()) {
+            outFrame.set(getTask().getBounds());
+        } else if (isDockedResizing()) {
+            // If we are animating while docked resizing, then use the stack bounds as the
+            // animation target (which will be different than the task bounds)
+            outFrame.set(getTask().getParent().getBounds());
+        } else {
+            outFrame.set(getContainingFrame());
+        }
+        outSurfaceInsets.set(getAttrs().surfaceInsets);
+        // TODO(b/72757033): These are insets relative to the window frame, but we're really
+        // interested in the insets relative to the frame we chose in the if-blocks above.
+        getContentInsets(outInsets);
+        getStableInsets(outStableInsets);
+    }
 }

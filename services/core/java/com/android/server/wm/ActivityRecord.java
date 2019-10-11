@@ -214,10 +214,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WIND
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -294,6 +292,7 @@ import android.view.IApplicationToken;
 import android.view.InputApplicationHandle;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
@@ -318,6 +317,7 @@ import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityMetricsLogger.WindowingModeTransitionInfoSnapshot;
 import com.android.server.wm.ActivityStack.ActivityState;
 import com.android.server.wm.WindowManagerService.H;
+import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
 
@@ -553,24 +553,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mCurrentLaunchCanTurnScreenOn = true;
 
     /**
-     * This gets used during some open/close transitions as well as during a change transition
-     * where it represents the starting-state snapshot.
-     */
-    private AppWindowThumbnail mThumbnail;
-    private final Rect mTransitStartRect = new Rect();
-
-    /**
-     * If we are running an animation, this determines the transition type. Must be one of
-     * AppTransition.TRANSIT_* constants.
-     */
-    private int mTransit;
-
-    /**
-     * If we are running an animation, this determines the flags during this animation. Must be a
-     * bitwise combination of AppTransition.TRANSIT_FLAG_* constants.
-     */
-    private int mTransitFlags;
-    /**
      * This leash is used to "freeze" the app surface in place after the state change, but before
      * the animation is ready to start.
      */
@@ -666,7 +648,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
     boolean mIsExiting;
 
-    boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
 
     boolean mAppStopped;
@@ -677,15 +658,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
     ArrayDeque<Configuration> mFrozenMergedConfig = new ArrayDeque<>();
-
-    /** Whether this token should be boosted at the top of all app window tokens. */
-    @VisibleForTesting boolean mNeedsZBoost;
-
-    /** Layer used to constrain the animation to a token's stack bounds. */
-    SurfaceControl mAnimationBoundsLayer;
-
-    /** Whether this token needs to create mAnimationBoundsLayer for cropping animations. */
-    boolean mNeedsAnimationBoundsLayer;
 
     private AppSaturationInfo mLastAppSaturationInfo;
 
@@ -711,10 +683,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     private final Configuration mTmpConfig = new Configuration();
     private final Rect mTmpBounds = new Rect();
-
-    private final Point mTmpPoint = new Point();
-    private final Rect mTmpRect = new Rect();
-    private final Rect mTmpPrevBounds = new Rect();
 
     // Token for targeting this activity for assist purposes.
     final Binder assistToken = new Binder();
@@ -4124,7 +4092,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (transit != WindowManager.TRANSIT_UNSET) {
                 if (mUseTransferredAnimation) {
                     runningAppAnimation = isAnimating();
-                } else if (applyAnimationLocked(lp, transit, visible, isVoiceInteraction)) {
+                } else if (applyAnimation(lp, transit, visible, isVoiceInteraction)) {
                     runningAppAnimation = true;
                 }
                 delayed = runningAppAnimation;
@@ -5701,26 +5669,42 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-
     @VisibleForTesting
     boolean shouldAnimate(int transit) {
+        final Task task = getTask();
+        if (task != null && !task.shouldAnimate()) {
+            return false;
+        }
         final boolean isSplitScreenPrimary =
                 getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
         final boolean allowSplitScreenPrimaryAnimation = transit != TRANSIT_WALLPAPER_OPEN;
-
-        // Don't animate while the task runs recents animation but only if we are in the mode
-        // where we cancel with deferred screenshot, which means that the controller has
-        // transformed the task.
-        final RecentsAnimationController controller = mWmService.getRecentsAnimationController();
-        if (controller != null && controller.isAnimatingTask(getTask())
-                && controller.shouldDeferCancelUntilNextTransition()) {
-            return false;
-        }
 
         // We animate always if it's not split screen primary, and only some special cases in split
         // screen primary because it causes issues with stack clipping when we run an un-minimize
         // animation at the same time.
         return !isSplitScreenPrimary || allowSplitScreenPrimaryAnimation;
+    }
+
+    @Override
+    boolean isChangingAppTransition() {
+        final Task task = getTask();
+        if (task != null) {
+            return task.isChangingAppTransition();
+        }
+        return super.isChangingAppTransition();
+    }
+
+    @Override
+    boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
+            boolean isVoiceInteraction) {
+        if (mWmService.mDisableTransitionAnimation || !shouldAnimate(transit)) {
+            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
+                    "applyAnimation: transition animation is disabled or skipped. "
+                            + "container=%s", this);
+            cancelAnimation();
+            return false;
+        }
+        return super.applyAnimation(lp, transit, enter, isVoiceInteraction);
     }
 
     /**
@@ -5734,171 +5718,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final SurfaceControl boundsLayer = builder.build();
         t.show(boundsLayer);
         return boundsLayer;
-    }
-
-    boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction) {
-
-        if (mWmService.mDisableTransitionAnimation || !shouldAnimate(transit)) {
-            ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
-                    "applyAnimation: transition animation is disabled or skipped. "
-                            + "atoken=%s", this);
-            cancelAnimation();
-            return false;
-        }
-
-        // Only apply an animation if the display isn't frozen. If it is frozen, there is no reason
-        // to animate and it can cause strange artifacts when we unfreeze the display if some
-        // different animation is running.
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#applyAnimationLocked");
-        if (okToAnimate()) {
-            final AnimationAdapter adapter;
-            AnimationAdapter thumbnailAdapter = null;
-
-            final int appStackClipMode =
-                    getDisplayContent().mAppTransition.getAppStackClipMode();
-
-            // Separate position and size for use in animators.
-            mTmpRect.set(getAnimationBounds(appStackClipMode));
-            mTmpPoint.set(mTmpRect.left, mTmpRect.top);
-            mTmpRect.offsetTo(0, 0);
-
-            final boolean isChanging = AppTransition.isChangeTransit(transit) && enter
-                    && getDisplayContent().mChangingApps.contains(this);
-
-            // Delaying animation start isn't compatible with remote animations at all.
-            if (getDisplayContent().mAppTransition.getRemoteAnimationController() != null
-                    && !mSurfaceAnimator.isAnimationStartDelayed()) {
-                RemoteAnimationController.RemoteAnimationRecord adapters =
-                        getDisplayContent().mAppTransition.getRemoteAnimationController()
-                                .createRemoteAnimationRecord(this, mTmpPoint, mTmpRect,
-                                        (isChanging ? mTransitStartRect : null));
-                adapter = adapters.mAdapter;
-                thumbnailAdapter = adapters.mThumbnailAdapter;
-            } else if (isChanging) {
-                final float durationScale = mWmService.getTransitionAnimationScaleLocked();
-                mTmpRect.offsetTo(mTmpPoint.x, mTmpPoint.y);
-                adapter = new LocalAnimationAdapter(
-                        new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
-                                getDisplayContent().getDisplayInfo(), durationScale,
-                                true /* isAppAnimation */, false /* isThumbnail */),
-                        mWmService.mSurfaceAnimationRunner);
-                if (mThumbnail != null) {
-                    thumbnailAdapter = new LocalAnimationAdapter(
-                            new WindowChangeAnimationSpec(mTransitStartRect, mTmpRect,
-                                    getDisplayContent().getDisplayInfo(), durationScale,
-                                    true /* isAppAnimation */, true /* isThumbnail */),
-                            mWmService.mSurfaceAnimationRunner);
-                }
-                mTransit = transit;
-                mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
-            } else {
-                mNeedsAnimationBoundsLayer = (appStackClipMode == STACK_CLIP_AFTER_ANIM);
-
-                final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
-                if (a != null) {
-                    // Only apply corner radius to animation if we're not in multi window mode.
-                    // We don't want rounded corners when in pip or split screen.
-                    final float windowCornerRadius = !inMultiWindowMode()
-                            ? getDisplayContent().getWindowCornerRadius()
-                            : 0;
-                    adapter = new LocalAnimationAdapter(
-                            new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
-                                    getDisplayContent().mAppTransition.canSkipFirstFrame(),
-                                    appStackClipMode,
-                                    true /* isAppAnimation */,
-                                    windowCornerRadius),
-                            mWmService.mSurfaceAnimationRunner);
-                    if (a.getZAdjustment() == Animation.ZORDER_TOP) {
-                        mNeedsZBoost = true;
-                    }
-                    mTransit = transit;
-                    mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
-                } else {
-                    adapter = null;
-                }
-            }
-            if (adapter != null) {
-                startAnimation(getPendingTransaction(), adapter, !isVisible());
-                if (adapter.getShowWallpaper()) {
-                    mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                }
-                if (thumbnailAdapter != null) {
-                    mThumbnail.startAnimation(
-                            getPendingTransaction(), thumbnailAdapter, !isVisible());
-                }
-            }
-        } else {
-            cancelAnimation();
-        }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-
-        return isAnimating();
-    }
-
-    private Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction) {
-        final DisplayContent displayContent = getTask().getDisplayContent();
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final int width = displayInfo.appWidth;
-        final int height = displayInfo.appHeight;
-        ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
-                "applyAnimation: atoken=%s", this);
-
-        // Determine the visible rect to calculate the thumbnail clip
-        final WindowState win = findMainWindow();
-        final Rect frame = new Rect(0, 0, width, height);
-        final Rect displayFrame = new Rect(0, 0,
-                displayInfo.logicalWidth, displayInfo.logicalHeight);
-        final Rect insets = new Rect();
-        final Rect stableInsets = new Rect();
-        Rect surfaceInsets = null;
-        final boolean freeform = win != null && win.inFreeformWindowingMode();
-        if (win != null) {
-            // Containing frame will usually cover the whole screen, including dialog windows.
-            // For freeform workspace windows it will not cover the whole screen and it also
-            // won't exactly match the final freeform window frame (e.g. when overlapping with
-            // the status bar). In that case we need to use the final frame.
-            if (freeform) {
-                frame.set(win.getFrameLw());
-            } else if (win.isLetterboxedAppWindow()) {
-                frame.set(getTask().getBounds());
-            } else if (win.isDockedResizing()) {
-                // If we are animating while docked resizing, then use the stack bounds as the
-                // animation target (which will be different than the task bounds)
-                frame.set(getTask().getParent().getBounds());
-            } else {
-                frame.set(win.getContainingFrame());
-            }
-            surfaceInsets = win.getAttrs().surfaceInsets;
-            // XXX(b/72757033): These are insets relative to the window frame, but we're really
-            // interested in the insets relative to the frame we chose in the if-blocks above.
-            win.getContentInsets(insets);
-            win.getStableInsets(stableInsets);
-        }
-
-        if (mLaunchTaskBehind) {
-            // Differentiate the two animations. This one which is briefly on the screen
-            // gets the !enter animation, and the other activity which remains on the
-            // screen gets the enter animation. Both appear in the mOpeningApps set.
-            enter = false;
-        }
-        ProtoLog.d(WM_DEBUG_APP_TRANSITIONS,
-                "Loading animation for app transition. transit=%s enter=%b frame=%s insets=%s "
-                        + "surfaceInsets=%s",
-                AppTransition.appTransitionToString(transit), enter, frame, insets, surfaceInsets);
-        final Configuration displayConfig = displayContent.getConfiguration();
-        final Animation a = getDisplayContent().mAppTransition.loadAnimation(lp, transit, enter,
-                displayConfig.uiMode, displayConfig.orientation, frame, displayFrame, insets,
-                surfaceInsets, stableInsets, isVoiceInteraction, freeform, getTask().mTaskId);
-        if (a != null) {
-            if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
-            final int containingWidth = frame.width();
-            final int containingHeight = frame.height();
-            a.initialize(containingWidth, containingHeight, width, height);
-            a.scaleCurrentDuration(mWmService.getTransitionAnimationScaleLocked());
-        }
-        return a;
     }
 
     @Override
@@ -6080,11 +5899,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!isAnimating()) {
             return;
         }
-        final int taskId = getTask().mTaskId;
         final GraphicBuffer thumbnailHeader =
-                getDisplayContent().mAppTransition.getAppTransitionThumbnailHeader(taskId);
+                getDisplayContent().mAppTransition.getAppTransitionThumbnailHeader(getTask());
         if (thumbnailHeader == null) {
-            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "No thumbnail header bitmap for: %d", taskId);
+            ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "No thumbnail header bitmap for: %s", getTask());
             return;
         }
         clearThumbnail();
@@ -6138,7 +5956,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect insets = win != null ? win.getContentInsets() : null;
         final Configuration displayConfig = mDisplayContent.getConfiguration();
         return getDisplayContent().mAppTransition.createThumbnailAspectScaleAnimationLocked(
-                appRect, insets, thumbnailHeader, getTask().mTaskId, displayConfig.uiMode,
+                appRect, insets, thumbnailHeader, getTask(), displayConfig.uiMode,
                 displayConfig.orientation);
     }
 
@@ -6648,6 +6466,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @VisibleForTesting
+    @Override
     Rect getAnimationBounds(int appStackClipMode) {
         if (appStackClipMode == STACK_CLIP_BEFORE_ANIM && getStack() != null) {
             // Using the stack bounds here effectively applies the clipping before animation.
@@ -7721,5 +7540,36 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             System.arraycopy(matrix, 0, mMatrix, 0, mMatrix.length);
             System.arraycopy(translation, 0, mTranslation, 0, mTranslation.length);
         }
+    }
+
+    @Override
+    RemoteAnimationTarget createRemoteAnimationTarget(
+            RemoteAnimationController.RemoteAnimationRecord record) {
+        final Task task = getTask();
+        final WindowState mainWindow = findMainWindow();
+        if (task == null || mainWindow == null) {
+            return null;
+        }
+        final Rect insets = new Rect();
+        mainWindow.getContentInsets(insets);
+        InsetUtils.addInsets(insets, getLetterboxInsets());
+        return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
+                record.mAdapter.mCapturedLeash, !task.fillsParent(),
+                mainWindow.mWinAnimator.mLastClipRect, insets,
+                getPrefixOrderIndex(), record.mAdapter.mPosition,
+                record.mAdapter.mStackBounds, task.getWindowConfiguration(),
+                false /*isNotInRecents*/,
+                record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,
+                record.mStartBounds);
+    }
+
+    @Override
+    void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
+            Rect outSurfaceInsets) {
+        final WindowState win = findMainWindow();
+        if (win == null) {
+            return;
+        }
+        win.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
     }
 }

@@ -321,14 +321,6 @@ class WindowToken extends WindowContainer<WindowState> {
         return toString();
     }
 
-    boolean okToDisplay() {
-        return mDisplayContent != null && mDisplayContent.okToDisplay();
-    }
-
-    boolean okToAnimate() {
-        return mDisplayContent != null && mDisplayContent.okToAnimate();
-    }
-
     /**
      * Return whether windows from this token can layer above the
      * system bars, or in other words extend outside of the "Decor Frame"
