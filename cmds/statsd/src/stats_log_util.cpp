@@ -445,6 +445,8 @@ int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
             return 12 * 60 * 60 * 1000LL;
         case ONE_DAY:
             return 24 * 60 * 60 * 1000LL;
+        case ONE_WEEK:
+            return 7 * 24 * 60 * 60 * 1000LL;
         case CTS:
             return 1000;
         case TIME_UNIT_UNSPECIFIED:
