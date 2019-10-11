@@ -16,6 +16,7 @@
 
 #include "idmap2/RawPrintVisitor.h"
 
+#include <algorithm>
 #include <cstdarg>
 #include <string>
 
@@ -26,6 +27,15 @@
 #include "idmap2/Result.h"
 
 using android::ApkAssets;
+
+namespace {
+
+size_t StringSizeWhenEncoded(const std::string& s) {
+  size_t null_bytes = 4 - (s.size() % 4);
+  return sizeof(uint32_t) + s.size() + null_bytes;
+}
+
+}  // namespace
 
 namespace android::idmap2 {
 
@@ -40,8 +50,9 @@ void RawPrintVisitor::visit(const IdmapHeader& header) {
   print(header.GetVersion(), "version");
   print(header.GetTargetCrc(), "target crc");
   print(header.GetOverlayCrc(), "overlay crc");
-  print(header.GetTargetPath().to_string(), "target path");
-  print(header.GetOverlayPath().to_string(), "overlay path");
+  print(header.GetTargetPath().to_string(), kIdmapStringLength, "target path");
+  print(header.GetOverlayPath().to_string(), kIdmapStringLength, "overlay path");
+  print("...", StringSizeWhenEncoded(header.GetDebugInfo()), "debug info");
 
   target_apk_ = ApkAssets::Load(header.GetTargetPath().to_string());
   if (target_apk_) {
@@ -164,7 +175,7 @@ void RawPrintVisitor::print(uint32_t value, const char* fmt, ...) {
 }
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)
-void RawPrintVisitor::print(const std::string& value, const char* fmt, ...) {
+void RawPrintVisitor::print(const std::string& value, size_t encoded_size, const char* fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   std::string comment;
@@ -174,7 +185,7 @@ void RawPrintVisitor::print(const std::string& value, const char* fmt, ...) {
   stream_ << base::StringPrintf("%08zx: ", offset_) << "........  " << comment << ": " << value
           << std::endl;
 
-  offset_ += kIdmapStringLength;
+  offset_ += encoded_size;
 }
 
 // NOLINTNEXTLINE(cert-dcl50-cpp)

@@ -146,7 +146,8 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
                                                                const LoadedPackage* target_package,
                                                                const LoadedPackage* overlay_package,
                                                                size_t string_pool_offset,
-                                                               const XmlParser& overlay_parser) {
+                                                               const XmlParser& overlay_parser,
+                                                               LogInfo& log_info) {
   ResourceMapping resource_mapping;
   auto root_it = overlay_parser.tree_iterator();
   if (root_it->event() != XmlParser::Event::START_TAG || root_it->name() != "overlay") {
@@ -181,7 +182,8 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
     ResourceId target_id =
         target_am->GetResourceId(*target_resource, "", target_package->GetPackageName());
     if (target_id == 0U) {
-      LOG(WARNING) << "failed to find resource \"" << *target_resource << "\" in target resources";
+      log_info.Warning(LogMessage() << "failed to find resource \"" << *target_resource
+                                    << "\" in target resources");
       continue;
     }
 
@@ -196,7 +198,7 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
          overlay_resource->dataType == Res_value::TYPE_DYNAMIC_REFERENCE)
             ? overlay_package_id == EXTRACT_PACKAGE(overlay_resource->data)
             : false;
-    
+
     if (rewrite_overlay_reference) {
       overlay_resource->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
     }
@@ -239,7 +241,8 @@ void ResourceMapping::FilterOverlayableResources(const AssetManager2* target_am,
                                                  const LoadedPackage* target_package,
                                                  const LoadedPackage* overlay_package,
                                                  const OverlayManifestInfo& overlay_info,
-                                                 const PolicyBitmask& fulfilled_policies) {
+                                                 const PolicyBitmask& fulfilled_policies,
+                                                 LogInfo& log_info) {
   std::set<ResourceId> remove_ids;
   for (const auto& target_map : target_map_) {
     const ResourceId target_resid = target_map.first;
@@ -256,9 +259,9 @@ void ResourceMapping::FilterOverlayableResources(const AssetManager2* target_am,
       name = StringPrintf("0x%08x", target_resid);
     }
 
-    LOG(WARNING) << "overlay \"" << overlay_package->GetPackageName()
-                 << "\" is not allowed to overlay resource \"" << *name
-                 << "\" in target: " << success.GetErrorMessage();
+    log_info.Warning(LogMessage() << "overlay \"" << overlay_package->GetPackageName()
+                                  << "\" is not allowed to overlay resource \"" << *name
+                                  << "\" in target: " << success.GetErrorMessage());
 
     remove_ids.insert(target_resid);
   }
@@ -272,7 +275,15 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
                                                        const ApkAssets& overlay_apk_assets,
                                                        const OverlayManifestInfo& overlay_info,
                                                        const PolicyBitmask& fulfilled_policies,
-                                                       bool enforce_overlayable) {
+                                                       bool enforce_overlayable,
+                                                       LogInfo& log_info) {
+  if (enforce_overlayable) {
+    log_info.Info(LogMessage() << "fulfilled_policies="
+                               << ConcatPolicies(BitmaskToPolicies(fulfilled_policies))
+                               << " enforce_overlayable="
+                               << (enforce_overlayable ? "true" : "false"));
+  }
+
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true /* invalidate_caches */,
                                          false /* filter_incompatible_configs*/)) {
@@ -333,7 +344,7 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
     string_pool_offset = overlay_arsc->GetStringPool()->size();
 
     resource_mapping = CreateResourceMapping(&target_asset_manager, target_pkg, overlay_pkg,
-                                             string_pool_offset, *(*parser));
+                                             string_pool_offset, *(*parser), log_info);
   } else {
     // If no file is specified using android:resourcesMap, it is assumed that the overlay only
     // defines resources intended to override target resources of the same type and name.
@@ -349,7 +360,7 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
     // Filter out resources the overlay is not allowed to override.
     (*resource_mapping)
         .FilterOverlayableResources(&target_asset_manager, target_pkg, overlay_pkg, overlay_info,
-                                    fulfilled_policies);
+                                    fulfilled_policies, log_info);
   }
 
   resource_mapping->target_package_id_ = target_pkg->GetPackageId();
