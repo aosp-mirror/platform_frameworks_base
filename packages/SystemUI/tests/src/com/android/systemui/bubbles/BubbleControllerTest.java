@@ -74,7 +74,6 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -174,8 +173,7 @@ public class BubbleControllerTest extends SysuiTestCase {
         TestableNotificationInterruptionStateProvider interruptionStateProvider =
                 new TestableNotificationInterruptionStateProvider(mContext,
                         mock(NotificationFilter.class),
-                        mock(StatusBarStateController.class),
-                        mock(BatteryController.class));
+                        mock(StatusBarStateController.class));
         interruptionStateProvider.setUpWithPresenter(
                 mock(NotificationPresenter.class),
                 mock(HeadsUpManager.class),
@@ -661,9 +659,8 @@ public class BubbleControllerTest extends SysuiTestCase {
             NotificationInterruptionStateProvider {
 
         TestableNotificationInterruptionStateProvider(Context context,
-                NotificationFilter filter, StatusBarStateController controller,
-                BatteryController batteryController) {
-            super(context, filter, controller, batteryController);
+                NotificationFilter filter, StatusBarStateController controller) {
+            super(context, filter, controller);
             mUseHeadsUp = true;
         }
     }
