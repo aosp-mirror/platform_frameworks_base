@@ -36,6 +36,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.volume.CarVolumeDialogComponent;
+import com.android.systemui.volume.VolumeDialogComponent;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -102,4 +104,8 @@ abstract class CarSystemUIModule {
     @IntoMap
     @ClassKey(StatusBar.class)
     public abstract SystemUI providesStatusBar(CarStatusBar statusBar);
+
+    @Binds
+    abstract VolumeDialogComponent bindVolumeDialogComponent(
+            CarVolumeDialogComponent carVolumeDialogComponent);
 }

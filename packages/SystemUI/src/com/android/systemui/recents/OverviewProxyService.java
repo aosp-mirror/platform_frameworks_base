@@ -101,6 +101,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private static final long MAX_BACKOFF_MILLIS = 10 * 60 * 1000;
 
     private final Context mContext;
+    private final PipUI mPipUI;
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final NavigationBarController mNavBarController;
@@ -361,8 +362,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             long token = Binder.clearCallingIdentity();
             try {
-                final PipUI component = SysUiServiceProvider.getComponent(mContext, PipUI.class);
-                component.setShelfHeight(visible, shelfHeight);
+                mPipUI.setShelfHeight(visible, shelfHeight);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -479,8 +479,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public OverviewProxyService(Context context, DeviceProvisionedController provisionController,
             NavigationBarController navBarController, NavigationModeController navModeController,
             StatusBarWindowController statusBarWinController,
-            SysUiState sysUiState) {
+            SysUiState sysUiState, PipUI pipUI) {
         mContext = context;
+        mPipUI = pipUI;
         mHandler = new Handler();
         mNavBarController = navBarController;
         mStatusBarWinController = statusBarWinController;
