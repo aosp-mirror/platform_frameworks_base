@@ -47,6 +47,7 @@ import android.graphics.Point;
 import android.graphics.PostProcessor;
 import android.media.ExifInterface;
 import android.media.MediaFile;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -3007,22 +3008,32 @@ public final class MediaStore {
             public static final String BOOKMARK = "bookmark";
 
             /**
-             * The standard of color aspects
-             * @hide
+             * The color standard of this media file, if available.
+             *
+             * @see MediaFormat#COLOR_STANDARD_BT709
+             * @see MediaFormat#COLOR_STANDARD_BT601_PAL
+             * @see MediaFormat#COLOR_STANDARD_BT601_NTSC
+             * @see MediaFormat#COLOR_STANDARD_BT2020
              */
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String COLOR_STANDARD = "color_standard";
 
             /**
-             * The transfer of color aspects
-             * @hide
+             * The color transfer of this media file, if available.
+             *
+             * @see MediaFormat#COLOR_TRANSFER_LINEAR
+             * @see MediaFormat#COLOR_TRANSFER_SDR_VIDEO
+             * @see MediaFormat#COLOR_TRANSFER_ST2084
+             * @see MediaFormat#COLOR_TRANSFER_HLG
              */
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String COLOR_TRANSFER = "color_transfer";
 
             /**
-             * The range of color aspects
-             * @hide
+             * The color range of this media file, if available.
+             *
+             * @see MediaFormat#COLOR_RANGE_LIMITED
+             * @see MediaFormat#COLOR_RANGE_FULL
              */
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
             public static final String COLOR_RANGE = "color_range";

@@ -35,12 +35,15 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.net.Uri;
 import android.os.MessageQueue.OnFileDescriptorEventListener;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
 import android.util.Log;
+import android.util.Size;
 
 import dalvik.system.CloseGuard;
 import dalvik.system.VMRuntime;
@@ -204,6 +207,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     /**
      * Create a new ParcelFileDescriptor accessing a given file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with files hosted outside your app, use an API like
+     * {@link ContentResolver#openFile(Uri, String, CancellationSignal)}.
      *
      * @param file The file to be opened.
      * @param mode The desired access mode, must be one of
@@ -226,6 +233,10 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
 
     /**
      * Create a new ParcelFileDescriptor accessing a given file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with files hosted outside your app, use an API like
+     * {@link ContentResolver#openFile(Uri, String, CancellationSignal)}.
      *
      * @param file The file to be opened.
      * @param mode The desired access mode, must be one of
