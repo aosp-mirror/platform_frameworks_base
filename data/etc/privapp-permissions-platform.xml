@@ -354,7 +354,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.server.wifistack">
+    <privapp-permissions package="com.android.wifi">
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
         <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.DUMP"/>
