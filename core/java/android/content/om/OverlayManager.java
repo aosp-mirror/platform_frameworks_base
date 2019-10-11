@@ -166,9 +166,8 @@ public class OverlayManager {
     }
 
     /**
-     * Returns information about all overlays for the given target package for
-     * the specified user. The returned list is ordered according to the
-     * overlay priority with the highest priority at the end of the list.
+     * Clear part of the overlay manager's internal cache of PackageInfo
+     * objects. Only intended for testing.
      *
      * @param targetPackageName The name of the target package.
      * @param user The user to get the OverlayInfos for.
