@@ -5888,7 +5888,7 @@ package android.provider {
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
-    field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
+    field @Deprecated public static final String NAMESPACE_DEX_BOOT = "dex_boot";
     field public static final String NAMESPACE_DISPLAY_MANAGER = "display_manager";
     field public static final String NAMESPACE_GAME_DRIVER = "game_driver";
     field public static final String NAMESPACE_INPUT_NATIVE_BOOT = "input_native_boot";
