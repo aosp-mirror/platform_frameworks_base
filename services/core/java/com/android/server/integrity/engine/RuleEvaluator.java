@@ -88,11 +88,8 @@ final class RuleEvaluator {
                     // NOT connector has only 1 formula attached.
                     return !isMatch(openFormula.getFormulas().get(0), appInstallMetadata);
                 case AND:
-                    boolean result = true;
-                    for (Formula subFormula : openFormula.getFormulas()) {
-                        result &= isMatch(subFormula, appInstallMetadata);
-                    }
-                    return result;
+                    return openFormula.getFormulas().stream().allMatch(
+                            subFormula -> isMatch(subFormula, appInstallMetadata));
                 default:
                     Slog.i(TAG, String.format("Returned no match for unknown connector %s",
                             openFormula.getConnector()));
