@@ -1778,21 +1778,6 @@ interface ITelephony {
      boolean isInEmergencySmsMode();
 
     /**
-     * Get a list of SMS apps on a user.
-     */
-    String[] getSmsApps(int userId);
-
-    /**
-     * Get the default SMS app on a given user.
-     */
-    String getDefaultSmsApp(int userId);
-
-    /**
-     * Set the default SMS app to a given package on a given user.
-     */
-    void setDefaultSmsApp(int userId, String packageName);
-
-    /**
      * Return the modem radio power state for slot index.
      *
      */
