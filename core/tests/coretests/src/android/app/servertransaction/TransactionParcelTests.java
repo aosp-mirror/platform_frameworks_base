@@ -611,6 +611,10 @@ public class TransactionParcelTests {
         }
 
         @Override
+        public void attachStartupAgents(String s) throws RemoteException {
+        }
+
+        @Override
         public void scheduleApplicationInfoChanged(ApplicationInfo applicationInfo)
                 throws RemoteException {
         }

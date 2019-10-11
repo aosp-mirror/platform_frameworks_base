@@ -23,6 +23,7 @@ import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.compat.ChangeReporter;
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.util.DumpUtils;
 
@@ -100,9 +101,29 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public void setOverrides(CompatibilityChangeConfig overrides, String packageName) {
+        CompatConfig.get().addOverrides(overrides, packageName);
+    }
+
+    @Override
+    public void clearOverrides(String packageName) {
+        CompatConfig config = CompatConfig.get();
+        config.removePackageOverrides(packageName);
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, "platform_compat", pw)) return;
         CompatConfig.get().dumpConfig(pw);
+    }
+
+    /**
+     * Clears information stored about events reported on behalf of an app.
+     * To be called once upon app start or end. A second call would be a no-op.
+     * @param appInfo the app to reset
+     */
+    public void resetReporting(ApplicationInfo appInfo) {
+        mChangeReporter.resetReportedChanges(appInfo.uid);
     }
 
     private ApplicationInfo getApplicationInfo(String packageName) {
