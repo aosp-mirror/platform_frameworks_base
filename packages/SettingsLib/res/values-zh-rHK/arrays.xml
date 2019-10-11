@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wifi_status">
     <item msgid="1922181315419294640"></item>
-    <item msgid="8934131797783724664">"掃描中…"</item>
+    <item msgid="8934131797783724664">"掃瞄中…"</item>
     <item msgid="8513729475867537913">"正在連線..."</item>
     <item msgid="515055375277271756">"正在驗證…"</item>
     <item msgid="1943354004029184381">"正在取得 IP 位址…"</item>
@@ -36,7 +36,7 @@
   </string-array>
   <string-array name="wifi_status_with_ssid">
     <item msgid="7714855332363650812"></item>
-    <item msgid="8878186979715711006">"掃描中…"</item>
+    <item msgid="8878186979715711006">"掃瞄中…"</item>
     <item msgid="355508996603873860">"正在連線到 <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="554971459996405634">"正在取得 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 的授權…"</item>
     <item msgid="7928343808033020343">"正在從 <xliff:g id="NETWORK_NAME">%1$s</xliff:g> 取得 IP 位址…"</item>
@@ -57,6 +57,11 @@
     <item msgid="505558545611516707">"不使用 HDCP 檢查"</item>
     <item msgid="3878793616631049349">"僅使用 HDCP 檢查 DRM 內容"</item>
     <item msgid="45075631231212732">"永遠使用 HDCP 檢查"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"已停用"</item>
+    <item msgid="1969681323976948639">"已啟用篩選"</item>
+    <item msgid="8719029132154020716">"已啟用"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (預設)"</item>
@@ -137,6 +142,12 @@
     <item msgid="4327143584633311908">"平衡音訊和連線品質"</item>
     <item msgid="4681409244565426925">"已優化連線品質"</item>
     <item msgid="364670732877872677">"盡力傳送 (自動調整位元率)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">"，使用中"</item>
+    <item msgid="8962366465966010158">"，使用中 (媒體)"</item>
+    <item msgid="4046665544396189228">"，使用中 (手機)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"關閉"</item>

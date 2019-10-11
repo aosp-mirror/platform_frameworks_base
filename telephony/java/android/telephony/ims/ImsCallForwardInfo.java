@@ -185,6 +185,7 @@ public final class ImsCallForwardInfo implements Parcelable {
         out.writeInt(mServiceClass);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return super.toString() + ", Condition: " + mCondition
@@ -204,7 +205,7 @@ public final class ImsCallForwardInfo implements Parcelable {
         mServiceClass = in.readInt();
     }
 
-    public static final Creator<ImsCallForwardInfo> CREATOR =
+    public static final @android.annotation.NonNull Creator<ImsCallForwardInfo> CREATOR =
             new Creator<ImsCallForwardInfo>() {
         @Override
         public ImsCallForwardInfo createFromParcel(Parcel in) {

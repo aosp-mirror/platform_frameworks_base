@@ -17,9 +17,9 @@ package com.android.test.uibench.leanback;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.support.v17.leanback.widget.ImageCardView;
-import android.support.v17.leanback.widget.Presenter;
-import android.support.v4.content.res.ResourcesCompat;
+import androidx.leanback.widget.ImageCardView;
+import androidx.leanback.widget.Presenter;
+import androidx.core.content.res.ResourcesCompat;
 import android.view.ContextThemeWrapper;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;

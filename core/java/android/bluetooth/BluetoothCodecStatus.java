@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,7 +43,7 @@ public final class BluetoothCodecStatus implements Parcelable {
     public static final String EXTRA_CODEC_STATUS =
             "android.bluetooth.codec.extra.CODEC_STATUS";
 
-    private final BluetoothCodecConfig mCodecConfig;
+    private final @Nullable BluetoothCodecConfig mCodecConfig;
     private final BluetoothCodecConfig[] mCodecsLocalCapabilities;
     private final BluetoothCodecConfig[] mCodecsSelectableCapabilities;
 
@@ -144,7 +145,7 @@ public final class BluetoothCodecStatus implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<BluetoothCodecStatus> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<BluetoothCodecStatus> CREATOR =
             new Parcelable.Creator<BluetoothCodecStatus>() {
                 public BluetoothCodecStatus createFromParcel(Parcel in) {
                     final BluetoothCodecConfig codecConfig = in.readTypedObject(
@@ -177,7 +178,7 @@ public final class BluetoothCodecStatus implements Parcelable {
      * @return the current codec configuration
      */
     @UnsupportedAppUsage
-    public BluetoothCodecConfig getCodecConfig() {
+    public @Nullable BluetoothCodecConfig getCodecConfig() {
         return mCodecConfig;
     }
 

@@ -97,7 +97,6 @@ public class MessagingLayoutTransformState extends TransformState {
         HashMap<MessagingGroup, MessagingGroup> pairs = findPairs(ownGroups, otherGroups);
         MessagingGroup lastPairedGroup = null;
         float currentTranslation = 0;
-        float transformationDistanceRemaining = 0;
         for (int i = ownGroups.size() - 1; i >= 0; i--) {
             MessagingGroup ownGroup = ownGroups.get(i);
             MessagingGroup matchingGroup = pairs.get(ownGroup);
@@ -108,13 +107,10 @@ public class MessagingLayoutTransformState extends TransformState {
                         lastPairedGroup = ownGroup;
                         if (to){
                             float totalTranslation = ownGroup.getTop() - matchingGroup.getTop();
-                            transformationDistanceRemaining
-                                    = matchingGroup.getAvatar().getTranslationY();
-                            currentTranslation = transformationDistanceRemaining - totalTranslation;
+                            currentTranslation = matchingGroup.getAvatar().getTranslationY()
+                                    - totalTranslation;
                         } else {
-                            float totalTranslation = matchingGroup.getTop() - ownGroup.getTop();
                             currentTranslation = ownGroup.getAvatar().getTranslationY();
-                            transformationDistanceRemaining = currentTranslation - totalTranslation;
                         }
                     }
                 } else {
@@ -122,14 +118,20 @@ public class MessagingLayoutTransformState extends TransformState {
                     if (lastPairedGroup != null) {
                         adaptGroupAppear(ownGroup, transformationAmount, currentTranslation,
                                 to);
-                        int distance = lastPairedGroup.getTop() - ownGroup.getTop();
-                        float transformationDistance = mTransformInfo.isAnimating()
-                                ? distance
-                                : ownGroup.getHeight() * 0.75f;
-                        float translationProgress = transformationDistanceRemaining
-                                - (distance - transformationDistance);
-                        groupTransformationAmount =
-                                translationProgress / transformationDistance;
+                        float newPosition = ownGroup.getTop() + currentTranslation;
+
+                        if (!mTransformInfo.isAnimating()) {
+                            // We fade the group away as soon as 1/2 of it is translated away on top
+                            float fadeStart = -ownGroup.getHeight() * 0.5f;
+                            groupTransformationAmount = (newPosition - fadeStart)
+                                    / Math.abs(fadeStart);
+                        } else {
+                            float fadeStart = -ownGroup.getHeight() * 0.75f;
+                            // We want to fade out as soon as the animation starts, let's add the
+                            // complete top in addition
+                            groupTransformationAmount = (newPosition - fadeStart)
+                                    / (Math.abs(fadeStart) + ownGroup.getTop());
+                        }
                         groupTransformationAmount = Math.max(0.0f, Math.min(1.0f,
                                 groupTransformationAmount));
                         if (to) {
@@ -175,7 +177,8 @@ public class MessagingLayoutTransformState extends TransformState {
             relativeOffset *= 0.5f;
         }
         ownGroup.getMessageContainer().setTranslationY(relativeOffset);
-        ownGroup.setTranslationY(overallTranslation * 0.85f);
+        ownGroup.getSenderView().setTranslationY(relativeOffset);
+        ownGroup.setTranslationY(overallTranslation * 0.9f);
     }
 
     private void disappear(MessagingGroup ownGroup, float transformationAmount) {
@@ -250,7 +253,9 @@ public class MessagingLayoutTransformState extends TransformState {
                     otherChild = null;
                 }
             }
-            if (otherChild == null) {
+            if (otherChild == null && previousTranslation < 0) {
+                // Let's fade out as we approach the top of the screen. We can only do this if
+                // we're actually moving up
                 float distanceToTop = child.getTop() + child.getHeight() + previousTranslation;
                 transformationAmount = distanceToTop / child.getHeight();
                 transformationAmount = Math.max(0.0f, Math.min(1.0f, transformationAmount));
@@ -260,13 +265,15 @@ public class MessagingLayoutTransformState extends TransformState {
             }
             transformView(transformationAmount, to, child, otherChild, false, /* sameAsAny */
                     useLinearTransformation);
-            if (transformationAmount == 0.0f
-                    && otherGroup.getIsolatedMessage() == otherChild) {
+            boolean otherIsIsolated = otherGroup.getIsolatedMessage() == otherChild;
+            if (transformationAmount == 0.0f && otherIsIsolated) {
                 ownGroup.setTransformingImages(true);
             }
             if (otherChild == null) {
                 child.setTranslationY(previousTranslation);
                 setClippingDeactivated(child, true);
+            } else if (ownGroup.getIsolatedMessage() == child || otherIsIsolated) {
+                // We don't want to add any translation for the image that is transforming
             } else if (to) {
                 float totalTranslation = child.getTop() + ownGroup.getTop()
                         - otherChild.getTop() - otherChild.getTop();
@@ -399,6 +406,7 @@ public class MessagingLayoutTransformState extends TransformState {
                 setClippingDeactivated(ownGroup.getSenderView(), false);
                 ownGroup.setTranslationY(0);
                 ownGroup.getMessageContainer().setTranslationY(0);
+                ownGroup.getSenderView().setTranslationY(0);
             }
             ownGroup.setTransformingImages(false);
             ownGroup.updateClipRect();

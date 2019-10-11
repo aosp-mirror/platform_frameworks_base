@@ -16,7 +16,9 @@
 
 package android.os.storage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +35,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.CharArrayWriter;
 import java.io.File;
+import java.util.Locale;
 
 /**
  * Information about a shared/external storage volume for a specific user.
@@ -170,7 +173,7 @@ public final class StorageVolume implements Parcelable {
      * @return the mount path
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public String getPath() {
         return mPath.toString();
     }
@@ -261,6 +264,16 @@ public final class StorageVolume implements Parcelable {
         return mFsUuid;
     }
 
+    /** {@hide} */
+    public static @Nullable String normalizeUuid(@Nullable String fsUuid) {
+        return fsUuid != null ? fsUuid.toLowerCase(Locale.US) : null;
+    }
+
+    /** {@hide} */
+    public @Nullable String getNormalizedUuid() {
+        return normalizeUuid(mFsUuid);
+    }
+
     /**
      * Parse and return volume UUID as FAT volume ID, or return -1 if unable to
      * parse or UUID is unknown.
@@ -330,7 +343,12 @@ public final class StorageVolume implements Parcelable {
      * @return intent to request access, or {@code null} if the requested directory is invalid for
      *         that volume.
      * @see DocumentsContract
+     * @deprecated Callers should migrate to using {@link Intent#ACTION_OPEN_DOCUMENT_TREE} instead.
+     *             Launching this {@link Intent} on devices running
+     *             {@link android.os.Build.VERSION_CODES#Q} or higher, will immediately finish
+     *             with a result code of {@link android.app.Activity#RESULT_CANCELED}.
      */
+    @Deprecated
     public @Nullable Intent createAccessIntent(String directoryName) {
         if ((isPrimary() && directoryName == null) ||
                 (directoryName != null && !Environment.isStandardDirectory(directoryName))) {
@@ -339,6 +357,32 @@ public final class StorageVolume implements Parcelable {
         final Intent intent = new Intent(ACTION_OPEN_EXTERNAL_DIRECTORY);
         intent.putExtra(EXTRA_STORAGE_VOLUME, this);
         intent.putExtra(EXTRA_DIRECTORY_NAME, directoryName);
+        return intent;
+    }
+
+    /**
+     * Builds an {@link Intent#ACTION_OPEN_DOCUMENT_TREE} to allow the user to grant access to any
+     * directory subtree (or entire volume) from the {@link android.provider.DocumentsProvider}s
+     * available on the device. The initial location of the document navigation will be the root of
+     * this {@link StorageVolume}.
+     *
+     * Note that the returned {@link Intent} simply suggests that the user picks this {@link
+     * StorageVolume} by default, but the user may select a different location. Callers must respect
+     * the user's chosen location, even if it is different from the originally requested location.
+     *
+     * @return intent to {@link Intent#ACTION_OPEN_DOCUMENT_TREE} initially showing the contents
+     *         of this {@link StorageVolume}
+     * @see Intent#ACTION_OPEN_DOCUMENT_TREE
+     */
+    @NonNull public Intent createOpenDocumentTreeIntent() {
+        final String rootId = isEmulated()
+                ? DocumentsContract.EXTERNAL_STORAGE_PRIMARY_EMULATED_ROOT_ID
+                : mFsUuid;
+        final Uri rootUri = DocumentsContract.buildRootUri(
+                DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY, rootId);
+        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                .putExtra(DocumentsContract.EXTRA_INITIAL_URI, rootUri)
+                .putExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, true);
         return intent;
     }
 
@@ -392,7 +436,7 @@ public final class StorageVolume implements Parcelable {
         pw.decreaseIndent();
     }
 
-    public static final Creator<StorageVolume> CREATOR = new Creator<StorageVolume>() {
+    public static final @android.annotation.NonNull Creator<StorageVolume> CREATOR = new Creator<StorageVolume>() {
         @Override
         public StorageVolume createFromParcel(Parcel in) {
             return new StorageVolume(in);
@@ -423,33 +467,5 @@ public final class StorageVolume implements Parcelable {
         parcel.writeParcelable(mOwner, flags);
         parcel.writeString(mFsUuid);
         parcel.writeString(mState);
-    }
-
-    /** {@hide} */
-    public static final class ScopedAccessProviderContract {
-
-        private ScopedAccessProviderContract() {
-            throw new UnsupportedOperationException("contains constants only");
-        }
-
-        public static final String AUTHORITY = "com.android.documentsui.scopedAccess";
-
-        public static final String TABLE_PACKAGES = "packages";
-        public static final String TABLE_PERMISSIONS = "permissions";
-
-        public static final String COL_PACKAGE = "package_name";
-        public static final String COL_VOLUME_UUID = "volume_uuid";
-        public static final String COL_DIRECTORY = "directory";
-        public static final String COL_GRANTED = "granted";
-
-        public static final String[] TABLE_PACKAGES_COLUMNS = new String[] { COL_PACKAGE };
-        public static final String[] TABLE_PERMISSIONS_COLUMNS =
-                new String[] { COL_PACKAGE, COL_VOLUME_UUID, COL_DIRECTORY, COL_GRANTED };
-
-        public static final int TABLE_PACKAGES_COL_PACKAGE = 0;
-        public static final int TABLE_PERMISSIONS_COL_PACKAGE = 0;
-        public static final int TABLE_PERMISSIONS_COL_VOLUME_UUID = 1;
-        public static final int TABLE_PERMISSIONS_COL_DIRECTORY = 2;
-        public static final int TABLE_PERMISSIONS_COL_GRANTED = 3;
     }
 }

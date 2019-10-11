@@ -39,13 +39,22 @@ enum class Bidi : uint8_t;
 }
 
 namespace android {
+class PaintFilter;
 
 namespace uirenderer {
 class CanvasPropertyPaint;
 class CanvasPropertyPrimitive;
 class DeferredLayerUpdater;
-class DisplayList;
 class RenderNode;
+
+namespace skiapipeline {
+class SkiaDisplayList;
+}
+
+/**
+ * Data structure that holds the list of commands used in display list stream
+ */
+using DisplayList = skiapipeline::SkiaDisplayList;
 }
 
 namespace SaveFlags {
@@ -65,11 +74,10 @@ typedef uint32_t Flags;
 }  // namespace SaveFlags
 
 namespace uirenderer {
-class SkiaCanvasProxy;
 namespace VectorDrawable {
 class Tree;
-};
-};
+}
+}
 typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 typedef std::function<void(uint16_t* text, float* positions)> ReadGlyphFunc;
@@ -170,6 +178,9 @@ public:
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) = 0;
     virtual void callDrawGLFunction(Functor* functor,
                                     uirenderer::GlFunctorLifecycleListener* listener) = 0;
+    virtual void drawWebViewFunctor(int /*functor*/) {
+        LOG_ALWAYS_FATAL("Not supported");
+    }
 
     // ----------------------------------------------------------------------------
     // Canvas state operations
@@ -180,11 +191,13 @@ public:
     virtual int save(SaveFlags::Flags flags) = 0;
     virtual void restore() = 0;
     virtual void restoreToCount(int saveCount) = 0;
+    virtual void restoreUnclippedLayer(int saveCount, const SkPaint& paint) = 0;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
                           SaveFlags::Flags flags) = 0;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
                                SaveFlags::Flags flags) = 0;
+    virtual int saveUnclippedLayer(int, int, int, int) = 0;
 
     // Matrix
     virtual void getMatrix(SkMatrix* outMatrix) const = 0;
@@ -205,8 +218,8 @@ public:
     virtual bool clipPath(const SkPath* path, SkClipOp op) = 0;
 
     // filters
-    virtual SkDrawFilter* getDrawFilter() = 0;
-    virtual void setDrawFilter(SkDrawFilter* drawFilter) = 0;
+    virtual PaintFilter* getPaintFilter() = 0;
+    virtual void setPaintFilter(sk_sp<PaintFilter> paintFilter) = 0;
 
     // WebView only
     virtual SkCanvasState* captureCanvasState() const { return nullptr; }
@@ -228,6 +241,8 @@ public:
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) = 0;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
                                const SkPaint& paint) = 0;
+    virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
+                                const SkPaint& paint) = 0;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) = 0;
     virtual void drawOval(float left, float top, float right, float bottom,
                           const SkPaint& paint) = 0;
@@ -268,35 +283,44 @@ public:
      * Converts utf16 text to glyphs, calculating position and boundary,
      * and delegating the final draw to virtual drawGlyphs method.
      */
-    void drawText(const uint16_t* text, int start, int count, int contextCount, float x, float y,
-                  minikin::Bidi bidiFlags, const Paint& origPaint, const Typeface* typeface,
-                  minikin::MeasuredText* mt);
+    void drawText(const uint16_t* text, int textSize, int start, int count, int contextStart,
+                  int contextCount, float x, float y, minikin::Bidi bidiFlags,
+                  const Paint& origPaint, const Typeface* typeface, minikin::MeasuredText* mt);
 
     void drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
                         const SkPath& path, float hOffset, float vOffset, const Paint& paint,
                         const Typeface* typeface);
 
+    void drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
+                                float outerBottom, float outerRx, float outerRy, float innerLeft,
+                                float innerTop, float innerRight, float innerBottom, float innerRx,
+                                float innerRy, const SkPaint& paint);
+
+    void drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
+                                float outerBottom, const float* outerRadii, float innerLeft,
+                                float innerTop, float innerRight, float innerBottom,
+                                const float* innerRadii, const SkPaint& paint);
+
     static int GetApiLevel() { return sApiLevel; }
 
 protected:
-    void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
+    void drawTextDecorations(float x, float y, float length, const Paint& paint);
 
     /**
      * glyphFunc: valid only for the duration of the call and should not be cached.
      * drawText: count is of glyphs
      * totalAdvance: used to define width of text decorations (underlines, strikethroughs).
      */
-    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
+    virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const Paint& paint, float x,
                             float y, float boundsLeft, float boundsTop, float boundsRight,
                             float boundsBottom, float totalAdvance) = 0;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
-                                  const SkPaint& paint, const SkPath& path, size_t start,
+                                  const Paint& paint, const SkPath& path, size_t start,
                                   size_t end) = 0;
     static int sApiLevel;
 
     friend class DrawTextFunctor;
     friend class DrawTextOnPathFunctor;
-    friend class uirenderer::SkiaCanvasProxy;
 };
 
-};  // namespace android
+}  // namespace android

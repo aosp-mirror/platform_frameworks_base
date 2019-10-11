@@ -40,8 +40,9 @@ public class FrameMetricsObserver {
     @UnsupportedAppUsage
     private FrameMetrics mFrameMetrics;
 
-    /* package */ Window.OnFrameMetricsAvailableListener mListener;
-    /* package */ VirtualRefBasePtr mNative;
+    /* pacage */ Window.OnFrameMetricsAvailableListener mListener;
+    /** @hide */
+    public VirtualRefBasePtr mNative;
 
     /**
      * Creates a FrameMetricsObserver

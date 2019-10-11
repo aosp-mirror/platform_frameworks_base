@@ -1,0 +1,15 @@
+{
+    "presubmit": [
+        {
+            "name": "CtsAppOpsTestCases"
+        },
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.appop"
+                }
+            ]
+        }
+    ]
+}

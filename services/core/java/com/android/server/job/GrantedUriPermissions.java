@@ -17,6 +17,7 @@
 package com.android.server.job;
 
 import android.app.IActivityManager;
+import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.content.ContentProvider;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
+import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -42,16 +45,14 @@ public final class GrantedUriPermissions {
         mGrantFlags = grantFlags;
         mSourceUserId = UserHandle.getUserId(uid);
         mTag = tag;
-        mPermissionOwner = am.newUriPermissionOwner("job: " + tag);
+        mPermissionOwner = LocalServices
+                .getService(UriGrantsManagerInternal.class).newUriPermissionOwner("job: " + tag);
     }
 
     public void revoke(IActivityManager am) {
         for (int i = mUris.size()-1; i >= 0; i--) {
-            try {
-                am.revokeUriPermissionFromOwner(mPermissionOwner, mUris.get(i),
-                        mGrantFlags, mSourceUserId);
-            } catch (RemoteException e) {
-            }
+            LocalServices.getService(UriGrantsManagerInternal.class).revokeUriPermissionFromOwner(
+                    mPermissionOwner, mUris.get(i), mGrantFlags, mSourceUserId);
         }
         mUris.clear();
     }
@@ -119,8 +120,8 @@ public final class GrantedUriPermissions {
             if (curPerms == null) {
                 curPerms = new GrantedUriPermissions(am, grantFlags, sourceUid, tag);
             }
-            am.grantUriPermissionFromOwner(curPerms.mPermissionOwner, sourceUid, targetPackage,
-                    uri, grantFlags, sourceUserId, targetUserId);
+            UriGrantsManager.getService().grantUriPermissionFromOwner(curPerms.mPermissionOwner,
+                    sourceUid, targetPackage, uri, grantFlags, sourceUserId, targetUserId);
             curPerms.mUris.add(uri);
         } catch (RemoteException e) {
             Slog.e("JobScheduler", "AM dead");

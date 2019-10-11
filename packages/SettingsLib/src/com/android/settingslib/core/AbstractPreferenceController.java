@@ -1,6 +1,9 @@
 package com.android.settingslib.core;
 
 import android.content.Context;
+import android.text.TextUtils;
+import android.util.Log;
+
 import androidx.preference.Preference;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceScreen;
@@ -9,6 +12,8 @@ import androidx.preference.PreferenceScreen;
  * A controller that manages event for preference.
  */
 public abstract class AbstractPreferenceController {
+
+    private static final String TAG = "AbstractPrefController";
 
     protected final Context mContext;
 
@@ -21,6 +26,10 @@ public abstract class AbstractPreferenceController {
      */
     public void displayPreference(PreferenceScreen screen) {
         final String prefKey = getPreferenceKey();
+        if (TextUtils.isEmpty(prefKey)) {
+            Log.w(TAG, "Skipping displayPreference because key is empty:" + getClass().getName());
+            return;
+        }
         if (isAvailable()) {
             setVisible(screen, prefKey, true /* visible */);
             if (this instanceof Preference.OnPreferenceChangeListener) {

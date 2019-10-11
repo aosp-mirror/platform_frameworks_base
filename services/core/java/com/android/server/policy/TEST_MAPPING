@@ -1,0 +1,72 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.policy."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "WmTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.policy."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsPermission2TestCases",
+      "options": [
+        {
+          "include-filter": "android.permission2.cts.RestrictedPermissionsTest"
+        },
+        {
+          "include-filter": "android.permission2.cts.RestrictedStoragePermissionSharedUidTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsPermissionTestCases",
+      "options": [
+        {
+          "include-filter": "android.permission.cts.SplitPermissionTest"
+        },
+        {
+          "include-filter": "android.permission.cts.BackgroundPermissionsTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.policy."
+        }
+      ]
+    },
+    {
+      "name": "WmTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.policy."
+        }
+      ]
+    }
+  ]
+}

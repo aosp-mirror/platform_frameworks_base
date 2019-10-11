@@ -19,7 +19,9 @@ package android.view.autofill;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 /** @hide */
 public final class Helper {
@@ -62,7 +64,8 @@ public final class Helper {
     }
 
     /**
-     * Convers a collaction of {@link AutofillId AutofillIds} to an array.
+     * Converts a collaction of {@link AutofillId AutofillIds} to an array.
+     *
      * @param collection The collection.
      * @return The array.
      */
@@ -73,6 +76,14 @@ public final class Helper {
         final AutofillId[] array = new AutofillId[collection.size()];
         collection.toArray(array);
         return array;
+    }
+
+    /**
+     * Converts a Set to a List.
+     */
+    @Nullable
+    public static <T> ArrayList<T> toList(@Nullable Set<T> set) {
+        return set == null ? null : new ArrayList<T>(set);
     }
 
     private Helper() {

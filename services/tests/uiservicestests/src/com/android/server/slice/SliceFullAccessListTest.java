@@ -47,7 +47,7 @@ public class SliceFullAccessListTest extends UiServiceTestCase {
     private SliceFullAccessList mAccessList;
 
     @Before
-    public void setup() {
+    public void setUp() {
         mAccessList = new SliceFullAccessList(mContext);
     }
 

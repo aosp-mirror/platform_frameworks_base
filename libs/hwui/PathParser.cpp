@@ -210,9 +210,8 @@ void PathParser::validateVerbAndPoints(char verb, size_t points, PathParser::Par
     if (numberOfPointsExpected > 0) {
         result->failureMessage += "a multiple of ";
     }
-    result->failureMessage += std::to_string(numberOfPointsExpected)
-            + " floats. However, " + std::to_string(points)
-            + " float(s) are found. ";
+    result->failureMessage += std::to_string(numberOfPointsExpected) + " floats. However, " +
+                              std::to_string(points) + " float(s) are found. ";
 }
 
 void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
@@ -242,8 +241,8 @@ void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
         validateVerbAndPoints(pathStr[start], points.size(), result);
         if (result->failureOccurred) {
             // If either verb or points is not valid, return immediately.
-            result->failureMessage += "Failure occurred at position " +
-                                     std::to_string(start) + " of path: " + pathStr;
+            result->failureMessage += "Failure occurred at position " + std::to_string(start) +
+                                      " of path: " + pathStr;
             return;
         }
         data->verbs.push_back(pathStr[start]);
@@ -257,8 +256,8 @@ void PathParser::getPathDataFromAsciiString(PathData* data, ParseResult* result,
         validateVerbAndPoints(pathStr[start], 0, result);
         if (result->failureOccurred) {
             // If either verb or points is not valid, return immediately.
-            result->failureMessage += "Failure occurred at position " +
-                                     std::to_string(start) + " of path: " + pathStr;
+            result->failureMessage += "Failure occurred at position " + std::to_string(start) +
+                                      " of path: " + pathStr;
             return;
         }
         data->verbs.push_back(pathStr[start]);
@@ -305,5 +304,5 @@ void PathParser::parseAsciiStringForSkPath(SkPath* skPath, ParseResult* result, 
     return;
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

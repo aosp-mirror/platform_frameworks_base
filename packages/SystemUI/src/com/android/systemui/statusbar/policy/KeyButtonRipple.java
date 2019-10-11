@@ -25,10 +25,9 @@ import android.graphics.CanvasProperty;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.RecordingCanvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.SystemProperties;
-import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -74,6 +73,13 @@ public class KeyButtonRipple extends Drawable {
     private final HashSet<Animator> mRunningAnimations = new HashSet<>();
     private final ArrayList<Animator> mTmpArray = new ArrayList<>();
 
+    public enum Type {
+        OVAL,
+        ROUNDED_RECT
+    }
+
+    private Type mType = Type.ROUNDED_RECT;
+
     public KeyButtonRipple(Context ctx, View targetView) {
         mMaxWidth =  ctx.getResources().getDimensionPixelSize(R.dimen.key_button_ripple_max_width);
         mTargetView = targetView;
@@ -85,6 +91,10 @@ public class KeyButtonRipple extends Drawable {
 
     public void setDelayTouchFeedback(boolean delay) {
         mDelayTouchFeedback = delay;
+    }
+
+    public void setType(Type type) {
+        mType = type;
     }
 
     private Paint getRipplePaint() {
@@ -112,9 +122,15 @@ public class KeyButtonRipple extends Drawable {
             final float ry = horizontal ? cy : radius;
             final float corner = horizontal ? cy : cx;
 
-            canvas.drawRoundRect(cx - rx, cy - ry,
-                    cx + rx, cy + ry,
-                    corner, corner, p);
+            if (mType == Type.ROUNDED_RECT) {
+                canvas.drawRoundRect(cx - rx, cy - ry, cx + rx, cy + ry, corner, corner, p);
+            } else {
+                canvas.save();
+                canvas.translate(cx, cy);
+                float r = Math.min(rx, ry);
+                canvas.drawOval(-r, -r, r, r, p);
+                canvas.restore();
+            }
         }
     }
 
@@ -122,7 +138,7 @@ public class KeyButtonRipple extends Drawable {
     public void draw(Canvas canvas) {
         mSupportHardware = canvas.isHardwareAccelerated();
         if (mSupportHardware) {
-            drawHardware((DisplayListCanvas) canvas);
+            drawHardware((RecordingCanvas) canvas);
         } else {
             drawSoftware(canvas);
         }
@@ -147,10 +163,18 @@ public class KeyButtonRipple extends Drawable {
         return getBounds().width() > getBounds().height();
     }
 
-    private void drawHardware(DisplayListCanvas c) {
+    private void drawHardware(RecordingCanvas c) {
         if (mDrawingHardwareGlow) {
-            c.drawRoundRect(mLeftProp, mTopProp, mRightProp, mBottomProp, mRxProp, mRyProp,
-                    mPaintProp);
+            if (mType == Type.ROUNDED_RECT) {
+                c.drawRoundRect(mLeftProp, mTopProp, mRightProp, mBottomProp, mRxProp, mRyProp,
+                        mPaintProp);
+            } else {
+                CanvasProperty<Float> cx = CanvasProperty.createFloat(getBounds().width() / 2);
+                CanvasProperty<Float> cy = CanvasProperty.createFloat(getBounds().height() / 2);
+                int d = Math.min(getBounds().width(), getBounds().height());
+                CanvasProperty<Float> r = CanvasProperty.createFloat(1.0f * d / 2);
+                c.drawCircle(cx, cy, r, mPaintProp);
+            }
         }
     }
 

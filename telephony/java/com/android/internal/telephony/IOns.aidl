@@ -17,9 +17,9 @@
 package com.android.internal.telephony;
 
 import android.telephony.AvailableNetworkInfo;
-import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
+import com.android.internal.telephony.IUpdateAvailableNetworksCallback;
 
 interface IOns {
 

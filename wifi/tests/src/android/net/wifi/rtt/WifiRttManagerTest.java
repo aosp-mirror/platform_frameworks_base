@@ -32,6 +32,8 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.test.TestLooper;
 
+import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,6 +47,7 @@ import java.util.concurrent.Executor;
 /**
  * Unit test harness for WifiRttManager class.
  */
+@SmallTest
 public class WifiRttManagerTest {
     private WifiRttManager mDut;
     private TestLooper mMockLooper;
@@ -78,7 +81,7 @@ public class WifiRttManagerTest {
         List<RangingResult> results = new ArrayList<>();
         results.add(
                 new RangingResult(RangingResult.STATUS_SUCCESS, MacAddress.BROADCAST_ADDRESS, 15, 5,
-                        10, 8, 5, null, null, 666));
+                        10, 8, 5, null, null, null, 666));
         RangingResultCallback callbackMock = mock(RangingResultCallback.class);
         ArgumentCaptor<IRttCallback> callbackCaptor = ArgumentCaptor.forClass(IRttCallback.class);
 
@@ -240,7 +243,7 @@ public class WifiRttManagerTest {
 
         // RangingResults constructed with a MAC address
         RangingResult result = new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi,
-                numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr, timestamp);
+                numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr, null, timestamp);
 
         Parcel parcelW = Parcel.obtain();
         result.writeToParcel(parcelW, 0);
@@ -256,7 +259,7 @@ public class WifiRttManagerTest {
 
         // RangingResults constructed with a PeerHandle
         result = new RangingResult(status, peerHandle, distanceCm, distanceStdDevCm, rssi,
-                numAttemptedMeasurements, numSuccessfulMeasurements, null, null, timestamp);
+                numAttemptedMeasurements, numSuccessfulMeasurements, null, null, null, timestamp);
 
         parcelW = Parcel.obtain();
         result.writeToParcel(parcelW, 0);
@@ -289,9 +292,9 @@ public class WifiRttManagerTest {
         byte[] lcr = { };
 
         RangingResult rr1 = new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi,
-                numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr, timestamp);
+                numAttemptedMeasurements, numSuccessfulMeasurements, lci, lcr, null, timestamp);
         RangingResult rr2 = new RangingResult(status, mac, distanceCm, distanceStdDevCm, rssi,
-                numAttemptedMeasurements, numSuccessfulMeasurements, null, null, timestamp);
+                numAttemptedMeasurements, numSuccessfulMeasurements, null, null, null, timestamp);
 
         assertEquals(rr1, rr2);
     }

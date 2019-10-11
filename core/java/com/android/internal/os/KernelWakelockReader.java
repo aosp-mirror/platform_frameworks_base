@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -66,6 +67,7 @@ public class KernelWakelockReader {
     private final String[] mProcWakelocksName = new String[3];
     private final long[] mProcWakelocksData = new long[3];
     private ISuspendControlService mSuspendControlService = null;
+    private byte[] mKernelWakelockBuffer = new byte[32 * 1024];
 
     /**
      * Reads kernel wakelock stats and updates the staleStats with the new information.
@@ -84,7 +86,7 @@ public class KernelWakelockReader {
             }
             return removeOldStats(staleStats);
         } else {
-            byte[] buffer = new byte[32*1024];
+            Arrays.fill(mKernelWakelockBuffer, (byte) 0);
             int len = 0;
             boolean wakeup_sources;
             final long startTime = SystemClock.uptimeMillis();
@@ -107,7 +109,8 @@ public class KernelWakelockReader {
                 }
 
                 int cnt;
-                while ((cnt = is.read(buffer, len, buffer.length - len)) > 0) {
+                while ((cnt = is.read(mKernelWakelockBuffer, len,
+                                mKernelWakelockBuffer.length - len)) > 0) {
                     len += cnt;
                 }
 
@@ -125,12 +128,13 @@ public class KernelWakelockReader {
             }
 
             if (len > 0) {
-                if (len >= buffer.length) {
-                    Slog.wtf(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
+                if (len >= mKernelWakelockBuffer.length) {
+                    Slog.wtf(TAG, "Kernel wake locks exceeded mKernelWakelockBuffer size "
+                            + mKernelWakelockBuffer.length);
                 }
                 int i;
                 for (i=0; i<len; i++) {
-                    if (buffer[i] == '\0') {
+                    if (mKernelWakelockBuffer[i] == '\0') {
                         len = i;
                         break;
                     }
@@ -143,7 +147,7 @@ public class KernelWakelockReader {
                 Slog.w(TAG, "Failed to get Native wakelock stats from SystemSuspend");
             }
             // Get kernel wakelock stats
-            parseProcWakelocks(buffer, len, wakeup_sources, staleStats);
+            parseProcWakelocks(mKernelWakelockBuffer, len, wakeup_sources, staleStats);
             return removeOldStats(staleStats);
         }
     }
@@ -240,7 +244,7 @@ public class KernelWakelockReader {
                                          PROC_WAKELOCKS_FORMAT,
                         nameStringArray, wlData, null);
 
-                name = nameStringArray[0];
+                name = nameStringArray[0].trim();
                 count = (int) wlData[1];
 
                 if (wakeup_sources) {

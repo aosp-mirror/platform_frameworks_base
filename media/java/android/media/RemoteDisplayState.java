@@ -76,7 +76,7 @@ public final class RemoteDisplayState implements Parcelable {
         dest.writeTypedList(displays);
     }
 
-    public static final Parcelable.Creator<RemoteDisplayState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<RemoteDisplayState> CREATOR =
             new Parcelable.Creator<RemoteDisplayState>() {
         @Override
         public RemoteDisplayState createFromParcel(Parcel in) {
@@ -176,7 +176,7 @@ public final class RemoteDisplayState implements Parcelable {
         }
 
         @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<RemoteDisplayInfo> CREATOR =
+        public static final @android.annotation.NonNull Parcelable.Creator<RemoteDisplayInfo> CREATOR =
                 new Parcelable.Creator<RemoteDisplayInfo>() {
             @Override
             public RemoteDisplayInfo createFromParcel(Parcel in) {

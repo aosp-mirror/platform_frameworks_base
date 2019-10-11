@@ -35,13 +35,14 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class WakeLockTest extends SysuiTestCase {
 
+    private static final String WHY = "test";
     WakeLock mWakeLock;
     PowerManager.WakeLock mInner;
 
     @Before
     public void setUp() {
         mInner = WakeLock.createPartialInner(mContext, WakeLockTest.class.getName());
-        mWakeLock = WakeLock.wrap(mInner);
+        mWakeLock = WakeLock.wrap(mInner, 20000);
     }
 
     @After
@@ -57,23 +58,15 @@ public class WakeLockTest extends SysuiTestCase {
 
     @Test
     public void wakeLock_acquire() {
-        mWakeLock.acquire();
+        mWakeLock.acquire(WHY);
         assertTrue(mInner.isHeld());
     }
 
     @Test
     public void wakeLock_release() {
-        mWakeLock.acquire();
-        mWakeLock.release();
+        mWakeLock.acquire(WHY);
+        mWakeLock.release(WHY);
         assertFalse(mInner.isHeld());
-    }
-
-    @Test
-    public void wakeLock_refCounted() {
-        mWakeLock.acquire();
-        mWakeLock.acquire();
-        mWakeLock.release();
-        assertTrue(mInner.isHeld());
     }
 
     @Test

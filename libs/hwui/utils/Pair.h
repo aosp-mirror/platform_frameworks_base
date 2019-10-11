@@ -36,7 +36,7 @@ struct Pair {
     inline const S& getSecond() const { return second; }
 };
 
-};  // namespace uirenderer
+}  // namespace uirenderer
 
 template <typename F, typename S>
 struct trait_trivial_ctor<uirenderer::Pair<F, S> > {
@@ -55,6 +55,6 @@ struct trait_trivial_move<uirenderer::Pair<F, S> > {
     enum { value = aggregate_traits<F, S>::has_trivial_move };
 };
 
-};  // namespace android
+}  // namespace android
 
 #endif  // ANDROID_HWUI_PAIR_H

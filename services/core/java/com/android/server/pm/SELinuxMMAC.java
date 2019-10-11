@@ -78,6 +78,13 @@ public final class SELinuxMMAC {
         sMacPermissions.add(new File(
             Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"));
 
+        // SystemExt mac permissions (optional).
+        final File systemExtMacPermission = new File(
+                Environment.getSystemExtDirectory(), "/etc/selinux/system_ext_mac_permissions.xml");
+        if (systemExtMacPermission.exists()) {
+            sMacPermissions.add(systemExtMacPermission);
+        }
+
         // Product mac permissions (optional).
         final File productMacPermission = new File(
                 Environment.getProductDirectory(), "/etc/selinux/product_mac_permissions.xml");

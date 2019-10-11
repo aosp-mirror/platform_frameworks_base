@@ -16,17 +16,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Rect;
-import androidx.annotation.VisibleForTesting;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
+import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -95,12 +92,16 @@ public class NearestTouchFrame extends FrameLayout {
     }
 
     private View findNearestChild(MotionEvent event) {
+        if (mClickableChildren.isEmpty()) {
+            return null;
+        }
         return mClickableChildren
                 .stream()
-                .filter(v -> v.isAttachedToWindow())
+                .filter(View::isAttachedToWindow)
                 .map(v -> new Pair<>(distance(v, event), v))
                 .min(Comparator.comparingInt(f -> f.first))
-                .get().second;
+                .map(data -> data.second)
+                .orElse(null);
     }
 
     private int distance(View v, MotionEvent event) {

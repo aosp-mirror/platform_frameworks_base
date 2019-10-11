@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "SkiaUtils.h"
+
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 #include <SkMatrix.h>
@@ -47,11 +49,9 @@ public:
      *      layer into the canvas.
      */
     explicit RenderNodeDrawable(RenderNode* node, SkCanvas* canvas, bool composeLayer = true,
-                                bool inReorderingSection = false)
-            : mRenderNode(node)
-            , mRecordedTransform(canvas->getTotalMatrix())
-            , mComposeLayer(composeLayer)
-            , mInReorderingSection(inReorderingSection) {}
+                                bool inReorderingSection = false);
+
+    ~RenderNodeDrawable();
 
     /**
      * Draws into the canvas this render node and its children. If the node is marked as a
@@ -91,7 +91,7 @@ protected:
     virtual SkRect onGetBounds() override {
         // We don't want to enable a record time quick reject because the properties
         // of the RenderNode may be updated on subsequent frames.
-        return SkRect::MakeLargest();
+        return SkRectMakeLargest();
     }
     /**
      * This function draws into a canvas as forceDraw, but does nothing if the render node has a
@@ -150,6 +150,6 @@ private:
     SkiaDisplayList* mProjectedDisplayList = nullptr;
 };
 
-};  // namespace skiapipeline
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace skiapipeline
+}  // namespace uirenderer
+}  // namespace android

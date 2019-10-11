@@ -34,7 +34,7 @@ public abstract class TaskKeyCache<V> {
      * Gets a specific entry in the cache with the specified key, regardless of whether the cached
      * value is valid or not.
      */
-    final V get(TaskKey key) {
+    public final synchronized V get(TaskKey key) {
         return getCacheEntry(key.id);
     }
 
@@ -42,7 +42,7 @@ public abstract class TaskKeyCache<V> {
      * Returns the value only if the key is valid (has not been updated since the last time it was
      * in the cache)
      */
-    final V getAndInvalidateIfModified(TaskKey key) {
+    public final synchronized V getAndInvalidateIfModified(TaskKey key) {
         TaskKey lastKey = mKeys.get(key.id);
         if (lastKey != null) {
             if ((lastKey.windowingMode != key.windowingMode) ||
@@ -59,7 +59,7 @@ public abstract class TaskKeyCache<V> {
     }
 
     /** Puts an entry in the cache for a specific key. */
-    final void put(TaskKey key, V value) {
+    public final synchronized void put(TaskKey key, V value) {
         if (key == null || value == null) {
             Log.e(TAG, "Unexpected null key or value: " + key + ", " + value);
             return;
@@ -70,14 +70,14 @@ public abstract class TaskKeyCache<V> {
 
 
     /** Removes a cache entry for a specific key. */
-    final void remove(TaskKey key) {
+    public final synchronized void remove(TaskKey key) {
         // Remove the key after the cache value because we need it to make the callback
         removeCacheEntry(key.id);
         mKeys.remove(key.id);
     }
 
     /** Removes all the entries in the cache. */
-    final void evictAll() {
+    public final synchronized void evictAll() {
         evictAllCache();
         mKeys.clear();
     }

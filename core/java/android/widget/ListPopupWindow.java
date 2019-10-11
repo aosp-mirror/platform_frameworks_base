@@ -471,11 +471,24 @@ public class ListPopupWindow implements ShowableListMenu {
      * Specifies the anchor-relative bounds of the popup's transition
      * epicenter.
      *
-     * @param bounds anchor-relative bounds
-     * @hide
+     * @param bounds anchor-relative bounds, or {@code null} to use default epicenter
+     *
+     * @see #getEpicenterBounds()
      */
-    public void setEpicenterBounds(Rect bounds) {
-        mEpicenterBounds = bounds;
+    public void setEpicenterBounds(@Nullable Rect bounds) {
+        mEpicenterBounds = bounds != null ? new Rect(bounds) : null;
+    }
+
+    /**
+     * Returns bounds which are used as a popup's epicenter
+     * of the enter and exit transitions.
+     *
+     * @return bounds relative to anchor view, or {@code null} if not set
+     * @see #setEpicenterBounds(Rect)
+     */
+    @Nullable
+    public Rect getEpicenterBounds() {
+        return mEpicenterBounds != null ? new Rect(mEpicenterBounds) : null;
     }
 
     /**
@@ -689,7 +702,7 @@ public class ListPopupWindow implements ShowableListMenu {
 
             mPopup.setWidth(widthSpec);
             mPopup.setHeight(heightSpec);
-            mPopup.setClipToScreenEnabled(true);
+            mPopup.setIsClippedToScreen(true);
 
             // use outside touchable to dismiss drop down when touching outside of it, so
             // only set this if the dropdown is not always visible

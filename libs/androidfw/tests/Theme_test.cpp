@@ -21,12 +21,14 @@
 #include "TestHelpers.h"
 #include "androidfw/ResourceUtils.h"
 #include "data/lib_one/R.h"
+#include "data/lib_two/R.h"
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
 #include "data/system/R.h"
 
 namespace app = com::android::app;
 namespace lib_one = com::android::lib_one;
+namespace lib_two = com::android::lib_two;
 namespace libclient = com::android::libclient;
 
 namespace android {
@@ -263,7 +265,7 @@ TEST_F(ThemeTest, CopyThemeSameAssetManager) {
   ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleThree));
 
   // Copy the theme to theme_one.
-  ASSERT_TRUE(theme_one->SetTo(*theme_two));
+  theme_one->SetTo(*theme_two);
 
   // Clear theme_two to make sure we test that there WAS a copy.
   theme_two->Clear();
@@ -279,30 +281,82 @@ TEST_F(ThemeTest, CopyThemeSameAssetManager) {
   EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
-TEST_F(ThemeTest, OnlyCopySystemThemeWhenAssetManagersDiffer) {
-  AssetManager2 assetmanager_one;
-  assetmanager_one.SetApkAssets({system_assets_.get(), style_assets_.get()});
+TEST_F(ThemeTest, OnlyCopySameAssetsThemeWhenAssetManagersDiffer) {
+  AssetManager2 assetmanager_dst;
+  assetmanager_dst.SetApkAssets({system_assets_.get(), lib_one_assets_.get(), style_assets_.get(),
+                                 libclient_assets_.get()});
 
-  AssetManager2 assetmanager_two;
-  assetmanager_two.SetApkAssets({system_assets_.get(), style_assets_.get()});
+  AssetManager2 assetmanager_src;
+  assetmanager_src.SetApkAssets({system_assets_.get(), lib_two_assets_.get(), lib_one_assets_.get(),
+                                 style_assets_.get()});
 
-  auto theme_one = assetmanager_one.NewTheme();
-  ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne));
+  auto theme_dst = assetmanager_dst.NewTheme();
+  ASSERT_TRUE(theme_dst->ApplyStyle(app::R::style::StyleOne));
 
-  auto theme_two = assetmanager_two.NewTheme();
-  ASSERT_TRUE(theme_two->ApplyStyle(R::style::Theme_One));
-  ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleTwo));
+  auto theme_src = assetmanager_src.NewTheme();
+  ASSERT_TRUE(theme_src->ApplyStyle(R::style::Theme_One));
+  ASSERT_TRUE(theme_src->ApplyStyle(app::R::style::StyleTwo));
+  ASSERT_TRUE(theme_src->ApplyStyle(fix_package_id(lib_one::R::style::Theme, 0x03),
+                                    false /*force*/));
+  ASSERT_TRUE(theme_src->ApplyStyle(fix_package_id(lib_two::R::style::Theme, 0x02),
+                                    false /*force*/));
 
-  EXPECT_TRUE(theme_one->SetTo(*theme_two));
+  theme_dst->SetTo(*theme_src);
 
   Res_value value;
   uint32_t flags;
 
-  // No app resources.
-  EXPECT_EQ(kInvalidCookie, theme_one->GetAttribute(app::R::attr::attr_one, &value, &flags));
+  // System resources (present in destination asset manager).
+  EXPECT_EQ(0, theme_dst->GetAttribute(R::attr::foreground, &value, &flags));
 
-  // Only system.
-  EXPECT_NE(kInvalidCookie, theme_one->GetAttribute(R::attr::foreground, &value, &flags));
+  // The cookie of the style asset is 3 in the source and 2 in the destination.
+  // Check that the cookie has been rewritten to the destination values.
+  EXPECT_EQ(2, theme_dst->GetAttribute(app::R::attr::attr_one, &value, &flags));
+
+  // The cookie of the lib_one asset is 2 in the source and 1 in the destination.
+  // The package id of the lib_one package is 0x03 in the source and 0x02 in the destination
+  // Check that the cookie and packages have been rewritten to the destination values.
+  EXPECT_EQ(1, theme_dst->GetAttribute(fix_package_id(lib_one::R::attr::attr1, 0x02), &value,
+                                       &flags));
+  EXPECT_EQ(1, theme_dst->GetAttribute(fix_package_id(lib_one::R::attr::attr2, 0x02), &value,
+                                       &flags));
+
+  // attr2 references an attribute in lib_one. Check that the resolution of the attribute value is
+  // correct after the value of attr2 had its package id rewritten to the destination package id.
+  EXPECT_EQ(700, value.data);
+}
+
+TEST_F(ThemeTest, CopyNonReferencesWhenPackagesDiffer) {
+  AssetManager2 assetmanager_dst;
+  assetmanager_dst.SetApkAssets({system_assets_.get()});
+
+  AssetManager2 assetmanager_src;
+  assetmanager_src.SetApkAssets({system_assets_.get(), style_assets_.get()});
+
+  auto theme_dst = assetmanager_dst.NewTheme();
+  auto theme_src = assetmanager_src.NewTheme();
+  ASSERT_TRUE(theme_src->ApplyStyle(app::R::style::StyleSeven));
+  theme_dst->SetTo(*theme_src);
+
+  Res_value value;
+  uint32_t flags;
+
+  // Allow inline resource values to be copied even if the source apk asset is not present in the
+  // destination.
+  EXPECT_EQ(0, theme_dst->GetAttribute(0x0101021b /* android:versionCode */, &value, &flags));
+
+  // Do not copy strings since the data is an index into the values string pool of the source apk
+  // asset.
+  EXPECT_EQ(-1, theme_dst->GetAttribute(0x01010001 /* android:label */, &value, &flags));
+
+  // Do not copy values that reference another resource if the resource is not present in the
+  // destination.
+  EXPECT_EQ(-1, theme_dst->GetAttribute(0x01010002 /* android:icon */, &value, &flags));
+  EXPECT_EQ(-1, theme_dst->GetAttribute(0x010100d1 /* android:tag */, &value, &flags));
+
+  // Allow @empty to and @null to be copied.
+  EXPECT_EQ(0, theme_dst->GetAttribute(0x010100d0 /* android:id */, &value, &flags));
+  EXPECT_EQ(0, theme_dst->GetAttribute(0x01010000 /* android:theme */, &value, &flags));
 }
 
 }  // namespace android

@@ -24,7 +24,7 @@ public class ApduList implements Parcelable {
         return commands;
     }
 
-    public static final Parcelable.Creator<ApduList> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ApduList> CREATOR =
         new Parcelable.Creator<ApduList>() {
         @Override
         public ApduList createFromParcel(Parcel in) {

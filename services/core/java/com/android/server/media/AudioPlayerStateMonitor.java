@@ -18,14 +18,11 @@ package com.android.server.media;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
-import android.media.IAudioService;
-import android.media.IPlaybackConfigDispatcher;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -42,11 +39,11 @@ import java.util.Set;
 /**
  * Monitors the state changes of audio players.
  */
-class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
+class AudioPlayerStateMonitor {
     private static boolean DEBUG = MediaSessionService.DEBUG;
     private static String TAG = "AudioPlayerStateMonitor";
 
-    private static AudioPlayerStateMonitor sInstance = new AudioPlayerStateMonitor();
+    private static AudioPlayerStateMonitor sInstance;
 
     /**
      * Listener for handling the active state changes of audio players.
@@ -96,94 +93,31 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
     private final Map<OnAudioPlayerActiveStateChangedListener, MessageHandler> mListenerMap =
             new ArrayMap<>();
     @GuardedBy("mLock")
-    private final Set<Integer> mActiveAudioUids = new ArraySet<>();
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    final Set<Integer> mActiveAudioUids = new ArraySet<>();
     @GuardedBy("mLock")
-    private ArrayMap<Integer, AudioPlaybackConfiguration> mPrevActiveAudioPlaybackConfigs =
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    ArrayMap<Integer, AudioPlaybackConfiguration> mPrevActiveAudioPlaybackConfigs =
             new ArrayMap<>();
     // Sorted array of UIDs that had active audio playback. (i.e. playing an audio/video)
     // The UID whose audio playback becomes active at the last comes first.
     // TODO(b/35278867): Find and use unique identifier for apps because apps may share the UID.
     @GuardedBy("mLock")
-    private final IntArray mSortedAudioPlaybackClientUids = new IntArray();
+    @SuppressWarnings("WeakerAccess") /* synthetic access */
+    final IntArray mSortedAudioPlaybackClientUids = new IntArray();
 
-    @GuardedBy("mLock")
-    private boolean mRegisteredToAudioService;
-
-    static AudioPlayerStateMonitor getInstance() {
-        return sInstance;
-    }
-
-    private AudioPlayerStateMonitor() {
-    }
-
-    /**
-     * Called when the {@link AudioPlaybackConfiguration} is updated.
-     * <p>If an app starts audio playback, the app's local media session will be the media button
-     * session. If the app has multiple media sessions, the playback active local session will be
-     * picked.
-     *
-     * @param configs List of the current audio playback configuration
-     */
-    @Override
-    public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
-            boolean flush) {
-        if (flush) {
-            Binder.flushPendingCommands();
-        }
-        final long token = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                // Update mActiveAudioUids
-                mActiveAudioUids.clear();
-                ArrayMap<Integer, AudioPlaybackConfiguration> activeAudioPlaybackConfigs =
-                        new ArrayMap<>();
-                for (AudioPlaybackConfiguration config : configs) {
-                    if (config.isActive()) {
-                        mActiveAudioUids.add(config.getClientUid());
-                        activeAudioPlaybackConfigs.put(config.getPlayerInterfaceId(), config);
-                    }
-                }
-
-                // Update mSortedAuioPlaybackClientUids.
-                for (int i = 0; i < activeAudioPlaybackConfigs.size(); ++i) {
-                    AudioPlaybackConfiguration config = activeAudioPlaybackConfigs.valueAt(i);
-                    final int uid = config.getClientUid();
-                    if (!mPrevActiveAudioPlaybackConfigs.containsKey(
-                            config.getPlayerInterfaceId())) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Found a new active media playback. " +
-                                    AudioPlaybackConfiguration.toLogFriendlyString(config));
-                        }
-                        // New active audio playback.
-                        int index = mSortedAudioPlaybackClientUids.indexOf(uid);
-                        if (index == 0) {
-                            // It's the lastly played music app already. Skip updating.
-                            continue;
-                        } else if (index > 0) {
-                            mSortedAudioPlaybackClientUids.remove(index);
-                        }
-                        mSortedAudioPlaybackClientUids.add(0, uid);
-                    }
-                }
-                // Notify the active state change of audio players.
-                for (AudioPlaybackConfiguration config : configs) {
-                    final int pii = config.getPlayerInterfaceId();
-                    boolean wasActive = mPrevActiveAudioPlaybackConfigs.remove(pii) != null;
-                    if (wasActive != config.isActive()) {
-                        sendAudioPlayerActiveStateChangedMessageLocked(
-                                config, /* isRemoved */ false);
-                    }
-                }
-                for (AudioPlaybackConfiguration config : mPrevActiveAudioPlaybackConfigs.values()) {
-                    sendAudioPlayerActiveStateChangedMessageLocked(config, /* isRemoved */ true);
-                }
-
-                // Update mPrevActiveAudioPlaybackConfigs
-                mPrevActiveAudioPlaybackConfigs = activeAudioPlaybackConfigs;
+    static AudioPlayerStateMonitor getInstance(Context context) {
+        synchronized (AudioPlayerStateMonitor.class) {
+            if (sInstance == null) {
+                sInstance = new AudioPlayerStateMonitor(context);
             }
-        } finally {
-            Binder.restoreCallingIdentity(token);
+            return sInstance;
         }
+    }
+
+    private AudioPlayerStateMonitor(Context context) {
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        am.registerAudioPlaybackCallback(new AudioManagerPlaybackListener(), null);
     }
 
     /**
@@ -208,7 +142,8 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
 
     /**
      * Returns the sorted list of UIDs that have had active audio playback. (i.e. playing an
-     * audio/video) The UID whose audio playback becomes active at the last comes first.
+     * audio/video) The UID whose audio is currently playing comes first, then the UID whose audio
+     * playback becomes active at the last comes next.
      */
     public IntArray getSortedAudioPlaybackClientUids() {
         IntArray sortedAudioPlaybackClientUids = new IntArray();
@@ -275,25 +210,86 @@ class AudioPlayerStateMonitor extends IPlaybackConfigDispatcher.Stub {
         }
     }
 
-    public void registerSelfIntoAudioServiceIfNeeded(IAudioService audioService) {
-        synchronized (mLock) {
-            try {
-                if (!mRegisteredToAudioService) {
-                    audioService.registerPlaybackCallback(this);
-                    mRegisteredToAudioService = true;
-                }
-            } catch (RemoteException e) {
-                Log.wtf(TAG, "Failed to register playback callback", e);
-                mRegisteredToAudioService = false;
-            }
-        }
-    }
-
     @GuardedBy("mLock")
     private void sendAudioPlayerActiveStateChangedMessageLocked(
             final AudioPlaybackConfiguration config, final boolean isRemoved) {
         for (MessageHandler messageHandler : mListenerMap.values()) {
             messageHandler.sendAudioPlayerActiveStateChangedMessage(config, isRemoved);
+        }
+    }
+
+    private class AudioManagerPlaybackListener extends AudioManager.AudioPlaybackCallback {
+        @Override
+        public void onPlaybackConfigChanged(List<AudioPlaybackConfiguration> configs) {
+            synchronized (mLock) {
+                // Update mActiveAudioUids
+                mActiveAudioUids.clear();
+                ArrayMap<Integer, AudioPlaybackConfiguration> activeAudioPlaybackConfigs =
+                        new ArrayMap<>();
+                for (AudioPlaybackConfiguration config : configs) {
+                    if (config.isActive()) {
+                        mActiveAudioUids.add(config.getClientUid());
+                        activeAudioPlaybackConfigs.put(config.getPlayerInterfaceId(), config);
+                    }
+                }
+
+                // Update mSortedAuioPlaybackClientUids.
+                for (int i = 0; i < activeAudioPlaybackConfigs.size(); ++i) {
+                    AudioPlaybackConfiguration config = activeAudioPlaybackConfigs.valueAt(i);
+                    final int uid = config.getClientUid();
+                    if (!mPrevActiveAudioPlaybackConfigs.containsKey(
+                            config.getPlayerInterfaceId())) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Found a new active media playback. "
+                                    + AudioPlaybackConfiguration.toLogFriendlyString(config));
+                        }
+                        // New active audio playback.
+                        int index = mSortedAudioPlaybackClientUids.indexOf(uid);
+                        if (index == 0) {
+                            // It's the lastly played music app already. Skip updating.
+                            continue;
+                        } else if (index > 0) {
+                            mSortedAudioPlaybackClientUids.remove(index);
+                        }
+                        mSortedAudioPlaybackClientUids.add(0, uid);
+                    }
+                }
+
+                if (mActiveAudioUids.size() > 0
+                        && !mActiveAudioUids.contains(mSortedAudioPlaybackClientUids.get(0))) {
+                    int firstActiveUid = -1;
+                    int firatActiveUidIndex = -1;
+                    for (int i = 1; i < mSortedAudioPlaybackClientUids.size(); ++i) {
+                        int uid = mSortedAudioPlaybackClientUids.get(i);
+                        if (mActiveAudioUids.contains(uid)) {
+                            firatActiveUidIndex = i;
+                            firstActiveUid = uid;
+                            break;
+                        }
+                    }
+                    for (int i = firatActiveUidIndex; i > 0; --i) {
+                        mSortedAudioPlaybackClientUids.set(i,
+                                mSortedAudioPlaybackClientUids.get(i - 1));
+                    }
+                    mSortedAudioPlaybackClientUids.set(0, firstActiveUid);
+                }
+
+                // Notify the active state change of audio players.
+                for (AudioPlaybackConfiguration config : configs) {
+                    final int pii = config.getPlayerInterfaceId();
+                    boolean wasActive = mPrevActiveAudioPlaybackConfigs.remove(pii) != null;
+                    if (wasActive != config.isActive()) {
+                        sendAudioPlayerActiveStateChangedMessageLocked(
+                                config, /* isRemoved */ false);
+                    }
+                }
+                for (AudioPlaybackConfiguration config : mPrevActiveAudioPlaybackConfigs.values()) {
+                    sendAudioPlayerActiveStateChangedMessageLocked(config, /* isRemoved */ true);
+                }
+
+                // Update mPrevActiveAudioPlaybackConfigs
+                mPrevActiveAudioPlaybackConfigs = activeAudioPlaybackConfigs;
+            }
         }
     }
 }

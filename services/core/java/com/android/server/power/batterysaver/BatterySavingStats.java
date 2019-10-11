@@ -15,7 +15,6 @@
  */
 package com.android.server.power.batterysaver;
 
-import android.metrics.LogMaker;
 import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
 import android.util.ArrayMap;
@@ -24,12 +23,8 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
-import com.android.server.power.BatterySaverPolicy;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -58,9 +53,10 @@ public class BatterySavingStats {
     interface BatterySaverState {
         int OFF = 0;
         int ON = 1;
+        int ADAPTIVE = 2;
 
         int SHIFT = 0;
-        int BITS = 1;
+        int BITS = 2;
         int MASK = (1 << BITS) - 1;
 
         static int fromIndex(int index) {
@@ -142,7 +138,6 @@ public class BatterySavingStats {
     }
 
     private BatteryManagerInternal mBatteryManagerInternal;
-    private final MetricsLogger mMetricsLogger;
 
     private static final int STATE_NOT_INITIALIZED = -1;
     private static final int STATE_CHARGING = -2;
@@ -172,28 +167,11 @@ public class BatterySavingStats {
     @GuardedBy("mLock")
     private long mLastBatterySaverDisabledTime = 0;
 
-    private final MetricsLoggerHelper mMetricsLoggerHelper = new MetricsLoggerHelper();
-
-    @VisibleForTesting
-    @GuardedBy("mLock")
-    private boolean mSendTronLog;
-
     /** Visible for unit tests */
     @VisibleForTesting
-    public BatterySavingStats(Object lock, MetricsLogger metricsLogger) {
+    public BatterySavingStats(Object lock) {
         mLock = lock;
         mBatteryManagerInternal = LocalServices.getService(BatteryManagerInternal.class);
-        mMetricsLogger = metricsLogger;
-    }
-
-    public BatterySavingStats(Object lock) {
-        this(lock, new MetricsLogger());
-    }
-
-    public void setSendTronLog(boolean send) {
-        synchronized (mLock) {
-            mSendTronLog = send;
-        }
     }
 
     private BatteryManagerInternal getBatteryManagerInternal() {
@@ -325,7 +303,6 @@ public class BatterySavingStats {
 
         endLastStateLocked(now, batteryLevel, batteryPercent);
         startNewStateLocked(newState, now, batteryLevel, batteryPercent);
-        mMetricsLoggerHelper.transitionStateLocked(newState, now, batteryLevel, batteryPercent);
     }
 
     @GuardedBy("mLock")
@@ -471,60 +448,5 @@ public class BatterySavingStats {
                 onStat.totalBatteryDrain / 1000,
                 onStat.totalBatteryDrainPercent,
                 onStat.drainPerHour() / 1000.0));
-    }
-
-    @VisibleForTesting
-    class MetricsLoggerHelper {
-        private int mLastState = STATE_NOT_INITIALIZED;
-        private long mStartTime;
-        private int mStartBatteryLevel;
-        private int mStartPercent;
-
-        private static final int STATE_CHANGE_DETECT_MASK =
-                (BatterySaverState.MASK << BatterySaverState.SHIFT) |
-                (InteractiveState.MASK << InteractiveState.SHIFT);
-
-        public void transitionStateLocked(
-                int newState, long now, int batteryLevel, int batteryPercent) {
-            final boolean stateChanging =
-                    ((mLastState >= 0) ^ (newState >= 0)) ||
-                    (((mLastState ^ newState) & STATE_CHANGE_DETECT_MASK) != 0);
-            if (stateChanging) {
-                if (mLastState >= 0) {
-                    final long deltaTime = now - mStartTime;
-
-                    reportLocked(mLastState, deltaTime, mStartBatteryLevel, mStartPercent,
-                            batteryLevel, batteryPercent);
-                }
-                mStartTime = now;
-                mStartBatteryLevel = batteryLevel;
-                mStartPercent = batteryPercent;
-            }
-            mLastState = newState;
-        }
-
-        void reportLocked(int state, long deltaTimeMs,
-                int startBatteryLevelUa, int startBatteryLevelPercent,
-                int endBatteryLevelUa, int endBatteryLevelPercent) {
-            if (!mSendTronLog) {
-                return;
-            }
-            final boolean batterySaverOn =
-                    BatterySaverState.fromIndex(state) != BatterySaverState.OFF;
-            final boolean interactive =
-                    InteractiveState.fromIndex(state) != InteractiveState.NON_INTERACTIVE;
-
-            final LogMaker logMaker = new LogMaker(MetricsProto.MetricsEvent.BATTERY_SAVER)
-                    .setSubtype(batterySaverOn ? 1 : 0)
-                    .addTaggedData(MetricsEvent.FIELD_INTERACTIVE, interactive ? 1 : 0)
-                    .addTaggedData(MetricsEvent.FIELD_DURATION_MILLIS, deltaTimeMs)
-                    .addTaggedData(MetricsEvent.FIELD_START_BATTERY_UA, startBatteryLevelUa)
-                    .addTaggedData(MetricsEvent.FIELD_START_BATTERY_PERCENT,
-                            startBatteryLevelPercent)
-                    .addTaggedData(MetricsEvent.FIELD_END_BATTERY_UA, endBatteryLevelUa)
-                    .addTaggedData(MetricsEvent.FIELD_END_BATTERY_PERCENT, endBatteryLevelPercent);
-
-            mMetricsLogger.write(logMaker);
-        }
     }
 }

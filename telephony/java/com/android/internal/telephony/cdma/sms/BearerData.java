@@ -764,13 +764,13 @@ public final class BearerData {
                                       " > " + SmsConstants.MAX_USER_DATA_BYTES + " bytes)");
         }
 
-        /*
-         * TODO(cleanup): figure out what the right answer is WRT paddingBits field
-         *
-         *   userData.paddingBits = (userData.payload.length * 8) - (userData.numFields * 7);
-         *   userData.paddingBits = 0; // XXX this seems better, but why?
-         *
-         */
+        if (bData.userData.msgEncoding == UserData.ENCODING_7BIT_ASCII) {
+            bData.userData.paddingBits =
+                    (bData.userData.payload.length * 8) - (bData.userData.numFields * 7);
+        } else {
+            bData.userData.paddingBits = 0;
+        }
+
         int dataBits = (bData.userData.payload.length * 8) - bData.userData.paddingBits;
         int paramBits = dataBits + 13;
         if ((bData.userData.msgEncoding == UserData.ENCODING_IS91_EXTENDED_PROTOCOL) ||

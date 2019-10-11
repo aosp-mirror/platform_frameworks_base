@@ -17,7 +17,7 @@ package com.android.systemui.shared.system;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.view.DisplayListCanvas;
+import android.graphics.RecordingCanvas;
 import android.view.View;
 import android.view.ViewRootImpl;
 import android.view.WindowCallbacks;
@@ -55,7 +55,7 @@ public class WindowCallbacksCompat {
         }
 
         @Override
-        public void onPostDraw(DisplayListCanvas canvas) {
+        public void onPostDraw(RecordingCanvas canvas) {
             WindowCallbacksCompat.this.onPostDraw(canvas);
         }
     };

@@ -25,7 +25,6 @@ import android.widget.Button;
 
 import com.android.frameworks.coretests.R;
 
-
 /**
  * Tests hiding and showing the list filter by hiding and showing an ancestor of the 
  * ListView

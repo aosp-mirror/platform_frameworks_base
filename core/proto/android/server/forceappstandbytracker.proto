@@ -17,7 +17,7 @@
 syntax = "proto2";
 
 import "frameworks/base/core/proto/android/server/statlogger.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 package com.android.server;
 
@@ -71,7 +71,7 @@ message ForceAppStandbyTrackerProto {
     message ExemptedPackage {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 userId = 1;
+        optional int32 user_id = 1;
         optional string package_name = 2;
     }
 

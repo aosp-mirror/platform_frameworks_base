@@ -35,7 +35,7 @@ abstract class RequestArcAction extends HdmiCecFeatureAction {
      *
      * @param source {@link HdmiCecLocalDevice} instance
      * @param avrAddress address of AV receiver. It should be AUDIO_SYSTEM type
-     * @throw IllegalArugmentException if device type of sourceAddress and avrAddress
+     * @throws IllegalArgumentException if device type of sourceAddress and avrAddress
      *                      is invalid
      */
     RequestArcAction(HdmiCecLocalDevice source, int avrAddress) {

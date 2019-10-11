@@ -104,6 +104,18 @@ public final class VirtualDisplay {
         }
     }
 
+    /**
+     * Sets the on/off state for a virtual display.
+     *
+     * @param isOn Whether the display should be on or off.
+     * @hide
+     */
+    public void setDisplayState(boolean isOn) {
+        if (mToken != null) {
+            mGlobal.setVirtualDisplayState(mToken, isOn);
+        }
+    }
+
     @Override
     public String toString() {
         return "VirtualDisplay{display=" + mDisplay + ", token=" + mToken

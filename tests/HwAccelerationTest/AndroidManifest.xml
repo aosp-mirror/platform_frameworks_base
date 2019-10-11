@@ -310,6 +310,15 @@
                 <category android:name="com.android.test.hwui.TEST" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="PictureCaptureDemo"
+            android:label="Debug/Picture Capture">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
         
         <activity
                 android:name="SmallCircleActivity"
@@ -1012,6 +1021,36 @@
                 android:name="PixelCopyWindow"
                 android:label="Readback/Window"
                 android:screenOrientation="fullSensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name="PositionListenerActivity"
+                android:label="RenderNode/PositionListener"
+                android:screenOrientation="fullSensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="CustomRenderer"
+            android:label="HardwareRenderer/HelloTakeSurface"
+            android:screenOrientation="fullSensor">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.hwui.TEST" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="MyLittleTextureView"
+            android:label="HardwareRenderer/MyLittleTextureView"
+            android:screenOrientation="fullSensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.hwui.TEST" />

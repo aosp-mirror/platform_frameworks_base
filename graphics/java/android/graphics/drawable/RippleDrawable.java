@@ -892,7 +892,10 @@ public class RippleDrawable extends LayerDrawable {
             // The ripple timing depends on the paint's alpha value, so we need
             // to push just the alpha channel into the paint and let the filter
             // handle the full-alpha color.
-            mMaskColorFilter.setColor(color | 0xFF000000);
+            int maskColor = color | 0xFF000000;
+            if (mMaskColorFilter.getColor() != maskColor) {
+                mMaskColorFilter = new PorterDuffColorFilter(maskColor, mMaskColorFilter.getMode());
+            }
             p.setColor(color & 0xFF000000);
             p.setColorFilter(mMaskColorFilter);
             p.setShader(mMaskShader);

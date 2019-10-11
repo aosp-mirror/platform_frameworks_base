@@ -20,9 +20,9 @@ import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -142,7 +142,8 @@ public final class PermissionsState {
             final int userCount = other.mPermissionReviewRequired.size();
             for (int i = 0; i < userCount; i++) {
                 final boolean reviewRequired = other.mPermissionReviewRequired.valueAt(i);
-                mPermissionReviewRequired.put(i, reviewRequired);
+                mPermissionReviewRequired.put(other.mPermissionReviewRequired.keyAt(i),
+                        reviewRequired);
             }
         }
     }
@@ -306,6 +307,13 @@ public final class PermissionsState {
         return false;
     }
 
+    /**
+     * Returns whether the state has any known request for the given permission name,
+     * whether or not it has been granted.
+     */
+    public boolean hasRequestedPermission(String name) {
+        return mPermissions != null && (mPermissions.get(name) != null);
+    }
     /**
      * Gets all permissions for a given device user id regardless if they
      * are install time or runtime permissions.
@@ -599,7 +607,7 @@ public final class PermissionsState {
 
     private int grantPermission(BasePermission permission, int userId) {
         if (hasPermission(permission.getName(), userId)) {
-            return PERMISSION_OPERATION_FAILURE;
+            return PERMISSION_OPERATION_SUCCESS;
         }
 
         final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));
@@ -624,7 +632,7 @@ public final class PermissionsState {
     private int revokePermission(BasePermission permission, int userId) {
         final String permName = permission.getName();
         if (!hasPermission(permName, userId)) {
-            return PERMISSION_OPERATION_FAILURE;
+            return PERMISSION_OPERATION_SUCCESS;
         }
 
         final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));

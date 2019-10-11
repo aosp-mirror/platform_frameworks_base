@@ -17,64 +17,40 @@
 #include "Layer.h"
 
 #include "renderstate/RenderState.h"
-
-#include <SkToSRGBColorFilter.h>
+#include "utils/Color.h"
 
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter> colorFilter, int alpha,
-             SkBlendMode mode)
-        : GpuMemoryTracker(GpuObjectType::Layer)
-        , mRenderState(renderState)
-        , mode(mode)
-        , mApi(api)
+Layer::Layer(RenderState& renderState, sk_sp<SkColorFilter> colorFilter, int alpha,
+        SkBlendMode mode)
+        : mRenderState(renderState)
         , mColorFilter(colorFilter)
-        , alpha(alpha) {
+        , alpha(alpha)
+        , mode(mode) {
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
-    buildColorSpaceWithFilter();
     renderState.registerLayer(this);
+    texTransform.setIdentity();
+    transform.setIdentity();
 }
 
 Layer::~Layer() {
     mRenderState.unregisterLayer(this);
 }
 
-void Layer::setColorFilter(sk_sp<SkColorFilter> filter) {
-    if (filter != mColorFilter) {
-        mColorFilter = filter;
-        buildColorSpaceWithFilter();
-    }
-}
-
-void Layer::setDataSpace(android_dataspace dataspace) {
-    if (dataspace != mCurrentDataspace) {
-        mCurrentDataspace = dataspace;
-        buildColorSpaceWithFilter();
-    }
-}
-
-void Layer::buildColorSpaceWithFilter() {
-    sk_sp<SkColorFilter> colorSpaceFilter;
-    sk_sp<SkColorSpace> colorSpace = DataSpaceToColorSpace(mCurrentDataspace);
-    if (colorSpace && !colorSpace->isSRGB()) {
-        colorSpaceFilter = SkToSRGBColorFilter::Make(colorSpace);
-    }
-
-    if (mColorFilter && colorSpaceFilter) {
-        mColorSpaceWithFilter = mColorFilter->makeComposed(colorSpaceFilter);
-    } else if (colorSpaceFilter) {
-        mColorSpaceWithFilter = colorSpaceFilter;
-    } else {
-        mColorSpaceWithFilter = mColorFilter;
-    }
-}
-
 void Layer::postDecStrong() {
     mRenderState.postDecStrong(this);
 }
 
-};  // namespace uirenderer
-};  // namespace android
+SkBlendMode Layer::getMode() const {
+    if (mBlend || mode != SkBlendMode::kSrcOver) {
+        return mode;
+    } else {
+        return SkBlendMode::kSrc;
+    }
+}
+
+}  // namespace uirenderer
+}  // namespace android

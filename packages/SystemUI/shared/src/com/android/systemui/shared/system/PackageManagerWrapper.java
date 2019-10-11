@@ -22,8 +22,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
+import android.os.UserHandle;
 
 import java.util.List;
 
@@ -39,6 +41,8 @@ public class PackageManagerWrapper {
     public static PackageManagerWrapper getInstance() {
         return sInstance;
     }
+
+    private PackageManagerWrapper() {}
 
     /**
      * @return the activity info for a given {@param componentName} and {@param userId}.
@@ -60,6 +64,21 @@ public class PackageManagerWrapper {
     public ComponentName getHomeActivities(List<ResolveInfo> allHomeCandidates) {
         try {
             return mIPackageManager.getHomeActivities(allHomeCandidates);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Determine the best Activity to perform for a given Intent.
+     */
+    public ResolveInfo resolveActivity(Intent intent, @ResolveInfoFlags int flags) {
+        final String resolvedType =
+                intent.resolveTypeIfNeeded(AppGlobals.getInitialApplication().getContentResolver());
+        try {
+            return mIPackageManager.resolveIntent(
+                    intent, resolvedType, flags, UserHandle.getCallingUserId());
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;

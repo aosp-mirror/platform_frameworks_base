@@ -1,0 +1,9 @@
+{
+  "presubmit": [
+    {
+      "name": "view-inspector-annotation-processor-test"
+    }, {
+      "name": "CtsViewInspectorAnnotationProcessorTestCases"
+    }
+  ]
+}

@@ -21,6 +21,9 @@ import android.view.WindowManager;
 import com.android.systemui.Dependency;
 import com.android.systemui.tuner.TunerService.Tunable;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Version of Space that can be resized by a tunable setting.
  */
@@ -35,8 +38,9 @@ public class TunablePadding implements Tunable {
     private final View mView;
     private final int mDefaultSize;
     private final float mDensity;
+    private final TunerService mTunerService;
 
-    private TunablePadding(String key, int def, int flags, View view) {
+    private TunablePadding(String key, int def, int flags, View view, TunerService tunerService) {
         mDefaultSize = def;
         mFlags = flags;
         mView = view;
@@ -44,7 +48,8 @@ public class TunablePadding implements Tunable {
         view.getContext().getSystemService(WindowManager.class)
                 .getDefaultDisplay().getMetrics(metrics);
         mDensity = metrics.density;
-        Dependency.get(TunerService.class).addTunable(this, key);
+        mTunerService = tunerService;
+        mTunerService.addTunable(this, key);
     }
 
     @Override
@@ -66,16 +71,29 @@ public class TunablePadding implements Tunable {
     }
 
     public void destroy() {
-        Dependency.get(TunerService.class).removeTunable(this);
+        mTunerService.removeTunable(this);
     }
 
-    // Exists for easy injecting in tests.
+    /**
+     * Exists for easy injecting in tests.
+     */
+    @Singleton
     public static class TunablePaddingService {
+
+        private final TunerService mTunerService;
+
+        /**
+         */
+        @Inject
+        public TunablePaddingService(TunerService tunerService) {
+            mTunerService = tunerService;
+        }
+
         public TunablePadding add(View view, String key, int defaultSize, int flags) {
             if (view == null) {
                 throw new IllegalArgumentException();
             }
-            return new TunablePadding(key, defaultSize, flags, view);
+            return new TunablePadding(key, defaultSize, flags, view, mTunerService);
         }
     }
 

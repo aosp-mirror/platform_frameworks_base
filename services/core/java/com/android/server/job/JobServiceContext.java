@@ -247,9 +247,20 @@ public final class JobServiceContext implements ServiceConnection {
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
-            boolean binding = mContext.bindServiceAsUser(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND,
-                    new UserHandle(job.getUserId()));
+            boolean binding = false;
+            try {
+                binding = mContext.bindServiceAsUser(intent, this,
+                        Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                        | Context.BIND_NOT_PERCEPTIBLE,
+                        new UserHandle(job.getUserId()));
+            } catch (SecurityException e) {
+                // Some permission policy, for example INTERACT_ACROSS_USERS and
+                // android:singleUser, can result in a SecurityException being thrown from
+                // bindServiceAsUser().  If this happens, catch it and fail gracefully.
+                Slog.w(TAG, "Job service " + job.getServiceComponent().getShortClassName()
+                        + " cannot be executed: " + e.getMessage());
+                binding = false;
+            }
             if (!binding) {
                 if (DEBUG) {
                     Slog.d(TAG, job.getServiceComponent().getShortClassName() + " unavailable.");
@@ -264,7 +275,8 @@ public final class JobServiceContext implements ServiceConnection {
             }
             mJobPackageTracker.noteActive(job);
             try {
-                mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
+                mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid(),
+                        job.getStandbyBucket(), job.getJobId());
             } catch (RemoteException e) {
                 // Whatever.
             }
@@ -773,7 +785,8 @@ public final class JobServiceContext implements ServiceConnection {
         mJobPackageTracker.noteInactive(completedJob, mParams.getStopReason(), reason);
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(),
-                    mRunningJob.getSourceUid(), mParams.getStopReason());
+                    mRunningJob.getSourceUid(), mParams.getStopReason(),
+                    mRunningJob.getStandbyBucket(), mRunningJob.getJobId());
         } catch (RemoteException e) {
             // Whatever.
         }

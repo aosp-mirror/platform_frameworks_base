@@ -20,14 +20,11 @@
 #include "jni.h"
 
 #include <media/stagefright/foundation/ABase.h>
-#include <media/IDrm.h>
-#include <media/IDrmClient.h>
+#include <mediadrm/IDrm.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
 
 namespace android {
-
-struct IDrm;
 
 class DrmListener: virtual public RefBase
 {
@@ -37,7 +34,10 @@ public:
 };
 
 struct JDrm : public BnDrmClient {
-    static bool IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType);
+    static status_t IsCryptoSchemeSupported(const uint8_t uuid[16],
+                                            const String8 &mimeType,
+                                            DrmPlugin::SecurityLevel level,
+                                            bool *isSupported);
 
     JDrm(JNIEnv *env, jobject thiz, const uint8_t uuid[16], const String8 &appPackageName);
 

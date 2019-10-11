@@ -172,4 +172,20 @@ public abstract class JobScheduler {
      *     if the supplied job ID does not correspond to any job.
      */
     public abstract @Nullable JobInfo getPendingJob(int jobId);
+
+    /**
+     * <b>For internal system callers only!</b>
+     * Returns a list of all currently-executing jobs.
+     * @hide
+     */
+    public abstract List<JobInfo> getStartedJobs();
+
+    /**
+     * <b>For internal system callers only!</b>
+     * Returns a snapshot of the state of all jobs known to the system.
+     *
+     * <p class="note">This is a slow operation, so it should be called sparingly.
+     * @hide
+     */
+    public abstract List<JobSnapshot> getAllJobSnapshots();
 }

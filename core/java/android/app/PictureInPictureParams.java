@@ -17,7 +17,7 @@
 package android.app;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -182,7 +182,7 @@ public final class PictureInPictureParams implements Parcelable {
      * @return the aspect ratio. If none is set, return 0.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public float getAspectRatio() {
         if (mAspectRatio != null) {
             return mAspectRatio.floatValue();
@@ -207,7 +207,7 @@ public final class PictureInPictureParams implements Parcelable {
      * @return the set of user actions.
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public List<RemoteAction> getActions() {
         return mUserActions;
     }
@@ -234,7 +234,7 @@ public final class PictureInPictureParams implements Parcelable {
      * @return the source rect hint
      * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public Rect getSourceRectHint() {
         return mSourceRectHint;
     }
@@ -275,7 +275,7 @@ public final class PictureInPictureParams implements Parcelable {
         }
     }
 
-    public static final Creator<PictureInPictureParams> CREATOR =
+    public static final @android.annotation.NonNull Creator<PictureInPictureParams> CREATOR =
             new Creator<PictureInPictureParams>() {
                 public PictureInPictureParams createFromParcel(Parcel in) {
                     return new PictureInPictureParams(in);

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
@@ -80,9 +81,6 @@ class WindowToken extends WindowContainer<WindowState> {
     // Set to true when this token is in a pending transaction where its
     // windows will be put to the bottom of the list.
     boolean sendingToBottom;
-
-    // The display this token is on.
-    protected DisplayContent mDisplayContent;
 
     /** The owner has {@link android.Manifest.permission#MANAGE_APP_TOKENS} */
     final boolean mOwnerCanManageAppTokens;
@@ -162,7 +160,7 @@ class WindowToken extends WindowContainer<WindowState> {
 
         for (int i = 0; i < count; i++) {
             final WindowState win = mChildren.get(i);
-            if (win.mWinAnimator.isAnimationSet()) {
+            if (win.isAnimating()) {
                 delayed = true;
             }
             changed |= win.onSetAppExiting();
@@ -171,13 +169,21 @@ class WindowToken extends WindowContainer<WindowState> {
         setHidden(true);
 
         if (changed) {
-            mService.mWindowPlacerLocked.performSurfacePlacement();
-            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
+            mWmService.mWindowPlacerLocked.performSurfacePlacement();
+            mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /*updateInputWindows*/);
         }
 
         if (delayed) {
             mDisplayContent.mExitingTokens.add(this);
         }
+    }
+
+    /**
+     * @return The scale for applications running in compatibility mode. Multiply the size in the
+     *         application by this scale will be the size in the screen.
+     */
+    float getSizeCompatScale() {
+        return mDisplayContent.mCompatibleScreenScale;
     }
 
     /**
@@ -201,7 +207,7 @@ class WindowToken extends WindowContainer<WindowState> {
         if (!mChildren.contains(win)) {
             if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Adding " + win + " to " + this);
             addChild(win, mWindowComparator);
-            mService.mWindowsChanged = true;
+            mWmService.mWindowsChanged = true;
             // TODO: Should we also be setting layout needed here and other places?
         }
     }
@@ -234,26 +240,10 @@ class WindowToken extends WindowContainer<WindowState> {
         return false;
     }
 
-    int getHighestAnimLayer() {
-        int highest = -1;
-        for (int j = 0; j < mChildren.size(); j++) {
-            final WindowState w = mChildren.get(j);
-            final int wLayer = w.getHighestAnimLayer();
-            if (wLayer > highest) {
-                highest = wLayer;
-            }
-        }
-        return highest;
-    }
-
     AppWindowToken asAppWindowToken() {
         // TODO: Not sure if this is the best way to handle this vs. using instanceof and casting.
         // I am not an app window token!
         return null;
-    }
-
-    DisplayContent getDisplayContent() {
-        return mDisplayContent;
     }
 
     @Override
@@ -266,9 +256,9 @@ class WindowToken extends WindowContainer<WindowState> {
         super.removeImmediately();
     }
 
+    @Override
     void onDisplayChanged(DisplayContent dc) {
         dc.reParentWindowToken(this);
-        mDisplayContent = dc;
 
         // TODO(b/36740756): One day this should perhaps be hooked
         // up with goodToGo, so we don't move a window
@@ -280,13 +270,18 @@ class WindowToken extends WindowContainer<WindowState> {
 
     @CallSuper
     @Override
-    public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            @WindowTraceLogLevel int logLevel) {
+        if (logLevel == WindowTraceLogLevel.CRITICAL && !isVisible()) {
+            return;
+        }
+
         final long token = proto.start(fieldId);
-        super.writeToProto(proto, WINDOW_CONTAINER, trim);
+        super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(HASH_CODE, System.identityHashCode(this));
         for (int i = 0; i < mChildren.size(); i++) {
             final WindowState w = mChildren.get(i);
-            w.writeToProto(proto, WINDOWS, trim);
+            w.writeToProto(proto, WINDOWS, logLevel);
         }
         proto.write(HIDDEN, mHidden);
         proto.write(WAITING_TO_SHOW, waitingToShow);
@@ -336,9 +331,9 @@ class WindowToken extends WindowContainer<WindowState> {
      * system bars, or in other words extend outside of the "Decor Frame"
      */
     boolean canLayerAboveSystemBars() {
-        int layer = mService.mPolicy.getWindowLayerFromTypeLw(windowType,
+        int layer = mWmService.mPolicy.getWindowLayerFromTypeLw(windowType,
                 mOwnerCanManageAppTokens);
-        int navLayer = mService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
+        int navLayer = mWmService.mPolicy.getWindowLayerFromTypeLw(TYPE_NAVIGATION_BAR,
                 mOwnerCanManageAppTokens);
         return mOwnerCanManageAppTokens && (layer > navLayer);
     }

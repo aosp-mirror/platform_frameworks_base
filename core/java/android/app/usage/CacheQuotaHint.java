@@ -81,7 +81,7 @@ public final class CacheQuotaHint implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (o instanceof CacheQuotaHint) {
             final CacheQuotaHint other = (CacheQuotaHint) o;
             return Objects.equals(mUuid, other.mUuid)
@@ -140,7 +140,7 @@ public final class CacheQuotaHint implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<CacheQuotaHint> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<CacheQuotaHint> CREATOR =
             new Creator<CacheQuotaHint>() {
                 @Override
                 public CacheQuotaHint createFromParcel(Parcel in) {

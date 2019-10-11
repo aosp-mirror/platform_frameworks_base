@@ -1606,12 +1606,13 @@ public class BaseBundle {
     private void readFromParcelInner(Parcel parcel, int length) {
         if (length < 0) {
             throw new RuntimeException("Bad length in parcel: " + length);
-
         } else if (length == 0) {
             // Empty Bundle or end of data.
             mParcelledData = NoImagePreloadHolder.EMPTY_PARCEL;
             mParcelledByNative = false;
             return;
+        } else if (length % 4 != 0) {
+            throw new IllegalStateException("Bundle length is not aligned by 4: " + length);
         }
 
         final int magic = parcel.readInt();

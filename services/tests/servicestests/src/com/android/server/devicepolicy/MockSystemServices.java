@@ -28,6 +28,7 @@ import android.accounts.AccountManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -63,6 +64,7 @@ import android.view.IWindowManager;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +93,9 @@ public class MockSystemServices {
     public final IIpConnectivityMetrics iipConnectivityMetrics;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
+    public final IActivityTaskManager iactivityTaskManager;
     public ActivityManagerInternal activityManagerInternal;
+    public ActivityTaskManagerInternal activityTaskManagerInternal;
     public final IPackageManager ipackageManager;
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
@@ -129,7 +133,9 @@ public class MockSystemServices {
         iipConnectivityMetrics = mock(IIpConnectivityMetrics.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
+        iactivityTaskManager = mock(IActivityTaskManager.class);
         activityManagerInternal = mock(ActivityManagerInternal.class);
+        activityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
         ipackageManager = mock(IPackageManager.class);
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);

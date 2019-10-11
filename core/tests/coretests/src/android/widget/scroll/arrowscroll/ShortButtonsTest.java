@@ -16,15 +16,15 @@
 
 package android.widget.scroll.arrowscroll;
 
-import android.widget.scroll.ShortButtons;
-
 import android.graphics.Rect;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.ScrollView;
+import android.widget.scroll.ShortButtons;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 public class ShortButtonsTest extends ActivityInstrumentationTestCase<ShortButtons> {
 

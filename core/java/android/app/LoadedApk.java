@@ -77,6 +77,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 final class IntentReceiverLeaked extends AndroidRuntimeException {
     @UnsupportedAppUsage
@@ -695,6 +696,23 @@ public final class LoadedApk {
         return loaders;
     }
 
+    private StrictMode.ThreadPolicy allowThreadDiskReads() {
+        if (mActivityThread == null) {
+            // When LoadedApk is used without an ActivityThread (usually in a
+            // zygote context), don't call into StrictMode, as it initializes
+            // the binder subsystem, which we don't want.
+            return null;
+        }
+
+        return StrictMode.allowThreadDiskReads();
+    }
+
+    private void setThreadPolicy(StrictMode.ThreadPolicy policy) {
+        if (mActivityThread != null && policy != null) {
+            StrictMode.setThreadPolicy(policy);
+        }
+    }
+
     private void createOrUpdateClassLoaderLocked(List<String> addedPaths) {
         if (mPackageName.equals("android")) {
             // Note: This branch is taken for system server and we don't need to setup
@@ -717,8 +735,11 @@ public final class LoadedApk {
 
         // Avoid the binder call when the package is the current application package.
         // The activity manager will perform ensure that dexopt is performed before
-        // spinning up the process.
-        if (!Objects.equals(mPackageName, ActivityThread.currentPackageName()) && mIncludeCode) {
+        // spinning up the process. Similarly, don't call into binder when we don't
+        // have an ActivityThread object.
+        if (mActivityThread != null
+                && !Objects.equals(mPackageName, ActivityThread.currentPackageName())
+                && mIncludeCode) {
             try {
                 ActivityThread.getPackageManager().notifyPackageUse(mPackageName,
                         PackageManager.NOTIFY_PACKAGE_USE_CROSS_PACKAGE);
@@ -802,12 +823,12 @@ public final class LoadedApk {
         // mIncludeCode == false).
         if (!mIncludeCode) {
             if (mDefaultClassLoader == null) {
-                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+                StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
                 mDefaultClassLoader = ApplicationLoaders.getDefault().getClassLoader(
                         "" /* codePath */, mApplicationInfo.targetSdkVersion, isBundledApp,
                         librarySearchPath, libraryPermittedPath, mBaseClassLoader,
                         null /* classLoaderName */);
-                StrictMode.setThreadPolicy(oldPolicy);
+                setThreadPolicy(oldPolicy);
                 mAppComponentFactory = AppComponentFactory.DEFAULT;
             }
 
@@ -835,7 +856,7 @@ public final class LoadedApk {
         if (mDefaultClassLoader == null) {
             // Temporarily disable logging of disk reads on the Looper thread
             // as this is early and necessary.
-            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
 
             List<ClassLoader> sharedLibraries = createSharedLibrariesLoaders(
                     mApplicationInfo.sharedLibraryInfos, isBundledApp, librarySearchPath,
@@ -847,60 +868,18 @@ public final class LoadedApk {
                     mApplicationInfo.classLoaderName, sharedLibraries);
             mAppComponentFactory = createAppFactory(mApplicationInfo, mDefaultClassLoader);
 
-            StrictMode.setThreadPolicy(oldPolicy);
+            setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.
             needToSetupJitProfiles = true;
         }
 
         if (!libPaths.isEmpty() && SystemProperties.getBoolean(PROPERTY_NAME_APPEND_NATIVE, true)) {
             // Temporarily disable logging of disk reads on the Looper thread as this is necessary
-            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
             try {
                 ApplicationLoaders.getDefault().addNative(mDefaultClassLoader, libPaths);
             } finally {
-                StrictMode.setThreadPolicy(oldPolicy);
-            }
-        }
-
-        // /aepx/com.android.runtime/lib, /vendor/lib, /odm/lib and /product/lib
-        // are added to the native lib search paths of the classloader.
-        // Note that this is done AFTER the classloader is
-        // created by ApplicationLoaders.getDefault().getClassLoader(...). The
-        // reason is because if we have added the paths when creating the classloader
-        // above, the paths are also added to the search path of the linker namespace
-        // 'classloader-namespace', which will allow ALL libs in the paths to apps.
-        // Since only the libs listed in <partition>/etc/public.libraries.txt can be
-        // available to apps, we shouldn't add the paths then.
-        //
-        // However, we need to add the paths to the classloader (Java) though. This
-        // is because when a native lib is requested via System.loadLibrary(), the
-        // classloader first tries to find the requested lib in its own native libs
-        // search paths. If a lib is not found in one of the paths, dlopen() is not
-        // called at all. This can cause a problem that a vendor public native lib
-        // is accessible when directly opened via dlopen(), but inaccesible via
-        // System.loadLibrary(). In order to prevent the problem, we explicitly
-        // add the paths only to the classloader, and not to the native loader
-        // (linker namespace).
-        List<String> extraLibPaths = new ArrayList<>(4);
-        String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
-        if (!defaultSearchPaths.contains("/apex/com.android.runtime/lib")) {
-            extraLibPaths.add("/apex/com.android.runtime/lib" + abiSuffix);
-        }
-        if (!defaultSearchPaths.contains("/vendor/lib")) {
-            extraLibPaths.add("/vendor/lib" + abiSuffix);
-        }
-        if (!defaultSearchPaths.contains("/odm/lib")) {
-            extraLibPaths.add("/odm/lib" + abiSuffix);
-        }
-        if (!defaultSearchPaths.contains("/product/lib")) {
-            extraLibPaths.add("/product/lib" + abiSuffix);
-        }
-        if (!extraLibPaths.isEmpty()) {
-            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-            try {
-                ApplicationLoaders.getDefault().addNative(mDefaultClassLoader, extraLibPaths);
-            } finally {
-                StrictMode.setThreadPolicy(oldPolicy);
+                setThreadPolicy(oldPolicy);
             }
         }
 
@@ -920,7 +899,9 @@ public final class LoadedApk {
         //
         // It is NOT ok to call this function from the system_server (for any of the packages it
         // loads code from) so we explicitly disallow it there.
-        if (needToSetupJitProfiles && !ActivityThread.isSystem()) {
+        //
+        // It is not ok to call this in a zygote context where mActivityThread is null.
+        if (needToSetupJitProfiles && !ActivityThread.isSystem() && mActivityThread != null) {
             setupJitProfileSupport();
         }
 
@@ -1488,7 +1469,7 @@ public final class LoadedApk {
             private Intent mCurIntent;
             private final boolean mOrdered;
             private boolean mDispatched;
-            private Throwable mPreviousRunStacktrace; // To investigate b/37809561. STOPSHIP remove.
+            private boolean mRunCalled;
 
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                     boolean ordered, boolean sticky, int sendingUser) {
@@ -1516,13 +1497,12 @@ public final class LoadedApk {
                     final Intent intent = mCurIntent;
                     if (intent == null) {
                         Log.wtf(TAG, "Null intent being dispatched, mDispatched=" + mDispatched
-                                + ": run() previously called at "
-                                + Log.getStackTraceString(mPreviousRunStacktrace));
+                                + (mRunCalled ? ", run() has already been called" : ""));
                     }
 
                     mCurIntent = null;
                     mDispatched = true;
-                    mPreviousRunStacktrace = new Throwable("Previous stacktrace");
+                    mRunCalled = true;
                     if (receiver == null || intent == null || mForgotten) {
                         if (mRegistered && ordered) {
                             if (ActivityThread.DEBUG_BROADCAST) Slog.i(ActivityThread.TAG,
@@ -1645,6 +1625,16 @@ public final class LoadedApk {
     @UnsupportedAppUsage
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
             Context context, Handler handler, int flags) {
+        return getServiceDispatcherCommon(c, context, handler, null, flags);
+    }
+
+    public final IServiceConnection getServiceDispatcher(ServiceConnection c,
+            Context context, Executor executor, int flags) {
+        return getServiceDispatcherCommon(c, context, null, executor, flags);
+    }
+
+    private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
+            Context context, Handler handler, Executor executor, int flags) {
         synchronized (mServices) {
             LoadedApk.ServiceDispatcher sd = null;
             ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
@@ -1653,7 +1643,11 @@ public final class LoadedApk {
                 sd = map.get(c);
             }
             if (sd == null) {
-                sd = new ServiceDispatcher(c, context, handler, flags);
+                if (executor != null) {
+                    sd = new ServiceDispatcher(c, context, executor, flags);
+                } else {
+                    sd = new ServiceDispatcher(c, context, handler, flags);
+                }
                 if (DEBUG) Slog.d(TAG, "Creating new dispatcher " + sd + " for conn " + c);
                 if (map == null) {
                     map = new ArrayMap<>();
@@ -1661,9 +1655,22 @@ public final class LoadedApk {
                 }
                 map.put(c, sd);
             } else {
-                sd.validate(context, handler);
+                sd.validate(context, handler, executor);
             }
             return sd.getIServiceConnection();
+        }
+    }
+
+    @UnsupportedAppUsage
+    public IServiceConnection lookupServiceDispatcher(ServiceConnection c,
+            Context context) {
+        synchronized (mServices) {
+            LoadedApk.ServiceDispatcher sd = null;
+            ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
+            if (map != null) {
+                sd = map.get(c);
+            }
+            return sd != null ? sd.getIServiceConnection() : null;
         }
     }
 
@@ -1725,6 +1732,7 @@ public final class LoadedApk {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Context mContext;
         private final Handler mActivityThread;
+        private final Executor mActivityExecutor;
         private final ServiceConnectionLeaked mLocation;
         private final int mFlags;
 
@@ -1764,12 +1772,25 @@ public final class LoadedApk {
             mConnection = conn;
             mContext = context;
             mActivityThread = activityThread;
+            mActivityExecutor = null;
             mLocation = new ServiceConnectionLeaked(null);
             mLocation.fillInStackTrace();
             mFlags = flags;
         }
 
-        void validate(Context context, Handler activityThread) {
+        ServiceDispatcher(ServiceConnection conn,
+                Context context, Executor activityExecutor, int flags) {
+            mIServiceConnection = new InnerConnection(this);
+            mConnection = conn;
+            mContext = context;
+            mActivityThread = null;
+            mActivityExecutor = activityExecutor;
+            mLocation = new ServiceConnectionLeaked(null);
+            mLocation.fillInStackTrace();
+            mFlags = flags;
+        }
+
+        void validate(Context context, Handler activityThread, Executor activityExecutor) {
             if (mContext != context) {
                 throw new RuntimeException(
                     "ServiceConnection " + mConnection +
@@ -1781,6 +1802,12 @@ public final class LoadedApk {
                     "ServiceConnection " + mConnection +
                     " registered with differing handler (was " +
                     mActivityThread + " now " + activityThread + ")");
+            }
+            if (mActivityExecutor != activityExecutor) {
+                throw new RuntimeException(
+                    "ServiceConnection " + mConnection +
+                    " registered with differing executor (was " +
+                    mActivityExecutor + " now " + activityExecutor + ")");
             }
         }
 
@@ -1821,7 +1848,9 @@ public final class LoadedApk {
         }
 
         public void connected(ComponentName name, IBinder service, boolean dead) {
-            if (mActivityThread != null) {
+            if (mActivityExecutor != null) {
+                mActivityExecutor.execute(new RunConnection(name, service, 0, dead));
+            } else if (mActivityThread != null) {
                 mActivityThread.post(new RunConnection(name, service, 0, dead));
             } else {
                 doConnected(name, service, dead);
@@ -1829,7 +1858,9 @@ public final class LoadedApk {
         }
 
         public void death(ComponentName name, IBinder service) {
-            if (mActivityThread != null) {
+            if (mActivityExecutor != null) {
+                mActivityExecutor.execute(new RunConnection(name, service, 1, false));
+            } else if (mActivityThread != null) {
                 mActivityThread.post(new RunConnection(name, service, 1, false));
             } else {
                 doDeath(name, service);

@@ -24,7 +24,11 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
+import static android.app.servertransaction.TransactionExecutorHelper.getShortActivityName;
+import static android.app.servertransaction.TransactionExecutorHelper.getStateName;
 import static android.app.servertransaction.TransactionExecutorHelper.lastCallbackRequestingState;
+import static android.app.servertransaction.TransactionExecutorHelper.tId;
+import static android.app.servertransaction.TransactionExecutorHelper.transactionToString;
 
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
@@ -35,6 +39,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class that manages transaction execution in the correct order.
@@ -62,25 +67,47 @@ public class TransactionExecutor {
      * either remain in the initial state, or last state needed by a callback.
      */
     public void execute(ClientTransaction transaction) {
+        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Start resolving transaction");
+
         final IBinder token = transaction.getActivityToken();
-        log("Start resolving transaction for client: " + mTransactionHandler + ", token: " + token);
+        if (token != null) {
+            final Map<IBinder, ClientTransactionItem> activitiesToBeDestroyed =
+                    mTransactionHandler.getActivitiesToBeDestroyed();
+            final ClientTransactionItem destroyItem = activitiesToBeDestroyed.get(token);
+            if (destroyItem != null) {
+                if (transaction.getLifecycleStateRequest() == destroyItem) {
+                    // It is going to execute the transaction that will destroy activity with the
+                    // token, so the corresponding to-be-destroyed record can be removed.
+                    activitiesToBeDestroyed.remove(token);
+                }
+                if (mTransactionHandler.getActivityClient(token) == null) {
+                    // The activity has not been created but has been requested to destroy, so all
+                    // transactions for the token are just like being cancelled.
+                    Slog.w(TAG, tId(transaction) + "Skip pre-destroyed transaction:\n"
+                            + transactionToString(transaction, mTransactionHandler));
+                    return;
+                }
+            }
+        }
+
+        if (DEBUG_RESOLVER) Slog.d(TAG, transactionToString(transaction, mTransactionHandler));
 
         executeCallbacks(transaction);
 
         executeLifecycleState(transaction);
         mPendingActions.clear();
-        log("End resolving transaction");
+        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "End resolving transaction");
     }
 
     /** Cycle through all states requested by callbacks and execute them at proper times. */
     @VisibleForTesting
     public void executeCallbacks(ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
-        if (callbacks == null) {
+        if (callbacks == null || callbacks.isEmpty()) {
             // No callbacks to execute, return early.
             return;
         }
-        log("Resolving callbacks");
+        if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callbacks in transaction");
 
         final IBinder token = transaction.getActivityToken();
         ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
@@ -97,12 +124,12 @@ public class TransactionExecutor {
         final int size = callbacks.size();
         for (int i = 0; i < size; ++i) {
             final ClientTransactionItem item = callbacks.get(i);
-            log("Resolving callback: " + item);
+            if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Resolving callback: " + item);
             final int postExecutionState = item.getPostExecutionState();
             final int closestPreExecutionState = mHelper.getClosestPreExecutionState(r,
                     item.getPostExecutionState());
             if (closestPreExecutionState != UNDEFINED) {
-                cycleToPath(r, closestPreExecutionState);
+                cycleToPath(r, closestPreExecutionState, transaction);
             }
 
             item.execute(mTransactionHandler, token, mPendingActions);
@@ -116,7 +143,7 @@ public class TransactionExecutor {
                 // Skip the very last transition and perform it by explicit state request instead.
                 final boolean shouldExcludeLastTransition =
                         i == lastCallbackRequestingState && finalState == postExecutionState;
-                cycleToPath(r, postExecutionState, shouldExcludeLastTransition);
+                cycleToPath(r, postExecutionState, shouldExcludeLastTransition, transaction);
             }
         }
     }
@@ -128,10 +155,14 @@ public class TransactionExecutor {
             // No lifecycle request, return early.
             return;
         }
-        log("Resolving lifecycle state: " + lifecycleItem);
 
         final IBinder token = transaction.getActivityToken();
         final ActivityClientRecord r = mTransactionHandler.getActivityClient(token);
+        if (DEBUG_RESOLVER) {
+            Slog.d(TAG, tId(transaction) + "Resolving lifecycle state: "
+                    + lifecycleItem + " for activity: "
+                    + getShortActivityName(token, mTransactionHandler));
+        }
 
         if (r == null) {
             // Ignore requests for non-existent client records for now.
@@ -139,7 +170,7 @@ public class TransactionExecutor {
         }
 
         // Cycle to the state right before the final requested state.
-        cycleToPath(r, lifecycleItem.getTargetState(), true /* excludeLastState */);
+        cycleToPath(r, lifecycleItem.getTargetState(), true /* excludeLastState */, transaction);
 
         // Execute the final transition with proper parameters.
         lifecycleItem.execute(mTransactionHandler, token, mPendingActions);
@@ -148,8 +179,8 @@ public class TransactionExecutor {
 
     /** Transition the client between states. */
     @VisibleForTesting
-    public void cycleToPath(ActivityClientRecord r, int finish) {
-        cycleToPath(r, finish, false /* excludeLastState */);
+    public void cycleToPath(ActivityClientRecord r, int finish, ClientTransaction transaction) {
+        cycleToPath(r, finish, false /* excludeLastState */, transaction);
     }
 
     /**
@@ -157,20 +188,30 @@ public class TransactionExecutor {
      * sequence. This is used when resolving lifecycle state request, when the last transition must
      * be performed with some specific parameters.
      */
-    private void cycleToPath(ActivityClientRecord r, int finish,
-            boolean excludeLastState) {
+    private void cycleToPath(ActivityClientRecord r, int finish, boolean excludeLastState,
+            ClientTransaction transaction) {
         final int start = r.getLifecycleState();
-        log("Cycle from: " + start + " to: " + finish + " excludeLastState:" + excludeLastState);
+        if (DEBUG_RESOLVER) {
+            Slog.d(TAG, tId(transaction) + "Cycle activity: "
+                    + getShortActivityName(r.token, mTransactionHandler)
+                    + " from: " + getStateName(start) + " to: " + getStateName(finish)
+                    + " excludeLastState: " + excludeLastState);
+        }
         final IntArray path = mHelper.getLifecyclePath(start, finish, excludeLastState);
-        performLifecycleSequence(r, path);
+        performLifecycleSequence(r, path, transaction);
     }
 
     /** Transition the client through previously initialized state sequence. */
-    private void performLifecycleSequence(ActivityClientRecord r, IntArray path) {
+    private void performLifecycleSequence(ActivityClientRecord r, IntArray path,
+            ClientTransaction transaction) {
         final int size = path.size();
         for (int i = 0, state; i < size; i++) {
             state = path.get(i);
-            log("Transitioning to state: " + state);
+            if (DEBUG_RESOLVER) {
+                Slog.d(TAG, tId(transaction) + "Transitioning activity: "
+                        + getShortActivityName(r.token, mTransactionHandler)
+                        + " to state: " + getStateName(state));
+            }
             switch (state) {
                 case ON_CREATE:
                     mTransactionHandler.handleLaunchActivity(r, mPendingActions,
@@ -205,9 +246,5 @@ public class TransactionExecutor {
                     throw new IllegalArgumentException("Unexpected lifecycle state: " + state);
             }
         }
-    }
-
-    private static void log(String message) {
-        if (DEBUG_RESOLVER) Slog.d(TAG, message);
     }
 }

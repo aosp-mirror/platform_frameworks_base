@@ -79,36 +79,41 @@ class DexViewBuilder {
 
  private:
   // Accessors for the stack of views that are under construction.
-  dex::Value AcquireRegister();
-  void ReleaseRegister();
+  dex::LiveRegister AcquireRegister();
   dex::Value GetCurrentView() const;
   dex::Value GetCurrentLayoutParams() const;
   dex::Value GetParentView() const;
   void PopViewStack();
 
+  // Methods to simplify building different code fragments.
+  void BuildGetLayoutInflater(dex::Value dest);
+  void BuildGetResources(dex::Value dest);
+  void BuildGetLayoutResource(dex::Value dest, dex::Value resources, dex::Value resid);
+  void BuildLayoutResourceToAttributeSet(dex::Value dest, dex::Value layout_resource);
+  void BuildXmlNext();
+  void BuildTryCreateView(dex::Value dest, dex::Value parent, dex::Value classname);
+
   dex::MethodBuilder* method_;
 
-  // Registers used for code generation
+  // Parameters to the generated method
   dex::Value const context_;
   dex::Value const resid_;
-  const dex::Value inflater_;
-  const dex::Value xml_;
-  const dex::Value attrs_;
-  const dex::Value classname_tmp_;
+
+  // Registers used for code generation
+  const dex::LiveRegister inflater_;
+  const dex::LiveRegister xml_;
+  const dex::LiveRegister attrs_;
+  const dex::LiveRegister classname_tmp_;
 
   const dex::MethodDeclData xml_next_;
   const dex::MethodDeclData try_create_view_;
   const dex::MethodDeclData generate_layout_params_;
   const dex::MethodDeclData add_view_;
 
-  // used for keeping track of which registers are in use
-  size_t top_register_{0};
-  std::vector<dex::Value> register_stack_;
-
   // Keep track of the views currently in progress.
   struct ViewEntry {
-    dex::Value view;
-    std::optional<dex::Value> layout_params;
+    dex::LiveRegister view;
+    std::optional<dex::LiveRegister> layout_params;
   };
   std::vector<ViewEntry> view_stack_;
 };

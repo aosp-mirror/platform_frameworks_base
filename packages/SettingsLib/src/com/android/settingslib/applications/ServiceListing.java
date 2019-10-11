@@ -32,8 +32,6 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.util.Slog;
 
-import com.android.settingslib.wrapper.PackageManagerWrapper;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -127,8 +125,7 @@ public class ServiceListing {
         mServices.clear();
         final int user = ActivityManager.getCurrentUser();
 
-        final PackageManagerWrapper pmWrapper =
-                new PackageManagerWrapper(mContext.getPackageManager());
+        final PackageManager pmWrapper = mContext.getPackageManager();
         List<ResolveInfo> installedServices = pmWrapper.queryIntentServicesAsUser(
                 new Intent(mIntentAction),
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,

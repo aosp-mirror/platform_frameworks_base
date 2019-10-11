@@ -15,18 +15,17 @@
  */
 
 syntax = "proto2";
-option java_multiple_files = true;
-
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
-
 package android.os;
 
-//Memory usage of running processes
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/privacy.proto";
+
+// Memory usage of running processes
 message ProcrankProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Currently running process
-    // Next Tag: 11
     message Process {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -59,11 +58,12 @@ message ProcrankProto {
 
         // process command
         optional string cmdline = 10;
+
+        // Next Tag: 11
     }
     repeated Process processes = 1;
 
     // Summary
-    // Next Tag: 3
     message Summary {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -83,6 +83,8 @@ message ProcrankProto {
             optional string raw_text = 1;
         }
         optional Ram ram = 3;
+
+        // Next Tag: 4
     }
     optional Summary summary = 2;
 }

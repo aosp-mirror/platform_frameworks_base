@@ -50,9 +50,9 @@ public:
 
     void AssertBufferContent(const char* expected) {
         int i = 0;
-        EncodedBuffer::iterator it = buffer.data();
-        while (it.hasNext()) {
-            ASSERT_EQ(it.next(), expected[i++]);
+        sp<ProtoReader> reader = buffer.data()->read();
+        while (reader->hasNext()) {
+            ASSERT_EQ(reader->next(), expected[i++]);
         }
         EXPECT_EQ(expected[i], '\0');
     }
@@ -92,8 +92,8 @@ TEST_F(FdBufferTest, ReadAndWrite) {
 }
 
 TEST_F(FdBufferTest, IterateEmpty) {
-    EncodedBuffer::iterator it = buffer.data();
-    EXPECT_FALSE(it.hasNext());
+    sp<ProtoReader> reader = buffer.data()->read();
+    EXPECT_FALSE(reader->hasNext());
 }
 
 TEST_F(FdBufferTest, ReadAndIterate) {
@@ -102,15 +102,23 @@ TEST_F(FdBufferTest, ReadAndIterate) {
     ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
 
     int i = 0;
-    EncodedBuffer::iterator it = buffer.data();
-    while (it.hasNext()) {
-        EXPECT_EQ(it.next(), (uint8_t)testdata[i++]);
-    }
+    sp<ProtoReader> reader = buffer.data()->read();
 
-    it.rp()->rewind();
-    it.rp()->move(buffer.size());
-    EXPECT_EQ(it.bytesRead(), testdata.size());
-    EXPECT_FALSE(it.hasNext());
+    while (reader->hasNext()) {
+        EXPECT_EQ(reader->next(), (uint8_t)testdata[i++]);
+    }
+}
+
+TEST_F(FdBufferTest, Move) {
+    std::string testdata = "FdBuffer test string";
+    ASSERT_TRUE(WriteStringToFile(testdata, tf.path));
+    ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, READ_TIMEOUT));
+
+    sp<ProtoReader> reader = buffer.data()->read();
+    reader->move(buffer.size());
+
+    EXPECT_EQ(reader->bytesRead(), testdata.size());
+    EXPECT_FALSE(reader->hasNext());
 }
 
 TEST_F(FdBufferTest, ReadTimeout) {
@@ -224,9 +232,9 @@ TEST_F(FdBufferTest, ReadInStreamEmpty) {
     }
 }
 
-TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
-    const std::string testFile = kTestDataPath + "morethan4MB.txt";
-    size_t fourMB = (size_t)4 * 1024 * 1024;
+TEST_F(FdBufferTest, ReadInStreamMoreThan4MBWithMove) {
+    const std::string testFile = kTestDataPath + "morethan96MB.txt";
+    size_t ninetySixMB = (size_t)96 * 1024 * 1024;
     unique_fd fd(open(testFile.c_str(), O_RDONLY | O_CLOEXEC));
     ASSERT_NE(fd.get(), -1);
     int pid = fork();
@@ -246,19 +254,49 @@ TEST_F(FdBufferTest, ReadInStreamMoreThan4MB) {
         ASSERT_EQ(NO_ERROR,
                   buffer.readProcessedDataInStream(fd, std::move(p2cPipe.writeFd()),
                                                    std::move(c2pPipe.readFd()), READ_TIMEOUT));
-        EXPECT_EQ(buffer.size(), fourMB);
+        EXPECT_EQ(buffer.size(), ninetySixMB);
         EXPECT_FALSE(buffer.timedOut());
         EXPECT_TRUE(buffer.truncated());
         wait(&pid);
-        EncodedBuffer::iterator it = buffer.data();
-        it.rp()->move(fourMB);
-        EXPECT_EQ(it.bytesRead(), fourMB);
-        EXPECT_FALSE(it.hasNext());
+        sp<ProtoReader> reader = buffer.data()->read();
+        reader->move(ninetySixMB);
 
-        it.rp()->rewind();
-        while (it.hasNext()) {
-            char c = 'A' + (it.bytesRead() % 64 / 8);
-            ASSERT_TRUE(it.next() == c);
+        EXPECT_EQ(reader->bytesRead(), ninetySixMB);
+        EXPECT_FALSE(reader->hasNext());
+    }
+}
+
+TEST_F(FdBufferTest, ReadInStreamMoreThan4MBWithNext) {
+    const std::string testFile = kTestDataPath + "morethan96MB.txt";
+    size_t ninetySixMB = (size_t)96 * 1024 * 1024;
+    unique_fd fd(open(testFile.c_str(), O_RDONLY | O_CLOEXEC));
+    ASSERT_NE(fd.get(), -1);
+    int pid = fork();
+    ASSERT_TRUE(pid != -1);
+
+    if (pid == 0) {
+        p2cPipe.writeFd().reset();
+        c2pPipe.readFd().reset();
+        ASSERT_TRUE(DoDataStream(p2cPipe.readFd(), c2pPipe.writeFd()));
+        p2cPipe.readFd().reset();
+        c2pPipe.writeFd().reset();
+        _exit(EXIT_SUCCESS);
+    } else {
+        p2cPipe.readFd().reset();
+        c2pPipe.writeFd().reset();
+
+        ASSERT_EQ(NO_ERROR,
+                  buffer.readProcessedDataInStream(fd, std::move(p2cPipe.writeFd()),
+                                                   std::move(c2pPipe.readFd()), READ_TIMEOUT));
+        EXPECT_EQ(buffer.size(), ninetySixMB);
+        EXPECT_FALSE(buffer.timedOut());
+        EXPECT_TRUE(buffer.truncated());
+        wait(&pid);
+        sp<ProtoReader> reader = buffer.data()->read();
+
+        while (reader->hasNext()) {
+            char c = 'A' + (reader->bytesRead() % 64 / 8);
+            ASSERT_TRUE(reader->next() == c);
         }
     }
 }

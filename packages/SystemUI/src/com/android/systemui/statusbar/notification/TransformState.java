@@ -29,9 +29,9 @@ import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
  * A transform state of a view.

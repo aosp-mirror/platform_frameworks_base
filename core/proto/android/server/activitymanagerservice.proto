@@ -28,12 +28,13 @@ import "frameworks/base/core/proto/android/content/intent.proto";
 import "frameworks/base/core/proto/android/content/package_item_info.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/internal/processstats.proto";
+import "frameworks/base/core/proto/android/os/bundle.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/util/common.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 
@@ -62,11 +63,14 @@ message ActivityStackSupervisorProto {
     optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
     repeated ActivityDisplayProto displays = 2;
     optional KeyguardControllerProto keyguard_controller = 3;
+    // TODO(b/111541062): Focused stack and resumed activity are now per-display. Topmost instances
+    // can be obtained from top display and these fields can be removed.
     optional int32 focused_stack_id = 4;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
     // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
     // know what activity types to check for when invoking splitscreen multi-window.
     optional bool is_home_recents_component = 6;
+    repeated .com.android.server.wm.IdentifierProto pending_activities = 7;
 }
 
 /* represents ActivityStackSupervisor.ActivityDisplay */
@@ -76,6 +80,9 @@ message ActivityDisplayProto {
     optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
     optional int32 id = 2;
     repeated ActivityStackProto stacks = 3;
+    optional int32 focused_stack_id = 4;
+    optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
+    optional bool single_task_instance = 6;
 }
 
 message ActivityStackProto {
@@ -124,6 +131,14 @@ message KeyguardControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional bool keyguard_showing = 1;
+    repeated KeyguardOccludedProto keyguard_occluded_states= 2;
+    optional bool aod_showing = 3;
+}
+
+message KeyguardOccludedProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 display_id = 1;
     optional bool keyguard_occluded = 2;
 }
 
@@ -158,7 +173,8 @@ message ReceiverListProto {
     optional BroadcastRecordProto current = 5;
     optional bool linked_to_death = 6;
     repeated BroadcastFilterProto filters = 7;
-    optional string hex_hash = 8; // used to find this ReceiverList object in IntentResolver
+    // Used to find this ReceiverList object in IntentResolver
+    optional string hex_hash = 8;
 }
 
 message ProcessRecordProto {
@@ -171,6 +187,7 @@ message ProcessRecordProto {
     optional int32 app_id = 5;
     optional int32 isolated_app_id = 6;
     optional bool persistent = 7;
+    optional int32 lru_index = 8;
 }
 
 message BroadcastRecordProto {
@@ -185,7 +202,8 @@ message BroadcastFilterProto {
 
     optional .android.content.IntentFilterProto intent_filter = 1;
     optional string required_permission = 2;
-    optional string hex_hash = 3; // used to find the BroadcastFilter object in IntentResolver
+    // Used to find the BroadcastFilter object in IntentResolver
+    optional string hex_hash = 3;
     optional int32 owning_user_id = 4;
 }
 
@@ -406,6 +424,7 @@ message StickyBroadcastProto {
     message StickyAction {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
+        // The action of the sticky Intent.
         optional string name = 1;
         repeated .android.content.IntentProto intents = 2;
     }
@@ -551,7 +570,7 @@ message ServiceRecordProto {
 message ConnectionRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // used to find same record, e.g. AppBindRecord has the hex_hash
+    // Used to find same record, e.g. AppBindRecord has the hex_hash
     optional string hex_hash = 1; // cross reference the object and avoid double logging.
     optional int32 user_id = 2;
 
@@ -572,6 +591,8 @@ message ConnectionRecordProto {
         SHOWING_UI = 13;
         NOT_VISIBLE = 14;
         DEAD = 15;
+        NOT_PERCEPTIBLE = 16;
+        INCLUDE_CAPABILITIES = 17;
     }
     repeated Flag flags = 3;
     optional string service_name = 4;
@@ -737,6 +758,7 @@ message ActivityManagerServiceDumpProcessesProto {
             optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
             optional int32 pid = 3;
             optional int32 uid = 4;
+            optional bool is_user_initiated = 5;
         }
         optional Dump dump = 2;
     }
@@ -798,7 +820,11 @@ message ActiveInstrumentationProto {
     optional string profile_file = 6;
     optional string watcher = 7;
     optional string ui_automation_connection = 8;
-    optional string arguments = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    // Arguments as given to the ActiveInstrumentation object in Bundle
+    // toString format.
+    reserved 9; // arguments (in String format).
+    // Arguments as given to the ActiveInstrumentation object.
+    optional .android.os.BundleProto arguments = 10;
 }
 
 // Proto definition of com.android.server.am.UidRecord.java

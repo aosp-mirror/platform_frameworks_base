@@ -374,10 +374,21 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean commitText(CharSequence text, int newCursorPosition) {
         try {
             mIInputContext.commitText(text, newCursorPosition);
+            notifyUserActionIfNecessary();
             return true;
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    @AnyThread
+    private void notifyUserActionIfNecessary() {
+        final AbstractInputMethodService inputMethodService = mInputMethodService.get();
+        if (inputMethodService == null) {
+            // This basically should not happen, because it's the the caller of this method.
+            return;
+        }
+        inputMethodService.notifyUserActionIfNecessary();
     }
 
     @AnyThread
@@ -452,6 +463,7 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
         try {
             mIInputContext.setComposingText(text, newCursorPosition);
+            notifyUserActionIfNecessary();
             return true;
         } catch (RemoteException e) {
             return false;
@@ -492,6 +504,7 @@ public class InputConnectionWrapper implements InputConnection {
     public boolean sendKeyEvent(KeyEvent event) {
         try {
             mIInputContext.sendKeyEvent(event);
+            notifyUserActionIfNecessary();
             return true;
         } catch (RemoteException e) {
             return false;

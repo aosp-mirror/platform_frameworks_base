@@ -27,9 +27,11 @@ import android.content.pm.UserInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  * adb install -r \
  *     ${ANDROID_PRODUCT_OUT}/data/app/MultiUserPerfTests/MultiUserPerfTests.apk &&
  * adb shell am instrument -e class android.multiuser.UserLifecycleTests \
- *     -w com.android.perftests.multiuser/android.support.test.runner.AndroidJUnitRunner
+ *     -w com.android.perftests.multiuser/androidx.test.runner.AndroidJUnitRunner
  *
  * or
  *
@@ -129,6 +131,47 @@ public class UserLifecycleTests {
         }
     }
 
+    /** Tests switching to an already-created, but no-longer-running, user. */
+    @Test
+    public void switchUser_stopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ true);
+            final CountDownLatch latch = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch, testUser);
+            mRunner.resumeTiming();
+
+            mAm.switchUser(testUser);
+            boolean success = latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+
+            mRunner.pauseTiming();
+            attestTrue("Failed to achieve 2nd ACTION_USER_UNLOCKED for user " + testUser, success);
+            switchUser(startUser);
+            removeUser(testUser);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests switching to an already-created already-running non-owner user. */
+    @Test
+    public void switchUser_running() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final int startUser = mAm.getCurrentUser();
+            final int testUser = initializeNewUserAndSwitchBack(/* stopNewUser */ false);
+            mRunner.resumeTiming();
+
+            switchUser(testUser);
+
+            mRunner.pauseTiming();
+            attestTrue("Failed to switch to user " + testUser, mAm.isUserRunning(testUser));
+            switchUser(startUser);
+            removeUser(testUser);
+            mRunner.resumeTiming();
+        }
+    }
+
     @Test
     public void stopUser() throws Exception {
         while (mRunner.keepRunning()) {
@@ -180,6 +223,34 @@ public class UserLifecycleTests {
 
             mIam.startUserInBackground(userInfo.id);
             latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+
+            mRunner.pauseTiming();
+            removeUser(userInfo.id);
+            mRunner.resumeTiming();
+        }
+    }
+
+    /** Tests starting an already-created, but no-longer-running, profile. */
+    @Test
+    public void managedProfileUnlock_stopped() throws Exception {
+        while (mRunner.keepRunning()) {
+            mRunner.pauseTiming();
+            final UserInfo userInfo = mUm.createProfileForUser("TestUser",
+                    UserInfo.FLAG_MANAGED_PROFILE, mAm.getCurrentUser());
+            // Start the profile initially, then stop it. Similar to setQuietModeEnabled.
+            final CountDownLatch latch1 = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, userInfo.id);
+            mIam.startUserInBackground(userInfo.id);
+            latch1.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
+            stopUser(userInfo.id, true);
+
+            // Now we restart the profile.
+            final CountDownLatch latch2 = new CountDownLatch(1);
+            registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch2, userInfo.id);
+            mRunner.resumeTiming();
+
+            mIam.startUserInBackground(userInfo.id);
+            latch2.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
 
             mRunner.pauseTiming();
             removeUser(userInfo.id);
@@ -261,6 +332,35 @@ public class UserLifecycleTests {
         latch.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS);
     }
 
+    /**
+     * Creates a user and waits for its ACTION_USER_UNLOCKED.
+     * Then switches to back to the original user and waits for its switchUser() to finish.
+     *
+     * @param stopNewUser whether to stop the new user after switching to otherUser.
+     * @return userId of the newly created user.
+     */
+    private int initializeNewUserAndSwitchBack(boolean stopNewUser) throws Exception {
+        final int origUser = mAm.getCurrentUser();
+        // First, create and switch to testUser, waiting for its ACTION_USER_UNLOCKED
+        final int testUser = mUm.createUser("TestUser", 0).id;
+        final CountDownLatch latch1 = new CountDownLatch(1);
+        registerBroadcastReceiver(Intent.ACTION_USER_UNLOCKED, latch1, testUser);
+        mAm.switchUser(testUser);
+        attestTrue("Failed to achieve initial ACTION_USER_UNLOCKED for user " + testUser,
+                latch1.await(TIMEOUT_IN_SECOND, TimeUnit.SECONDS));
+
+        // Second, switch back to origUser, waiting merely for switchUser() to finish
+        switchUser(origUser);
+        attestTrue("Didn't switch back to user, " + origUser, origUser == mAm.getCurrentUser());
+
+        if (stopNewUser) {
+            stopUser(testUser, true);
+            attestFalse("Failed to stop user " + testUser, mAm.isUserRunning(testUser));
+        }
+
+        return testUser;
+    }
+
     private void registerUserSwitchObserver(final CountDownLatch switchLatch,
             final CountDownLatch bootCompleteLatch, final int userId) throws Exception {
         ActivityManager.getService().registerUserSwitchObserver(
@@ -311,5 +411,15 @@ public class UserLifecycleTests {
         if (mUm.getUserInfo(userId) != null) {
             mUsersToRemove.add(userId);
         }
+    }
+
+    private void attestTrue(String message, boolean attestion) {
+        if (!attestion) {
+            Log.w(TAG, message);
+        }
+    }
+
+    private void attestFalse(String message, boolean attestion) {
+        attestTrue(message, !attestion);
     }
 }

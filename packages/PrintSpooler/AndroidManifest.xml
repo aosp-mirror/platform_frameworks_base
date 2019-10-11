@@ -34,15 +34,16 @@
     <uses-permission android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.READ_PRINT_SERVICES" />
     <uses-permission android:name="android.permission.READ_PRINT_SERVICE_RECOMMENDATIONS" />
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowClearUserData="true"
         android:label="@string/app_label"
-        android:allowBackup= "false"
+        android:icon="@drawable/ic_app_icon"
         android:supportsRtl="true">
 
         <service

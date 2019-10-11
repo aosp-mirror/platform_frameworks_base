@@ -19,13 +19,12 @@ package com.android.settingslib.deviceinfo;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.provider.Settings;
+import android.text.TextUtils;
+
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
-import android.text.TextUtils;
 
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;
@@ -38,6 +37,10 @@ public abstract class AbstractWifiMacAddressPreferenceController
 
     @VisibleForTesting
     static final String KEY_WIFI_MAC_ADDRESS = "wifi_mac_address";
+    @VisibleForTesting
+    static final int OFF = 0;
+    @VisibleForTesting
+    static final int ON = 1;
 
     private static final String[] CONNECTIVITY_INTENTS = {
             ConnectivityManager.CONNECTIVITY_ACTION,
@@ -78,15 +81,14 @@ public abstract class AbstractWifiMacAddressPreferenceController
     @SuppressLint("HardwareIds")
     @Override
     protected void updateConnectivity() {
-        WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
-        final int macRandomizationMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED, 0);
-        final String macAddress = wifiInfo == null ? null : wifiInfo.getMacAddress();
+        final String[] macAddresses = mWifiManager.getFactoryMacAddresses();
+        String macAddress = null;
+        if (macAddresses != null && macAddresses.length > 0) {
+            macAddress = macAddresses[0];
+        }
 
         if (TextUtils.isEmpty(macAddress)) {
             mWifiMacAddress.setSummary(R.string.status_unavailable);
-        } else if (macRandomizationMode == 1 && WifiInfo.DEFAULT_MAC_ADDRESS.equals(macAddress)) {
-            mWifiMacAddress.setSummary(R.string.wifi_status_mac_randomized);
         } else {
             mWifiMacAddress.setSummary(macAddress);
         }

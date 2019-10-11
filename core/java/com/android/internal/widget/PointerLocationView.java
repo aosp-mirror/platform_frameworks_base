@@ -20,21 +20,28 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.graphics.Paint.FontMetricsInt;
+import android.graphics.Path;
+import android.graphics.RectF;
+import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
+import android.view.ISystemGestureExclusionListener;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
+import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-import android.view.MotionEvent.PointerCoords;
 
 import java.util.ArrayList;
 
@@ -106,10 +113,6 @@ public class PointerLocationView extends View implements InputDeviceListener,
         }
     }
 
-    private final int ESTIMATE_PAST_POINTS = 4;
-    private final int ESTIMATE_FUTURE_POINTS = 2;
-    private final float ESTIMATE_INTERVAL = 0.02f;
-
     private final InputManager mIm;
 
     private final ViewConfiguration mVC;
@@ -122,6 +125,7 @@ public class PointerLocationView extends View implements InputDeviceListener,
     private final Paint mPathPaint;
     private final FontMetricsInt mTextMetrics = new FontMetricsInt();
     private int mHeaderBottom;
+    private int mHeaderPaddingTop = 0;
     @UnsupportedAppUsage
     private boolean mCurDown;
     @UnsupportedAppUsage
@@ -132,12 +136,16 @@ public class PointerLocationView extends View implements InputDeviceListener,
     @UnsupportedAppUsage
     private final ArrayList<PointerState> mPointers = new ArrayList<PointerState>();
     private final PointerCoords mTempCoords = new PointerCoords();
-    
+
+    private final Region mSystemGestureExclusion = new Region();
+    private final Path mSystemGestureExclusionPath = new Path();
+    private final Paint mSystemGestureExclusionPaint;
+
     private final VelocityTracker mVelocity;
     private final VelocityTracker mAltVelocity;
 
     private final FasterStringBuilder mText = new FasterStringBuilder();
-    
+
     @UnsupportedAppUsage
     private boolean mPrintCoords = true;
     
@@ -177,7 +185,11 @@ public class PointerLocationView extends View implements InputDeviceListener,
         mPathPaint.setARGB(255, 0, 96, 255);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(1);
-        
+
+        mSystemGestureExclusionPaint = new Paint();
+        mSystemGestureExclusionPaint.setARGB(25, 255, 0, 0);
+        mSystemGestureExclusionPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
         PointerState ps = new PointerState();
         mPointers.add(ps);
         mActivePointerId = 0;
@@ -196,12 +208,22 @@ public class PointerLocationView extends View implements InputDeviceListener,
     public void setPrintCoords(boolean state) {
         mPrintCoords = state;
     }
-    
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        if (insets.getDisplayCutout() != null) {
+            mHeaderPaddingTop = insets.getDisplayCutout().getSafeInsetTop();
+        } else {
+            mHeaderPaddingTop = 0;
+        }
+        return super.onApplyWindowInsets(insets);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mTextPaint.getFontMetricsInt(mTextMetrics);
-        mHeaderBottom = -mTextMetrics.ascent+mTextMetrics.descent+2;
+        mHeaderBottom = mHeaderPaddingTop-mTextMetrics.ascent+mTextMetrics.descent+2;
         if (false) {
             Log.i("foo", "Metrics: ascent=" + mTextMetrics.ascent
                     + " descent=" + mTextMetrics.descent
@@ -230,16 +252,22 @@ public class PointerLocationView extends View implements InputDeviceListener,
     protected void onDraw(Canvas canvas) {
         final int w = getWidth();
         final int itemW = w/7;
-        final int base = -mTextMetrics.ascent+1;
+        final int base = mHeaderPaddingTop-mTextMetrics.ascent+1;
         final int bottom = mHeaderBottom;
 
         final int NP = mPointers.size();
+
+        if (!mSystemGestureExclusion.isEmpty()) {
+            mSystemGestureExclusionPath.reset();
+            mSystemGestureExclusion.getBoundaryPath(mSystemGestureExclusionPath);
+            canvas.drawPath(mSystemGestureExclusionPath, mSystemGestureExclusionPaint);
+        }
 
         // Labels
         if (mActivePointerId >= 0) {
             final PointerState ps = mPointers.get(mActivePointerId);
             
-            canvas.drawRect(0, 0, itemW-1, bottom,mTextBackgroundPaint);
+            canvas.drawRect(0, mHeaderPaddingTop, itemW-1, bottom,mTextBackgroundPaint);
             canvas.drawText(mText.clear()
                     .append("P: ").append(mCurNumPointers)
                     .append(" / ").append(mMaxNumPointers)
@@ -247,24 +275,26 @@ public class PointerLocationView extends View implements InputDeviceListener,
 
             final int N = ps.mTraceCount;
             if ((mCurDown && ps.mCurDown) || N == 0) {
-                canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom, mTextBackgroundPaint);
+                canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
+                        mTextBackgroundPaint);
                 canvas.drawText(mText.clear()
                         .append("X: ").append(ps.mCoords.x, 1)
                         .toString(), 1 + itemW, base, mTextPaint);
-                canvas.drawRect(itemW * 2, 0, (itemW * 3) - 1, bottom, mTextBackgroundPaint);
+                canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
+                        mTextBackgroundPaint);
                 canvas.drawText(mText.clear()
                         .append("Y: ").append(ps.mCoords.y, 1)
                         .toString(), 1 + itemW * 2, base, mTextPaint);
             } else {
                 float dx = ps.mTraceX[N - 1] - ps.mTraceX[0];
                 float dy = ps.mTraceY[N - 1] - ps.mTraceY[0];
-                canvas.drawRect(itemW, 0, (itemW * 2) - 1, bottom,
+                canvas.drawRect(itemW, mHeaderPaddingTop, (itemW * 2) - 1, bottom,
                         Math.abs(dx) < mVC.getScaledTouchSlop()
                         ? mTextBackgroundPaint : mTextLevelPaint);
                 canvas.drawText(mText.clear()
                         .append("dX: ").append(dx, 1)
                         .toString(), 1 + itemW, base, mTextPaint);
-                canvas.drawRect(itemW * 2, 0, (itemW * 3) - 1, bottom,
+                canvas.drawRect(itemW * 2, mHeaderPaddingTop, (itemW * 3) - 1, bottom,
                         Math.abs(dy) < mVC.getScaledTouchSlop()
                         ? mTextBackgroundPaint : mTextLevelPaint);
                 canvas.drawText(mText.clear()
@@ -272,26 +302,29 @@ public class PointerLocationView extends View implements InputDeviceListener,
                         .toString(), 1 + itemW * 2, base, mTextPaint);
             }
 
-            canvas.drawRect(itemW * 3, 0, (itemW * 4) - 1, bottom, mTextBackgroundPaint);
+            canvas.drawRect(itemW * 3, mHeaderPaddingTop, (itemW * 4) - 1, bottom,
+                    mTextBackgroundPaint);
             canvas.drawText(mText.clear()
                     .append("Xv: ").append(ps.mXVelocity, 3)
                     .toString(), 1 + itemW * 3, base, mTextPaint);
 
-            canvas.drawRect(itemW * 4, 0, (itemW * 5) - 1, bottom, mTextBackgroundPaint);
+            canvas.drawRect(itemW * 4, mHeaderPaddingTop, (itemW * 5) - 1, bottom,
+                    mTextBackgroundPaint);
             canvas.drawText(mText.clear()
                     .append("Yv: ").append(ps.mYVelocity, 3)
                     .toString(), 1 + itemW * 4, base, mTextPaint);
 
-            canvas.drawRect(itemW * 5, 0, (itemW * 6) - 1, bottom, mTextBackgroundPaint);
-            canvas.drawRect(itemW * 5, 0, (itemW * 5) + (ps.mCoords.pressure * itemW) - 1,
-                    bottom, mTextLevelPaint);
+            canvas.drawRect(itemW * 5, mHeaderPaddingTop, (itemW * 6) - 1, bottom,
+                    mTextBackgroundPaint);
+            canvas.drawRect(itemW * 5, mHeaderPaddingTop,
+                    (itemW * 5) + (ps.mCoords.pressure * itemW) - 1, bottom, mTextLevelPaint);
             canvas.drawText(mText.clear()
                     .append("Prs: ").append(ps.mCoords.pressure, 2)
                     .toString(), 1 + itemW * 5, base, mTextPaint);
 
-            canvas.drawRect(itemW * 6, 0, w, bottom, mTextBackgroundPaint);
-            canvas.drawRect(itemW * 6, 0, (itemW * 6) + (ps.mCoords.size * itemW) - 1,
-                    bottom, mTextLevelPaint);
+            canvas.drawRect(itemW * 6, mHeaderPaddingTop, w, bottom, mTextBackgroundPaint);
+            canvas.drawRect(itemW * 6, mHeaderPaddingTop,
+                    (itemW * 6) + (ps.mCoords.size * itemW) - 1, bottom, mTextLevelPaint);
             canvas.drawText(mText.clear()
                     .append("Size: ").append(ps.mCoords.size, 2)
                     .toString(), 1 + itemW * 6, base, mTextPaint);
@@ -326,37 +359,14 @@ public class PointerLocationView extends View implements InputDeviceListener,
             }
 
             if (drawn) {
-                // Draw movement estimate curve.
-                mPaint.setARGB(128, 128, 0, 128);
-                float lx = ps.mEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                float ly = ps.mEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
-                    float x = ps.mEstimator.estimateX(i * ESTIMATE_INTERVAL);
-                    float y = ps.mEstimator.estimateY(i * ESTIMATE_INTERVAL);
-                    canvas.drawLine(lx, ly, x, y, mPaint);
-                    lx = x;
-                    ly = y;
-                }
-
                 // Draw velocity vector.
                 mPaint.setARGB(255, 255, 64, 128);
                 float xVel = ps.mXVelocity * (1000 / 60);
                 float yVel = ps.mYVelocity * (1000 / 60);
                 canvas.drawLine(lastX, lastY, lastX + xVel, lastY + yVel, mPaint);
 
-                // Draw alternate estimate.
+                // Draw velocity vector using an alternate VelocityTracker strategy.
                 if (mAltVelocity != null) {
-                    mPaint.setARGB(128, 0, 128, 128);
-                    lx = ps.mAltEstimator.estimateX(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                    ly = ps.mAltEstimator.estimateY(-ESTIMATE_PAST_POINTS * ESTIMATE_INTERVAL);
-                    for (int i = -ESTIMATE_PAST_POINTS + 1; i <= ESTIMATE_FUTURE_POINTS; i++) {
-                        float x = ps.mAltEstimator.estimateX(i * ESTIMATE_INTERVAL);
-                        float y = ps.mAltEstimator.estimateY(i * ESTIMATE_INTERVAL);
-                        canvas.drawLine(lx, ly, x, y, mPaint);
-                        lx = x;
-                        ly = y;
-                    }
-
                     mPaint.setARGB(255, 64, 255, 128);
                     xVel = ps.mAltXVelocity * (1000 / 60);
                     yVel = ps.mAltYVelocity * (1000 / 60);
@@ -736,6 +746,17 @@ public class PointerLocationView extends View implements InputDeviceListener,
         super.onAttachedToWindow();
 
         mIm.registerInputDeviceListener(this, getHandler());
+        if (shouldShowSystemGestureExclusion()) {
+            try {
+                WindowManagerGlobal.getWindowManagerService()
+                        .registerSystemGestureExclusionListener(mSystemGestureExclusionListener,
+                                mContext.getDisplayId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            mSystemGestureExclusion.setEmpty();
+        }
         logInputDevices();
     }
 
@@ -744,6 +765,12 @@ public class PointerLocationView extends View implements InputDeviceListener,
         super.onDetachedFromWindow();
 
         mIm.unregisterInputDeviceListener(this);
+        try {
+            WindowManagerGlobal.getWindowManagerService().unregisterSystemGestureExclusionListener(
+                    mSystemGestureExclusionListener, mContext.getDisplayId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override
@@ -775,6 +802,10 @@ public class PointerLocationView extends View implements InputDeviceListener,
         } else {
             Log.i(TAG, state + ": " + deviceId);
         }
+    }
+
+    private static boolean shouldShowSystemGestureExclusion() {
+        return SystemProperties.getBoolean("debug.pointerlocation.showexclusion", false);
     }
 
     // HACK
@@ -857,7 +888,11 @@ public class PointerLocationView extends View implements InputDeviceListener,
                 scale *= 10;
             }
             value = (float) (Math.rint(value * scale) / scale);
-            
+
+            // Corner case: (int)-0.1 will become zero, so the negative sign gets lost
+            if ((int) value == 0 && value < 0) {
+                append("-");
+            }
             append((int) value);
 
             if (precision != 0) {
@@ -889,4 +924,20 @@ public class PointerLocationView extends View implements InputDeviceListener,
             return oldLength;
         }
     }
+
+    private ISystemGestureExclusionListener mSystemGestureExclusionListener =
+            new ISystemGestureExclusionListener.Stub() {
+        @Override
+        public void onSystemGestureExclusionChanged(int displayId, Region systemGestureExclusion) {
+            Region exclusion = Region.obtain(systemGestureExclusion);
+            Handler handler = getHandler();
+            if (handler != null) {
+                handler.post(() -> {
+                    mSystemGestureExclusion.set(exclusion);
+                    exclusion.recycle();
+                    invalidate();
+                });
+            }
+        }
+    };
 }

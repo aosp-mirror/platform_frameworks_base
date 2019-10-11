@@ -18,10 +18,10 @@
 #include "Log.h"
 
 #include "StatsPuller.h"
+#include "StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "puller_util.h"
 #include "stats_log_util.h"
-#include "StatsPullerManagerImpl.h"
 
 namespace android {
 namespace os {
@@ -32,45 +32,54 @@ using std::lock_guard;
 sp<UidMap> StatsPuller::mUidMap = nullptr;
 void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 
-// ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 StatsPuller::StatsPuller(const int tagId)
-    : mTagId(tagId) {
-    auto pullAtomInfo = StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId);
-    if (pullAtomInfo != StatsPullerManagerImpl::kAllPullAtomInfo.end()) {
-        mCoolDownNs = pullAtomInfo->second.coolDownNs;
-        VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
-    } else {
-        mCoolDownNs = 0;
-        VLOG("Creating puller for a non-recognised tag %d.", mTagId);
-    }
+    : mTagId(tagId), mLastPullTimeNs(0) {
 }
 
-bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<LogEvent>>* data) {
+bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
-    int64_t wallClockTimeNs = getWallClockNs();
+    int64_t elapsedTimeNs = getElapsedRealtimeNs();
     StatsdStats::getInstance().notePull(mTagId);
-    if (elapsedTimeNs - mLastPullTimeNs < mCoolDownNs) {
-        (*data) = mCachedData;
-        StatsdStats::getInstance().notePullFromCache(mTagId);
-        return true;
+    const bool shouldUseCache = elapsedTimeNs - mLastPullTimeNs <
+                                StatsPullerManager::kAllPullAtomInfo.at(mTagId).coolDownNs;
+    if (shouldUseCache) {
+        if (mHasGoodData) {
+            (*data) = mCachedData;
+            StatsdStats::getInstance().notePullFromCache(mTagId);
+        }
+        return mHasGoodData;
     }
-    if (mMinPullIntervalNs > elapsedTimeNs - mLastPullTimeNs) {
-        mMinPullIntervalNs = elapsedTimeNs - mLastPullTimeNs;
-        StatsdStats::getInstance().updateMinPullIntervalSec(mTagId,
-                                                            mMinPullIntervalNs / NS_PER_SEC);
+
+    if (mLastPullTimeNs > 0) {
+        StatsdStats::getInstance().updateMinPullIntervalSec(
+                mTagId, (elapsedTimeNs - mLastPullTimeNs) / NS_PER_SEC);
     }
     mCachedData.clear();
     mLastPullTimeNs = elapsedTimeNs;
-    bool ret = PullInternal(&mCachedData);
-    for (const shared_ptr<LogEvent>& data : mCachedData) {
-        data->setElapsedTimestampNs(elapsedTimeNs);
-        data->setLogdWallClockTimestampNs(wallClockTimeNs);
+    mHasGoodData = PullInternal(&mCachedData);
+    if (!mHasGoodData) {
+        return mHasGoodData;
     }
-    if (ret && mCachedData.size() > 0) {
-      mergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
-      (*data) = mCachedData;
+    const int64_t pullDurationNs = getElapsedRealtimeNs() - elapsedTimeNs;
+    StatsdStats::getInstance().notePullTime(mTagId, pullDurationNs);
+    const bool pullTimeOut =
+            pullDurationNs > StatsPullerManager::kAllPullAtomInfo.at(mTagId).pullTimeoutNs;
+    if (pullTimeOut) {
+        // Something went wrong. Discard the data.
+        clearCacheLocked();
+        mHasGoodData = false;
+        StatsdStats::getInstance().notePullTimeout(mTagId);
+        ALOGW("Pull for atom %d exceeds timeout %lld nano seconds.", mTagId,
+              (long long)pullDurationNs);
+        return mHasGoodData;
     }
-    return ret;
+
+    if (mCachedData.size() > 0) {
+        mapAndMergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
+    }
+
+    (*data) = mCachedData;
+    return mHasGoodData;
 }
 
 int StatsPuller::ForceClearCache() {
@@ -79,6 +88,10 @@ int StatsPuller::ForceClearCache() {
 
 int StatsPuller::clearCache() {
     lock_guard<std::mutex> lock(mLock);
+    return clearCacheLocked();
+}
+
+int StatsPuller::clearCacheLocked() {
     int ret = mCachedData.size();
     mCachedData.clear();
     mLastPullTimeNs = 0;
@@ -86,7 +99,8 @@ int StatsPuller::clearCache() {
 }
 
 int StatsPuller::ClearCacheIfNecessary(int64_t timestampNs) {
-    if (timestampNs - mLastPullTimeNs > mCoolDownNs) {
+    if (timestampNs - mLastPullTimeNs >
+        StatsPullerManager::kAllPullAtomInfo.at(mTagId).coolDownNs) {
         return clearCache();
     } else {
         return 0;

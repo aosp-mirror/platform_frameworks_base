@@ -66,7 +66,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * CacheQuotaStrategy is a strategy for determining cache quotas using usage stats and foreground
@@ -296,19 +295,16 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
      * @return the number of bytes that were free on the device when the quotas were last calced.
      */
     public long setupQuotasFromFile() throws IOException {
-        FileInputStream stream;
-        try {
-            stream = mPreviousValuesFile.openRead();
+        Pair<Long, List<CacheQuotaHint>> cachedValues = null;
+        try (FileInputStream stream = mPreviousValuesFile.openRead()) {
+            try {
+                cachedValues = readFromXml(stream);
+            } catch (XmlPullParserException e) {
+                throw new IllegalStateException(e.getMessage());
+            }
         } catch (FileNotFoundException e) {
             // The file may not exist yet -- this isn't truly exceptional.
             return -1;
-        }
-
-        Pair<Long, List<CacheQuotaHint>> cachedValues = null;
-        try {
-            cachedValues = readFromXml(stream);
-        } catch (XmlPullParserException e) {
-            throw new IllegalStateException(e.getMessage());
         }
 
         if (cachedValues == null) {
@@ -316,6 +312,7 @@ public class CacheQuotaStrategy implements RemoteCallback.OnResultListener {
             return -1;
         }
         pushProcessedQuotas(cachedValues.second);
+
         return cachedValues.first;
     }
 

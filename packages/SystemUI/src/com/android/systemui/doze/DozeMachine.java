@@ -17,12 +17,12 @@
 package com.android.systemui.doze;
 
 import android.annotation.MainThread;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 
-import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -43,6 +43,8 @@ public class DozeMachine {
 
     static final String TAG = "DozeMachine";
     static final boolean DEBUG = DozeService.DEBUG;
+    private static final String REASON_CHANGE_STATE = "DozeMachine#requestState";
+    private static final String REASON_HELD_FOR_STATE = "DozeMachine#heldForState";
 
     public enum State {
         /** Default state. Transition to INITIALIZED to get Doze going. */
@@ -57,6 +59,8 @@ public class DozeMachine {
         DOZE_REQUEST_PULSE,
         /** Pulse is showing. Device is awake and showing UI. */
         DOZE_PULSING,
+        /** Pulse is showing with bright wallpaper. Device is awake and showing UI. */
+        DOZE_PULSING_BRIGHT,
         /** Pulse is done showing. Followed by transition to DOZE or DOZE_AOD. */
         DOZE_PULSE_DONE,
         /** Doze is done. DozeService is finished. */
@@ -82,6 +86,7 @@ public class DozeMachine {
             switch (this) {
                 case DOZE_REQUEST_PULSE:
                 case DOZE_PULSING:
+                case DOZE_PULSING_BRIGHT:
                     return true;
                 default:
                     return false;
@@ -99,6 +104,7 @@ public class DozeMachine {
                 case DOZE:
                     return Display.STATE_OFF;
                 case DOZE_PULSING:
+                case DOZE_PULSING_BRIGHT:
                     return Display.STATE_ON;
                 case DOZE_AOD:
                 case DOZE_AOD_PAUSING:
@@ -167,14 +173,14 @@ public class DozeMachine {
         boolean runNow = !isExecutingTransition();
         mQueuedRequests.add(requestedState);
         if (runNow) {
-            mWakeLock.acquire();
+            mWakeLock.acquire(REASON_CHANGE_STATE);
             for (int i = 0; i < mQueuedRequests.size(); i++) {
                 // Transitions in Parts can call back into requestState, which will
                 // cause mQueuedRequests to grow.
                 transitionTo(mQueuedRequests.get(i), pulseReason);
             }
             mQueuedRequests.clear();
-            mWakeLock.release();
+            mWakeLock.release(REASON_CHANGE_STATE);
         }
     }
 
@@ -186,7 +192,10 @@ public class DozeMachine {
     @MainThread
     public State getState() {
         Assert.isMainThread();
-        Preconditions.checkState(!isExecutingTransition());
+        if (isExecutingTransition()) {
+            throw new IllegalStateException("Cannot get state because there were pending "
+                    + "transitions: " + mQueuedRequests.toString());
+        }
         return mState;
     }
 
@@ -200,6 +209,7 @@ public class DozeMachine {
         Assert.isMainThread();
         Preconditions.checkState(mState == State.DOZE_REQUEST_PULSE
                 || mState == State.DOZE_PULSING
+                || mState == State.DOZE_PULSING_BRIGHT
                 || mState == State.DOZE_PULSE_DONE, "must be in pulsing state, but is " + mState);
         return mPulseReason;
     }
@@ -209,7 +219,7 @@ public class DozeMachine {
         mDozeService.requestWakeUp();
     }
 
-    private boolean isExecutingTransition() {
+    public boolean isExecutingTransition() {
         return !mQueuedRequests.isEmpty();
     }
 
@@ -281,7 +291,8 @@ public class DozeMachine {
                     break;
                 case DOZE_PULSE_DONE:
                     Preconditions.checkState(
-                            mState == State.DOZE_REQUEST_PULSE || mState == State.DOZE_PULSING);
+                            mState == State.DOZE_REQUEST_PULSE || mState == State.DOZE_PULSING
+                                    || mState == State.DOZE_PULSING_BRIGHT);
                     break;
                 default:
                     break;
@@ -311,10 +322,10 @@ public class DozeMachine {
     private void updateWakeLockState(State newState) {
         boolean staysAwake = newState.staysAwake();
         if (mWakeLockHeldForCurrentState && !staysAwake) {
-            mWakeLock.release();
+            mWakeLock.release(REASON_HELD_FOR_STATE);
             mWakeLockHeldForCurrentState = false;
         } else if (!mWakeLockHeldForCurrentState && staysAwake) {
-            mWakeLock.acquire();
+            mWakeLock.acquire(REASON_HELD_FOR_STATE);
             mWakeLockHeldForCurrentState = true;
         }
     }
@@ -336,6 +347,7 @@ public class DozeMachine {
     public void dump(PrintWriter pw) {
         pw.print(" state="); pw.println(mState);
         pw.print(" wakeLockHeldForCurrentState="); pw.println(mWakeLockHeldForCurrentState);
+        pw.print(" wakeLock="); pw.println(mWakeLock);
         pw.println("Parts:");
         for (Part p : mParts) {
             p.dump(pw);

@@ -192,7 +192,7 @@ public final class SpellCheckerInfo implements Parcelable {
     /**
      * Used to make this class parcelable.
      */
-    public static final Parcelable.Creator<SpellCheckerInfo> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<SpellCheckerInfo> CREATOR
             = new Parcelable.Creator<SpellCheckerInfo>() {
         @Override
         public SpellCheckerInfo createFromParcel(Parcel source) {

@@ -24,24 +24,27 @@ import java.util.Arrays;
  *
  * Current recognized args:
  * <ul>
- * <li> --setuid=<i>uid of child process, defaults to 0</i>
- * <li> --setgid=<i>gid of child process, defaults to 0</i>
- * <li> --setgroups=<i>comma-separated list of supplimentary gid's</i>
- * <li> --capabilities=<i>a pair of comma-separated integer strings
- * indicating Linux capabilities(2) set for child. The first string represents the
- * <code>permitted</code> set, and the second the
+ *   <li> --setuid=<i>uid of child process, defaults to 0</i>
+ *   <li> --setgid=<i>gid of child process, defaults to 0</i>
+ *   <li> --setgroups=<i>comma-separated list of supplimentary gid's</i>
+ *   <li> --capabilities=<i>a pair of comma-separated integer strings
+ * indicating Linux capabilities(2) set for child. The first string
+ * represents the <code>permitted</code> set, and the second the
  * <code>effective</code> set. Precede each with 0 or
- * 0x for octal or hexidecimal value. If unspecified, both default to 0. This parameter is only
- * applied if the uid of the new process will be non-0. </i>
- * <li> --rlimit=r,c,m<i>tuple of values for setrlimit() call.
- * <code>r</code> is the resource, <code>c</code> and <code>m</code>
- * are the settings for current and max value.</i>
- * <li> --instruction-set=<i>instruction-set-string</i> which instruction set to use/emulate.
- * <li> --nice-name=<i>nice name to appear in ps</i>
- * <li> --runtime-args indicates that the remaining arg list should
- * be handed off to com.android.internal.os.RuntimeInit, rather than processed directly. Android
- * runtime startup (eg, Binder initialization) is also eschewed.
- * <li> [--] &lt;args for RuntimeInit &gt;
+ * 0x for octal or hexidecimal value. If unspecified, both default to 0.
+ * This parameter is only applied if the uid of the new process will
+ * be non-0. </i>
+ *   <li> --rlimit=r,c,m<i>tuple of values for setrlimit() call.
+ *    <code>r</code> is the resource, <code>c</code> and <code>m</code>
+ *    are the settings for current and max value.</i>
+ *   <li> --instruction-set=<i>instruction-set-string</i> which instruction set to use/emulate.
+ *   <li> --nice-name=<i>nice name to appear in ps</i>
+ *   <li> --package-name=<i>package name this process belongs to</i>
+ *   <li> --runtime-args indicates that the remaining arg list should
+ * be handed off to com.android.internal.os.RuntimeInit, rather than
+ * processed directly.
+ * Android runtime startup (eg, Binder initialization) is also eschewed.
+ *   <li> [--] &lt;args for RuntimeInit &gt;
  * </ul>
  */
 class ZygoteArguments {
@@ -98,6 +101,12 @@ class ZygoteArguments {
     String mSeInfo;
 
     /**
+     *
+     */
+    boolean mUsapPoolEnabled;
+    boolean mUsapPoolStatusSpecified = false;
+
+    /**
      * from all --rlimit=r,c,m
      */
     ArrayList<int[]> mRLimits;
@@ -106,6 +115,9 @@ class ZygoteArguments {
      * from --invoke-with
      */
     String mInvokeWith;
+
+    /** from --package-name */
+    String mPackageName;
 
     /**
      * Any args after and including the first non-option arg (or after a '--')
@@ -132,6 +144,12 @@ class ZygoteArguments {
      * The APK path of the package to preload, when using --preload-package.
      */
     String mPreloadPackage;
+
+    /**
+     * A Base64 string representing a serialize ApplicationInfo Parcel,
+     when using --preload-app.
+     */
+    String mPreloadApp;
 
     /**
      * The native library path of the package to preload, when using --preload-package.
@@ -184,6 +202,12 @@ class ZygoteArguments {
      * pre-forked zygote at boot time, or when it changes, via --hidden-api-log-sampling-rate.
      */
     int mHiddenApiAccessLogSampleRate = -1;
+
+    /**
+     * Sampling rate for logging hidden API accesses to statslog. This is sent to the
+     * pre-forked zygote at boot time, or when it changes, via --hidden-api-statslog-sampling-rate.
+     */
+    int mHiddenApiAccessStatslogSampleRate = -1;
 
     /**
      * Constructs instance and parses args
@@ -331,6 +355,12 @@ class ZygoteArguments {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_READ;
             } else if (arg.equals("--mount-external-write")) {
                 mMountExternal = Zygote.MOUNT_EXTERNAL_WRITE;
+            } else if (arg.equals("--mount-external-full")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_FULL;
+            }  else if (arg.equals("--mount-external-installer")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_INSTALLER;
+            }  else if (arg.equals("--mount-external-legacy")) {
+                mMountExternal = Zygote.MOUNT_EXTERNAL_LEGACY;
             } else if (arg.equals("--query-abi-list")) {
                 mAbiListQuery = true;
             } else if (arg.equals("--get-pid")) {
@@ -341,6 +371,8 @@ class ZygoteArguments {
                 mInstructionSet = arg.substring(arg.indexOf('=') + 1);
             } else if (arg.startsWith("--app-data-dir=")) {
                 mAppDataDir = arg.substring(arg.indexOf('=') + 1);
+            } else if (arg.equals("--preload-app")) {
+                mPreloadApp = args[++curArg];
             } else if (arg.equals("--preload-package")) {
                 mPreloadPackage = args[++curArg];
                 mPreloadPackageLibs = args[++curArg];
@@ -366,6 +398,24 @@ class ZygoteArguments {
                         "Invalid log sampling rate: " + rateStr, nfe);
                 }
                 expectRuntimeArgs = false;
+            } else if (arg.startsWith("--hidden-api-statslog-sampling-rate=")) {
+                String rateStr = arg.substring(arg.indexOf('=') + 1);
+                try {
+                    mHiddenApiAccessStatslogSampleRate = Integer.parseInt(rateStr);
+                } catch (NumberFormatException nfe) {
+                    throw new IllegalArgumentException(
+                        "Invalid statslog sampling rate: " + rateStr, nfe);
+                }
+                expectRuntimeArgs = false;
+            } else if (arg.startsWith("--package-name=")) {
+                if (mPackageName != null) {
+                    throw new IllegalArgumentException("Duplicate arg specified");
+                }
+                mPackageName = arg.substring(arg.indexOf('=') + 1);
+            } else if (arg.startsWith("--usap-pool-enabled=")) {
+                mUsapPoolStatusSpecified = true;
+                mUsapPoolEnabled = Boolean.parseBoolean(arg.substring(arg.indexOf('=') + 1));
+                expectRuntimeArgs = false;
             } else {
                 break;
             }
@@ -383,6 +433,11 @@ class ZygoteArguments {
             if (args.length - curArg > 0) {
                 throw new IllegalArgumentException(
                     "Unexpected arguments after --preload-package.");
+            }
+        } else if (mPreloadApp != null) {
+            if (args.length - curArg > 0) {
+                throw new IllegalArgumentException(
+                    "Unexpected arguments after --preload-app.");
             }
         } else if (expectRuntimeArgs) {
             if (!seenRuntimeArgs) {

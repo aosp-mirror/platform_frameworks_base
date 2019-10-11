@@ -26,14 +26,19 @@ import static com.android.server.testutils.TestUtils.strictMock;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Message;
 import android.util.DebugUtils;
 import android.view.InputDevice;
@@ -44,7 +49,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
+import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,9 +107,11 @@ public class MagnificationGestureHandlerTest {
     public static final float DEFAULT_X = 301;
     public static final float DEFAULT_Y = 299;
 
+    private static final int DISPLAY_0 = 0;
+
     private Context mContext;
-    private AccessibilityManagerService mAms;
-    private MagnificationController mMagnificationController;
+    MagnificationController mMagnificationController;
+
     private OffsettableClock mClock;
     private MagnificationGestureHandler mMgh;
     private TestHandler mHandler;
@@ -112,18 +121,26 @@ public class MagnificationGestureHandlerTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
-        mAms = new AccessibilityManagerService(mContext);
-        mMagnificationController = new MagnificationController(
-                mContext, mAms, /* lock */ new Object()) {
+        final MagnificationController.ControllerContext mockController =
+                mock(MagnificationController.ControllerContext.class);
+        final WindowManagerInternal mockWindowManager = mock(WindowManagerInternal.class);
+        when(mockController.getContext()).thenReturn(mContext);
+        when(mockController.getAms()).thenReturn(mock(AccessibilityManagerService.class));
+        when(mockController.getWindowManager()).thenReturn(mockWindowManager);
+        when(mockController.getHandler()).thenReturn(new Handler(mContext.getMainLooper()));
+        when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
+        when(mockController.getAnimationDuration()).thenReturn(1000L);
+        when(mockWindowManager.setMagnificationCallbacks(eq(DISPLAY_0), any())).thenReturn(true);
+        mMagnificationController = new MagnificationController(mockController, new Object()) {
             @Override
-            public boolean magnificationRegionContains(float x, float y) {
+            public boolean magnificationRegionContains(int displayId, float x, float y) {
                 return true;
             }
 
             @Override
-            void setForceShowMagnifiableBounds(boolean show) {}
+            void setForceShowMagnifiableBounds(int displayId, boolean show) {}
         };
-        mMagnificationController.mRegistered = true;
+        mMagnificationController.register(DISPLAY_0);
         mClock = new OffsettableClock.Stopped();
 
         boolean detectTripleTap = true;
@@ -131,12 +148,17 @@ public class MagnificationGestureHandlerTest {
         mMgh = newInstance(detectTripleTap, detectShortcutTrigger);
     }
 
+    @After
+    public void tearDown() {
+        mMagnificationController.unregister(DISPLAY_0);
+    }
+
     @NonNull
     private MagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         MagnificationGestureHandler h = new MagnificationGestureHandler(
                 mContext, mMagnificationController,
-                detectTripleTap, detectShortcutTrigger);
+                detectTripleTap, detectShortcutTrigger, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
             protected String messageToString(Message m) {
@@ -284,6 +306,24 @@ public class MagnificationGestureHandlerTest {
     public void testTripleTapAndHold_zoomsImmediately() {
         assertZoomsImmediatelyOnSwipeFrom(STATE_2TAPS);
         assertZoomsImmediatelyOnSwipeFrom(STATE_SHORTCUT_TRIGGERED);
+    }
+
+    @Test
+    public void testMultiTap_outOfDistanceSlop_shouldInIdle() {
+        // All delay motion events should be sent, if multi-tap with out of distance slop.
+        // STATE_IDLE will check if tapCount() < 2.
+        allowEventDelegation();
+        assertStaysIn(STATE_IDLE, () -> {
+            tap();
+            tap(DEFAULT_X * 2, DEFAULT_Y * 2);
+        });
+        assertStaysIn(STATE_IDLE, () -> {
+            tap();
+            tap(DEFAULT_X * 2, DEFAULT_Y * 2);
+            tap();
+            tap(DEFAULT_X * 2, DEFAULT_Y * 2);
+            tap();
+        });
     }
 
     private void assertZoomsImmediatelyOnSwipeFrom(int state) {
@@ -493,7 +533,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     private boolean isZoomed() {
-        return mMgh.mMagnificationController.isMagnifying();
+        return mMgh.mMagnificationController.isMagnifying(DISPLAY_0);
     }
 
     private int tapCount() {
@@ -507,6 +547,11 @@ public class MagnificationGestureHandlerTest {
     private void tap() {
         send(downEvent());
         send(upEvent());
+    }
+
+    private void tap(float x, float y) {
+        send(downEvent(x, y));
+        send(upEvent(x, y));
     }
 
     private void swipe() {
@@ -550,18 +595,26 @@ public class MagnificationGestureHandlerTest {
     }
 
     private MotionEvent downEvent() {
+        return downEvent(DEFAULT_X, DEFAULT_Y);
+    }
+
+    private MotionEvent downEvent(float x, float y) {
         mLastDownTime = mClock.now();
         return fromTouchscreen(MotionEvent.obtain(mLastDownTime, mLastDownTime,
-                ACTION_DOWN, DEFAULT_X, DEFAULT_Y, 0));
+                ACTION_DOWN, x, y, 0));
     }
 
     private MotionEvent upEvent() {
-        return upEvent(mLastDownTime);
+        return upEvent(DEFAULT_X, DEFAULT_Y, mLastDownTime);
     }
 
-    private MotionEvent upEvent(long downTime) {
+    private MotionEvent upEvent(float x, float y) {
+        return upEvent(x, y, mLastDownTime);
+    }
+
+    private MotionEvent upEvent(float x, float y, long downTime) {
         return fromTouchscreen(MotionEvent.obtain(downTime, mClock.now(),
-                MotionEvent.ACTION_UP, DEFAULT_X, DEFAULT_Y, 0));
+                MotionEvent.ACTION_UP, x, y, 0));
     }
 
     private MotionEvent pointerEvent(int action, float x, float y) {

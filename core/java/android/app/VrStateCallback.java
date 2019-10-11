@@ -15,13 +15,14 @@
  */
 package android.app;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.SystemApi;
 
 /**
  * Listens to VR Mode state changes. Use with methods in {@link VrManager}.
  *
  * @hide
  */
+@SystemApi
 public abstract class VrStateCallback {
 
     /**
@@ -29,7 +30,6 @@ public abstract class VrStateCallback {
      *
      * @param enabled True when VR State is in persistent mode, false otherwise.
      */
-    @UnsupportedAppUsage
     public void onPersistentVrStateChanged(boolean enabled) {}
 
     /**

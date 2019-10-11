@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -76,6 +77,11 @@ public class ContextHubService extends IContextHubService.Stub {
     public static final int MSG_HUB_RESET = 7;
 
     private static final int OS_APP_INSTANCE = -1;
+
+    /*
+     * Local flag to enable debug logging.
+     */
+    private static final boolean DEBUG_LOG_ENABLED = false;
 
     private final Context mContext;
 
@@ -165,8 +171,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
         HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
         for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
             IContextHubClient client = mClientManager.registerClient(
-                    createDefaultClientCallback(contextHubId), contextHubId);
+                    contextHubInfo, createDefaultClientCallback(contextHubId));
             defaultClientMap.put(contextHubId, client);
 
             try {
@@ -409,10 +416,12 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
 
         ArrayList<Integer> foundInstances = new ArrayList<>();
-        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
-            if (filter.testMatch(info)) {
-                foundInstances.add(info.getHandle());
-            }
+        if (filter != null) {
+            mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> {
+                if (filter.testMatch(info)) {
+                    foundInstances.add(info.getHandle());
+                }
+            });
         }
 
         int[] retArray = new int[foundInstances.size()];
@@ -599,8 +608,8 @@ public class ContextHubService extends IContextHubService.Stub {
     /**
      * Creates and registers a client at the service for the specified Context Hub.
      *
-     * @param clientCallback the client interface to register with the service
      * @param contextHubId   the ID of the hub this client is attached to
+     * @param clientCallback the client interface to register with the service
      * @return the generated client interface, null if registration was unsuccessful
      *
      * @throws IllegalArgumentException if contextHubId is not a valid ID
@@ -609,7 +618,7 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     @Override
     public IContextHubClient createClient(
-            IContextHubClientCallback clientCallback, int contextHubId) throws RemoteException {
+            int contextHubId, IContextHubClientCallback clientCallback) throws RemoteException {
         checkPermissions();
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
@@ -618,7 +627,31 @@ public class ContextHubService extends IContextHubService.Stub {
             throw new NullPointerException("Cannot register client with null callback");
         }
 
-        return mClientManager.registerClient(clientCallback, contextHubId);
+        ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
+        return mClientManager.registerClient(contextHubInfo, clientCallback);
+    }
+
+    /**
+     * Creates and registers a PendingIntent client at the service for the specified Context Hub.
+     *
+     * @param contextHubId  the ID of the hub this client is attached to
+     * @param pendingIntent the PendingIntent associated with this client
+     * @param nanoAppId     the ID of the nanoapp PendingIntent events will be sent for
+     * @return the generated client interface
+     *
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     */
+    @Override
+    public IContextHubClient createPendingIntentClient(
+            int contextHubId, PendingIntent pendingIntent, long nanoAppId) throws RemoteException {
+        checkPermissions();
+        if (!isValidContextHubId(contextHubId)) {
+            throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
+        }
+
+        ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
+        return mClientManager.registerClient(contextHubInfo, pendingIntent, nanoAppId);
     }
 
     /**
@@ -760,9 +793,7 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
-            pw.println(info);
-        }
+        mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
 
         // dump eventLog
     }
@@ -779,12 +810,16 @@ public class ContextHubService extends IContextHubService.Stub {
 
         int msgVersion = 0;
         int callbacksCount = mCallbacksList.beginBroadcast();
-        Log.d(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle " +
-                contextHubHandle + ", appInstance " + appInstance + ", callBackCount "
-                + callbacksCount);
+        if (DEBUG_LOG_ENABLED) {
+            Log.v(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle "
+                    + contextHubHandle + ", appInstance " + appInstance + ", callBackCount "
+                    + callbacksCount);
+        }
 
         if (callbacksCount < 1) {
-            Log.v(TAG, "No message callbacks registered.");
+            if (DEBUG_LOG_ENABLED) {
+                Log.v(TAG, "No message callbacks registered.");
+            }
             return 0;
         }
 

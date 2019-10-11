@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.animation;
 
-import com.android.frameworks.coretests.R;
+package android.animation;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.Button;
+
+import com.android.frameworks.coretests.R;
 
 public class BasicAnimatorActivity extends Activity {
     public Button mAnimatingButton;

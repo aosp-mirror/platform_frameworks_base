@@ -21,9 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.UnsupportedAppUsage;
-import android.content.LocaleProto;
 import android.icu.util.ULocale;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -143,25 +141,6 @@ public final class LocaleList implements Parcelable {
     }
 
     /**
-     * Helper to write LocaleList to a protocol buffer output stream.  Assumes the parent
-     * protobuf has declared the locale as repeated.
-     *
-     * @param protoOutputStream Stream to write the locale to.
-     * @param fieldId Field Id of the Locale as defined in the parent message.
-     * @hide
-     */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
-        for (int i = 0; i < mList.length; i++) {
-            final Locale locale = mList[i];
-            final long token = protoOutputStream.start(fieldId);
-            protoOutputStream.write(LocaleProto.LANGUAGE, locale.getLanguage());
-            protoOutputStream.write(LocaleProto.COUNTRY, locale.getCountry());
-            protoOutputStream.write(LocaleProto.VARIANT, locale.getVariant());
-            protoOutputStream.end(token);
-        }
-    }
-
-    /**
      * Retrieves a String representation of the language tags in this list.
      */
     @NonNull
@@ -256,7 +235,7 @@ public final class LocaleList implements Parcelable {
         mStringRepresentation = sb.toString();
     }
 
-    public static final Parcelable.Creator<LocaleList> CREATOR
+    public static final @android.annotation.NonNull Parcelable.Creator<LocaleList> CREATOR
             = new Parcelable.Creator<LocaleList>() {
         @Override
         public LocaleList createFromParcel(Parcel source) {
@@ -323,6 +302,13 @@ public final class LocaleList implements Parcelable {
      */
     public static boolean isPseudoLocale(Locale locale) {
         return LOCALE_EN_XA.equals(locale) || LOCALE_AR_XB.equals(locale);
+    }
+
+    /**
+     * Returns true if locale is a pseudo-locale, false otherwise.
+     */
+    public static boolean isPseudoLocale(@Nullable ULocale locale) {
+        return isPseudoLocale(locale != null ? locale.toLocale() : null);
     }
 
     @IntRange(from=0, to=1)

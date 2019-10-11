@@ -17,11 +17,13 @@
 package android.database;
 
 import android.database.sqlite.SQLiteDatabase;
-import android.test.suitebuilder.annotation.Suppress;
+import android.test.AndroidTestCase;
 import android.util.Log;
+
+import androidx.test.filters.Suppress;
+
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
-import android.test.AndroidTestCase;
 
 /* 
  * This is a series of unit tests for database locks.

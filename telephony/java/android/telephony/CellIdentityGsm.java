@@ -273,7 +273,7 @@ public final class CellIdentityGsm extends CellIdentity {
 
     /** Implement the Parcelable interface */
     @SuppressWarnings("hiding")
-    public static final Creator<CellIdentityGsm> CREATOR =
+    public static final @android.annotation.NonNull Creator<CellIdentityGsm> CREATOR =
             new Creator<CellIdentityGsm>() {
                 @Override
                 public CellIdentityGsm createFromParcel(Parcel in) {

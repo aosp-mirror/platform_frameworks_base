@@ -16,9 +16,7 @@
 package com.android.systemui.qs.external;
 
 import android.os.IBinder;
-import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
-import android.service.quicksettings.Tile;
 import android.util.Log;
 
 

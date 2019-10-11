@@ -16,14 +16,25 @@
 
 package com.android.internal.util;
 
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.ImageDecoder;
+import android.graphics.ImageDecoder.ImageInfo;
+import android.graphics.ImageDecoder.Source;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Size;
+
+import java.io.IOException;
 
 /**
  * Utility class for image analysis and processing.
@@ -80,7 +91,7 @@ public class ImageUtils {
             width = height = COMPACT_BITMAP_SIZE;
         }
 
-        final int size = height*width;
+        final int size = height * width;
         ensureBufferSize(size);
         bitmap.getPixels(mTempBuffer, 0, width, 0, 0, width, height);
         for (int i = 0; i < size; i++) {
@@ -155,5 +166,53 @@ public class ImageUtils {
         drawable.draw(canvas);
 
         return result;
+    }
+
+    /**
+     * @see https://developer.android.com/topic/performance/graphics/load-bitmap
+     */
+    public static int calculateSampleSize(Size currentSize, Size requestedSize) {
+        int inSampleSize = 1;
+
+        if (currentSize.getHeight() > requestedSize.getHeight()
+                || currentSize.getWidth() > requestedSize.getWidth()) {
+            final int halfHeight = currentSize.getHeight() / 2;
+            final int halfWidth = currentSize.getWidth() / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= requestedSize.getHeight()
+                    && (halfWidth / inSampleSize) >= requestedSize.getWidth()) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    /**
+     * Load a bitmap, and attempt to downscale to the required size, to save
+     * on memory. Updated to use newer and more compatible ImageDecoder.
+     *
+     * @see https://developer.android.com/topic/performance/graphics/load-bitmap
+     */
+    public static Bitmap loadThumbnail(ContentResolver resolver, Uri uri, Size size)
+            throws IOException {
+
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(uri)) {
+            final Bundle opts = new Bundle();
+            opts.putParcelable(ContentResolver.EXTRA_SIZE, Point.convert(size));
+
+            return ImageDecoder.decodeBitmap(ImageDecoder.createSource(() -> {
+                return client.openTypedAssetFile(uri, "image/*", opts, null);
+            }), (ImageDecoder decoder, ImageInfo info, Source source) -> {
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+
+                    final int sample = calculateSampleSize(info.getSize(), size);
+                    if (sample > 1) {
+                        decoder.setTargetSampleSize(sample);
+                    }
+                });
+        }
     }
 }

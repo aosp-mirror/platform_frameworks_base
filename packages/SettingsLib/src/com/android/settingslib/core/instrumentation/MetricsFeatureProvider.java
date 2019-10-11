@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.core.instrumentation;
 
+import android.app.Activity;
+import android.app.settings.SettingsEnums;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,7 +32,12 @@ import java.util.List;
  * FeatureProvider for metrics.
  */
 public class MetricsFeatureProvider {
-    private List<LogWriter> mLoggerWriters;
+    /**
+     * The metrics category constant for logging source when a setting fragment is opened.
+     */
+    public static final String EXTRA_SOURCE_METRICS_CATEGORY = ":settings:source_metrics";
+
+    protected List<LogWriter> mLoggerWriters;
 
     public MetricsFeatureProvider() {
         mLoggerWriters = new ArrayList<>();
@@ -39,6 +46,25 @@ public class MetricsFeatureProvider {
 
     protected void installLogWriters() {
         mLoggerWriters.add(new EventLogWriter());
+    }
+
+    /**
+     * Returns the attribution id for specified activity. If no attribution is set, returns {@link
+     * SettingsEnums#PAGE_UNKNOWN}.
+     *
+     * <p/> Attribution is a {@link SettingsEnums} page id that indicates where the specified
+     * activity is launched from.
+     */
+    public int getAttribution(Activity activity) {
+        if (activity == null) {
+            return SettingsEnums.PAGE_UNKNOWN;
+        }
+        final Intent intent = activity.getIntent();
+        if (intent == null) {
+            return SettingsEnums.PAGE_UNKNOWN;
+        }
+        return intent.getIntExtra(EXTRA_SOURCE_METRICS_CATEGORY,
+                SettingsEnums.PAGE_UNKNOWN);
     }
 
     public void visible(Context context, int source, int category) {
@@ -53,72 +79,42 @@ public class MetricsFeatureProvider {
         }
     }
 
-    public void actionWithSource(Context context, int source, int category) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.actionWithSource(context, source, category);
-        }
-    }
-
     /**
-     * Logs a user action. Includes the elapsed time since the containing
-     * fragment has been visible.
+     * Logs a simple action without page id or attribution
      */
-    public void action(VisibilityLoggerMixin visibilityLogger, int category, int value) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.action(category, value,
-                    sinceVisibleTaggedData(visibilityLogger.elapsedTimeSinceVisible()));
-        }
-    }
-
-    /**
-     * Logs a user action. Includes the elapsed time since the containing
-     * fragment has been visible.
-     */
-    public void action(VisibilityLoggerMixin visibilityLogger, int category, boolean value) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.action(category, value,
-                    sinceVisibleTaggedData(visibilityLogger.elapsedTimeSinceVisible()));
-        }
-    }
-
-    public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
+    public void action(Context context, int category,  Pair<Integer, Object>... taggedData) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, taggedData);
         }
     }
 
-    /** @deprecated use {@link #action(VisibilityLoggerMixin, int, int)} */
-    @Deprecated
+    /**
+     * Logs a generic Settings event.
+     */
+    public void action(Context context, int category, String pkg) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.action(context, category, pkg);
+        }
+    }
+
+    /**
+     * Logs a generic Settings event.
+     */
+    public void action(int attribution, int action, int pageId, String key, int value) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.action(attribution, action, pageId, key, value);
+        }
+    }
+
     public void action(Context context, int category, int value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
         }
     }
 
-    /** @deprecated use {@link #action(VisibilityLoggerMixin, int, boolean)} */
-    @Deprecated
     public void action(Context context, int category, boolean value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
-        }
-    }
-
-    public void action(Context context, int category, String pkg,
-            Pair<Integer, Object>... taggedData) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.action(context, category, pkg, taggedData);
-        }
-    }
-
-    public void count(Context context, String name, int value) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.count(context, name, value);
-        }
-    }
-
-    public void histogram(Context context, String name, int bucket) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.histogram(context, name, bucket);
         }
     }
 
@@ -141,19 +137,22 @@ public class MetricsFeatureProvider {
                 // Not loggable
                 return;
             }
-            action(context, MetricsEvent.ACTION_SETTINGS_TILE_CLICK, action,
-                    Pair.create(MetricsEvent.FIELD_CONTEXT, sourceMetricsCategory));
+            action(sourceMetricsCategory,
+                    MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                    SettingsEnums.PAGE_UNKNOWN,
+                    action,
+                    0);
             return;
         } else if (TextUtils.equals(cn.getPackageName(), context.getPackageName())) {
             // Going to a Setting internal page, skip click logging in favor of page's own
             // visibility logging.
             return;
         }
-        action(context, MetricsEvent.ACTION_SETTINGS_TILE_CLICK, cn.flattenToString(),
-                Pair.create(MetricsEvent.FIELD_CONTEXT, sourceMetricsCategory));
+        action(sourceMetricsCategory,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                cn.flattenToString(),
+                0);
     }
 
-    private Pair<Integer, Object> sinceVisibleTaggedData(long timestamp) {
-        return Pair.create(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, timestamp);
-    }
 }

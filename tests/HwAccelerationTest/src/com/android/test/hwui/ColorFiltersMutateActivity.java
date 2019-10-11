@@ -106,7 +106,7 @@ public class ColorFiltersMutateActivity extends Activity {
             mPorterDuffColor = porterDuffColor;
             final PorterDuffColorFilter filter =
                     (PorterDuffColorFilter) mBlendPaint.getColorFilter();
-            filter.setColor(mPorterDuffColor);
+            mBlendPaint.setColorFilter(new PorterDuffColorFilter(porterDuffColor, filter.getMode()));
             invalidate();
         }
 

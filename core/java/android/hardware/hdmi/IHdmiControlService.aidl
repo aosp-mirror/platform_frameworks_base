@@ -19,6 +19,7 @@ package android.hardware.hdmi;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
+import android.hardware.hdmi.IHdmiControlStatusChangeListener;
 import android.hardware.hdmi.IHdmiDeviceEventListener;
 import android.hardware.hdmi.IHdmiHotplugEventListener;
 import android.hardware.hdmi.IHdmiInputChangeListener;
@@ -41,15 +42,19 @@ interface IHdmiControlService {
     HdmiDeviceInfo getActiveSource();
     void oneTouchPlay(IHdmiControlCallback callback);
     void queryDisplayStatus(IHdmiControlCallback callback);
+    void addHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
+    void removeHdmiControlStatusChangeListener(IHdmiControlStatusChangeListener listener);
     void addHotplugEventListener(IHdmiHotplugEventListener listener);
     void removeHotplugEventListener(IHdmiHotplugEventListener listener);
     void addDeviceEventListener(IHdmiDeviceEventListener listener);
     void deviceSelect(int deviceId, IHdmiControlCallback callback);
     void portSelect(int portId, IHdmiControlCallback callback);
     void sendKeyEvent(int deviceType, int keyCode, boolean isPressed);
+    void sendVolumeKeyEvent(int deviceType, int keyCode, boolean isPressed);
     List<HdmiPortInfo> getPortInfo();
     boolean canChangeSystemAudioMode();
     boolean getSystemAudioMode();
+    int getPhysicalAddress();
     void setSystemAudioMode(boolean enabled, IHdmiControlCallback callback);
     void addSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
     void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
@@ -60,6 +65,9 @@ interface IHdmiControlService {
     void setInputChangeListener(IHdmiInputChangeListener listener);
     List<HdmiDeviceInfo> getInputDevices();
     List<HdmiDeviceInfo> getDeviceList();
+    void powerOffRemoteDevice(int logicalAddress, int powerStatus);
+    void powerOnRemoteDevice(int logicalAddress, int powerStatus);
+    void askRemoteDeviceToBecomeActiveSource(int physicalAddress);
     void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
             boolean hasVendorId);
     void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
@@ -72,4 +80,6 @@ interface IHdmiControlService {
     void sendMhlVendorCommand(int portId, int offset, int length, in byte[] data);
     void addHdmiMhlVendorCommandListener(IHdmiMhlVendorCommandListener listener);
     void setStandbyMode(boolean isStandbyModeOn);
+    void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
+    void setSystemAudioModeOnForAudioOnlySource();
 }

@@ -43,3 +43,19 @@ prebuilt_etc {
     sub_dir: "permissions",
     product_specific: true,
 }
+
+android_app {
+    name: "SystemExtPrivAppPermissionTest",
+    sdk_version: "current",
+    privileged: true,
+    manifest: "system_ext/AndroidManifest.xml",
+    system_ext_specific: true,
+    required: ["system_extprivapp-permissions-test.xml"],
+}
+
+prebuilt_etc {
+    name: "system_extprivapp-permissions-test.xml",
+    src: "system_ext/privapp-permissions-test.xml",
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

@@ -19,8 +19,6 @@ package com.android.providers.settings;
 import android.app.ActivityManager;
 import android.content.IContentProvider;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Process;
@@ -107,7 +105,7 @@ final public class SettingsService extends Binder {
             RESET,
         }
 
-        int mUser = -1;     // unspecified
+        int mUser = UserHandle.USER_NULL;
         CommandVerb mVerb = CommandVerb.UNSPECIFIED;
         String mTable = null;
         String mKey = null;
@@ -124,7 +122,7 @@ final public class SettingsService extends Binder {
 
         @Override
         public int onCommand(String cmd) {
-            if (cmd == null) {
+            if (cmd == null || "help".equals(cmd) || "-h".equals(cmd)) {
                 return handleDefaultCommands(cmd);
             }
 
@@ -134,15 +132,15 @@ final public class SettingsService extends Binder {
             String arg = cmd;
             do {
                 if ("--user".equals(arg)) {
-                    if (mUser != -1) {
-                        // --user specified more than once; invalid
+                    if (mUser != UserHandle.USER_NULL) {
+                        perr.println("Invalid user: --user specified more than once");
                         break;
                     }
-                    arg = getNextArgRequired();
-                    if ("current".equals(arg) || "cur".equals(arg)) {
-                        mUser = UserHandle.USER_CURRENT;
-                    } else {
-                        mUser = Integer.parseInt(arg);
+                    mUser = UserHandle.parseUserArg(getNextArgRequired());
+
+                    if (mUser == UserHandle.USER_ALL) {
+                        perr.println("Invalid user: all");
+                        return -1;
                     }
                 } else if (mVerb == CommandVerb.UNSPECIFIED) {
                     if ("get".equalsIgnoreCase(arg)) {
@@ -256,18 +254,12 @@ final public class SettingsService extends Binder {
                 return -1;
             }
 
-            if (mUser == UserHandle.USER_CURRENT) {
+            if (mUser == UserHandle.USER_NULL || mUser == UserHandle.USER_CURRENT) {
                 try {
                     mUser = ActivityManager.getService().getCurrentUser().id;
                 } catch (RemoteException e) {
                     throw new RuntimeException("Failed in IPC", e);
                 }
-            }
-            if (mUser < 0) {
-                mUser = UserHandle.USER_SYSTEM;
-            } else if (mVerb == CommandVerb.DELETE || mVerb == CommandVerb.LIST) {
-                perr.println("--user not supported for delete and list.");
-                return -1;
             }
             UserManager userManager = UserManager.get(mProvider.getContext());
             if (userManager.getUserInfo(mUser) == null) {
@@ -304,27 +296,22 @@ final public class SettingsService extends Binder {
             return 0;
         }
 
-        private List<String> listForUser(IContentProvider provider, int userHandle, String table) {
-            final Uri uri = "system".equals(table) ? Settings.System.CONTENT_URI
-                    : "secure".equals(table) ? Settings.Secure.CONTENT_URI
-                    : "global".equals(table) ? Settings.Global.CONTENT_URI
-                    : null;
-            final ArrayList<String> lines = new ArrayList<String>();
-            if (uri == null) {
-                return lines;
+        List<String> listForUser(IContentProvider provider, int userHandle, String table) {
+            final String callListCommand;
+            if ("system".equals(table)) callListCommand = Settings.CALL_METHOD_LIST_SYSTEM;
+            else if ("secure".equals(table)) callListCommand = Settings.CALL_METHOD_LIST_SECURE;
+            else if ("global".equals(table)) callListCommand = Settings.CALL_METHOD_LIST_GLOBAL;
+            else {
+                getErrPrintWriter().println("Invalid table; no list performed");
+                throw new IllegalArgumentException("Invalid table " + table);
             }
+            final ArrayList<String> lines = new ArrayList<String>();
             try {
-                final Cursor cursor = provider.query(resolveCallingPackage(), uri, null, null,
-                        null);
-                try {
-                    while (cursor != null && cursor.moveToNext()) {
-                        lines.add(cursor.getString(1) + "=" + cursor.getString(2));
-                    }
-                } finally {
-                    if (cursor != null) {
-                        cursor.close();
-                    }
-                }
+                Bundle arg = new Bundle();
+                arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
+                Bundle result = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callListCommand, null, arg);
+                lines.addAll(result.getStringArrayList(SettingsProvider.RESULT_SETTINGS_LIST));
                 Collections.sort(lines);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
@@ -347,7 +334,8 @@ final public class SettingsService extends Binder {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                Bundle b = provider.call(resolveCallingPackage(), callGetCommand, key, arg);
+                Bundle b = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callGetCommand, key, arg);
                 if (b != null) {
                     result = b.getPairValue();
                 }
@@ -384,7 +372,8 @@ final public class SettingsService extends Binder {
                 if (makeDefault) {
                     arg.putBoolean(Settings.CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
-                provider.call(resolveCallingPackage(), callPutCommand, key, arg);
+                provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callPutCommand, key, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }
@@ -392,22 +381,27 @@ final public class SettingsService extends Binder {
 
         int deleteForUser(IContentProvider provider, int userHandle,
                 final String table, final String key) {
-            Uri targetUri;
-            if ("system".equals(table)) targetUri = Settings.System.getUriFor(key);
-            else if ("secure".equals(table)) targetUri = Settings.Secure.getUriFor(key);
-            else if ("global".equals(table)) targetUri = Settings.Global.getUriFor(key);
-            else {
+            final String callDeleteCommand;
+            if ("system".equals(table)) {
+                callDeleteCommand = Settings.CALL_METHOD_DELETE_SYSTEM;
+            } else if ("secure".equals(table)) {
+                callDeleteCommand = Settings.CALL_METHOD_DELETE_SECURE;
+            } else if ("global".equals(table)) {
+                callDeleteCommand = Settings.CALL_METHOD_DELETE_GLOBAL;
+            } else {
                 getErrPrintWriter().println("Invalid table; no delete performed");
                 throw new IllegalArgumentException("Invalid table " + table);
             }
 
-            int num = 0;
             try {
-                num = provider.delete(resolveCallingPackage(), targetUri, null, null);
+                Bundle arg = new Bundle();
+                arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
+                Bundle result = provider.call(resolveCallingPackage(), Settings.AUTHORITY,
+                        callDeleteCommand, key, arg);
+                return result.getInt(SettingsProvider.RESULT_ROWS_DELETED);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }
-            return num;
         }
 
         void resetForUser(IContentProvider provider, int userHandle,
@@ -429,7 +423,7 @@ final public class SettingsService extends Binder {
                 }
                 String packageName = mPackageName != null ? mPackageName : resolveCallingPackage();
                 arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-                provider.call(packageName, callResetCommand, null, arg);
+                provider.call(packageName, Settings.AUTHORITY, callResetCommand, null, arg);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }
@@ -473,12 +467,12 @@ final public class SettingsService extends Binder {
                 pw.println("      Change the contents of KEY to VALUE.");
                 pw.println("      TAG to associate with the setting.");
                 pw.println("      {default} to set as the default, case-insensitive only for global/secure namespace");
-                pw.println("  delete NAMESPACE KEY");
+                pw.println("  delete [--user <USER_ID> | current] NAMESPACE KEY");
                 pw.println("      Delete the entry for KEY.");
                 pw.println("  reset [--user <USER_ID> | current] NAMESPACE {PACKAGE_NAME | RESET_MODE}");
                 pw.println("      Reset the global/secure table for a package with mode.");
                 pw.println("      RESET_MODE is one of {untrusted_defaults, untrusted_clear, trusted_defaults}, case-insensitive");
-                pw.println("  list NAMESPACE");
+                pw.println("  list [--user <USER_ID> | current] NAMESPACE");
                 pw.println("      Print all defined keys.");
                 pw.println("      NAMESPACE is one of {system, secure, global}, case-insensitive");
             }

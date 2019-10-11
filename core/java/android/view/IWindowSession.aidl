@@ -28,8 +28,11 @@ import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
+import android.view.InsetsState;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import java.util.List;
 
 /**
  * System private per-application interface to the window manager.
@@ -37,18 +40,14 @@ import android.view.SurfaceControl;
  * {@hide}
  */
 interface IWindowSession {
-    int add(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets,
-            out InputChannel outInputChannel);
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outFrame,
             out Rect outContentInsets, out Rect outStableInsets, out Rect outOutsets,
-            out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel);
-    int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets);
+            out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel,
+            out InsetsState insetsState);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets);
+            out Rect outStableInsets, out InsetsState insetsState);
     @UnsupportedAppUsage
     void remove(IWindow window);
 
@@ -92,6 +91,7 @@ interface IWindowSession {
      * config for window, if it is now becoming visible and the merged configuration has changed
      * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
+     * @param insetsState The current insets state in the system.
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
@@ -102,7 +102,8 @@ interface IWindowSession {
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Rect outOutsets, out Rect outBackdropFrame,
             out DisplayCutout.ParcelableWrapper displayCutout,
-            out MergedConfiguration outMergedConfiguration, out Surface outSurface);
+            out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
+            out InsetsState insetsState);
 
     /*
      * Notify the window manager that an application is relaunching and
@@ -155,7 +156,7 @@ interface IWindowSession {
     boolean getInTouchMode();
 
     @UnsupportedAppUsage
-    boolean performHapticFeedback(IWindow window, int effectId, boolean always);
+    boolean performHapticFeedback(int effectId, boolean always);
 
     /**
      * Initiate the drag operation itself
@@ -186,8 +187,10 @@ interface IWindowSession {
 
     /**
      * Cancel the current drag operation.
+     * skipAnimation is 'true' when it should skip the drag cancel animation which brings the drag
+     * shadow image back to the drag start position.
      */
-    void cancelDragAndDrop(IBinder dragToken);
+    void cancelDragAndDrop(IBinder dragToken, boolean skipAnimation);
 
     /**
      * Tell the OS that we've just dragged into a View that is willing to accept the drop
@@ -207,6 +210,7 @@ interface IWindowSession {
      */
     void setWallpaperPosition(IBinder windowToken, float x, float y, float xstep, float ystep);
 
+    @UnsupportedAppUsage
     void wallpaperOffsetsComplete(IBinder window);
 
     /**
@@ -217,6 +221,7 @@ interface IWindowSession {
     Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, in Bundle extras, boolean sync);
 
+    @UnsupportedAppUsage
     void wallpaperCommandComplete(IBinder window, in Bundle result);
 
     /**
@@ -249,13 +254,51 @@ interface IWindowSession {
      */
     boolean startMovingTask(IWindow window, float startX, float startY);
 
+    void finishMovingTask(IWindow window);
+
     void updatePointerIcon(IWindow window);
 
     /**
-     * Update a tap exclude region with a rectangular area identified by provided id in the window.
-     * Touches on this region will not switch focus to this window. Passing an empty rect will
-     * remove the area from the exclude region of this window.
+     * Reparent the top layers for a display to the requested SurfaceControl. The display that is
+     * going to be re-parented (the displayId passed in) needs to have been created by the same
+     * process that is requesting the re-parent. This is to ensure clients can't just re-parent
+     * display content info to any SurfaceControl, as this would be a security issue.
+     *
+     * @param window The window which owns the SurfaceControl. This indicates the z-order of the
+     *               windows of this display against the windows on the parent display.
+     * @param sc The SurfaceControl that the top level layers for the display should be re-parented
+     *           to.
+     * @param displayId The id of the display to be re-parented.
      */
-    void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
-            int height);
+    void reparentDisplayContent(IWindow window, in SurfaceControl sc, int displayId);
+
+    /**
+     * Update the location of a child display in its parent window. This enables windows in the
+     * child display to compute the global transformation matrix.
+     *
+     * @param window The parent window of the display.
+     * @param x The x coordinate in the parent window.
+     * @param y The y coordinate in the parent window.
+     * @param displayId The id of the display to be notified.
+     */
+    void updateDisplayContentLocation(IWindow window, int x, int y, int displayId);
+
+    /**
+     * Update a tap exclude region identified by provided id in the window. Touches on this region
+     * will neither be dispatched to this window nor change the focus to this window. Passing an
+     * invalid region will remove the area from the exclude region of this window.
+     */
+    void updateTapExcludeRegion(IWindow window, int regionId, in Region region);
+
+    /**
+     * Called when the client has changed the local insets state, and now the server should reflect
+     * that new state.
+     */
+    void insetsModified(IWindow window, in InsetsState state);
+
+
+    /**
+     * Called when the system gesture exclusion has changed.
+     */
+    oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 }

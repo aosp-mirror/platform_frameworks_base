@@ -16,6 +16,9 @@
 
 package android.util;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.DeadSystemException;
 
@@ -26,6 +29,8 @@ import com.android.internal.util.LineBreakBufferedWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.UnknownHostException;
 
 /**
@@ -58,6 +63,10 @@ import java.net.UnknownHostException;
  * significant work and incurring significant overhead.
  */
 public final class Log {
+    /** @hide */
+    @IntDef({ASSERT, ERROR, WARN, INFO, DEBUG, VERBOSE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Level {}
 
     /**
      * Priority constant for the println method; use Log.v.
@@ -121,7 +130,7 @@ public final class Log {
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      */
-    public static int v(String tag, String msg) {
+    public static int v(@Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, VERBOSE, tag, msg);
     }
 
@@ -132,7 +141,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    public static int v(String tag, String msg, Throwable tr) {
+    public static int v(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
         return printlns(LOG_ID_MAIN, VERBOSE, tag, msg, tr);
     }
 
@@ -142,7 +151,7 @@ public final class Log {
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      */
-    public static int d(String tag, String msg) {
+    public static int d(@Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, DEBUG, tag, msg);
     }
 
@@ -153,7 +162,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    public static int d(String tag, String msg, Throwable tr) {
+    public static int d(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
         return printlns(LOG_ID_MAIN, DEBUG, tag, msg, tr);
     }
 
@@ -163,7 +172,7 @@ public final class Log {
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      */
-    public static int i(String tag, String msg) {
+    public static int i(@Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, INFO, tag, msg);
     }
 
@@ -174,7 +183,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    public static int i(String tag, String msg, Throwable tr) {
+    public static int i(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
         return printlns(LOG_ID_MAIN, INFO, tag, msg, tr);
     }
 
@@ -184,7 +193,7 @@ public final class Log {
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      */
-    public static int w(String tag, String msg) {
+    public static int w(@Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, WARN, tag, msg);
     }
 
@@ -195,7 +204,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    public static int w(String tag, String msg, Throwable tr) {
+    public static int w(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
         return printlns(LOG_ID_MAIN, WARN, tag, msg, tr);
     }
 
@@ -206,9 +215,8 @@ public final class Log {
      *  INFO will be logged. Before you make any calls to a logging method you should check to see
      *  if your tag should be logged. You can change the default level by setting a system property:
      *      'setprop log.tag.&lt;YOUR_LOG_TAG> &lt;LEVEL>'
-     *  Where level is either VERBOSE, DEBUG, INFO, WARN, ERROR, ASSERT, or SUPPRESS. SUPPRESS will
-     *  turn off all logging for your tag. You can also create a local.prop file that with the
-     *  following in it:
+     *  Where level is either VERBOSE, DEBUG, INFO, WARN, ERROR, or ASSERT.
+     *  You can also create a local.prop file that with the following in it:
      *      'log.tag.&lt;YOUR_LOG_TAG>=&lt;LEVEL>'
      *  and place that in /data/local.prop.
      *
@@ -219,15 +227,15 @@ public final class Log {
      *         for Nougat (7.0) releases (API <= 23) and prior, there is no
      *         tag limit of concern after this API level.
      */
-    public static native boolean isLoggable(String tag, int level);
+    public static native boolean isLoggable(@Nullable String tag, @Level int level);
 
-    /*
+    /**
      * Send a {@link #WARN} log message and log the exception.
      * @param tag Used to identify the source of a log message.  It usually identifies
      *        the class or activity where the log call occurs.
      * @param tr An exception to log
      */
-    public static int w(String tag, Throwable tr) {
+    public static int w(@Nullable String tag, @Nullable Throwable tr) {
         return printlns(LOG_ID_MAIN, WARN, tag, "", tr);
     }
 
@@ -237,7 +245,7 @@ public final class Log {
      *        the class or activity where the log call occurs.
      * @param msg The message you would like logged.
      */
-    public static int e(String tag, String msg) {
+    public static int e(@Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, ERROR, tag, msg);
     }
 
@@ -248,7 +256,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @param tr An exception to log
      */
-    public static int e(String tag, String msg, Throwable tr) {
+    public static int e(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
         return printlns(LOG_ID_MAIN, ERROR, tag, msg, tr);
     }
 
@@ -261,7 +269,7 @@ public final class Log {
      * @param tag Used to identify the source of a log message.
      * @param msg The message you would like logged.
      */
-    public static int wtf(String tag, String msg) {
+    public static int wtf(@Nullable String tag, @Nullable String msg) {
         return wtf(LOG_ID_MAIN, tag, msg, null, false, false);
     }
 
@@ -270,7 +278,7 @@ public final class Log {
      * call stack.
      * @hide
      */
-    public static int wtfStack(String tag, String msg) {
+    public static int wtfStack(@Nullable String tag, @Nullable String msg) {
         return wtf(LOG_ID_MAIN, tag, msg, null, true, false);
     }
 
@@ -280,7 +288,7 @@ public final class Log {
      * @param tag Used to identify the source of a log message.
      * @param tr An exception to log.
      */
-    public static int wtf(String tag, Throwable tr) {
+    public static int wtf(@Nullable String tag, @NonNull Throwable tr) {
         return wtf(LOG_ID_MAIN, tag, tr.getMessage(), tr, false, false);
     }
 
@@ -291,13 +299,13 @@ public final class Log {
      * @param msg The message you would like logged.
      * @param tr An exception to log.  May be null.
      */
-    public static int wtf(String tag, String msg, Throwable tr) {
+    public static int wtf(@Nullable String tag, @Nullable String msg, @Nullable Throwable tr) {
         return wtf(LOG_ID_MAIN, tag, msg, tr, false, false);
     }
 
     @UnsupportedAppUsage
-    static int wtf(int logId, String tag, String msg, Throwable tr, boolean localStack,
-            boolean system) {
+    static int wtf(int logId, @Nullable String tag, @Nullable String msg, @Nullable Throwable tr,
+            boolean localStack, boolean system) {
         TerribleFailure what = new TerribleFailure(msg, tr);
         // Only mark this as ERROR, do not use ASSERT since that should be
         // reserved for cases where the system is guaranteed to abort.
@@ -307,7 +315,7 @@ public final class Log {
         return bytes;
     }
 
-    static void wtfQuiet(int logId, String tag, String msg, boolean system) {
+    static void wtfQuiet(int logId, @Nullable String tag, @Nullable String msg, boolean system) {
         TerribleFailure what = new TerribleFailure(msg, null);
         sWtfHandler.onTerribleFailure(tag, what, system);
     }
@@ -319,7 +327,8 @@ public final class Log {
      *
      * @hide
      */
-    public static TerribleFailureHandler setWtfHandler(TerribleFailureHandler handler) {
+    @NonNull
+    public static TerribleFailureHandler setWtfHandler(@NonNull TerribleFailureHandler handler) {
         if (handler == null) {
             throw new NullPointerException("handler == null");
         }
@@ -332,7 +341,8 @@ public final class Log {
      * Handy function to get a loggable stack trace from a Throwable
      * @param tr An exception to log
      */
-    public static String getStackTraceString(Throwable tr) {
+    @NonNull
+    public static String getStackTraceString(@Nullable Throwable tr) {
         if (tr == null) {
             return "";
         }
@@ -362,7 +372,7 @@ public final class Log {
      * @param msg The message you would like logged.
      * @return The number of bytes written.
      */
-    public static int println(int priority, String tag, String msg) {
+    public static int println(@Level int priority, @Nullable String tag, @NonNull String msg) {
         return println_native(LOG_ID_MAIN, priority, tag, msg);
     }
 
@@ -388,8 +398,8 @@ public final class Log {
      * chunks. This is to avoid truncation.
      * @hide
      */
-    public static int printlns(int bufID, int priority, String tag, String msg,
-            Throwable tr) {
+    public static int printlns(int bufID, int priority, @Nullable String tag, @NonNull String msg,
+            @Nullable Throwable tr) {
         ImmediateLogWriter logWriter = new ImmediateLogWriter(bufID, priority, tag);
         // Acceptable buffer size. Get the native buffer size, subtract two zero terminators,
         // and the length of the tag.

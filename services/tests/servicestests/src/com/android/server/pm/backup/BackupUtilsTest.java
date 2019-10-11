@@ -99,7 +99,6 @@ public class BackupUtilsTest {
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -118,7 +117,6 @@ public class BackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -203,7 +201,6 @@ public class BackupUtilsTest {
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -226,7 +223,6 @@ public class BackupUtilsTest {
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -247,7 +243,6 @@ public class BackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -270,7 +265,6 @@ public class BackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -295,7 +289,6 @@ public class BackupUtilsTest {
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -319,7 +312,6 @@ public class BackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -347,7 +339,6 @@ public class BackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();

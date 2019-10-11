@@ -16,8 +16,6 @@
 
 package android.widget.gridview;
 
-import android.widget.gridview.GridSetSelectionMany;
-
 public class GridSetSelectionManyTest extends GridSetSelectionBaseTest<GridSetSelectionMany> {
     public GridSetSelectionManyTest() {
         super(GridSetSelectionMany.class);

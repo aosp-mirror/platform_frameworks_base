@@ -178,5 +178,5 @@ void Blur::vertical(float* weights, int32_t radius, const uint8_t* source, uint8
     }
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

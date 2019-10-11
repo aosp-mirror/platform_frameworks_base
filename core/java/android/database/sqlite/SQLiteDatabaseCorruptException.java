@@ -25,4 +25,20 @@ public class SQLiteDatabaseCorruptException extends SQLiteException {
     public SQLiteDatabaseCorruptException(String error) {
         super(error);
     }
+
+    /**
+     * @return true if a given {@link Throwable} or any of its inner causes is of
+     * {@link SQLiteDatabaseCorruptException}.
+     *
+     * @hide
+     */
+    public static boolean isCorruptException(Throwable th) {
+        while (th != null) {
+            if (th instanceof SQLiteDatabaseCorruptException) {
+                return true;
+            }
+            th = th.getCause();
+        }
+        return false;
+    }
 }

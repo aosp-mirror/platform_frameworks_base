@@ -32,8 +32,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
-import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests for the SettingContentProvider.
@@ -258,7 +260,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_VALUE, false);
 
             // Reset the changes made by the "shell/root" package
-            resetToDefaultsViaShell(type, "shell");
+            resetToDefaultsViaShell(type, "com.android.shell");
             resetToDefaultsViaShell(type, "root");
 
             // Make sure the old APIs don't set defaults
@@ -272,7 +274,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_VALUE_2, false);
 
             // Reset the changes made by this package
-            resetToDefaultsViaShell(type, "shell");
+            resetToDefaultsViaShell(type, "com.android.shell");
             resetToDefaultsViaShell(type, "root");
 
             // Make sure the old APIs don't set defaults
@@ -313,7 +315,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_VALUE_2, "TOKEN2", false);
 
             // Reset settings associated with TOKEN1
-            resetToDefaultsViaShell(type, "shell", "TOKEN1");
+            resetToDefaultsViaShell(type, "com.android.shell", "TOKEN1");
             resetToDefaultsViaShell(type, "root", "TOKEN1");
 
             // Make sure TOKEN1 settings are reset
@@ -325,7 +327,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                     FAKE_SETTING_NAME_1));
 
             // Reset settings associated with TOKEN2
-            resetToDefaultsViaShell(type, "shell", "TOKEN2");
+            resetToDefaultsViaShell(type, "com.android.shell", "TOKEN2");
             resetToDefaultsViaShell(type, "root", "TOKEN2");
 
             // Make sure TOKEN2 settings are reset
@@ -613,7 +615,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             final String name, final String value, final int userId) throws Exception {
         ContentResolver contentResolver = getContext().getContentResolver();
 
-        final Uri settingUri = getBaseUriForType(type);
+        final Uri settingUri = getBaseUriForType(type).buildUpon().appendPath(name).build();
 
         final AtomicBoolean success = new AtomicBoolean();
 
@@ -640,20 +642,22 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
 
             final long startTimeMillis = SystemClock.uptimeMillis();
             synchronized (mLock) {
-                if (success.get()) {
-                    return;
-                }
-                final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                if (elapsedTimeMillis > WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS) {
-                    fail("Could not change setting for "
-                            + WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS + " ms");
-                }
-                final long remainingTimeMillis = WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS
-                        - elapsedTimeMillis;
-                try {
-                    mLock.wait(remainingTimeMillis);
-                } catch (InterruptedException ie) {
-                    /* ignore */
+                while (true) {
+                    if (success.get()) {
+                        return;
+                    }
+                    final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
+                    if (elapsedTimeMillis >= WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS) {
+                        fail("Could not change setting for "
+                                + WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS + " ms");
+                    }
+                    final long remainingTimeMillis = WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS
+                            - elapsedTimeMillis;
+                    try {
+                        mLock.wait(remainingTimeMillis);
+                    } catch (InterruptedException ie) {
+                        /* ignore */
+                    }
                 }
             }
         } finally {
@@ -689,39 +693,50 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
-    public void testUpdateLocationProvidersAllowedLocked_enableProviders() throws Exception {
-        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+    public void testLocationModeChanges_viaFrontEndApi() throws Exception {
+        setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
                 Settings.Secure.LOCATION_MODE,
                 String.valueOf(Settings.Secure.LOCATION_MODE_OFF),
                 UserHandle.USER_SYSTEM);
-
-        // Enable one provider
-        updateStringViaProviderApiSetting(
-                SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+gps");
-
         assertEquals(
                 "Wrong location providers",
-                "gps",
-                queryStringViaProviderApi(
-                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+                "",
+                getStringViaFrontEndApiSetting(
+                        SETTING_TYPE_SECURE,
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                        UserHandle.USER_SYSTEM));
 
-        // Enable a list of providers, including the one that is already enabled
-        updateStringViaProviderApiSetting(
+        setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                "+gps,+network,+network");
+                Settings.Secure.LOCATION_MODE,
+                String.valueOf(Settings.Secure.LOCATION_MODE_BATTERY_SAVING),
+                UserHandle.USER_SYSTEM);
+        assertEquals(
+                "Wrong location providers",
+                "network",
+                getStringViaFrontEndApiSetting(
+                        SETTING_TYPE_SECURE,
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                        UserHandle.USER_SYSTEM));
 
+        setStringViaFrontEndApiSetting(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_MODE,
+                String.valueOf(Settings.Secure.LOCATION_MODE_HIGH_ACCURACY),
+                UserHandle.USER_SYSTEM);
         assertEquals(
                 "Wrong location providers",
                 "gps,network",
-                queryStringViaProviderApi(
-                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+                getStringViaFrontEndApiSetting(
+                        SETTING_TYPE_SECURE,
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                        UserHandle.USER_SYSTEM));
     }
 
     @Test
-    public void testUpdateLocationProvidersAllowedLocked_disableProviders() throws Exception {
-        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+    public void testLocationProvidersAllowed_disableProviders() throws Exception {
+        setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
                 Settings.Secure.LOCATION_MODE,
                 String.valueOf(Settings.Secure.LOCATION_MODE_HIGH_ACCURACY),
@@ -732,7 +747,6 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                 SETTING_TYPE_SECURE,
                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 "-gps,-network");
-
         assertEquals(
                 "Wrong location providers",
                 "",
@@ -744,7 +758,6 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                 SETTING_TYPE_SECURE,
                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                 "-test");
-
         assertEquals(
                 "Wrong location providers",
                 "",
@@ -753,8 +766,8 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
-    public void testUpdateLocationProvidersAllowedLocked_enableAndDisable() throws Exception {
-        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+    public void testLocationProvidersAllowed_enableAndDisable() throws Exception {
+        setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
                 Settings.Secure.LOCATION_MODE,
                 String.valueOf(Settings.Secure.LOCATION_MODE_OFF),
@@ -775,8 +788,8 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
     }
 
     @Test
-    public void testUpdateLocationProvidersAllowedLocked_invalidInput() throws Exception {
-        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+    public void testLocationProvidersAllowedLocked_invalidInput() throws Exception {
+        setStringViaFrontEndApiSetting(
                 SETTING_TYPE_SECURE,
                 Settings.Secure.LOCATION_MODE,
                 String.valueOf(Settings.Secure.LOCATION_MODE_OFF),

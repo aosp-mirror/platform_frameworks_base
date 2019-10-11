@@ -27,10 +27,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.View.OnApplyWindowInsetsListener;
@@ -39,23 +37,29 @@ import android.view.WindowInsets;
 import android.widget.FrameLayout;
 import android.widget.Toolbar;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class ActionBarOverlayLayoutTest {
 
-    private static final Rect TOP_INSET_5 = new Rect(0, 5, 0, 0);
-    private static final Rect TOP_INSET_25 = new Rect(0, 25, 0, 0);
-    private static final Rect ZERO_INSET = new Rect(0, 0, 0, 0);
+    private static final Insets TOP_INSET_5 = Insets.of(0, 5, 0, 0);
+    private static final Insets TOP_INSET_25 = Insets.of(0, 25, 0, 0);
     private static final DisplayCutout CONSUMED_CUTOUT = null;
-    private static final DisplayCutout CUTOUT_5 = new DisplayCutout(TOP_INSET_5, Arrays.asList(
-            new Rect(100, 0, 200, 5)));
+    private static final DisplayCutout CUTOUT_5 = new DisplayCutout(
+            TOP_INSET_5,
+            null /* boundLeft */,
+            new Rect(100, 0, 200, 5),
+            null /* boundRight */,
+            null /* boundBottom*/);
     private static final int EXACTLY_1000 = makeMeasureSpec(1000, EXACTLY);
 
     private Context mContext;
@@ -112,7 +116,7 @@ public class ActionBarOverlayLayoutTest {
 
         mLayout.measure(EXACTLY_1000, EXACTLY_1000);
 
-        assertThat(mContentInsetsListener.captured, is(insetsWith(ZERO_INSET, CONSUMED_CUTOUT)));
+        assertThat(mContentInsetsListener.captured, is(insetsWith(Insets.NONE, CONSUMED_CUTOUT)));
     }
 
     @Test
@@ -136,7 +140,7 @@ public class ActionBarOverlayLayoutTest {
 
         mLayout.measure(EXACTLY_1000, EXACTLY_1000);
 
-        assertThat(mContentInsetsListener.captured, is(insetsWith(ZERO_INSET, NO_CUTOUT)));
+        assertThat(mContentInsetsListener.captured, is(insetsWith(Insets.NONE, NO_CUTOUT)));
     }
 
     @Test
@@ -160,11 +164,11 @@ public class ActionBarOverlayLayoutTest {
 
         mLayout.measure(EXACTLY_1000, EXACTLY_1000);
 
-        assertThat(mContentInsetsListener.captured, is(insetsWith(ZERO_INSET, NO_CUTOUT)));
+        assertThat(mContentInsetsListener.captured, is(insetsWith(Insets.NONE, NO_CUTOUT)));
     }
 
-    private WindowInsets insetsWith(Rect content, DisplayCutout cutout) {
-        return new WindowInsets(content, null, null, false, false, cutout);
+    private WindowInsets insetsWith(Insets content, DisplayCutout cutout) {
+        return new WindowInsets(content.toRect(), null, false, false, cutout);
     }
 
     private ViewGroup createViewGroupWithId(int id) {

@@ -23,11 +23,12 @@ import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import androidx.annotation.VisibleForTesting;
 import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.ArrayUtils;
@@ -74,20 +75,32 @@ public class PowerWhitelistBackend {
             return true;
         }
 
+        if (isDefaultActiveApp(pkg)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if it is default active app in multiple area(i.e. SMS, Dialer, Device admin..)
+     */
+    public boolean isDefaultActiveApp(String pkg) {
         // Additionally, check if pkg is default dialer/sms. They are considered essential apps and
         // should be automatically whitelisted (otherwise user may be able to set restriction on
         // them, leading to bad device behavior.)
-        if (!mAppContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            return false;
-        }
+
+        final boolean hasTelephony = mAppContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_TELEPHONY);
         final ComponentName defaultSms = SmsApplication.getDefaultSmsApplication(mAppContext,
                 true /* updateIfNeeded */);
-        if (defaultSms != null && TextUtils.equals(pkg, defaultSms.getPackageName())) {
+        if (hasTelephony && defaultSms != null && TextUtils.equals(pkg,
+                defaultSms.getPackageName())) {
             return true;
         }
 
         final String defaultDialer = DefaultDialerManager.getDefaultDialerApplication(mAppContext);
-        if (TextUtils.equals(pkg, defaultDialer)) {
+        if (hasTelephony && TextUtils.equals(pkg, defaultDialer)) {
             return true;
         }
 

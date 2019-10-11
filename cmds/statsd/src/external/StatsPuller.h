@@ -18,7 +18,6 @@
 
 #include <android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
-#include <utils/String16.h>
 #include <mutex>
 #include <vector>
 #include "packages/UidMap.h"
@@ -37,7 +36,16 @@ public:
 
     virtual ~StatsPuller() {}
 
-    bool Pull(const int64_t timeNs, std::vector<std::shared_ptr<LogEvent>>* data);
+    // Pulls the most recent data.
+    // The data may be served from cache if consecutive pulls come within
+    // predefined cooldown time.
+    // Returns true if the pull was successful.
+    // Returns false when
+    //   1) the pull fails
+    //   2) pull takes longer than mPullTimeoutNs (intrinsic to puller)
+    // If a metric wants to make any change to the data, like timestamps, it
+    // should make a copy as this data may be shared with multiple metrics.
+    bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear cache immediately
     int ForceClearCache();
@@ -50,28 +58,29 @@ public:
     virtual void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService){};
 
 protected:
-    // The atom tag id this puller pulls
     const int mTagId;
 
 private:
     mutable std::mutex mLock;
-    // Minimum time before this puller does actual pull again.
-    // If a pull request comes before cooldown, a cached version from purevious pull
-    // will be returned.
-    // The actual value should be determined by individual pullers.
-    int64_t mCoolDownNs;
-    // For puller stats
-    int64_t mMinPullIntervalNs = LONG_MAX;
 
+    // Real puller impl.
     virtual bool PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) = 0;
 
-    // Cache of data from last pull. If next request comes before cool down finishes,
-    // cached data will be returned.
-    std::vector<std::shared_ptr<LogEvent>> mCachedData;
+    bool mHasGoodData = false;
 
     int64_t mLastPullTimeNs;
 
+    // Cache of data from last pull. If next request comes before cool down finishes,
+    // cached data will be returned.
+    // Cached data is cleared when
+    //   1) A pull fails
+    //   2) A new pull request comes after cooldown time.
+    //   3) clearCache is called.
+    std::vector<std::shared_ptr<LogEvent>> mCachedData;
+
     int clearCache();
+
+    int clearCacheLocked();
 
     static sp<UidMap> mUidMap;
 };

@@ -48,11 +48,7 @@ public class PackageManagerStub extends PackageManager {
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
             throws NameNotFoundException {
-        if (sPackageInfo == null) {
-            throw new NameNotFoundException();
-        }
-
-        return sPackageInfo;
+        return getPackageInfoAsUser(packageName, flags, UserHandle.USER_SYSTEM);
     }
 
     @Override
@@ -64,7 +60,11 @@ public class PackageManagerStub extends PackageManager {
     @Override
     public PackageInfo getPackageInfoAsUser(String packageName, int flags, int userId)
             throws NameNotFoundException {
-        return null;
+        if (sPackageInfo == null) {
+            throw new NameNotFoundException();
+        }
+
+        return sPackageInfo;
     }
 
     @Override
@@ -134,7 +134,12 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
-    public boolean isPermissionReviewModeEnabled() {
+    public boolean arePermissionsIndividuallyControlled() {
+        return false;
+    }
+
+    @Override
+    public boolean isWirelessConsentModeEnabled() {
         return false;
     }
 
@@ -942,6 +947,11 @@ public class PackageManagerStub extends PackageManager {
 
     @Override
     public boolean isUpgrade() {
+        return false;
+    }
+
+    @Override
+    public boolean isDeviceUpgrading() {
         return false;
     }
 

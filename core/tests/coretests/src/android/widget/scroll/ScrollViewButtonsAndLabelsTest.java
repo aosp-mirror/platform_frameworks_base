@@ -17,14 +17,14 @@
 package android.widget.scroll;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 public class ScrollViewButtonsAndLabelsTest
         extends ActivityInstrumentationTestCase<ScrollViewButtonsAndLabels> {

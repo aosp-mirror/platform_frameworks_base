@@ -16,27 +16,30 @@
 
 package android.app;
 
-import static com.android.internal.util.NotificationColorUtil.satisfiesTextContrast;
+import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
+import android.content.LocusId;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.widget.RemoteViews;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -106,9 +109,9 @@ public class NotificationTest {
         int backgroundColor = 0xff585868;
         int initialForegroundColor = 0xff505868;
         builder.setColorPalette(backgroundColor, initialForegroundColor);
-        int primaryTextColor = builder.getPrimaryTextColor();
+        int primaryTextColor = builder.getPrimaryTextColor(builder.mParams);
         assertTrue(satisfiesTextContrast(primaryTextColor, backgroundColor));
-        int secondaryTextColor = builder.getSecondaryTextColor();
+        int secondaryTextColor = builder.getSecondaryTextColor(builder.mParams);
         assertTrue(satisfiesTextContrast(secondaryTextColor, backgroundColor));
     }
 
@@ -317,6 +320,27 @@ public class NotificationTest {
         assertEquals(
                 Notification.Action.SEMANTIC_ACTION_DELETE,
                 action.clone().getSemanticAction());
+    }
+
+    @Test
+    public void testBuilder_setLocusId() {
+        LocusId locusId = new LocusId("4815162342");
+        Notification notification = new Notification.Builder(mContext, "whatever")
+                .setLocusId(locusId).build();
+        assertEquals(locusId, notification.getLocusId());
+
+        Notification clone = writeAndReadParcelable(notification);
+        assertEquals(locusId, clone.getLocusId());
+    }
+
+    @Test
+    public void testBuilder_setLocusId_null() {
+        Notification notification = new Notification.Builder(mContext, "whatever")
+                .setLocusId(null).build();
+        assertNull(notification.getLocusId());
+
+        Notification clone = writeAndReadParcelable(notification);
+        assertNull(clone.getLocusId());
     }
 
     private Notification.Builder getMediaNotification() {

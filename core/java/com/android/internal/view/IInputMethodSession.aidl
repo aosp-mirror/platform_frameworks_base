@@ -29,10 +29,8 @@ import android.view.inputmethod.ExtractedText;
  * {@hide}
  */
 oneway interface IInputMethodSession {
-    void finishInput();
-
     void updateExtractedText(int token, in ExtractedText text);
-    
+
     void updateSelection(int oldSelStart, int oldSelEnd,
             int newSelStart, int newSelEnd,
             int candidatesStart, int candidatesEnd);
@@ -50,4 +48,6 @@ oneway interface IInputMethodSession {
     void finishSession();
 
     void updateCursorAnchorInfo(in CursorAnchorInfo cursorAnchorInfo);
+
+    void notifyImeHidden();
 }

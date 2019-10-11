@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.text.LineBreaker;
 import android.text.method.TextKeyListener;
 import android.text.style.AlignmentSpan;
 import android.text.style.LeadingMarginSpan;
@@ -50,9 +51,9 @@ import java.util.Arrays;
 public abstract class Layout {
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
-            BREAK_STRATEGY_SIMPLE,
-            BREAK_STRATEGY_HIGH_QUALITY,
-            BREAK_STRATEGY_BALANCED
+            LineBreaker.BREAK_STRATEGY_SIMPLE,
+            LineBreaker.BREAK_STRATEGY_HIGH_QUALITY,
+            LineBreaker.BREAK_STRATEGY_BALANCED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BreakStrategy {}
@@ -63,19 +64,19 @@ public abstract class Layout {
      * before it (which yields a more consistent user experience when editing), but layout may not
      * be the highest quality.
      */
-    public static final int BREAK_STRATEGY_SIMPLE = 0;
+    public static final int BREAK_STRATEGY_SIMPLE = LineBreaker.BREAK_STRATEGY_SIMPLE;
 
     /**
      * Value for break strategy indicating high quality line breaking, including automatic
      * hyphenation and doing whole-paragraph optimization of line breaks.
      */
-    public static final int BREAK_STRATEGY_HIGH_QUALITY = 1;
+    public static final int BREAK_STRATEGY_HIGH_QUALITY = LineBreaker.BREAK_STRATEGY_HIGH_QUALITY;
 
     /**
      * Value for break strategy indicating balanced line breaking. The breaks are chosen to
      * make all lines as close to the same length as possible, including automatic hyphenation.
      */
-    public static final int BREAK_STRATEGY_BALANCED = 2;
+    public static final int BREAK_STRATEGY_BALANCED = LineBreaker.BREAK_STRATEGY_BALANCED;
 
     /** @hide */
     @IntDef(prefix = { "HYPHENATION_FREQUENCY_" }, value = {
@@ -93,29 +94,29 @@ public abstract class Layout {
      * layout and there is otherwise no valid break. Soft hyphens are ignored and will not be used
      * as suggestions for potential line breaks.
      */
-    public static final int HYPHENATION_FREQUENCY_NONE = 0;
+    public static final int HYPHENATION_FREQUENCY_NONE = LineBreaker.HYPHENATION_FREQUENCY_NONE;
 
     /**
      * Value for hyphenation frequency indicating a light amount of automatic hyphenation, which
      * is a conservative default. Useful for informal cases, such as short sentences or chat
      * messages.
      */
-    public static final int HYPHENATION_FREQUENCY_NORMAL = 1;
+    public static final int HYPHENATION_FREQUENCY_NORMAL = LineBreaker.HYPHENATION_FREQUENCY_NORMAL;
 
     /**
      * Value for hyphenation frequency indicating the full amount of automatic hyphenation, typical
      * in typography. Useful for running text and where it's important to put the maximum amount of
      * text in a screen with limited space.
      */
-    public static final int HYPHENATION_FREQUENCY_FULL = 2;
+    public static final int HYPHENATION_FREQUENCY_FULL = LineBreaker.HYPHENATION_FREQUENCY_FULL;
 
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
     /** @hide */
     @IntDef(prefix = { "JUSTIFICATION_MODE_" }, value = {
-            JUSTIFICATION_MODE_NONE,
-            JUSTIFICATION_MODE_INTER_WORD
+            LineBreaker.JUSTIFICATION_MODE_NONE,
+            LineBreaker.JUSTIFICATION_MODE_INTER_WORD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface JustificationMode {}
@@ -123,12 +124,13 @@ public abstract class Layout {
     /**
      * Value for justification mode indicating no justification.
      */
-    public static final int JUSTIFICATION_MODE_NONE = 0;
+    public static final int JUSTIFICATION_MODE_NONE = LineBreaker.JUSTIFICATION_MODE_NONE;
 
     /**
      * Value for justification mode indicating the text is justified by stretching word spacing.
      */
-    public static final int JUSTIFICATION_MODE_INTER_WORD = 1;
+    public static final int JUSTIFICATION_MODE_INTER_WORD =
+            LineBreaker.JUSTIFICATION_MODE_INTER_WORD;
 
     /*
      * Line spacing multiplier for default line spacing.
@@ -435,7 +437,8 @@ public abstract class Layout {
             previousLineEnd = getLineStart(lineNum + 1);
             final boolean justify = isJustificationRequired(lineNum);
             int end = getLineVisibleEnd(lineNum, start, previousLineEnd);
-            paint.setHyphenEdit(getHyphen(lineNum));
+            paint.setStartHyphenEdit(getStartHyphenEdit(lineNum));
+            paint.setEndHyphenEdit(getEndHyphenEdit(lineNum));
 
             int ltop = previousLineBottom;
             int lbottom = getLineTop(lineNum + 1);
@@ -564,7 +567,9 @@ public abstract class Layout {
                 // XXX: assumes there's nothing additional to be done
                 canvas.drawText(buf, start, end, x, lbaseline, paint);
             } else {
-                tl.set(paint, buf, start, end, dir, directions, hasTab, tabStops);
+                tl.set(paint, buf, start, end, dir, directions, hasTab, tabStops,
+                        getEllipsisStart(lineNum),
+                        getEllipsisStart(lineNum) + getEllipsisCount(lineNum));
                 if (justify) {
                     tl.justify(right - left - indentWidth);
                 }
@@ -612,7 +617,7 @@ public abstract class Layout {
                     previousLineBottom = lbottom;
                     int lbaseline = lbottom - getLineDescent(i);
 
-                    if (start >= spanEnd) {
+                    if (end >= spanEnd) {
                         // These should be infrequent, so we'll use this so that
                         // we don't have to check as often.
                         spanEnd = mLineBackgroundSpans.getNextTransition(start, textLength);
@@ -906,12 +911,21 @@ public abstract class Layout {
     public abstract int getBottomPadding();
 
     /**
-     * Returns the hyphen edit for a line.
+     * Returns the start hyphen edit for a line.
      *
      * @hide
      */
-    public int getHyphen(int line) {
-        return 0;
+    public @Paint.StartHyphenEdit int getStartHyphenEdit(int line) {
+        return Paint.START_HYPHEN_EDIT_NO_EDIT;
+    }
+
+    /**
+     * Returns the end hyphen edit for a line.
+     *
+     * @hide
+     */
+    public @Paint.EndHyphenEdit int getEndHyphenEdit(int line) {
+        return Paint.END_HYPHEN_EDIT_NO_EDIT;
     }
 
     /**
@@ -1034,8 +1048,10 @@ public abstract class Layout {
      *
      * @returns true if offset is at the BiDi level transition point and trailing BiDi level is
      *          higher than previous BiDi level. See above for the detail.
+     * @hide
      */
-    private boolean primaryIsTrailingPrevious(int offset) {
+    @VisibleForTesting
+    public boolean primaryIsTrailingPrevious(int offset) {
         int line = getLineForOffset(offset);
         int lineStart = getLineStart(line);
         int lineEnd = getLineEnd(line);
@@ -1089,8 +1105,10 @@ public abstract class Layout {
      * #primaryIsTrailingPrevious for all offsets on a line.
      * @param line The line giving the offsets we compute the information for
      * @return The array of results, indexed from 0, where 0 corresponds to the line start offset
+     * @hide
      */
-    private boolean[] primaryIsTrailingPreviousAllLineOffsets(int line) {
+    @VisibleForTesting
+    public boolean[] primaryIsTrailingPreviousAllLineOffsets(int line) {
         int lineStart = getLineStart(line);
         int lineEnd = getLineEnd(line);
         int[] runs = getLineDirections(line).mDirections;
@@ -1103,6 +1121,9 @@ public abstract class Layout {
             int limit = start + (runs[i + 1] & RUN_LENGTH_MASK);
             if (limit > lineEnd) {
                 limit = lineEnd;
+            }
+            if (limit == start) {
+                continue;
             }
             level[limit - lineStart - 1] =
                     (byte) ((runs[i + 1] >>> RUN_LEVEL_SHIFT) & RUN_LEVEL_MASK);
@@ -1187,7 +1208,8 @@ public abstract class Layout {
         }
 
         TextLine tl = TextLine.obtain();
-        tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops);
+        tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops,
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         float wid = tl.measure(offset - start, trailing, null);
         TextLine.recycle(tl);
 
@@ -1201,8 +1223,8 @@ public abstract class Layout {
     }
 
     /**
-     * Computes in linear time the results of calling
-     * #getHorizontal for all offsets on a line.
+     * Computes in linear time the results of calling #getHorizontal for all offsets on a line.
+     *
      * @param line The line giving the offsets we compute information for
      * @param clamped Whether to clamp the results to the width of the layout
      * @param primary Whether the results should be the primary or the secondary horizontal
@@ -1226,7 +1248,8 @@ public abstract class Layout {
         }
 
         TextLine tl = TextLine.obtain();
-        tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops);
+        tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops,
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         boolean[] trailings = primaryIsTrailingPreviousAllLineOffsets(line);
         if (!primary) {
             for (int offset = 0; offset < trailings.length; ++offset) {
@@ -1237,7 +1260,7 @@ public abstract class Layout {
         TextLine.recycle(tl);
 
         if (clamped) {
-            for (int offset = 0; offset <= wid.length; ++offset) {
+            for (int offset = 0; offset < wid.length; ++offset) {
                 if (wid[offset] > mWidth) {
                     wid[offset] = mWidth;
                 }
@@ -1259,29 +1282,53 @@ public abstract class Layout {
      * scrolling on the specified line.
      */
     public float getLineLeft(int line) {
-        int dir = getParagraphDirection(line);
+        final int dir = getParagraphDirection(line);
         Alignment align = getParagraphAlignment(line);
+        // Before Q, StaticLayout.Builder.setAlignment didn't check whether the input alignment
+        // is null. And when it is null, the old behavior is the same as ALIGN_CENTER.
+        // To keep consistency, we convert a null alignment to ALIGN_CENTER.
+        if (align == null) {
+            align = Alignment.ALIGN_CENTER;
+        }
 
-        if (align == Alignment.ALIGN_LEFT) {
-            return 0;
-        } else if (align == Alignment.ALIGN_NORMAL) {
-            if (dir == DIR_RIGHT_TO_LEFT)
-                return getParagraphRight(line) - getLineMax(line);
-            else
-                return 0;
-        } else if (align == Alignment.ALIGN_RIGHT) {
-            return mWidth - getLineMax(line);
-        } else if (align == Alignment.ALIGN_OPPOSITE) {
-            if (dir == DIR_RIGHT_TO_LEFT)
-                return 0;
-            else
+        // First convert combinations of alignment and direction settings to
+        // three basic cases: ALIGN_LEFT, ALIGN_RIGHT and ALIGN_CENTER.
+        // For unexpected cases, it will fallback to ALIGN_LEFT.
+        final Alignment resultAlign;
+        switch(align) {
+            case ALIGN_NORMAL:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_RIGHT : Alignment.ALIGN_LEFT;
+                break;
+            case ALIGN_OPPOSITE:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_LEFT : Alignment.ALIGN_RIGHT;
+                break;
+            case ALIGN_CENTER:
+                resultAlign = Alignment.ALIGN_CENTER;
+                break;
+            case ALIGN_RIGHT:
+                resultAlign = Alignment.ALIGN_RIGHT;
+                break;
+            default: /* align == Alignment.ALIGN_LEFT */
+                resultAlign = Alignment.ALIGN_LEFT;
+        }
+
+        // Here we must use getLineMax() to do the computation, because it maybe overridden by
+        // derived class. And also note that line max equals the width of the text in that line
+        // plus the leading margin.
+        switch (resultAlign) {
+            case ALIGN_CENTER:
+                final int left = getParagraphLeft(line);
+                final float max = getLineMax(line);
+                // This computation only works when mWidth equals leadingMargin plus
+                // the width of text in this line. If this condition doesn't meet anymore,
+                // please change here too.
+                return (float) Math.floor(left + (mWidth - max) / 2);
+            case ALIGN_RIGHT:
                 return mWidth - getLineMax(line);
-        } else { /* align == Alignment.ALIGN_CENTER */
-            int left = getParagraphLeft(line);
-            int right = getParagraphRight(line);
-            int max = ((int) getLineMax(line)) & ~1;
-
-            return left + ((right - left) - max) / 2;
+            default: /* resultAlign == Alignment.ALIGN_LEFT */
+                return 0;
         }
     }
 
@@ -1290,29 +1337,46 @@ public abstract class Layout {
      * scrolling on the specified line.
      */
     public float getLineRight(int line) {
-        int dir = getParagraphDirection(line);
+        final int dir = getParagraphDirection(line);
         Alignment align = getParagraphAlignment(line);
+        // Before Q, StaticLayout.Builder.setAlignment didn't check whether the input alignment
+        // is null. And when it is null, the old behavior is the same as ALIGN_CENTER.
+        // To keep consistency, we convert a null alignment to ALIGN_CENTER.
+        if (align == null) {
+            align = Alignment.ALIGN_CENTER;
+        }
 
-        if (align == Alignment.ALIGN_LEFT) {
-            return getParagraphLeft(line) + getLineMax(line);
-        } else if (align == Alignment.ALIGN_NORMAL) {
-            if (dir == DIR_RIGHT_TO_LEFT)
+        final Alignment resultAlign;
+        switch(align) {
+            case ALIGN_NORMAL:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_RIGHT : Alignment.ALIGN_LEFT;
+                break;
+            case ALIGN_OPPOSITE:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_LEFT : Alignment.ALIGN_RIGHT;
+                break;
+            case ALIGN_CENTER:
+                resultAlign = Alignment.ALIGN_CENTER;
+                break;
+            case ALIGN_RIGHT:
+                resultAlign = Alignment.ALIGN_RIGHT;
+                break;
+            default: /* align == Alignment.ALIGN_LEFT */
+                resultAlign = Alignment.ALIGN_LEFT;
+        }
+
+        switch (resultAlign) {
+            case ALIGN_CENTER:
+                final int right = getParagraphRight(line);
+                final float max = getLineMax(line);
+                // This computation only works when mWidth equals leadingMargin plus width of the
+                // text in this line. If this condition doesn't meet anymore, please change here.
+                return (float) Math.ceil(right - (mWidth - max) / 2);
+            case ALIGN_RIGHT:
                 return mWidth;
-            else
-                return getParagraphLeft(line) + getLineMax(line);
-        } else if (align == Alignment.ALIGN_RIGHT) {
-            return mWidth;
-        } else if (align == Alignment.ALIGN_OPPOSITE) {
-            if (dir == DIR_RIGHT_TO_LEFT)
+            default: /* resultAlign == Alignment.ALIGN_LEFT */
                 return getLineMax(line);
-            else
-                return mWidth;
-        } else { /* align == Alignment.ALIGN_CENTER */
-            int left = getParagraphLeft(line);
-            int right = getParagraphRight(line);
-            int max = ((int) getLineMax(line)) & ~1;
-
-            return right - ((right - left) - max) / 2;
         }
     }
 
@@ -1367,8 +1431,10 @@ public abstract class Layout {
         final TextLine tl = TextLine.obtain();
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
-        paint.setHyphenEdit(getHyphen(line));
-        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops);
+        paint.setStartHyphenEdit(getStartHyphenEdit(line));
+        paint.setEndHyphenEdit(getEndHyphenEdit(line));
+        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
@@ -1395,8 +1461,10 @@ public abstract class Layout {
         final TextLine tl = TextLine.obtain();
         final TextPaint paint = mWorkPaint;
         paint.set(mPaint);
-        paint.setHyphenEdit(getHyphen(line));
-        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops);
+        paint.setStartHyphenEdit(getStartHyphenEdit(line));
+        paint.setEndHyphenEdit(getEndHyphenEdit(line));
+        tl.set(paint, mText, start, end, dir, directions, hasTabs, tabStops,
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
@@ -1481,7 +1549,8 @@ public abstract class Layout {
         TextLine tl = TextLine.obtain();
         // XXX: we don't care about tabs as we just use TextLine#getOffsetToLeftRightOf here.
         tl.set(mPaint, mText, lineStartOffset, lineEndOffset, getParagraphDirection(line), dirs,
-                false, null);
+                false, null,
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         final HorizontalMeasurementProvider horizontal =
                 new HorizontalMeasurementProvider(line, primary);
 
@@ -1590,11 +1659,11 @@ public abstract class Layout {
         }
 
         float get(final int offset) {
-            if (mHorizontals == null || offset < mLineStartOffset
-                    || offset >= mLineStartOffset + mHorizontals.length) {
+            final int index = offset - mLineStartOffset;
+            if (mHorizontals == null || index < 0 || index >= mHorizontals.length) {
                 return getHorizontal(offset, mPrimary);
             } else {
-                return mHorizontals[offset - mLineStartOffset];
+                return mHorizontals[index];
             }
         }
     }
@@ -1658,7 +1727,7 @@ public abstract class Layout {
      * Return the vertical position of the baseline of the specified line.
      */
     public final int getLineBaseline(int line) {
-        // getLineTop(line+1) == getLineTop(line)
+        // getLineTop(line+1) == getLineBottom(line)
         return getLineTop(line+1) - getLineDescent(line);
     }
 
@@ -1736,7 +1805,8 @@ public abstract class Layout {
 
         TextLine tl = TextLine.obtain();
         // XXX: we don't care about tabs
-        tl.set(mPaint, mText, lineStart, lineEnd, lineDir, directions, false, null);
+        tl.set(mPaint, mText, lineStart, lineEnd, lineDir, directions, false, null,
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line));
         caret = lineStart + tl.getOffsetToLeftRightOf(caret - lineStart, toLeft);
         TextLine.recycle(tl);
         return caret;
@@ -1792,6 +1862,7 @@ public abstract class Layout {
         }
 
     }
+
     /**
      * Fills in the specified Path with a representation of a cursor
      * at the specified offset.  This will often be a vertical line
@@ -1807,7 +1878,6 @@ public abstract class Layout {
 
         boolean clamped = shouldClampCursor(line);
         float h1 = getPrimaryHorizontal(point, clamped) - 0.5f;
-        float h2 = isLevelBoundary(point) ? getSecondaryHorizontal(point, clamped) - 0.5f : h1;
 
         int caps = TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SHIFT_ON) |
                    TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SELECTING);
@@ -1825,34 +1895,24 @@ public abstract class Layout {
 
         if (h1 < 0.5f)
             h1 = 0.5f;
-        if (h2 < 0.5f)
-            h2 = 0.5f;
 
-        if (Float.compare(h1, h2) == 0) {
-            dest.moveTo(h1, top);
-            dest.lineTo(h1, bottom);
-        } else {
-            dest.moveTo(h1, top);
-            dest.lineTo(h1, (top + bottom) >> 1);
-
-            dest.moveTo(h2, (top + bottom) >> 1);
-            dest.lineTo(h2, bottom);
-        }
+        dest.moveTo(h1, top);
+        dest.lineTo(h1, bottom);
 
         if (caps == 2) {
-            dest.moveTo(h2, bottom);
-            dest.lineTo(h2 - dist, bottom + dist);
-            dest.lineTo(h2, bottom);
-            dest.lineTo(h2 + dist, bottom + dist);
+            dest.moveTo(h1, bottom);
+            dest.lineTo(h1 - dist, bottom + dist);
+            dest.lineTo(h1, bottom);
+            dest.lineTo(h1 + dist, bottom + dist);
         } else if (caps == 1) {
-            dest.moveTo(h2, bottom);
-            dest.lineTo(h2 - dist, bottom + dist);
+            dest.moveTo(h1, bottom);
+            dest.lineTo(h1 - dist, bottom + dist);
 
-            dest.moveTo(h2 - dist, bottom + dist - 0.5f);
-            dest.lineTo(h2 + dist, bottom + dist - 0.5f);
+            dest.moveTo(h1 - dist, bottom + dist - 0.5f);
+            dest.lineTo(h1 + dist, bottom + dist - 0.5f);
 
-            dest.moveTo(h2 + dist, bottom + dist);
-            dest.lineTo(h2, bottom);
+            dest.moveTo(h1 + dist, bottom + dist);
+            dest.lineTo(h1, bottom);
         }
 
         if (fn == 2) {
@@ -2119,7 +2179,8 @@ public abstract class Layout {
                     break;
                 }
             }
-            tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops);
+            tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops,
+                    0 /* ellipsisStart */, 0 /* ellipsisEnd */);
             return margin + Math.abs(tl.metrics(null));
         } finally {
             TextLine.recycle(tl);
@@ -2132,27 +2193,28 @@ public abstract class Layout {
     /**
      * @hide
      */
-    /* package */ static class TabStops {
-        private int[] mStops;
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static class TabStops {
+        private float[] mStops;
         private int mNumStops;
-        private int mIncrement;
+        private float mIncrement;
 
-        TabStops(int increment, Object[] spans) {
+        public TabStops(float increment, Object[] spans) {
             reset(increment, spans);
         }
 
-        void reset(int increment, Object[] spans) {
+        void reset(float increment, Object[] spans) {
             this.mIncrement = increment;
 
             int ns = 0;
             if (spans != null) {
-                int[] stops = this.mStops;
+                float[] stops = this.mStops;
                 for (Object o : spans) {
                     if (o instanceof TabStopSpan) {
                         if (stops == null) {
-                            stops = new int[10];
+                            stops = new float[10];
                         } else if (ns == stops.length) {
-                            int[] nstops = new int[ns * 2];
+                            float[] nstops = new float[ns * 2];
                             for (int i = 0; i < ns; ++i) {
                                 nstops[i] = stops[i];
                             }
@@ -2174,9 +2236,9 @@ public abstract class Layout {
         float nextTab(float h) {
             int ns = this.mNumStops;
             if (ns > 0) {
-                int[] stops = this.mStops;
+                float[] stops = this.mStops;
                 for (int i = 0; i < ns; ++i) {
-                    int stop = stops[i];
+                    float stop = stops[i];
                     if (stop > h) {
                         return stop;
                     }
@@ -2185,7 +2247,10 @@ public abstract class Layout {
             return nextDefaultStop(h, mIncrement);
         }
 
-        public static float nextDefaultStop(float h, int inc) {
+        /**
+         * Returns the position of next tab stop.
+         */
+        public static float nextDefaultStop(float h, float inc) {
             return ((int) ((h + inc) / inc)) * inc;
         }
     }
@@ -2324,6 +2389,52 @@ public abstract class Layout {
         @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
         public Directions(int[] dirs) {
             mDirections = dirs;
+        }
+
+        /**
+         * Returns number of BiDi runs.
+         *
+         * @hide
+         */
+        public @IntRange(from = 0) int getRunCount() {
+            return mDirections.length / 2;
+        }
+
+        /**
+         * Returns the start offset of the BiDi run.
+         *
+         * @param runIndex the index of the BiDi run
+         * @return the start offset of the BiDi run.
+         * @hide
+         */
+        public @IntRange(from = 0) int getRunStart(@IntRange(from = 0) int runIndex) {
+            return mDirections[runIndex * 2];
+        }
+
+        /**
+         * Returns the length of the BiDi run.
+         *
+         * Note that this method may return too large number due to reducing the number of object
+         * allocations. The too large number means the remaining part is assigned to this run. The
+         * caller must clamp the returned value.
+         *
+         * @param runIndex the index of the BiDi run
+         * @return the length of the BiDi run.
+         * @hide
+         */
+        public @IntRange(from = 0) int getRunLength(@IntRange(from = 0) int runIndex) {
+            return mDirections[runIndex * 2 + 1] & RUN_LENGTH_MASK;
+        }
+
+        /**
+         * Returns true if the BiDi run is RTL.
+         *
+         * @param runIndex the index of the BiDi run
+         * @return true if the BiDi run is RTL.
+         * @hide
+         */
+        public boolean isRunRtl(int runIndex) {
+            return (mDirections[runIndex * 2 + 1] & RUN_RTL_FLAG) != 0;
         }
     }
 
@@ -2477,7 +2588,7 @@ public abstract class Layout {
         ALIGN_RIGHT,
     }
 
-    private static final int TAB_INCREMENT = 20;
+    private static final float TAB_INCREMENT = 20;
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)

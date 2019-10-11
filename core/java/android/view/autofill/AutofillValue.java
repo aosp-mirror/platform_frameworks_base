@@ -21,12 +21,15 @@ import static android.view.View.AUTOFILL_TYPE_LIST;
 import static android.view.View.AUTOFILL_TYPE_TEXT;
 import static android.view.View.AUTOFILL_TYPE_TOGGLE;
 import static android.view.autofill.Helper.sDebug;
+import static android.view.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 
 import com.android.internal.util.Preconditions;
@@ -41,6 +44,9 @@ import java.util.Objects;
  * {@link View#getAutofillType()}.
  */
 public final class AutofillValue implements Parcelable {
+
+    private static final String TAG = "AutofillValue";
+
     private final @View.AutofillType int mType;
     private final @NonNull Object mValue;
 
@@ -235,7 +241,7 @@ public final class AutofillValue implements Parcelable {
         }
     }
 
-    public static final Parcelable.Creator<AutofillValue> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<AutofillValue> CREATOR =
             new Parcelable.Creator<AutofillValue>() {
         @Override
         public AutofillValue createFromParcel(Parcel source) {
@@ -256,8 +262,15 @@ public final class AutofillValue implements Parcelable {
      * Creates a new {@link AutofillValue} to autofill a {@link View} representing a text field.
      *
      * <p>See {@link View#AUTOFILL_TYPE_TEXT} for more info.
+     *
+     * <p><b>Note:</b> This method is not thread safe and can throw an exception if the
+     * {@code value} is modified by a different thread before it returns.
      */
     public static AutofillValue forText(@Nullable CharSequence value) {
+        if (sVerbose && !Looper.getMainLooper().isCurrentThread()) {
+            Log.v(TAG, "forText() not called on main thread: " + Thread.currentThread());
+        }
+
         return value == null ? null : new AutofillValue(AUTOFILL_TYPE_TEXT,
                 TextUtils.trimNoCopySpans(value));
     }

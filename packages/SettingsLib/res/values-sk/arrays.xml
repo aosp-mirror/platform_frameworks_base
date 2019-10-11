@@ -58,6 +58,11 @@
     <item msgid="3878793616631049349">"Použiť kontrolu HDCP len pre obsah DRM"</item>
     <item msgid="45075631231212732">"Vždy používať kontrolu HDCP"</item>
   </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"Deaktivované"</item>
+    <item msgid="1969681323976948639">"Aktivované filtrované"</item>
+    <item msgid="8719029132154020716">"Aktivované"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (predvolené)"</item>
     <item msgid="2809759619990248160">"AVRCP 1.3"</item>
@@ -137,6 +142,12 @@
     <item msgid="4327143584633311908">"Vyrovnaná kvalita zvuku a pripojenia"</item>
     <item msgid="4681409244565426925">"Optimalizovaná kvalita pripojenia"</item>
     <item msgid="364670732877872677">"Najvyšši kvalita (adaptívna prenosová rýchlosť)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", aktívne"</item>
+    <item msgid="8962366465966010158">", aktívne (médiá)"</item>
+    <item msgid="4046665544396189228">", aktívne (telefón)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"Vypnuté"</item>

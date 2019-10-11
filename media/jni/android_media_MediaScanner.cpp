@@ -27,6 +27,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include <android-base/macros.h>                // for FALLTHROUGH_INTENDED
 
 using namespace android;
 
@@ -92,6 +93,7 @@ static bool isValidUtf8(const char* bytes) {
                 return false;
             }
             // Fall through to take care of the final byte.
+            FALLTHROUGH_INTENDED;
         case 0x0c:
         case 0x0d:
             // Bit pattern 110x, so there is one additional byte.

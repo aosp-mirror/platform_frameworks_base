@@ -33,6 +33,7 @@ interface IRecentsAnimationController {
      * Takes a screenshot of the task associated with the given {@param taskId}. Only valid for the
      * current set of task ids provided to the handler.
      */
+    @UnsupportedAppUsage
     ActivityManager.TaskSnapshot screenshotTask(int taskId);
 
     /**
@@ -40,9 +41,11 @@ interface IRecentsAnimationController {
      * with remote animation targets should be relinquished. If {@param moveHomeToTop} is true, then
      * the home activity should be moved to the top. Otherwise, the home activity is hidden and the
      * user is returned to the app.
+     * @param sendUserLeaveHint If set to true, {@link Activity#onUserLeaving} will be sent to the
+     *                          top resumed app, false otherwise.
      */
     @UnsupportedAppUsage
-    void finish(boolean moveHomeToTop);
+    void finish(boolean moveHomeToTop, boolean sendUserLeaveHint);
 
     /**
      * Called by the handler to indicate that the recents animation input consumer should be
@@ -72,4 +75,33 @@ interface IRecentsAnimationController {
      * Hides the current input method if one is showing.
      */
     void hideCurrentInputMethod();
+
+    /**
+     * Set a state for controller whether would like to cancel recents animations with deferred
+     * task screenshot presentation.
+     *
+     * When we cancel the recents animation due to a stack order change, we can't just cancel it
+     * immediately as it would lead to a flicker in Launcher if we just remove the task from the
+     * leash. Instead we screenshot the previous task and replace the child of the leash with the
+     * screenshot, so that Launcher can still control the leash lifecycle & make the next app
+     * transition animate smoothly without flickering.
+     *
+     * @param screenshot When set {@code true}, means recents animation will be canceled when the
+     *                   next app launch. System will take previous task's screenshot when the next
+     *                   app transition starting, and skip previous task's animation.
+     *                   Set {@code false} means will not take screenshot & skip animation
+     *                   for previous task.
+     *
+     * @see #cleanupScreenshot()
+     * @see IRecentsAnimationRunner#onCancelled
+     */
+    void setCancelWithDeferredScreenshot(boolean screenshot);
+
+    /**
+     * Clean up the screenshot of previous task which was created during recents animation that
+     * was cancelled by a stack order change.
+     *
+     * @see {@link IRecentsAnimationRunner#onAnimationCanceled}
+     */
+    void cleanupScreenshot();
 }

@@ -40,7 +40,7 @@
     <item msgid="355508996603873860">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ সৈতে সংযোগ কৰি থকা হৈছে…"</item>
     <item msgid="554971459996405634">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ জৰিয়তে সত্যাপন কৰি থকা হৈছে…"</item>
     <item msgid="7928343808033020343">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ আইপি ঠিকনা পৰা সংগ্ৰহ কৰি থকা হৈছে…"</item>
-    <item msgid="8937994881315223448">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ সৈতে সংযোগ কৰা হ\'ল"</item>
+    <item msgid="8937994881315223448">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ সৈতে সংযোগ কৰা হ’ল"</item>
     <item msgid="1330262655415760617">"স্থগিত"</item>
     <item msgid="7698638434317271902">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>ৰ পৰা সংযোগ বিচ্ছিন্ন কৰি থকা হৈছে…"</item>
     <item msgid="197508606402264311">"সংযোগ বিচ্ছিন্ন"</item>
@@ -57,6 +57,11 @@
     <item msgid="505558545611516707">"কেতিয়াও HDCP পৰীক্ষণ ব্যৱহাৰ নকৰিব"</item>
     <item msgid="3878793616631049349">"কেৱল DRM সমলৰ বাবে HDCP পৰীক্ষণ ব্যৱহাৰ কৰক"</item>
     <item msgid="45075631231212732">"সদায় HDCP পৰীক্ষণ ব্যৱহাৰ কৰক"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_entries">
+    <item msgid="3966341281672645384">"অক্ষম আছে"</item>
+    <item msgid="1969681323976948639">"সক্ষম কৰাবিলাক ফিল্টাৰ কৰা হৈছে"</item>
+    <item msgid="8719029132154020716">"সক্ষম কৰা আছে"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP ১.৪ (ডিফ’ল্ট)"</item>
@@ -81,7 +86,7 @@
     <item msgid="3304843301758635896">"বিকল্প ক\'ডেকসমূহ অসক্ষম কৰক"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_summaries">
-    <item msgid="5062108632402595000">"ছিষ্টেমৰ বাছনি ব্যৱহাৰ কৰক (ডিফল্ট)"</item>
+    <item msgid="5062108632402595000">"ছিষ্টেমৰ বাছনি ব্যৱহাৰ কৰক (ডিফ\'ল্ট)"</item>
     <item msgid="6898329690939802290">"এছবিচি"</item>
     <item msgid="6839647709301342559">"এএচি"</item>
     <item msgid="7848030269621918608">"<xliff:g id="QUALCOMM">Qualcomm®</xliff:g> <xliff:g id="APTX">aptX™</xliff:g> অডিঅ’"</item>
@@ -130,13 +135,19 @@
     <item msgid="7158319962230727476">"ধ্বনিৰ মানৰ বাবে অপ্টিমাইজ কৰা হৈছে (৯৯০কি.বা.প্ৰ.ছে./৯০৯কি.বা.প্ৰ.ছে.)"</item>
     <item msgid="2921767058740704969">"ধ্বনি আৰু সংযোগৰ সন্তুলিত গুণগত মান (৬৬০কে.বি.প্ৰ.ছে./৬০৬কে.বি.প্ৰ.ছে."</item>
     <item msgid="8860982705384396512">"সংযোগৰ ক্ষমতা অনুযায়ী সৰ্বোত্তম (৩৩০কে.বি.প্ৰ.ছে/৩০৩কে.বি.প্ৰ.ছে)"</item>
-    <item msgid="4414060457677684127">"সৰ্বশ্ৰেষ্ঠ প্ৰচেষ্টা (খাপ খাব পৰা ৰেইট)"</item>
+    <item msgid="4414060457677684127">"উত্তম প্ৰচেষ্টা (অভিযোজিত বিট ৰেইট)"</item>
   </string-array>
   <string-array name="bluetooth_a2dp_codec_ldac_playback_quality_summaries">
     <item msgid="6398189564246596868">"অডিঅ\' গুণমানৰ বাবে অপ্টিমাইজ কৰা হৈছে"</item>
     <item msgid="4327143584633311908">"ধ্বনি আৰু সংযোগৰ সন্তুলিত গুণগত মান"</item>
     <item msgid="4681409244565426925">"সংযোগৰ ক্ষমতা অনুযায়ী সৰ্বোত্তম"</item>
-    <item msgid="364670732877872677">"উত্তম প্ৰচেষ্টা (খাপ খাব পৰা বিট ৰেইট)"</item>
+    <item msgid="364670732877872677">"উত্তম প্ৰচেষ্টা (অভিযোজিত বিট ৰেইট)"</item>
+  </string-array>
+  <string-array name="bluetooth_audio_active_device_summaries">
+    <item msgid="4862957058729193940"></item>
+    <item msgid="6481691720774549651">", সক্ৰিয়"</item>
+    <item msgid="8962366465966010158">", সক্ৰিয় (মিডিয়া)"</item>
+    <item msgid="4046665544396189228">", সক্ৰিয় (ফ\'ন)"</item>
   </string-array>
   <string-array name="select_logd_size_titles">
     <item msgid="8665206199209698501">"অফ কৰক"</item>
@@ -225,12 +236,12 @@
     <item msgid="1064373276095698656">"পৰীক্ষণ কৰা চিত্ৰাংকণ কমাণ্ডবোৰ সেউজীয়া ৰঙত হাইলাইট কৰক"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
-    <item msgid="2193584639058893150">"অফ"</item>
+    <item msgid="2193584639058893150">"অফ হৈ আছে"</item>
     <item msgid="2751513398307949636">"স্ক্ৰীণত দণ্ড হিচাপে"</item>
     <item msgid="2355151170975410323">"<xliff:g id="AS_TYPED_COMMAND">adb shell dumpsys gfxinfo</xliff:g>ত"</item>
   </string-array>
   <string-array name="debug_hw_overdraw_entries">
-    <item msgid="8190572633763871652">"বন্ধ কৰক"</item>
+    <item msgid="8190572633763871652">"অফ কৰক"</item>
     <item msgid="7688197031296835369">"পিক্সেল একাধিকবাৰ ব্যৱহৃত অংশসমূহ দেখুৱাওক"</item>
     <item msgid="2290859360633824369">"ডিউটাৰএন\'মেলীৰ অংশসমূহ দেখুৱাওক"</item>
   </string-array>

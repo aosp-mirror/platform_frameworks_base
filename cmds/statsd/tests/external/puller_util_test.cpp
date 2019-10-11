@@ -80,7 +80,7 @@ TEST(puller_util, MergeNoDimension) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
 
   vector<vector<int>> actual;
   extractIntoVector(inputData, actual);
@@ -120,7 +120,7 @@ TEST(puller_util, MergeWithDimension) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
 
   vector<vector<int>> actual;
   extractIntoVector(inputData, actual);
@@ -154,7 +154,7 @@ TEST(puller_util, NoMergeHostUidOnly) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
 
   // 20->32->31
   // 20->22->21
@@ -190,7 +190,7 @@ TEST(puller_util, IsolatedUidOnly) {
       .WillRepeatedly(Return(hostUid));
   EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
       .WillRepeatedly(ReturnArg<0>());
-  mergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
 
   // 20->32->31
   // 20->22->21
@@ -231,7 +231,7 @@ TEST(puller_util, MultipleIsolatedUidToOneHostUid) {
 
   sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
   EXPECT_CALL(*uidMap, getHostUidOrSelf(_)).WillRepeatedly(Return(hostUid));
-  mergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId);
 
   vector<vector<int>> actual;
   extractIntoVector(inputData, actual);
@@ -256,7 +256,7 @@ TEST(puller_util, NoNeedToMerge) {
   inputData.push_back(event);
 
   sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-  mergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId);
+  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId);
 
   EXPECT_EQ(2, (int)inputData.size());
 }

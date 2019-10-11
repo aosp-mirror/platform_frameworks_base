@@ -169,7 +169,7 @@ public final class ImsExternalCallState implements Parcelable {
         Rlog.d(TAG, "ImsExternalCallState writeToParcel = " + out.toString());
     }
 
-    public static final Parcelable.Creator<ImsExternalCallState> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<ImsExternalCallState> CREATOR =
             new Parcelable.Creator<ImsExternalCallState>() {
         @Override
         public ImsExternalCallState createFromParcel(Parcel in) {
@@ -213,6 +213,7 @@ public final class ImsExternalCallState implements Parcelable {
         return mIsHeld;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ImsExternalCallState { mCallId = " + mCallId +

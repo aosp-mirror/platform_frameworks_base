@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.notification.HybridNotificationView
+<com.android.systemui.statusbar.notification.row.HybridNotificationView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -35,4 +35,4 @@
         android:singleLine="true"
         style="?attr/hybridNotificationTextStyle"
     />
-</com.android.systemui.statusbar.notification.HybridNotificationView>
+</com.android.systemui.statusbar.notification.row.HybridNotificationView>

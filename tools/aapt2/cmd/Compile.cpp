@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include <dirent.h>
+#include "Compile.h"
 
+#include <dirent.h>
 #include <string>
 
 #include "android-base/errors.h"
@@ -27,9 +28,9 @@
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
 #include "Diagnostics.h"
-#include "Flags.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
+#include "cmd/Util.h"
 #include "compile/IdAssigner.h"
 #include "compile/InlineXmlFormatParser.h"
 #include "compile/Png.h"
@@ -40,8 +41,11 @@
 #include "format/proto/ProtoSerialize.h"
 #include "io/BigBufferStream.h"
 #include "io/FileStream.h"
+#include "io/FileSystem.h"
 #include "io/StringStream.h"
 #include "io/Util.h"
+#include "io/ZipArchive.h"
+#include "trace/TraceBuffer.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
@@ -71,9 +75,9 @@ struct ResourcePathData {
 };
 
 // Resource file paths are expected to look like: [--/res/]type[-config]/name
-static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
+static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path, const char dir_sep,
                                                        std::string* out_error) {
-  std::vector<std::string> parts = util::Split(path, file::sDirSep);
+  std::vector<std::string> parts = util::Split(path, dir_sep);
   if (parts.size() < 2) {
     if (out_error) *out_error = "bad resource path";
     return {};
@@ -121,16 +125,6 @@ static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
                           extension.to_string(), config_str.to_string(), config};
 }
 
-struct CompileOptions {
-  std::string output_path;
-  Maybe<std::string> res_dir;
-  Maybe<std::string> generate_text_symbols_path;
-  bool pseudolocalize = false;
-  bool no_png_crunch = false;
-  bool legacy_mode = false;
-  bool verbose = false;
-};
-
 static std::string BuildIntermediateContainerFilename(const ResourcePathData& data) {
   std::stringstream name;
   name << data.resource_dir;
@@ -145,96 +139,40 @@ static std::string BuildIntermediateContainerFilename(const ResourcePathData& da
   return name.str();
 }
 
-static bool IsHidden(const StringPiece& filename) {
-  return util::StartsWith(filename, ".");
-}
-
-// Walks the res directory structure, looking for resource files.
-static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& options,
-                                  std::vector<ResourcePathData>* out_path_data) {
-  const std::string& root_dir = options.res_dir.value();
-  std::unique_ptr<DIR, decltype(closedir)*> d(opendir(root_dir.data()), closedir);
-  if (!d) {
-    context->GetDiagnostics()->Error(DiagMessage(root_dir) << "failed to open directory: "
-                                                           << SystemErrorCodeToString(errno));
-    return false;
-  }
-
-  while (struct dirent* entry = readdir(d.get())) {
-    if (IsHidden(entry->d_name)) {
-      continue;
-    }
-
-    std::string prefix_path = root_dir;
-    file::AppendPath(&prefix_path, entry->d_name);
-
-    if (file::GetFileType(prefix_path) != file::FileType::kDirectory) {
-      continue;
-    }
-
-    std::unique_ptr<DIR, decltype(closedir)*> subdir(opendir(prefix_path.data()), closedir);
-    if (!subdir) {
-      context->GetDiagnostics()->Error(DiagMessage(prefix_path) << "failed to open directory: "
-                                                                << SystemErrorCodeToString(errno));
-      return false;
-    }
-
-    while (struct dirent* leaf_entry = readdir(subdir.get())) {
-      if (IsHidden(leaf_entry->d_name)) {
-        continue;
-      }
-
-      std::string full_path = prefix_path;
-      file::AppendPath(&full_path, leaf_entry->d_name);
-
-      std::string err_str;
-      Maybe<ResourcePathData> path_data = ExtractResourcePathData(full_path, &err_str);
-      if (!path_data) {
-        context->GetDiagnostics()->Error(DiagMessage(full_path) << err_str);
-        return false;
-      }
-
-      out_path_data->push_back(std::move(path_data.value()));
-    }
-  }
-
-  // File-system directory enumeration order is platform-dependent. Sort the result to remove any
-  // inconsistencies between platforms.
-  std::sort(
-      out_path_data->begin(), out_path_data->end(),
-      [](const ResourcePathData& a, const ResourcePathData& b) { return a.source < b.source; });
-  return true;
-}
-
 static bool CompileTable(IAaptContext* context, const CompileOptions& options,
-                         const ResourcePathData& path_data, IArchiveWriter* writer,
+                         const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                          const std::string& output_path) {
+  TRACE_CALL();
+  // Filenames starting with "donottranslate" are not localizable
+  bool translatable_file = path_data.name.find("donottranslate") != 0;
   ResourceTable table;
   {
-    FileInputStream fin(path_data.source.path);
-    if (fin.HadError()) {
+    auto fin = file->OpenInputStream();
+    if (fin->HadError()) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << "failed to open file: " << fin.GetError());
+          << "failed to open file: " << fin->GetError());
       return false;
     }
 
     // Parse the values file from XML.
-    xml::XmlPullParser xml_parser(&fin);
+    xml::XmlPullParser xml_parser(fin.get());
 
     ResourceParserOptions parser_options;
     parser_options.error_on_positional_arguments = !options.legacy_mode;
+    parser_options.translatable = translatable_file;
 
-    // If the filename includes donottranslate, then the default translatable is false.
-    parser_options.translatable = path_data.name.find("donottranslate") == std::string::npos;
+    // If visibility was forced, we need to use it when creating a new resource and also error if
+    // we try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
+    parser_options.visibility = options.visibility;
 
     ResourceParser res_parser(context->GetDiagnostics(), &table, path_data.source, path_data.config,
-                              parser_options);
+        parser_options);
     if (!res_parser.Parse(&xml_parser)) {
       return false;
     }
   }
 
-  if (options.pseudolocalize) {
+  if (options.pseudolocalize && translatable_file) {
     // Generate pseudo-localized strings (en-XA and ar-XB).
     // These are created as weak symbols, and are only generated from default
     // configuration
@@ -294,36 +232,48 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 
     Printer r_txt_printer(&fout_text);
     for (const auto& package : table.packages) {
-      for (const auto& type : package->types) {
-        for (const auto& entry : type->entries) {
-          // Check access modifiers.
-          switch(entry->visibility.level) {
-            case Visibility::Level::kUndefined :
-              r_txt_printer.Print("default ");
-              break;
-            case Visibility::Level::kPublic :
-              r_txt_printer.Print("public ");
-              break;
-            case Visibility::Level::kPrivate :
-              r_txt_printer.Print("private ");
-          }
+      // Only print resources defined locally, e.g. don't write android attributes.
+      if (package->name.empty()) {
+        for (const auto& type : package->types) {
+          for (const auto& entry : type->entries) {
+            // Check access modifiers.
+            switch (entry->visibility.level) {
+              case Visibility::Level::kUndefined :
+                r_txt_printer.Print("default ");
+                break;
+              case Visibility::Level::kPublic :
+                r_txt_printer.Print("public ");
+                break;
+              case Visibility::Level::kPrivate :
+                r_txt_printer.Print("private ");
+            }
 
-          if (type->type != ResourceType::kStyleable) {
-            r_txt_printer.Print("int ");
-            r_txt_printer.Print(to_string(type->type));
-            r_txt_printer.Print(" ");
-            r_txt_printer.Println(entry->name);
-          } else {
-            r_txt_printer.Print("int[] styleable ");
-            r_txt_printer.Println(entry->name);
+            if (type->type != ResourceType::kStyleable) {
+              r_txt_printer.Print("int ");
+              r_txt_printer.Print(to_string(type->type));
+              r_txt_printer.Print(" ");
+              r_txt_printer.Println(entry->name);
+            } else {
+              r_txt_printer.Print("int[] styleable ");
+              r_txt_printer.Println(entry->name);
 
-            if (!entry->values.empty()) {
-              auto styleable = static_cast<const Styleable*>(entry->values.front()->value.get());
-              for (const auto& attr : styleable->entries) {
-                r_txt_printer.Print("default int styleable ");
-                r_txt_printer.Print(entry->name);
-                r_txt_printer.Print("_");
-                r_txt_printer.Println(attr.name.value().entry);
+              if (!entry->values.empty()) {
+                auto styleable =
+                    static_cast<const Styleable*>(entry->values.front()->value.get());
+                for (const auto& attr : styleable->entries) {
+                  // The visibility of the children under the styleable does not matter as they are
+                  // nested under their parent and use its visibility.
+                  r_txt_printer.Print("default int styleable ");
+                  r_txt_printer.Print(entry->name);
+                  // If the package name is present, also include it in the mangled name (e.g.
+                  // "android")
+                  if (!attr.name.value().package.empty()) {
+                    r_txt_printer.Print("_");
+                    r_txt_printer.Print(MakePackageSafeName(attr.name.value().package));
+                  }
+                  r_txt_printer.Print("_");
+                  r_txt_printer.Println(attr.name.value().entry);
+                }
               }
             }
           }
@@ -338,6 +288,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 static bool WriteHeaderAndDataToWriter(const StringPiece& output_path, const ResourceFile& file,
                                        io::KnownSizeInputStream* in, IArchiveWriter* writer,
                                        IDiagnostics* diag) {
+  TRACE_CALL();
   // Start the entry so we can write the header.
   if (!writer->StartEntry(output_path, 0)) {
     diag->Error(DiagMessage(output_path) << "failed to open file");
@@ -402,26 +353,26 @@ static bool IsValidFile(IAaptContext* context, const std::string& input_path) {
 }
 
 static bool CompileXml(IAaptContext* context, const CompileOptions& options,
-                       const ResourcePathData& path_data, IArchiveWriter* writer,
+                       const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                        const std::string& output_path) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling XML");
   }
 
   std::unique_ptr<xml::XmlResource> xmlres;
   {
-    FileInputStream fin(path_data.source.path);
-    if (fin.HadError()) {
+    auto fin = file->OpenInputStream();
+    if (fin->HadError()) {
       context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << "failed to open file: " << fin.GetError());
+                                       << "failed to open file: " << fin->GetError());
       return false;
     }
 
-    xmlres = xml::Inflate(&fin, context->GetDiagnostics(), path_data.source);
-  }
-
-  if (!xmlres) {
-    return false;
+    xmlres = xml::Inflate(fin.get(), context->GetDiagnostics(), path_data.source);
+    if (!xmlres) {
+      return false;
+    }
   }
 
   xmlres->file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir), path_data.name);
@@ -502,8 +453,9 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
 }
 
 static bool CompilePng(IAaptContext* context, const CompileOptions& options,
-                       const ResourcePathData& path_data, IArchiveWriter* writer,
+                       const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                        const std::string& output_path) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling PNG");
   }
@@ -516,12 +468,9 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
   res_file.type = ResourceFile::Type::kPng;
 
   {
-    std::string content;
-    if (!android::base::ReadFileToString(path_data.source.path, &content,
-                                         true /*follow_symlinks*/)) {
-      context->GetDiagnostics()->Error(DiagMessage(path_data.source)
-                                       << "failed to open file: "
-                                       << SystemErrorCodeToString(errno));
+    auto data = file->OpenAsData();
+    if (!data) {
+      context->GetDiagnostics()->Error(DiagMessage(path_data.source) << "failed to open file ");
       return false;
     }
 
@@ -530,6 +479,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
 
     // Ensure that we only keep the chunks we care about if we end up
     // using the original PNG instead of the crunched one.
+    const StringPiece content(reinterpret_cast<const char*>(data->data()), data->size());
     PngChunkFilter png_chunk_filter(content);
     std::unique_ptr<Image> image = ReadPng(context, path_data.source, &png_chunk_filter);
     if (!image) {
@@ -592,7 +542,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     if (context->IsVerbose()) {
       // For debugging only, use the legacy PNG cruncher and compare the resulting file sizes.
       // This will help catch exotic cases where the new code may generate larger PNGs.
-      std::stringstream legacy_stream(content);
+      std::stringstream legacy_stream(content.to_string());
       BigBuffer legacy_buffer(4096);
       Png png(context->GetDiagnostics());
       if (!png.process(path_data.source, &legacy_stream, &legacy_buffer, {})) {
@@ -606,41 +556,32 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
   }
 
   io::BigBufferInputStream buffer_in(&buffer);
-  if (!WriteHeaderAndDataToWriter(output_path, res_file, &buffer_in, writer,
-                                  context->GetDiagnostics())) {
-    return false;
-  }
-  return true;
+  return WriteHeaderAndDataToWriter(output_path, res_file, &buffer_in, writer,
+      context->GetDiagnostics());
 }
 
 static bool CompileFile(IAaptContext* context, const CompileOptions& options,
-                        const ResourcePathData& path_data, IArchiveWriter* writer,
+                        const ResourcePathData& path_data, io::IFile* file, IArchiveWriter* writer,
                         const std::string& output_path) {
+  TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(DiagMessage(path_data.source) << "compiling file");
   }
 
-  BigBuffer buffer(256);
   ResourceFile res_file;
   res_file.name = ResourceName({}, *ParseResourceType(path_data.resource_dir), path_data.name);
   res_file.config = path_data.config;
   res_file.source = path_data.source;
   res_file.type = ResourceFile::Type::kUnknown;
 
-  std::string error_str;
-  Maybe<android::FileMap> f = file::MmapPath(path_data.source.path, &error_str);
-  if (!f) {
-    context->GetDiagnostics()->Error(DiagMessage(path_data.source) << "failed to mmap file: "
-                                     << error_str);
+  auto data = file->OpenAsData();
+  if (!data) {
+    context->GetDiagnostics()->Error(DiagMessage(path_data.source) << "failed to open file ");
     return false;
   }
 
-  io::MmappedData mmapped_in(std::move(f.value()));
-  if (!WriteHeaderAndDataToWriter(output_path, res_file, &mmapped_in, writer,
-                                  context->GetDiagnostics())) {
-    return false;
-  }
-  return true;
+  return WriteHeaderAndDataToWriter(output_path, res_file, data.get(), writer,
+      context->GetDiagnostics());
 }
 
 class CompileContext : public IAaptContext {
@@ -695,79 +636,34 @@ class CompileContext : public IAaptContext {
   bool verbose_ = false;
 };
 
-// Entry point for compilation phase. Parses arguments and dispatches to the correct steps.
-int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
-  CompileContext context(diagnostics);
-  CompileOptions options;
-
-  bool verbose = false;
-  Flags flags =
-      Flags()
-          .RequiredFlag("-o", "Output path", &options.output_path)
-          .OptionalFlag("--dir", "Directory to scan for resources", &options.res_dir)
-          .OptionalFlag("--output-text-symbols",
-                        "Generates a text file containing the resource symbols in the\n"
-                        "specified file",
-                        &options.generate_text_symbols_path)
-          .OptionalSwitch("--pseudo-localize",
-                          "Generate resources for pseudo-locales "
-                          "(en-XA and ar-XB)",
-                          &options.pseudolocalize)
-          .OptionalSwitch("--no-crunch", "Disables PNG processing", &options.no_png_crunch)
-          .OptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
-                          &options.legacy_mode)
-          .OptionalSwitch("-v", "Enables verbose logging", &verbose);
-  if (!flags.Parse("aapt2 compile", args, &std::cerr)) {
-    return 1;
-  }
-
-  context.SetVerbose(verbose);
-
-  std::unique_ptr<IArchiveWriter> archive_writer;
-
-  std::vector<ResourcePathData> input_data;
-  if (options.res_dir) {
-    if (!flags.GetArgs().empty()) {
-      // Can't have both files and a resource directory.
-      context.GetDiagnostics()->Error(DiagMessage() << "files given but --dir specified");
-      flags.Usage("aapt2 compile", &std::cerr);
-      return 1;
-    }
-
-    if (!LoadInputFilesFromDir(&context, options, &input_data)) {
-      return 1;
-    }
-
-    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options.output_path);
-
-  } else {
-    input_data.reserve(flags.GetArgs().size());
-
-    // Collect data from the path for each input file.
-    for (const std::string& arg : flags.GetArgs()) {
-      std::string error_str;
-      if (Maybe<ResourcePathData> path_data = ExtractResourcePathData(arg, &error_str)) {
-        input_data.push_back(std::move(path_data.value()));
-      } else {
-        context.GetDiagnostics()->Error(DiagMessage() << error_str << " (" << arg << ")");
-        return 1;
-      }
-    }
-
-    archive_writer = CreateDirectoryArchiveWriter(context.GetDiagnostics(), options.output_path);
-  }
-
-  if (!archive_writer) {
-    return 1;
-  }
-
+int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* output_writer,
+             CompileOptions& options) {
+  TRACE_CALL();
   bool error = false;
-  for (ResourcePathData& path_data : input_data) {
-    if (options.verbose) {
-      context.GetDiagnostics()->Note(DiagMessage(path_data.source) << "processing");
+
+  // Iterate over the input files in a stable, platform-independent manner
+  auto file_iterator  = inputs->Iterator();
+  while (file_iterator->HasNext()) {
+    auto file = file_iterator->Next();
+    std::string path = file->GetSource().path;
+
+    // Skip hidden input files
+    if (file::IsHidden(path)) {
+      continue;
     }
 
-    if (!IsValidFile(&context, path_data.source.path)) {
+    if (!options.res_zip && !IsValidFile(context, path)) {
+      error = true;
+      continue;
+    }
+
+    // Extract resource type information from the full path
+    std::string err_str;
+    ResourcePathData path_data;
+    if (auto maybe_path_data = ExtractResourcePathData(path, inputs->GetDirSeparator(), &err_str)) {
+      path_data = maybe_path_data.value();
+    } else {
+      context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << err_str);
       error = true;
       continue;
     }
@@ -782,16 +678,16 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
 
     } else if (const ResourceType* type = ParseResourceType(path_data.resource_dir)) {
       if (*type != ResourceType::kRaw) {
-        if (path_data.extension == "xml") {
+        if (*type == ResourceType::kXml || path_data.extension == "xml") {
           compile_func = &CompileXml;
         } else if ((!options.no_png_crunch && path_data.extension == "png")
-            || path_data.extension == "9.png") {
+                   || path_data.extension == "9.png") {
           compile_func = &CompilePng;
         }
       }
     } else {
-      context.GetDiagnostics()->Error(DiagMessage()
-                                      << "invalid file path '" << path_data.source << "'");
+      context->GetDiagnostics()->Error(DiagMessage()
+          << "invalid file path '" << path_data.source << "'");
       error = true;
       continue;
     }
@@ -801,17 +697,102 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     if (compile_func != &CompileFile && !options.legacy_mode
         && std::count(path_data.name.begin(), path_data.name.end(), '.') != 0) {
       error = true;
-      context.GetDiagnostics()->Error(DiagMessage() << "resource file '" << path_data.source.path
-                                                    << "' name cannot contain '.' other than for"
-                                                    << "specifying the extension");
+      context->GetDiagnostics()->Error(DiagMessage(file->GetSource())
+                                                    << "file name cannot contain '.' other than for"
+                                                    << " specifying the extension");
       continue;
     }
 
-    // Compile the file.
     const std::string out_path = BuildIntermediateContainerFilename(path_data);
-    error |= !compile_func(&context, options, path_data, archive_writer.get(), out_path);
+    if (!compile_func(context, options, path_data, file, output_writer, out_path)) {
+      context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << "file failed to compile");
+      error = true;
+    }
   }
+
   return error ? 1 : 0;
+}
+
+int CompileCommand::Action(const std::vector<std::string>& args) {
+  TRACE_FLUSH(trace_folder_? trace_folder_.value() : "", "CompileCommand::Action");
+  CompileContext context(diagnostic_);
+  context.SetVerbose(options_.verbose);
+
+  if (visibility_) {
+    if (visibility_.value() == "public") {
+      options_.visibility = Visibility::Level::kPublic;
+    } else if (visibility_.value() == "private") {
+      options_.visibility = Visibility::Level::kPrivate;
+    } else if (visibility_.value() == "default") {
+      options_.visibility = Visibility::Level::kUndefined;
+    } else {
+      context.GetDiagnostics()->Error(
+          DiagMessage() << "Unrecognized visibility level passes to --visibility: '"
+                        << visibility_.value() << "'. Accepted levels: public, private, default");
+      return 1;
+    }
+  }
+
+  std::unique_ptr<io::IFileCollection> file_collection;
+  std::unique_ptr<IArchiveWriter> archive_writer;
+
+  // Collect the resources files to compile
+  if (options_.res_dir && options_.res_zip) {
+    context.GetDiagnostics()->Error(DiagMessage()
+                                      << "only one of --dir and --zip can be specified");
+    return 1;
+  } else if (options_.res_dir) {
+    if (!args.empty()) {
+      context.GetDiagnostics()->Error(DiagMessage() << "files given but --dir specified");
+      Usage(&std::cerr);
+      return 1;
+    }
+
+    // Load the files from the res directory
+    std::string err;
+    file_collection = io::FileCollection::Create(options_.res_dir.value(), &err);
+    if (!file_collection) {
+      context.GetDiagnostics()->Error(DiagMessage(options_.res_dir.value()) << err);
+      return 1;
+    }
+
+    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options_.output_path);
+  } else if (options_.res_zip) {
+    if (!args.empty()) {
+      context.GetDiagnostics()->Error(DiagMessage() << "files given but --zip specified");
+      Usage(&std::cerr);
+      return 1;
+    }
+
+    // Load a zip file containing a res directory
+    std::string err;
+    file_collection = io::ZipFileCollection::Create(options_.res_zip.value(), &err);
+    if (!file_collection) {
+      context.GetDiagnostics()->Error(DiagMessage(options_.res_zip.value()) << err);
+      return 1;
+    }
+
+    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options_.output_path);
+  } else {
+    auto collection = util::make_unique<io::FileCollection>();
+
+    // Collect data from the path for each input file.
+    std::vector<std::string> sorted_args = args;
+    std::sort(sorted_args.begin(), sorted_args.end());
+
+    for (const std::string& arg : sorted_args) {
+      collection->InsertFile(arg);
+    }
+
+    file_collection = std::move(collection);
+    archive_writer = CreateDirectoryArchiveWriter(context.GetDiagnostics(), options_.output_path);
+  }
+
+  if (!archive_writer) {
+    return 1;
+  }
+
+  return Compile(&context, file_collection.get(), archive_writer.get(), options_);
 }
 
 }  // namespace aapt

@@ -1,0 +1,60 @@
+/*
+ * Copyright (C) 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.hardware.biometrics;
+
+option java_outer_classname = "BiometricsProtoEnums";
+option java_multiple_files = true;
+
+// Logging constants for <Biometric>Service and BiometricService
+
+enum ModalityEnum {
+    MODALITY_UNKNOWN = 0;
+    MODALITY_FINGERPRINT = 1;   // 1 << 0
+    MODALITY_IRIS = 2;          // 1 << 1
+    MODALITY_FACE = 4;          // 1 << 2
+}
+
+enum ClientEnum {
+    CLIENT_UNKNOWN = 0;
+    CLIENT_KEYGUARD = 1;
+    CLIENT_BIOMETRIC_PROMPT = 2;
+    CLIENT_FINGERPRINT_MANAGER = 3; // Deprecated API before BiometricPrompt was introduced
+}
+
+enum ActionEnum {
+    ACTION_UNKNOWN = 0;
+    ACTION_ENROLL = 1;
+    ACTION_AUTHENTICATE = 2;
+    ACTION_ENUMERATE = 3;
+    ACTION_REMOVE = 4;
+}
+
+enum IssueEnum {
+    ISSUE_UNKNOWN = 0;
+    // When a biometric HAL has crashed.
+    ISSUE_HAL_DEATH = 1;
+    // When Android Framework has a template that doesn't exist in the HAL. The framework
+    // is expected to remove its template to stay in sync with the HAL.
+    ISSUE_UNKNOWN_TEMPLATE_ENROLLED_FRAMEWORK = 2;
+    // When the HAL has a template that doesn't exist in Android Framework. The framework
+    // is expected to notify the HAL to remove this template to stay in sync with the framework.
+    ISSUE_UNKNOWN_TEMPLATE_ENROLLED_HAL = 3;
+    // When the HAL has not sent ERROR_CANCELED within the specified timeout.
+    ISSUE_CANCEL_TIMED_OUT = 4;
+}

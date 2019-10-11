@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorPrimary">
+            android:textColor="@android:color/white">
         </TextView>
 
         <ImageView

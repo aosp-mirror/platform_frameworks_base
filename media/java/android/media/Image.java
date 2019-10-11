@@ -75,7 +75,7 @@ public abstract class Image implements AutoCloseable {
     /**
      * Get the format for this image. This format determines the number of
      * ByteBuffers needed to represent the image, and the general layout of the
-     * pixel data in each in ByteBuffer.
+     * pixel data in each ByteBuffer.
      *
      * <p>
      * The format is one of the values from
@@ -153,6 +153,13 @@ public abstract class Image implements AutoCloseable {
      *   pixel stride are undefined for this format. Calling {@link Plane#getRowStride()}
      *   or {@link Plane#getPixelStride()} on RAW_PRIVATE image will cause
      *   UnSupportedOperationException being thrown.
+     *   </td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#HEIC HEIC}</td>
+     *   <td>1</td>
+     *   <td>Compressed data, so row and pixel strides are 0. To uncompress, use
+     *      {@link android.graphics.BitmapFactory#decodeByteArray BitmapFactory#decodeByteArray}.
      *   </td>
      * </tr>
      * </table>

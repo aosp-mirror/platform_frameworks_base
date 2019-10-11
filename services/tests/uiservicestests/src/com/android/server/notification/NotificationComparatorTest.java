@@ -15,8 +15,9 @@
  */
 package com.android.server.notification;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -111,7 +112,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordMinCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "minCall", callUid, callUid, n1,
                 new UserHandle(userId), "", 2000), getDefaultChannel());
-        mRecordMinCall.setUserImportance(NotificationManager.IMPORTANCE_MIN);
+        mRecordMinCall.setSystemImportance(NotificationManager.IMPORTANCE_MIN);
 
         Notification n2 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
@@ -120,7 +121,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordHighCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "highcall", callUid, callUid, n2,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
-        mRecordHighCall.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordHighCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n3 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MediaStyle()
@@ -129,14 +130,14 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordDefaultMedia = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "media", uid2, uid2, n3, new UserHandle(userId),
                 "", 1499), getDefaultChannel());
-        mRecordDefaultMedia.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        mRecordDefaultMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n4 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setStyle(new Notification.MessagingStyle("sender!")).build();
         mRecordInlineReply = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "inlinereply", uid2, uid2, n4, new UserHandle(userId),
                 "", 1599), getDefaultChannel());
-        mRecordInlineReply.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordInlineReply.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
         mRecordInlineReply.setPackagePriority(Notification.PRIORITY_MAX);
 
         if (smsPkg != null) {
@@ -145,7 +146,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
             mRecordSms = new NotificationRecord(mContext, new StatusBarNotification(smsPkg,
                     smsPkg, 1, "sms", smsUid, smsUid, n5, new UserHandle(userId),
                     "", 1299), getDefaultChannel());
-            mRecordSms.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+            mRecordSms.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
         }
 
         Notification n6 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
@@ -153,20 +154,20 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 pkg2, 1, "starred", uid2, uid2, n6, new UserHandle(userId),
                 "", 1259), getDefaultChannel());
         mRecordStarredContact.setContactAffinity(ValidateNotificationPeople.STARRED_CONTACT);
-        mRecordStarredContact.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        mRecordStarredContact.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n7 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
         mRecordContact = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "contact", uid2, uid2, n7, new UserHandle(userId),
                 "", 1259), getDefaultChannel());
         mRecordContact.setContactAffinity(ValidateNotificationPeople.VALID_CONTACT);
-        mRecordContact.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        mRecordContact.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n8 = new Notification.Builder(mContext, TEST_CHANNEL_ID).build();
         mRecordUrgent = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "urgent", uid2, uid2, n8, new UserHandle(userId),
                 "", 1258), getDefaultChannel());
-        mRecordUrgent.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordUrgent.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n9 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
@@ -176,7 +177,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordCheater = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "cheater", uid2, uid2, n9, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
-        mRecordCheater.setUserImportance(NotificationManager.IMPORTANCE_LOW);
+        mRecordCheater.setSystemImportance(NotificationManager.IMPORTANCE_LOW);
         mRecordCheater.setPackagePriority(Notification.PRIORITY_MAX);
 
         Notification n10 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
@@ -184,7 +185,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordEmail = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "email", uid2, uid2, n10, new UserHandle(userId),
                 "", 1599), getDefaultChannel());
-        mRecordEmail.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordEmail.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n11 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
@@ -193,7 +194,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordCheaterColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "cheater", uid2, uid2, n11, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
-        mRecordCheaterColorized.setUserImportance(NotificationManager.IMPORTANCE_LOW);
+        mRecordCheaterColorized.setSystemImportance(NotificationManager.IMPORTANCE_LOW);
 
         Notification n12 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_MESSAGE)
@@ -203,7 +204,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mNoMediaSessionMedia = new NotificationRecord(mContext, new StatusBarNotification(
                 pkg2, pkg2, 1, "cheater", uid2, uid2, n12, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
-        mNoMediaSessionMedia.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        mNoMediaSessionMedia.setSystemImportance(NotificationManager.IMPORTANCE_DEFAULT);
 
         Notification n13 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
@@ -212,7 +213,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
                 pkg2, 1, "colorized", uid2, uid2, n13,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
-        mRecordHighCall.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordColorized.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
 
         Notification n14 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
@@ -222,15 +223,15 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         mRecordColorizedCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "colorizedCall", callUid, callUid, n14,
                 new UserHandle(userId), "", 1999), getDefaultChannel());
-        mRecordColorizedCall.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+        mRecordColorizedCall.setSystemImportance(NotificationManager.IMPORTANCE_HIGH);
     }
 
     @Test
-    public void testOrdering() throws Exception {
+    public void testOrdering() {
         final List<NotificationRecord> expected = new ArrayList<>();
         expected.add(mRecordColorizedCall);
-        expected.add(mRecordDefaultMedia);
         expected.add(mRecordColorized);
+        expected.add(mRecordDefaultMedia);
         expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
         if (mRecordSms != null) {
@@ -251,11 +252,11 @@ public class NotificationComparatorTest extends UiServiceTestCase {
 
         Collections.sort(actual, new NotificationComparator(mContext));
 
-        assertEquals(expected, actual);
+        assertThat(actual, contains(expected.toArray()));
     }
 
     @Test
-    public void testMessaging() throws Exception {
+    public void testMessaging() {
         NotificationComparator comp = new NotificationComparator(mContext);
         assertTrue(comp.isImportantMessaging(mRecordInlineReply));
         if (mRecordSms != null) {
@@ -266,7 +267,7 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPeople() throws Exception {
+    public void testPeople() {
         NotificationComparator comp = new NotificationComparator(mContext);
         assertTrue(comp.isImportantPeople(mRecordStarredContact));
         assertTrue(comp.isImportantPeople(mRecordContact));

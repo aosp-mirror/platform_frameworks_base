@@ -16,11 +16,11 @@
 
 package com.android.framework.permission.tests;
 
-import java.util.ArrayList;
-
 import android.telephony.SmsManager;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import java.util.ArrayList;
 
 /**
  * Verify that SmsManager apis cannot be called without required permissions.
@@ -31,6 +31,10 @@ public class SmsManagerPermissionTest extends AndroidTestCase {
     private static final short DEST_PORT = (short)1004;
     private static final String DEST_NUMBER = "4567";
     private static final String SRC_NUMBER = "1234";
+
+    private static final int CELL_BROADCAST_MESSAGE_ID_START = 10;
+    private static final int CELL_BROADCAST_MESSAGE_ID_END = 20;
+    private static final int CELL_BROADCAST_GSM_RAN_TYPE = 0;
 
     /**
      * Verify that SmsManager.sendTextMessage requires permissions.
@@ -78,6 +82,36 @@ public class SmsManagerPermissionTest extends AndroidTestCase {
             SmsManager.getDefault().sendMultipartTextMessage(SRC_NUMBER, DEST_NUMBER, msgParts,
                     null, null);
             fail("SmsManager.sendMultipartTextMessage did not throw SecurityException as expected");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Verify that SmsManager.enableCellBroadcastRange requires permissions.
+     * <p>Tests system permission: android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST
+     */
+    @SmallTest
+    public void testEnableCellBroadcastRange() {
+        try {
+            SmsManager.getDefault().enableCellBroadcastRange(CELL_BROADCAST_MESSAGE_ID_START,
+                    CELL_BROADCAST_MESSAGE_ID_END, CELL_BROADCAST_GSM_RAN_TYPE);
+            fail("SmsManager.sendDataMessage did not throw SecurityException as expected");
+        } catch (SecurityException e) {
+            // expected
+        }
+    }
+
+    /**
+     * Verify that SmsManager.disableCellBroadcastRange requires permissions.
+     * <p>Tests system permission: android.Manifest.permission.RECEIVE_EMERGENCY_BROADCAST
+     */
+    @SmallTest
+    public void testDisableCellBroadcastRange() {
+        try {
+            SmsManager.getDefault().disableCellBroadcastRange(CELL_BROADCAST_MESSAGE_ID_START,
+                    CELL_BROADCAST_MESSAGE_ID_END, CELL_BROADCAST_GSM_RAN_TYPE);
+            fail("SmsManager.sendDataMessage did not throw SecurityException as expected");
         } catch (SecurityException e) {
             // expected
         }

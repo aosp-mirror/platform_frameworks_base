@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
-import android.media.AudioRecord;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
@@ -137,16 +136,6 @@ public final class MediaProjection {
         DisplayManager dm = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
         return dm.createVirtualDisplay(this, name, width, height, dpi, surface, flags, callback,
                 handler, null /* uniqueId */);
-    }
-
-    /**
-     * Creates an AudioRecord to capture audio played back by the system.
-     * @hide
-     */
-    public AudioRecord createAudioRecord(
-            int sampleRateInHz, int channelConfig,
-            int audioFormat, int bufferSizeInBytes) {
-        return null;
     }
 
     /**

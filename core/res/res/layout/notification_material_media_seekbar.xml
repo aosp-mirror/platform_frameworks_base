@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notification_media_progress"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_alignParentBottom="true"
+    >
+    <SeekBar android:id="@+id/notification_media_progress_bar"
+        style="@style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="3dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="24dp"
+        android:clickable="true"
+        android:layout_marginBottom="-24dp"
+        android:layout_marginTop="-12dp"
+        android:splitTrack="false"
+    />
+    <FrameLayout
+        android:id="@+id/notification_media_progress_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="11dp"
+        >
+
+        <!-- width is set to "match_parent" to avoid extra layout calls -->
+        <TextView android:id="@+id/notification_media_elapsed_time"
+            style="@style/Widget.DeviceDefault.Notification.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:gravity="start"
+        />
+
+        <TextView android:id="@+id/notification_media_total_time"
+            style="@style/Widget.DeviceDefault.Notification.Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:gravity="end"
+        />
+    </FrameLayout>
+</LinearLayout>

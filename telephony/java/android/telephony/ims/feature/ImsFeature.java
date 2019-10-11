@@ -201,15 +201,20 @@ public abstract class ImsFeature {
     }
 
     /**
-     * Contains the capabilities defined and supported by an ImsFeature in the form of a bit mask.
-     * <p>
-     * Typically this class is not used directly, but rather extended in subclasses of
+     * Contains the IMS capabilities defined and supported by an ImsFeature in the form of a
+     * bit-mask.
+     *
+     * @deprecated This class is not used directly, but rather extended in subclasses of
      * {@link ImsFeature} to provide service specific capabilities.
+     * @see MmTelFeature.MmTelCapabilities
      * @hide
      */
-    @SystemApi
+    // Not Actually deprecated, but we need to remove it from the @SystemApi surface.
+    @Deprecated
+    @SystemApi // SystemApi only because it was leaked through type usage in a previous release.
     public static class Capabilities {
         /** @deprecated Use getters and accessors instead. */
+        // Not actually deprecated, but we need to remove it from the @SystemApi surface eventually.
         protected int mCapabilities = 0;
 
         /**

@@ -16,52 +16,58 @@
 
 package com.android.server.usb;
 
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+import static com.android.server.usb.UsbProfileGroupSettingsManager.getAccessoryFilters;
+import static com.android.server.usb.UsbProfileGroupSettingsManager.getDeviceFilters;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
+import android.content.res.XmlResourceParser;
+import android.hardware.usb.AccessoryFilter;
+import android.hardware.usb.DeviceFilter;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import android.os.Binder;
-import android.os.Process;
 import android.os.UserHandle;
-import android.service.usb.UsbSettingsAccessoryPermissionProto;
-import android.service.usb.UsbSettingsDevicePermissionProto;
+import android.service.usb.UsbAccessoryAttachedActivities;
+import android.service.usb.UsbDeviceAttachedActivities;
 import android.service.usb.UsbUserSettingsManagerProto;
 import android.util.Slog;
-import android.util.SparseBooleanArray;
 
+import com.android.internal.util.XmlUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
 
-import java.util.HashMap;
+import org.xmlpull.v1.XmlPullParser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class UsbUserSettingsManager {
-    private static final String TAG = "UsbUserSettingsManager";
+    private static final String TAG = UsbUserSettingsManager.class.getSimpleName();
     private static final boolean DEBUG = false;
 
     private final UserHandle mUser;
-    private final boolean mDisablePermissionDialogs;
 
     private final Context mUserContext;
     private final PackageManager mPackageManager;
-
-    // Temporary mapping USB device name to list of UIDs with permissions for the device
-    private final HashMap<String, SparseBooleanArray> mDevicePermissionMap =
-            new HashMap<>();
-    // Temporary mapping UsbAccessory to list of UIDs with permissions for the accessory
-    private final HashMap<UsbAccessory, SparseBooleanArray> mAccessoryPermissionMap =
-            new HashMap<>();
+    private final UsbPermissionManager mUsbPermissionManager;
 
     private final Object mLock = new Object();
 
-    public UsbUserSettingsManager(Context context, UserHandle user) {
+    UsbUserSettingsManager(Context context, UserHandle user,
+            @NonNull UsbPermissionManager usbPermissionManager) {
         if (DEBUG) Slog.v(TAG, "Creating settings for " + user);
 
         try {
@@ -73,9 +79,7 @@ class UsbUserSettingsManager {
         mPackageManager = mUserContext.getPackageManager();
 
         mUser = user;
-
-        mDisablePermissionDialogs = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_disableUsbPermissionDialogs);
+        mUsbPermissionManager = usbPermissionManager;
     }
 
     /**
@@ -84,9 +88,7 @@ class UsbUserSettingsManager {
      * @param device The device the permissions are for
      */
     void removeDevicePermissions(@NonNull UsbDevice device) {
-        synchronized (mLock) {
-            mDevicePermissionMap.remove(device.getDeviceName());
-        }
+        mUsbPermissionManager.removeDevicePermissions(device);
     }
 
     /**
@@ -95,9 +97,7 @@ class UsbUserSettingsManager {
      * @param accessory The accessory the permissions are for
      */
     void removeAccessoryPermissions(@NonNull UsbAccessory accessory) {
-        synchronized (mLock) {
-            mAccessoryPermissionMap.remove(accessory);
-        }
+        mUsbPermissionManager.removeAccessoryPermissions(accessory);
     }
 
     /**
@@ -158,52 +158,39 @@ class UsbUserSettingsManager {
     }
 
     public boolean hasPermission(UsbDevice device, String packageName, int uid) {
-        synchronized (mLock) {
-            if (isCameraDevicePresent(device)) {
-                if (!isCameraPermissionGranted(packageName, uid)) {
-                    return false;
-                }
-            }
-            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
-                return true;
-            }
-            SparseBooleanArray uidList = mDevicePermissionMap.get(device.getDeviceName());
-            if (uidList == null) {
+        if (isCameraDevicePresent(device)) {
+            if (!isCameraPermissionGranted(packageName, uid)) {
                 return false;
             }
-            return uidList.get(uid);
         }
+
+        return mUsbPermissionManager.hasPermission(device, uid);
     }
 
-    public boolean hasPermission(UsbAccessory accessory) {
-        synchronized (mLock) {
-            int uid = Binder.getCallingUid();
-            if (uid == Process.SYSTEM_UID || mDisablePermissionDialogs) {
-                return true;
-            }
-            SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-            if (uidList == null) {
-                return false;
-            }
-            return uidList.get(uid);
-        }
+    public boolean hasPermission(UsbAccessory accessory, int uid) {
+        return mUsbPermissionManager.hasPermission(accessory, uid);
     }
 
     public void checkPermission(UsbDevice device, String packageName, int uid) {
         if (!hasPermission(device, packageName, uid)) {
-            throw new SecurityException("User has not given permission to device " + device);
+            throw new SecurityException("User has not given " + uid + "/" + packageName
+                    + " permission to access device " + device.getDeviceName());
         }
     }
 
-    public void checkPermission(UsbAccessory accessory) {
-        if (!hasPermission(accessory)) {
-            throw new SecurityException("User has not given permission to accessory " + accessory);
+    public void checkPermission(UsbAccessory accessory, int uid) {
+        if (!hasPermission(accessory, uid)) {
+            throw new SecurityException("User has not given " + uid + " permission to accessory "
+                    + accessory);
         }
     }
 
-    private void requestPermissionDialog(Intent intent, String packageName, PendingIntent pi) {
-        final int uid = Binder.getCallingUid();
-
+    private void requestPermissionDialog(@Nullable UsbDevice device,
+                                         @Nullable UsbAccessory accessory,
+                                         boolean canBeDefault,
+                                         String packageName,
+                                         PendingIntent pi,
+                                         int uid) {
         // compare uid with packageName to foil apps pretending to be someone else
         try {
             ApplicationInfo aInfo = mPackageManager.getApplicationInfo(packageName, 0);
@@ -215,27 +202,15 @@ class UsbUserSettingsManager {
             throw new IllegalArgumentException("package " + packageName + " not found");
         }
 
-        long identity = Binder.clearCallingIdentity();
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.usb.UsbPermissionActivity");
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Intent.EXTRA_INTENT, pi);
-        intent.putExtra("package", packageName);
-        intent.putExtra(Intent.EXTRA_UID, uid);
-        try {
-            mUserContext.startActivityAsUser(intent, mUser);
-        } catch (ActivityNotFoundException e) {
-            Slog.e(TAG, "unable to start UsbPermissionActivity");
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        mUsbPermissionManager.requestPermissionDialog(device,
+                accessory, canBeDefault, packageName, uid, mUserContext, pi);
     }
 
     public void requestPermission(UsbDevice device, String packageName, PendingIntent pi, int uid) {
-      Intent intent = new Intent();
+        Intent intent = new Intent();
 
         // respond immediately if permission has already been granted
-      if (hasPermission(device, packageName, uid)) {
+        if (hasPermission(device, packageName, uid)) {
             intent.putExtra(UsbManager.EXTRA_DEVICE, device);
             intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
             try {
@@ -258,16 +233,15 @@ class UsbUserSettingsManager {
             }
         }
 
-        // start UsbPermissionActivity so user can choose an activity
-        intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        requestPermissionDialog(intent, packageName, pi);
+        requestPermissionDialog(device, null, canBeDefault(device, packageName), packageName, pi,
+                uid);
     }
 
-    public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi) {
-        Intent intent = new Intent();
-
+    public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi,
+            int uid) {
         // respond immediately if permission has already been granted
-        if (hasPermission(accessory)) {
+        if (hasPermission(accessory, uid)) {
+            Intent intent = new Intent();
             intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
             intent.putExtra(UsbManager.EXTRA_PERMISSION_GRANTED, true);
             try {
@@ -278,31 +252,123 @@ class UsbUserSettingsManager {
             return;
         }
 
-        intent.putExtra(UsbManager.EXTRA_ACCESSORY, accessory);
-        requestPermissionDialog(intent, packageName, pi);
+        requestPermissionDialog(null, accessory, canBeDefault(accessory, packageName), packageName,
+                pi, uid);
     }
 
     public void grantDevicePermission(UsbDevice device, int uid) {
-        synchronized (mLock) {
-            String deviceName = device.getDeviceName();
-            SparseBooleanArray uidList = mDevicePermissionMap.get(deviceName);
-            if (uidList == null) {
-                uidList = new SparseBooleanArray(1);
-                mDevicePermissionMap.put(deviceName, uidList);
-            }
-            uidList.put(uid, true);
-        }
+        mUsbPermissionManager.grantDevicePermission(device, uid);
     }
 
     public void grantAccessoryPermission(UsbAccessory accessory, int uid) {
-        synchronized (mLock) {
-            SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-            if (uidList == null) {
-                uidList = new SparseBooleanArray(1);
-                mAccessoryPermissionMap.put(accessory, uidList);
+        mUsbPermissionManager.grantAccessoryPermission(accessory, uid);
+    }
+
+    /**
+     * Get all activities that can handle the device/accessory attached intent.
+     *
+     * @param intent The intent to handle
+     *
+     * @return The resolve infos of the activities that can handle the intent
+     */
+    List<ResolveInfo> queryIntentActivities(@NonNull Intent intent) {
+        return mPackageManager.queryIntentActivitiesAsUser(intent, PackageManager.GET_META_DATA,
+                mUser.getIdentifier());
+    }
+
+    /**
+     * Can the app be the default for the USB device. I.e. can the app be launched by default if
+     * the device is plugged in.
+     *
+     * @param device The device the app would be default for
+     * @param packageName The package name of the app
+     *
+     * @return {@code true} if the app can be default
+     */
+    private boolean canBeDefault(@NonNull UsbDevice device, String packageName) {
+        ActivityInfo[] activities = getPackageActivities(packageName);
+        if (activities != null) {
+            int numActivities = activities.length;
+            for (int i = 0; i < numActivities; i++) {
+                ActivityInfo activityInfo = activities[i];
+
+                try (XmlResourceParser parser = activityInfo.loadXmlMetaData(mPackageManager,
+                        UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+                    if (parser == null) {
+                        continue;
+                    }
+
+                    XmlUtils.nextElement(parser);
+                    while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                        if ("usb-device".equals(parser.getName())) {
+                            DeviceFilter filter = DeviceFilter.read(parser);
+                            if (filter.matches(device)) {
+                                return true;
+                            }
+                        }
+
+                        XmlUtils.nextElement(parser);
+                    }
+                } catch (Exception e) {
+                    Slog.w(TAG, "Unable to load component info " + activityInfo.toString(), e);
+                }
             }
-            uidList.put(uid, true);
         }
+
+        return false;
+    }
+
+    /**
+     * Can the app be the default for the USB accessory. I.e. can the app be launched by default if
+     * the accessory is plugged in.
+     *
+     * @param accessory The accessory the app would be default for
+     * @param packageName The package name of the app
+     *
+     * @return {@code true} if the app can be default
+     */
+    private boolean canBeDefault(@NonNull UsbAccessory accessory, String packageName) {
+        ActivityInfo[] activities = getPackageActivities(packageName);
+        if (activities != null) {
+            int numActivities = activities.length;
+            for (int i = 0; i < numActivities; i++) {
+                ActivityInfo activityInfo = activities[i];
+
+                try (XmlResourceParser parser = activityInfo.loadXmlMetaData(mPackageManager,
+                        UsbManager.ACTION_USB_ACCESSORY_ATTACHED)) {
+                    if (parser == null) {
+                        continue;
+                    }
+
+                    XmlUtils.nextElement(parser);
+                    while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
+                        if ("usb-accessory".equals(parser.getName())) {
+                            AccessoryFilter filter = AccessoryFilter.read(parser);
+                            if (filter.matches(accessory)) {
+                                return true;
+                            }
+                        }
+
+                        XmlUtils.nextElement(parser);
+                    }
+                } catch (Exception e) {
+                    Slog.w(TAG, "Unable to load component info " + activityInfo.toString(), e);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private ActivityInfo[] getPackageActivities(String packageName) {
+        try {
+            PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
+                    PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
+            return packageInfo.activities;
+        } catch (PackageManager.NameNotFoundException e) {
+            // ignore
+        }
+        return null;
     }
 
     public void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
@@ -311,35 +377,59 @@ class UsbUserSettingsManager {
         synchronized (mLock) {
             dump.write("user_id", UsbUserSettingsManagerProto.USER_ID, mUser.getIdentifier());
 
-            for (String deviceName : mDevicePermissionMap.keySet()) {
-                long devicePermissionToken = dump.start("device_permissions",
-                        UsbUserSettingsManagerProto.DEVICE_PERMISSIONS);
+            mUsbPermissionManager.dump(dump);
 
-                dump.write("device_name", UsbSettingsDevicePermissionProto.DEVICE_NAME, deviceName);
+            List<ResolveInfo> deviceAttachedActivities = queryIntentActivities(
+                    new Intent(UsbManager.ACTION_USB_DEVICE_ATTACHED));
+            int numDeviceAttachedActivities = deviceAttachedActivities.size();
+            for (int activityNum = 0; activityNum < numDeviceAttachedActivities; activityNum++) {
+                ResolveInfo deviceAttachedActivity = deviceAttachedActivities.get(activityNum);
 
-                SparseBooleanArray uidList = mDevicePermissionMap.get(deviceName);
-                int count = uidList.size();
-                for (int i = 0; i < count; i++) {
-                    dump.write("uids", UsbSettingsDevicePermissionProto.UIDS, uidList.keyAt(i));
+                long deviceAttachedActivityToken = dump.start("device_attached_activities",
+                        UsbUserSettingsManagerProto.DEVICE_ATTACHED_ACTIVITIES);
+
+                writeComponentName(dump, "activity", UsbDeviceAttachedActivities.ACTIVITY,
+                        new ComponentName(deviceAttachedActivity.activityInfo.packageName,
+                                deviceAttachedActivity.activityInfo.name));
+
+                ArrayList<DeviceFilter> deviceFilters = getDeviceFilters(mPackageManager,
+                        deviceAttachedActivity);
+                if (deviceFilters != null) {
+                    int numDeviceFilters = deviceFilters.size();
+                    for (int filterNum = 0; filterNum < numDeviceFilters; filterNum++) {
+                        deviceFilters.get(filterNum).dump(dump, "filters",
+                                UsbDeviceAttachedActivities.FILTERS);
+                    }
                 }
 
-                dump.end(devicePermissionToken);
+                dump.end(deviceAttachedActivityToken);
             }
-            for (UsbAccessory accessory : mAccessoryPermissionMap.keySet()) {
-                long accessoryPermissionToken = dump.start("accessory_permissions",
-                        UsbUserSettingsManagerProto.ACCESSORY_PERMISSIONS);
 
-                dump.write("accessory_description",
-                        UsbSettingsAccessoryPermissionProto.ACCESSORY_DESCRIPTION,
-                        accessory.getDescription());
+            List<ResolveInfo> accessoryAttachedActivities =
+                    queryIntentActivities(new Intent(UsbManager.ACTION_USB_ACCESSORY_ATTACHED));
+            int numAccessoryAttachedActivities = accessoryAttachedActivities.size();
+            for (int activityNum = 0; activityNum < numAccessoryAttachedActivities; activityNum++) {
+                ResolveInfo accessoryAttachedActivity =
+                        accessoryAttachedActivities.get(activityNum);
 
-                SparseBooleanArray uidList = mAccessoryPermissionMap.get(accessory);
-                int count = uidList.size();
-                for (int i = 0; i < count; i++) {
-                    dump.write("uids", UsbSettingsAccessoryPermissionProto.UIDS, uidList.keyAt(i));
+                long accessoryAttachedActivityToken = dump.start("accessory_attached_activities",
+                        UsbUserSettingsManagerProto.ACCESSORY_ATTACHED_ACTIVITIES);
+
+                writeComponentName(dump, "activity", UsbAccessoryAttachedActivities.ACTIVITY,
+                        new ComponentName(accessoryAttachedActivity.activityInfo.packageName,
+                                accessoryAttachedActivity.activityInfo.name));
+
+                ArrayList<AccessoryFilter> accessoryFilters = getAccessoryFilters(mPackageManager,
+                        accessoryAttachedActivity);
+                if (accessoryFilters != null) {
+                    int numAccessoryFilters = accessoryFilters.size();
+                    for (int filterNum = 0; filterNum < numAccessoryFilters; filterNum++) {
+                        accessoryFilters.get(filterNum).dump(dump, "filters",
+                                UsbAccessoryAttachedActivities.FILTERS);
+                    }
                 }
 
-                dump.end(accessoryPermissionToken);
+                dump.end(accessoryAttachedActivityToken);
             }
         }
 

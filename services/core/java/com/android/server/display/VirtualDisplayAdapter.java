@@ -17,15 +17,14 @@
 package com.android.server.display;
 
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
-import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
-import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 
 import android.content.Context;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -33,10 +32,10 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.os.IBinder.DeathRecipient;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
@@ -60,7 +59,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     static final boolean DEBUG = false;
 
     // Unique id prefix for virtual displays
-    private static final String UNIQUE_ID_PREFIX = "virtual:";
+    @VisibleForTesting
+    static final String UNIQUE_ID_PREFIX = "virtual:";
 
     private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
             new ArrayMap<IBinder, VirtualDisplayDevice>();
@@ -147,6 +147,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         return device;
     }
 
+    void setVirtualDisplayStateLocked(IBinder appToken, boolean isOn) {
+        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
+        if (device != null) {
+            device.setDisplayState(isOn);
+        }
+    }
+
     /**
      * Returns the next unique index for the uniqueIdPrefix
      */
@@ -206,6 +213,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private int mPendingChanges;
         private int mUniqueIndex;
         private Display.Mode mMode;
+        private boolean mIsDisplayOn;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName,
@@ -226,6 +234,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mDisplayState = Display.STATE_UNKNOWN;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
             mUniqueIndex = uniqueIndex;
+            mIsDisplayOn = surface != null;
         }
 
         @Override
@@ -304,6 +313,14 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             }
         }
 
+        void setDisplayState(boolean isOn) {
+            if (mIsDisplayOn != isOn) {
+                mIsDisplayOn = isOn;
+                mInfo = null;
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
+            }
+        }
+
         public void stopLocked() {
             setSurfaceLocked(null);
             mStopped = true;
@@ -366,13 +383,18 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL) != 0) {
-                  mInfo.flags |= DisplayDeviceInfo.FLAG_DESTROY_CONTENT_ON_REMOVAL;
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_DESTROY_CONTENT_ON_REMOVAL;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = ((mFlags & VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH) == 0) ?
                         DisplayDeviceInfo.TOUCH_NONE : DisplayDeviceInfo.TOUCH_VIRTUAL;
-                mInfo.state = mSurface != null ? Display.STATE_ON : Display.STATE_OFF;
+
+                mInfo.state = mIsDisplayOn ? Display.STATE_ON : Display.STATE_OFF;
+
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;
             }

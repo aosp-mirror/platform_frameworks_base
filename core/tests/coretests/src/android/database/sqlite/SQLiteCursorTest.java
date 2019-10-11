@@ -23,7 +23,8 @@ import android.database.Cursor;
 import android.database.CursorWindow;
 import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
+
+import androidx.test.filters.LargeTest;
 
 import java.io.File;
 import java.util.Arrays;

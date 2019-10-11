@@ -32,7 +32,7 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     private static final String TAG = "RecoverableKeyStoreDbHp";
 
-    static final int DATABASE_VERSION = 4;
+    static final int DATABASE_VERSION = 6; // Added user id serial number.
     private static final String DATABASE_NAME = "recoverablekeystore.db";
 
     private static final String SQL_CREATE_KEYS_ENTRY =
@@ -46,6 +46,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + KeysEntry.COLUMN_NAME_GENERATION_ID + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_LAST_SYNCED_AT + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_RECOVERY_STATUS + " INTEGER,"
+                    + KeysEntry.COLUMN_NAME_KEY_METADATA + " BLOB,"
                     + "UNIQUE(" + KeysEntry.COLUMN_NAME_UID + ","
                     + KeysEntry.COLUMN_NAME_ALIAS + "))";
 
@@ -53,7 +54,8 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + UserMetadataEntry.TABLE_NAME + "( "
                     + UserMetadataEntry._ID + " INTEGER PRIMARY KEY,"
                     + UserMetadataEntry.COLUMN_NAME_USER_ID + " INTEGER UNIQUE,"
-                    + UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID + " INTEGER)";
+                    + UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID + " INTEGER,"
+                    + UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER + " INTEGER DEFAULT -1)";
 
     private static final String SQL_CREATE_RECOVERY_SERVICE_METADATA_ENTRY =
             "CREATE TABLE " + RecoveryServiceMetadataEntry.TABLE_NAME + " ("
@@ -78,7 +80,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + RootOfTrustEntry._ID + " INTEGER PRIMARY KEY,"
                     + RootOfTrustEntry.COLUMN_NAME_USER_ID + " INTEGER,"
                     + RootOfTrustEntry.COLUMN_NAME_UID + " INTEGER,"
-                    + RootOfTrustEntry.COLUMN_NAME_ROOT_ALIAS + " TEST,"
+                    + RootOfTrustEntry.COLUMN_NAME_ROOT_ALIAS + " TEXT,"
                     + RootOfTrustEntry.COLUMN_NAME_CERT_PATH + " BLOB,"
                     + RootOfTrustEntry.COLUMN_NAME_CERT_SERIAL + " INTEGER,"
                     + "UNIQUE("
@@ -135,6 +137,16 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
             oldVersion = 4;
         }
 
+        if (oldVersion < 5 && newVersion >= 5) {
+            upgradeDbForVersion5(db);
+            oldVersion = 5;
+        }
+
+        if (oldVersion < 6 && newVersion >= 6) {
+            upgradeDbForVersion6(db);
+            oldVersion = 6;
+        }
+
         if (oldVersion != newVersion) {
             Log.e(TAG, "Failed to update recoverablekeystore database to the most recent version");
         }
@@ -164,6 +176,22 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
         addColumnToTable(db, RecoveryServiceMetadataEntry.TABLE_NAME,
                 RecoveryServiceMetadataEntry.COLUMN_NAME_ACTIVE_ROOT_OF_TRUST, "TEXT",
                 /*defaultStr=*/ null);
+    }
+
+    private void upgradeDbForVersion5(SQLiteDatabase db) {
+        Log.d(TAG, "Updating recoverable keystore database to version 5");
+        // adds a column to store the metadata for application keys
+        addColumnToTable(db, KeysEntry.TABLE_NAME,
+                KeysEntry.COLUMN_NAME_KEY_METADATA, "BLOB", /*defaultStr=*/ null);
+    }
+
+    private void upgradeDbForVersion6(SQLiteDatabase db) {
+        Log.d(TAG, "Updating recoverable keystore database to version 6");
+        // adds a column to store the user serial number
+        addColumnToTable(db, UserMetadataEntry.TABLE_NAME,
+                UserMetadataEntry.COLUMN_NAME_USER_SERIAL_NUMBER,
+                "INTEGER DEFAULT -1",
+                 /*defaultStr=*/ null);
     }
 
     private static void addColumnToTable(

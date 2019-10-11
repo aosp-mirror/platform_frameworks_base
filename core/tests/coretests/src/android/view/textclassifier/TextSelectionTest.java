@@ -18,10 +18,12 @@ package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
 
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +33,12 @@ import java.util.Locale;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextSelectionTest {
+    private static final String BUNDLE_KEY = "key";
+    private static final String BUNDLE_VALUE = "value";
+    private static final Bundle BUNDLE = new Bundle();
+    static {
+        BUNDLE.putString(BUNDLE_KEY, BUNDLE_VALUE);
+    }
 
     @Test
     public void testParcel() {
@@ -42,6 +50,7 @@ public class TextSelectionTest {
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
                 .setEntityType(TextClassifier.TYPE_URL, 0.1f)
                 .setId(id)
+                .setExtras(BUNDLE)
                 .build();
 
         // Parcel and unparcel
@@ -61,15 +70,19 @@ public class TextSelectionTest {
         assertEquals(0.7f, result.getConfidenceScore(TextClassifier.TYPE_PHONE), 1e-7f);
         assertEquals(0.3f, result.getConfidenceScore(TextClassifier.TYPE_ADDRESS), 1e-7f);
         assertEquals(0.1f, result.getConfidenceScore(TextClassifier.TYPE_URL), 1e-7f);
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
     }
 
     @Test
     public void testParcelRequest() {
         final String text = "text";
+        final String packageName = "packageName";
         final TextSelection.Request reference =
                 new TextSelection.Request.Builder(text, 0, text.length())
                         .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
+                        .setExtras(BUNDLE)
                         .build();
+        reference.setCallingPackageName(packageName);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -77,9 +90,11 @@ public class TextSelectionTest {
         parcel.setDataPosition(0);
         final TextSelection.Request result = TextSelection.Request.CREATOR.createFromParcel(parcel);
 
-        assertEquals(text, result.getText());
+        assertEquals(text, result.getText().toString());
         assertEquals(0, result.getStartIndex());
         assertEquals(text.length(), result.getEndIndex());
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
+        assertEquals(packageName, result.getCallingPackageName());
     }
 }

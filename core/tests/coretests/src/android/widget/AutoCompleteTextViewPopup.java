@@ -18,8 +18,8 @@ package android.widget;
 
 import android.app.Instrumentation;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.FlakyTest;
-import android.test.suitebuilder.annotation.MediumTest;
+
+import androidx.test.filters.FlakyTest;
 
 /**
  * A collection of tests on aspects of the AutoCompleteTextView's popup
@@ -41,7 +41,7 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test that we can move the selection and it responds as expected */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupSetListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
@@ -73,7 +73,7 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test that we can look at the selection as we move around */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupGetListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
@@ -100,7 +100,7 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test that we can clear the selection */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupClearListSelection() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
@@ -133,7 +133,7 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Make sure we handle an empty adapter properly */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupNavigateNoAdapter() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();
@@ -167,7 +167,7 @@ public class AutoCompleteTextViewPopup
     }
 
     /** Test the show/hide behavior of the drop-down. */
-    @FlakyTest(tolerance=3)
+    @FlakyTest
     public void testPopupShow() throws Throwable {
         AutoCompleteTextViewSimple theActivity = getActivity();
         final AutoCompleteTextView textView = theActivity.getTextView();

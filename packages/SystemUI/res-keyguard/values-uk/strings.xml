@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Торкніться, щоб ввести пароль"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Введіть пароль, щоб розблокувати"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Введіть PIN-код, щоб розблокувати"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Введіть PIN-код"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Введіть ключ"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Введіть пароль"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Неправильний PIN-код."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Недійсна картка."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Заряджено"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Заряджається"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Швидке заряджання"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Повільне заряджання"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Повністю заряджений"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Бездротове заряджання"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Заряджання"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Швидке заряджання"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Повільне заряджання"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Підключіть зарядний пристрій."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Натисніть меню, щоб розблокувати."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Мережу заблоковано"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"SIM-карту заблоковано PUK-кодом."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Розблокування SIM-карти…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"PIN-код"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Пароль пристрою"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"PIN-код SIM-карти"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"PUK-код SIM-карти"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Наступний сигнал: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Не вдається вимкнути eSIM-карту через помилку."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Ввести"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Не пам’ятаю ключ"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Неправильний ключ"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Неправильний пароль"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Неправильний ключ"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Неправильний пароль"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Неправильний PIN-код"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
@@ -148,8 +153,9 @@
       <item quantity="many">Ви не розблоковували пристрій <xliff:g id="NUMBER_1">%d</xliff:g> годин. Підтвердьте пароль.</item>
       <item quantity="other">Ви не розблоковували пристрій <xliff:g id="NUMBER_1">%d</xliff:g> години. Підтвердьте пароль.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не розпізнано"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Не розпізнано"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Не розпізнано"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Введіть PIN-код SIM-карти. Залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
       <item quantity="few">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
       <item quantity="many">Введіть PIN-код SIM-карти. Залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб.</item>
@@ -161,4 +167,86 @@
       <item quantity="many">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроб. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
       <item quantity="other">SIM-карту заблоковано. Щоб продовжити, введіть PUK-код. Залишилося <xliff:g id="_NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано. Щоб дізнатися більше, зверніться до свого оператора.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="one">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+      <item quantity="few">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+      <item quantity="many">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Зараз"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"дванадцята"</item>
+    <item msgid="7389464214252023751">"перша"</item>
+    <item msgid="8803180377002008046">"друга"</item>
+    <item msgid="8614897059944644719">"третя"</item>
+    <item msgid="2293058674782619556">"четверта"</item>
+    <item msgid="4815402358455041664">"п’ята"</item>
+    <item msgid="3325754778509665687">"шоста"</item>
+    <item msgid="5805551341866280575">"сьома"</item>
+    <item msgid="203334816668238610">"восьма"</item>
+    <item msgid="4828052671464488923">"дев’ята"</item>
+    <item msgid="2233497913571137419">"десята"</item>
+    <item msgid="5621554266768657830">"одинадцята"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985"></item>
+    <item msgid="8837126587669001578">"одна"</item>
+    <item msgid="4294343372940455660">"дві"</item>
+    <item msgid="7129166637707421536">"три"</item>
+    <item msgid="7579404865008788673">"чотири"</item>
+    <item msgid="3873924689207380586">"п’ять"</item>
+    <item msgid="4849565597850069377">"шість"</item>
+    <item msgid="4404219424523572364">"сім"</item>
+    <item msgid="8740481214764087329">"вісім"</item>
+    <item msgid="1713216865806811237">"дев’ять"</item>
+    <item msgid="3508406095411245038">"десять"</item>
+    <item msgid="7161996337755311711">"одинадцять"</item>
+    <item msgid="4044549963329624197">"дванадцять"</item>
+    <item msgid="333373157917379088">"тринадцять"</item>
+    <item msgid="2631202907124819385">"чотирнадцять"</item>
+    <item msgid="6472396076858033453">"п’ятнадцять"</item>
+    <item msgid="8656981856181581643">"шістнадцять"</item>
+    <item msgid="7289026608562030619">"сімнадцять"</item>
+    <item msgid="3881477602692646573">"вісімнадцять"</item>
+    <item msgid="3358129827772984226">"дев’ятнадцять"</item>
+    <item msgid="3308575407402865807">"двадцять"</item>
+    <item msgid="5346560955382229629">"двадцять\nодна"</item>
+    <item msgid="226750304761473436">"двадцять\nдві"</item>
+    <item msgid="616811325336838734">"двадцять\nтри"</item>
+    <item msgid="616346116869053440">"двадцять\nчотири"</item>
+    <item msgid="4642996410384042830">"двадцять\nп’ять"</item>
+    <item msgid="7506092849993571465">"двадцять\nшість"</item>
+    <item msgid="1915078191101042031">"двадцять\nсім"</item>
+    <item msgid="4292378641900520252">"двадцять\nвісім"</item>
+    <item msgid="5339513901773103696">"двадцять\nдев’ять"</item>
+    <item msgid="3574673250891657607">"тридцять"</item>
+    <item msgid="5796923836589110940">"тридцять\nодна"</item>
+    <item msgid="5859323597571702052">"тридцять\nдві"</item>
+    <item msgid="5133326723148876507">"тридцять\nтри"</item>
+    <item msgid="2693999494655663096">"тридцять\nчотири"</item>
+    <item msgid="3316754944962836197">"тридцять\nп’ять"</item>
+    <item msgid="816891008836796723">"тридцять\nшість"</item>
+    <item msgid="9158890488666520078">"тридцять\nсім"</item>
+    <item msgid="1894769703213894011">"тридцять\nвісім"</item>
+    <item msgid="5638820345598572399">"тридцять\nдев’ять"</item>
+    <item msgid="8838304023017895439">"сорок"</item>
+    <item msgid="1834742948932559597">"сорок\nодна"</item>
+    <item msgid="6573707308847773944">"сорок\nдві"</item>
+    <item msgid="2450149950652678001">"сорок\nтри"</item>
+    <item msgid="2874667401318178036">"сорок\nчотири"</item>
+    <item msgid="3391101532763048862">"сорок\nп’ять"</item>
+    <item msgid="1671489330863254362">"сорок\nшість"</item>
+    <item msgid="5916017359554531038">"сорок\nсім"</item>
+    <item msgid="8205413177993059967">"сорок\nвісім"</item>
+    <item msgid="6607867415142171302">"сорок\nдев’ять"</item>
+    <item msgid="8358850748472089162">"п’ятдесят"</item>
+    <item msgid="3551313125255080234">"п’ятдесят\nодна"</item>
+    <item msgid="1559678130725716542">"п’ятдесят\nдві"</item>
+    <item msgid="431441994725492377">"п’ятдесят\nтри"</item>
+    <item msgid="6345774640539623024">"п’ятдесят\nчотири"</item>
+    <item msgid="8018192990793931120">"п’ятдесят\nп’ять"</item>
+    <item msgid="6187650843754604534">"п’ятдесят\nшість"</item>
+    <item msgid="8727240174015993259">"п’ятдесят\nсім"</item>
+    <item msgid="848339003778952950">"п’ятдесят\nвісім"</item>
+    <item msgid="5798985802835423618">"п’ятдесят\nдев’ять"</item>
+  </string-array>
 </resources>

@@ -50,8 +50,8 @@
     <string name="search" msgid="5421724265322228497">"খুঁজুন"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"সমস্ত প্রিন্টার"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"পরিষেবা যোগ করুন"</string>
-    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"অনুসন্ধান বাক্স দেখানো হচ্ছে"</string>
-    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"অনুসন্ধান বাক্স লুকানো রয়েছে"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"সার্চ বাক্স দেখানো হচ্ছে"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"সার্চ বাক্স লুকানো রয়েছে"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"প্রিন্টার যোগ করুন"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"প্রিন্টার বেছে নিন"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"মুদ্রকটিকে সরিয়ে দিন"</string>
@@ -65,7 +65,7 @@
     <string name="notification_channel_failure" msgid="9042250774797916414">"এগুলি প্রিন্ট করা যায়নি"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"ফাইল তৈরি করা গেল না"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"কিছু প্রিন্ট পরিষেবা অক্ষম করা আছে"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"মুদ্রকগুলি অনুসন্ধান করা হচ্ছে"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"প্রিন্টার খোঁজা হচ্ছে"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"প্রিন্ট পরিষেবা সক্ষম নেই"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"কোনো প্রিন্টার পাওয়া যায়নি"</string>
     <string name="cannot_add_printer" msgid="7840348733668023106">"মুদ্রকগুলি যোগ করা যাবে না"</string>

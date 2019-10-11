@@ -28,6 +28,9 @@
 #include <GLES3/gl31.h>
 #include <GLES3/gl32.h>
 
+// constant used by the NULL GPU implementation as well as HWUI's unit tests
+constexpr int NULL_GPU_MAX_TEXTURE_SIZE = 2048;
+
 // Generate stubs that route all the calls to our function table
 #include "gles_redefine.h"
 

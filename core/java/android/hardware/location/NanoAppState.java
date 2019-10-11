@@ -75,7 +75,7 @@ public final class NanoAppState implements Parcelable {
         out.writeInt(mIsEnabled ? 1 : 0);
     }
 
-    public static final Creator<NanoAppState> CREATOR =
+    public static final @android.annotation.NonNull Creator<NanoAppState> CREATOR =
             new Creator<NanoAppState>() {
                 @Override
                 public NanoAppState createFromParcel(Parcel in) {

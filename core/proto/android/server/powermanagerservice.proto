@@ -28,7 +28,7 @@ import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message PowerManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -318,6 +318,26 @@ message BatterySaverStateMachineProto {
     // Whether battery saver is enabled.
     optional bool enabled = 1;
 
+    enum StateEnum {
+        STATE_UNKNOWN = 0;
+        STATE_OFF = 1;
+        STATE_MANUAL_ON = 2;
+        STATE_AUTOMATIC_ON = 3;
+        STATE_OFF_AUTOMATIC_SNOOZED = 4;
+        STATE_PENDING_STICKY_ON = 5;
+    }
+    optional StateEnum state = 18;
+
+    // Whether full battery saver is enabled.
+    optional bool is_full_enabled = 14;
+
+    // Whether adaptive battery saver is enabled.
+    optional bool is_adaptive_enabled = 15;
+
+    // Whether the battery saver policy indicates that is_enabled should be
+    // advertised.
+    optional bool should_advertise_is_enabled = 16;
+
     // Whether system has booted.
     optional bool boot_completed = 2;
 
@@ -327,8 +347,7 @@ message BatterySaverStateMachineProto {
     // Whether battery status has been set at least once.
     optional bool battery_status_set = 4;
 
-    // Whether automatic battery saver has been canceled by the user.
-    optional bool battery_saver_snoozing = 5;
+    reserved 5; // battery_saver_snoozing
 
     // Whether the device is connected to any power source.
     optional bool is_powered = 6;
@@ -350,4 +369,18 @@ message BatterySaverStateMachineProto {
     // The value of Global.LOW_POWER_MODE_TRIGGER_LEVEL. This is a cached value, so it could
     // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
     optional int32 setting_battery_saver_trigger_threshold = 11;
+
+    // The value of Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_ENABLED. This is a cached value, so
+    // it could be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional bool setting_battery_saver_sticky_auto_disable_enabled = 12;
+
+    // The value of Global.LOW_POWER_MODE_STICKY_AUTO_DISABLE_LEVEL. This is a cached value, so it
+    // could be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional int32 setting_battery_saver_sticky_auto_disable_threshold = 13;
+
+    // The last time adaptive battery saver was changed by an external service,
+    // using elapsed realtime as the timebase.
+    optional int64 last_adaptive_battery_saver_changed_externally_elapsed = 17;
+
+    // Next tag: 19
 }

@@ -27,7 +27,7 @@
 
 namespace android::uirenderer {
 
-class ThreadBase : protected Thread {
+class ThreadBase : public Thread {
     PREVENT_COPY_AND_ASSIGN(ThreadBase);
 
 public:
@@ -46,6 +46,8 @@ public:
     void start(const char* name = "ThreadBase") { Thread::run(name); }
 
     void join() { Thread::join(); }
+
+    bool isRunning() const { return Thread::isRunning(); }
 
 protected:
     void waitForWork() {
@@ -66,10 +68,12 @@ protected:
     void processQueue() { mQueue.process(); }
 
     virtual bool threadLoop() override {
+        Looper::setForThread(mLooper);
         while (!exitPending()) {
             waitForWork();
             processQueue();
         }
+        Looper::setForThread(nullptr);
         return false;
     }
 

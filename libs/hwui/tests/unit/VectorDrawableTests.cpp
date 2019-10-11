@@ -85,8 +85,10 @@ const static TestData sTestDataSet[] = {
              outPath->rCubicTo(8.0, 8.0, 8.0, 8.0, 8.0, 8.0);
              outPath->cubicTo(16.0, 16.0, 9.0, 9.0, 9.0, 9.0);
              outPath->rCubicTo(0.0, 0.0, 9.0, 9.0, 9.0, 9.0);
-             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCW_Direction, 10.0, 10.0);
-             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCW_Direction, 20.0, 20.0);
+             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCW_Direction, 10.0,
+                            10.0);
+             outPath->arcTo(10.0, 10.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCW_Direction, 20.0,
+                            20.0);
          }},
 
         // Check box VectorDrawable path data
@@ -157,7 +159,8 @@ const static TestData sTestDataSet[] = {
          },
          [](SkPath* outPath) {
              outPath->moveTo(300.0, 70.0);
-             outPath->arcTo(230.0, 230.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCCW_Direction, 301.0, 70.0);
+             outPath->arcTo(230.0, 230.0, 0.0, SkPath::kLarge_ArcSize, SkPath::kCCW_Direction,
+                            301.0, 70.0);
              outPath->close();
              outPath->moveTo(300.0, 70.0);
          }},
@@ -236,14 +239,14 @@ struct StringPath {
 };
 
 const StringPath sStringPaths[] = {
-        {"3e...3", false},     // Not starting with a verb and ill-formatted float
-        {"L.M.F.A.O", false},  // No floats following verbs
-        {"m 1 1", true},       // Valid path data
-        {"\n \t   z", true},   // Valid path data with leading spaces
-        {"1-2e34567", false},  // Not starting with a verb and ill-formatted float
-        {"f 4 5", false},      // Invalid verb
-        {"\r      ", false},   // Empty string
-        {"L1,0 L1,1 L0,1 z M1000", false}    // Not enough floats following verb M.
+        {"3e...3", false},                 // Not starting with a verb and ill-formatted float
+        {"L.M.F.A.O", false},              // No floats following verbs
+        {"m 1 1", true},                   // Valid path data
+        {"\n \t   z", true},               // Valid path data with leading spaces
+        {"1-2e34567", false},              // Not starting with a verb and ill-formatted float
+        {"f 4 5", false},                  // Invalid verb
+        {"\r      ", false},               // Empty string
+        {"L1,0 L1,1 L0,1 z M1000", false}  // Not enough floats following verb M.
 };
 
 static bool hasSameVerbs(const PathData& from, const PathData& to) {
@@ -406,5 +409,5 @@ TEST(VectorDrawable, drawPathWithoutIncrementingShaderRefCount) {
     EXPECT_TRUE(shader->unique());
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

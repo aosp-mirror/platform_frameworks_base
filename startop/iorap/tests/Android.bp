@@ -17,14 +17,18 @@ java_library {
     name: "libiorap-java-test-lib",
     srcs: ["src/**/*.kt"],
     static_libs: [
-      // non-test dependencies
-      "libiorap-java",
-      // test android dependencies
-      "platform-test-annotations",
-      "android-support-test",
-      // test framework dependencies
-      "mockito-target-inline-minus-junit4",
-      // "mockito-target-minus-junit4",
+        // Non-test dependencies
+        // library under test
+        "services.startop.iorap",
+        // need the system_server code to be on the classpath,
+        "services.core",
+        // Test Dependencies
+        // test android dependencies
+        "platform-test-annotations",
+        "androidx.test.rules",
+        // test framework dependencies
+        "mockito-target-inline-minus-junit4",
+        // "mockito-target-minus-junit4",
         // Mockito also requires JNI (see Android.mk)
         // and android:debuggable=true (see AndroidManifest.xml)
         "truth-prebuilt",

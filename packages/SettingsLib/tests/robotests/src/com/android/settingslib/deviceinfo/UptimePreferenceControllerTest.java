@@ -23,11 +23,11 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.SystemClock;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceScreen;
 import android.text.format.DateUtils;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceScreen;
+
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
@@ -35,9 +35,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLooper;
 
-@RunWith(SettingsLibRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 public class UptimePreferenceControllerTest {
     @Mock
     private Context mContext;
@@ -63,7 +64,8 @@ public class UptimePreferenceControllerTest {
         uptimePreferenceController.displayPreference(mScreen);
 
         // SystemClock is shadowed so it shouldn't advance unexpectedly while the test is running
-        verify(mPreference).setSummary(DateUtils.formatDuration(SystemClock.elapsedRealtime()));
+        verify(mPreference).setSummary(
+                DateUtils.formatElapsedTime(SystemClock.elapsedRealtime() / 1000));
     }
 
     @Test
@@ -90,7 +92,7 @@ public class UptimePreferenceControllerTest {
 
     private static class ConcreteUptimePreferenceController
             extends AbstractUptimePreferenceController {
-        public ConcreteUptimePreferenceController(Context context,
+        private ConcreteUptimePreferenceController(Context context,
                 Lifecycle lifecycle) {
             super(context, lifecycle);
         }

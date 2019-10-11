@@ -15,6 +15,7 @@
  */
 
 #include "TestSceneBase.h"
+#include "hwui/Paint.h"
 
 class TextAnimation;
 
@@ -28,9 +29,9 @@ public:
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
         card = TestUtils::createNode(0, 0, width, height, [](RenderProperties& props,
                                                              Canvas& canvas) {
-            SkPaint paint;
+            Paint paint;
             paint.setAntiAlias(true);
-            paint.setTextSize(50);
+            paint.getSkFont().setSize(50);
 
             paint.setColor(Color::Black);
             for (int i = 0; i < 10; i++) {

@@ -44,7 +44,15 @@ public class AlarmTimeout implements AlarmManager.OnAlarmListener {
         mHandler = handler;
     }
 
-    public void schedule(long timeout, int mode) {
+    /**
+     * Schedules an alarm in {@code timeout} milliseconds in the future.
+     *
+     * @param timeout How long to wait from now.
+     * @param mode {@link #MODE_CRASH_IF_SCHEDULED}, {@link #MODE_IGNORE_IF_SCHEDULED} or
+     *             {@link #MODE_RESCHEDULE_IF_SCHEDULED}.
+     * @return {@code true} when scheduled successfully, {@code false} otherwise.
+     */
+    public boolean schedule(long timeout, int mode) {
         switch (mode) {
             case MODE_CRASH_IF_SCHEDULED:
                 if (mScheduled) {
@@ -53,7 +61,7 @@ public class AlarmTimeout implements AlarmManager.OnAlarmListener {
                 break;
             case MODE_IGNORE_IF_SCHEDULED:
                 if (mScheduled) {
-                    return;
+                    return false;
                 }
                 break;
             case MODE_RESCHEDULE_IF_SCHEDULED:
@@ -68,6 +76,7 @@ public class AlarmTimeout implements AlarmManager.OnAlarmListener {
         mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + timeout, mTag, this, mHandler);
         mScheduled = true;
+        return true;
     }
 
     public boolean isScheduled() {

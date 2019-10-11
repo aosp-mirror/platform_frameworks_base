@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.UserHandle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -79,8 +80,16 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     protected void resetState() {
-        mSecurityMessageDisplay.setMessage("");
+        mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
+        if (mSecurityMessageDisplay != null) {
+            mSecurityMessageDisplay.setMessage("");
+        }
         final boolean wasDisabled = mPasswordEntry.isEnabled();
+        // Don't set enabled password entry & showSoftInput when PasswordEntry is invisible or in
+        // pausing stage.
+        if (!mResumed || !mPasswordEntry.isVisibleToUser()) {
+            return;
+        }
         setPasswordEntryEnabled(true);
         setPasswordEntryInputEnabled(true);
         if (wasDisabled) {
@@ -169,6 +178,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 Context.INPUT_METHOD_SERVICE);
 
         mPasswordEntry = findViewById(getPasswordTextViewId());
+        mPasswordEntry.setTextOperationUser(UserHandle.of(KeyguardUpdateMonitor.getCurrentUser()));
         mPasswordEntryDisabler = new TextViewInputDisabler(mPasswordEntry);
         mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
         mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
@@ -193,7 +203,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             public void onClick(View v) {
                 mCallback.userActivity(); // Leave the screen on a bit longer
                 // Do not show auxiliary subtypes in password lock screen.
-                mImm.showInputMethodPicker(false /* showAuxiliarySubtypes */);
+                mImm.showInputMethodPickerFromSystem(false /* showAuxiliarySubtypes */,
+                        getContext().getDisplayId());
             }
         });
 
@@ -201,6 +212,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(view -> {
                 mCallback.reset();
+                mCallback.onCancelClicked();
             });
         }
 
@@ -231,8 +243,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected String getPasswordText() {
-        return mPasswordEntry.getText().toString();
+    protected byte[] getPasswordText() {
+        return charSequenceToByteArray(mPasswordEntry.getText());
     }
 
     @Override
@@ -254,7 +266,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
      */
     private boolean hasMultipleEnabledIMEsOrSubtypes(InputMethodManager imm,
             final boolean shouldIncludeAuxiliarySubtypes) {
-        final List<InputMethodInfo> enabledImis = imm.getEnabledInputMethodList();
+        final List<InputMethodInfo> enabledImis =
+                imm.getEnabledInputMethodListAsUser(KeyguardUpdateMonitor.getCurrentUser());
 
         // Number of the filtered IMEs
         int filteredImisCount = 0;
@@ -365,5 +378,19 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     public CharSequence getTitle() {
         return getContext().getString(
                 com.android.internal.R.string.keyguard_accessibility_password_unlock);
+    }
+
+    /*
+     * This method avoids creating a new string when getting a byte array from EditView#getText().
+     */
+    private static byte[] charSequenceToByteArray(CharSequence chars) {
+        if (chars == null) {
+            return null;
+        }
+        byte[] bytes = new byte[chars.length()];
+        for (int i = 0; i < chars.length(); i++) {
+            bytes[i] = (byte) chars.charAt(i);
+        }
+        return bytes;
     }
 }

@@ -18,15 +18,15 @@ package android.widget.gridview.touch;
 
 import android.content.Context;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.TouchUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.GridView;
-
 import android.widget.gridview.GridVerticalSpacingStackFromBottom;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 public class GridTouchVerticalSpacingStackFromBottomTest extends ActivityInstrumentationTestCase<GridVerticalSpacingStackFromBottom> {
     private GridVerticalSpacingStackFromBottom mActivity;

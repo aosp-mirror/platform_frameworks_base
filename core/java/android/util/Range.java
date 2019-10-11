@@ -28,7 +28,7 @@ import android.hardware.camera2.utils.HashCodeHelpers;
  * "integers from 1 to 100 inclusive."
  * </p>
  * <p>
- * All ranges are bounded, and the left side of the range is always {@code >=}
+ * All ranges are bounded, and the left side of the range is always {@code <=}
  * the right side of the range.
  * </p>
  *

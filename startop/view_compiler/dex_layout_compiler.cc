@@ -22,76 +22,94 @@
 namespace startop {
 
 using android::base::StringPrintf;
+using dex::Instruction;
+using dex::LiveRegister;
+using dex::Prototype;
+using dex::TypeDescriptor;
+using dex::Value;
+
+namespace {
+// TODO: these are a bunch of static initializers, which we should avoid. See if
+// we can make them constexpr.
+const TypeDescriptor kAttributeSet = TypeDescriptor::FromClassname("android.util.AttributeSet");
+const TypeDescriptor kContext = TypeDescriptor::FromClassname("android.content.Context");
+const TypeDescriptor kLayoutInflater = TypeDescriptor::FromClassname("android.view.LayoutInflater");
+const TypeDescriptor kResources = TypeDescriptor::FromClassname("android.content.res.Resources");
+const TypeDescriptor kString = TypeDescriptor::FromClassname("java.lang.String");
+const TypeDescriptor kView = TypeDescriptor::FromClassname("android.view.View");
+const TypeDescriptor kViewGroup = TypeDescriptor::FromClassname("android.view.ViewGroup");
+const TypeDescriptor kXmlResourceParser =
+    TypeDescriptor::FromClassname("android.content.res.XmlResourceParser");
+}  // namespace
 
 DexViewBuilder::DexViewBuilder(dex::MethodBuilder* method)
     : method_{method},
-      context_{dex::Value::Parameter(0)},
-      resid_{dex::Value::Parameter(1)},
-      inflater_{method->MakeRegister()},
-      xml_{method->MakeRegister()},
-      attrs_{method->MakeRegister()},
-      classname_tmp_{method->MakeRegister()},
-      xml_next_{method->dex_file()->GetOrDeclareMethod(
-          dex::TypeDescriptor::FromClassname("android.content.res.XmlResourceParser"), "next",
-          dex::Prototype{dex::TypeDescriptor::Int()})},
+      context_{Value::Parameter(0)},
+      resid_{Value::Parameter(1)},
+      inflater_{method->AllocRegister()},
+      xml_{method->AllocRegister()},
+      attrs_{method->AllocRegister()},
+      classname_tmp_{method->AllocRegister()},
+      xml_next_{method->dex_file()->GetOrDeclareMethod(kXmlResourceParser, "next",
+                                                       Prototype{TypeDescriptor::Int()})},
       try_create_view_{method->dex_file()->GetOrDeclareMethod(
-          dex::TypeDescriptor::FromClassname("android.view.LayoutInflater"), "tryCreateView",
-          dex::Prototype{dex::TypeDescriptor::FromClassname("android.view.View"),
-                         dex::TypeDescriptor::FromClassname("android.view.View"),
-                         dex::TypeDescriptor::FromClassname("java.lang.String"),
-                         dex::TypeDescriptor::FromClassname("android.content.Context"),
-                         dex::TypeDescriptor::FromClassname("android.util.AttributeSet")})},
+          kLayoutInflater, "tryCreateView",
+          Prototype{kView, kView, kString, kContext, kAttributeSet})},
       generate_layout_params_{method->dex_file()->GetOrDeclareMethod(
-          dex::TypeDescriptor::FromClassname("android.view.ViewGroup"), "generateLayoutParams",
-          dex::Prototype{dex::TypeDescriptor::FromClassname("android.view.ViewGroup$LayoutParams"),
-                         dex::TypeDescriptor::FromClassname("android.util.AttributeSet")})},
+          kViewGroup, "generateLayoutParams",
+          Prototype{TypeDescriptor::FromClassname("android.view.ViewGroup$LayoutParams"),
+                    kAttributeSet})},
       add_view_{method->dex_file()->GetOrDeclareMethod(
-          dex::TypeDescriptor::FromClassname("android.view.ViewGroup"), "addView",
-          dex::Prototype{
-              dex::TypeDescriptor::Void(),
-              dex::TypeDescriptor::FromClassname("android.view.View"),
-              dex::TypeDescriptor::FromClassname("android.view.ViewGroup$LayoutParams")})},
-      // The register stack starts with one register, which will be null for the root view.
-      register_stack_{{method->MakeRegister()}} {}
+          kViewGroup, "addView",
+          Prototype{TypeDescriptor::Void(),
+                    kView,
+                    TypeDescriptor::FromClassname("android.view.ViewGroup$LayoutParams")})} {}
+
+void DexViewBuilder::BuildGetLayoutInflater(Value dest) {
+  // dest = LayoutInflater.from(context);
+  auto layout_inflater_from = method_->dex_file()->GetOrDeclareMethod(
+      kLayoutInflater, "from", Prototype{kLayoutInflater, kContext});
+  method_->AddInstruction(Instruction::InvokeStaticObject(layout_inflater_from.id, dest, context_));
+}
+
+void DexViewBuilder::BuildGetResources(Value dest) {
+  // dest = context.getResources();
+  auto get_resources =
+      method_->dex_file()->GetOrDeclareMethod(kContext, "getResources", Prototype{kResources});
+  method_->AddInstruction(Instruction::InvokeVirtualObject(get_resources.id, dest, context_));
+}
+
+void DexViewBuilder::BuildGetLayoutResource(Value dest, Value resources, Value resid) {
+  // dest = resources.getLayout(resid);
+  auto get_layout = method_->dex_file()->GetOrDeclareMethod(
+      kResources, "getLayout", Prototype{kXmlResourceParser, TypeDescriptor::Int()});
+  method_->AddInstruction(Instruction::InvokeVirtualObject(get_layout.id, dest, resources, resid));
+}
+
+void DexViewBuilder::BuildLayoutResourceToAttributeSet(dex::Value dest,
+                                                       dex::Value layout_resource) {
+  // dest = Xml.asAttributeSet(layout_resource);
+  auto as_attribute_set = method_->dex_file()->GetOrDeclareMethod(
+      TypeDescriptor::FromClassname("android.util.Xml"),
+      "asAttributeSet",
+      Prototype{kAttributeSet, TypeDescriptor::FromClassname("org.xmlpull.v1.XmlPullParser")});
+  method_->AddInstruction(
+      Instruction::InvokeStaticObject(as_attribute_set.id, dest, layout_resource));
+}
+
+void DexViewBuilder::BuildXmlNext() {
+  // xml_.next();
+  method_->AddInstruction(Instruction::InvokeInterface(xml_next_.id, {}, xml_));
+}
 
 void DexViewBuilder::Start() {
-  dex::DexBuilder* const dex = method_->dex_file();
+  BuildGetLayoutInflater(/*dest=*/inflater_);
+  BuildGetResources(/*dest=*/xml_);
+  BuildGetLayoutResource(/*dest=*/xml_, /*resources=*/xml_, resid_);
+  BuildLayoutResourceToAttributeSet(/*dest=*/attrs_, /*layout_resource=*/xml_);
 
-  // LayoutInflater inflater = LayoutInflater.from(context);
-  auto layout_inflater_from = dex->GetOrDeclareMethod(
-      dex::TypeDescriptor::FromClassname("android.view.LayoutInflater"),
-      "from",
-      dex::Prototype{dex::TypeDescriptor::FromClassname("android.view.LayoutInflater"),
-                     dex::TypeDescriptor::FromClassname("android.content.Context")});
-  method_->AddInstruction(
-      dex::Instruction::InvokeStaticObject(layout_inflater_from.id, /*dest=*/inflater_, context_));
-
-  // Resources res = context.getResources();
-  auto context_type = dex::TypeDescriptor::FromClassname("android.content.Context");
-  auto resources_type = dex::TypeDescriptor::FromClassname("android.content.res.Resources");
-  auto get_resources =
-      dex->GetOrDeclareMethod(context_type, "getResources", dex::Prototype{resources_type});
-  method_->AddInstruction(dex::Instruction::InvokeVirtualObject(get_resources.id, xml_, context_));
-
-  // XmlResourceParser xml = res.getLayout(resid);
-  auto xml_resource_parser_type =
-      dex::TypeDescriptor::FromClassname("android.content.res.XmlResourceParser");
-  auto get_layout =
-      dex->GetOrDeclareMethod(resources_type,
-                              "getLayout",
-                              dex::Prototype{xml_resource_parser_type, dex::TypeDescriptor::Int()});
-  method_->AddInstruction(dex::Instruction::InvokeVirtualObject(get_layout.id, xml_, xml_, resid_));
-
-  // AttributeSet attrs = Xml.asAttributeSet(xml);
-  auto as_attribute_set = dex->GetOrDeclareMethod(
-      dex::TypeDescriptor::FromClassname("android.util.Xml"),
-      "asAttributeSet",
-      dex::Prototype{dex::TypeDescriptor::FromClassname("android.util.AttributeSet"),
-                     dex::TypeDescriptor::FromClassname("org.xmlpull.v1.XmlPullParser")});
-  method_->AddInstruction(dex::Instruction::InvokeStaticObject(as_attribute_set.id, attrs_, xml_));
-
-  // xml.next(); // start document
-  method_->AddInstruction(dex::Instruction::InvokeInterface(xml_next_.id, {}, xml_));
+  // Advance past start document tag
+  BuildXmlNext();
 }
 
 void DexViewBuilder::Finish() {}
@@ -107,58 +125,57 @@ std::string ResolveName(const std::string& name) {
 }
 }  // namespace
 
+void DexViewBuilder::BuildTryCreateView(Value dest, Value parent, Value classname) {
+  // dest = inflater_.tryCreateView(parent, classname, context_, attrs_);
+  method_->AddInstruction(Instruction::InvokeVirtualObject(
+      try_create_view_.id, dest, inflater_, parent, classname, context_, attrs_));
+}
+
 void DexViewBuilder::StartView(const std::string& name, bool is_viewgroup) {
   bool const is_root_view = view_stack_.empty();
 
-  // xml.next(); // start tag
-  method_->AddInstruction(dex::Instruction::InvokeInterface(xml_next_.id, {}, xml_));
+  // Advance to start tag
+  BuildXmlNext();
 
-  dex::Value view = AcquireRegister();
+  LiveRegister view = AcquireRegister();
   // try to create the view using the factories
   method_->BuildConstString(classname_tmp_,
                             name);  // TODO: the need to fully qualify the classname
   if (is_root_view) {
-    dex::Value null = AcquireRegister();
+    LiveRegister null = AcquireRegister();
     method_->BuildConst4(null, 0);
-    method_->AddInstruction(dex::Instruction::InvokeVirtualObject(
-        try_create_view_.id, view, inflater_, null, classname_tmp_, context_, attrs_));
-    ReleaseRegister();
+    BuildTryCreateView(/*dest=*/view, /*parent=*/null, classname_tmp_);
   } else {
-    method_->AddInstruction(dex::Instruction::InvokeVirtualObject(
-        try_create_view_.id, view, inflater_, GetCurrentView(), classname_tmp_, context_, attrs_));
+    BuildTryCreateView(/*dest=*/view, /*parent=*/GetCurrentView(), classname_tmp_);
   }
   auto label = method_->MakeLabel();
   // branch if not null
   method_->AddInstruction(
-      dex::Instruction::OpWithArgs(dex::Instruction::Op::kBranchNEqz, /*dest=*/{}, view, label));
+      Instruction::OpWithArgs(Instruction::Op::kBranchNEqz, /*dest=*/{}, view, label));
 
   // If null, create the class directly.
   method_->BuildNew(view,
-                    dex::TypeDescriptor::FromClassname(ResolveName(name)),
-                    dex::Prototype{dex::TypeDescriptor::Void(),
-                                   dex::TypeDescriptor::FromClassname("android.content.Context"),
-                                   dex::TypeDescriptor::FromClassname("android.util.AttributeSet")},
+                    TypeDescriptor::FromClassname(ResolveName(name)),
+                    Prototype{TypeDescriptor::Void(), kContext, kAttributeSet},
                     context_,
                     attrs_);
 
-  method_->AddInstruction(
-      dex::Instruction::OpWithArgs(dex::Instruction::Op::kBindLabel, /*dest=*/{}, label));
+  method_->AddInstruction(Instruction::OpWithArgs(Instruction::Op::kBindLabel, /*dest=*/{}, label));
 
   if (is_viewgroup) {
     // Cast to a ViewGroup so we can add children later.
-    const ir::Type* view_group_def = method_->dex_file()->GetOrAddType(
-        dex::TypeDescriptor::FromClassname("android.view.ViewGroup").descriptor());
-    method_->AddInstruction(dex::Instruction::Cast(view, dex::Value::Type(view_group_def->orig_index)));
+    const ir::Type* view_group_def = method_->dex_file()->GetOrAddType(kViewGroup.descriptor());
+    method_->AddInstruction(Instruction::Cast(view, Value::Type(view_group_def->orig_index)));
   }
 
   if (!is_root_view) {
     // layout_params = parent.generateLayoutParams(attrs);
-    dex::Value layout_params{AcquireRegister()};
-    method_->AddInstruction(dex::Instruction::InvokeVirtualObject(
+    LiveRegister layout_params{AcquireRegister()};
+    method_->AddInstruction(Instruction::InvokeVirtualObject(
         generate_layout_params_.id, layout_params, GetCurrentView(), attrs_));
-    view_stack_.push_back({view, layout_params});
+    view_stack_.push_back({std::move(view), std::move(layout_params)});
   } else {
-    view_stack_.push_back({view, {}});
+    view_stack_.push_back({std::move(view), {}});
   }
 }
 
@@ -167,40 +184,24 @@ void DexViewBuilder::FinishView() {
     method_->BuildReturn(GetCurrentView(), /*is_object=*/true);
   } else {
     // parent.add(view, layout_params)
-    method_->AddInstruction(dex::Instruction::InvokeVirtual(
+    method_->AddInstruction(Instruction::InvokeVirtual(
         add_view_.id, /*dest=*/{}, GetParentView(), GetCurrentView(), GetCurrentLayoutParams()));
     // xml.next(); // end tag
-    method_->AddInstruction(dex::Instruction::InvokeInterface(xml_next_.id, {}, xml_));
+    method_->AddInstruction(Instruction::InvokeInterface(xml_next_.id, {}, xml_));
   }
   PopViewStack();
 }
 
-dex::Value DexViewBuilder::AcquireRegister() {
-  top_register_++;
-  if (register_stack_.size() == top_register_) {
-    register_stack_.push_back(method_->MakeRegister());
-  }
-  return register_stack_[top_register_];
-}
+LiveRegister DexViewBuilder::AcquireRegister() { return method_->AllocRegister(); }
 
-void DexViewBuilder::ReleaseRegister() { top_register_--; }
-
-dex::Value DexViewBuilder::GetCurrentView() const { return view_stack_.back().view; }
-dex::Value DexViewBuilder::GetCurrentLayoutParams() const {
+Value DexViewBuilder::GetCurrentView() const { return view_stack_.back().view; }
+Value DexViewBuilder::GetCurrentLayoutParams() const {
   return view_stack_.back().layout_params.value();
 }
-dex::Value DexViewBuilder::GetParentView() const {
-  return view_stack_[view_stack_.size() - 2].view;
-}
+Value DexViewBuilder::GetParentView() const { return view_stack_[view_stack_.size() - 2].view; }
 
 void DexViewBuilder::PopViewStack() {
-  const auto& top = view_stack_.back();
-  // release the layout params if we have them
-  if (top.layout_params.has_value()) {
-    ReleaseRegister();
-  }
   // Unconditionally release the view register.
-  ReleaseRegister();
   view_stack_.pop_back();
 }
 

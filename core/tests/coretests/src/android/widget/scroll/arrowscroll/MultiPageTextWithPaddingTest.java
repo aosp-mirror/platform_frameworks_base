@@ -16,14 +16,14 @@
 
 package android.widget.scroll.arrowscroll;
 
-import android.test.suitebuilder.annotation.Suppress;
-import android.widget.scroll.arrowscroll.MultiPageTextWithPadding;
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.view.KeyEvent;
-import android.widget.TextView;
 import android.widget.ScrollView;
+import android.widget.TextView;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.Suppress;
 
 @Suppress // Flaky
 public class MultiPageTextWithPaddingTest extends

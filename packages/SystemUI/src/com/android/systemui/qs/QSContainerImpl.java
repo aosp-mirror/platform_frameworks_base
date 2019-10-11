@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -26,9 +27,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.CommandQueue;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
@@ -69,7 +68,6 @@ public class QSContainerImpl extends FrameLayout {
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
 
-        setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         setMargins();
     }
@@ -77,16 +75,7 @@ public class QSContainerImpl extends FrameLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
-        // Hide the backgrounds when in landscape mode.
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            mBackgroundGradient.setVisibility(View.INVISIBLE);
-            mStatusBarBackground.setVisibility(View.INVISIBLE);
-        } else {
-            mBackgroundGradient.setVisibility(View.VISIBLE);
-            mStatusBarBackground.setVisibility(View.VISIBLE);
-        }
-
+        setBackgroundGradientVisibility(newConfig);
         updateResources();
         mSizePoint.set(0, 0); // Will be retrieved on next measure pass.
     }
@@ -100,15 +89,26 @@ public class QSContainerImpl extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // Since we control our own bottom, be whatever size we want.
-        // Otherwise the QSPanel ends up with 0 height when the window is only the
-        // size of the status bar.
-        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(
-                MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED));
+        // QSPanel will show as many rows as it can (up to TileLayout.MAX_ROWS) such that the
+        // bottom and footer are inside the screen.
+        Configuration config = getResources().getConfiguration();
+        boolean navBelow = config.smallestScreenWidthDp >= 600
+                || config.orientation != Configuration.ORIENTATION_LANDSCAPE;
+        MarginLayoutParams layoutParams = (MarginLayoutParams) mQSPanel.getLayoutParams();
+
+        // The footer is pinned to the bottom of QSPanel (same bottoms), therefore we don't need to
+        // subtract its height. We do not care if the collapsed notifications fit in the screen.
+        int maxQs = getDisplayHeight() - layoutParams.topMargin - layoutParams.bottomMargin
+                - getPaddingBottom();
+        if (navBelow) {
+            maxQs -= getResources().getDimensionPixelSize(R.dimen.navigation_bar_height);
+        }
+        // Measure with EXACTLY. That way, PagedTileLayout will only use excess height and will be
+        // measured last, after other views and padding is accounted for.
+        mQSPanel.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(maxQs, MeasureSpec.EXACTLY));
         int width = mQSPanel.getMeasuredWidth();
-        LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
         int height = layoutParams.topMargin + layoutParams.bottomMargin
-                + mQSPanel.getMeasuredHeight();
+                + mQSPanel.getMeasuredHeight() + getPaddingBottom();
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 
@@ -128,7 +128,7 @@ public class QSContainerImpl extends FrameLayout {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        mBackgroundGradient.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        setBackgroundGradientVisibility(getResources().getConfiguration());
         mBackground.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
     }
 
@@ -166,6 +166,16 @@ public class QSContainerImpl extends FrameLayout {
         return mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
                 : Math.round(mQsExpansion * (heightOverride - mHeader.getHeight()))
                 + mHeader.getHeight();
+    }
+
+    private void setBackgroundGradientVisibility(Configuration newConfig) {
+        if (newConfig.orientation == ORIENTATION_LANDSCAPE) {
+            mBackgroundGradient.setVisibility(View.INVISIBLE);
+            mStatusBarBackground.setVisibility(View.INVISIBLE);
+        } else {
+            mBackgroundGradient.setVisibility(mQsDisabled ? View.INVISIBLE : View.VISIBLE);
+            mStatusBarBackground.setVisibility(View.VISIBLE);
+        }
     }
 
     public void setExpansion(float expansion) {

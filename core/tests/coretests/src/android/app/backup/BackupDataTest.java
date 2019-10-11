@@ -16,31 +16,22 @@
 
 package android.app.backup;
 
-import android.app.backup.BackupDataInput;
-import android.app.backup.BackupDataOutput;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
-import android.test.InstrumentationTestCase;
 import android.util.Base64;
-import android.util.Log;
-import org.json.JSONObject;
+
+import androidx.test.filters.LargeTest;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.Exception;
-import java.nio.ByteBuffer;
 
 @LargeTest
 public class BackupDataTest extends AndroidTestCase {

@@ -16,64 +16,84 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.TestApi;
 
 /**
  * Java API for ::android::vintf::RuntimeInfo. Methods return null / 0 on any error.
  *
  * @hide
  */
+@TestApi
 public class VintfRuntimeInfo {
 
     private VintfRuntimeInfo() {}
 
     /**
      * @return /sys/fs/selinux/policyvers, via security_policyvers() native call
+     *
+     * @hide
      */
     public static native long getKernelSepolicyVersion();
     /**
      * @return content of /proc/cpuinfo
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getCpuInfo();
     /**
      * @return os name extracted from uname() native call
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getOsName();
     /**
      * @return node name extracted from uname() native call
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getNodeName();
     /**
      * @return os release extracted from uname() native call
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getOsRelease();
     /**
      * @return os version extracted from uname() native call
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getOsVersion();
     /**
      * @return hardware id extracted from uname() native call
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getHardwareId();
     /**
      * @return kernel version extracted from uname() native call. Format is
      * {@code x.y.z}.
+     *
+     * @hide
      */
-    @UnsupportedAppUsage
+    @TestApi
     public static native String getKernelVersion();
     /**
      * @return libavb version in OS. Format is {@code x.y}.
+     *
+     * @hide
      */
     public static native String getBootAvbVersion();
     /**
      * @return libavb version in bootloader. Format is {@code x.y}.
+     *
+     * @hide
      */
     public static native String getBootVbmetaAvbVersion();
-
 }

@@ -32,7 +32,9 @@ import android.service.usb.UsbConnectionRecordProto;
 import android.service.usb.UsbHostManagerProto;
 import android.service.usb.UsbIsHeadsetProto;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -40,6 +42,7 @@ import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.usb.descriptors.UsbDescriptor;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 import com.android.server.usb.descriptors.UsbDeviceDescriptor;
+import com.android.server.usb.descriptors.UsbInterfaceDescriptor;
 import com.android.server.usb.descriptors.report.TextReportCanvas;
 import com.android.server.usb.descriptors.tree.UsbDescriptorsTree;
 
@@ -85,6 +88,7 @@ public class UsbHostManager {
     private int mNumConnects;    // TOTAL # of connect/disconnect
     private final LinkedList<ConnectionRecord> mConnections = new LinkedList<ConnectionRecord>();
     private ConnectionRecord mLastConnect;
+    private final ArrayMap<String, ConnectionRecord> mConnected = new ArrayMap<>();
 
     /*
      * ConnectionRecord
@@ -299,6 +303,11 @@ public class UsbHostManager {
         if (mode != ConnectionRecord.DISCONNECT) {
             mLastConnect = rec;
         }
+        if (mode == ConnectionRecord.CONNECT) {
+            mConnected.put(deviceAddress, rec);
+        } else if (mode == ConnectionRecord.DISCONNECT) {
+            mConnected.remove(deviceAddress);
+        }
     }
 
     private void logUsbDevice(UsbDescriptorParser descriptorParser) {
@@ -352,8 +361,6 @@ public class UsbHostManager {
             }
             return false;
         }
-        UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
-        logUsbDevice(parser);
 
         if (isBlackListed(deviceClass, deviceSubclass)) {
             if (DEBUG) {
@@ -361,6 +368,15 @@ public class UsbHostManager {
             }
             return false;
         }
+
+        UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress, descriptors);
+        if (deviceClass == UsbConstants.USB_CLASS_PER_INTERFACE
+                && !checkUsbInterfacesBlackListed(parser)) {
+            return false;
+        }
+
+        // Potentially can block as it may read data from the USB device.
+        logUsbDevice(parser);
 
         synchronized (mLock) {
             if (mDevices.get(deviceAddress) != null) {
@@ -370,13 +386,18 @@ public class UsbHostManager {
                 return false;
             }
 
-            UsbDevice newDevice = parser.toAndroidUsbDevice();
-            if (newDevice == null) {
+            UsbDevice.Builder newDeviceBuilder = parser.toAndroidUsbDevice();
+            if (newDeviceBuilder == null) {
                 Slog.e(TAG, "Couldn't create UsbDevice object.");
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT_BADDEVICE,
                         parser.getRawDescriptors());
             } else {
+                UsbSerialReader serialNumberReader = new UsbSerialReader(mContext, mSettingsManager,
+                        newDeviceBuilder.serialNumber);
+                UsbDevice newDevice = newDeviceBuilder.build(serialNumberReader);
+                serialNumberReader.setDevice(newDevice);
+
                 mDevices.put(deviceAddress, newDevice);
                 Slog.d(TAG, "Added device " + newDevice);
 
@@ -395,6 +416,12 @@ public class UsbHostManager {
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
                         parser.getRawDescriptors());
+
+                // Stats collection
+                StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, newDevice.getVendorId(),
+                        newDevice.getProductId(), parser.hasAudioInterface(),
+                        parser.hasHIDInterface(), parser.hasStorageInterface(),
+                        StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_CONNECTED, 0);
             }
         }
 
@@ -408,16 +435,31 @@ public class UsbHostManager {
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     @SuppressWarnings("unused")
     private void usbDeviceRemoved(String deviceAddress) {
+        if (DEBUG) {
+            Slog.d(TAG, "usbDeviceRemoved(" + deviceAddress + ") end");
+        }
+
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceAddress);
             if (device != null) {
                 Slog.d(TAG, "Removed device at " + deviceAddress + ": " + device.getProductName());
-                mUsbAlsaManager.usbDeviceRemoved(deviceAddress/*device*/);
+                mUsbAlsaManager.usbDeviceRemoved(deviceAddress);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
-
+                ConnectionRecord current = mConnected.get(deviceAddress);
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.DISCONNECT, null);
+
+                if (current != null) {
+                    UsbDescriptorParser parser = new UsbDescriptorParser(deviceAddress,
+                            current.mDescriptors);
+                        // Stats collection
+                    StatsLog.write(StatsLog.USB_DEVICE_ATTACHED, device.getVendorId(),
+                            device.getProductId(), parser.hasAudioInterface(),
+                            parser.hasHIDInterface(),  parser.hasStorageInterface(),
+                            StatsLog.USB_DEVICE_ATTACHED__STATE__STATE_DISCONNECTED,
+                            System.currentTimeMillis() - current.mTimestamp);
+                }
             } else {
                 Slog.d(TAG, "Removed device at " + deviceAddress + " was already gone");
             }
@@ -507,6 +549,29 @@ public class UsbHostManager {
         } else {
             pw.println("No USB Devices have been connected.");
         }
+    }
+
+    private boolean checkUsbInterfacesBlackListed(UsbDescriptorParser parser) {
+        // Device class needs to be obtained through the device interface.  Ignore device only
+        // if ALL interfaces are black-listed.
+        boolean shouldIgnoreDevice = false;
+        for (UsbDescriptor descriptor: parser.getDescriptors()) {
+            if (!(descriptor instanceof UsbInterfaceDescriptor)) {
+                continue;
+            }
+            UsbInterfaceDescriptor iface = (UsbInterfaceDescriptor) descriptor;
+            shouldIgnoreDevice = isBlackListed(iface.getUsbClass(), iface.getUsbSubclass());
+            if (!shouldIgnoreDevice) {
+                break;
+            }
+        }
+        if (shouldIgnoreDevice) {
+            if (DEBUG) {
+                Slog.d(TAG, "usb interface class is black listed");
+            }
+            return false;
+        }
+        return true;
     }
 
     private native void monitorUsbHostBus();

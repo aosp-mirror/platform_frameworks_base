@@ -17,12 +17,15 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.Canvas;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.graphics.SurfaceTexture;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -55,7 +58,8 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private static native long nativeCreateFromSurfaceControl(long surfaceControlNativeObject);
-    private static native long nativeGetFromSurfaceControl(long surfaceControlNativeObject);
+    private static native long nativeGetFromSurfaceControl(long surfaceObject,
+            long surfaceControlNativeObject);
 
     private static native long nativeLockCanvas(long nativeObject, Canvas canvas, Rect dirty)
             throws OutOfResourcesException;
@@ -81,7 +85,7 @@ public class Surface implements Parcelable {
     private static native int nativeSetSharedBufferModeEnabled(long nativeObject, boolean enabled);
     private static native int nativeSetAutoRefreshEnabled(long nativeObject, boolean enabled);
 
-    public static final Parcelable.Creator<Surface> CREATOR =
+    public static final @android.annotation.NonNull Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
         @Override
         public Surface createFromParcel(Parcel source) {
@@ -180,6 +184,18 @@ public class Surface implements Parcelable {
      */
     @UnsupportedAppUsage
     public Surface() {
+    }
+
+    /**
+     * Create a Surface assosciated with a given {@link SurfaceControl}. Buffers submitted to this
+     * surface will be displayed by the system compositor according to the parameters
+     * specified by the control. Multiple surfaces may be constructed from one SurfaceControl,
+     * but only one can be connected (e.g. have an active EGL context) at a time.
+     *
+     * @param from The SurfaceControl to assosciate this Surface with
+     */
+    public Surface(@NonNull SurfaceControl from) {
+        copyFrom(from);
     }
 
     /**
@@ -492,7 +508,6 @@ public class Surface implements Parcelable {
      * in to it.
      *
      * @param other {@link SurfaceControl} to copy from.
-     *
      * @hide
      */
     @UnsupportedAppUsage
@@ -506,9 +521,12 @@ public class Surface implements Parcelable {
             throw new NullPointerException(
                     "null SurfaceControl native object. Are you using a released SurfaceControl?");
         }
-        long newNativeObject = nativeGetFromSurfaceControl(surfaceControlPtr);
+        long newNativeObject = nativeGetFromSurfaceControl(mNativeObject, surfaceControlPtr);
 
         synchronized (mLock) {
+            if (newNativeObject == mNativeObject) {
+                return;
+            }
             if (mNativeObject != 0) {
                 nativeRelease(mNativeObject);
             }
@@ -889,12 +907,13 @@ public class Surface implements Parcelable {
     private final class HwuiContext {
         private final RenderNode mRenderNode;
         private long mHwuiRenderer;
-        private DisplayListCanvas mCanvas;
+        private RecordingCanvas mCanvas;
         private final boolean mIsWideColorGamut;
 
         HwuiContext(boolean isWideColorGamut) {
             mRenderNode = RenderNode.create("HwuiCanvas", null);
             mRenderNode.setClipToBounds(false);
+            mRenderNode.setForceDarkAllowed(false);
             mIsWideColorGamut = isWideColorGamut;
             mHwuiRenderer = nHwuiCreate(mRenderNode.mNativeRenderNode, mNativeObject,
                     isWideColorGamut);
@@ -904,7 +923,7 @@ public class Surface implements Parcelable {
             if (mCanvas != null) {
                 throw new IllegalStateException("Surface was already locked!");
             }
-            mCanvas = mRenderNode.start(width, height);
+            mCanvas = mRenderNode.beginRecording(width, height);
             return mCanvas;
         }
 
@@ -913,7 +932,7 @@ public class Surface implements Parcelable {
                 throw new IllegalArgumentException("canvas object must be the same instance that "
                         + "was previously returned by lockCanvas");
             }
-            mRenderNode.end(mCanvas);
+            mRenderNode.endRecording();
             mCanvas = null;
             nHwuiDraw(mHwuiRenderer);
         }

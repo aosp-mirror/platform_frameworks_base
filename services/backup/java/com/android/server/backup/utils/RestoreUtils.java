@@ -34,7 +34,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Process;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -72,7 +72,9 @@ public class RestoreUtils {
             HashMap<String, Signature[]> manifestSignatures,
             HashMap<String, RestorePolicy> packagePolicies,
             FileMetadata info,
-            String installerPackageName, BytesReadListener bytesReadListener) {
+            String installerPackageName,
+            BytesReadListener bytesReadListener,
+            int userId) {
         boolean okay = true;
 
         if (DEBUG) {
@@ -144,8 +146,8 @@ public class RestoreUtils {
                     uninstall = true;
                 } else {
                     try {
-                        PackageInfo pkg = packageManager.getPackageInfo(info.packageName,
-                                PackageManager.GET_SIGNING_CERTIFICATES);
+                        PackageInfo pkg = packageManager.getPackageInfoAsUser(info.packageName,
+                                PackageManager.GET_SIGNING_CERTIFICATES, userId);
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP)
                                 == 0) {
                             Slog.w(TAG, "Restore stream contains apk of package "
@@ -160,7 +162,7 @@ public class RestoreUtils {
                             if (AppBackupUtils.signaturesMatch(sigs, pkg, pmi)) {
                                 // If this is a system-uid app without a declared backup agent,
                                 // don't restore any of the file data.
-                                if ((pkg.applicationInfo.uid < Process.FIRST_APPLICATION_UID)
+                                if (UserHandle.isCore(pkg.applicationInfo.uid)
                                         && (pkg.applicationInfo.backupAgentName == null)) {
                                     Slog.w(TAG, "Installed app " + info.packageName
                                             + " has restricted uid and no agent");

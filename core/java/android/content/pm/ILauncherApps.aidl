@@ -23,6 +23,9 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IOnAppsChangedListener;
+import android.content.pm.LauncherApps;
+import android.content.pm.IPackageInstallerCallback;
+import android.content.pm.PackageInstaller;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
@@ -43,6 +46,9 @@ interface ILauncherApps {
             String callingPackage, String packageName, in UserHandle user);
     ActivityInfo resolveActivity(
             String callingPackage, in ComponentName component, in UserHandle user);
+    void startSessionDetailsActivityAsUser(in IApplicationThread caller, String callingPackage,
+                in PackageInstaller.SessionInfo sessionInfo, in Rect sourceBounds, in Bundle opts,
+                in UserHandle user);
     void startActivityAsUser(in IApplicationThread caller, String callingPackage,
             in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
@@ -55,6 +61,9 @@ interface ILauncherApps {
             String callingPackage, in ComponentName component, in UserHandle user);
     ApplicationInfo getApplicationInfo(
             String callingPackage, String packageName, int flags, in UserHandle user);
+
+    LauncherApps.AppUsageLimit getAppUsageLimit(String callingPackage, String packageName,
+            in UserHandle user);
 
     ParceledListSlice getShortcuts(String callingPackage, long changedSince, String packageName,
             in List shortcutIds, in ComponentName componentName, int flags, in UserHandle user);
@@ -69,9 +78,15 @@ interface ILauncherApps {
             int userId);
 
     boolean hasShortcutHostPermission(String callingPackage);
+    boolean shouldHideFromSuggestions(String packageName, in UserHandle user);
 
     ParceledListSlice getShortcutConfigActivities(
             String callingPackage, String packageName, in UserHandle user);
     IntentSender getShortcutConfigActivityIntent(String callingPackage, in ComponentName component,
             in UserHandle user);
+
+    // Unregister is performed using package installer
+    void registerPackageInstallerCallback(String callingPackage,
+            in IPackageInstallerCallback callback);
+    ParceledListSlice getAllSessions(String callingPackage);
 }

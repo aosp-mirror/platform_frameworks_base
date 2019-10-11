@@ -36,7 +36,7 @@ import android.os.Parcelable;
  * {@link #canRender}.
  *
  * @see Slice
- * @see SliceProvider#onBindSlice(Uri)
+ * @see SliceProvider#onBindSlice(Uri, Set)
  */
 public final class SliceSpec implements Parcelable {
 
@@ -108,7 +108,7 @@ public final class SliceSpec implements Parcelable {
         return String.format("SliceSpec{%s,%d}", mType, mRevision);
     }
 
-    public static final Creator<SliceSpec> CREATOR = new Creator<SliceSpec>() {
+    public static final @android.annotation.NonNull Creator<SliceSpec> CREATOR = new Creator<SliceSpec>() {
         @Override
         public SliceSpec createFromParcel(Parcel source) {
             return new SliceSpec(source);

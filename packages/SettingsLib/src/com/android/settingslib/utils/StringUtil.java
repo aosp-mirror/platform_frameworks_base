@@ -107,20 +107,22 @@ public class StringUtil {
     }
 
     /**
-     * Returns relative time for the given millis in the past, in a short format such as "2 days
-     * ago", "5 hr. ago", "40 min. ago", or "29 sec. ago".
+     * Returns relative time for the given millis in the past with different format style.
+     * In a short format such as "2 days ago", "5 hr. ago", "40 min. ago", or "29 sec. ago".
+     * In a long format such as "2 days ago", "5 hours ago",  "40 minutes ago" or "29 seconds ago".
      *
      * <p>The unit is chosen to have good information value while only using one unit. So 27 hours
      * and 50 minutes would be formatted as "28 hr. ago", while 50 hours would be formatted as
      * "2 days ago".
      *
-     * @param context the application context
-     * @param millis the elapsed time in milli seconds
+     * @param context     the application context
+     * @param millis      the elapsed time in milli seconds
      * @param withSeconds include seconds?
+     * @param formatStyle format style
      * @return the formatted elapsed time
      */
     public static CharSequence formatRelativeTime(Context context, double millis,
-            boolean withSeconds) {
+            boolean withSeconds, RelativeDateTimeFormatter.Style formatStyle) {
         final int seconds = (int) Math.floor(millis / 1000);
         final RelativeUnit unit;
         final int value;
@@ -144,9 +146,31 @@ public class StringUtil {
         final RelativeDateTimeFormatter formatter = RelativeDateTimeFormatter.getInstance(
                 ULocale.forLocale(locale),
                 null /* default NumberFormat */,
-                RelativeDateTimeFormatter.Style.LONG,
+                formatStyle,
                 android.icu.text.DisplayContext.CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE);
 
         return formatter.format(value, RelativeDateTimeFormatter.Direction.LAST, unit);
+    }
+
+    /**
+     * Returns relative time for the given millis in the past, in a long format such as "2 days
+     * ago", "5 hours ago",  "40 minutes ago" or "29 seconds ago".
+     *
+     * <p>The unit is chosen to have good information value while only using one unit. So 27 hours
+     * and 50 minutes would be formatted as "28 hr. ago", while 50 hours would be formatted as
+     * "2 days ago".
+     *
+     * @param context     the application context
+     * @param millis      the elapsed time in milli seconds
+     * @param withSeconds include seconds?
+     * @return the formatted elapsed time
+     * @deprecated use {@link #formatRelativeTime(Context, double, boolean,
+     * RelativeDateTimeFormatter.Style)} instead.
+     */
+    @Deprecated
+    public static CharSequence formatRelativeTime(Context context, double millis,
+            boolean withSeconds) {
+        return formatRelativeTime(context, millis, withSeconds,
+                RelativeDateTimeFormatter.Style.LONG);
     }
 }

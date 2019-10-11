@@ -34,6 +34,14 @@ enum class PixelStorageType {
     Hardware,
 };
 
+// TODO: Find a better home for this. It's here because hwui/Bitmap is exported and CanvasTransform
+// isn't, but cleanup should be done
+enum class BitmapPalette {
+    Unknown,
+    Light,
+    Dark,
+};
+
 namespace uirenderer {
 namespace renderthread {
 class RenderThread;
@@ -46,28 +54,33 @@ typedef void (*FreeFunc)(void* addr, void* context);
 
 class ANDROID_API Bitmap : public SkPixelRef {
 public:
+    /* The allocate factories not only construct the Bitmap object but also allocate the
+     * backing store whose type is determined by the specific method that is called.
+     *
+     * The factories that accept SkBitmap* as a param will modify those params by
+     * installing the returned bitmap as their SkPixelRef.
+     *
+     * The factories that accept const SkBitmap& as a param will copy the contents of the
+     * provided bitmap into the newly allocated buffer.
+     */
+    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
+    static sk_sp<Bitmap> allocateHardwareBitmap(const SkBitmap& bitmap);
     static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
-    static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
-
-    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
-    static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
-                                              size_t rowBytes);
-
-    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
-
+    /* The createFrom factories construct a new Bitmap object by wrapping the already allocated
+     * memory that is provided as an input param.
+     */
+    static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer,
+                                    SkColorType colorType,
+                                    sk_sp<SkColorSpace> colorSpace,
+                                    SkAlphaType alphaType = kPremul_SkAlphaType,
+                                    BitmapPalette palette = BitmapPalette::Unknown);
+    static sk_sp<Bitmap> createFrom(const SkImageInfo& info, size_t rowBytes, int fd, void* addr,
+                                    size_t size, bool readOnly);
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
-    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
-           size_t rowBytes);
-    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
-
-    int rowBytesAsPixels() const {
-        return rowBytes() >> mInfo.shiftPerPixel();
-    }
+    int rowBytesAsPixels() const { return rowBytes() >> mInfo.shiftPerPixel(); }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes);
     void reconfigure(const SkImageInfo& info);
@@ -90,28 +103,50 @@ public:
 
     bool isHardware() const { return mPixelStorageType == PixelStorageType::Hardware; }
 
+    PixelStorageType pixelStorageType() const { return mPixelStorageType; }
+
     GraphicBuffer* graphicBuffer();
 
     /**
      * Creates or returns a cached SkImage and is safe to be invoked from either
      * the UI or RenderThread.
      *
-     * @param outputColorFilter is a required param that will be populated by
-     *     this function if the bitmap's colorspace is not sRGB. If populated the
-     *     filter will convert colors from the bitmaps colorspace into sRGB. It
-     *     is the callers responsibility to use this colorFilter when drawing
-     *     this image into any destination that is presumed to be sRGB (i.e. a
-     *     buffer that has no colorspace defined).
      */
-    sk_sp<SkImage> makeImage(sk_sp<SkColorFilter>* outputColorFilter);
+    sk_sp<SkImage> makeImage();
+
+    static BitmapPalette computePalette(const SkImageInfo& info, const void* addr, size_t rowBytes);
+
+    static BitmapPalette computePalette(const SkBitmap& bitmap) {
+        return computePalette(bitmap.info(), bitmap.getPixels(), bitmap.rowBytes());
+    }
+
+    BitmapPalette palette() {
+        if (!isHardware() && mPaletteGenerationId != getGenerationID()) {
+            mPalette = computePalette(info(), pixels(), rowBytes());
+            mPaletteGenerationId = getGenerationID();
+        }
+        return mPalette;
+    }
 
 private:
+    static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
+    static sk_sp<Bitmap> allocateHeapBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
+
+    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
+    Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
+           size_t rowBytes);
+    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette);
+
     virtual ~Bitmap();
     void* getStorage() const;
 
     SkImageInfo mInfo;
 
     const PixelStorageType mPixelStorageType;
+
+    BitmapPalette mPalette = BitmapPalette::Unknown;
+    uint32_t mPaletteGenerationId = -1;
 
     bool mHasHardwareMipMap = false;
 

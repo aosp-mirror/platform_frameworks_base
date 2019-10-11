@@ -53,6 +53,11 @@ public class CbGeoUtils {
 
     private static final String TAG = "CbGeoUtils";
 
+    /** The TLV tags of WAC, defined in ATIS-0700041 5.2.3 WAC tag coding. */
+    public static final int GEO_FENCING_MAXIMUM_WAIT_TIME = 0x01;
+    public static final int GEOMETRY_TYPE_POLYGON = 0x02;
+    public static final int GEOMETRY_TYPE_CIRCLE = 0x03;
+
     /** The identifier of geometry in the encoded string. */
     private static final String CIRCLE_SYMBOL = "circle";
     private static final String POLYGON_SYMBOL = "polygon";
@@ -91,6 +96,11 @@ public class CbGeoUtils {
             double x = dlat * dlat
                     + dlng * dlng * Math.cos(Math.toRadians(lat)) * Math.cos(Math.toRadians(p.lat));
             return 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)) * EARTH_RADIUS_METER;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + lat + "," + lng + ")";
         }
     }
 
@@ -289,7 +299,8 @@ public class CbGeoUtils {
      * @return the encoded string.
      */
     @NonNull
-    public static String encodeGeometriesToString(@NonNull List<Geometry> geometries) {
+    public static String encodeGeometriesToString(List<Geometry> geometries) {
+        if (geometries == null || geometries.isEmpty()) return "";
         return geometries.stream()
                 .map(geometry -> encodeGeometryToString(geometry))
                 .filter(encodedStr -> !TextUtils.isEmpty(encodedStr))

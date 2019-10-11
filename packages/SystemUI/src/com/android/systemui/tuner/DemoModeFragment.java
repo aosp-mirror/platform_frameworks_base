@@ -23,12 +23,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.SwitchPreference;
+import android.view.MenuItem;
+
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceChangeListener;
+import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceScreen;
-import android.view.MenuItem;
+import androidx.preference.SwitchPreference;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;

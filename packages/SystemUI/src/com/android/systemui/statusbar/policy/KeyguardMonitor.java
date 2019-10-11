@@ -19,13 +19,33 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 public interface KeyguardMonitor extends CallbackController<Callback> {
 
     boolean isSecure();
-    boolean canSkipBouncer();
     boolean isShowing();
     boolean isOccluded();
     boolean isKeyguardFadingAway();
     boolean isKeyguardGoingAway();
+    boolean isLaunchTransitionFadingAway();
     long getKeyguardFadingAwayDuration();
     long getKeyguardFadingAwayDelay();
+    long calculateGoingToFullShadeDelay();
+
+    default boolean isDeviceInteractive() {
+        return false;
+    }
+
+    default void setLaunchTransitionFadingAway(boolean b) {
+    }
+
+    default void notifyKeyguardGoingAway(boolean b) {
+    }
+
+    default void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
+    }
+
+    default void notifyKeyguardDoneFading() {
+    }
+
+    default void notifyKeyguardState(boolean showing, boolean methodSecure, boolean occluded) {
+    }
 
     interface Callback {
         void onKeyguardShowingChanged();

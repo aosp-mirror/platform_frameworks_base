@@ -678,6 +678,89 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * Pre-processes an SMS WAP for Teleservice Id 0xFDEA(65002).
+     *
+     * It requires an additional header parsing to extract new Message Identifier and new User Data
+     * from WDP SMS User Data.
+     *
+     * - WDP SMS User Data Subparameter =
+     *   |User Data SUBPARAMETER_ID ~ NUM_FIELDS| + |CHARi| + |RESERVED|
+     *
+     * - WDP SMS User Data Subparameter CHARi =
+     *   |New Message Identifier Subparameter(HEADER_IND = 0)| +
+     *   |New User Data Subparameter(MSG_ENCODING = ENCODING_OCTET)|
+     *
+     * @return true if preprocessing is successful, false otherwise.
+     */
+    public boolean preprocessCdmaFdeaWap() {
+        try {
+            BitwiseInputStream inStream = new BitwiseInputStream(mUserData);
+
+            // Message Identifier SUBPARAMETER_ID(0x00)
+            if (inStream.read(8) != 0x00) {
+                Rlog.e(LOG_TAG, "Invalid FDEA WDP Header Message Identifier SUBPARAMETER_ID");
+                return false;
+            }
+
+            // Message Identifier SUBPARAM_LEN(0x03)
+            if (inStream.read(8) != 0x03) {
+                Rlog.e(LOG_TAG, "Invalid FDEA WDP Header Message Identifier SUBPARAM_LEN");
+                return false;
+            }
+
+            // Message Identifier MESSAGE_TYPE
+            mBearerData.messageType = inStream.read(4);
+
+            // Message Identifier MESSAGE_ID
+            int msgId = inStream.read(8) << 8;
+            msgId |= inStream.read(8);
+            mBearerData.messageId = msgId;
+            mMessageRef = msgId;
+
+            // Message Identifier HEADER_IND
+            mBearerData.hasUserDataHeader = (inStream.read(1) == 1);
+            if (mBearerData.hasUserDataHeader) {
+                Rlog.e(LOG_TAG, "Invalid FDEA WDP Header Message Identifier HEADER_IND");
+                return false;
+            }
+
+            // Message Identifier RESERVED
+            inStream.skip(3);
+
+            // User Data SUBPARAMETER_ID(0x01)
+            if (inStream.read(8) != 0x01) {
+                Rlog.e(LOG_TAG, "Invalid FDEA WDP Header User Data SUBPARAMETER_ID");
+                return false;
+            }
+
+            // User Data SUBPARAM_LEN
+            int userDataLen = inStream.read(8) * 8;
+
+            // User Data MSG_ENCODING
+            mBearerData.userData.msgEncoding = inStream.read(5);
+            int consumedBits = 5;
+            if (mBearerData.userData.msgEncoding != UserData.ENCODING_OCTET) {
+                Rlog.e(LOG_TAG, "Invalid FDEA WDP Header User Data MSG_ENCODING");
+                return false;
+            }
+
+            // User Data NUM_FIELDS
+            mBearerData.userData.numFields = inStream.read(8);
+            consumedBits += 8;
+
+            int remainingBits = userDataLen - consumedBits;
+            int dataBits = mBearerData.userData.numFields * 8;
+            dataBits = dataBits < remainingBits ? dataBits : remainingBits;
+            mBearerData.userData.payload = inStream.readByteArray(dataBits);
+            mUserData = mBearerData.userData.payload;
+            return true;
+        } catch (BitwiseInputStream.AccessException ex) {
+            Rlog.e(LOG_TAG, "Fail to preprocess FDEA WAP: " + ex);
+        }
+        return false;
+    }
+
+    /**
      * Parses a SMS message from its BearerData stream.
      */
     public void parseSms() {

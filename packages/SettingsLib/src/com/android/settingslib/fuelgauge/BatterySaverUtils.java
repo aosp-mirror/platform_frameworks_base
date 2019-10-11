@@ -19,9 +19,11 @@ package com.android.settingslib.fuelgauge;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
@@ -30,7 +32,28 @@ import android.util.Slog;
  * Utilities related to battery saver.
  */
 public class BatterySaverUtils {
+
     private static final String TAG = "BatterySaverUtils";
+    /**
+     * When set to "true" the notification will be a generic confirm message instead of asking the
+     * user if they want to turn on battery saver. If set to false the dialog will specifically
+     * talk about battery saver without giving the option of turning it on. The only button visible
+     * will be a generic confirmation button to acknowledge the dialog.
+     */
+    public static final String EXTRA_CONFIRM_TEXT_ONLY = "extra_confirm_only";
+    /**
+     * Ignored if {@link #EXTRA_CONFIRM_TEXT_ONLY} is "false". Can be set to any of the values in
+     * {@link PowerManager.AutoPowerSaveModeTriggers}. If set the dialog will set the power
+     * save mode trigger to the specified value after the user acknowledges the trigger.
+     */
+    public static final String EXTRA_POWER_SAVE_MODE_TRIGGER = "extra_power_save_mode_trigger";
+    /**
+     * Ignored if {@link #EXTRA_CONFIRM_TEXT_ONLY} is "false". can be set to any value between
+     * 0-100 that will be used if {@link #EXTRA_POWER_SAVE_MODE_TRIGGER} is
+     * {@link PowerManager#POWER_SAVE_MODE_TRIGGER_PERCENTAGE}.
+     */
+    public static final String EXTRA_POWER_SAVE_MODE_TRIGGER_LEVEL =
+            "extra_power_save_mode_trigger_level";
 
     private BatterySaverUtils() {
     }
@@ -95,14 +118,17 @@ public class BatterySaverUtils {
         }
         final ContentResolver cr = context.getContentResolver();
 
-        if (enable && needFirstTimeWarning && maybeShowBatterySaverConfirmation(context)) {
+        final Bundle confirmationExtras = new Bundle(1);
+        confirmationExtras.putBoolean(EXTRA_CONFIRM_TEXT_ONLY, false);
+        if (enable && needFirstTimeWarning
+                && maybeShowBatterySaverConfirmation(context, confirmationExtras)) {
             return false;
         }
         if (enable && !needFirstTimeWarning) {
             setBatterySaverConfirmationAcknowledged(context);
         }
 
-        if (context.getSystemService(PowerManager.class).setPowerSaveMode(enable)) {
+        if (context.getSystemService(PowerManager.class).setPowerSaveModeEnabled(enable)) {
             if (enable) {
                 final int count =
                         Secure.getInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, 0) + 1;
@@ -115,7 +141,7 @@ public class BatterySaverUtils {
                         && Global.getInt(cr, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) == 0
                         && Secure.getInt(cr,
                         Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 0) == 0) {
-                    showAutoBatterySaverSuggestion(context);
+                    showAutoBatterySaverSuggestion(context, confirmationExtras);
                 }
             }
 
@@ -124,23 +150,38 @@ public class BatterySaverUtils {
         return false;
     }
 
-    private static boolean maybeShowBatterySaverConfirmation(Context context) {
+    /**
+     * Shows the battery saver confirmation warning if it hasn't been acknowledged by the user in
+     * the past before. Various extras can be provided that will change the behavior of this
+     * notification as well as the ui for it.
+     * @param context A valid context
+     * @param extras Any extras to include in the intent to trigger this confirmation that will
+     * help the system disambiguate what to show/do
+     *
+     * @return True if it showed the notification because it has not been previously acknowledged.
+     * @see #EXTRA_CONFIRM_TEXT_ONLY
+     * @see #EXTRA_POWER_SAVE_MODE_TRIGGER
+     * @see #EXTRA_POWER_SAVE_MODE_TRIGGER_LEVEL
+     */
+    public static boolean maybeShowBatterySaverConfirmation(Context context, Bundle extras) {
         if (Secure.getInt(context.getContentResolver(),
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
             return false; // Already shown.
         }
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION));
+        context.sendBroadcast(
+                getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, extras));
         return true;
     }
 
-    private static void showAutoBatterySaverSuggestion(Context context) {
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION));
+    private static void showAutoBatterySaverSuggestion(Context context, Bundle extras) {
+        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION, extras));
     }
 
-    private static Intent getSystemUiBroadcast(String action) {
+    private static Intent getSystemUiBroadcast(String action, Bundle extras) {
         final Intent i = new Intent(action);
         i.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         i.setPackage(SYSUI_PACKAGE);
+        i.putExtras(extras);
         return i;
     }
 
@@ -174,6 +215,24 @@ public class BatterySaverUtils {
         if (Global.getInt(context.getContentResolver(), Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0)
                 == 0) {
             setAutoBatterySaverTriggerLevel(context, level);
+        }
+    }
+
+    /**
+     * Reverts battery saver schedule mode to none if we are in a bad state where routine mode
+     * is selected but no app is configured to actually provide the signal.
+     * @param context a valid context
+     */
+    public static void revertScheduleToNoneIfNeeded(Context context) {
+        ContentResolver resolver = context.getContentResolver();
+        final int currentMode = Global.getInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
+        boolean providerConfigured = !TextUtils.isEmpty(context.getString(
+                com.android.internal.R.string.config_batterySaverScheduleProvider));
+        if (currentMode == PowerManager.POWER_SAVE_MODE_TRIGGER_DYNAMIC && !providerConfigured) {
+            Global.putInt(resolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
+            Global.putInt(resolver, Global.AUTOMATIC_POWER_SAVE_MODE,
+                    PowerManager.POWER_SAVE_MODE_TRIGGER_PERCENTAGE);
         }
     }
 }

@@ -67,7 +67,6 @@ public class EuiccManager {
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
 
-
     /**
      * Broadcast Action: The eUICC OTA status is changed.
      * <p class="note">
@@ -210,6 +209,16 @@ public class EuiccManager {
     public static final int EMBEDDED_SUBSCRIPTION_RESULT_ERROR = 2;
 
     /**
+     * Key for an extra set on the {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} intent for which
+     * kind of activation flow will be evolved. (see {@code EUICC_ACTIVATION_})
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ACTIVATION_TYPE =
+            "android.telephony.euicc.extra.ACTIVATION_TYPE";
+
+    /**
      * Key for an extra set on {@link PendingIntent} result callbacks providing a detailed result
      * code.
      *
@@ -261,9 +270,13 @@ public class EuiccManager {
 
     /**
      * Key for an extra set on the {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} intent for
-     * whether the user choses to use eUICC to set up network in SUW.
+     * whether eSIM provisioning flow is forced to be started or not. If this extra hasn't been
+     * set, eSIM provisioning flow may be skipped and the corresponding carrier's app will be
+     * notified. Otherwise, eSIM provisioning flow will be started when
+     * {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} has been received.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_FORCE_PROVISION =
             "android.telephony.euicc.extra.FORCE_PROVISION";
 
@@ -337,6 +350,60 @@ public class EuiccManager {
      * carrier. If not provided, the app's launcher icon will be used as a fallback.
      */
     public static final String META_DATA_CARRIER_ICON = "android.telephony.euicc.carriericon";
+
+    /**
+     * Euicc activation type which will be included in {@link #EXTRA_ACTIVATION_TYPE} and used to
+     * decide which kind of activation flow should be lauched.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"EUICC_ACTIVATION_"}, value = {
+            EUICC_ACTIVATION_TYPE_DEFAULT,
+            EUICC_ACTIVATION_TYPE_BACKUP,
+            EUICC_ACTIVATION_TYPE_TRANSFER,
+            EUICC_ACTIVATION_TYPE_ACCOUNT_REQUIRED,
+    })
+    public @interface EuiccActivationType{}
+
+
+    /**
+     * The default euicc activation type which includes checking server side and downloading the
+     * profile based on carrier's download configuration.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_DEFAULT = 1;
+
+    /**
+     * The euicc activation type used when the default download process failed. LPA will start the
+     * backup flow and try to download the profile for the carrier.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_BACKUP = 2;
+
+    /**
+     * The activation flow of eSIM seamless transfer will be used. LPA will start normal eSIM
+     * activation flow and if it's failed, the name of the carrier selected will be recorded. After
+     * the future device pairing, LPA will contact this carrier to transfer it from the other device
+     * to this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_TRANSFER = 3;
+
+    /**
+     * The activation flow of eSIM requiring user account will be started. This can only be used
+     * when there is user account signed in. Otherwise, the flow will be failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int EUICC_ACTIVATION_TYPE_ACCOUNT_REQUIRED = 4;
 
     /**
      * Euicc OTA update status which can be got by {@link #getOtaStatus}
@@ -430,7 +497,7 @@ public class EuiccManager {
     public boolean isEnabled() {
         // In the future, this may reach out to IEuiccController (if non-null) to check any dynamic
         // restrictions.
-        return getIEuiccController() != null;
+        return getIEuiccController() != null && refreshCardIdIfUninitialized();
     }
 
     /**
@@ -444,7 +511,7 @@ public class EuiccManager {
      */
     @Nullable
     public String getEid() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return null;
         }
         try {
@@ -467,7 +534,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public int getOtaStatus() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
         }
         try {
@@ -502,7 +569,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
             boolean switchAfterDownload, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -564,7 +631,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             PendingIntent callbackIntent =
                     resolutionIntent.getParcelableExtra(
                             EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT);
@@ -601,7 +668,7 @@ public class EuiccManager {
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -631,7 +698,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -650,7 +717,7 @@ public class EuiccManager {
      */
     @Nullable
     public EuiccInfo getEuiccInfo() {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             return null;
         }
         try {
@@ -675,7 +742,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -715,7 +782,7 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -740,8 +807,8 @@ public class EuiccManager {
      */
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
-            int subscriptionId, String nickname, PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+            int subscriptionId, @Nullable String nickname, @NonNull PendingIntent callbackIntent) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -765,7 +832,7 @@ public class EuiccManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void eraseSubscriptions(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }
@@ -795,7 +862,7 @@ public class EuiccManager {
      * @hide
      */
     public void retainSubscriptionsForFactoryReset(PendingIntent callbackIntent) {
-        if (!refreshCardIdIfUninitialized()) {
+        if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
             return;
         }

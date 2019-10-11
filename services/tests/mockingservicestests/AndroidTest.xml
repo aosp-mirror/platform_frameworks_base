@@ -19,6 +19,7 @@
 
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="cleanup-apks" value="true" />
+        <option name="install-arg" value="-t" />
         <option name="test-file-name" value="FrameworksMockingServicesTests.apk" />
     </target_preparer>
 

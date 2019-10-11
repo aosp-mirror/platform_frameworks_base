@@ -25,7 +25,7 @@ import "frameworks/base/core/proto/android/app/notification_channel_group.proto"
 import "frameworks/base/core/proto/android/app/notificationmanager.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/media/audioattributes.proto";
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+import "frameworks/base/core/proto/android/privacy.proto";
 
 message NotificationServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -59,20 +59,25 @@ message NotificationRecordProto {
     }
     optional State state = 2;
     optional int32 flags = 3;
-    optional string channelId = 4 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string channel_id = 4 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string sound = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional .android.media.AudioAttributesProto audio_attributes = 6;
     optional bool can_vibrate = 7;
     optional bool can_show_light = 8;
     optional string group_key = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional sint32 importance = 10;
+    // The package the notification was posted for.
+    optional string package = 11;
+    // The package that posted the notification. It might not be the same as package.
+    optional string delegate_package = 12;
 }
 
 message ListenersDisablingEffectsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 hint = 1;
-    repeated ManagedServiceInfoProto listeners = 2;
+    reserved 2; // ManagedServiceInfoProto listeners
+    repeated android.content.ComponentNameProto listener_components = 3;
 }
 
 message ManagedServiceInfoProto {
@@ -88,6 +93,8 @@ message ManagedServiceInfoProto {
 message ManagedServicesProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Hard-coded string identifying what the service config is for
+    // (eg: "notification assistant" or "notification listener").
     optional string caption = 1;
 
     message ServiceProto {
@@ -147,8 +154,11 @@ enum ZenMode {
 message ConditionProto {
     option (android.msg_privacy).dest = DEST_EXPLICIT;
 
+    // The URI representing the rule being updated.
     optional string id = 1;
+    // A user visible description of the rule state.
     optional string summary = 2;
+    // Android generated strings that detail when ZenMode will end.
     optional string line_1 = 3;
     optional string line_2 = 4;
     optional int32 icon = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -189,10 +199,15 @@ message ZenRuleProto {
         (android.privacy).dest = DEST_AUTOMATIC
     ];
 
-    // Required for automatic ZenRules.
+    // Required for automatic ZenRules. The condition's ID, which is the URI
+    // representing the rule being updated.
     optional string condition_id = 8;
     optional ConditionProto condition = 9;
     optional android.content.ComponentNameProto component = 10;
+    optional ZenPolicyProto zenPolicy = 11;
+
+    // Indicates whether this ZenRule has been modified after its initial creation
+    optional bool modified = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
 }
 
 // A dump from com.android.server.notification.ZenModeHelper.
@@ -204,4 +219,48 @@ message ZenModeProto {
     optional int32 suppressed_effects = 3;
     repeated android.content.ComponentNameProto suppressors = 4;
     optional android.app.PolicyProto policy = 5;
+}
+
+// An android.service.notification.ZenPolicy object
+message ZenPolicyProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum State {
+        STATE_UNSET = 0;
+        STATE_ALLOW = 1;
+        STATE_DISALLOW = 2;
+    }
+
+    // Notifications and sounds allowed/disallowed when DND is active
+    optional State reminders = 1;
+    optional State events = 2;
+    optional State messages = 3;
+    optional State calls = 4;
+    optional State repeat_callers = 5;
+    optional State alarms = 6;
+    optional State media = 7;
+    optional State system = 8;
+
+    // Visual effects allowed/disallowed for intercepted notifications when DND is active
+    optional State full_screen_intent = 9;
+    optional State lights = 10;
+    optional State peek = 11;
+    optional State status_bar = 12;
+    optional State badge= 13;
+    optional State ambient = 14;
+    optional State notification_list = 15;
+
+    enum Sender {
+        SENDER_UNSET = 0;
+        // Any sender is prioritized.
+        SENDER_ANY = 1;
+        // Saved contacts are prioritized.
+        SENDER_CONTACTS = 2;
+        // Only starred contacts are prioritized.
+        SENDER_STARRED = 3;
+        // No calls/messages are prioritized.
+        SENDER_NONE = 4;
+    }
+    optional Sender priority_calls = 16;
+    optional Sender priority_messages = 17;
 }

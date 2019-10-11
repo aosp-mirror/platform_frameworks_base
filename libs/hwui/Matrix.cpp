@@ -526,5 +526,5 @@ void Matrix4::dump(const char* label) const {
     ALOGD("]");
 }
 
-};  // namespace uirenderer
-};  // namespace android
+}  // namespace uirenderer
+}  // namespace android

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:height="24dp" android:width="24dp" android:viewportHeight="24" android:viewportWidth="24">
+    <group android:name="_R_G">
+        <group android:name="_R_G_L_4_G_N_1_T_0" android:translateX="12"
+               android:translateY="12">
+            <group android:name="_R_G_L_4_G" android:translateX="-12.25"
+                   android:translateY="-10.25">
+                <path android:name="_R_G_L_4_G_D_0_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 2.25 C15.67,2.25 18.98,3.52 21.55,5.78 C21.55,5.78 12.25,17.1 12.25,17.1 C12.25,17.1 2.95,5.78 2.95,5.78 C5.52,3.52 8.83,2.25 12.25,2.25c  M12.25 0.25 C7.5,0.25 3.22,2.33 0.25,5.64 C0.25,5.64 12.25,20.25 12.25,20.25 C12.25,20.25 24.25,5.64 24.25,5.64 C21.28,2.33 17,0.25 12.25,0.25c "/>
+            </group>
+        </group>
+        <group android:name="_R_G_L_3_G_N_1_T_0" android:translateX="12"
+               android:translateY="12">
+            <group android:name="_R_G_L_3_G" android:translateX="-12.25"
+                   android:translateY="-10.25">
+                <path android:name="_R_G_L_3_G_D_0_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 2.25 C15.65,2.25 18.95,3.55 21.55,5.75 C21.55,5.75 12.25,17.05 12.25,17.05 C12.25,17.05 2.95,5.75 2.95,5.75 C5.55,3.55 8.85,2.25 12.25,2.25c  M12.25 0.25 C7.45,0.25 3.25,2.35 0.25,5.65 C0.25,5.65 12.25,20.25 12.25,20.25 C12.25,20.25 24.25,5.65 24.25,5.65 C21.25,2.35 17.05,0.25 12.25,0.25c "/>
+                <path android:name="_R_G_L_3_G_D_1_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 11.25 C10.15,11.25 8.15,12.15 6.85,13.65 C6.85,13.65 12.25,20.25 12.25,20.25 C12.25,20.25 17.65,13.65 17.65,13.65 C16.35,12.15 14.35,11.25 12.25,11.25c "/>
+            </group>
+        </group>
+        <group android:name="_R_G_L_2_G_N_1_T_0" android:translateX="12"
+               android:translateY="12">
+            <group android:name="_R_G_L_2_G" android:translateX="-12.25"
+                   android:translateY="-10.25">
+                <path android:name="_R_G_L_2_G_D_0_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 2.25 C15.65,2.25 18.95,3.55 21.55,5.75 C21.55,5.75 12.25,17.05 12.25,17.05 C12.25,17.05 2.95,5.75 2.95,5.75 C5.55,3.55 8.85,2.25 12.25,2.25c  M12.25 0.25 C7.45,0.25 3.25,2.35 0.25,5.65 C0.25,5.65 12.25,20.25 12.25,20.25 C12.25,20.25 24.25,5.65 24.25,5.65 C21.25,2.35 17.05,0.25 12.25,0.25c "/>
+                <path android:name="_R_G_L_2_G_D_1_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 8.25 C9.45,8.25 6.75,9.45 5.05,11.45 C5.05,11.45 12.25,20.25 12.25,20.25 C12.25,20.25 19.45,11.45 19.45,11.45 C17.75,9.45 15.05,8.25 12.25,8.25c "/>
+            </group>
+        </group>
+        <group android:name="_R_G_L_1_G_N_1_T_0" android:translateX="12"
+               android:translateY="12">
+            <group android:name="_R_G_L_1_G" android:translateX="-12.25"
+                   android:translateY="-10.25">
+                <path android:name="_R_G_L_1_G_D_0_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 2.25 C15.65,2.25 18.95,3.55 21.55,5.75 C21.55,5.75 12.25,17.05 12.25,17.05 C12.25,17.05 2.95,5.75 2.95,5.75 C5.55,3.55 8.85,2.25 12.25,2.25c  M12.25 0.25 C7.45,0.25 3.25,2.35 0.25,5.65 C0.25,5.65 12.25,20.25 12.25,20.25 C12.25,20.25 24.25,5.65 24.25,5.65 C21.25,2.35 17.05,0.25 12.25,0.25c "/>
+                <path android:name="_R_G_L_1_G_D_1_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 5.25 C8.75,5.25 5.45,6.75 3.25,9.25 C3.25,9.25 12.25,20.25 12.25,20.25 C12.25,20.25 21.25,9.25 21.25,9.25 C19.05,6.75 15.75,5.25 12.25,5.25c "/>
+            </group>
+        </group>
+        <group android:name="_R_G_L_0_G_N_1_T_0" android:translateX="12"
+               android:translateY="12">
+            <group android:name="_R_G_L_0_G" android:translateX="-12.25"
+                   android:translateY="-10.25">
+                <path android:name="_R_G_L_0_G_D_0_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 2.25 C15.65,2.25 18.95,3.55 21.55,5.75 C21.55,5.75 12.25,17.05 12.25,17.05 C12.25,17.05 2.95,5.75 2.95,5.75 C5.55,3.55 8.85,2.25 12.25,2.25c  M12.25 0.25 C7.45,0.25 3.25,2.35 0.25,5.65 C0.25,5.65 12.25,20.25 12.25,20.25 C12.25,20.25 24.25,5.65 24.25,5.65 C21.25,2.35 17.05,0.25 12.25,0.25c "/>
+                <path android:name="_R_G_L_0_G_D_1_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 5.25 C8.75,5.25 5.45,6.75 3.25,9.25 C3.25,9.25 12.25,20.25 12.25,20.25 C12.25,20.25 21.25,9.25 21.25,9.25 C19.05,6.75 15.75,5.25 12.25,5.25c "/>
+                <path android:name="_R_G_L_0_G_D_2_P_0" android:fillColor="#000000"
+                      android:fillAlpha="1" android:fillType="nonZero"
+                      android:pathData=" M12.25 0.25 C7.45,0.25 3.25,2.35 0.25,5.65 C0.25,5.65 12.25,20.25 12.25,20.25 C12.25,20.25 24.25,5.65 24.25,5.65 C21.25,2.35 17.05,0.25 12.25,0.25c "/>
+            </group>
+        </group>
+    </group>
+    <group android:name="time_group"/>
+</vector>

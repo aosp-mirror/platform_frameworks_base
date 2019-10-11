@@ -16,8 +16,14 @@
 
 package android.util;
 
+import static android.Manifest.permission.DUMP;
+import static android.Manifest.permission.PACKAGE_USAGE_STATS;
+
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.os.IStatsManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -32,7 +38,10 @@ public final class StatsLog extends StatsLogInternal {
 
     private static IStatsManager sService;
 
-    private StatsLog() {}
+    private static Object sLogLock = new Object();
+
+    private StatsLog() {
+    }
 
     /**
      * Logs a start event.
@@ -41,11 +50,13 @@ public final class StatsLog extends StatsLogInternal {
      * @return True if the log request was sent to statsd.
      */
     public static boolean logStart(int label) {
-        synchronized (StatsLog.class) {
+        synchronized (sLogLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging start");
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when logging start");
+                    }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(label,
@@ -53,7 +64,9 @@ public final class StatsLog extends StatsLogInternal {
                 return true;
             } catch (RemoteException e) {
                 sService = null;
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging start");
+                if (DEBUG) {
+                    Slog.d(TAG, "Failed to connect to statsd when logging start");
+                }
                 return false;
             }
         }
@@ -66,18 +79,22 @@ public final class StatsLog extends StatsLogInternal {
      * @return True if the log request was sent to statsd.
      */
     public static boolean logStop(int label) {
-        synchronized (StatsLog.class) {
+        synchronized (sLogLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging stop");
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when logging stop");
+                    }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
                 return true;
             } catch (RemoteException e) {
                 sService = null;
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                if (DEBUG) {
+                    Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                }
                 return false;
             }
         }
@@ -90,11 +107,13 @@ public final class StatsLog extends StatsLogInternal {
      * @return True if the log request was sent to statsd.
      */
     public static boolean logEvent(int label) {
-        synchronized (StatsLog.class) {
+        synchronized (sLogLock) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging event");
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when logging event");
+                    }
                     return false;
                 }
                 service.sendAppBreadcrumbAtom(
@@ -102,11 +121,97 @@ public final class StatsLog extends StatsLogInternal {
                 return true;
             } catch (RemoteException e) {
                 sService = null;
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging event");
+                if (DEBUG) {
+                    Slog.d(TAG, "Failed to connect to statsd when logging event");
+                }
                 return false;
             }
         }
     }
+
+    /**
+     * Logs an event for binary push for module updates.
+     *
+     * @param trainName        name of install train.
+     * @param trainVersionCode version code of the train.
+     * @param options          optional flags about this install.
+     *                         The last 3 bits indicate options:
+     *                             0x01: FLAG_REQUIRE_STAGING
+     *                             0x02: FLAG_ROLLBACK_ENABLED
+     *                             0x04: FLAG_REQUIRE_LOW_LATENCY_MONITOR
+     * @param state            current install state. Defined as State enums in
+     *                         BinaryPushStateChanged atom in
+     *                         frameworks/base/cmds/statsd/src/atoms.proto
+     * @param experimentIds    experiment ids.
+     * @return True if the log request was sent to statsd.
+     */
+    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
+    public static boolean logBinaryPushStateChanged(@NonNull String trainName,
+            long trainVersionCode, int options, int state,
+            @NonNull long[] experimentIds) {
+        synchronized (sLogLock) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when logging event");
+                    }
+                    return false;
+                }
+                service.sendBinaryPushStateChangedAtom(
+                        trainName, trainVersionCode, options, state, experimentIds);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Failed to connect to StatsCompanionService when logging "
+                                    + "BinaryPushStateChanged");
+                }
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Logs an event for watchdog rollbacks.
+     *
+     * @param rollbackType          state of the rollback.
+     * @param packageName           package name being rolled back.
+     * @param packageVersionCode    version of the package being rolled back.
+     *
+     * @return True if the log request was sent to statsd.
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {DUMP, PACKAGE_USAGE_STATS})
+    public static boolean logWatchdogRollbackOccurred(int rollbackType, String packageName,
+            long packageVersionCode) {
+        synchronized (sLogLock) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Failed to find statsd when logging event");
+                    }
+                    return false;
+                }
+
+                service.sendWatchdogRollbackOccurredAtom(rollbackType, packageName,
+                        packageVersionCode);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Failed to connect to StatsCompanionService when logging "
+                                    + "WatchdogRollbackOccurred");
+                }
+                return false;
+            }
+        }
+    }
+
 
     private static IStatsManager getIStatsManagerLocked() throws RemoteException {
         if (sService != null) {
@@ -125,4 +230,13 @@ public final class StatsLog extends StatsLogInternal {
      */
     @SystemApi
     public static native void writeRaw(@NonNull byte[] buffer, int size);
+
+    private static void enforceDumpCallingPermission(Context context) {
+        context.enforceCallingPermission(android.Manifest.permission.DUMP, "Need DUMP permission.");
+    }
+
+    private static void enforcesageStatsCallingPermission(Context context) {
+        context.enforceCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS,
+                "Need PACKAGE_USAGE_STATS permission.");
+    }
 }

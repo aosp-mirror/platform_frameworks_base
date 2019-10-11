@@ -19,12 +19,15 @@ Copyright (C) 2016 The Android Open Source Project
         android:height="64dp"
         android:viewportWidth="64"
         android:viewportHeight="64">
-
-    <path
-        android:fillColor="#fcfcfc"
-        android:strokeColor="#e8eaed"
-        android:strokeWidth="0.25"
-        android:pathData="M62,50A12,12,0,1,1,50,38,12,12,0,0,1,62,50" />
-    <path
-        android:pathData="M 0 0 H 64 V 64 H 0 V 0 Z" />
+    <group
+        android:scaleX=".24"
+        android:scaleY=".24"
+        android:translateX="38"
+        android:translateY="38">
+        <path
+            android:fillColor="#fcfcfc"
+            android:strokeColor="#e8eaed"
+            android:strokeWidth="0.25"
+            android:pathData="@string/config_icon_mask" />
+    </group>
 </vector>

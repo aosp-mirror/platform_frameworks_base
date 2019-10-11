@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2019, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:viewportHeight="24"
+    android:viewportWidth="24"
+    android:width="24dp" >
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M13.93,16.02c0.15,0.15,0.34,0.22,0.53,0.22c0.19,0,0.38-0.07,0.53-0.22c0.29-0.29,0.3-0.77,0.01-1.06l-2.25-2.28V7.75 C12.75,7.34,12.41,7,12,7s-0.75,0.34-0.75,0.75V13c0,0.2,0.08,0.39,0.22,0.53L13.93,16.02z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M16.4,2.55c-0.25,0.33-0.18,0.8,0.15,1.05l4.02,3c0.13,0.1,0.29,0.15,0.45,0.15c0.23,0,0.45-0.1,0.6-0.3 c0.25-0.33,0.18-0.8-0.15-1.05l-4.02-3C17.12,2.15,16.65,2.22,16.4,2.55z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M2.98,6.75c0.16,0,0.31-0.05,0.45-0.15l4.02-3c0.33-0.25,0.4-0.72,0.15-1.05C7.35,2.22,6.88,2.15,6.55,2.4l-4.02,3 C2.2,5.65,2.13,6.12,2.38,6.45C2.52,6.65,2.75,6.75,2.98,6.75z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3.08,13c0,4.96,4,9,8.92,9c0,0,0.01,0,0.01,0c2.38,0,4.61-0.93,6.3-2.63c1.68-1.7,2.61-3.95,2.61-6.35V13 c0-4.96-4-9-8.92-9S3.08,8.04,3.08,13z M12,5.5c4.09,0,7.42,3.36,7.42,7.5h0.75l-0.75,0.02c0,2-0.78,3.88-2.18,5.3 c-1.4,1.41-3.26,2.19-5.23,2.19c0,0-0.01,0-0.01,0c-4.09,0-7.42-3.36-7.42-7.5S7.91,5.5,12,5.5z" />
+</vector>

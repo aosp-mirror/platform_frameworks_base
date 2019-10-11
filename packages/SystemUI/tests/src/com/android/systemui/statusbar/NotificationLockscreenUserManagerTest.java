@@ -16,12 +16,14 @@
 
 package com.android.systemui.statusbar;
 
-import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
 import static android.content.Intent.ACTION_USER_SWITCHED;
+import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,7 +43,12 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import com.google.android.collect.Lists;
@@ -61,7 +68,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationData mNotificationData;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
+    @Mock private StatusBarKeyguardViewManager mKeyguardViewManager;
 
     private int mCurrentUserId;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
@@ -78,10 +87,12 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
                 new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
-        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
+        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                Handler.createAsync(Looper.myLooper()));
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
-        mLockscreenUserManager.setUpWithPresenter(mPresenter, mEntryManager);
+        mLockscreenUserManager.setUpWithPresenter(mPresenter);
     }
 
     @Test
@@ -130,15 +141,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testActionDeviceLockedChangedWithDifferentUserIdCallsOnWorkChallengeChanged() {
-        Intent intent = new Intent()
-                .setAction(ACTION_DEVICE_LOCKED_CHANGED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId + 1);
-        mLockscreenUserManager.getAllUsersReceiverForTest().onReceive(mContext, intent);
-        verify(mPresenter, times(1)).onWorkChallengeChanged();
-    }
-
-    @Test
     public void testActionUserSwitchedCallsOnUserSwitched() {
         Intent intent = new Intent()
                 .setAction(ACTION_USER_SWITCHED)
@@ -154,13 +156,36 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         assertTrue(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUserId));
     }
 
-    private class TestNotificationLockscreenUserManager extends NotificationLockscreenUserManager {
+    @Test
+    public void testShowSilentNotifications_settingSaysShow() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 1);
+        when(mNotificationData.isHighPriority(any())).thenReturn(false);
+
+        assertTrue(mLockscreenUserManager.shouldShowOnKeyguard(mock(NotificationEntry.class)));
+    }
+
+    @Test
+    public void testShowSilentNotifications_settingSaysHide() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 1);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS, 0);
+        when(mNotificationData.isHighPriority(any())).thenReturn(false);
+
+        assertFalse(mLockscreenUserManager.shouldShowOnKeyguard(mock(NotificationEntry.class)));
+    }
+
+    private class TestNotificationLockscreenUserManager
+            extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
             super(context);
-        }
-
-        public BroadcastReceiver getAllUsersReceiverForTest() {
-            return mAllUsersReceiver;
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.am;
@@ -28,6 +28,8 @@ import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.util.DebugUtils.valueToString;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
@@ -67,15 +69,15 @@ import android.os.SystemClock;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.AppOpsService;
+import com.android.server.appop.AppOpsService;
+import com.android.server.am.ProcessList.IsolatedUidRange;
+import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
+import com.android.server.wm.ActivityTaskManagerService;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -91,21 +93,11 @@ import java.util.function.Function;
 /**
  * Test class for {@link ActivityManagerService}.
  *
- * To run the tests, use
- *
- * runtest -c com.android.server.am.ActivityManagerServiceTest frameworks-services
- *
- * or the following steps:
- *
- * Build: m FrameworksServicesTests
- * Install: adb install -r \
- *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksServicesTests/FrameworksServicesTests.apk
- * Run: adb shell am instrument -e class com.android.server.am.ActivityManagerServiceTest -w \
- *     com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:ActivityManagerServiceTest
  */
 @SmallTest
 @FlakyTest(bugId = 113616538)
-@RunWith(AndroidJUnit4.class)
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
 
@@ -122,10 +114,9 @@ public class ActivityManagerServiceTest {
         UidRecord.CHANGE_ACTIVE
     };
 
-    @Mock private Context mContext;
+    private Context mContext = getInstrumentation().getTargetContext();
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
-    @Mock private BatteryStatsImpl mBatteryStatsImpl;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -142,8 +133,8 @@ public class ActivityManagerServiceTest {
         mInjector = new TestInjector();
         mAms = new ActivityManagerService(mInjector);
         mAms.mWaitForNetworkTimeoutMs = 2000;
-
-        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+        mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
+        mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
     }
 
     @After
@@ -151,6 +142,7 @@ public class ActivityManagerServiceTest {
         mHandlerThread.quit();
     }
 
+    @SuppressWarnings("GuardedBy")
     @MediumTest
     @Test
     public void incrementProcStateSeqAndNotifyAppsLocked() throws Exception {
@@ -177,7 +169,8 @@ public class ActivityManagerServiceTest {
                 true); // expectNotify
 
         // Explicitly setting the seq counter for more verification.
-        mAms.mProcStateSeqCounter = 42;
+        // @SuppressWarnings("GuardedBy")
+        mAms.mProcessList.mProcStateSeqCounter = 42;
 
         // Uid state is not moving from background to foreground or vice versa.
         verifySeqCounterAndInteractions(uidRec,
@@ -260,16 +253,16 @@ public class ActivityManagerServiceTest {
         final UidRecord uidRec = new UidRecord(uid);
         uidRec.waitingForNetwork = true;
         uidRec.hasInternetPermission = true;
-        mAms.mActiveUids.put(uid, uidRec);
+        mAms.mProcessList.mActiveUids.put(uid, uidRec);
 
-        final ProcessRecord appRec = new ProcessRecord(null, mBatteryStatsImpl,
-                new ApplicationInfo(), TAG, uid);
+        final ProcessRecord appRec = new ProcessRecord(mAms, new ApplicationInfo(), TAG, uid);
         appRec.thread = Mockito.mock(IApplicationThread.class);
-        mAms.mLruProcesses.add(appRec);
+        mAms.mProcessList.mLruProcesses.add(appRec);
 
         return uidRec;
     }
 
+    @SuppressWarnings("GuardedBy")
     private void verifySeqCounterAndInteractions(UidRecord uidRec, int prevState, int curState,
             int expectedGlobalCounter, int expectedCurProcStateSeq, int expectedBlockState,
             boolean expectNotify) throws Exception {
@@ -277,14 +270,15 @@ public class ActivityManagerServiceTest {
         thread.startAndWait("Unexpected state for " + uidRec);
 
         uidRec.setProcState = prevState;
-        uidRec.curProcState = curState;
+        uidRec.setCurProcState(curState);
         mAms.incrementProcStateSeqAndNotifyAppsLocked();
 
-        assertEquals(expectedGlobalCounter, mAms.mProcStateSeqCounter);
+        // @SuppressWarnings("GuardedBy")
+        assertEquals(expectedGlobalCounter, mAms.mProcessList.mProcStateSeqCounter);
         assertEquals(expectedCurProcStateSeq, uidRec.curProcStateSeq);
 
-        for (int i = mAms.mLruProcesses.size() - 1; i >= 0; --i) {
-            final ProcessRecord app = mAms.mLruProcesses.get(i);
+        for (int i = mAms.mProcessList.getLruSizeLocked() - 1; i >= 0; --i) {
+            final ProcessRecord app = mAms.mProcessList.mLruProcesses.get(i);
             // AMS should notify apps only for block states other than NETWORK_STATE_NO_CHANGE.
             if (app.uid == uidRec.uid && expectedBlockState == NETWORK_STATE_BLOCK) {
                 verify(app.thread).setNetworkBlockSeq(uidRec.curProcStateSeq);
@@ -302,6 +296,117 @@ public class ActivityManagerServiceTest {
         }
     }
 
+    private void validateAppZygoteIsolatedUidRange(IsolatedUidRange uidRange) {
+        assertNotNull(uidRange);
+        assertTrue(uidRange.mFirstUid >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
+                && uidRange.mFirstUid <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
+        assertTrue(uidRange.mLastUid >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
+                && uidRange.mLastUid <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
+        assertTrue(uidRange.mLastUid > uidRange.mFirstUid
+                && ((uidRange.mLastUid - uidRange.mFirstUid + 1)
+                     == Process.NUM_UIDS_PER_APP_ZYGOTE));
+    }
+
+    private void verifyUidRangesNoOverlap(IsolatedUidRange uidRange1, IsolatedUidRange uidRange2) {
+        IsolatedUidRange lowRange = uidRange1.mFirstUid <= uidRange2.mFirstUid ? uidRange1 : uidRange2;
+        IsolatedUidRange highRange = lowRange == uidRange1  ? uidRange2 : uidRange1;
+
+        assertTrue(highRange.mFirstUid > lowRange.mLastUid);
+    }
+
+    @Test
+    public void testIsolatedUidRangeAllocator() {
+        final IsolatedUidRangeAllocator allocator = mAms.mProcessList.mAppIsolatedUidRangeAllocator;
+
+        // Create initial range
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.processName = "com.android.test.app";
+        appInfo.uid = 10000;
+        final IsolatedUidRange range = allocator.getOrCreateIsolatedUidRangeLocked(
+                appInfo.processName, appInfo.uid);
+        validateAppZygoteIsolatedUidRange(range);
+        verifyIsolatedUidAllocator(range);
+
+        // Create a second range
+        ApplicationInfo appInfo2 = new ApplicationInfo();
+        appInfo2.processName = "com.android.test.app2";
+        appInfo2.uid = 10001;
+        IsolatedUidRange range2 = allocator.getOrCreateIsolatedUidRangeLocked(
+                appInfo2.processName, appInfo2.uid);
+        validateAppZygoteIsolatedUidRange(range2);
+        verifyIsolatedUidAllocator(range2);
+
+        // Verify ranges don't overlap
+        verifyUidRangesNoOverlap(range, range2);
+
+        // Free range, reallocate and verify
+        allocator.freeUidRangeLocked(appInfo2);
+        range2 = allocator.getOrCreateIsolatedUidRangeLocked(appInfo2.processName, appInfo2.uid);
+        validateAppZygoteIsolatedUidRange(range2);
+        verifyUidRangesNoOverlap(range, range2);
+        verifyIsolatedUidAllocator(range2);
+
+        // Free both, then try to allocate the maximum number of UID ranges
+        allocator.freeUidRangeLocked(appInfo);
+        allocator.freeUidRangeLocked(appInfo2);
+
+        int maxNumUidRanges = (Process.LAST_APP_ZYGOTE_ISOLATED_UID
+                - Process.FIRST_APP_ZYGOTE_ISOLATED_UID + 1) / Process.NUM_UIDS_PER_APP_ZYGOTE;
+        for (int i = 0; i < maxNumUidRanges; i++) {
+            appInfo = new ApplicationInfo();
+            appInfo.uid = 10000 + i;
+            appInfo.processName = "com.android.test.app" + Integer.toString(i);
+            IsolatedUidRange uidRange = allocator.getOrCreateIsolatedUidRangeLocked(
+                    appInfo.processName, appInfo.uid);
+            validateAppZygoteIsolatedUidRange(uidRange);
+            verifyIsolatedUidAllocator(uidRange);
+        }
+
+        // Try to allocate another one and make sure it fails
+        appInfo = new ApplicationInfo();
+        appInfo.uid = 9000;
+        appInfo.processName = "com.android.test.app.failed";
+        IsolatedUidRange failedRange = allocator.getOrCreateIsolatedUidRangeLocked(
+                appInfo.processName, appInfo.uid);
+
+        assertNull(failedRange);
+    }
+
+    public void verifyIsolatedUid(ProcessList.IsolatedUidRange range, int uid) {
+        assertTrue(uid >= range.mFirstUid && uid <= range.mLastUid);
+    }
+
+    public void verifyIsolatedUidAllocator(ProcessList.IsolatedUidRange range) {
+        int uid = range.allocateIsolatedUidLocked(0);
+        verifyIsolatedUid(range, uid);
+
+        int uid2 = range.allocateIsolatedUidLocked(0);
+        verifyIsolatedUid(range, uid2);
+        assertTrue(uid2 != uid);
+
+        // Free both
+        range.freeIsolatedUidLocked(uid);
+        range.freeIsolatedUidLocked(uid2);
+
+        // Allocate the entire range
+        for (int i = 0; i < (range.mLastUid - range.mFirstUid + 1); ++i) {
+            uid = range.allocateIsolatedUidLocked(0);
+            verifyIsolatedUid(range, uid);
+        }
+
+        // Ensure the next one fails
+        uid = range.allocateIsolatedUidLocked(0);
+        assertEquals(uid, -1);
+    }
+
+    @Test
+    public void testGlobalIsolatedUidAllocator() {
+        final IsolatedUidRange globalUidRange = mAms.mProcessList.mGlobalIsolatedUids;
+        assertEquals(globalUidRange.mFirstUid, Process.FIRST_ISOLATED_UID);
+        assertEquals(globalUidRange.mLastUid, Process.LAST_ISOLATED_UID);
+        verifyIsolatedUidAllocator(globalUidRange);
+    }
+
     @Test
     public void testBlockStateForUid() {
         final UidRecord uidRec = new UidRecord(TEST_UID);
@@ -312,47 +417,48 @@ public class ActivityManagerServiceTest {
             return String.format(errorTemplate,
                     valueToString(ActivityManagerService.class, "NETWORK_STATE_", blockState),
                     valueToString(ActivityManager.class, "PROCESS_STATE_", uidRec.setProcState),
-                    valueToString(ActivityManager.class, "PROCESS_STATE_", uidRec.curProcState));
+                    valueToString(ActivityManager.class, "PROCESS_STATE_", uidRec.getCurProcState())
+            );
         };
 
         // No change in uid state
         uidRec.setProcState = PROCESS_STATE_RECEIVER;
-        uidRec.curProcState = PROCESS_STATE_RECEIVER;
+        uidRec.setCurProcState(PROCESS_STATE_RECEIVER);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Foreground to foreground
         uidRec.setProcState = PROCESS_STATE_FOREGROUND_SERVICE;
-        uidRec.curProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+        uidRec.setCurProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_CACHED_ACTIVITY;
-        uidRec.curProcState = PROCESS_STATE_CACHED_EMPTY;
+        uidRec.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_NONEXISTENT;
-        uidRec.curProcState = PROCESS_STATE_CACHED_ACTIVITY;
+        uidRec.setCurProcState(PROCESS_STATE_CACHED_ACTIVITY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Background to foreground
         uidRec.setProcState = PROCESS_STATE_SERVICE;
-        uidRec.curProcState = PROCESS_STATE_FOREGROUND_SERVICE;
+        uidRec.setCurProcState(PROCESS_STATE_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_BLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Foreground to background
         uidRec.setProcState = PROCESS_STATE_TOP;
-        uidRec.curProcState = PROCESS_STATE_LAST_ACTIVITY;
+        uidRec.setCurProcState(PROCESS_STATE_LAST_ACTIVITY);
         expectedBlockState = NETWORK_STATE_UNBLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
@@ -563,8 +669,8 @@ public class ActivityManagerServiceTest {
             ActivityManager.PROCESS_STATE_SERVICE,
             ActivityManager.PROCESS_STATE_RECEIVER
         };
-        final ArrayList<UidRecord.ChangeItem> pendingItemsForUids
-                = new ArrayList<>(changesForPendingItems.length);
+        final ArrayList<UidRecord.ChangeItem> pendingItemsForUids =
+                new ArrayList<>(changesForPendingItems.length);
         for (int i = 0; i < changesForPendingItems.length; ++i) {
             final UidRecord.ChangeItem item = new UidRecord.ChangeItem();
             item.uid = i;
@@ -596,10 +702,10 @@ public class ActivityManagerServiceTest {
                 assertNotNull("validateUidRecord should not be null since the change is neither "
                         + "CHANGE_GONE nor CHANGE_GONE_IDLE", validateUidRecord);
                 assertEquals("processState: " + item.processState + " curProcState: "
-                        + validateUidRecord.curProcState + " should have been equal",
-                        item.processState, validateUidRecord.curProcState);
+                        + validateUidRecord.getCurProcState() + " should have been equal",
+                        item.processState, validateUidRecord.getCurProcState());
                 assertEquals("processState: " + item.processState + " setProcState: "
-                        + validateUidRecord.curProcState + " should have been equal",
+                        + validateUidRecord.getCurProcState() + " should have been equal",
                         item.processState, validateUidRecord.setProcState);
                 if (item.change == UidRecord.CHANGE_IDLE) {
                     assertTrue("UidRecord.idle should be updated to true for CHANGE_IDLE",
@@ -613,7 +719,8 @@ public class ActivityManagerServiceTest {
 
         // Verify that when uid state changes to CHANGE_GONE or CHANGE_GONE_IDLE, then it
         // will be removed from validateUids.
-        assertNotEquals("validateUids should not be empty", 0, mAms.mValidateUids.size());
+        assertNotEquals("validateUids should not be empty", 0,
+                mAms.mValidateUids.size());
         for (int i = 0; i < pendingItemsForUids.size(); ++i) {
             final UidRecord.ChangeItem item = pendingItemsForUids.get(i);
             // Assign CHANGE_GONE_IDLE to some items and CHANGE_GONE to the others, using even/odd
@@ -623,7 +730,7 @@ public class ActivityManagerServiceTest {
         }
         mAms.mPendingUidChanges.addAll(pendingItemsForUids);
         mAms.dispatchUidsChanged();
-        assertEquals("validateUids should be empty, validateUids: " + mAms.mValidateUids,
+        assertEquals("validateUids should be empty, size=" + mAms.mValidateUids.size(),
                 0, mAms.mValidateUids.size());
     }
 
@@ -751,7 +858,7 @@ public class ActivityManagerServiceTest {
         record.curProcStateSeq = curProcStateSeq;
         record.lastDispatchedProcStateSeq = lastDispatchedProcStateSeq;
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
-        mAms.mActiveUids.put(Process.myUid(), record);
+        mAms.mProcessList.mActiveUids.put(Process.myUid(), record);
 
         CustomThread thread = new CustomThread(record.networkStateLock, new Runnable() {
             @Override
@@ -774,10 +881,10 @@ public class ActivityManagerServiceTest {
             thread.assertTerminated(errMsg);
         }
 
-        mAms.mActiveUids.clear();
+        mAms.mProcessList.mActiveUids.clear();
     }
 
-    private class TestHandler extends Handler {
+    private static class TestHandler extends Handler {
         private static final long WAIT_FOR_MSG_TIMEOUT_MS = 4000; // 4 sec
         private static final long WAIT_FOR_MSG_INTERVAL_MS = 400; // 0.4 sec
 

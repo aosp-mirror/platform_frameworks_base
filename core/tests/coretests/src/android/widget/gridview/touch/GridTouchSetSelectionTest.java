@@ -17,13 +17,13 @@
 package android.widget.gridview.touch;
 
 import android.test.ActivityInstrumentationTestCase;
-import android.test.suitebuilder.annotation.LargeTest;
-import android.test.suitebuilder.annotation.MediumTest;
 import android.test.TouchUtils;
 import android.view.View;
 import android.widget.GridView;
-
 import android.widget.gridview.GridSimple;
+
+import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 
 /**
  * Tests setting the selection in touch mode

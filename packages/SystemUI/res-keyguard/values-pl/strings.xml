@@ -28,12 +28,16 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Dotknij, by wpisać hasło"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Wpisz hasło, aby odblokować"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Wpisz kod PIN, aby odblokować"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Wpisz kod PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Narysuj wzór"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Wpisz hasło"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Nieprawidłowy kod PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Nieprawidłowa karta."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Naładowana"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Ładowanie"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Szybkie ładowanie"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Wolne ładowanie"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Bateria w pełni naładowana"</string>
+    <string name="keyguard_plugged_in_wireless" msgid="3004717438401575235">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie bezprzewodowe"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Szybkie ładowanie"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Podłącz ładowarkę."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Naciśnij Menu, aby odblokować."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Sieć zablokowana"</string>
@@ -48,6 +52,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Karta SIM jest zablokowana kodem PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Odblokowuję kartę SIM…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Miejsce na kod PIN"</string>
+    <string name="keyguard_accessibility_password" msgid="7695303207740941101">"Hasło urządzenia"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Miejsce na kod PIN karty SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Miejsce na kod PUK karty SIM"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Następny alarm ustawiony na: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
@@ -57,8 +62,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Nie można wyłączyć karty eSIM z powodu błędu."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Nie pamiętam wzoru"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Nieprawidłowy wzór"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Nieprawidłowe hasło"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Nieprawidłowy wzór"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Nieprawidłowe hasło"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Nieprawidłowy kod PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="few">Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sekundy.</item>
@@ -148,8 +153,9 @@
       <item quantity="other">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_1">%d</xliff:g> godziny. Potwierdź hasło.</item>
       <item quantity="one">Urządzenie nie zostało odblokowane od <xliff:g id="NUMBER_0">%d</xliff:g> godziny. Potwierdź hasło.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nie rozpoznano"</string>
-    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nie rozpoznano"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nie rozpoznano"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="few">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> próby.</item>
       <item quantity="many">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> prób.</item>
       <item quantity="other">Wpisz kod PIN karty SIM. Masz jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> próby.</item>
@@ -161,4 +167,86 @@
       <item quantity="other">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_1">%d</xliff:g> próby, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
       <item quantity="one">Karta SIM została wyłączona. Wpisz kod PUK, by przejść dalej. Masz jeszcze <xliff:g id="_NUMBER_0">%d</xliff:g> próbę, zanim karta SIM zostanie trwale zablokowana. Aby uzyskać szczegółowe informacje, skontaktuj się z operatorem.</item>
     </plurals>
+    <plurals name="type_clock_header" formatted="false" msgid="6782840450655632763">
+      <item quantity="few">"<annotation name="color">"Jest"</annotation>\n"^1\n^2</item>
+      <item quantity="many">"<annotation name="color">"Jest"</annotation>\n"^1\n^2</item>
+      <item quantity="other">"<annotation name="color">"Jest"</annotation>\n"^1\n^2</item>
+      <item quantity="one">"<annotation name="color">"Jest"</annotation>\n"^1\n^2</item>
+    </plurals>
+  <string-array name="type_clock_hours">
+    <item msgid="3543074812389379830">"Dwanaście"</item>
+    <item msgid="7389464214252023751">"Jeden"</item>
+    <item msgid="8803180377002008046">"Dwa"</item>
+    <item msgid="8614897059944644719">"Trzy"</item>
+    <item msgid="2293058674782619556">"Cztery"</item>
+    <item msgid="4815402358455041664">"Pięć"</item>
+    <item msgid="3325754778509665687">"Sześć"</item>
+    <item msgid="5805551341866280575">"Siedem"</item>
+    <item msgid="203334816668238610">"Osiem"</item>
+    <item msgid="4828052671464488923">"Dziewięć"</item>
+    <item msgid="2233497913571137419">"Dziesięć"</item>
+    <item msgid="5621554266768657830">"Jedenaście"</item>
+  </string-array>
+  <string-array name="type_clock_minutes">
+    <item msgid="8322049385467207985">"Zero zero"</item>
+    <item msgid="8837126587669001578">"Zero jeden"</item>
+    <item msgid="4294343372940455660">"Zero dwa"</item>
+    <item msgid="7129166637707421536">"Zero trzy"</item>
+    <item msgid="7579404865008788673">"Zero cztery"</item>
+    <item msgid="3873924689207380586">"Zero pięć"</item>
+    <item msgid="4849565597850069377">"Zero sześć"</item>
+    <item msgid="4404219424523572364">"Zero siedem"</item>
+    <item msgid="8740481214764087329">"Zero osiem"</item>
+    <item msgid="1713216865806811237">"Zero dziewięć"</item>
+    <item msgid="3508406095411245038">"Dziesięć"</item>
+    <item msgid="7161996337755311711">"Jedenaście"</item>
+    <item msgid="4044549963329624197">"Dwanaście"</item>
+    <item msgid="333373157917379088">"Trzynaście"</item>
+    <item msgid="2631202907124819385">"Czternaście"</item>
+    <item msgid="6472396076858033453">"Piętnaście"</item>
+    <item msgid="8656981856181581643">"Szesnaście"</item>
+    <item msgid="7289026608562030619">"Siedemnaście"</item>
+    <item msgid="3881477602692646573">"Osiemnaście"</item>
+    <item msgid="3358129827772984226">"Dziewiętnaście"</item>
+    <item msgid="3308575407402865807">"Dwadzieścia"</item>
+    <item msgid="5346560955382229629">"Dwadzieścia\njeden"</item>
+    <item msgid="226750304761473436">"Dwadzieścia\ndwa"</item>
+    <item msgid="616811325336838734">"Dwadzieścia\ntrzy"</item>
+    <item msgid="616346116869053440">"Dwadzieścia\ncztery"</item>
+    <item msgid="4642996410384042830">"Dwadzieścia\npięć"</item>
+    <item msgid="7506092849993571465">"Dwadzieścia\nsześć"</item>
+    <item msgid="1915078191101042031">"Dwadzieścia\nsiedem"</item>
+    <item msgid="4292378641900520252">"Dwadzieścia\nosiem"</item>
+    <item msgid="5339513901773103696">"Dwadzieścia\ndziewięć"</item>
+    <item msgid="3574673250891657607">"Trzydzieści"</item>
+    <item msgid="5796923836589110940">"Trzydzieści\njeden"</item>
+    <item msgid="5859323597571702052">"Trzydzieści\ndwa"</item>
+    <item msgid="5133326723148876507">"Trzydzieści\ntrzy"</item>
+    <item msgid="2693999494655663096">"Trzydzieści\ncztery"</item>
+    <item msgid="3316754944962836197">"Trzydzieści\npięć"</item>
+    <item msgid="816891008836796723">"Trzydzieści\nsześć"</item>
+    <item msgid="9158890488666520078">"Trzydzieści\nsiedem"</item>
+    <item msgid="1894769703213894011">"Trzydzieści\nosiem"</item>
+    <item msgid="5638820345598572399">"Trzydzieści\ndziewięć"</item>
+    <item msgid="8838304023017895439">"Czterdzieści"</item>
+    <item msgid="1834742948932559597">"Czterdzieści\njeden"</item>
+    <item msgid="6573707308847773944">"Czterdzieści\ndwa"</item>
+    <item msgid="2450149950652678001">"Czterdzieści\ntrzy"</item>
+    <item msgid="2874667401318178036">"Czterdzieści\ncztery"</item>
+    <item msgid="3391101532763048862">"Czterdzieści\npięć"</item>
+    <item msgid="1671489330863254362">"Czterdzieści\nsześć"</item>
+    <item msgid="5916017359554531038">"Czterdzieści\nsiedem"</item>
+    <item msgid="8205413177993059967">"Czterdzieści\nosiem"</item>
+    <item msgid="6607867415142171302">"Czterdzieści\ndziewięć"</item>
+    <item msgid="8358850748472089162">"Pięćdziesiąt"</item>
+    <item msgid="3551313125255080234">"Pięćdziesiąt\njeden"</item>
+    <item msgid="1559678130725716542">"Pięćdziesiąt\ndwa"</item>
+    <item msgid="431441994725492377">"Pięćdziesiąt\ntrzy"</item>
+    <item msgid="6345774640539623024">"Pięćdziesiąt\ncztery"</item>
+    <item msgid="8018192990793931120">"Pięćdziesiąt\npięć"</item>
+    <item msgid="6187650843754604534">"Pięćdziesiąt\nsześć"</item>
+    <item msgid="8727240174015993259">"Pięćdziesiąt\nsiedem"</item>
+    <item msgid="848339003778952950">"Pięćdziesiąt\nosiem."</item>
+    <item msgid="5798985802835423618">"Pięćdziesiąt\ndziewięć"</item>
+  </string-array>
 </resources>
