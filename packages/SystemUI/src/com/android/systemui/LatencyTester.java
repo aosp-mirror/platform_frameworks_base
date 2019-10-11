@@ -41,6 +41,10 @@ public class LatencyTester extends SystemUI {
     private static final String ACTION_TURN_ON_SCREEN =
             "com.android.systemui.latency.ACTION_TURN_ON_SCREEN";
 
+    public LatencyTester(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         if (!Build.IS_DEBUGGABLE) {

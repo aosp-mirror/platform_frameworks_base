@@ -33,25 +33,30 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIApplication;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 public class KeyguardService extends Service {
     static final String TAG = "KeyguardService";
     static final String PERMISSION = android.Manifest.permission.CONTROL_KEYGUARD;
 
-    private KeyguardViewMediator mKeyguardViewMediator;
-    private KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
+    private final KeyguardViewMediator mKeyguardViewMediator;
+    private final KeyguardLifecyclesDispatcher mKeyguardLifecyclesDispatcher;
+
+    @Inject
+    public KeyguardService(KeyguardViewMediator keyguardViewMediator,
+                           KeyguardLifecyclesDispatcher keyguardLifecyclesDispatcher) {
+        super();
+        mKeyguardViewMediator = keyguardViewMediator;
+        mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
+    }
 
     @Override
     public void onCreate() {
         ((SystemUIApplication) getApplication()).startServicesIfNeeded();
-        mKeyguardViewMediator =
-                ((SystemUIApplication) getApplication()).getComponent(KeyguardViewMediator.class);
-        mKeyguardLifecyclesDispatcher = new KeyguardLifecyclesDispatcher(
-                Dependency.get(ScreenLifecycle.class),
-                Dependency.get(WakefulnessLifecycle.class));
-
     }
 
     @Override

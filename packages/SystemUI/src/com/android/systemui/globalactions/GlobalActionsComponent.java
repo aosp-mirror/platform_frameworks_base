@@ -35,6 +35,10 @@ public class GlobalActionsComponent extends SystemUI implements Callbacks, Globa
     private Extension<GlobalActions> mExtension;
     private IStatusBarService mBarService;
 
+    public GlobalActionsComponent(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         mBarService = IStatusBarService.Stub.asInterface(

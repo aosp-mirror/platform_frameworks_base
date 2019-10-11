@@ -245,6 +245,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Inject
     public CarStatusBar(
+            Context context,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -300,6 +301,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
             NotifLog notifLog) {
         super(
+                context,
                 lightBarController,
                 autoHideController,
                 keyguardUpdateMonitor,

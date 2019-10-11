@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.util.Log;
@@ -36,6 +37,10 @@ public class VolumeUI extends SystemUI {
 
     private boolean mEnabled;
     private VolumeDialogComponent mVolumeComponent;
+
+    public VolumeUI(Context context) {
+        super(context);
+    }
 
     @Override
     public void start() {

@@ -1101,6 +1101,10 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     // Need this class since CommandQueue already extends IStatusBar.Stub, so CommandQueueStart
     // is needed so it can extend SystemUI.
     public static class CommandQueueStart extends SystemUI {
+        public CommandQueueStart(Context context) {
+            super(context);
+        }
+
         @Override
         public void start() {
             putComponent(CommandQueue.class, new CommandQueue(mContext));

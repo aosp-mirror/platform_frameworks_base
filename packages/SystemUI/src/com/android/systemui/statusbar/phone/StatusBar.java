@@ -620,6 +620,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Inject
     public StatusBar(
+            Context context,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -674,6 +675,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
             NotifLog notifLog) {
+        super(context);
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;

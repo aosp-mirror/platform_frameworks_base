@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.SliceBroadcastRelay;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -44,6 +45,14 @@ import org.mockito.ArgumentCaptor;
 public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
 
     private static final String TEST_ACTION = "com.android.systemui.action.TEST_ACTION";
+    private SliceBroadcastRelayHandler mRelayHandler;
+    private Context mSpyContext;
+    @Before
+    public void setup() {
+        mSpyContext = spy(mContext);
+
+        mRelayHandler = new SliceBroadcastRelayHandler(mSpyContext);
+    }
 
     @Test
     public void testRegister() {
@@ -52,8 +61,6 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
                 .authority("something")
                 .path("test")
                 .build();
-        SliceBroadcastRelayHandler relayHandler = new SliceBroadcastRelayHandler();
-        relayHandler.mContext = spy(mContext);
 
         Intent intent = new Intent(SliceBroadcastRelay.ACTION_REGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
@@ -63,8 +70,8 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         intent.putExtra(SliceBroadcastRelay.EXTRA_FILTER, value);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, testUri);
 
-        relayHandler.handleIntent(intent);
-        verify(relayHandler.mContext).registerReceiver(any(), eq(value));
+        mRelayHandler.handleIntent(intent);
+        verify(mSpyContext).registerReceiver(any(), eq(value));
     }
 
     @Test
@@ -74,8 +81,6 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
                 .authority("something")
                 .path("test")
                 .build();
-        SliceBroadcastRelayHandler relayHandler = new SliceBroadcastRelayHandler();
-        relayHandler.mContext = spy(mContext);
 
         Intent intent = new Intent(SliceBroadcastRelay.ACTION_REGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
@@ -84,14 +89,14 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         IntentFilter value = new IntentFilter(TEST_ACTION);
         intent.putExtra(SliceBroadcastRelay.EXTRA_FILTER, value);
 
-        relayHandler.handleIntent(intent);
+        mRelayHandler.handleIntent(intent);
         ArgumentCaptor<BroadcastReceiver> relay = ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(relayHandler.mContext).registerReceiver(relay.capture(), eq(value));
+        verify(mSpyContext).registerReceiver(relay.capture(), eq(value));
 
         intent = new Intent(SliceBroadcastRelay.ACTION_UNREGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
-        relayHandler.handleIntent(intent);
-        verify(relayHandler.mContext).unregisterReceiver(eq(relay.getValue()));
+        mRelayHandler.handleIntent(intent);
+        verify(mSpyContext).unregisterReceiver(eq(relay.getValue()));
     }
 
     @Test
@@ -101,12 +106,10 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
                 .authority("something")
                 .path("test")
                 .build();
-        SliceBroadcastRelayHandler relayHandler = new SliceBroadcastRelayHandler();
-        relayHandler.mContext = spy(mContext);
 
         Intent intent = new Intent(SliceBroadcastRelay.ACTION_UNREGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
-        relayHandler.handleIntent(intent);
+        mRelayHandler.handleIntent(intent);
         // No crash
     }
 
@@ -118,9 +121,6 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
                 .authority("something")
                 .path("test")
                 .build();
-        SliceBroadcastRelayHandler relayHandler = new SliceBroadcastRelayHandler();
-        relayHandler.mContext = spy(mContext);
-
         Intent intent = new Intent(SliceBroadcastRelay.ACTION_REGISTER);
         intent.putExtra(SliceBroadcastRelay.EXTRA_URI, ContentProvider.maybeAddUserId(testUri, 0));
         intent.putExtra(SliceBroadcastRelay.EXTRA_RECEIVER,
@@ -128,10 +128,10 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         IntentFilter value = new IntentFilter(TEST_ACTION);
         intent.putExtra(SliceBroadcastRelay.EXTRA_FILTER, value);
 
-        relayHandler.handleIntent(intent);
+        mRelayHandler.handleIntent(intent);
         ArgumentCaptor<BroadcastReceiver> relay = ArgumentCaptor.forClass(BroadcastReceiver.class);
-        verify(relayHandler.mContext).registerReceiver(relay.capture(), eq(value));
-        relay.getValue().onReceive(relayHandler.mContext, new Intent(TEST_ACTION));
+        verify(mSpyContext).registerReceiver(relay.capture(), eq(value));
+        relay.getValue().onReceive(mSpyContext, new Intent(TEST_ACTION));
 
         verify(Receiver.sReceiver, timeout(2000)).onReceive(any(), any());
     }

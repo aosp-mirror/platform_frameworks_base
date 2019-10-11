@@ -60,6 +60,10 @@ public class StorageNotification extends SystemUI {
     private NotificationManager mNotificationManager;
     private StorageManager mStorageManager;
 
+    public StorageNotification(Context context) {
+        super(context);
+    }
+
     private static class MoveInfo {
         public int moveId;
         public Bundle extras;
