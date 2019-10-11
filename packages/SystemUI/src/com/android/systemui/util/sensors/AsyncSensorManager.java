@@ -139,6 +139,12 @@ public class AsyncSensorManager extends SensorManager
 
     @Override
     protected boolean requestTriggerSensorImpl(TriggerEventListener listener, Sensor sensor) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener cannot be null");
+        }
+        if (sensor == null) {
+            throw new IllegalArgumentException("sensor cannot be null");
+        }
         mHandler.post(() -> {
             if (!mInner.requestTriggerSensor(listener, sensor)) {
                 Log.e(TAG, "Requesting " + listener + " for " + sensor + " failed.");
