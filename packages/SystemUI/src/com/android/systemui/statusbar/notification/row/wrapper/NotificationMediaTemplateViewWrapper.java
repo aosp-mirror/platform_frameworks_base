@@ -247,6 +247,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         }
 
         mSeekBar.getThumb().setAlpha(isVisible ? 255 : 0);
+        mSeekBar.setAlpha(isVisible ? 255 : 182);
         mSeekBar.setEnabled(isVisible);
         mMetricsLogger.write(newLog(MetricsEvent.TYPE_DETAIL, isVisible ? 1 : 0));
     }
