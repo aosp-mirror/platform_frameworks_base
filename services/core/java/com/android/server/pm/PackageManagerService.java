@@ -1675,7 +1675,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     // Send broadcasts
                     for (int i = 0; i < size; i++) {
-                        sendPackageChangedBroadcast(packages[i], true, components[i], uids[i]);
+                        sendPackageChangedBroadcast(packages[i], true, components[i], uids[i],
+                                null);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
@@ -2163,7 +2164,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // send broadcast that all consumers of the static shared library have changed
                     sendPackageChangedBroadcast(pkg.packageName, false /*killFlag*/,
                             new ArrayList<>(Collections.singletonList(pkg.packageName)),
-                            pkg.applicationInfo.uid);
+                            pkg.applicationInfo.uid, null);
                 }
             }
 
@@ -20039,7 +20040,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (sendNow) {
                 int packageUid = UserHandle.getUid(userId, pkgSetting.appId);
                 sendPackageChangedBroadcast(packageName,
-                        (flags&PackageManager.DONT_KILL_APP) != 0, components, packageUid);
+                        (flags & PackageManager.DONT_KILL_APP) != 0, components, packageUid, null);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -20071,7 +20072,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void sendPackageChangedBroadcast(String packageName,
-            boolean killFlag, ArrayList<String> componentNames, int packageUid) {
+            boolean killFlag, ArrayList<String> componentNames, int packageUid,
+            String reason) {
         if (DEBUG_INSTALL)
             Log.v(TAG, "Sending package changed: package=" + packageName + " components="
                     + componentNames);
@@ -20082,6 +20084,9 @@ public class PackageManagerService extends IPackageManager.Stub
         extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
         extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
         extras.putInt(Intent.EXTRA_UID, packageUid);
+        if (reason != null) {
+            extras.putString(Intent.EXTRA_REASON, reason);
+        }
         // If this is not reporting a change of the overall package, then only send it
         // to registered receivers.  We don't want to launch a swath of apps for every
         // little component state change.
@@ -20328,6 +20333,34 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         }
+
+        IntentFilter overlayFilter = new IntentFilter(Intent.ACTION_OVERLAY_CHANGED);
+        overlayFilter.addDataScheme("package");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent == null) {
+                    return;
+                }
+                Uri data = intent.getData();
+                if (data == null) {
+                    return;
+                }
+                String packageName = data.getSchemeSpecificPart();
+                if (packageName == null) {
+                    return;
+                }
+                PackageParser.Package pkg = mPackages.get(packageName);
+                if (pkg == null) {
+                    return;
+                }
+                sendPackageChangedBroadcast(pkg.packageName,
+                        false /* killFlag */,
+                        new ArrayList<>(Collections.singletonList(pkg.packageName)),
+                        pkg.applicationInfo.uid,
+                        Intent.ACTION_OVERLAY_CHANGED);
+            }
+        }, overlayFilter);
 
         mModuleInfoProvider.systemReady();
 

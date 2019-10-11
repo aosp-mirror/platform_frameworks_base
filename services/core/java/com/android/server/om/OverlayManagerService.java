@@ -17,11 +17,13 @@
 package com.android.server.om;
 
 import static android.app.AppGlobals.getPackageManager;
+import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
+import static android.content.Intent.EXTRA_REASON;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 import static android.os.Trace.TRACE_TAG_RRO;
 import static android.os.Trace.traceBegin;
@@ -356,7 +358,11 @@ public final class OverlayManagerService extends SystemService {
                     }
                     break;
                 case ACTION_PACKAGE_CHANGED:
-                    onPackageChanged(packageName, userIds);
+                    // ignore the intent if it was sent by the package manager as a result of the
+                    // overlay manager having sent ACTION_OVERLAY_CHANGED
+                    if (!ACTION_OVERLAY_CHANGED.equals(intent.getStringExtra(EXTRA_REASON))) {
+                        onPackageChanged(packageName, userIds);
+                    }
                     break;
                 case ACTION_PACKAGE_REMOVED:
                     if (replacing) {
@@ -885,7 +891,7 @@ public final class OverlayManagerService extends SystemService {
             FgThread.getHandler().post(() -> {
                 updateAssets(userId, targetPackageName);
 
-                final Intent intent = new Intent(Intent.ACTION_OVERLAY_CHANGED,
+                final Intent intent = new Intent(ACTION_OVERLAY_CHANGED,
                         Uri.fromParts("package", targetPackageName, null));
                 intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
