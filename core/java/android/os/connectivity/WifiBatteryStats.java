@@ -15,278 +15,385 @@
  */
 package android.os.connectivity;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.BatteryStats;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
- * API for Wifi power stats
+ * Class for holding Wifi related battery stats
  *
  * @hide
  */
+@SystemApi
 public final class WifiBatteryStats implements Parcelable {
+    private long mLoggingDurationMillis = 0;
+    private long mKernelActiveTimeMillis = 0;
+    private long mNumPacketsTx = 0;
+    private long mNumBytesTx = 0;
+    private long mNumPacketsRx = 0;
+    private long mNumBytesRx = 0;
+    private long mSleepTimeMillis = 0;
+    private long mScanTimeMillis = 0;
+    private long mIdleTimeMillis = 0;
+    private long mRxTimeMillis = 0;
+    private long mTxTimeMillis = 0;
+    private long mEnergyConsumedMaMillis = 0;
+    private long mNumAppScanRequest = 0;
+    private long[] mTimeInStateMillis =
+        new long[BatteryStats.NUM_WIFI_STATES];
+    private long[] mTimeInSupplicantStateMillis =
+        new long[BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS];
+    private long[] mTimeInRxSignalStrengthLevelMillis =
+        new long[BatteryStats.NUM_WIFI_SUPPL_STATES];
+    private long mMonitoredRailChargeConsumedMaMillis = 0;
 
-  private long mLoggingDurationMs;
-  private long mKernelActiveTimeMs;
-  private long mNumPacketsTx;
-  private long mNumBytesTx;
-  private long mNumPacketsRx;
-  private long mNumBytesRx;
-  private long mSleepTimeMs;
-  private long mScanTimeMs;
-  private long mIdleTimeMs;
-  private long mRxTimeMs;
-  private long mTxTimeMs;
-  private long mEnergyConsumedMaMs;
-  private long mNumAppScanRequest;
-  private long[] mTimeInStateMs;
-  private long[] mTimeInSupplicantStateMs;
-  private long[] mTimeInRxSignalStrengthLevelMs;
-  private long mMonitoredRailChargeConsumedMaMs;
+    public static final @NonNull Parcelable.Creator<WifiBatteryStats> CREATOR =
+            new Parcelable.Creator<WifiBatteryStats>() {
+                public WifiBatteryStats createFromParcel(Parcel in) {
+                    return new WifiBatteryStats(in);
+                }
 
-  public static final @android.annotation.NonNull Parcelable.Creator<WifiBatteryStats> CREATOR = new
-      Parcelable.Creator<WifiBatteryStats>() {
-        public WifiBatteryStats createFromParcel(Parcel in) {
-          return new WifiBatteryStats(in);
-        }
+                public WifiBatteryStats[] newArray(int size) {
+                    return new WifiBatteryStats[size];
+                }
+            };
 
-        public WifiBatteryStats[] newArray(int size) {
-          return new WifiBatteryStats[size];
-        }
-      };
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-  public WifiBatteryStats() {
-    initialize();
-  }
+    @Override
+    public void writeToParcel(@NonNull Parcel out, int flags) {
+        out.writeLong(mLoggingDurationMillis);
+        out.writeLong(mKernelActiveTimeMillis);
+        out.writeLong(mNumPacketsTx);
+        out.writeLong(mNumBytesTx);
+        out.writeLong(mNumPacketsRx);
+        out.writeLong(mNumBytesRx);
+        out.writeLong(mSleepTimeMillis);
+        out.writeLong(mScanTimeMillis);
+        out.writeLong(mIdleTimeMillis);
+        out.writeLong(mRxTimeMillis);
+        out.writeLong(mTxTimeMillis);
+        out.writeLong(mEnergyConsumedMaMillis);
+        out.writeLong(mNumAppScanRequest);
+        out.writeLongArray(mTimeInStateMillis);
+        out.writeLongArray(mTimeInRxSignalStrengthLevelMillis);
+        out.writeLongArray(mTimeInSupplicantStateMillis);
+        out.writeLong(mMonitoredRailChargeConsumedMaMillis);
+    }
 
-  public void writeToParcel(Parcel out, int flags) {
-    out.writeLong(mLoggingDurationMs);
-    out.writeLong(mKernelActiveTimeMs);
-    out.writeLong(mNumPacketsTx);
-    out.writeLong(mNumBytesTx);
-    out.writeLong(mNumPacketsRx);
-    out.writeLong(mNumBytesRx);
-    out.writeLong(mSleepTimeMs);
-    out.writeLong(mScanTimeMs);
-    out.writeLong(mIdleTimeMs);
-    out.writeLong(mRxTimeMs);
-    out.writeLong(mTxTimeMs);
-    out.writeLong(mEnergyConsumedMaMs);
-    out.writeLong(mNumAppScanRequest);
-    out.writeLongArray(mTimeInStateMs);
-    out.writeLongArray(mTimeInRxSignalStrengthLevelMs);
-    out.writeLongArray(mTimeInSupplicantStateMs);
-    out.writeLong(mMonitoredRailChargeConsumedMaMs);
-  }
+    @Override
+    public boolean equals(@Nullable Object other) {
+        if (!(other instanceof WifiBatteryStats)) return false;
+        if (other == this) return true;
+        WifiBatteryStats otherStats = (WifiBatteryStats) other;
+        return this.mLoggingDurationMillis == otherStats.mLoggingDurationMillis
+                && this.mKernelActiveTimeMillis == otherStats.mKernelActiveTimeMillis
+                && this.mNumPacketsTx == otherStats.mNumPacketsTx
+                && this.mNumBytesTx == otherStats.mNumBytesTx
+                && this.mNumPacketsRx == otherStats.mNumPacketsRx
+                && this.mNumBytesRx == otherStats.mNumBytesRx
+                && this.mSleepTimeMillis == otherStats.mSleepTimeMillis
+                && this.mScanTimeMillis == otherStats.mScanTimeMillis
+                && this.mIdleTimeMillis == otherStats.mIdleTimeMillis
+                && this.mRxTimeMillis == otherStats.mRxTimeMillis
+                && this.mTxTimeMillis == otherStats.mTxTimeMillis
+                && this.mEnergyConsumedMaMillis == otherStats.mEnergyConsumedMaMillis
+                && this.mNumAppScanRequest == otherStats.mNumAppScanRequest
+                && Arrays.equals(this.mTimeInStateMillis, otherStats.mTimeInStateMillis)
+                && Arrays.equals(this.mTimeInSupplicantStateMillis,
+                    otherStats.mTimeInSupplicantStateMillis)
+                && Arrays.equals(this.mTimeInRxSignalStrengthLevelMillis,
+                    otherStats.mTimeInRxSignalStrengthLevelMillis)
+                && this.mMonitoredRailChargeConsumedMaMillis
+                    == otherStats.mMonitoredRailChargeConsumedMaMillis;
+    }
 
-  public void readFromParcel(Parcel in) {
-    mLoggingDurationMs = in.readLong();
-    mKernelActiveTimeMs = in.readLong();
-    mNumPacketsTx = in.readLong();
-    mNumBytesTx = in.readLong();
-    mNumPacketsRx = in.readLong();
-    mNumBytesRx = in.readLong();
-    mSleepTimeMs = in.readLong();
-    mScanTimeMs = in.readLong();
-    mIdleTimeMs = in.readLong();
-    mRxTimeMs = in.readLong();
-    mTxTimeMs = in.readLong();
-    mEnergyConsumedMaMs = in.readLong();
-    mNumAppScanRequest = in.readLong();
-    in.readLongArray(mTimeInStateMs);
-    in.readLongArray(mTimeInRxSignalStrengthLevelMs);
-    in.readLongArray(mTimeInSupplicantStateMs);
-    mMonitoredRailChargeConsumedMaMs = in.readLong();
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hash(mLoggingDurationMillis, mKernelActiveTimeMillis, mNumPacketsTx,
+                mNumBytesTx, mNumPacketsRx, mNumBytesRx, mSleepTimeMillis, mScanTimeMillis,
+                mIdleTimeMillis, mRxTimeMillis, mTxTimeMillis, mEnergyConsumedMaMillis,
+                mNumAppScanRequest, Arrays.hashCode(mTimeInStateMillis),
+                Arrays.hashCode(mTimeInSupplicantStateMillis),
+                Arrays.hashCode(mTimeInRxSignalStrengthLevelMillis),
+                mMonitoredRailChargeConsumedMaMillis);
+    }
 
-  public long getLoggingDurationMs() {
-    return mLoggingDurationMs;
-  }
+    /** @hide **/
+    public WifiBatteryStats() {}
 
-  public long getKernelActiveTimeMs() {
-    return mKernelActiveTimeMs;
-  }
+    private void readFromParcel(Parcel in) {
+        mLoggingDurationMillis = in.readLong();
+        mKernelActiveTimeMillis = in.readLong();
+        mNumPacketsTx = in.readLong();
+        mNumBytesTx = in.readLong();
+        mNumPacketsRx = in.readLong();
+        mNumBytesRx = in.readLong();
+        mSleepTimeMillis = in.readLong();
+        mScanTimeMillis = in.readLong();
+        mIdleTimeMillis = in.readLong();
+        mRxTimeMillis = in.readLong();
+        mTxTimeMillis = in.readLong();
+        mEnergyConsumedMaMillis = in.readLong();
+        mNumAppScanRequest = in.readLong();
+        in.readLongArray(mTimeInStateMillis);
+        in.readLongArray(mTimeInRxSignalStrengthLevelMillis);
+        in.readLongArray(mTimeInSupplicantStateMillis);
+        mMonitoredRailChargeConsumedMaMillis = in.readLong();
+    }
 
-  public long getNumPacketsTx() {
-    return mNumPacketsTx;
-  }
+    /**
+     * Returns the duration for which these wifi stats were collected.
+     *
+     * @return Duration of stats collection in millis.
+     */
+    public long getLoggingDurationMillis() {
+        return mLoggingDurationMillis;
+    }
 
-  public long getNumBytesTx() {
-    return mNumBytesTx;
-  }
+    /**
+     * Returns the duration for which the kernel was active within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Duration of kernel active time in millis.
+     */
+    public long getKernelActiveTimeMillis() {
+        return mKernelActiveTimeMillis;
+    }
 
-  public long getNumPacketsRx() {
-    return mNumPacketsRx;
-  }
+    /**
+     * Returns the number of packets transmitted over wifi within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Number of packets transmitted.
+     */
+    public long getNumPacketsTx() {
+        return mNumPacketsTx;
+    }
 
-  public long getNumBytesRx() {
-    return mNumBytesRx;
-  }
+    /**
+     * Returns the number of packets received over wifi within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Number of packets received.
+     */
+    public long getNumBytesTx() {
+        return mNumBytesTx;
+    }
 
-  public long getSleepTimeMs() {
-    return mSleepTimeMs;
-  }
+    /**
+     * Returns the number of bytes transmitted over wifi within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Number of bytes transmitted.
+     */
+    public long getNumPacketsRx() {
+        return mNumPacketsRx;
+    }
 
-  public long getScanTimeMs() {
-    return mScanTimeMs;
-  }
+    /**
+     * Returns the number of bytes received over wifi within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Number of bytes received.
+     */
+    public long getNumBytesRx() {
+        return mNumBytesRx;
+    }
 
-  public long getIdleTimeMs() {
-    return mIdleTimeMs;
-  }
+    /**
+     * Returns the duration for which the device was sleeping within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Duration of sleep time in millis.
+     */
+    public long getSleepTimeMillis() {
+        return mSleepTimeMillis;
+    }
 
-  public long getRxTimeMs() {
-    return mRxTimeMs;
-  }
+    /**
+     * Returns the duration for which the device was wifi scanning within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Duration of wifi scanning time in millis.
+     */
+    public long getScanTimeMillis() {
+        return mScanTimeMillis;
+    }
 
-  public long getTxTimeMs() {
-    return mTxTimeMs;
-  }
+    /**
+     * Returns the duration for which the device was idle within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Duration of idle time in millis.
+     */
+    public long getIdleTimeMillis() {
+        return mIdleTimeMillis;
+    }
 
-  public long getEnergyConsumedMaMs() {
-    return mEnergyConsumedMaMs;
-  }
+    /**
+     * Returns the duration for which the device was receiving over wifi within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Duration of wifi reception time in millis.
+     */
+    public long getRxTimeMillis() {
+        return mRxTimeMillis;
+    }
 
-  public long getNumAppScanRequest() {
-    return mNumAppScanRequest;
-  }
+    /**
+     * Returns the duration for which the device was transmitting over wifi within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Duration of wifi transmission time in millis.
+     */
+    public long getTxTimeMillis() {
+        return mTxTimeMillis;
+    }
 
-  public long[] getTimeInStateMs() {
-    return mTimeInStateMs;
-  }
+    /**
+     * Returns an estimation of energy consumed by wifi chip within
+     * {@link #getLoggingDurationMillis()}.
+     *
+     * @return Energy consumed in millis.
+     */
+    public long getEnergyConsumedMaMillis() {
+        return mEnergyConsumedMaMillis;
+    }
 
-  public long[] getTimeInRxSignalStrengthLevelMs() {
-    return mTimeInRxSignalStrengthLevelMs;
-  }
+    /**
+     * Returns the number of app initiated wifi scans within {@link #getLoggingDurationMillis()}.
+     *
+     * @return Number of app scans.
+     */
+    public long getNumAppScanRequest() {
+        return mNumAppScanRequest;
+    }
 
-  public long[] getTimeInSupplicantStateMs() {
-    return mTimeInSupplicantStateMs;
-  }
+    /**
+     * Returns the energy consumed by wifi chip within {@link #getLoggingDurationMillis()}.
+     *
+     * @return Energy consumed in millis.
+     */
+    public long getMonitoredRailChargeConsumedMaMillis() {
+        return mMonitoredRailChargeConsumedMaMillis;
+    }
 
-  public long getMonitoredRailChargeConsumedMaMs() {
-    return mMonitoredRailChargeConsumedMaMs;
-  }
+    /** @hide */
+    public void setLoggingDurationMillis(long t) {
+        mLoggingDurationMillis = t;
+        return;
+    }
 
-  public void setLoggingDurationMs(long t) {
-    mLoggingDurationMs = t;
-    return;
-  }
+    /** @hide */
+    public void setKernelActiveTimeMillis(long t) {
+        mKernelActiveTimeMillis = t;
+        return;
+    }
 
-  public void setKernelActiveTimeMs(long t) {
-    mKernelActiveTimeMs = t;
-    return;
-  }
+    /** @hide */
+    public void setNumPacketsTx(long n) {
+        mNumPacketsTx = n;
+        return;
+    }
 
-  public void setNumPacketsTx(long n) {
-    mNumPacketsTx = n;
-    return;
-  }
+    /** @hide */
+    public void setNumBytesTx(long b) {
+        mNumBytesTx = b;
+        return;
+    }
 
-  public void setNumBytesTx(long b) {
-    mNumBytesTx = b;
-    return;
-  }
+    /** @hide */
+    public void setNumPacketsRx(long n) {
+        mNumPacketsRx = n;
+        return;
+    }
 
-  public void setNumPacketsRx(long n) {
-    mNumPacketsRx = n;
-    return;
-  }
+    /** @hide */
+    public void setNumBytesRx(long b) {
+        mNumBytesRx = b;
+        return;
+    }
 
-  public void setNumBytesRx(long b) {
-    mNumBytesRx = b;
-    return;
-  }
+    /** @hide */
+    public void setSleepTimeMillis(long t) {
+        mSleepTimeMillis = t;
+        return;
+    }
 
-  public void setSleepTimeMs(long t) {
-    mSleepTimeMs = t;
-    return;
-  }
+    /** @hide */
+    public void setScanTimeMillis(long t) {
+        mScanTimeMillis = t;
+        return;
+    }
 
-  public void setScanTimeMs(long t) {
-    mScanTimeMs = t;
-    return;
-  }
+    /** @hide */
+    public void setIdleTimeMillis(long t) {
+        mIdleTimeMillis = t;
+        return;
+    }
 
-  public void setIdleTimeMs(long t) {
-    mIdleTimeMs = t;
-    return;
-  }
+    /** @hide */
+    public void setRxTimeMillis(long t) {
+        mRxTimeMillis = t;
+        return;
+    }
 
-  public void setRxTimeMs(long t) {
-    mRxTimeMs = t;
-    return;
-  }
+    /** @hide */
+    public void setTxTimeMillis(long t) {
+        mTxTimeMillis = t;
+        return;
+    }
 
-  public void setTxTimeMs(long t) {
-    mTxTimeMs = t;
-    return;
-  }
+    /** @hide */
+    public void setEnergyConsumedMaMillis(long e) {
+        mEnergyConsumedMaMillis = e;
+        return;
+    }
 
-  public void setEnergyConsumedMaMs(long e) {
-    mEnergyConsumedMaMs = e;
-    return;
-  }
+    /** @hide */
+    public void setNumAppScanRequest(long n) {
+        mNumAppScanRequest = n;
+        return;
+    }
 
-  public void setNumAppScanRequest(long n) {
-    mNumAppScanRequest = n;
-    return;
-  }
+    /** @hide */
+    public void setTimeInStateMillis(long[] t) {
+        mTimeInStateMillis = Arrays.copyOfRange(t, 0,
+                Math.min(t.length, BatteryStats.NUM_WIFI_STATES));
+        return;
+    }
 
-  public void setTimeInStateMs(long[] t) {
-    mTimeInStateMs = Arrays.copyOfRange(t, 0,
-        Math.min(t.length, BatteryStats.NUM_WIFI_STATES));
-    return;
-  }
+    /** @hide */
+    public void setTimeInRxSignalStrengthLevelMillis(long[] t) {
+        mTimeInRxSignalStrengthLevelMillis = Arrays.copyOfRange(t, 0,
+                Math.min(t.length, BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS));
+        return;
+    }
 
-  public void setTimeInRxSignalStrengthLevelMs(long[] t) {
-    mTimeInRxSignalStrengthLevelMs = Arrays.copyOfRange(t, 0,
-        Math.min(t.length, BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS));
-    return;
-  }
+    /** @hide */
+    public void setTimeInSupplicantStateMillis(long[] t) {
+        mTimeInSupplicantStateMillis = Arrays.copyOfRange(
+                t, 0, Math.min(t.length, BatteryStats.NUM_WIFI_SUPPL_STATES));
+        return;
+    }
 
-  public void setTimeInSupplicantStateMs(long[] t) {
-    mTimeInSupplicantStateMs = Arrays.copyOfRange(
-        t, 0, Math.min(t.length, BatteryStats.NUM_WIFI_SUPPL_STATES));
-    return;
-  }
+    /** @hide */
+    public void setMonitoredRailChargeConsumedMaMillis(long monitoredRailEnergyConsumedMaMillis) {
+        mMonitoredRailChargeConsumedMaMillis = monitoredRailEnergyConsumedMaMillis;
+        return;
+    }
 
-  public void setMonitoredRailChargeConsumedMaMs(long monitoredRailEnergyConsumedMaMs) {
-    mMonitoredRailChargeConsumedMaMs = monitoredRailEnergyConsumedMaMs;
-    return;
-  }
-
-  public int describeContents() {
-    return 0;
-  }
-
-  private WifiBatteryStats(Parcel in) {
-    initialize();
-    readFromParcel(in);
-  }
-
-  private void initialize() {
-    mLoggingDurationMs = 0;
-    mKernelActiveTimeMs = 0;
-    mNumPacketsTx = 0;
-    mNumBytesTx = 0;
-    mNumPacketsRx = 0;
-    mNumBytesRx = 0;
-    mSleepTimeMs = 0;
-    mScanTimeMs = 0;
-    mIdleTimeMs = 0;
-    mRxTimeMs = 0;
-    mTxTimeMs = 0;
-    mEnergyConsumedMaMs = 0;
-    mNumAppScanRequest = 0;
-    mTimeInStateMs = new long[BatteryStats.NUM_WIFI_STATES];
-    Arrays.fill(mTimeInStateMs, 0);
-    mTimeInRxSignalStrengthLevelMs = new long[BatteryStats.NUM_WIFI_SIGNAL_STRENGTH_BINS];
-    Arrays.fill(mTimeInRxSignalStrengthLevelMs, 0);
-    mTimeInSupplicantStateMs = new long[BatteryStats.NUM_WIFI_SUPPL_STATES];
-    Arrays.fill(mTimeInSupplicantStateMs, 0);
-    mMonitoredRailChargeConsumedMaMs = 0;
-    return;
-  }
+    private WifiBatteryStats(Parcel in) {
+        readFromParcel(in);
+    }
 }

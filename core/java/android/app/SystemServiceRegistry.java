@@ -125,6 +125,7 @@ import android.net.wifi.rtt.WifiRttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BatteryStatsManager;
 import android.os.BugreportManager;
 import android.os.Build;
 import android.os.DropBoxManager;
@@ -1285,6 +1286,16 @@ public final class SystemServiceRegistry {
                                 Context.DYNAMIC_SYSTEM_SERVICE);
                         return new DynamicSystemManager(
                                 IDynamicSystemService.Stub.asInterface(b));
+                    }});
+        registerService(Context.BATTERY_STATS_SERVICE, BatteryStatsManager.class,
+                new CachedServiceFetcher<BatteryStatsManager>() {
+                    @Override
+                    public BatteryStatsManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.BATTERY_STATS_SERVICE);
+                        return new BatteryStatsManager(
+                                IBatteryStats.Stub.asInterface(b));
                     }});
         //CHECKSTYLE:ON IndentationCheck
     }

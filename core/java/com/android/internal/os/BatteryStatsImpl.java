@@ -12668,23 +12668,23 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             timeSignalStrengthTimeMs[i] = getWifiSignalStrengthTime(i, rawRealTime, which) / 1000;
         }
-        s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
-        s.setKernelActiveTimeMs(getWifiActiveTime(rawRealTime, which) / 1000);
+        s.setLoggingDurationMillis(computeBatteryRealtime(rawRealTime, which) / 1000);
+        s.setKernelActiveTimeMillis(getWifiActiveTime(rawRealTime, which) / 1000);
         s.setNumPacketsTx(getNetworkActivityPackets(NETWORK_WIFI_TX_DATA, which));
         s.setNumBytesTx(getNetworkActivityBytes(NETWORK_WIFI_TX_DATA, which));
         s.setNumPacketsRx(getNetworkActivityPackets(NETWORK_WIFI_RX_DATA, which));
         s.setNumBytesRx(getNetworkActivityBytes(NETWORK_WIFI_RX_DATA, which));
-        s.setSleepTimeMs(sleepTimeMs);
-        s.setIdleTimeMs(idleTimeMs);
-        s.setRxTimeMs(rxTimeMs);
-        s.setTxTimeMs(txTimeMs);
-        s.setScanTimeMs(scanTimeMs);
-        s.setEnergyConsumedMaMs(energyConsumedMaMs);
+        s.setSleepTimeMillis(sleepTimeMs);
+        s.setIdleTimeMillis(idleTimeMs);
+        s.setRxTimeMillis(rxTimeMs);
+        s.setTxTimeMillis(txTimeMs);
+        s.setScanTimeMillis(scanTimeMs);
+        s.setEnergyConsumedMaMillis(energyConsumedMaMs);
         s.setNumAppScanRequest(numAppScanRequest);
-        s.setTimeInStateMs(timeInStateMs);
-        s.setTimeInSupplicantStateMs(timeInSupplStateMs);
-        s.setTimeInRxSignalStrengthLevelMs(timeSignalStrengthTimeMs);
-        s.setMonitoredRailChargeConsumedMaMs(monitoredRailChargeConsumedMaMs);
+        s.setTimeInStateMillis(timeInStateMs);
+        s.setTimeInSupplicantStateMillis(timeInSupplStateMs);
+        s.setTimeInRxSignalStrengthLevelMillis(timeSignalStrengthTimeMs);
+        s.setMonitoredRailChargeConsumedMaMillis(monitoredRailChargeConsumedMaMs);
         return s;
     }
 
