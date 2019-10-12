@@ -5237,7 +5237,7 @@ public abstract class Context {
     @SystemApi
     @TestApi
     @NonNull
-    public Context createContextAsUser(@NonNull UserHandle user) {
+    public Context createContextAsUser(@NonNull UserHandle user, @CreatePackageOptions int flags) {
         if (Build.IS_ENG) {
             throw new IllegalStateException("createContextAsUser not overridden!");
         }

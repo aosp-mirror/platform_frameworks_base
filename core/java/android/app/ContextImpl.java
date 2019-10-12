@@ -2212,9 +2212,9 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public Context createContextAsUser(UserHandle user) {
+    public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
         try {
-            return createPackageContextAsUser(getPackageName(), mFlags, user);
+            return createPackageContextAsUser(getPackageName(), flags, user);
         } catch (NameNotFoundException e) {
             throw new IllegalStateException("Own package not found: package=" + getPackageName());
         }

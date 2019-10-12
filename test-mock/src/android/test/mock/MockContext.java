@@ -758,7 +758,7 @@ public class MockContext extends Context {
 
     /** {@hide} */
     @Override
-    public Context createContextAsUser(UserHandle user) {
+    public Context createContextAsUser(UserHandle user, @CreatePackageOptions int flags) {
         throw new UnsupportedOperationException();
     }
 
