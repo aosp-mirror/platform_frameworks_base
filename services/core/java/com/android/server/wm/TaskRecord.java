@@ -447,7 +447,7 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     void cleanUpResourcesForDestroy() {
-        if (!mActivities.isEmpty()) {
+        if (hasChild()) {
             return;
         }
 
@@ -1095,7 +1095,7 @@ class TaskRecord extends ConfigurationContainer {
             // There are no non-finishing activities in the task.
             return null;
         }
-        return mActivities.get(rootActivityIndex);
+        return getChildAt(rootActivityIndex);
     }
 
     ActivityRecord getTopActivity() {
@@ -1103,8 +1103,8 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     ActivityRecord getTopActivity(boolean includeOverlays) {
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = mActivities.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityRecord r = getChildAt(i);
             if (r.finishing || (!includeOverlays && r.mTaskOverlay)) {
                 continue;
             }
@@ -1115,8 +1115,8 @@ class TaskRecord extends ConfigurationContainer {
 
     ActivityRecord topRunningActivityLocked() {
         if (mStack != null) {
-            for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = mActivities.get(activityNdx);
+            for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = getChildAt(activityNdx);
                 if (!r.finishing && r.okToShowLocked()) {
                     return r;
                 }
@@ -1126,8 +1126,8 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     boolean isVisible() {
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = mActivities.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityRecord r = getChildAt(i);
             if (r.visible) {
                 return true;
             }
@@ -1139,8 +1139,8 @@ class TaskRecord extends ConfigurationContainer {
      * Return true if any activities in this task belongs to input uid.
      */
     boolean containsAppUid(int uid) {
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = mActivities.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityRecord r = getChildAt(i);
             if (r.getUid() == uid) {
                 return true;
             }
@@ -1150,8 +1150,8 @@ class TaskRecord extends ConfigurationContainer {
 
     void getAllRunningVisibleActivitiesLocked(ArrayList<ActivityRecord> outActivities) {
         if (mStack != null) {
-            for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = mActivities.get(activityNdx);
+            for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = getChildAt(activityNdx);
                 if (!r.finishing && r.okToShowLocked() && r.visibleIgnoringKeyguard) {
                     outActivities.add(r);
                 }
@@ -1161,8 +1161,8 @@ class TaskRecord extends ConfigurationContainer {
 
     ActivityRecord topRunningActivityWithStartingWindowLocked() {
         if (mStack != null) {
-            for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = mActivities.get(activityNdx);
+            for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                ActivityRecord r = getChildAt(activityNdx);
                 if (r.mStartingWindowState != STARTING_WINDOW_SHOWN
                         || r.finishing || !r.okToShowLocked()) {
                     continue;
@@ -1179,8 +1179,8 @@ class TaskRecord extends ConfigurationContainer {
      */
     void getNumRunningActivities(TaskActivitiesReport reportOut) {
         reportOut.reset();
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = mActivities.get(i);
+        for (int i = getChildCount() - 1; i >= 0; --i) {
+            final ActivityRecord r = getChildAt(i);
             if (r.finishing) {
                 continue;
             }
@@ -1227,17 +1227,17 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     void addActivityToTop(ActivityRecord r) {
-        addActivityAtIndex(mActivities.size(), r);
+        addActivityAtIndex(getChildCount(), r);
     }
 
     @Override
     /*@WindowConfiguration.ActivityType*/
     public int getActivityType() {
         final int applicationType = super.getActivityType();
-        if (applicationType != ACTIVITY_TYPE_UNDEFINED || mActivities.isEmpty()) {
+        if (applicationType != ACTIVITY_TYPE_UNDEFINED || !hasChild()) {
             return applicationType;
         }
-        return mActivities.get(0).getActivityType();
+        return getChildAt(0).getActivityType();
     }
 
     /**
@@ -1259,7 +1259,7 @@ class TaskRecord extends ConfigurationContainer {
             numFullscreen++;
         }
         // Only set this based on the first activity
-        if (mActivities.isEmpty()) {
+        if (!hasChild()) {
             if (r.getActivityType() == ACTIVITY_TYPE_UNDEFINED) {
                 // Normally non-standard activity type for the activity record will be set when the
                 // object is created, however we delay setting the standard application type until
@@ -1279,10 +1279,10 @@ class TaskRecord extends ConfigurationContainer {
             r.setActivityType(getActivityType());
         }
 
-        final int size = mActivities.size();
+        final int size = getChildCount();
 
         if (index == size && size > 0) {
-            final ActivityRecord top = mActivities.get(size - 1);
+            final ActivityRecord top = getChildAt(size - 1);
             if (top.mTaskOverlay) {
                 // Place below the task overlay activity since the overlay activity should always
                 // be on top.
@@ -1341,7 +1341,7 @@ class TaskRecord extends ConfigurationContainer {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
-        if (mActivities.isEmpty()) {
+        if (!hasChild()) {
             return !mReuseTask;
         }
         updateEffectiveIntent();
@@ -1355,8 +1355,8 @@ class TaskRecord extends ConfigurationContainer {
      */
     boolean onlyHasTaskOverlayActivities(boolean excludeFinishing) {
         int count = 0;
-        for (int i = mActivities.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = mActivities.get(i);
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = getChildAt(i);
             if (excludeFinishing && r.finishing) {
                 continue;
             }
@@ -1372,7 +1372,7 @@ class TaskRecord extends ConfigurationContainer {
         // We will automatically remove the task either if it has explicitly asked for
         // this, or it is empty and has never contained an activity that got shown to
         // the user.
-        return autoRemoveRecents || (mActivities.isEmpty() && !hasBeenVisible);
+        return autoRemoveRecents || (!hasChild() && !hasBeenVisible);
     }
 
     /**
@@ -1380,9 +1380,9 @@ class TaskRecord extends ConfigurationContainer {
      * task starting at a specified index.
      */
     final void performClearTaskAtIndexLocked(int activityNdx, String reason) {
-        int numActivities = mActivities.size();
+        int numActivities = getChildCount();
         for ( ; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = mActivities.get(activityNdx);
+            final ActivityRecord r = getChildAt(activityNdx);
             if (r.finishing) {
                 continue;
             }
@@ -1429,9 +1429,9 @@ class TaskRecord extends ConfigurationContainer {
      * or null if none was found.
      */
     final ActivityRecord performClearTaskLocked(ActivityRecord newR, int launchFlags) {
-        int numActivities = mActivities.size();
+        int numActivities = getChildCount();
         for (int activityNdx = numActivities - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord r = mActivities.get(activityNdx);
+            ActivityRecord r = getChildAt(activityNdx);
             if (r.finishing) {
                 continue;
             }
@@ -1440,7 +1440,7 @@ class TaskRecord extends ConfigurationContainer {
                 final ActivityRecord ret = r;
 
                 for (++activityNdx; activityNdx < numActivities; ++activityNdx) {
-                    r = mActivities.get(activityNdx);
+                    r = getChildAt(activityNdx);
                     if (r.finishing) {
                         continue;
                     }
@@ -1591,8 +1591,8 @@ class TaskRecord extends ConfigurationContainer {
      */
     final ActivityRecord findActivityInHistoryLocked(ActivityRecord r) {
         final ComponentName realActivity = r.mActivityComponent;
-        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-            ActivityRecord candidate = mActivities.get(activityNdx);
+        for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord candidate = getChildAt(activityNdx);
             if (candidate.finishing) {
                 continue;
             }
@@ -1609,12 +1609,12 @@ class TaskRecord extends ConfigurationContainer {
         // Traverse upwards looking for any break between main task activities and
         // utility activities.
         int activityNdx;
-        final int numActivities = mActivities.size();
+        final int numActivities = getChildCount();
         final boolean relinquish = numActivities != 0 &&
-                (mActivities.get(0).info.flags & FLAG_RELINQUISH_TASK_IDENTITY) != 0;
+                (getChildAt(0).info.flags & FLAG_RELINQUISH_TASK_IDENTITY) != 0;
         for (activityNdx = Math.min(numActivities, 1); activityNdx < numActivities;
                 ++activityNdx) {
-            final ActivityRecord r = mActivities.get(activityNdx);
+            final ActivityRecord r = getChildAt(activityNdx);
             if (relinquish && (r.info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0) {
                 // This will be the top activity for determining taskDescription. Pre-inc to
                 // overcome initial decrement below.
@@ -1642,7 +1642,7 @@ class TaskRecord extends ConfigurationContainer {
             boolean navigationBarContrastWhenTransparent = false;
             boolean topActivity = true;
             for (--activityNdx; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = mActivities.get(activityNdx);
+                final ActivityRecord r = getChildAt(activityNdx);
                 if (r.mTaskOverlay) {
                     continue;
                 }
@@ -1697,9 +1697,9 @@ class TaskRecord extends ConfigurationContainer {
      */
     int findRootIndex(boolean effectiveRoot) {
         int effectiveNdx = -1;
-        final int topActivityNdx = mActivities.size() - 1;
+        final int topActivityNdx = getChildCount() - 1;
         for (int activityNdx = 0; activityNdx <= topActivityNdx; ++activityNdx) {
-            final ActivityRecord r = mActivities.get(activityNdx);
+            final ActivityRecord r = getChildAt(activityNdx);
             if (r.finishing) {
                 continue;
             }
@@ -1720,7 +1720,7 @@ class TaskRecord extends ConfigurationContainer {
             // But we still want to update the intent, so let's use the bottom activity.
             effectiveRootIndex = 0;
         }
-        final ActivityRecord r = mActivities.get(effectiveRootIndex);
+        final ActivityRecord r = getChildAt(effectiveRootIndex);
         setIntent(r);
 
         // Update the task description when the activities change
@@ -2289,8 +2289,8 @@ class TaskRecord extends ConfigurationContainer {
     }
 
     void addStartingWindowsForVisibleActivities(boolean taskSwitch) {
-        for (int activityNdx = mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ActivityRecord r = mActivities.get(activityNdx);
+        for (int activityNdx = getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+            final ActivityRecord r = getChildAt(activityNdx);
             if (r.visible) {
                 r.showStartingWindow(null /* prev */, false /* newTask */, taskSwitch);
             }
@@ -2462,7 +2462,7 @@ class TaskRecord extends ConfigurationContainer {
             sb.append(" StackId=");
             sb.append(getStackId());
             sb.append(" sz=");
-            sb.append(mActivities.size());
+            sb.append(getChildCount());
             sb.append('}');
             return sb.toString();
         }
@@ -2495,8 +2495,8 @@ class TaskRecord extends ConfigurationContainer {
         final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, logLevel);
         proto.write(ID, mTaskId);
-        for (int i = mActivities.size() - 1; i >= 0; i--) {
-            ActivityRecord activity = mActivities.get(i);
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            ActivityRecord activity = getChildAt(i);
             activity.writeToProto(proto, ACTIVITIES);
         }
         proto.write(STACK_ID, mStack.mStackId);
@@ -2607,10 +2607,9 @@ class TaskRecord extends ConfigurationContainer {
             out.endTag(null, TAG_INTENT);
         }
 
-        final ArrayList<ActivityRecord> activities = mActivities;
-        final int numActivities = activities.size();
+        final int numActivities = getChildCount();
         for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
+            final ActivityRecord r = getChildAt(activityNdx);
             if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable() ||
                     ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
                             | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT) &&

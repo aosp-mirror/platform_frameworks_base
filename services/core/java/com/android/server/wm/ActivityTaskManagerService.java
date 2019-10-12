@@ -1981,7 +1981,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final TaskRecord task = r.getTaskRecord();
                 int index = task.mActivities.lastIndexOf(r);
                 if (index > 0) {
-                    ActivityRecord under = task.mActivities.get(index - 1);
+                    ActivityRecord under = task.getChildAt(index - 1);
                     under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
                 return r.setOccludesParent(false);

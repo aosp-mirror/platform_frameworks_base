@@ -1430,9 +1430,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 continue;
             }
 
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (r.isActivityTypeHome()
                         && ((userId == UserHandle.USER_ALL) || (r.mUserId == userId))) {
                     return r;

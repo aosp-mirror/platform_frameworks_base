@@ -983,7 +983,7 @@ class RootActivityContainer extends ConfigurationContainer
             stack.resize(task.getRequestedOverrideBounds(), null /* tempTaskBounds */,
                     null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS, !DEFER_RESUME);
 
-            if (task.mActivities.size() == 1) {
+            if (task.getChildCount() == 1) {
                 // Defer resume until below, and do not schedule PiP changes until we animate below
                 task.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE, DEFER_RESUME,
                         false /* schedulePictureInPictureModeChange */, reason);

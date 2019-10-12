@@ -488,7 +488,7 @@ class ActivityStack extends ConfigurationContainer {
     int numActivities() {
         int count = 0;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            count += mTaskHistory.get(taskNdx).mActivities.size();
+            count += mTaskHistory.get(taskNdx).getChildCount();
         }
         return count;
     }
@@ -1077,9 +1077,8 @@ class ActivityStack extends ConfigurationContainer {
     ActivityRecord topRunningNonOverlayTaskActivity() {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (!r.finishing && !r.mTaskOverlay) {
                     return r;
                 }
@@ -1091,9 +1090,8 @@ class ActivityStack extends ConfigurationContainer {
     ActivityRecord topRunningNonDelayedActivityLocked(ActivityRecord notTop) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = activities.get(activityNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (!r.finishing && !r.delayedResume && r != notTop && r.okToShowLocked()) {
                     return r;
                 }
@@ -1117,9 +1115,8 @@ class ActivityStack extends ConfigurationContainer {
             if (task.mTaskId == taskId) {
                 continue;
             }
-            ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int i = activities.size() - 1; i >= 0; --i) {
-                final ActivityRecord r = activities.get(i);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 // Note: the taskId check depends on real taskId fields being non-zero
                 if (!r.finishing && (token != r.appToken) && r.okToShowLocked()) {
                     return r;
@@ -1431,10 +1428,8 @@ class ActivityStack extends ConfigurationContainer {
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = activities.get(activityNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (!r.okToShowLocked()) {
                     continue;
                 }
@@ -1500,9 +1495,10 @@ class ActivityStack extends ConfigurationContainer {
     void awakeFromSleepingLocked() {
         // Ensure activities are no longer sleeping.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                activities.get(activityNdx).setSleeping(false);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
+                r.setSleeping(false);
             }
         }
         if (mPausingActivity != null) {
@@ -1516,9 +1512,9 @@ class ActivityStack extends ConfigurationContainer {
         final int userId = UserHandle.getUserId(aInfo.uid);
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final List<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord ar = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord ar = task.getChildAt(activityNdx);
 
                 if ((userId == ar.mUserId) && packageName.equals(ar.packageName)) {
                     ar.updateApplicationInfo(aInfo);
@@ -1594,9 +1590,9 @@ class ActivityStack extends ConfigurationContainer {
         // Make sure any paused or stopped but visible activities are now sleeping.
         // This ensures that the activity's onStop() is called.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (r.isState(STARTED, STOPPING, STOPPED, PAUSED, PAUSING)) {
                     r.setSleeping(true);
                 }
@@ -1880,9 +1876,8 @@ class ActivityStack extends ConfigurationContainer {
         }
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
 
                 if (r.finishing) {
                     // We don't factor in finishing activities when determining translucency since
@@ -2113,9 +2108,8 @@ class ActivityStack extends ConfigurationContainer {
                     && top != null && !top.mLaunchTaskBehind;
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
-                final ArrayList<ActivityRecord> activities = task.mActivities;
-                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    final ActivityRecord r = activities.get(activityNdx);
+                for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                    final ActivityRecord r = task.getChildAt(activityNdx);
                     final boolean isTop = r == top;
                     if (aboveTop && !isTop) {
                         continue;
@@ -2363,9 +2357,8 @@ class ActivityStack extends ConfigurationContainer {
     void clearOtherAppTimeTrackers(AppTimeTracker except) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if ( r.appTimeTracker != except) {
                     r.appTimeTracker = null;
                 }
@@ -2423,9 +2416,9 @@ class ActivityStack extends ConfigurationContainer {
         }
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (aboveTop) {
                     if (r == topActivity) {
                         aboveTop = false;
@@ -3210,14 +3203,13 @@ class ActivityStack extends ConfigurationContainer {
 
         // We only do this for activities that are not the root of the task (since if we finish
         // the root, we may no longer have the task!).
-        final ArrayList<ActivityRecord> activities = task.mActivities;
-        final int numActivities = activities.size();
+        final int numActivities = task.getChildCount();
         int lastActivityNdx = task.findRootIndex(true /* effectiveRoot */);
         if (lastActivityNdx == -1) {
             lastActivityNdx = 0;
         }
         for (int i = numActivities - 1; i > lastActivityNdx; --i) {
-            ActivityRecord target = activities.get(i);
+            ActivityRecord target = task.getChildAt(i);
             // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
             if (target.isRootOfTask()) break;
 
@@ -3257,7 +3249,7 @@ class ActivityStack extends ConfigurationContainer {
                 final TaskRecord targetTask;
                 final ActivityRecord bottom =
                         !mTaskHistory.isEmpty() && !mTaskHistory.get(0).mActivities.isEmpty() ?
-                                mTaskHistory.get(0).mActivities.get(0) : null;
+                                mTaskHistory.get(0).getChildAt(0) : null;
                 if (bottom != null && target.taskAffinity.equals(bottom.getTaskRecord().affinity)) {
                     // If the activity currently at the bottom has the
                     // same task affinity as the one we are moving,
@@ -3279,7 +3271,7 @@ class ActivityStack extends ConfigurationContainer {
                 boolean noOptions = canMoveOptions;
                 final int start = replyChainEnd < 0 ? i : replyChainEnd;
                 for (int srcPos = start; srcPos >= i; --srcPos) {
-                    final ActivityRecord p = activities.get(srcPos);
+                    final ActivityRecord p = task.getChildAt(srcPos);
                     if (p.finishing) {
                         continue;
                     }
@@ -3312,7 +3304,7 @@ class ActivityStack extends ConfigurationContainer {
                     // In this case, we want to finish this activity
                     // and everything above it, so be sneaky and pretend
                     // like these are all in the reply chain.
-                    end = activities.size() - 1;
+                    end = task.getChildCount() - 1;
                 } else if (replyChainEnd < 0) {
                     end = i;
                 } else {
@@ -3320,7 +3312,7 @@ class ActivityStack extends ConfigurationContainer {
                 }
                 boolean noOptions = canMoveOptions;
                 for (int srcPos = i; srcPos <= end; srcPos++) {
-                    ActivityRecord p = activities.get(srcPos);
+                    ActivityRecord p = task.getChildAt(srcPos);
                     if (p.finishing) {
                         continue;
                     }
@@ -3389,8 +3381,7 @@ class ActivityStack extends ConfigurationContainer {
         int replyChainEnd = -1;
         final String taskAffinity = task.affinity;
 
-        final ArrayList<ActivityRecord> activities = affinityTask.mActivities;
-        final int numActivities = activities.size();
+        final int numActivities = task.getChildCount();
 
         // Do not operate on or below the effective root Activity.
         int lastActivityNdx = affinityTask.findRootIndex(true /* effectiveRoot */);
@@ -3398,7 +3389,7 @@ class ActivityStack extends ConfigurationContainer {
             lastActivityNdx = 0;
         }
         for (int i = numActivities - 1; i > lastActivityNdx; --i) {
-            ActivityRecord target = activities.get(i);
+            ActivityRecord target = task.getChildAt(i);
             // TODO: Why is this needed? Looks like we're breaking the loop before we reach the root
             if (target.isRootOfTask()) break;
 
@@ -3435,7 +3426,7 @@ class ActivityStack extends ConfigurationContainer {
                     if (DEBUG_TASKS) Slog.v(TAG_TASKS,
                             "Finishing task at index " + start + " to " + i);
                     for (int srcPos = start; srcPos >= i; --srcPos) {
-                        final ActivityRecord p = activities.get(srcPos);
+                        final ActivityRecord p = task.getChildAt(srcPos);
                         if (p.finishing) {
                             continue;
                         }
@@ -3443,7 +3434,7 @@ class ActivityStack extends ConfigurationContainer {
                     }
                 } else {
                     if (taskInsertionPoint < 0) {
-                        taskInsertionPoint = task.mActivities.size();
+                        taskInsertionPoint = task.getChildCount();
 
                     }
 
@@ -3452,7 +3443,7 @@ class ActivityStack extends ConfigurationContainer {
                             "Reparenting from task=" + affinityTask + ":" + start + "-" + i
                             + " to task=" + task + ":" + taskInsertionPoint);
                     for (int srcPos = start; srcPos >= i; --srcPos) {
-                        final ActivityRecord p = activities.get(srcPos);
+                        final ActivityRecord p = task.getChildAt(srcPos);
                         p.reparent(task, taskInsertionPoint, "resetAffinityTaskIfNeededLocked");
 
                         if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
@@ -3589,9 +3580,9 @@ class ActivityStack extends ConfigurationContainer {
     /** Finish all activities that were started for result from the specified activity. */
     final void finishSubActivityLocked(ActivityRecord self, String resultWho, int requestCode) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (r.resultTo == self && r.requestCode == requestCode) {
                     if ((r.resultWho == null && resultWho == null) ||
                         (r.resultWho != null && r.resultWho.equals(resultWho))) {
@@ -3637,11 +3628,11 @@ class ActivityStack extends ConfigurationContainer {
                 if (taskNdx < 0) {
                     break;
                 }
-                activityNdx = mTaskHistory.get(taskNdx).mActivities.size() - 1;
+                activityNdx = mTaskHistory.get(taskNdx).getChildCount() - 1;
             } while (activityNdx < 0);
         }
         if (activityNdx >= 0) {
-            r = mTaskHistory.get(taskNdx).mActivities.get(activityNdx);
+            r = mTaskHistory.get(taskNdx).getChildAt(activityNdx);
             if (r.isState(STARTED, RESUMED, PAUSING, PAUSED)) {
                 if (!r.isActivityTypeHome() || mService.mHomeProcess != r.app) {
                     Slog.w(TAG, "  Force finishing activity "
@@ -3659,8 +3650,8 @@ class ActivityStack extends ConfigurationContainer {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             TaskRecord tr = mTaskHistory.get(taskNdx);
             if (tr.voiceSession != null && tr.voiceSession.asBinder() == sessionBinder) {
-                for (int activityNdx = tr.mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    ActivityRecord r = tr.mActivities.get(activityNdx);
+                for (int activityNdx = tr.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                    ActivityRecord r = tr.getChildAt(activityNdx);
                     if (!r.finishing) {
                         r.finishIfPossible("finish-voice", false /* oomAdj */);
                         didOne = true;
@@ -3668,8 +3659,8 @@ class ActivityStack extends ConfigurationContainer {
                 }
             } else {
                 // Check if any of the activities are using voice
-                for (int activityNdx = tr.mActivities.size() - 1; activityNdx >= 0; --activityNdx) {
-                    ActivityRecord r = tr.mActivities.get(activityNdx);
+                for (int activityNdx = tr.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                    ActivityRecord r = tr.getChildAt(activityNdx);
                     if (r.voiceSession != null && r.voiceSession.asBinder() == sessionBinder) {
                         // Inform of cancellation
                         r.clearVoiceSessionLocked();
@@ -3695,9 +3686,9 @@ class ActivityStack extends ConfigurationContainer {
     void finishAllActivitiesImmediately() {
         boolean noActivitiesInStack = true;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 noActivitiesInStack = false;
                 Slog.d(TAG, "finishAllActivitiesImmediatelyLocked: finishing " + r);
                 r.destroyIfPossible("finishAllActivitiesImmediatelyLocked");
@@ -3765,12 +3756,12 @@ class ActivityStack extends ConfigurationContainer {
             return false;
         }
         int finishTo = start - 1;
-        ActivityRecord parent = finishTo < 0 ? null : activities.get(finishTo);
+        ActivityRecord parent = finishTo < 0 ? null : task.getChildAt(finishTo);
         boolean foundParentInTask = false;
         final ComponentName dest = destIntent.getComponent();
         if (start > 0 && dest != null) {
             for (int i = finishTo; i >= 0; i--) {
-                ActivityRecord r = activities.get(i);
+                ActivityRecord r = task.getChildAt(i);
                 if (r.info.packageName.equals(dest.getPackageName()) &&
                         r.info.name.equals(dest.getClassName())) {
                     finishTo = i;
@@ -3931,9 +3922,9 @@ class ActivityStack extends ConfigurationContainer {
         boolean lastIsOpaque = false;
         boolean activityRemoved = false;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (r.finishing) {
                     continue;
                 }
@@ -3978,15 +3969,14 @@ class ActivityStack extends ConfigurationContainer {
             }
             if (DEBUG_RELEASE) Slog.d(TAG_RELEASE, "Looking for activities to release in " + task);
             int curNum = 0;
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int actNdx = 0; actNdx < activities.size(); actNdx++) {
-                final ActivityRecord activity = activities.get(actNdx);
+            for (int actNdx = 0; actNdx < task.getChildCount(); actNdx++) {
+                final ActivityRecord activity = task.getChildAt(actNdx);
                 if (activity.app == app && activity.isDestroyable()) {
                     if (DEBUG_RELEASE) Slog.v(TAG_RELEASE, "Destroying " + activity
                             + " in state " + activity.getState() + " resumed=" + mResumedActivity
                             + " pausing=" + mPausingActivity + " for reason " + reason);
                     activity.destroyImmediately(true /* removeFromApp */, reason);
-                    if (activities.get(actNdx) != activity) {
+                    if (task.getChildAt(actNdx) != activity) {
                         // Was removed from list, back up so we don't miss the next one.
                         actNdx--;
                     }
@@ -4170,8 +4160,8 @@ class ActivityStack extends ConfigurationContainer {
 
         if (timeTracker != null) {
             // The caller wants a time tracker associated with this task.
-            for (int i = tr.mActivities.size() - 1; i >= 0; i--) {
-                tr.mActivities.get(i).appTimeTracker = timeTracker;
+            for (int i = tr.getChildCount() - 1; i >= 0; i--) {
+                tr.getChildAt(i).appTimeTracker = timeTracker;
             }
         }
 
@@ -4425,9 +4415,9 @@ class ActivityStack extends ConfigurationContainer {
 
     boolean willActivityBeVisibleLocked(IBinder token) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (r.appToken == token) {
                     return true;
                 }
@@ -4447,9 +4437,9 @@ class ActivityStack extends ConfigurationContainer {
 
     void closeSystemDialogsLocked() {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if ((r.info.flags&ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
                     r.finishIfPossible("close-sys", true /* oomAdj */);
                 }
@@ -4556,10 +4546,10 @@ class ActivityStack extends ConfigurationContainer {
         final int top = mTaskHistory.size() - 1;
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Performing unhandledBack(): top activity at " + top);
         if (top >= 0) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(top).mActivities;
-            int activityTop = activities.size() - 1;
+            final TaskRecord task = mTaskHistory.get(top);
+            int activityTop = task.getChildCount() - 1;
             if (activityTop >= 0) {
-                activities.get(activityTop).finishIfPossible("unhandled-back", true /* oomAdj */);
+                task.getChildAt(activityTop).finishIfPossible("unhandled-back", true /* oomAdj */);
             }
         }
     }
@@ -4585,9 +4575,9 @@ class ActivityStack extends ConfigurationContainer {
 
     void handleAppCrash(WindowProcessController app) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = task.getChildAt(activityNdx);
                 if (r.app == app) {
                     Slog.w(TAG, "  Force finishing activity "
                             + r.intent.getComponent().flattenToShortString());
@@ -4705,9 +4695,9 @@ class ActivityStack extends ConfigurationContainer {
         // All activities that came from the package must be
         // restarted as if there was a config change.
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord a = activities.get(activityNdx);
+            final TaskRecord task = mTaskHistory.get(taskNdx);
+            for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord a = task.getChildAt(activityNdx);
                 if (a.info.packageName.equals(packageName)) {
                     a.forceNewConfig = true;
                     if (starting != null && a == starting && a.visible) {

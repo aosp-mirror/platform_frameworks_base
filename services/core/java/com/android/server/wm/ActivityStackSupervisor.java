@@ -824,7 +824,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         System.identityHashCode(r), task.mTaskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
-                    updateHomeProcess(task.mActivities.get(0).app);
+                    updateHomeProcess(task.getChildAt(0).app);
                 }
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
@@ -1899,9 +1899,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         task.createTask(onTop, true /* showForAllUsers */);
         if (DEBUG_RECENTS) Slog.v(TAG_RECENTS,
                 "Added restored task=" + task + " to stack=" + stack);
-        final ArrayList<ActivityRecord> activities = task.mActivities;
-        for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-            activities.get(activityNdx).setTask(task);
+        for (int activityNdx = task.getChildCount() - 1; activityNdx >= 0; --activityNdx) {
+            final ActivityRecord r = task.getChildAt(activityNdx);
+            r.setTask(task);
         }
         return true;
     }
@@ -2501,8 +2501,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.mActivities.get(i);
+        for (int i = task.getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.getChildAt(i);
             if (r.attachedToProcess()) {
                 mMultiWindowModeChangedActivities.add(r);
             }
@@ -2524,8 +2524,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     }
 
     void scheduleUpdatePictureInPictureModeIfNeeded(TaskRecord task, Rect targetStackBounds) {
-        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.mActivities.get(i);
+        for (int i = task.getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.getChildAt(i);
             if (r.attachedToProcess()) {
                 mPipModeChangedActivities.add(r);
                 // If we are scheduling pip change, then remove this activity from multi-window
@@ -2543,8 +2543,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void updatePictureInPictureMode(TaskRecord task, Rect targetStackBounds, boolean forceUpdate) {
         mHandler.removeMessages(REPORT_PIP_MODE_CHANGED_MSG);
-        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
-            final ActivityRecord r = task.mActivities.get(i);
+        for (int i = task.getChildCount() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.getChildAt(i);
             if (r.attachedToProcess()) {
                 r.updatePictureInPictureMode(targetStackBounds, forceUpdate);
             }
