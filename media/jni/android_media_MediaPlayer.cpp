@@ -1446,7 +1446,6 @@ extern int register_android_media_MediaHTTPConnection(JNIEnv *env);
 extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaMuxer(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
-extern int register_android_media_MediaScanner(JNIEnv *env);
 extern int register_android_media_MediaSync(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
@@ -1482,11 +1481,6 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_MediaRecorder(env) < 0) {
         ALOGE("ERROR: MediaRecorder native registration failed\n");
-        goto bail;
-    }
-
-    if (register_android_media_MediaScanner(env) < 0) {
-        ALOGE("ERROR: MediaScanner native registration failed\n");
         goto bail;
     }
 

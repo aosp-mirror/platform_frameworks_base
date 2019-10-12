@@ -846,7 +846,7 @@ public class RingtoneManager {
      * Adds an audio file to the list of ringtones.
      *
      * After making sure the given file is an audio file, copies the file to the ringtone storage,
-     * and asks the {@link android.media.MediaScanner} to scan that file. This call will block until
+     * and asks the system to scan that file. This call will block until
      * the scan is completed.
      *
      * The directory where the copied file is stored is the directory that matches the ringtone's
