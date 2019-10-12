@@ -53,7 +53,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
@@ -86,8 +85,6 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
     HeadsUpManager mHeadsUpManager;
     @Mock
     NotificationInterruptionStateProvider.HeadsUpSuppressor mHeadsUpSuppressor;
-    @Mock
-    BatteryController mBatteryController;
 
     private NotificationInterruptionStateProvider mNotifInterruptionStateProvider;
 
@@ -101,8 +98,7 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
                         mDreamManager,
                         mAmbientDisplayConfiguration,
                         mNotificationFilter,
-                        mStatusBarStateController,
-                        mBatteryController);
+                        mStatusBarStateController);
 
         mNotifInterruptionStateProvider.setUpWithPresenter(
                 mPresenter,
@@ -577,17 +573,17 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
     /**
      * Testable class overriding constructor.
      */
-    public static class TestableNotificationInterruptionStateProvider extends
+    public class TestableNotificationInterruptionStateProvider extends
             NotificationInterruptionStateProvider {
 
         TestableNotificationInterruptionStateProvider(Context context,
                 PowerManager powerManager, IDreamManager dreamManager,
                 AmbientDisplayConfiguration ambientDisplayConfiguration,
                 NotificationFilter notificationFilter,
-                StatusBarStateController statusBarStateController,
-                BatteryController batteryController) {
+                StatusBarStateController statusBarStateController) {
             super(context, powerManager, dreamManager, ambientDisplayConfiguration,
-                    notificationFilter, batteryController, statusBarStateController);
+                    notificationFilter,
+                    statusBarStateController);
         }
     }
 }
