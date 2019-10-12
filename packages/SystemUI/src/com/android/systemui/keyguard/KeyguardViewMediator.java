@@ -685,9 +685,8 @@ public class KeyguardViewMediator extends SystemUI {
             Context context,
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils) {
-        super();
+        super(context);
 
-        mContext = context;
         mFalsingManager = falsingManager;
 
         mLockPatternUtils = lockPatternUtils;
@@ -795,7 +794,6 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (this) {
             setupLocked();
         }
-        putComponent(KeyguardViewMediator.class, this);
     }
 
     /**

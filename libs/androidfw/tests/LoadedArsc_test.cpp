@@ -25,6 +25,7 @@
 #include "data/overlayable/R.h"
 #include "data/sparse/R.h"
 #include "data/styles/R.h"
+#include "data/system/R.h"
 
 namespace app = com::android::app;
 namespace basic = com::android::basic;
@@ -385,6 +386,39 @@ TEST(LoadedArscTest, GetOverlayableMap) {
   ASSERT_EQ(2, map.size());
   ASSERT_EQ(map.at("OverlayableResources1"), "overlay://theme");
   ASSERT_EQ(map.at("OverlayableResources2"), "overlay://com.android.overlayable");
+}
+
+TEST(LoadedArscTest, LoadCustomLoader) {
+  std::string contents;
+
+  std::unique_ptr<Asset>
+      asset = ApkAssets::CreateAssetFromFile(GetTestDataPath() + "/loader/resources.arsc");
+
+  MockLoadedIdmap loaded_idmap;
+  const StringPiece data(
+      reinterpret_cast<const char*>(asset->getBuffer(true /*wordAligned*/)),
+      asset->getLength());
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc =
+      LoadedArsc::Load(data, nullptr, false, false, true);
+  ASSERT_THAT(loaded_arsc, NotNull());
+
+  const LoadedPackage* package =
+      loaded_arsc->GetPackageById(get_package_id(android::R::string::cancel));
+  ASSERT_THAT(package, NotNull());
+  EXPECT_THAT(package->GetPackageName(), StrEq("android"));
+  EXPECT_THAT(package->GetPackageId(), Eq(0x01));
+
+  const uint8_t type_index = get_type_id(android::R::string::cancel) - 1;
+  const uint16_t entry_index = get_entry_id(android::R::string::cancel);
+
+  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
+  ASSERT_THAT(type_spec, NotNull());
+  ASSERT_THAT(type_spec->type_count, Ge(1u));
+
+  const ResTable_type* type = type_spec->types[0];
+  ASSERT_THAT(type, NotNull());
+  ASSERT_THAT(LoadedPackage::GetEntry(type, entry_index), NotNull());
 }
 
 // structs with size fields (like Res_value, ResTable_entry) should be

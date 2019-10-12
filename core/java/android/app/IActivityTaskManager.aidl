@@ -215,7 +215,6 @@ interface IActivityTaskManager {
 
     void releaseSomeActivities(in IApplicationThread app);
     Bitmap getTaskDescriptionIcon(in String filename, int userId);
-    void startInPlaceAnimationOnFrontMostApplication(in Bundle opts);
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);
     void setTaskResizeable(int taskId, int resizeableMode);

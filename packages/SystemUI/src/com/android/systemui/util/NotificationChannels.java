@@ -38,6 +38,10 @@ public class NotificationChannels extends SystemUI {
     public static String BATTERY     = "BAT";
     public static String HINTS       = "HNT";
 
+    public NotificationChannels(Context context) {
+        super(context);
+    }
+
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         final NotificationChannel batteryChannel = new NotificationChannel(BATTERY,

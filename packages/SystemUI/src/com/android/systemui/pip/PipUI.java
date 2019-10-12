@@ -19,6 +19,7 @@ package com.android.systemui.pip;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.UserHandle;
@@ -30,14 +31,23 @@ import com.android.systemui.statusbar.CommandQueue;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Controls the picture-in-picture window.
  */
+@Singleton
 public class PipUI extends SystemUI implements CommandQueue.Callbacks {
 
     private BasePipManager mPipManager;
 
     private boolean mSupportsPip;
+
+    @Inject
+    public PipUI(Context context) {
+        super(context);
+    }
 
     @Override
     public void start() {
@@ -59,7 +69,6 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
         mPipManager.initialize(mContext);
 
         getComponent(CommandQueue.class).addCallback(this);
-        putComponent(PipUI.class, this);
     }
 
     @Override

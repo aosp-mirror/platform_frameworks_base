@@ -527,8 +527,8 @@ class ActivityMetricsLogger {
     }
 
     private boolean hasVisibleNonFinishingActivity(TaskRecord t) {
-        for (int i = t.mActivities.size() - 1; i >= 0; --i) {
-            final ActivityRecord r = t.mActivities.get(i);
+        for (int i = t.getChildCount() - 1; i >= 0; --i) {
+            final ActivityRecord r = t.getChildAt(i);
             if (r.visible && !r.finishing) {
                 return true;
             }

@@ -1813,12 +1813,13 @@ public class WifiManager {
     }
 
     /**
-     * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name).
+     * Remove the Passpoint configuration identified by its FQDN (Fully Qualified Domain Name) added
+     * by the caller.
      *
-     * @param fqdn The FQDN of the Passpoint configuration to be removed
+     * @param fqdn The FQDN of the Passpoint configuration added by the caller to be removed
      * @throws IllegalArgumentException if no configuration is associated with the given FQDN or
      *                                  Passpoint is not enabled on the device.
-     * @deprecated This is no longer supported.
+     * @deprecated This will be non-functional in a future release.
      */
     @Deprecated
     @RequiresPermission(anyOf = {
@@ -1842,12 +1843,12 @@ public class WifiManager {
     }
 
     /**
-     * Return the list of installed Passpoint configurations.
+     * Return the list of installed Passpoint configurations added by the caller.
      *
      * An empty list will be returned when no configurations are installed.
      *
-     * @return A list of {@link PasspointConfiguration}
-     * @deprecated This is no longer supported.
+     * @return A list of {@link PasspointConfiguration} added by the caller
+     * @deprecated This will be non-functional in a future release.
      */
     @Deprecated
     @RequiresPermission(anyOf = {

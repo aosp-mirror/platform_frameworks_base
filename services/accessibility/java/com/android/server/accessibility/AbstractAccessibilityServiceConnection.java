@@ -91,7 +91,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     protected final Context mContext;
     protected final SystemSupport mSystemSupport;
     protected final WindowManagerInternal mWindowManagerService;
-    private final GlobalActionPerformer mGlobalActionPerformer;
+    private final SystemActionPerformer mSystemActionPerformer;
     private final AccessibilityWindowManager mA11yWindowManager;
     private final DisplayManager mDisplayManager;
     private final PowerManager mPowerManager;
@@ -213,7 +213,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
-            GlobalActionPerformer globalActionPerfomer,
+            SystemActionPerformer systemActionPerfomer,
             AccessibilityWindowManager a11yWindowManager) {
         mContext = context;
         mWindowManagerService = windowManagerInternal;
@@ -222,7 +222,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mAccessibilityServiceInfo = accessibilityServiceInfo;
         mLock = lock;
         mSecurityPolicy = securityPolicy;
-        mGlobalActionPerformer = globalActionPerfomer;
+        mSystemActionPerformer = systemActionPerfomer;
         mSystemSupport = systemSupport;
         mInvocationHandler = new InvocationHandler(mainHandler.getLooper());
         mA11yWindowManager = a11yWindowManager;
@@ -760,7 +760,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 return false;
             }
         }
-        return mGlobalActionPerformer.performGlobalAction(action);
+        return mSystemActionPerformer.performSystemAction(action);
     }
 
     @Override

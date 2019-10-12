@@ -19,6 +19,7 @@ package com.android.systemui;
 import android.app.Service;
 
 import com.android.systemui.doze.DozeService;
+import com.android.systemui.keyguard.KeyguardService;
 
 import dagger.Binds;
 import dagger.Module;
@@ -30,8 +31,15 @@ import dagger.multibindings.IntoMap;
  */
 @Module
 public abstract class ServiceBinder {
+    /** */
     @Binds
     @IntoMap
     @ClassKey(DozeService.class)
     public abstract Service bindDozeService(DozeService service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardService.class)
+    public abstract Service bindKeyguardService(KeyguardService service);
 }

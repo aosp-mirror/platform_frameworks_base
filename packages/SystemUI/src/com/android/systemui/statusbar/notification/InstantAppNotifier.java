@@ -31,6 +31,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.SynchronousUserSwitchObserver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -60,7 +61,7 @@ import com.android.systemui.util.NotificationChannels;
 
 import java.util.List;
 
-/** The clsss to show notification(s) of instant apps. This may show multiple notifications on
+/** The class to show notification(s) of instant apps. This may show multiple notifications on
  * splitted screen.
  */
 public class InstantAppNotifier extends SystemUI
@@ -74,7 +75,9 @@ public class InstantAppNotifier extends SystemUI
     private boolean mDockedStackExists;
     private KeyguardStateController mKeyguardStateController;
 
-    public InstantAppNotifier() {}
+    public InstantAppNotifier(Context context) {
+        super(context);
+    }
 
     @Override
     public void start() {

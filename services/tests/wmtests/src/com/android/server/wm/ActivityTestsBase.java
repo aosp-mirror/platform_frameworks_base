@@ -215,23 +215,6 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             return this;
         }
 
-        static Pair<Intent, ActivityInfo> createIntentAndActivityInfo() {
-            // TODO: Look into consolidating with dup. code in build() method below.
-            final int id = sCurrentActivityId++;
-            final ComponentName component = ComponentName.createRelative(
-                    DEFAULT_COMPONENT_PACKAGE_NAME, DEFAULT_COMPONENT_CLASS_NAME + id);
-
-            final Intent intent = new Intent();
-            intent.setComponent(component);
-
-            final ActivityInfo aInfo = new ActivityInfo();
-            aInfo.applicationInfo = new ApplicationInfo();
-            aInfo.applicationInfo.packageName = component.getPackageName();
-            aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-            aInfo.packageName = component.getPackageName();
-            return new Pair<>(intent, aInfo);
-        }
-
         ActivityRecord build() {
             if (mComponent == null) {
                 final int id = sCurrentActivityId++;
@@ -249,6 +232,7 @@ class ActivityTestsBase extends SystemServiceTestsBase {
             intent.setComponent(mComponent);
             final ActivityInfo aInfo = new ActivityInfo();
             aInfo.applicationInfo = new ApplicationInfo();
+            aInfo.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
             aInfo.packageName = mComponent.getPackageName();

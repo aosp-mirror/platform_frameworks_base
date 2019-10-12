@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -92,6 +93,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(StatusBarWindowController.class);
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
+        mDependency.injectMockDependency(NotificationMediaManager.class);
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectTestDependency(KeyguardStateController.class, mKeyguardStateController);
         when(mLockIconContainer.getParent()).thenReturn(mock(ViewGroup.class));

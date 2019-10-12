@@ -99,8 +99,8 @@ Result<Unit> Create(const std::vector<std::string>& args) {
     return Error("failed to load apk %s", overlay_apk_path.c_str());
   }
 
-  const auto idmap = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path,
-                                          *overlay_apk, fulfilled_policies, !ignore_overlayable);
+  const auto idmap =
+      Idmap::FromApkAssets(*target_apk, *overlay_apk, fulfilled_policies, !ignore_overlayable);
   if (!idmap) {
     return Error(idmap.GetError(), "failed to create idmap");
   }

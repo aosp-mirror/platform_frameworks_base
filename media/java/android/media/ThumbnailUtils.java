@@ -139,6 +139,12 @@ public class ThumbnailUtils {
 
     /**
      * Create a thumbnail for given audio file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with media hosted outside your app, consider using
+     * {@link ContentResolver#loadThumbnail(Uri, Size, CancellationSignal)}
+     * which enables remote providers to efficiently cache and invalidate
+     * thumbnails.
      *
      * @param file The audio file.
      * @param size The desired thumbnail size.
@@ -231,6 +237,12 @@ public class ThumbnailUtils {
 
     /**
      * Create a thumbnail for given image file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with media hosted outside your app, consider using
+     * {@link ContentResolver#loadThumbnail(Uri, Size, CancellationSignal)}
+     * which enables remote providers to efficiently cache and invalidate
+     * thumbnails.
      *
      * @param file The audio file.
      * @param size The desired thumbnail size.
@@ -334,6 +346,12 @@ public class ThumbnailUtils {
 
     /**
      * Create a thumbnail for given video file.
+     * <p>
+     * This method should only be used for files that you have direct access to;
+     * if you'd like to work with media hosted outside your app, consider using
+     * {@link ContentResolver#loadThumbnail(Uri, Size, CancellationSignal)}
+     * which enables remote providers to efficiently cache and invalidate
+     * thumbnails.
      *
      * @param file The video file.
      * @param size The desired thumbnail size.

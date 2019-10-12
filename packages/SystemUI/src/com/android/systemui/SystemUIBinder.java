@@ -17,10 +17,12 @@
 package com.android.systemui;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsModule;
 import com.android.systemui.util.leak.GarbageMonitor;
+import com.android.systemui.volume.VolumeUI;
 
 import dagger.Binds;
 import dagger.Module;
@@ -32,11 +34,24 @@ import dagger.multibindings.IntoMap;
  */
 @Module(includes = {RecentsModule.class})
 public abstract class SystemUIBinder {
+
+    /** Inject into GarbageMonitor.Service. */
+    @Binds
+    @IntoMap
+    @ClassKey(GarbageMonitor.Service.class)
+    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
+
     /** Inject into KeyguardViewMediator. */
     @Binds
     @IntoMap
     @ClassKey(KeyguardViewMediator.class)
     public abstract SystemUI bindKeyguardViewMediator(KeyguardViewMediator sysui);
+
+    /** Inject into PipUI. */
+    @Binds
+    @IntoMap
+    @ClassKey(PipUI.class)
+    public abstract SystemUI bindPipUI(PipUI sysui);
 
     /** Inject into PowerUI. */
     @Binds
@@ -50,9 +65,10 @@ public abstract class SystemUIBinder {
     @ClassKey(Recents.class)
     public abstract SystemUI bindRecents(Recents sysui);
 
-    /** Inject into GarbageMonitor.Service. */
+    /** Inject into VolumeUI. */
     @Binds
     @IntoMap
-    @ClassKey(GarbageMonitor.Service.class)
-    public abstract SystemUI bindGarbageMonitorService(GarbageMonitor.Service service);
+    @ClassKey(VolumeUI.class)
+    public abstract SystemUI bindVolumeUI(VolumeUI sysui);
+
 }

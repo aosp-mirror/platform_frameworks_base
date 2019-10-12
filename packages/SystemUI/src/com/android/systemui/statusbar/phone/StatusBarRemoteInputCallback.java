@@ -35,7 +35,6 @@ import android.view.View;
 import android.view.ViewParent;
 
 import com.android.systemui.ActivityIntentHelper;
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
@@ -58,19 +57,16 @@ import javax.inject.Singleton;
 public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         StatusBarStateController.StateListener {
 
-    private final KeyguardStateController mKeyguardStateController = Dependency.get(
-            KeyguardStateController.class);
-    private final SysuiStatusBarStateController mStatusBarStateController =
-            (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
-    private final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
+    private final KeyguardStateController mKeyguardStateController;
+    private final SysuiStatusBarStateController mStatusBarStateController;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final ActivityStarter mActivityStarter;
+    private final ShadeController mShadeController;
     private final Context mContext;
     private final ActivityIntentHelper mActivityIntentHelper;
     private final NotificationGroupManager mGroupManager;
     private View mPendingWorkRemoteInputView;
     private View mPendingRemoteInputView;
-    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
     private KeyguardManager mKeyguardManager;
     private final CommandQueue mCommandQueue;
     private int mDisabled2;
@@ -80,10 +76,19 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     /**
      */
     @Inject
-    public StatusBarRemoteInputCallback(Context context, NotificationGroupManager groupManager) {
+    public StatusBarRemoteInputCallback(Context context, NotificationGroupManager groupManager,
+            NotificationLockscreenUserManager notificationLockscreenUserManager,
+            KeyguardStateController keyguardStateController,
+            StatusBarStateController statusBarStateController,
+            ActivityStarter activityStarter, ShadeController shadeController) {
         mContext = context;
         mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
                 new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
+        mLockscreenUserManager = notificationLockscreenUserManager;
+        mKeyguardStateController = keyguardStateController;
+        mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
+        mShadeController = shadeController;
+        mActivityStarter = activityStarter;
         mStatusBarStateController.addCallback(this);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mCommandQueue = getComponent(context, CommandQueue.class);

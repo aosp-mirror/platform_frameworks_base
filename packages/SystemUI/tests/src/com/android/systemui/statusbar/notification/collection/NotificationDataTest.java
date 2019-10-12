@@ -74,6 +74,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationTestHelper;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
@@ -137,13 +138,14 @@ public class NotificationDataTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationGroupManager.class,
                 new NotificationGroupManager(mock(StatusBarStateController.class)));
         mDependency.injectMockDependency(ShadeController.class);
+        mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
         mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
         mNotificationData = new TestableNotificationData(
                 mock(NotificationSectionsFeatureManager.class));
         mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class), "");
-        mRow = new NotificationTestHelper(getContext()).createRow();
+        mRow = new NotificationTestHelper(getContext(), mDependency).createRow();
         Dependency.get(InitController.class).executePostInitTasks();
     }
 
@@ -159,10 +161,11 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testAllRelevantNotisTaggedWithAppOps() throws Exception {
         mNotificationData.add(mRow.getEntry());
-        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext()).createRow();
+        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext(), mDependency)
+                .createRow();
         mNotificationData.add(row2.getEntry());
         ExpandableNotificationRow diffPkg =
-                new NotificationTestHelper(getContext()).createRow("pkg", 4000,
+                new NotificationTestHelper(getContext(), mDependency).createRow("pkg", 4000,
                         Process.myUserHandle());
         mNotificationData.add(diffPkg.getEntry());
 
@@ -189,7 +192,8 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testAppOpsRemoval() throws Exception {
         mNotificationData.add(mRow.getEntry());
-        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext()).createRow();
+        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext(), mDependency)
+                .createRow();
         mNotificationData.add(row2.getEntry());
 
         ArraySet<Integer> expectedOps = new ArraySet<>();
@@ -221,7 +225,8 @@ public class NotificationDataTest extends SysuiTestCase {
     public void testGetNotificationsForCurrentUser_shouldFilterNonCurrentUserNotifications()
             throws Exception {
         mNotificationData.add(mRow.getEntry());
-        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext()).createRow();
+        ExpandableNotificationRow row2 = new NotificationTestHelper(getContext(), mDependency)
+                .createRow();
         mNotificationData.add(row2.getEntry());
 
         when(mEnvironment.isNotificationForCurrentProfiles(

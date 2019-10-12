@@ -559,6 +559,14 @@ public final class MediaCodecInfo {
         public static final String FEATURE_IntraRefresh = "intra-refresh";
 
         /**
+         * <b>decoder only</b>: codec supports low latency decoding.
+         * If supported, clients can enable the low latency mode for the decoder.
+         * When the mode is enabled, the decoder doesn't hold input and output data more than
+         * required by the codec standards.
+         */
+        public static final String FEATURE_LowLatency = "low-latency";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -587,6 +595,7 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_FrameParsing,     (1 << 4), false),
             new Feature(FEATURE_MultipleFrames,   (1 << 5), false),
             new Feature(FEATURE_DynamicTimestamp, (1 << 6), false),
+            new Feature(FEATURE_LowLatency,       (1 << 7), true),
         };
 
         private static final Feature[] encoderFeatures = {

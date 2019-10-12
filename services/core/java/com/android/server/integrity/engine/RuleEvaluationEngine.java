@@ -16,6 +16,10 @@
 
 package com.android.server.integrity.engine;
 
+import android.util.Slog;
+
+import com.android.server.integrity.model.AppInstallMetadata;
+import com.android.server.integrity.model.IntegrityCheckResult;
 import com.android.server.integrity.model.Rule;
 
 import java.util.ArrayList;
@@ -24,8 +28,8 @@ import java.util.List;
 /**
  * The engine used to evaluate rules against app installs.
  *
- * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation engine
- * to allow/block that install.
+ * <p>Every app install is evaluated against rules (pushed by the verifier) by the evaluation
+ * engine to allow/block that install.
  */
 public final class RuleEvaluationEngine {
     private static final String TAG = "RuleEvaluation";
@@ -33,15 +37,6 @@ public final class RuleEvaluationEngine {
     // The engine for loading rules, retrieving metadata for app installs, and evaluating app
     // installs against rules.
     private static RuleEvaluationEngine sRuleEvaluationEngine;
-
-    // The subset of rules loaded to be used to evaluate an app install request.
-    // TODO: Load rules relevant to app installs.
-    private List<Rule> mRules;
-
-    private RuleEvaluationEngine() {
-        // Initialize rules with the empty rule set.
-        mRules = new ArrayList<>();
-    }
 
     /**
      * Provide a singleton instance of the rule evaluation engine.
@@ -51,5 +46,34 @@ public final class RuleEvaluationEngine {
             return new RuleEvaluationEngine();
         }
         return sRuleEvaluationEngine;
+    }
+
+    /**
+     * Load, and match the list of rules against an app install metadata.
+     *
+     * @param appInstallMetadata Metadata of the app to be installed, and to evaluate the rules
+     *                           against.
+     * @return A rule matching the metadata. If there are multiple matching rules, returns any. If
+     * no rules are matching, returns {@link Rule#EMPTY}.
+     */
+    public IntegrityCheckResult evaluate(AppInstallMetadata appInstallMetadata) {
+        List<Rule> rules = loadRules(appInstallMetadata);
+        Rule matchedRule = RuleEvaluator.evaluateRules(rules, appInstallMetadata);
+        if (matchedRule == Rule.EMPTY) {
+            return IntegrityCheckResult.allow();
+        } else {
+            switch (matchedRule.getEffect()) {
+                case DENY:
+                    return IntegrityCheckResult.deny(matchedRule);
+                default:
+                    Slog.e(TAG, "Matched a non-DENY rule: " + matchedRule);
+                    return IntegrityCheckResult.allow();
+            }
+        }
+    }
+
+    private List<Rule> loadRules(AppInstallMetadata appInstallMetadata) {
+        // TODO: Load rules
+        return new ArrayList<>();
     }
 }

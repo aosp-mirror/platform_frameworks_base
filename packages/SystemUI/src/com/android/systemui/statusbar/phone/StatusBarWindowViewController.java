@@ -37,14 +37,17 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.PulseExpansionHandler;
+import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -88,6 +91,8 @@ public class StatusBarWindowViewController {
             ShadeController shadeController,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
+            KeyguardStateController keyguardStateController,
+            SysuiStatusBarStateController statusBarStateController,
             DozeLog dozeLog) {
         mView = view;
         mFalsingManager = falsingManager;
@@ -106,6 +111,8 @@ public class StatusBarWindowViewController {
                 shadeController,
                 notificationLockscreenUserManager,
                 notificationEntryManager,
+                keyguardStateController,
+                statusBarStateController,
                 dozeLog);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -472,6 +479,8 @@ public class StatusBarWindowViewController {
         private final FalsingManager mFalsingManager;
         private final PluginManager mPluginManager;
         private final TunerService mTunerService;
+        private final KeyguardStateController mKeyguardStateController;
+        private final SysuiStatusBarStateController mStatusBarStateController;
         private ShadeController mShadeController;
         private final NotificationLockscreenUserManager mNotificationLockScreenUserManager;
         private final NotificationEntryManager mNotificationEntryManager;
@@ -490,6 +499,8 @@ public class StatusBarWindowViewController {
                 TunerService tunerService,
                 NotificationLockscreenUserManager notificationLockscreenUserManager,
                 NotificationEntryManager notificationEntryManager,
+                KeyguardStateController keyguardStateController,
+                StatusBarStateController statusBarStateController,
                 DozeLog dozeLog) {
             mInjectionInflationController = injectionInflationController;
             mCoordinator = coordinator;
@@ -501,6 +512,8 @@ public class StatusBarWindowViewController {
             mTunerService = tunerService;
             mNotificationLockScreenUserManager = notificationLockscreenUserManager;
             mNotificationEntryManager = notificationEntryManager;
+            mKeyguardStateController = keyguardStateController;
+            mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
             mDozeLog = dozeLog;
         }
 
@@ -537,6 +550,8 @@ public class StatusBarWindowViewController {
                     mShadeController,
                     mNotificationLockScreenUserManager,
                     mNotificationEntryManager,
+                    mKeyguardStateController,
+                    mStatusBarStateController,
                     mDozeLog);
         }
     }

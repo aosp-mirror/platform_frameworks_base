@@ -36,6 +36,10 @@ import com.android.systemui.statusbar.CommandQueue;
  */
 public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
 
+    public TvStatusBar(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         putComponent(TvStatusBar.class, this);

@@ -295,6 +295,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system app predictor -->
         <flag name="appPredictor" value="0x200000" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the system telephony apps -->
+        <flag name="telephony" value="0x400000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -2840,6 +2843,9 @@
 
         <!-- The name of the overlayable whose resources will be overlaid. -->
         <attr name="targetName" />
+
+        <!-- The xml file that defines the target id to overlay value mappings. -->
+        <attr name="resourcesMap" format="reference" />
     </declare-styleable>
 
     <!-- Declaration of an {@link android.content.Intent} object in XML.  May

@@ -77,7 +77,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 .setContentTitle("Title")
                 .setContentText("Text")
                 .setStyle(new Notification.BigTextStyle().bigText("big text"));
-        ExpandableNotificationRow row = new NotificationTestHelper(mContext).createRow(
+        ExpandableNotificationRow row = new NotificationTestHelper(mContext, mDependency).createRow(
                 mBuilder.build());
         mRow = spy(row);
         mNotificationInflater = new NotificationContentInflater(mRow);

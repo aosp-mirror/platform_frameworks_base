@@ -197,12 +197,6 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_TASK_OPEN_BEHIND = 16;
 
     /**
-     * A window in a task is being animated in-place.
-     * @hide
-     */
-    int TRANSIT_TASK_IN_PLACE = 17;
-
-    /**
      * An activity is being relaunched (e.g. due to configuration change).
      * @hide
      */
@@ -286,7 +280,6 @@ public interface WindowManager extends ViewManager {
             TRANSIT_WALLPAPER_INTRA_OPEN,
             TRANSIT_WALLPAPER_INTRA_CLOSE,
             TRANSIT_TASK_OPEN_BEHIND,
-            TRANSIT_TASK_IN_PLACE,
             TRANSIT_ACTIVITY_RELAUNCH,
             TRANSIT_DOCK_TASK_FROM_RECENTS,
             TRANSIT_KEYGUARD_GOING_AWAY,
@@ -1832,6 +1825,13 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 0x01000000;
+
+        /**
+         * Flag to request creation of a BLAST (Buffer as LayerState) Layer.
+         * If not specified the client will receive a BufferQueue layer.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_USE_BLAST = 0x02000000;
 
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.

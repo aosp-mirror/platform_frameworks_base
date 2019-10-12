@@ -50,6 +50,7 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.IntentResolver;
 
 import java.io.PrintWriter;
@@ -386,8 +387,11 @@ public class ComponentResolver {
             addProvidersLocked(pkg, chatty);
             addServicesLocked(pkg, chatty);
         }
-        final String setupWizardPackage = sPackageManagerInternal.getKnownPackageName(
-                PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM);
+        // expect single setupwizard package
+        final String setupWizardPackage = ArrayUtils.firstOrNull(
+                sPackageManagerInternal.getKnownPackageNames(
+                        PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM));
+
         for (int i = newIntents.size() - 1; i >= 0; --i) {
             final PackageParser.ActivityIntentInfo intentInfo = newIntents.get(i);
             final PackageParser.Package disabledPkg = sPackageManagerInternal
@@ -421,8 +425,11 @@ public class ComponentResolver {
         final List<ActivityIntentInfo> protectedFilters = mProtectedFilters;
         mProtectedFilters = null;
 
-        final String setupWizardPackage = sPackageManagerInternal.getKnownPackageName(
-                PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM);
+        // expect single setupwizard package
+        final String setupWizardPackage = ArrayUtils.firstOrNull(
+                sPackageManagerInternal.getKnownPackageNames(
+                        PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM));
+
         if (DEBUG_FILTERS && setupWizardPackage == null) {
             Slog.i(TAG, "No setup wizard;"
                     + " All protected intents capped to priority 0");

@@ -19,6 +19,7 @@ package com.android.systemui.stackdivider;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.util.Log;
@@ -49,6 +50,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks {
     private boolean mAdjustedForIme = false;
     private boolean mHomeStackResizable = false;
     private ForcedResizableInfoActivityController mForcedResizableController;
+
+    public Divider(Context context) {
+        super(context);
+    }
 
     @Override
     public void start() {

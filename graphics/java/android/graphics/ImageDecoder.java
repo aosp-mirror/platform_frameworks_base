@@ -286,6 +286,9 @@ public final class ImageDecoder implements AutoCloseable {
 
                 return createFromStream(is, true, preferAnimation, this);
             }
+            if (assetFd == null) {
+                throw new FileNotFoundException(mUri.toString());
+            }
             return createFromAssetFileDescriptor(assetFd, preferAnimation, this);
         }
     }
@@ -341,6 +344,9 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private static ImageDecoder createFromAssetFileDescriptor(@NonNull AssetFileDescriptor assetFd,
             boolean preferAnimation, Source source) throws IOException {
+        if (assetFd == null) {
+            throw new FileNotFoundException();
+        }
         final FileDescriptor fd = assetFd.getFileDescriptor();
         final long offset = assetFd.getStartOffset();
 

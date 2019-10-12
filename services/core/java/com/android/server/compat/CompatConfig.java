@@ -25,6 +25,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.server.compat.config.Change;
 import com.android.server.compat.config.XmlParser;
 
@@ -185,6 +186,43 @@ public final class CompatConfig {
             }
         }
         return overrideExists;
+    }
+    /**
+     * Overrides the enabled state for a given change and app. This method is intended to be used
+     * *only* for debugging purposes.
+     *
+     * <p>Note, package overrides are not persistent and will be lost on system or runtime restart.
+     *
+     * @param overrides list of overrides to default changes config.
+     * @param packageName app for which the overrides will be applied.
+     */
+    public void addOverrides(
+            CompatibilityChangeConfig overrides, String packageName) {
+        synchronized (mChanges) {
+            for (Long changeId: overrides.enabledChanges()) {
+                addOverride(changeId, packageName, true);
+            }
+            for (Long changeId: overrides.disabledChanges()) {
+                addOverride(changeId, packageName, false);
+            }
+        }
+    }
+
+    /**
+     * Removes all overrides previously added via {@link #addOverride(long, String, boolean)} or
+     * {@link #addAppOverrides(CompatibilityChangeConfig, String)} for a certain package.
+     *
+     * <p>This restores the default behaviour for the given change and app, once any app
+     * processes have been restarted.
+     *
+     * @param packageName The package for which the overrides should be purged.
+     */
+    public void removePackageOverrides(String packageName) {
+        synchronized (mChanges) {
+            for (int i = 0; i < mChanges.size(); ++i) {
+                mChanges.valueAt(i).removePackageOverride(packageName);
+            }
+        }
     }
 
     /**

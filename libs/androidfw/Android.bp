@@ -166,7 +166,10 @@ cc_test {
             static_libs: common_test_libs + ["liblog", "libz"],
         },
     },
-    data: ["tests/data/**/*.apk"],
+    data: [
+      "tests/data/**/*.apk",
+      "tests/data/**/*.arsc",
+    ],
     test_suites: ["device-tests"],
 }
 

@@ -89,8 +89,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     private final ShadeController mShadeController = Dependency.get(ShadeController.class);
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
-    private final KeyguardStateController mKeyguardStateController = Dependency.get(
-            KeyguardStateController.class);
+    private final KeyguardStateController mKeyguardStateController;
     private final NotificationViewHierarchyManager mViewHierarchyManager =
             Dependency.get(NotificationViewHierarchyManager.class);
     private final NotificationLockscreenUserManager mLockscreenUserManager =
@@ -139,8 +138,10 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             ActivityLaunchAnimator activityLaunchAnimator,
             DynamicPrivacyController dynamicPrivacyController,
             NotificationAlertingManager notificationAlertingManager,
-            NotificationRowBinderImpl notificationRowBinder) {
+            NotificationRowBinderImpl notificationRowBinder,
+            KeyguardStateController keyguardStateController) {
         mContext = context;
+        mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
         mHeadsUpManager = headsUp;
         mDynamicPrivacyController = dynamicPrivacyController;

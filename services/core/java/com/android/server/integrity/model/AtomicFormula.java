@@ -20,6 +20,9 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
+import android.util.Slog;
+
+import java.util.Objects;
 
 /**
  * Represents a simple formula consisting of an app install metadata field and a value.
@@ -28,7 +31,9 @@ import android.annotation.Nullable;
  */
 public final class AtomicFormula extends Formula {
 
-    enum Key {
+    private static final String TAG = "AtomicFormula";
+
+    public enum Key {
         PACKAGE_NAME,
         APP_CERTIFICATE,
         INSTALLER_NAME,
@@ -37,7 +42,7 @@ public final class AtomicFormula extends Formula {
         PRE_INSTALLED
     }
 
-    enum Operator {
+    public enum Operator {
         EQ,
         LT,
         LE,
@@ -112,6 +117,100 @@ public final class AtomicFormula extends Formula {
         return mBoolValue;
     }
 
+    /**
+     * Get string representation of the value of the key in the formula.
+     *
+     * @return string representation of the value of the key.
+     */
+    public String getValue() {
+        if (mStringValue != null) {
+            return mStringValue;
+        }
+        if (mIntValue != null) {
+            return mIntValue.toString();
+        }
+        return mBoolValue.toString();
+    }
+
+    /**
+     * Check if the formula is true when substituting its {@link Key} with the string value.
+     *
+     * @param value String value to substitute the key with.
+     * @return {@code true} if the formula is true, and {@code false} otherwise.
+     */
+    public boolean isMatch(String value) {
+        switch (mOperator) {
+            case EQ:
+                return mStringValue.equals(value);
+        }
+        Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mStringValue));
+        return false;
+    }
+
+    /**
+     * Check if the formula is true when substituting its {@link Key} with the integer value.
+     *
+     * @param value Integer value to substitute the key with.
+     * @return {@code true} if the formula is true, and {@code false} otherwise.
+     */
+    public boolean isMatch(int value) {
+        switch (mOperator) {
+            case EQ:
+                return mIntValue == value;
+            case LE:
+                return mIntValue <= value;
+            case LT:
+                return mIntValue < value;
+            case GE:
+                return mIntValue >= value;
+            case GT:
+                return mIntValue > value;
+        }
+        Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mIntValue));
+        return false;
+    }
+
+    /**
+     * Check if the formula is true when substituting its {@link Key} with the boolean value.
+     *
+     * @param value Boolean value to substitute the key with.
+     * @return {@code true} if the formula is true, and {@code false} otherwise.
+     */
+    public boolean isMatch(boolean value) {
+        switch (mOperator) {
+            case EQ:
+                return mBoolValue == value;
+        }
+        Slog.i(TAG, String.format("Found operator %s for value %s", mOperator, mBoolValue));
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", mKey, mOperator, getValue());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AtomicFormula that = (AtomicFormula) o;
+        return mKey == that.mKey
+                && mOperator == that.mOperator
+                && Objects.equals(mStringValue, that.mStringValue)
+                && Objects.equals(mIntValue, that.mIntValue)
+                && Objects.equals(mBoolValue, that.mBoolValue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mKey, mOperator, mStringValue, mIntValue, mBoolValue);
+    }
+
     private void validateOperator(Key key, Operator operator) {
         boolean validOperator;
         switch (key) {
@@ -126,6 +225,7 @@ public final class AtomicFormula extends Formula {
                 validOperator = true;
                 break;
             default:
+                Slog.i(TAG, String.format("Found operator %s for key %s", operator, key));
                 validOperator = false;
         }
         if (!validOperator) {

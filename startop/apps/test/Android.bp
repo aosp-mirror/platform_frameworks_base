@@ -23,6 +23,7 @@ android_app {
         "src/ComplexLayoutInflationActivity.java",
         "src/FrameLayoutInflationActivity.java",
         "src/SystemServerBenchmarkActivity.java",
+        "src/SystemServerBenchmarks.java",
         "src/TextViewInflationActivity.java",
     ],
     sdk_version: "26", // Android O (8.0) and higher

@@ -620,6 +620,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Inject
     public StatusBar(
+            Context context,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -674,6 +675,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
             NotifLog notifLog) {
+        super(context);
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -959,7 +961,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager, mStatusBarWindow,
                             mStatusBarStateController, mKeyguardBypassController,
-                            mWakeUpCoordinator);
+                            mKeyguardStateController, mWakeUpCoordinator);
                     mHeadsUpAppearanceController.readFrom(oldController);
                     mStatusBarWindowViewController.setStatusBarView(mStatusBarView);
                     updateAreThereNotifications();
@@ -1171,7 +1173,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, mActivityLaunchAnimator, mDynamicPrivacyController,
-                mNotificationAlertingManager, rowBinder);
+                mNotificationAlertingManager, rowBinder, mKeyguardStateController);
 
         mNotificationListController =
                 new NotificationListController(
@@ -3600,7 +3602,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void updateKeyguardState() {
         mKeyguardStateController.notifyKeyguardState(mStatusBarKeyguardViewManager.isShowing(),
-                mKeyguardStateController.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
     }
 

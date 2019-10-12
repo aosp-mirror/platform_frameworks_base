@@ -75,6 +75,7 @@ import android.graphics.RenderNode;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
@@ -4496,8 +4497,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * When non-null and valid, this is expected to contain an up-to-date copy
      * of the background drawable. It is cleared on temporary detach, and reset
      * on cleanup.
+     * @hide
      */
-    private RenderNode mBackgroundRenderNode;
+    RenderNode mBackgroundRenderNode;
 
     @UnsupportedAppUsage
     private int mBackgroundResource;
@@ -5228,6 +5230,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sBrokenWindowBackground = targetSdkVersion < Build.VERSION_CODES.Q;
 
+            GradientDrawable.sWrapNegativeAngleMeasurements =
+                    targetSdkVersion >= Build.VERSION_CODES.Q;
             sCompatibilityDone = true;
         }
     }

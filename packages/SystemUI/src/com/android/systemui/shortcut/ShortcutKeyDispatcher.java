@@ -19,6 +19,7 @@ package com.android.systemui.shortcut;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.util.Log;
@@ -51,6 +52,10 @@ public class ShortcutKeyDispatcher extends SystemUI
 
     protected final long SC_DOCK_LEFT = META_MASK | KeyEvent.KEYCODE_LEFT_BRACKET;
     protected final long SC_DOCK_RIGHT = META_MASK | KeyEvent.KEYCODE_RIGHT_BRACKET;
+
+    public ShortcutKeyDispatcher(Context context) {
+        super(context);
+    }
 
     /**
      * Registers a shortcut key to window manager.

@@ -526,11 +526,13 @@ public class GarbageMonitor implements Dumpable {
     }
 
     /** */
+    @Singleton
     public static class Service extends SystemUI implements Dumpable {
         private final GarbageMonitor mGarbageMonitor;
 
         @Inject
-        public Service(GarbageMonitor garbageMonitor) {
+        public Service(Context context, GarbageMonitor garbageMonitor) {
+            super(context);
             mGarbageMonitor = garbageMonitor;
         }
 

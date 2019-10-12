@@ -31,6 +31,8 @@ import android.widget.FrameLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.assist.AssistManager;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 
 import org.junit.After;
@@ -51,6 +53,9 @@ public class NavigationBarInflaterViewTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
+        mDependency.injectMockDependency(AssistManager.class);
+        mDependency.injectMockDependency(OverviewProxyService.class);
+        mDependency.injectMockDependency(NavigationModeController.class);
 
         mNavBarInflaterView = spy(new NavigationBarInflaterView(mContext, null));
         doNothing().when(mNavBarInflaterView).createInflaters();

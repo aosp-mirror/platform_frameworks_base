@@ -45,6 +45,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.FrameInfo;
@@ -169,6 +170,8 @@ public final class ViewRootImpl implements ViewParent,
      * this, WindowCallbacks will not fire.
      */
     private static final boolean MT_RENDERER_AVAILABLE = true;
+
+    private static final boolean USE_BLAST_BUFFERQUEUE = false;
 
     /**
      * If set to 2, the view system will switch from using rectangles retrieved from window to
@@ -475,6 +478,9 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     public final Surface mSurface = new Surface();
     private final SurfaceControl mSurfaceControl = new SurfaceControl();
+    private SurfaceControl mBlastSurfaceControl;
+
+    private BLASTBufferQueue mBlastBufferQueue;
 
     /**
      * Transaction object that can be used to synchronize child SurfaceControl changes with
@@ -1282,6 +1288,11 @@ public final class ViewRootImpl implements ViewParent,
             }
             mWindowAttributes.privateFlags |= compatibleWindowFlag;
 
+            if (USE_BLAST_BUFFERQUEUE) {
+                mWindowAttributes.privateFlags =
+                    WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
+            }
+
             if (mWindowAttributes.preservePreviousSurfaceInsets) {
                 // Restore old surface insets.
                 mWindowAttributes.surfaceInsets.set(
@@ -1629,6 +1640,29 @@ public final class ViewRootImpl implements ViewParent,
         return mBoundsLayer;
     }
 
+    Surface getOrCreateBLASTSurface(int width, int height) {
+        if (mSurfaceControl == null || !mSurfaceControl.isValid()) {
+            return null;
+        }
+        if (mBlastSurfaceControl == null) {
+            mBlastSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+            .setParent(mSurfaceControl)
+            .setName("BLAST")
+            .setBLASTLayer()
+            .build();
+            mBlastBufferQueue = new BLASTBufferQueue(
+                mBlastSurfaceControl, width, height);
+
+        }
+        mBlastBufferQueue.update(mSurfaceControl, width, height);
+
+        mTransaction.show(mBlastSurfaceControl)
+            .reparent(mBlastSurfaceControl, mSurfaceControl)
+            .apply();
+
+        return mBlastBufferQueue.getSurface();
+    }
+    
     private void setBoundsLayerCrop() {
         // mWinFrame is already adjusted for surface insets. So offset it and use it as
         // the cropping bounds.
@@ -1658,6 +1692,13 @@ public final class ViewRootImpl implements ViewParent,
         }
         mSurface.release();
         mSurfaceControl.release();
+
+        if (mBlastBufferQueue != null) {
+            mTransaction.remove(mBlastSurfaceControl).apply();
+            mBlastSurfaceControl = null;
+            // We should probably add an explicit dispose.
+            mBlastBufferQueue = null;
+        }
     }
 
     /**
@@ -2413,10 +2454,9 @@ public final class ViewRootImpl implements ViewParent,
                     // will be transparent
                     if (mAttachInfo.mThreadedRenderer != null) {
                         try {
-                            hwInitialized = mAttachInfo.mThreadedRenderer.initialize(
-                                    mSurface);
+                            hwInitialized = mAttachInfo.mThreadedRenderer.initialize(mSurface);
                             if (hwInitialized && (host.mPrivateFlags
-                                    & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
+                                            & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
                                 // Don't pre-allocate if transparent regions
                                 // are requested as they may not be needed
                                 mAttachInfo.mThreadedRenderer.allocateBuffers();
@@ -7139,7 +7179,13 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingDisplayCutout,
                 mPendingMergedConfiguration, mSurfaceControl, mTempInsets);
         if (mSurfaceControl.isValid()) {
-            mSurface.copyFrom(mSurfaceControl);
+            if (USE_BLAST_BUFFERQUEUE == false) {
+                mSurface.copyFrom(mSurfaceControl);
+            } else { 
+                mSurface.transferFrom(getOrCreateBLASTSurface(
+                    (int) (mView.getMeasuredWidth() * appScale + 0.5f),
+                    (int) (mView.getMeasuredHeight() * appScale + 0.5f)));
+            }
         } else {
             destroySurface();
         }
@@ -7297,26 +7343,42 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public void dumpGfxInfo(int[] info) {
-        info[0] = info[1] = 0;
-        if (mView != null) {
-            getGfxInfo(mView, info);
+    static final class GfxInfo {
+        public int viewCount;
+        public long renderNodeMemoryUsage;
+        public long renderNodeMemoryAllocated;
+
+        void add(GfxInfo other) {
+            viewCount += other.viewCount;
+            renderNodeMemoryUsage += other.renderNodeMemoryUsage;
+            renderNodeMemoryAllocated += other.renderNodeMemoryAllocated;
         }
     }
 
-    private static void getGfxInfo(View view, int[] info) {
-        RenderNode renderNode = view.mRenderNode;
-        info[0]++;
-        if (renderNode != null) {
-            info[1] += (int) renderNode.computeApproximateMemoryUsage();
+    GfxInfo getGfxInfo() {
+        GfxInfo info = new GfxInfo();
+        if (mView != null) {
+            appendGfxInfo(mView, info);
         }
+        return info;
+    }
 
+    private static void computeRenderNodeUsage(RenderNode node, GfxInfo info) {
+        if (node == null) return;
+        info.renderNodeMemoryUsage += node.computeApproximateMemoryUsage();
+        info.renderNodeMemoryAllocated += node.computeApproximateMemoryAllocated();
+    }
+
+    private static void appendGfxInfo(View view, GfxInfo info) {
+        info.viewCount++;
+        computeRenderNodeUsage(view.mRenderNode, info);
+        computeRenderNodeUsage(view.mBackgroundRenderNode, info);
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
 
             int count = group.getChildCount();
             for (int i = 0; i < count; i++) {
-                getGfxInfo(group.getChildAt(i), info);
+                appendGfxInfo(group.getChildAt(i), info);
             }
         }
     }

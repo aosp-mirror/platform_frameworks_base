@@ -40,6 +40,12 @@ struct R {
       number = 0x01030000,  // sv
     };
   };
+
+  struct string {
+    enum : uint32_t {
+      cancel = 0x01040000,
+    };
+  };
 };
 
 }  // namespace android

@@ -19,15 +19,21 @@ package com.android.systemui.volume;
 import android.content.Context;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.VolumeDialog;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Allows for adding car specific dialog when the volume dialog is created.
  */
+@Singleton
 public class CarVolumeDialogComponent extends VolumeDialogComponent {
 
-    public CarVolumeDialogComponent(SystemUI sysui, Context context) {
-        super(sysui, context);
+    @Inject
+    public CarVolumeDialogComponent(Context context, KeyguardViewMediator keyguardViewMediator) {
+        super(context, keyguardViewMediator);
     }
 
     protected VolumeDialog createDefault() {

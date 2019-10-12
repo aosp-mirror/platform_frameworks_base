@@ -626,6 +626,10 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return mFullConfiguration.windowConfiguration.isAlwaysOnTop();
     }
 
+    boolean hasChild() {
+        return getChildCount() > 0;
+    }
+
     abstract protected int getChildCount();
 
     abstract protected E getChildAt(int index);

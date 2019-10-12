@@ -891,7 +891,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         activity.app = null;
         overlayActivity.app = null;
 
-        assertEquals(2, mTask.mActivities.size());
+        assertEquals(2, mTask.getChildCount());
 
         mStack.finishDisabledPackageActivitiesLocked(activity.packageName,
                 null  /* filterByClasses */, true /* doit */, true /* evenPersistent */,
@@ -900,7 +900,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Although the overlay activity is in another package, the non-overlay activities are
         // removed from the task. Since the overlay activity should be removed as well, the task
         // should be empty.
-        assertThat(mTask.mActivities).isEmpty();
+        assertFalse(mTask.hasChild());
         assertThat(mStack.getAllTasks()).isEmpty();
     }
 
@@ -918,11 +918,11 @@ public class ActivityStackTests extends ActivityTestsBase {
         // second activity will be immediately removed as it has no state.
         secondActivity.setSavedState(null /* savedState */);
 
-        assertEquals(2, mTask.mActivities.size());
+        assertEquals(2, mTask.getChildCount());
 
         mStack.handleAppDiedLocked(secondActivity.app);
 
-        assertThat(mTask.mActivities).isEmpty();
+        assertFalse(mTask.hasChild());
         assertThat(mStack.getAllTasks()).isEmpty();
     }
 
@@ -936,7 +936,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         mStack.handleAppDiedLocked(activity.app);
 
-        assertEquals(1, mTask.mActivities.size());
+        assertEquals(1, mTask.getChildCount());
         assertEquals(1, mStack.getAllTasks().size());
     }
 
@@ -950,7 +950,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         mStack.handleAppDiedLocked(activity.app);
 
-        assertThat(mTask.mActivities).isEmpty();
+        assertFalse(mTask.hasChild());
         assertThat(mStack.getAllTasks()).isEmpty();
     }
 
@@ -964,7 +964,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         mStack.handleAppDiedLocked(activity.app);
 
-        assertEquals(1, mTask.mActivities.size());
+        assertEquals(1, mTask.getChildCount());
         assertEquals(1, mStack.getAllTasks().size());
     }
 
@@ -978,7 +978,7 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         mStack.handleAppDiedLocked(activity.app);
 
-        assertThat(mTask.mActivities).isEmpty();
+        assertFalse(mTask.hasChild());
         assertThat(mStack.getAllTasks()).isEmpty();
     }
 

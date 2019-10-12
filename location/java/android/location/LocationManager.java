@@ -51,6 +51,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.util.Preconditions;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
@@ -1231,6 +1232,24 @@ public class LocationManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;
+        }
+    }
+
+    /**
+     * Returns a list of packages associated with the given provider,
+     * and an empty list if no package is associated with the provider.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    @Nullable
+    public List<String> getProviderPackages(@NonNull String provider) {
+        try {
+            return mService.getProviderPackages(provider);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return Collections.emptyList();
         }
     }
 

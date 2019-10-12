@@ -50,7 +50,7 @@ public class NotificationViewWrapperTest extends SysuiTestCase {
     public void setup() throws Exception {
         Assert.sMainLooper = TestableLooper.get(this).getLooper();
         mView = mock(View.class);
-        mRow = new NotificationTestHelper(getContext()).createRow();
+        mRow = new NotificationTestHelper(getContext(), mDependency).createRow();
         mNotificationViewWrapper = new TestableNotificationViewWrapper(mContext, mView, mRow);
     }
 

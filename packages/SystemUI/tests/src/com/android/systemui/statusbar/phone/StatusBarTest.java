@@ -286,6 +286,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .thenReturn(mStatusBarWindowViewController);
 
         mStatusBar = new StatusBar(
+                mContext,
                 mLightBarController,
                 mAutoHideController,
                 mKeyguardUpdateMonitor,
@@ -345,7 +346,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotifLog);
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
-        mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.mStatusBarKeyguardViewManager = mStatusBarKeyguardViewManager;
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;

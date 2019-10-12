@@ -23,8 +23,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.statusbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.volume.CarVolumeDialogComponent;
-import com.android.systemui.volume.VolumeDialogComponent;
 
 import javax.inject.Singleton;
 
@@ -55,10 +53,6 @@ public class CarSystemUIFactory extends SystemUIFactory {
     public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
             ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
         return new CarStatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
-    }
-
-    public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
-        return new CarVolumeDialogComponent(systemUi, context);
     }
 
     @Singleton

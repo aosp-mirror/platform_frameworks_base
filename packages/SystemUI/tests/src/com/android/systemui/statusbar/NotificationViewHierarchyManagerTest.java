@@ -103,7 +103,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
-        mHelper = new NotificationTestHelper(mContext);
+        mHelper = new NotificationTestHelper(mContext, mDependency);
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 

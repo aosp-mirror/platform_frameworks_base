@@ -248,6 +248,6 @@ iorapd_readahead_wait_until_finished() {
   local remote_path="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.pb")"
 
   # See 'read_ahead.cc' LOG(INFO).
-  local pattern="ReadAhead completed ($remote_path)"
+  local pattern="Description = $remote_path"
   logcat_wait_for_pattern "$timeout" "$timestamp" "$pattern"
 }

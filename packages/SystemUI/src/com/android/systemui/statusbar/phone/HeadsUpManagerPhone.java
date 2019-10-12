@@ -29,6 +29,7 @@ import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 
 import androidx.collection.ArraySet;
 
@@ -390,7 +391,12 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     }
 
     private void updateRegionForNotch(Region region) {
-        DisplayCutout cutout = mStatusBarWindowView.getRootWindowInsets().getDisplayCutout();
+        WindowInsets windowInsets = mStatusBarWindowView.getRootWindowInsets();
+        if (windowInsets == null) {
+            Log.w(TAG, "StatusBarWindowView is not attached.");
+            return;
+        }
+        DisplayCutout cutout = windowInsets.getDisplayCutout();
         if (cutout == null) {
             return;
         }

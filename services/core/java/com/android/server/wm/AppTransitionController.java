@@ -31,7 +31,6 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPE
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
-import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
@@ -179,8 +178,6 @@ public class AppTransitionController {
         final int layoutRedo;
         mService.mSurfaceAnimationRunner.deferStartingAnimations();
         try {
-            processApplicationsAnimatingInPlace(transit);
-
             handleClosingApps(transit, animLp, voiceInteraction);
             handleOpeningApps(transit, animLp, voiceInteraction);
             handleChangingApps(transit, animLp, voiceInteraction);
@@ -709,20 +706,5 @@ public class AppTransitionController {
             }
         }
         return topApp;
-    }
-
-    private void processApplicationsAnimatingInPlace(int transit) {
-        if (transit == TRANSIT_TASK_IN_PLACE) {
-            // Find the focused window
-            final WindowState win = mDisplayContent.findFocusedWindow();
-            if (win != null) {
-                final AppWindowToken wtoken = win.mAppToken;
-                ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now animating app in place %s", wtoken);
-                wtoken.cancelAnimation();
-                wtoken.applyAnimationLocked(null, transit, false, false);
-                wtoken.updateReportedVisibilityLocked();
-                wtoken.showAllWindowsLocked();
-            }
-        }
     }
 }

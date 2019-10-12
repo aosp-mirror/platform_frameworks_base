@@ -108,7 +108,7 @@ static struct arraymap_offsets_t {
   jmethodID put;
 } gArrayMapOffsets;
 
-jclass g_stringClass = nullptr;
+static jclass g_stringClass = nullptr;
 
 // ----------------------------------------------------------------------------
 
@@ -748,6 +748,41 @@ static jlong NativeOpenXmlAsset(JNIEnv* env, jobject /*clazz*/, jlong ptr, jint 
     jniThrowException(env, "java/io/FileNotFoundException", asset_path_utf8.c_str());
     return 0;
   }
+
+  // May be nullptr.
+  const DynamicRefTable* dynamic_ref_table = assetmanager->GetDynamicRefTableForCookie(cookie);
+
+  std::unique_ptr<ResXMLTree> xml_tree = util::make_unique<ResXMLTree>(dynamic_ref_table);
+  status_t err = xml_tree->setTo(asset->getBuffer(true), asset->getLength(), true);
+  asset.reset();
+
+  if (err != NO_ERROR) {
+    jniThrowException(env, "java/io/FileNotFoundException", "Corrupt XML binary file");
+    return 0;
+  }
+  return reinterpret_cast<jlong>(xml_tree.release());
+}
+
+static jlong NativeOpenXmlAssetFd(JNIEnv* env, jobject /*clazz*/, jlong ptr, int jcookie,
+                                  jobject file_descriptor) {
+  int fd = jniGetFDFromFileDescriptor(env, file_descriptor);
+  ATRACE_NAME(base::StringPrintf("AssetManager::OpenXmlAssetFd(%d)", fd).c_str());
+  if (fd < 0) {
+    jniThrowException(env, "java/lang/IllegalArgumentException", "Bad FileDescriptor");
+    return 0;
+  }
+
+  base::unique_fd dup_fd(::fcntl(fd, F_DUPFD_CLOEXEC, 0));
+  if (dup_fd < 0) {
+    jniThrowIOException(env, errno);
+    return 0;
+  }
+
+  std::unique_ptr<Asset>
+      asset(Asset::createFromFd(dup_fd.release(), nullptr, Asset::AccessMode::ACCESS_BUFFER));
+
+  ScopedLock<AssetManager2> assetmanager(AssetManagerFromLong(ptr));
+  ApkAssetsCookie cookie = JavaCookieToApkAssetsCookie(jcookie);
 
   // May be nullptr.
   const DynamicRefTable* dynamic_ref_table = assetmanager->GetDynamicRefTableForCookie(cookie);
@@ -1564,6 +1599,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeOpenNonAssetFd", "(JILjava/lang/String;[J)Landroid/os/ParcelFileDescriptor;",
      (void*)NativeOpenNonAssetFd},
     {"nativeOpenXmlAsset", "(JILjava/lang/String;)J", (void*)NativeOpenXmlAsset},
+    {"nativeOpenXmlAssetFd", "(JILjava/io/FileDescriptor;)J", (void*)NativeOpenXmlAssetFd},
 
     // AssetManager resource methods.
     {"nativeGetResourceValue", "(JISLandroid/util/TypedValue;Z)I", (void*)NativeGetResourceValue},

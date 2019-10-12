@@ -69,6 +69,7 @@ public:
 
     bool hasText() const { return mHasText; }
     size_t usedSize() const { return fUsed; }
+    size_t allocatedSize() const { return fReserved; }
 
 private:
     friend class RecordingCanvas;

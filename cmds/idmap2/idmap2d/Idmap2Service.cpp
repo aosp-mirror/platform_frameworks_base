@@ -137,8 +137,8 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to load apk " + overlay_apk_path);
   }
 
-  const auto idmap = Idmap::FromApkAssets(target_apk_path, *target_apk, overlay_apk_path,
-                                          *overlay_apk, policy_bitmask, enforce_overlayable);
+  const auto idmap =
+      Idmap::FromApkAssets(*target_apk, *overlay_apk, policy_bitmask, enforce_overlayable);
   if (!idmap) {
     return error(idmap.GetErrorMessage());
   }

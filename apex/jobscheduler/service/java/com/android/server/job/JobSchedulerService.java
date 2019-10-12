@@ -1025,17 +1025,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             // This may throw a SecurityException.
             jobStatus.prepareLocked();
 
-            if (work != null) {
-                // If work has been supplied, enqueue it into the new job.
-                jobStatus.enqueueWorkLocked(work);
-            }
-
             if (toCancel != null) {
                 // Implicitly replaces the existing job record with the new instance
                 cancelJobImplLocked(toCancel, jobStatus, "job rescheduled by app");
             } else {
                 startTrackingJobLocked(jobStatus, null);
             }
+
+            if (work != null) {
+                // If work has been supplied, enqueue it into the new job.
+                jobStatus.enqueueWorkLocked(work);
+            }
+
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     uId, null, jobStatus.getBatteryName(),
                     StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,

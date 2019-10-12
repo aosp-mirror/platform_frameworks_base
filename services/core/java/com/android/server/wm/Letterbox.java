@@ -20,7 +20,7 @@ import static android.view.SurfaceControl.HIDDEN;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.os.Binder;
+import android.os.IBinder;
 import android.os.Process;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
@@ -170,7 +170,7 @@ public class Letterbox {
         final InputWindowHandle mWindowHandle;
         final InputEventReceiver mInputEventReceiver;
         final WindowManagerService mWmService;
-        final Binder mToken = new Binder();
+        final IBinder mToken;
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
@@ -180,10 +180,11 @@ public class Letterbox {
             mClientChannel = channels[1];
             mInputEventReceiver = new SimpleInputReceiver(mClientChannel);
 
-            mWmService.mInputManager.registerInputChannel(mServerChannel, mToken);
+            mWmService.mInputManager.registerInputChannel(mServerChannel);
+            mToken = mServerChannel.getToken();
 
             mWindowHandle = new InputWindowHandle(null /* inputApplicationHandle */,
-                    null /* clientWindow */, win.getDisplayId());
+                    win.getDisplayId());
             mWindowHandle.name = name;
             mWindowHandle.token = mToken;
             mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE

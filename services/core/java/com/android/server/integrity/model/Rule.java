@@ -18,6 +18,8 @@ package com.android.server.integrity.model;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import java.util.Objects;
+
 /**
  * Represent rules to be used in the rule evaluation engine to match against app installs.
  *
@@ -60,5 +62,28 @@ public final class Rule {
 
     public Effect getEffect() {
         return mEffect;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Rule: %s, %s", mFormula, mEffect);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Rule that = (Rule) o;
+        return Objects.equals(mFormula, that.mFormula)
+                && Objects.equals(mEffect, that.mEffect);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mFormula, mEffect);
     }
 }

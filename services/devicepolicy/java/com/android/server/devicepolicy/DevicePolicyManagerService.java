@@ -2186,7 +2186,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         void postOnSystemServerInitThreadPool(Runnable runnable) {
-            SystemServerInitThreadPool.get().submit(runnable, LOG_TAG);
+            SystemServerInitThreadPool.submit(runnable, LOG_TAG);
         }
 
         public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {

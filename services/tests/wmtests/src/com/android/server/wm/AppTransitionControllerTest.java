@@ -101,10 +101,10 @@ public class AppTransitionControllerTest extends WindowTestsBase {
     @Test
     @FlakyTest(bugId = 131005232)
     public void testTransitWithinTask() {
-        final AppWindowToken opening = createAppWindowToken(mDisplayContent,
+        final ActivityRecord opening = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
         opening.setOccludesParent(false);
-        final AppWindowToken closing = createAppWindowToken(mDisplayContent,
+        final ActivityRecord closing = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD);
         closing.setOccludesParent(false);
         final Task task = opening.getTask();

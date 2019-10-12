@@ -211,6 +211,15 @@ public final class MediaFormat {
     public static final String KEY_MIME = "mime";
 
     /**
+     * An optional key describing the low latency decoding mode. This is an optional parameter
+     * that applies only to decoders. If enabled, the decoder doesn't hold input and output
+     * data more than required by the codec standards.
+     * The associated value is an integer (0 or 1): 1 when low-latency decoding is enabled,
+     * 0 otherwise. The default value is 0.
+     */
+    public static final String KEY_LOW_LATENCY = "low-latency";
+
+    /**
      * A key describing the language of the content, using either ISO 639-1
      * or 639-2/T codes.  The associated value is a string.
      */

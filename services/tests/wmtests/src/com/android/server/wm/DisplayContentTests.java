@@ -241,7 +241,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(dc);
+        final ActivityRecord token = WindowTestUtils.createTestAppWindowToken(dc);
         task.addChild(token, 0);
         assertEquals(dc, task.getDisplayContent());
         assertEquals(dc, token.getDisplayContent());
@@ -313,7 +313,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Add stack with activity.
         final TaskStack stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
-        final AppWindowToken token =
+        final ActivityRecord token =
                 WindowTestUtils.createTestAppWindowToken(dc0);
         task0.addChild(token, 0);
         dc0.configureDisplayPolicy();
@@ -321,7 +321,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final AppWindowToken token1 =
+        final ActivityRecord token1 =
                 WindowTestUtils.createTestAppWindowToken(dc0);
         task1.addChild(token1, 0);
         dc1.configureDisplayPolicy();
@@ -682,16 +682,15 @@ public class DisplayContentTests extends WindowTestsBase {
         // is appWin & null on the other display.
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         newDisplay.setInputMethodWindowLocked(null);
-        assertTrue("appWin should be IME target window",
-                appWin.equals(mDisplayContent.mInputMethodTarget));
+        assertEquals("appWin should be IME target window",
+                appWin, mDisplayContent.mInputMethodTarget);
         assertNull("newDisplay Ime target: ", newDisplay.mInputMethodTarget);
 
         // Switch input method window on new display & make sure the input method target also
         // switched as expected.
         newDisplay.setInputMethodWindowLocked(mImeWindow);
         mDisplayContent.setInputMethodWindowLocked(null);
-        assertTrue("appWin1 should be IME target window",
-                appWin1.equals(newDisplay.mInputMethodTarget));
+        assertEquals("appWin1 should be IME target window", appWin1, newDisplay.mInputMethodTarget);
         assertNull("default display Ime target: ", mDisplayContent.mInputMethodTarget);
     }
 

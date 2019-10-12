@@ -493,8 +493,12 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
     type_flags |= type_spec->GetFlagsForEntryIndex(local_entry_idx);
 
-    // If the package is an overlay, then even configurations that are the same MUST be chosen.
+
+    // If the package is an overlay or custom loader,
+    // then even configurations that are the same MUST be chosen.
     const bool package_is_overlay = loaded_package->IsOverlay();
+    const bool package_is_loader = loaded_package->IsCustomLoader();
+    const bool should_overlay = package_is_overlay || package_is_loader;
 
     if (use_fast_path) {
       const FilteredConfigGroup& filtered_group = loaded_package_impl.filtered_configs_[type_idx];
@@ -508,10 +512,28 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
         if (best_config == nullptr) {
           resolution_type = Resolution::Step::Type::INITIAL;
         } else if (this_config.isBetterThan(*best_config, desired_config)) {
-          resolution_type = Resolution::Step::Type::BETTER_MATCH;
-        } else if (package_is_overlay && this_config.compare(*best_config) == 0) {
-          resolution_type = Resolution::Step::Type::OVERLAID;
+          if (package_is_loader) {
+            resolution_type = Resolution::Step::Type::BETTER_MATCH_LOADER;
+          } else {
+            resolution_type = Resolution::Step::Type::BETTER_MATCH;
+          }
+        } else if (should_overlay && this_config.compare(*best_config) == 0) {
+          if (package_is_loader) {
+            resolution_type = Resolution::Step::Type::OVERLAID_LOADER;
+          } else if (package_is_overlay) {
+            resolution_type = Resolution::Step::Type::OVERLAID;
+          }
         } else {
+          if (resource_resolution_logging_enabled_) {
+            if (package_is_loader) {
+              resolution_type = Resolution::Step::Type::SKIPPED_LOADER;
+            } else {
+              resolution_type = Resolution::Step::Type::SKIPPED;
+            }
+            resolution_steps.push_back(Resolution::Step{resolution_type,
+                                                        this_config.toString(),
+                                                        &loaded_package->GetPackageName()});
+          }
           continue;
         }
 
@@ -520,6 +542,16 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
         const ResTable_type* type = filtered_group.types[i];
         const uint32_t offset = LoadedPackage::GetEntryOffset(type, local_entry_idx);
         if (offset == ResTable_type::NO_ENTRY) {
+          if (resource_resolution_logging_enabled_) {
+            if (package_is_loader) {
+              resolution_type = Resolution::Step::Type::NO_ENTRY_LOADER;
+            } else {
+              resolution_type = Resolution::Step::Type::NO_ENTRY;
+            }
+            resolution_steps.push_back(Resolution::Step{Resolution::Step::Type::NO_ENTRY,
+                                                        this_config.toString(),
+                                                        &loaded_package->GetPackageName()});
+          }
           continue;
         }
 
@@ -554,9 +586,17 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
           if (best_config == nullptr) {
             resolution_type = Resolution::Step::Type::INITIAL;
           } else if (this_config.isBetterThan(*best_config, desired_config)) {
-            resolution_type = Resolution::Step::Type::BETTER_MATCH;
-          } else if (package_is_overlay && this_config.compare(*best_config) == 0) {
-            resolution_type = Resolution::Step::Type::OVERLAID;
+            if (package_is_loader) {
+              resolution_type = Resolution::Step::Type::BETTER_MATCH_LOADER;
+            } else {
+              resolution_type = Resolution::Step::Type::BETTER_MATCH;
+            }
+          } else if (should_overlay && this_config.compare(*best_config) == 0) {
+            if (package_is_overlay) {
+              resolution_type = Resolution::Step::Type::OVERLAID;
+            } else if (package_is_loader) {
+              resolution_type = Resolution::Step::Type::OVERLAID_LOADER;
+            }
           } else {
             continue;
           }
@@ -678,8 +718,26 @@ std::string AssetManager2::GetLastResourceResolution() const {
       case Resolution::Step::Type::BETTER_MATCH:
         prefix = "Found better";
         break;
+      case Resolution::Step::Type::BETTER_MATCH_LOADER:
+        prefix = "Found better in loader";
+        break;
       case Resolution::Step::Type::OVERLAID:
         prefix = "Overlaid";
+        break;
+      case Resolution::Step::Type::OVERLAID_LOADER:
+        prefix = "Overlaid by loader";
+        break;
+      case Resolution::Step::Type::SKIPPED:
+        prefix = "Skipped";
+        break;
+      case Resolution::Step::Type::SKIPPED_LOADER:
+        prefix = "Skipped loader";
+        break;
+      case Resolution::Step::Type::NO_ENTRY:
+        prefix = "No entry";
+        break;
+      case Resolution::Step::Type::NO_ENTRY_LOADER:
+        prefix = "No entry for loader";
         break;
     }
 

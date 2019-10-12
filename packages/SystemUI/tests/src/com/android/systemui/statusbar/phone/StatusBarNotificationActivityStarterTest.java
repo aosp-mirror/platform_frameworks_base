@@ -140,7 +140,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         when(mContentIntent.getCreatorUserHandle()).thenReturn(UserHandle.of(1));
         when(mContentIntent.getIntent()).thenReturn(mContentIntentInner);
 
-        mNotificationTestHelper = new NotificationTestHelper(mContext);
+        mNotificationTestHelper = new NotificationTestHelper(mContext, mDependency);
 
         // Create standard notification with contentIntent
         mNotificationRow = mNotificationTestHelper.createRow();

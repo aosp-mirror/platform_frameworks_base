@@ -38,10 +38,8 @@ public final class InputWindowHandle {
     // The input application handle.
     public final InputApplicationHandle inputApplicationHandle;
 
-    // The client window.
-    public final IWindow clientWindow;
-
-    // The token associated with the window.
+    // The token associates input data with a window and its input channel. The client input
+    // channel and the server input channel will both contain this token.
     public IBinder token;
 
     // The window name.
@@ -120,10 +118,8 @@ public final class InputWindowHandle {
 
     private native void nativeDispose();
 
-    public InputWindowHandle(InputApplicationHandle inputApplicationHandle,
-            IWindow clientWindow, int displayId) {
+    public InputWindowHandle(InputApplicationHandle inputApplicationHandle, int displayId) {
         this.inputApplicationHandle = inputApplicationHandle;
-        this.clientWindow = clientWindow;
         this.displayId = displayId;
     }
 

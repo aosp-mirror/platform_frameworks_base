@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.Authenticator;
@@ -98,8 +99,7 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
         when(mDialog2.isAllowDeviceCredentials()).thenReturn(false);
 
-        mAuthController = new TestableAuthController(new MockInjector());
-        mAuthController.mContext = context;
+        mAuthController = new TestableAuthController(context, new MockInjector());
         mAuthController.mComponents = mContext.getComponents();
 
         mAuthController.start();
@@ -404,8 +404,8 @@ public class AuthControllerTest extends SysuiTestCase {
         private int mBuildCount = 0;
         private Bundle mLastBiometricPromptBundle;
 
-        public TestableAuthController(Injector injector) {
-            super(injector);
+        TestableAuthController(Context context, Injector injector) {
+            super(context, injector);
         }
 
         @Override

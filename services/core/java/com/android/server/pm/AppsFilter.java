@@ -41,7 +41,7 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.FgThread;
-import com.android.server.compat.PlatformCompat;
+import com.android.server.compat.CompatConfig;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -131,24 +131,22 @@ public class AppsFilter {
 
     private static class FeatureConfigImpl implements FeatureConfig {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
-        private final PackageManagerService.Injector mInjector;
         private volatile boolean mFeatureEnabled = true;
+        private CompatConfig mCompatibility;
 
         private FeatureConfigImpl(PackageManagerService.Injector injector) {
-            mInjector = injector;
+            mCompatibility = injector.getCompatibility();
         }
 
         @Override
         public void onSystemReady() {
             mFeatureEnabled = DeviceConfig.getBoolean(
-                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME,
-                    true);
+                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME, true);
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
                     properties -> {
                         synchronized (FeatureConfigImpl.this) {
-                            mFeatureEnabled = properties.getBoolean(
-                                    FILTERING_ENABLED_NAME, true);
+                            mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME, true);
                         }
                     });
         }
@@ -160,12 +158,7 @@ public class AppsFilter {
 
         @Override
         public boolean packageIsEnabled(PackageParser.Package pkg) {
-            final PlatformCompat compatibility = mInjector.getCompatibility();
-            if (compatibility == null) {
-                Slog.wtf(TAG, "PlatformCompat is null");
-                return mFeatureEnabled;
-            }
-            return compatibility.isChangeEnabled(
+            return mCompatibility.isChangeEnabled(
                     PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
         }
     }
@@ -202,19 +195,19 @@ public class AppsFilter {
             return false;
         }
         for (Intent intent : querying.mQueriesIntents) {
-            if (matches(intent, potentialTarget.providers, potentialTarget.activities,
-                    potentialTarget.services, potentialTarget.receivers)) {
+            if (matches(intent, potentialTarget)) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean matches(Intent intent,
-            ArrayList<PackageParser.Provider> providerList,
-            ArrayList<? extends Component<? extends IntentInfo>>... componentLists) {
-        for (int p = providerList.size() - 1; p >= 0; p--) {
-            PackageParser.Provider provider = providerList.get(p);
+    private static boolean matches(Intent intent, PackageParser.Package potentialTarget) {
+        for (int p = potentialTarget.providers.size() - 1; p >= 0; p--) {
+            PackageParser.Provider provider = potentialTarget.providers.get(p);
+            if (!provider.info.exported) {
+                continue;
+            }
             final ProviderInfo providerInfo = provider.info;
             final Uri data = intent.getData();
             if ("content".equalsIgnoreCase(intent.getScheme())
@@ -223,19 +216,44 @@ public class AppsFilter {
                 return true;
             }
         }
+        for (int s = potentialTarget.services.size() - 1; s >= 0; s--) {
+            PackageParser.Service service = potentialTarget.services.get(s);
+            if (!service.info.exported) {
+                continue;
+            }
+            if (matchesAnyFilter(intent, service)) {
+                return true;
+            }
+        }
+        for (int a = potentialTarget.activities.size() - 1; a >= 0; a--) {
+            PackageParser.Activity activity = potentialTarget.activities.get(a);
+            if (!activity.info.exported) {
+                continue;
+            }
+            if (matchesAnyFilter(intent, activity)) {
+                return true;
+            }
+        }
+        for (int r = potentialTarget.receivers.size() - 1; r >= 0; r--) {
+            PackageParser.Activity receiver = potentialTarget.receivers.get(r);
+            if (!receiver.info.exported) {
+                continue;
+            }
+            if (matchesAnyFilter(intent, receiver)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        for (int l = componentLists.length - 1; l >= 0; l--) {
-            ArrayList<? extends Component<? extends IntentInfo>> components = componentLists[l];
-            for (int c = components.size() - 1; c >= 0; c--) {
-                Component<? extends IntentInfo> component = components.get(c);
-                ArrayList<? extends IntentInfo> intents = component.intents;
-                for (int i = intents.size() - 1; i >= 0; i--) {
-                    IntentFilter intentFilter = intents.get(i);
-                    if (intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
-                            intent.getData(), intent.getCategories(), "AppsFilter") > 0) {
-                        return true;
-                    }
-                }
+    private static boolean matchesAnyFilter(
+            Intent intent, Component<? extends IntentInfo> component) {
+        ArrayList<? extends IntentInfo> intents = component.intents;
+        for (int i = intents.size() - 1; i >= 0; i--) {
+            IntentFilter intentFilter = intents.get(i);
+            if (intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
+                    intent.getData(), intent.getCategories(), "AppsFilter") > 0) {
+                return true;
             }
         }
         return false;

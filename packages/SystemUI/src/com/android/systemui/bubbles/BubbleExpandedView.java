@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_EXPANDED_VIEW;
@@ -128,8 +130,12 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
                             Log.d(TAG, "onActivityViewReady: calling startActivity, "
                                     + "bubble=" + getBubbleKey());
                         }
+                        Intent fillInIntent = new Intent();
+                        // Apply flags to make behaviour match documentLaunchMode=always.
+                        fillInIntent.addFlags(FLAG_ACTIVITY_NEW_DOCUMENT);
+                        fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
                         try {
-                            mActivityView.startActivity(mBubbleIntent, options);
+                            mActivityView.startActivity(mBubbleIntent, fillInIntent, options);
                         } catch (RuntimeException e) {
                             // If there's a runtime exception here then there's something
                             // wrong with the intent, we can't really recover / try to populate

@@ -156,7 +156,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Mock private AccessibilityWindowManager mMockA11yWindowManager;
     @Mock private AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock private WindowManagerInternal mMockWindowManagerInternal;
-    @Mock private GlobalActionPerformer mMockGlobalActionPerformer;
+    @Mock private SystemActionPerformer mMockSystemActionPerformer;
     @Mock private IBinder mMockService;
     @Mock private IAccessibilityServiceClient mMockServiceInterface;
     @Mock private KeyEventDispatcher mMockKeyEventDispatcher;
@@ -221,7 +221,7 @@ public class AbstractAccessibilityServiceConnectionTest {
 
         mServiceConnection = new TestAccessibilityServiceConnection(mMockContext, COMPONENT_NAME,
                 mSpyServiceInfo, SERVICE_ID, mHandler, new Object(), mMockSecurityPolicy,
-                mMockSystemSupport, mMockWindowManagerInternal, mMockGlobalActionPerformer,
+                mMockSystemSupport, mMockWindowManagerInternal, mMockSystemActionPerformer,
                 mMockA11yWindowManager);
         // Assume that the service is connected
         mServiceConnection.mService = mMockService;
@@ -489,7 +489,7 @@ public class AbstractAccessibilityServiceConnectionTest {
     @Test
     public void performGlobalAction() {
         mServiceConnection.performGlobalAction(GLOBAL_ACTION_HOME);
-        verify(mMockGlobalActionPerformer).performGlobalAction(GLOBAL_ACTION_HOME);
+        verify(mMockSystemActionPerformer).performSystemAction(GLOBAL_ACTION_HOME);
     }
 
     @Test
@@ -776,10 +776,10 @@ public class AbstractAccessibilityServiceConnectionTest {
                 AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
                 Object lock, AccessibilitySecurityPolicy securityPolicy,
                 SystemSupport systemSupport, WindowManagerInternal windowManagerInternal,
-                GlobalActionPerformer globalActionPerfomer,
+                SystemActionPerformer systemActionPerfomer,
                 AccessibilityWindowManager a11yWindowManager) {
             super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
-                    securityPolicy, systemSupport, windowManagerInternal, globalActionPerfomer,
+                    securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer,
                     a11yWindowManager);
             mResolvedUserId = USER_ID;
         }

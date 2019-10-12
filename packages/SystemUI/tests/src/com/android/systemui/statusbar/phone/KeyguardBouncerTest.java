@@ -100,6 +100,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(KeyguardUpdateMonitor.class, mKeyguardUpdateMonitor);
         mDependency.injectTestDependency(KeyguardSecurityModel.class, mKeyguardSecurityModel);
+        mDependency.injectMockDependency(KeyguardStateController.class);
         when(mKeyguardSecurityModel.getSecurityMode(anyInt()))
                 .thenReturn(KeyguardSecurityModel.SecurityMode.None);
         DejankUtils.setImmediate(true);

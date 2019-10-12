@@ -5152,7 +5152,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Let surface flinger to set the display ID of this input window handle because we don't
         // know which display the parent surface control is on.
         final InputWindowHandle portalWindowHandle = new InputWindowHandle(
-                null /* inputApplicationHandle */, null /* clientWindow */, INVALID_DISPLAY);
+                null /* inputApplicationHandle */, INVALID_DISPLAY);
         portalWindowHandle.name = name;
         portalWindowHandle.token = new Binder();
         portalWindowHandle.layoutParamsFlags =

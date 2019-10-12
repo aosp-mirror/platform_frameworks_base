@@ -152,10 +152,10 @@ public final class PermissionPolicyService extends SystemService {
             for (int i = 0; i < numDangerousPerms; i++) {
                 PermissionInfo perm = dangerousPerms.get(i);
 
-                if (perm.isHardRestricted() || perm.backgroundPermission != null) {
+                if (perm.isRuntime()) {
                     appOpsService.startWatchingMode(getSwitchOp(perm.name), null, appOpsListener);
-                } else if (perm.isSoftRestricted()) {
-                    appOpsService.startWatchingMode(getSwitchOp(perm.name), null, appOpsListener);
+                }
+                if (perm.isSoftRestricted()) {
                     SoftRestrictedPermissionPolicy policy =
                             SoftRestrictedPermissionPolicy.forPermission(null, null, null,
                                     perm.name);

@@ -48,7 +48,6 @@ import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.volume.VolumeDialogComponent;
 
 import java.util.function.Consumer;
 
@@ -167,10 +166,6 @@ public class SystemUIFactory {
     public KeyguardIndicationController createKeyguardIndicationController(Context context,
             ViewGroup indicationArea, LockIcon lockIcon) {
         return new KeyguardIndicationController(context, indicationArea, lockIcon);
-    }
-
-    public VolumeDialogComponent createVolumeDialogComponent(SystemUI systemUi, Context context) {
-        return new VolumeDialogComponent(systemUi, context);
     }
 
     @Module

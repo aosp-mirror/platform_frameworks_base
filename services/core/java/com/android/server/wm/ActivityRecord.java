@@ -1253,7 +1253,7 @@ final class ActivityRecord extends AppWindowToken {
 
     boolean setOccludesParent(boolean occludesParent) {
         final boolean changed = super.setOccludesParent(occludesParent);
-        if (changed) {
+        if (changed && task != null) {
             if (!occludesParent) {
                 getActivityStack().convertActivityToTranslucent(this);
             }
@@ -1577,12 +1577,12 @@ final class ActivityRecord extends AppWindowToken {
                     task.mTaskId, shortComponentName, reason);
             final ArrayList<ActivityRecord> activities = task.mActivities;
             final int index = activities.indexOf(this);
-            if (index < (activities.size() - 1)) {
+            if (index < (task.getChildCount() - 1)) {
                 if ((intent.getFlags() & Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
                     // If the caller asked that this activity (and all above it)
                     // be cleared when the task is reset, don't lose that information,
                     // but propagate it up to the next activity.
-                    final ActivityRecord next = activities.get(index + 1);
+                    final ActivityRecord next = task.getChildAt(index + 1);
                     next.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                 }
             }
@@ -2788,12 +2788,12 @@ final class ActivityRecord extends AppWindowToken {
         if (positionInTask == -1) {
             throw new IllegalStateException("Activity not found in its task");
         }
-        if (positionInTask == task.mActivities.size() - 1) {
+        if (positionInTask == task.getChildCount() - 1) {
             // It's the topmost activity in the task - should become resumed now
             return true;
         }
         // Check if activity above is finishing now and this one becomes the topmost in task.
-        final ActivityRecord activityAbove = task.mActivities.get(positionInTask + 1);
+        final ActivityRecord activityAbove = task.getChildAt(positionInTask + 1);
         if (activityAbove.finishing && results == null) {
             // We will only allow making active if activity above wasn't launched for result.
             // Otherwise it will cause this activity to resume before getting result.
@@ -2848,7 +2848,7 @@ final class ActivityRecord extends AppWindowToken {
         stopped = false;
 
         if (isActivityTypeHome()) {
-            mStackSupervisor.updateHomeProcess(task.mActivities.get(0).app);
+            mStackSupervisor.updateHomeProcess(task.getChildAt(0).app);
         }
 
         if (nowVisible) {
@@ -3542,7 +3542,7 @@ final class ActivityRecord extends AppWindowToken {
             super.resolveOverrideConfiguration(newParentConfiguration);
             // If the activity has override bounds, the relative configuration (e.g. screen size,
             // layout) needs to be resolved according to the bounds.
-            if (!matchParentBounds()) {
+            if (task != null && !matchParentBounds()) {
                 task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
                         newParentConfiguration);
             }

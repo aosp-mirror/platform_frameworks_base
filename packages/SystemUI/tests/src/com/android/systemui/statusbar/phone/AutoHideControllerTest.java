@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.IWindowManager;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -38,6 +39,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,7 +60,8 @@ public class AutoHideControllerTest extends SysuiTestCase {
     public void setUp() {
         mContext.putComponent(CommandQueue.class, mock(CommandQueue.class));
         mAutoHideController =
-                spy(new AutoHideController(mContext, Dependency.get(Dependency.MAIN_HANDLER)));
+                spy(new AutoHideController(mContext, Dependency.get(Dependency.MAIN_HANDLER),
+                        mock(NotificationRemoteInputManager.class), mock(IWindowManager.class)));
         mAutoHideController.mDisplayId = DEFAULT_DISPLAY;
         mAutoHideController.mSystemUiVisibility = View.VISIBLE;
     }

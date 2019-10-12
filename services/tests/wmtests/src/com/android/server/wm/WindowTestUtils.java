@@ -19,17 +19,11 @@ package com.android.server.wm;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.server.wm.ActivityTestsBase.ActivityBuilder.createIntentAndActivityInfo;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.app.ActivityManager;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.IBinder;
-import android.util.Pair;
 import android.view.IWindow;
 import android.view.WindowManager;
 
@@ -51,23 +45,22 @@ class WindowTestUtils {
     }
 
     /** Creates an {@link AppWindowToken} and adds it to the specified {@link Task}. */
-    static AppWindowToken createAppWindowTokenInTask(DisplayContent dc, Task task) {
-        final AppWindowToken newToken = createTestAppWindowToken(dc);
+    static ActivityRecord createAppWindowTokenInTask(DisplayContent dc, Task task) {
+        final ActivityRecord newToken = createTestAppWindowToken(dc);
         task.addChild(newToken, POSITION_TOP);
         return newToken;
     }
 
-    static AppWindowToken createTestAppWindowToken(DisplayContent dc) {
+    static ActivityRecord createTestAppWindowToken(DisplayContent dc) {
         synchronized (dc.mWmService.mGlobalLock) {
-            Pair<Intent, ActivityInfo> pair = createIntentAndActivityInfo();
-            final AppWindowToken token = new AppWindowToken(dc.mWmService,
-                    dc.mWmService.mAtmService, new ActivityRecord.Token(pair.first), pair.second,
-                    null, pair.first, dc);
-            token.setOccludesParent(true);
-            token.setHidden(false);
-            token.hiddenRequested = false;
-            spyOn(token);
-            return token;
+            final ActivityRecord r =
+                    new ActivityTestsBase.ActivityBuilder(dc.mWmService.mAtmService)
+                            .build();
+            r.onDisplayChanged(dc);
+            r.setOccludesParent(true);
+            r.setHidden(false);
+            r.hiddenRequested = false;
+            return r;
         }
     }
 

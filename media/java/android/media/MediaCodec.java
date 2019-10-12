@@ -649,7 +649,7 @@ import java.util.concurrent.locks.ReentrantLock;
  are not consumed by the Surface in a timely manner). Or it may be configured to not drop excessive
  frames. In the latter mode if the Surface is not consuming output frames fast enough, it will
  eventually block the decoder. Prior to {@link android.os.Build.VERSION_CODES#Q} the exact behavior
- was undefined, with the exception that View surfaces (SuerfaceView or TextureView) always dropped
+ was undefined, with the exception that View surfaces (SurfaceView or TextureView) always dropped
  excessive frames. Since {@link android.os.Build.VERSION_CODES#Q} the default behavior is to drop
  excessive frames. Applications can opt out of this behavior for non-View surfaces (such as
  ImageReader or SurfaceTexture) by targeting SDK {@link android.os.Build.VERSION_CODES#Q} and
@@ -3511,6 +3511,19 @@ final public class MediaCodec {
      * @see MediaFormat#KEY_HDR10_PLUS_INFO
      */
     public static final String PARAMETER_KEY_HDR10_PLUS_INFO = MediaFormat.KEY_HDR10_PLUS_INFO;
+
+    /**
+     * Enable/disable low latency decoding mode.
+     * When enabled, the decoder doesn't hold input and output data more than
+     * required by the codec standards.
+     * The value is an Integer object containing the value 1 to enable
+     * or the value 0 to disable.
+     *
+     * @see #setParameters(Bundle)
+     * @see MediaFormat#KEY_LOW_LATENCY
+     */
+    public static final String PARAMETER_KEY_LOW_LATENCY =
+            MediaFormat.KEY_LOW_LATENCY;
 
     /**
      * Communicate additional parameter changes to the component instance.

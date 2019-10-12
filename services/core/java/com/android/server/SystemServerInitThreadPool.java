@@ -67,23 +67,26 @@ public class SystemServerInitThreadPool {
     }
 
     /**
-     * Gets the singleton.
+     * Submits a task for execution.
      *
      * @throws IllegalStateException if it hasn't been started or has been shut down already.
      */
-    public static SystemServerInitThreadPool get() {
+    public static @NonNull Future<?> submit(@NonNull Runnable runnable,
+            @NonNull String description) {
+        Preconditions.checkNotNull(description, "description cannot be null");
+
+        SystemServerInitThreadPool instance;
         synchronized (LOCK) {
             Preconditions.checkState(sInstance != null, "Cannot get " + TAG
                     + " - it has been shut down");
-            return sInstance;
+            instance = sInstance;
         }
+
+        return instance.submitTask(runnable, description);
     }
 
-    /**
-     * Submits a task for execution.
-     */
-    public @NonNull Future<?> submit(@NonNull Runnable runnable, @NonNull String description) {
-        Preconditions.checkNotNull(description, "description cannot be null");
+    private @NonNull Future<?> submitTask(@NonNull Runnable runnable,
+            @NonNull String description) {
         synchronized (mPendingTasks) {
             Preconditions.checkState(!mShutDown, TAG + " already shut down");
             mPendingTasks.add(description);

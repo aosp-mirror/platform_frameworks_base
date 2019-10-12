@@ -132,12 +132,15 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         return result;
     }
 
+    public ScreenDecorations(Context context) {
+        super(context);
+    }
+
     @Override
     public void start() {
         mHandler = startHandlerThread();
         mHandler.post(this::startOnScreenDecorationsThread);
         setupStatusBarPaddingIfNeeded();
-        putComponent(ScreenDecorations.class, this);
     }
 
     @VisibleForTesting
