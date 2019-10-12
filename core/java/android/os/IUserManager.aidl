@@ -18,6 +18,7 @@
 package android.os;
 
 import android.os.Bundle;
+import android.os.IUserRestrictionsListener;
 import android.os.PersistableBundle;
 import android.os.UserManager;
 import android.content.pm.UserInfo;
@@ -75,6 +76,8 @@ interface IUserManager {
     boolean hasBaseUserRestriction(String restrictionKey, int userHandle);
     boolean hasUserRestriction(in String restrictionKey, int userHandle);
     boolean hasUserRestrictionOnAnyUser(in String restrictionKey);
+    boolean isSettingRestrictedForUser(in String setting, int userId, in String value, int callingUid);
+    void addUserRestrictionsListener(IUserRestrictionsListener listener);
     void setUserRestriction(String key, boolean value, int userHandle);
     void setApplicationRestrictions(in String packageName, in Bundle restrictions,
             int userHandle);

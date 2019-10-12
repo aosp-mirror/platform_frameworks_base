@@ -1986,6 +1986,38 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     *
+     * Checks whether changing the given setting to the given value is prohibited
+     * by the corresponding user restriction in the given user.
+     *
+     * May only be called by the OS itself.
+     *
+     * @return {@code true} if the change is prohibited, {@code false} if the change is allowed.
+     */
+    public boolean isSettingRestrictedForUser(String setting, @UserIdInt int userId,
+            String value, int callingUid) {
+        try {
+            return mService.isSettingRestrictedForUser(setting, userId, value, callingUid);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Register a binder callback for user restrictions changes.
+     * May only be called by the OS itself.
+     */
+    public void addUserRestrictionsListener(final IUserRestrictionsListener listener) {
+        try {
+            mService.addUserRestrictionsListener(listener);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the serial number for a user.  This is a device-unique
      * number assigned to that user; if the user is deleted and then a new
      * user created, the new users will not be given the same serial number.
