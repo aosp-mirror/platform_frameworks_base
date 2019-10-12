@@ -26,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
+import android.os.PowerManager;
 
 /**
  * An interface for running benchmarks and collecting results. Used so we can have both an
@@ -161,11 +162,18 @@ class SystemServerBenchmarks {
         });
 
         // We use PendingIntent.getCreatorPackage, since
-        //  getPackageIntentForSender is not public to us, but getCreatorPackage
-        //  is just a thin wrapper around it.
+        // getPackageIntentForSender is not public to us, but getCreatorPackage
+        // is just a thin wrapper around it.
         PendingIntent pi = PendingIntent.getActivity(parent, 0, new Intent(), 0);
         benchmarks.addBenchmark("getPackageIntentForSender", () -> {
             pi.getCreatorPackage();
+        });
+
+        PowerManager pwr = (PowerManager) parent.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pwr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "benchmark tag");
+        benchmarks.addBenchmark("WakeLock Acquire/Release", () -> {
+            wl.acquire();
+            wl.release();
         });
     }
 
