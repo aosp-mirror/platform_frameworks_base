@@ -3078,8 +3078,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 }
             }
         }
-        final String systemPackageName = mPackageManagerInt.getKnownPackageName(
-                PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM);
+        // expect single system package
+        String systemPackageName = ArrayUtils.firstOrNull(mPackageManagerInt.getKnownPackageNames(
+                PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM));
         final PackageParser.Package systemPackage =
                 mPackageManagerInt.getPackage(systemPackageName);
 
@@ -3195,18 +3196,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             //                  need a separate flag anymore. Hence we need to check which
             //                  permissions are needed by the permission controller
             if (!allowed && bp.isInstaller()
-                    && (pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                            PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM))
-                    || pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM),
+                    pkg.packageName) || ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER,
-                            UserHandle.USER_SYSTEM)))) {
+                    UserHandle.USER_SYSTEM), pkg.packageName)) {
                 // If this permission is to be granted to the system installer and
                 // this app is an installer, then it gets the permission.
                 allowed = true;
             }
             if (!allowed && bp.isVerifier()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                            PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM))) {
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
                 // If this permission is to be granted to the system verifier and
                 // this app is a verifier, then it gets the permission.
                 allowed = true;
@@ -3222,51 +3224,62 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 allowed = origPermissions.hasInstallPermission(perm);
             }
             if (!allowed && bp.isSetup()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                            PackageManagerInternal.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM))) {
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
                 // If this permission is to be granted to the system setup wizard and
                 // this app is a setup wizard, then it gets the permission.
                 allowed = true;
             }
             if (!allowed && bp.isSystemTextClassifier()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
-                            UserHandle.USER_SYSTEM))) {
+                    UserHandle.USER_SYSTEM), pkg.packageName)) {
                 // Special permissions for the system default text classifier.
                 allowed = true;
             }
             if (!allowed && bp.isConfigurator()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                    PackageManagerInternal.PACKAGE_CONFIGURATOR,
-                    UserHandle.USER_SYSTEM))) {
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_CONFIGURATOR,
+                    UserHandle.USER_SYSTEM), pkg.packageName)) {
                 // Special permissions for the device configurator.
                 allowed = true;
             }
             if (!allowed && bp.isWellbeing()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                    PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM))) {
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
                 // Special permission granted only to the OEM specified wellbeing app
                 allowed = true;
             }
             if (!allowed && bp.isDocumenter()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                            PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM))) {
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
                 // If this permission is to be granted to the documenter and
                 // this app is the documenter, then it gets the permission.
                 allowed = true;
             }
             if (!allowed && bp.isIncidentReportApprover()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER,
-                            UserHandle.USER_SYSTEM))) {
+                    UserHandle.USER_SYSTEM), pkg.packageName)) {
                 // If this permission is to be granted to the incident report approver and
                 // this app is the incident report approver, then it gets the permission.
                 allowed = true;
             }
             if (!allowed && bp.isAppPredictor()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                        PackageManagerInternal.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM))) {
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                            PackageManagerInternal.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
                 // Special permissions for the system app predictor.
+                allowed = true;
+            }
+            if (!allowed && bp.isTelephony()
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                        PackageManagerInternal.PACKAGE_TELEPHONY, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
+                // Special permissions for the system telephony apps.
                 allowed = true;
             }
         }
