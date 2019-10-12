@@ -42,6 +42,42 @@
 //  https://www.kernel.org/doc/Documentation/filesystems/fiemap.txt
 //  https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/tree/io/fiemap.c
 
+#ifndef F2FS_IOC_SET_PIN_FILE
+#ifndef F2FS_IOCTL_MAGIC
+#define F2FS_IOCTL_MAGIC 0xf5
+#endif
+#define F2FS_IOC_SET_PIN_FILE _IOW(F2FS_IOCTL_MAGIC, 13, __u32)
+#define F2FS_IOC_GET_PIN_FILE _IOR(F2FS_IOCTL_MAGIC, 14, __u32)
+#endif
+
+struct Args {
+  const char* block_device;
+  const char* file_name;
+  uint64_t byte_offset;
+  bool use_f2fs_pinning;
+};
+
+class ScopedF2fsFilePinning {
+ public:
+  explicit ScopedF2fsFilePinning(const char* file_path) {
+    fd_.reset(TEMP_FAILURE_RETRY(open(file_path, O_WRONLY | O_CLOEXEC, 0)));
+    if (fd_.get() == -1) {
+      perror("Failed to open");
+      return;
+    }
+    __u32 set = 1;
+    ioctl(fd_.get(), F2FS_IOC_SET_PIN_FILE, &set);
+  }
+
+  ~ScopedF2fsFilePinning() {
+    __u32 set = 0;
+    ioctl(fd_.get(), F2FS_IOC_SET_PIN_FILE, &set);
+  }
+
+ private:
+  android::base::unique_fd fd_;
+};
+
 ssize_t get_logical_block_size(const char* block_device) {
   android::base::unique_fd fd(open(block_device, O_RDONLY));
   if (fd.get() < 0) {
@@ -138,28 +174,51 @@ int write_block_to_device(const char* device_path, uint64_t block_offset,
   return 0;
 }
 
-int main(int argc, const char** argv) {
-  if (argc != 4) {
+std::unique_ptr<Args> parse_args(int argc, const char** argv) {
+  if (argc != 4 && argc != 5) {
     fprintf(stderr,
-            "Usage: %s block_dev filename byte_offset\n"
+            "Usage: %s [--use-f2fs-pinning] block_dev filename byte_offset\n"
             "\n"
             "This program bypasses filesystem and damages the specified byte\n"
             "at the physical position on <block_dev> corresponding to the\n"
             "logical byte location in <filename>.\n",
             argv[0]);
+    return nullptr;
+  }
+
+  auto args = std::make_unique<Args>();
+  const char** arg = &argv[1];
+  args->use_f2fs_pinning = strcmp(*arg, "--use-f2fs-pinning") == 0;
+  if (args->use_f2fs_pinning) {
+    ++arg;
+  }
+  args->block_device = *(arg++);
+  args->file_name = *(arg++);
+  args->byte_offset = strtoull(*arg, nullptr, 10);
+  if (args->byte_offset == ULLONG_MAX) {
+    perror("Invalid byte offset");
+    return nullptr;
+  }
+  return args;
+}
+
+int main(int argc, const char** argv) {
+  std::unique_ptr<Args> args = parse_args(argc, argv);
+  if (args == nullptr) {
     return -1;
   }
 
-  const char* block_device = argv[1];
-  const char* file_name = argv[2];
-  uint64_t byte_offset = strtoull(argv[3], nullptr, 10);
-
-  ssize_t block_size = get_logical_block_size(block_device);
+  ssize_t block_size = get_logical_block_size(args->block_device);
   if (block_size < 0) {
     return -1;
   }
 
-  int64_t physical_offset_signed = get_physical_offset(file_name, byte_offset);
+  std::unique_ptr<ScopedF2fsFilePinning> pinned_file;
+  if (args->use_f2fs_pinning) {
+    pinned_file = std::make_unique<ScopedF2fsFilePinning>(args->file_name);
+  }
+
+  int64_t physical_offset_signed = get_physical_offset(args->file_name, args->byte_offset);
   if (physical_offset_signed < 0) {
     return -1;
   }
@@ -172,7 +231,7 @@ int main(int argc, const char** argv) {
   std::unique_ptr<char> buf(static_cast<char*>(
       aligned_alloc(block_size /* alignment */, block_size /* size */)));
 
-  if (read_block_from_device(block_device, physical_block_offset, block_size,
+  if (read_block_from_device(args->block_device, physical_block_offset, block_size,
                              buf.get()) < 0) {
     return -1;
   }
@@ -180,7 +239,7 @@ int main(int argc, const char** argv) {
   printf("before: %hhx\n", *p);
   *p ^= 0xff;
   printf("after: %hhx\n", *p);
-  if (write_block_to_device(block_device, physical_block_offset, block_size,
+  if (write_block_to_device(args->block_device, physical_block_offset, block_size,
                             buf.get()) < 0) {
     return -1;
   }
