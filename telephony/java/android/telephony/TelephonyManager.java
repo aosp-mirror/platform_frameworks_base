@@ -200,11 +200,28 @@ public class TelephonyManager {
     /** @hide */
     static public final int OTASP_SIM_UNPROVISIONED = 5;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in ePDG links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_EPDG = 1;
 
-    /** @hide */
+    /**
+     * Used in carrier Wi-Fi for IMSI + IMPI encryption, this indicates a public key that's
+     * available for use in WLAN links.
+     *
+     * @hide
+     */
+    @SystemApi
     static public final int KEY_TYPE_WLAN = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"KEY_TYPE_"}, value = {KEY_TYPE_EPDG, KEY_TYPE_WLAN})
+    public @interface KeyType {}
 
     /**
      * No Single Radio Voice Call Continuity (SRVCC) handover is active.
@@ -3810,25 +3827,27 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns Carrier specific information that will be used to encrypt the IMSI and IMPI.
-     * This includes the public key and the key identifier. For multi-sim devices, if no subId
-     * has been specified, we will return the value for the dafault data sim.
-     * Return null if it is unavailable.
+     * Returns carrier specific information that will be used to encrypt the IMSI and IMPI,
+     * including the public key and the key identifier; or {@code null} if not available.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * @param keyType whether the key is being used for wlan or epdg. Valid key types are
-     *        {@link TelephonyManager#KEY_TYPE_EPDG} or
-     *        {@link TelephonyManager#KEY_TYPE_WLAN}.
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
+     *
+     * @param keyType whether the key is being used for EPDG or WLAN. Valid values are
+     *        {@link #KEY_TYPE_EPDG} or {@link #KEY_TYPE_WLAN}.
      * @return ImsiEncryptionInfo Carrier specific information that will be used to encrypt the
      *         IMSI and IMPI. This includes the public key and the key identifier. This information
-     *         will be stored in the device keystore. The system will return a null when no key was
-     *         found, and the carrier does not require a key. The system will throw
-     *         IllegalArgumentException when an invalid key is sent or when key is required but
+     *         will be stored in the device keystore. {@code null} will be returned when no key is
+     *         found, and the carrier does not require a key.
+     * @throws IllegalArgumentException when an invalid key is found or when key is required but
      *         not found.
      * @hide
      */
-    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int keyType) {
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    @Nullable
+    public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(@KeyType int keyType) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
@@ -3856,14 +3875,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Resets the Carrier Keys in the database. This involves 2 steps:
+     * Resets the carrier keys used to encrypt the IMSI and IMPI.
+     * <p>
+     * This involves 2 steps:
      *  1. Delete the keys from the database.
      *  2. Send an intent to download new Certificates.
      * <p>
-     * Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * For a multi-sim device, the dafault data sim is used if not specified.
+     * <p>
+     * Requires Permission: MODIFY_PHONE_STATE.
+     *
+     * @see #getCarrierInfoForImsiEncryption
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
     public void resetCarrierKeysForImsiEncryption() {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -3890,7 +3916,7 @@ public class TelephonyManager {
      * @return true if the digit at position keyType is 1, else false.
      * @hide
      */
-    private static boolean isKeyEnabled(int keyAvailability, int keyType) {
+    private static boolean isKeyEnabled(int keyAvailability, @KeyType int keyType) {
         int returnValue = (keyAvailability >> (keyType - 1)) & 1;
         return (returnValue == 1) ? true : false;
     }
@@ -3899,7 +3925,7 @@ public class TelephonyManager {
      * If Carrier requires Imsi to be encrypted.
      * @hide
      */
-    private boolean isImsiEncryptionRequired(int subId, int keyType) {
+    private boolean isImsiEncryptionRequired(int subId, @KeyType int keyType) {
         CarrierConfigManager configManager =
                 (CarrierConfigManager) mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (configManager == null) {
