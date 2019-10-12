@@ -1253,7 +1253,7 @@ final class ActivityRecord extends AppWindowToken {
 
     boolean setOccludesParent(boolean occludesParent) {
         final boolean changed = super.setOccludesParent(occludesParent);
-        if (changed) {
+        if (changed && task != null) {
             if (!occludesParent) {
                 getActivityStack().convertActivityToTranslucent(this);
             }
@@ -3542,7 +3542,7 @@ final class ActivityRecord extends AppWindowToken {
             super.resolveOverrideConfiguration(newParentConfiguration);
             // If the activity has override bounds, the relative configuration (e.g. screen size,
             // layout) needs to be resolved according to the bounds.
-            if (!matchParentBounds()) {
+            if (task != null && !matchParentBounds()) {
                 task.computeConfigResourceOverrides(getResolvedOverrideConfiguration(),
                         newParentConfiguration);
             }

@@ -68,13 +68,13 @@ public class TaskStackTests extends WindowTestsBase {
     public void testClosingAppDifferentStackOrientation() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        AppWindowToken appWindowToken1 =
+        ActivityRecord appWindowToken1 =
                 WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         task1.addChild(appWindowToken1, 0);
         appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        AppWindowToken appWindowToken2 =
+        ActivityRecord appWindowToken2 =
                 WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         task2.addChild(appWindowToken2, 0);
         appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
@@ -88,13 +88,13 @@ public class TaskStackTests extends WindowTestsBase {
     public void testMoveTaskToBackDifferentStackOrientation() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
-        AppWindowToken appWindowToken1 =
+        ActivityRecord appWindowToken1 =
                 WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         task1.addChild(appWindowToken1, 0);
         appWindowToken1.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
-        AppWindowToken appWindowToken2 =
+        ActivityRecord appWindowToken2 =
                 WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         task2.addChild(appWindowToken2, 0);
         appWindowToken2.setOrientation(SCREEN_ORIENTATION_PORTRAIT);

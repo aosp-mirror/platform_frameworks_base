@@ -57,7 +57,7 @@ public class AppChangeTransitionTests extends WindowTestsBase {
 
     private TaskStack mStack;
     private Task mTask;
-    private AppWindowToken mToken;
+    private ActivityRecord mToken;
 
     public void setUpOnDisplay(DisplayContent dc) {
         mStack = createTaskStackOnDisplay(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, dc);

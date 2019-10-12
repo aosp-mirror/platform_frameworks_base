@@ -204,15 +204,15 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
     }
 
-    AppWindowToken createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
+    ActivityRecord createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
         return createTestAppWindowToken(dc, windowingMode, activityType);
     }
 
-    AppWindowToken createTestAppWindowToken(DisplayContent dc, int
+    ActivityRecord createTestAppWindowToken(DisplayContent dc, int
             windowingMode, int activityType) {
         final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final AppWindowToken appWindowToken =
+        final ActivityRecord appWindowToken =
                 WindowTestUtils.createTestAppWindowToken(dc);
         task.addChild(appWindowToken, 0);
         return appWindowToken;
@@ -244,7 +244,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     WindowState createAppWindow(Task task, int type, String name) {
         synchronized (mWm.mGlobalLock) {
-            final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+            final ActivityRecord token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
             task.addChild(token, 0);
             return createWindow(null, type, token, name);
         }
