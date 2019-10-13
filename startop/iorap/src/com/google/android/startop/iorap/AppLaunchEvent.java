@@ -33,6 +33,7 @@ import com.android.server.wm.ActivityMetricsLaunchObserver.Temperature;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -162,8 +163,8 @@ public abstract class AppLaunchEvent implements Parcelable {
         @Override
         public boolean equals(Object other) {
             if (other instanceof BaseWithActivityRecordData) {
-                return activityRecordSnapshot.equals(
-                        ((BaseWithActivityRecordData)other).activityRecordSnapshot) &&
+                return (Arrays.equals(activityRecordSnapshot,
+                      ((BaseWithActivityRecordData)other).activityRecordSnapshot)) &&
                         super.equals(other);
             }
             return false;
@@ -171,7 +172,7 @@ public abstract class AppLaunchEvent implements Parcelable {
 
         @Override
         protected String toStringBody() {
-            return ", " + activityRecordSnapshot.toString();
+            return ", " + new String(activityRecordSnapshot);
         }
 
         @Override
@@ -208,7 +209,7 @@ public abstract class AppLaunchEvent implements Parcelable {
 
         @Override
         protected String toStringBody() {
-            return ", temperature=" + Integer.toString(temperature);
+            return super.toStringBody() + ", temperature=" + Integer.toString(temperature);
         }
 
         @Override
@@ -235,7 +236,7 @@ public abstract class AppLaunchEvent implements Parcelable {
 
         @Override
         public boolean equals(Object other) {
-            if (other instanceof ActivityLaunched) {
+            if (other instanceof ActivityLaunchFinished) {
                 return timestampNs == ((ActivityLaunchFinished)other).timestampNs &&
                        super.equals(other);
             }
@@ -244,7 +245,7 @@ public abstract class AppLaunchEvent implements Parcelable {
 
         @Override
         protected String toStringBody() {
-            return ", timestampNs=" + Long.toString(timestampNs);
+            return super.toStringBody() + ", timestampNs=" + Long.toString(timestampNs);
         }
 
         @Override
@@ -271,8 +272,8 @@ public abstract class AppLaunchEvent implements Parcelable {
         @Override
         public boolean equals(Object other) {
             if (other instanceof ActivityLaunchCancelled) {
-                return Objects.equals(activityRecordSnapshot,
-                        ((ActivityLaunchCancelled)other).activityRecordSnapshot) &&
+                return Arrays.equals(activityRecordSnapshot,
+                    ((ActivityLaunchCancelled)other).activityRecordSnapshot) &&
                         super.equals(other);
             }
             return false;
@@ -280,7 +281,7 @@ public abstract class AppLaunchEvent implements Parcelable {
 
         @Override
         protected String toStringBody() {
-            return ", " + activityRecordSnapshot.toString();
+            return super.toStringBody() + ", " + new String(activityRecordSnapshot);
         }
 
         @Override
@@ -325,7 +326,7 @@ public abstract class AppLaunchEvent implements Parcelable {
 
         @Override
         protected String toStringBody() {
-            return ", timestampNs=" + Long.toString(timestampNs);
+            return super.toStringBody() + ", timestampNs=" + Long.toString(timestampNs);
         }
 
         @Override
