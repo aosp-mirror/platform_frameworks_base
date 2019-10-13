@@ -246,12 +246,13 @@ class ActivityStack extends ConfigurationContainer {
         ActivityDisplay current = getParent();
         if (current != parent) {
             mDisplayId = parent.mDisplayId;
-            onParentChanged();
+            onParentChanged(parent, current);
         }
     }
 
     @Override
-    protected void onParentChanged() {
+    protected void onParentChanged(
+            ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         ActivityDisplay display = getParent();
         if (display != null) {
             // Rotations are relative to the display. This means if there are 2 displays rotated
@@ -264,7 +265,7 @@ class ActivityStack extends ConfigurationContainer {
             getConfiguration().windowConfiguration.setRotation(
                     display.getWindowConfiguration().getRotation());
         }
-        super.onParentChanged();
+        super.onParentChanged(newParent, oldParent);
         if (display != null && inSplitScreenPrimaryWindowingMode()) {
             // If we created a docked stack we want to resize it so it resizes all other stacks
             // in the system.
@@ -915,12 +916,13 @@ class ActivityStack extends ConfigurationContainer {
 
     /** Removes the stack completely. Also calls WindowManager to do the same on its side. */
     void remove() {
+        final ActivityDisplay oldDisplay = getDisplay();
         removeFromDisplay();
         if (mTaskStack != null) {
             mTaskStack.removeIfPossible();
             mTaskStack = null;
         }
-        onParentChanged();
+        onParentChanged(null, oldDisplay);
     }
 
     ActivityDisplay getDisplay() {
@@ -4719,11 +4721,12 @@ class ActivityStack extends ConfigurationContainer {
      *             {@link #REMOVE_TASK_MODE_MOVING}, {@link #REMOVE_TASK_MODE_MOVING_TO_TOP}.
      */
     void removeTask(TaskRecord task, String reason, int mode) {
-        final boolean removed = mTaskHistory.remove(task);
-
-        if (removed) {
-            EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, task.mTaskId, getStackId());
+        if (!mTaskHistory.remove(task)) {
+            // Not really in this stack anymore...
+            return;
         }
+
+        EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, task.mTaskId, getStackId());
 
         removeActivitiesFromLRUList(task);
         updateTaskMovement(task, true);
@@ -4758,7 +4761,7 @@ class ActivityStack extends ConfigurationContainer {
         if (inPinnedWindowingMode()) {
             mService.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
-        if (display.isSingleTaskInstance()) {
+        if (display != null && display.isSingleTaskInstance()) {
             mService.notifySingleTaskDisplayEmpty(display.mDisplayId);
         }
     }

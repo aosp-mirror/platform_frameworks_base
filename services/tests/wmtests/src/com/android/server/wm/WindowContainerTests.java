@@ -772,7 +772,7 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         @Override
-        void onParentChanged() {
+        void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
             mOnParentChangedCalled = true;
         }
 

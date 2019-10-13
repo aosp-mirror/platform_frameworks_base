@@ -1864,9 +1864,8 @@ class ActivityStarter {
                     mLaunchFlags);
 
             // The above code can remove {@code reusedActivity} from the task, leading to the
-            // the {@code ActivityRecord} removing its reference to the {@code TaskRecord}. The
-            // task reference is needed in the call below to
-            // {@link setTargetStackAndMoveToFrontIfNeeded}.
+            // {@code ActivityRecord} removing its reference to the {@code TaskRecord}. The task
+            // reference is needed in the call below to {@link setTargetStackAndMoveToFrontIfNeeded}
             if (targetTaskTop.getTaskRecord() == null) {
                 targetTaskTop.setTask(targetTask);
             }
@@ -2450,7 +2449,7 @@ class ActivityStarter {
 
     private void addOrReparentStartingActivity(TaskRecord parent, String reason) {
         if (mStartActivity.getTaskRecord() == null || mStartActivity.getTaskRecord() == parent) {
-            parent.addActivityToTop(mStartActivity);
+            parent.addChild(mStartActivity);
         } else {
             mStartActivity.reparent(parent, parent.getChildCount() /* top */, reason);
         }

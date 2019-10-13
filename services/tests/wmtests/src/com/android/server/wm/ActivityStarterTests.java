@@ -710,7 +710,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         if (startedActivity != null && startedActivity.getTaskRecord() != null) {
             // Remove the activity so it doesn't interfere with with subsequent activity launch
             // tests from this method.
-            startedActivity.getTaskRecord().removeActivity(startedActivity);
+            startedActivity.getTaskRecord().mTask.removeChild(startedActivity);
         }
     }
 

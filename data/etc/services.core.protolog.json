@@ -817,12 +817,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
-    "-415912575": {
-      "message": "setTask: %s at top.",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-415865166": {
       "message": "findFocusedWindow: Found new focus @ %s",
       "level": "VERBOSE",
@@ -882,6 +876,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-303497363": {
+      "message": "reparent: moving activity=%s to task=%d at %d",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "-253016819": {
       "message": "applyAnimation: transition animation is disabled or skipped. atoken=%s",
@@ -1237,12 +1237,6 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "393054329": {
-      "message": "reParentWindowToken: removing window token=%s from task=%s",
-      "level": "INFO",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "399841913": {
       "message": "SURFACE RECOVER DESTROY: %s",
       "level": "INFO",
@@ -1350,6 +1344,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/Session.java"
+    },
+    "609651209": {
+      "message": "addChild: %s at top.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/TaskRecord.java"
     },
     "620368427": {
       "message": "******* TELLING SURFACE FLINGER WE ARE BOOTED!",
@@ -1998,12 +1998,6 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowAnimator.java"
-    },
-    "1995048598": {
-      "message": "reparent: moving app token=%s to task=%d at %d",
-      "level": "INFO",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "2016061474": {
       "message": "Prepare app transition: transit=%s %s alwaysKeepCurrent=%b displayId=%d Callers=%s",
