@@ -31,7 +31,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.R;
 
-import org.lineageos.internal.logging.LineageMetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import javax.inject.Inject;
 
@@ -134,7 +134,7 @@ public class CaffeineTile extends QSTileImpl<BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return LineageMetricsLogger.TILE_CAFFEINE;
+        return MetricsEvent.MOONSHINE;
     }
 
     private void startCountDown(long duration) {
