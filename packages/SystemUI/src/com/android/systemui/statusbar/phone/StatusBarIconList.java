@@ -32,7 +32,7 @@ public class StatusBarIconList {
 
     public StatusBarIconList(String[] slots) {
         final int N = slots.length;
-        for (int i=0; i < N; i++) {
+        for (int i=1; i < N; i++) {
             mSlots.add(new Slot(slots[i], null));
         }
     }
