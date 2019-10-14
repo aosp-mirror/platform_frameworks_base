@@ -2584,15 +2584,15 @@ message MetricsEvent {
 
     // ACTION: Logged when trampoline activity finishes.
     // TIME: Indicates total time taken by trampoline activity to finish in MS.
-    PROVISIONING_TRAMPOLINE_ACTIVITY_TIME_MS = 523;
+    PROVISIONING_TRAMPOLINE_ACTIVITY_TIME_MS = 523 [deprecated=true];
 
     // ACTION: Logged when encryption activity finishes.
     // TIME: Indicates total time taken by post encryption activity to finish in MS.
-    PROVISIONING_POST_ENCRYPTION_ACTIVITY_TIME_MS = 524;
+    PROVISIONING_POST_ENCRYPTION_ACTIVITY_TIME_MS = 524 [deprecated=true];
 
     // ACTION: Logged when finalization activity finishes.
     // TIME: Indicates time taken by finalization activity to finish in MS.
-    PROVISIONING_FINALIZATION_ACTIVITY_TIME_MS = 525;
+    PROVISIONING_FINALIZATION_ACTIVITY_TIME_MS = 525 [deprecated=true];
 
     // OPEN: Settings Support > Phone/Chat -> Disclaimer
     DIALOG_SUPPORT_DISCLAIMER = 526;
