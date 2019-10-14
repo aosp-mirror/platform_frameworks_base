@@ -10234,11 +10234,13 @@ public class TelephonyManager {
 
     /**
      * Action set from carrier signalling broadcast receivers to enable/disable radio
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
      * @param subId the subscription ID that this action applies to.
      * @param enabled control enable or disable radio.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
         try {
             ITelephony service = getITelephony();
@@ -10253,11 +10255,13 @@ public class TelephonyManager {
     /**
      * Action set from carrier signalling broadcast receivers to start/stop reporting default
      * network available events
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
      * @param subId the subscription ID that this action applies to.
      * @param report control start/stop reporting network status.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
         try {
             ITelephony service = getITelephony();
@@ -10271,10 +10275,12 @@ public class TelephonyManager {
 
     /**
      * Action set from carrier signalling broadcast receivers to reset all carrier actions
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
+     * Permissions {@link android.Manifest.permission.MODIFY_PHONE_STATE} is required.
      * @param subId the subscription ID that this action applies to.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void carrierActionResetAll(int subId) {
         try {
             ITelephony service = getITelephony();

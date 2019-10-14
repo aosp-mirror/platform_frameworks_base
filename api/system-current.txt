@@ -8237,6 +8237,9 @@ package android.telephony {
 
   public class TelephonyManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void carrierActionReportDefaultNetworkStatus(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void carrierActionResetAll(int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void carrierActionSetRadioEnabled(int, boolean);
     method public int checkCarrierPrivilegesForPackage(String);
     method public int checkCarrierPrivilegesForPackageAnyPhone(String);
     method public void dial(String);
