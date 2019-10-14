@@ -16,6 +16,7 @@ package android.telecom;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
@@ -1908,6 +1909,29 @@ public class TelecomManager {
                 result = service.createManageBlockedNumbersIntent();
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#createManageBlockedNumbersIntent", e);
+            }
+        }
+        return result;
+    }
+
+
+    /**
+     * Creates the {@link Intent} which can be used with {@link Context#startActivity(Intent)} to
+     * launch the activity for emergency dialer.
+     *
+     * @param number Optional number to call in emergency dialer
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public Intent createLaunchEmergencyDialerIntent(@Nullable String number) {
+        ITelecomService service = getTelecomService();
+        Intent result = null;
+        if (service != null) {
+            try {
+                result = service.createLaunchEmergencyDialerIntent(number);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error createLaunchEmergencyDialerIntent", e);
             }
         }
         return result;
