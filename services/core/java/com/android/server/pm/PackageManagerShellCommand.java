@@ -2437,10 +2437,14 @@ class PackageManagerShellCommand extends ShellCommand {
             }
         }
         String arg = getNextArg();
-        if (arg == null) {
+        if (arg == null && !preCreateOnly) {
             getErrPrintWriter().println("Error: no user name specified.");
             return 1;
         }
+        if (arg != null && preCreateOnly) {
+            getErrPrintWriter().println("Warning: name is ignored for pre-created users");
+        }
+
         name = arg;
         UserInfo info;
         IUserManager um = IUserManager.Stub.asInterface(

@@ -2846,7 +2846,7 @@ public class UserManagerService extends IUserManager.Stub {
                     return null;
                 }
                 // If we're adding a guest and there already exists one, bail.
-                if (isGuest && findCurrentGuestUser() != null) {
+                if (isGuest && !preCreate && findCurrentGuestUser() != null) {
                     Log.e(LOG_TAG, "Cannot add guest user. Guest user already exists.");
                     return null;
                 }
@@ -3100,7 +3100,8 @@ public class UserManagerService extends IUserManager.Stub {
             final int size = mUsers.size();
             for (int i = 0; i < size; i++) {
                 final UserInfo user = mUsers.valueAt(i).info;
-                if (user.isGuest() && !user.guestToRemove && !mRemovingUserIds.get(user.id)) {
+                if (user.isGuest() && !user.guestToRemove && !user.preCreated
+                        && !mRemovingUserIds.get(user.id)) {
                     return user;
                 }
             }
