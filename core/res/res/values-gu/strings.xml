@@ -294,10 +294,10 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને SMS સંદેશા મોકલવા અને જોવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"સ્ટોરેજ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"તમારા ઉપકરણ પર ફોટો, મીડિયા અને ફાઇલો ઍક્સેસ કરવાની"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા ઉપકરણ પર ફોટા, મીડિયા અને ફાઇલોને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા ડિવાઇસ પર ફોટા, મીડિયા અને ફાઇલોને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"માઇક્રોફોન"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ઑડિઓ રેકોર્ડ કરવાની"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ઑડિઓ રેકૉર્ડ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ઑડિયો રેકૉર્ડ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"શારીરિક પ્રવૃત્તિ"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"તમારી શારીરિક પ્રવૃત્તિને ઍક્સેસ કરવી"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારી શારીરિક પ્રવૃત્તિને ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
@@ -324,7 +324,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"હાવભાવ કરો"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"ટૅપ, સ્વાઇપ, પિંચ કરી અને અન્ય હાવભાવ કરી શકે છે."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ફિંગરપ્રિન્ટ સંકેતો"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ઉપકરણના ફિંગરપ્રિન્ટ સેન્સર પર કરવામાં આવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ડિવાઇસના ફિંગરપ્રિન્ટ સેન્સર પર કરવામાં આવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -510,9 +510,9 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરો"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"ઍપને પ્રમાણીકરણ માટે બાયોમેટ્રિક હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ફિંગરપ્રિન્ટ હાર્ડવેરને સંચાલિત કરો"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"એપ્લિકેશનને ઉપયોગ માટે ફિંગરપ્રિન્ટ નમૂના ઉમેરવા અને કાઢી નાખવા માટે પદ્ધતિઓની વિનંતી કરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ઍપને ઉપયોગ માટે ફિંગરપ્રિન્ટ નમૂના ઉમેરવા અને કાઢી નાખવા માટે પદ્ધતિઓની વિનંતી કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ફિંગરપ્રિન્ટ હાર્ડવેરનો ઉપયોગ કરો"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"એપ્લિકેશનને પ્રમાણીકરણ માટે ફિંગરપ્રિન્ટ હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ઍપને પ્રમાણીકરણ માટે ફિંગરપ્રિન્ટ હાર્ડવેરનો ઉપયોગ કરવાની મંજૂરી આપે છે"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"આપનો સંગીત સંગ્રહ સંશોધિત કરવો"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"એપને તમારો સંગીત સંગ્રહ સંશોધિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"આપનો વિડિઓ સંગ્રહ સંશોધિત કરવો"</string>
@@ -1578,8 +1578,8 @@
     <string name="expires_on" msgid="3676242949915959821">"આ રોજ સમાપ્ત:"</string>
     <string name="serial_number" msgid="758814067660862493">"શૃંખલા ક્રમાંક:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ફિંગરપ્રિંટ્સ:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ફિંગરપ્રિંટ:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ફિંગરપ્રિંટ:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ફિંગરપ્રિન્ટ:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ફિંગરપ્રિન્ટ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"બધું જુઓ"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"પ્રવૃત્તિ પસંદ કરો"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"આની સાથે શેર કરો"</string>
