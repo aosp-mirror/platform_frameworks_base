@@ -8962,6 +8962,14 @@ public final class Settings {
         private static final Validator AWARE_LOCK_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * Controls whether tap gesture is enabled.
+         * @hide
+         */
+        public static final String TAP_GESTURE = "tap_gesture";
+
+        private static final Validator TAP_GESTURE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -9294,6 +9302,7 @@ public final class Settings {
             VALIDATORS.put(AWARE_LOCK_ENABLED, AWARE_LOCK_ENABLED_VALIDATOR);
             VALIDATORS.put(AWARE_TAP_PAUSE_GESTURE_COUNT, NON_NEGATIVE_INTEGER_VALIDATOR);
             VALIDATORS.put(AWARE_TAP_PAUSE_TOUCH_COUNT, NON_NEGATIVE_INTEGER_VALIDATOR);
+            VALIDATORS.put(TAP_GESTURE, TAP_GESTURE_VALIDATOR);
         }
 
         /**
