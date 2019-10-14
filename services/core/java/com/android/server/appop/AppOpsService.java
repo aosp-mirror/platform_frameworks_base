@@ -68,6 +68,7 @@ import android.hardware.camera2.CameraDevice.CAMERA_AUDIO_RESTRICTION;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1398,6 +1399,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void updatePermissionRevokedCompat(int uid, int switchCode, int mode) {
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        if (packageManagerInternal.getUidTargetSdkVersion(uid) >= Build.VERSION_CODES.M) {
+            return;
+        }
+
         PackageManager packageManager = mContext.getPackageManager();
         String[] packageNames = packageManager.getPackagesForUid(uid);
         if (ArrayUtils.isEmpty(packageNames)) {
