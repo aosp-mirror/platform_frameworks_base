@@ -17,6 +17,7 @@ package com.android.systemui;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.INotificationManager;
+import android.app.IWallpaperManager;
 import android.content.res.Configuration;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.NightDisplayListener;
@@ -77,6 +78,7 @@ import com.android.systemui.statusbar.notification.row.ChannelEditorDialogContro
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
@@ -318,6 +320,8 @@ public class Dependency {
     @Inject Lazy<SysUiState> mSysUiStateFlagsContainer;
     @Inject Lazy<AlarmManager> mAlarmManager;
     @Inject Lazy<KeyguardSecurityModel> mKeyguardSecurityModel;
+    @Inject Lazy<DozeParameters> mDozeParameters;
+    @Inject Lazy<IWallpaperManager> mWallpaperManager;
 
     @Inject
     public Dependency() {
@@ -504,6 +508,8 @@ public class Dependency {
         mProviders.put(SysUiState.class, mSysUiStateFlagsContainer::get);
         mProviders.put(AlarmManager.class, mAlarmManager::get);
         mProviders.put(KeyguardSecurityModel.class, mKeyguardSecurityModel::get);
+        mProviders.put(DozeParameters.class, mDozeParameters::get);
+        mProviders.put(IWallpaperManager.class, mWallpaperManager::get);
 
         // TODO(b/118592525): to support multi-display , we start to add something which is
         //                    per-display, while others may be global. I think it's time to add

@@ -76,6 +76,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private Handler mHandler;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock
+    private DozeParameters mDozeParameters;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -92,7 +94,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mStatusBarWindowController);
         mBiometricUnlockController = new BiometricUnlockController(mContext, mDozeScrimController,
                 mKeyguardViewMediator, mScrimController, mStatusBar, mKeyguardStateController,
-                mHandler, mUpdateMonitor, 0 /* wakeUpDelay */, mKeyguardBypassController);
+                mHandler, mUpdateMonitor, 0 /* wakeUpDelay */, mKeyguardBypassController,
+                mDozeParameters);
         mBiometricUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
     }
 

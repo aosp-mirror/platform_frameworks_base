@@ -220,6 +220,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
     @Mock private NotifLog mNotifLog;
+    @Mock private DozeParameters mDozeParameters;
 
     @Before
     public void setup() throws Exception {
@@ -343,7 +344,8 @@ public class StatusBarTest extends SysuiTestCase {
                 configurationController,
                 mStatusBarWindowController,
                 mStatusBarWindowViewControllerBuilder,
-                mNotifLog);
+                mNotifLog,
+                mDozeParameters);
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mComponents = mContext.getComponents();

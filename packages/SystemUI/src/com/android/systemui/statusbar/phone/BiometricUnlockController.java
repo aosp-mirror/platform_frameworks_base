@@ -128,6 +128,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
     private final KeyguardBypassController mKeyguardBypassController;
     private PowerManager.WakeLock mWakeLock;
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarWindowController mStatusBarWindowController;
     private final Context mContext;
@@ -146,31 +147,33 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
-    public BiometricUnlockController(Context context,
+    public BiometricUnlockController(
+            Context context,
             DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator,
             ScrimController scrimController,
             StatusBar statusBar,
             KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController,
+            DozeParameters dozeParameters) {
         this(context, dozeScrimController, keyguardViewMediator, scrimController, statusBar,
                 keyguardStateController, handler, keyguardUpdateMonitor,
                 context.getResources()
                         .getInteger(com.android.internal.R.integer.config_wakeUpDelayDoze),
-                keyguardBypassController);
+                keyguardBypassController, dozeParameters);
     }
 
     @VisibleForTesting
-    protected BiometricUnlockController(Context context,
-            DozeScrimController dozeScrimController, KeyguardViewMediator keyguardViewMediator,
-            ScrimController scrimController, StatusBar statusBar,
-            KeyguardStateController keyguardStateController, Handler handler,
+    protected BiometricUnlockController(Context context, DozeScrimController dozeScrimController,
+            KeyguardViewMediator keyguardViewMediator, ScrimController scrimController,
+            StatusBar statusBar, KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, int wakeUpDelay,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController, DozeParameters dozeParameters) {
         mContext = context;
         mPowerManager = context.getSystemService(PowerManager.class);
         mUpdateMonitor = keyguardUpdateMonitor;
+        mDozeParameters = dozeParameters;
         mUpdateMonitor.registerCallback(this);
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
@@ -284,7 +287,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
         }
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
-        boolean alwaysOnEnabled = DozeParameters.getInstance(mContext).getAlwaysOn();
+        boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
         boolean delayWakeUp = mode == MODE_WAKE_AND_UNLOCK && alwaysOnEnabled && mWakeUpDelay > 0;
         Runnable wakeUp = ()-> {
             if (!wasDeviceInteractive) {
