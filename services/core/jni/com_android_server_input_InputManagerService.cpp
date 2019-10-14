@@ -201,8 +201,7 @@ public:
 
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
-    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
-            int32_t displayId);
+    status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
     status_t registerInputMonitor(JNIEnv* env, const sp<InputChannel>& inputChannel,
             int32_t displayId, bool isGestureMonitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
@@ -435,10 +434,9 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
 }
 
 status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
-        const sp<InputChannel>& inputChannel, int32_t displayId) {
+        const sp<InputChannel>& inputChannel) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->registerInputChannel(
-            inputChannel, displayId);
+    return mInputManager->getDispatcher()->registerInputChannel(inputChannel);
 }
 
 status_t NativeInputManager::registerInputMonitor(JNIEnv* /* env */,
@@ -1405,7 +1403,7 @@ static void handleInputChannelDisposed(JNIEnv* env,
 }
 
 static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobject inputChannelObj, jint displayId) {
+        jlong ptr, jobject inputChannelObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
@@ -1415,7 +1413,7 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    status_t status = im->registerInputChannel(env, inputChannel, displayId);
+    status_t status = im->registerInputChannel(env, inputChannel);
 
     if (status) {
         std::string message;
@@ -1757,7 +1755,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
     { "nativeHasKeys", "(JII[I[Z)Z",
             (void*) nativeHasKeys },
     { "nativeRegisterInputChannel",
-            "(JLandroid/view/InputChannel;I)V",
+            "(JLandroid/view/InputChannel;)V",
             (void*) nativeRegisterInputChannel },
     { "nativeRegisterInputMonitor",
             "(JLandroid/view/InputChannel;IZ)V",
