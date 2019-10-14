@@ -56,8 +56,7 @@ public final class TimeSignal implements Parcelable {
 
     private static TimeSignal createFromParcel(Parcel in) {
         String sourceId = in.readString();
-        TimestampedValue<Long> utcTime =
-                TimestampedValue.readFromParcel(in, null /* classLoader */, Long.class);
+        TimestampedValue<Long> utcTime = in.readParcelable(null /* classLoader */);
         return new TimeSignal(sourceId, utcTime);
     }
 
@@ -69,7 +68,7 @@ public final class TimeSignal implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mSourceId);
-        TimestampedValue.writeToParcel(dest, mUtcTime);
+        dest.writeParcelable(mUtcTime, 0);
     }
 
     @NonNull
