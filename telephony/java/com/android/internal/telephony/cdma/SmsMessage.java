@@ -900,6 +900,20 @@ public class SmsMessage extends SmsMessageBase {
     }
 
     /**
+     * @return the bearer data byte array
+     */
+    public byte[] getEnvelopeBearerData() {
+        return mEnvelope.bearerData;
+    }
+
+    /**
+     * @return the 16-bit CDMA SCPT service category
+     */
+    public @CdmaSmsCbProgramData.Category int getEnvelopeServiceCategory() {
+        return mEnvelope.serviceCategory;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

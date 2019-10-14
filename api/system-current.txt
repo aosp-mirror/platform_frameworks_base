@@ -7316,7 +7316,7 @@ package android.telephony {
   public abstract class CellBroadcastService extends android.app.Service {
     ctor public CellBroadcastService();
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onCdmaCellBroadcastSms(int, byte[]);
+    method public abstract void onCdmaCellBroadcastSms(int, byte[], int);
     method public abstract void onGsmCellBroadcastSms(int, byte[]);
     field public static final String CELL_BROADCAST_SERVICE_INTERFACE = "android.telephony.CellBroadcastService";
   }
