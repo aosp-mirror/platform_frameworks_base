@@ -106,6 +106,7 @@ private:
     FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgrade);
     FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket);
     FRIEND_TEST(CountMetricProducerTest, TestFirstBucket);
+    FRIEND_TEST(CountMetricProducerTest, TestOneWeekTimeUnit);
 };
 
 }  // namespace statsd
