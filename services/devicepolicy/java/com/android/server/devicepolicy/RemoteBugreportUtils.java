@@ -51,7 +51,7 @@ class RemoteBugreportUtils {
     static final long REMOTE_BUGREPORT_TIMEOUT_MILLIS = 10 * DateUtils.MINUTE_IN_MILLIS;
 
     static final String CTL_STOP = "ctl.stop";
-    static final String REMOTE_BUGREPORT_SERVICE = "bugreportremote";
+    static final String REMOTE_BUGREPORT_SERVICE = "bugreportd";
 
     static final String BUGREPORT_MIMETYPE = "application/vnd.android.bugreport";
 
