@@ -773,6 +773,7 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_TELEPHONY = 4194304; // 0x400000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
+    field public static final int PROTECTION_FLAG_WIFI = 8388608; // 0x800000
     field @Nullable public final String backgroundPermission;
   }
 

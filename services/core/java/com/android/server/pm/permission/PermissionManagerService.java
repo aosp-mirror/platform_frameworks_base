@@ -3282,6 +3282,13 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Special permissions for the system telephony apps.
                 allowed = true;
             }
+            if (!allowed && bp.isWifi()
+                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
+                        PackageManagerInternal.PACKAGE_WIFI, UserHandle.USER_SYSTEM),
+                    pkg.packageName)) {
+                // Special permissions for the system wifi.
+                allowed = true;
+            }
         }
         return allowed;
     }

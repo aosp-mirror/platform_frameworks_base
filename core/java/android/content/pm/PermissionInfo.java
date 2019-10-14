@@ -248,6 +248,17 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     @TestApi
     public static final int PROTECTION_FLAG_TELEPHONY = 0x400000;
 
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>wifi</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final int PROTECTION_FLAG_WIFI = 0x800000;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PROTECTION_FLAG_" }, value = {
             PROTECTION_FLAG_PRIVILEGED,
@@ -270,6 +281,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
             PROTECTION_FLAG_INCIDENT_REPORT_APPROVER,
             PROTECTION_FLAG_APP_PREDICTOR,
             PROTECTION_FLAG_TELEPHONY,
+            PROTECTION_FLAG_WIFI,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProtectionFlags {}
@@ -515,6 +527,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         }
         if ((level & PermissionInfo.PROTECTION_FLAG_TELEPHONY) != 0) {
             protLevel += "|telephony";
+        }
+        if ((level & PermissionInfo.PROTECTION_FLAG_WIFI) != 0) {
+            protLevel += "|wifi";
         }
         return protLevel;
     }
