@@ -29,6 +29,9 @@ import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 
+/**
+ * {@hide}
+ */
 oneway interface IPhoneStateListener {
     void onServiceStateChanged(in ServiceState serviceState);
     void onSignalStrengthChanged(int asu);
