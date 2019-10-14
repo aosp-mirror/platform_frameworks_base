@@ -90,7 +90,7 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_UPDATE_ACTIONS = 4;
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
     public static final int MESSAGE_ANIMATION_ENDED = 6;
-    public static final int MESSAGE_TOUCH_EVENT = 7;
+    public static final int MESSAGE_POINTER_EVENT = 7;
 
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
@@ -165,9 +165,9 @@ public class PipMenuActivity extends Activity {
                     break;
                 }
 
-                case MESSAGE_TOUCH_EVENT: {
+                case MESSAGE_POINTER_EVENT: {
                     final MotionEvent ev = (MotionEvent) msg.obj;
-                    dispatchTouchEvent(ev);
+                    dispatchPointerEvent(ev);
                     break;
                 }
             }
@@ -219,6 +219,9 @@ public class PipMenuActivity extends Activity {
         updateFromIntent(getIntent());
         setTitle(R.string.pip_menu_title);
         setDisablePreviewScreenshots(true);
+
+        // Hide without an animation.
+        getWindow().setExitTransition(null);
     }
 
     @Override
@@ -269,6 +272,17 @@ public class PipMenuActivity extends Activity {
         }
     }
 
+    /**
+     * Dispatch a pointer event from {@link PipTouchHandler}.
+     */
+    private void dispatchPointerEvent(MotionEvent event) {
+        if (event.isTouchEvent()) {
+            dispatchTouchEvent(event);
+        } else {
+            dispatchGenericMotionEvent(event);
+        }
+    }
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (!mAllowTouches) {
@@ -288,8 +302,6 @@ public class PipMenuActivity extends Activity {
     public void finish() {
         notifyActivityCallback(null);
         super.finish();
-        // Hide without an animation (the menu should already be invisible at this point)
-        overridePendingTransition(0, 0);
     }
 
     @Override
