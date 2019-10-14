@@ -39,7 +39,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.UriPermission;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
@@ -70,15 +69,19 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import libcore.util.HexEncoding;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -2059,7 +2062,17 @@ public final class MediaStore {
             /**
              * A non human readable key calculated from the TITLE, used for
              * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
              */
+            @Deprecated
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String TITLE_KEY = "title_key";
 
@@ -2104,7 +2117,17 @@ public final class MediaStore {
             /**
              * A non human readable key calculated from the ARTIST, used for
              * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
              */
+            @Deprecated
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ARTIST_KEY = "artist_key";
 
@@ -2129,7 +2152,17 @@ public final class MediaStore {
             /**
              * A non human readable key calculated from the ALBUM, used for
              * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
              */
+            @Deprecated
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ALBUM_KEY = "album_key";
 
@@ -2186,91 +2219,89 @@ public final class MediaStore {
             public static final String IS_AUDIOBOOK = "is_audiobook";
 
             /**
-             * The genre of the audio file, if any
-             * Does not exist in the database - only used by the media scanner for inserts.
-             * @hide
+             * The id of the genre the audio file is from, if any
              */
-            @Deprecated
-            // @Column(Cursor.FIELD_TYPE_STRING)
+            @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
+            public static final String GENRE_ID = "genre_id";
+
+            /**
+             * The genre of the audio file, if any.
+             */
+            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String GENRE = "genre";
 
             /**
-             * The resource URI of a localized title, if any
+             * A non human readable key calculated from the GENRE, used for
+             * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
+             */
+            @Deprecated
+            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            public static final String GENRE_KEY = "genre_key";
+
+            /**
+             * The resource URI of a localized title, if any.
+             * <p>
              * Conforms to this pattern:
-             *   Scheme: {@link ContentResolver.SCHEME_ANDROID_RESOURCE}
-             *   Authority: Package Name of ringtone title provider
-             *   First Path Segment: Type of resource (must be "string")
-             *   Second Path Segment: Resource ID of title
-             * @hide
+             * <ul>
+             * <li>Scheme: {@link ContentResolver#SCHEME_ANDROID_RESOURCE}
+             * <li>Authority: Package Name of ringtone title provider
+             * <li>First Path Segment: Type of resource (must be "string")
+             * <li>Second Path Segment: Resource ID of title
+             * </ul>
              */
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String TITLE_RESOURCE_URI = "title_resource_uri";
         }
 
+        private static final Pattern PATTERN_TRIM_BEFORE = Pattern.compile(
+                "(?i)(^(the|an|a) |,\\s*(the|an|a)$|[^\\w\\s]|^\\s+|\\s+$)");
+        private static final Pattern PATTERN_TRIM_AFTER = Pattern.compile(
+                "(^(00)+|(00)+$)");
+
         /**
-         * Converts a name to a "key" that can be used for grouping, sorting
-         * and searching.
-         * The rules that govern this conversion are:
-         * - remove 'special' characters like ()[]'!?.,
-         * - remove leading/trailing spaces
-         * - convert everything to lowercase
-         * - remove leading "the ", "an " and "a "
-         * - remove trailing ", the|an|a"
-         * - remove accents. This step leaves us with CollationKey data,
-         *   which is not human readable
+         * Converts a user-visible string into a "key" that can be used for
+         * grouping, sorting, and searching.
          *
-         * @param name The artist or album name to convert
-         * @return The "key" for the given name.
+         * @return Opaque token that should not be parsed or displayed to users.
+         * @deprecated These keys are generated using
+         *             {@link java.util.Locale#ROOT}, which means they don't
+         *             reflect locale-specific sorting preferences. To apply
+         *             locale-specific sorting preferences, use
+         *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+         *             {@code COLLATE LOCALIZED}, or
+         *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
          */
-        public static String keyFor(String name) {
-            if (name != null)  {
-                boolean sortfirst = false;
-                if (name.equals(UNKNOWN_STRING)) {
-                    return "\001";
-                }
-                // Check if the first character is \001. We use this to
-                // force sorting of certain special files, like the silent ringtone.
-                if (name.startsWith("\001")) {
-                    sortfirst = true;
-                }
-                name = name.trim().toLowerCase();
-                if (name.startsWith("the ")) {
-                    name = name.substring(4);
-                }
-                if (name.startsWith("an ")) {
-                    name = name.substring(3);
-                }
-                if (name.startsWith("a ")) {
-                    name = name.substring(2);
-                }
-                if (name.endsWith(", the") || name.endsWith(",the") ||
-                    name.endsWith(", an") || name.endsWith(",an") ||
-                    name.endsWith(", a") || name.endsWith(",a")) {
-                    name = name.substring(0, name.lastIndexOf(','));
-                }
-                name = name.replaceAll("[\\[\\]\\(\\)\"'.,?!]", "").trim();
-                if (name.length() > 0) {
-                    // Insert a separator between the characters to avoid
-                    // matches on a partial character. If we ever change
-                    // to start-of-word-only matches, this can be removed.
-                    StringBuilder b = new StringBuilder();
-                    b.append('.');
-                    int nl = name.length();
-                    for (int i = 0; i < nl; i++) {
-                        b.append(name.charAt(i));
-                        b.append('.');
-                    }
-                    name = b.toString();
-                    String key = DatabaseUtils.getCollationKey(name);
-                    if (sortfirst) {
-                        key = "\001" + key;
-                    }
-                    return key;
-               } else {
-                    return "";
-                }
+        @Deprecated
+        public static @Nullable String keyFor(@Nullable String name) {
+            if (TextUtils.isEmpty(name)) return null;
+
+            if (UNKNOWN_STRING.equals(name)) {
+                return "01";
             }
-            return null;
+
+            final boolean sortFirst = name.startsWith("\001");
+
+            name = PATTERN_TRIM_BEFORE.matcher(name).replaceAll("");
+            if (TextUtils.isEmpty(name)) return null;
+
+            final Collator c = Collator.getInstance(Locale.ROOT);
+            c.setStrength(Collator.PRIMARY);
+            name = HexEncoding.encodeToString(c.getCollationKey(name).toByteArray(), false);
+
+            name = PATTERN_TRIM_AFTER.matcher(name).replaceAll("");
+            if (sortFirst) {
+                name = "01" + name;
+            }
+            return name;
         }
 
         public static final class Media implements AudioColumns {
@@ -2632,7 +2663,17 @@ public final class MediaStore {
             /**
              * A non human readable key calculated from the ARTIST, used for
              * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
              */
+            @Deprecated
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ARTIST_KEY = "artist_key";
 
@@ -2736,6 +2777,23 @@ public final class MediaStore {
             public static final String ARTIST = "artist";
 
             /**
+             * A non human readable key calculated from the ARTIST, used for
+             * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
+             */
+            @Deprecated
+            @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
+            public static final String ARTIST_KEY = "artist_key";
+
+            /**
              * The number of songs on this album
              */
             @Column(value = Cursor.FIELD_TYPE_INTEGER, readOnly = true)
@@ -2770,7 +2828,17 @@ public final class MediaStore {
             /**
              * A non human readable key calculated from the ALBUM, used for
              * searching, sorting and grouping
+             *
+             * @see Audio#keyFor(String)
+             * @deprecated These keys are generated using
+             *             {@link java.util.Locale#ROOT}, which means they don't
+             *             reflect locale-specific sorting preferences. To apply
+             *             locale-specific sorting preferences, use
+             *             {@link ContentResolver#QUERY_ARG_SQL_SORT_ORDER} with
+             *             {@code COLLATE LOCALIZED}, or
+             *             {@link ContentResolver#QUERY_ARG_SORT_LOCALE}.
              */
+            @Deprecated
             @Column(value = Cursor.FIELD_TYPE_STRING, readOnly = true)
             public static final String ALBUM_KEY = "album_key";
 
