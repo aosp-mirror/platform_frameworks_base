@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 
+import androidx.annotation.Nullable;
 import androidx.slice.Clock;
 
 import com.android.internal.app.AssistUtils;
@@ -68,6 +69,7 @@ public abstract class AssistModule {
     }
 
     @Provides
+    @Nullable
     static AssistHandleViewController provideAssistHandleViewController(
             NavigationBarController navigationBarController) {
         return navigationBarController.getAssistHandlerViewController();
