@@ -26,7 +26,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternChecker;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
 
 /**
@@ -96,13 +96,16 @@ public class AuthCredentialPasswordView extends AuthCredentialView
     }
 
     private void checkPasswordAndUnlock() {
-        final byte[] password = LockPatternUtils.charSequenceToByteArray(mPasswordField.getText());
-        if (password == null || password.length == 0) {
-            return;
-        }
+        try (LockscreenCredential password =  mCredentialType == Utils.CREDENTIAL_PIN
+                ? LockscreenCredential.createPinOrNone(mPasswordField.getText())
+                : LockscreenCredential.createPasswordOrNone(mPasswordField.getText())) {
+            if (password.isNone()) {
+                return;
+            }
 
-        mPendingLockCheck = LockPatternChecker.checkPassword(mLockPatternUtils,
-                password, mUserId, this::onCredentialChecked);
+            mPendingLockCheck = LockPatternChecker.checkCredential(mLockPatternUtils,
+                    password, mUserId, this::onCredentialChecked);
+        }
     }
 
     @Override

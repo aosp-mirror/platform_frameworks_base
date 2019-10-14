@@ -93,7 +93,7 @@ import android.util.Pair;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.RestrictionsListener;
@@ -4266,9 +4266,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isResetPasswordTokenActive(admin1));
 
         // test reset password with token
-        when(getServices().lockPatternUtils.setLockCredentialWithToken(eq(password.getBytes()),
-                eq(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD),
-                eq(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC), eq(handle), eq(token),
+        when(getServices().lockPatternUtils.setLockCredentialWithToken(
+                eq(LockscreenCredential.createPassword(password)),
+                eq(handle), eq(token),
                 eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(true);
         assertTrue(dpm.resetPasswordWithToken(admin1, password, token, 0));

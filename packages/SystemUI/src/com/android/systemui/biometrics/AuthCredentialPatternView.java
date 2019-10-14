@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
 
 import java.util.List;
@@ -64,11 +65,13 @@ public class AuthCredentialPatternView extends AuthCredentialView {
                 return;
             }
 
-            mPendingLockCheck = LockPatternChecker.checkPattern(
-                    mLockPatternUtils,
-                    pattern,
-                    mUserId,
-                    this::onPatternChecked);
+            try (LockscreenCredential credential = LockscreenCredential.createPattern(pattern)) {
+                mPendingLockCheck = LockPatternChecker.checkCredential(
+                        mLockPatternUtils,
+                        credential,
+                        mUserId,
+                        this::onPatternChecked);
+            }
         }
 
         private void onPatternChecked(boolean matched, int timeoutMs) {

@@ -167,8 +167,8 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected byte[] getPasswordText() {
-        return charSequenceToByteArray(mPasswordEntry.getText());
+    protected CharSequence getPasswordText() {
+        return mPasswordEntry.getText();
     }
 
     @Override
@@ -265,19 +265,5 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     public CharSequence getTitle() {
         return getContext().getString(
                 com.android.internal.R.string.keyguard_accessibility_pin_unlock);
-    }
-
-    /*
-     * This method avoids creating a new string when getting a byte array from EditView#getText().
-     */
-    private static byte[] charSequenceToByteArray(CharSequence chars) {
-        if (chars == null) {
-            return null;
-        }
-        byte[] bytes = new byte[chars.length()];
-        for (int i = 0; i < chars.length(); i++) {
-            bytes[i] = (byte) chars.charAt(i);
-        }
-        return bytes;
     }
 }

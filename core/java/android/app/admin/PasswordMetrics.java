@@ -27,9 +27,6 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
@@ -37,8 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
-import com.android.internal.widget.LockPatternUtils.CredentialType;
+import com.android.internal.widget.LockscreenCredential;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -226,21 +222,21 @@ public class PasswordMetrics implements Parcelable {
     };
 
     /**
-     * Returnsthe {@code PasswordMetrics} for a given credential.
+     * Returns the {@code PasswordMetrics} for a given credential.
      *
      * If the credential is a pin or a password, equivalent to {@link #computeForPassword(byte[])}.
      * {@code credential} cannot be null when {@code type} is
      * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
      */
-    public static PasswordMetrics computeForCredential(
-            @CredentialType int type, byte[] credential) {
-        if (type == CREDENTIAL_TYPE_PASSWORD) {
-            Preconditions.checkNotNull(credential, "credential cannot be null");
-            return PasswordMetrics.computeForPassword(credential);
-        } else if (type == CREDENTIAL_TYPE_PATTERN)  {
+    public static PasswordMetrics computeForCredential(LockscreenCredential credential) {
+        if (credential.isPassword()) {
+            return PasswordMetrics.computeForPassword(credential.getCredential());
+        } else if (credential.isPattern())  {
             return new PasswordMetrics(PASSWORD_QUALITY_SOMETHING);
-        } else /* if (type == CREDENTIAL_TYPE_NONE) */ {
+        } else if (credential.isNone()) {
             return new PasswordMetrics(PASSWORD_QUALITY_UNSPECIFIED);
+        } else {
+            throw new IllegalArgumentException("Unknown credential type " + credential.getType());
         }
     }
 
