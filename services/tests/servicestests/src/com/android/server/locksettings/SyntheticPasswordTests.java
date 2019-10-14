@@ -513,7 +513,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertFalse(mService.havePattern(PRIMARY_USER_ID));
     }
 
-    public void testgetHashFactorPrimaryUser() throws RemoteException {
+    public void testGetHashFactorPrimaryUser() throws RemoteException {
         final byte[] password = "password".getBytes();
         mService.setLockCredential(password, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID, false);
@@ -528,7 +528,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(hashFactor, newHashFactor);
     }
 
-    public void testgetHashFactorManagedProfileUnifiedChallenge() throws RemoteException {
+    public void testGetHashFactorManagedProfileUnifiedChallenge() throws RemoteException {
         final byte[] pattern = "1236".getBytes();
         mService.setLockCredential(pattern, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 null, PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID, false);
@@ -536,7 +536,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertNotNull(mService.getHashFactor(null, MANAGED_PROFILE_USER_ID));
     }
 
-    public void testgetHashFactorManagedProfileSeparateChallenge() throws RemoteException {
+    public void testGetHashFactorManagedProfileSeparateChallenge() throws RemoteException {
         final byte[] primaryPassword = "primary".getBytes();
         final byte[] profilePassword = "profile".getBytes();
         mService.setLockCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
