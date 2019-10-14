@@ -51,10 +51,10 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     private static final String TAG = "StatusIconContainer";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_OVERFLOW = false;
-    // Max 8 status icons including battery
-    private static final int MAX_ICONS = 7;
     private static final int MAX_DOTS = 1;
 
+    // Max status icons including battery
+    private int mMaxIcons;
     private int mDotPadding;
     private int mStaticDotDiameter;
     private int mUnderflowWidth;
@@ -102,6 +102,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         int radius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
         mStaticDotDiameter = 2 * radius;
         mUnderflowWidth = mIconDotFrameWidth + (MAX_DOTS - 1) * (mStaticDotDiameter + mDotPadding);
+        mMaxIcons = getResources().getInteger(R.integer.config_maxVisibleStatusIconContainer);
     }
 
     @Override
@@ -156,13 +157,13 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         }
 
         int visibleCount = mMeasureViews.size();
-        int maxVisible = visibleCount <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
+        int maxVisible = visibleCount <= mMaxIcons ? mMaxIcons : mMaxIcons - 1;
         int totalWidth = mPaddingLeft + mPaddingRight;
         boolean trackWidth = true;
 
         // Measure all children so that they report the correct width
         int childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.UNSPECIFIED);
-        mNeedsUnderflow = mShouldRestrictIcons && visibleCount > MAX_ICONS;
+        mNeedsUnderflow = mShouldRestrictIcons && visibleCount > mMaxIcons;
         for (int i = 0; i < mMeasureViews.size(); i++) {
             // Walking backwards
             View child = mMeasureViews.get(visibleCount - i - 1);
@@ -291,9 +292,9 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
             translationX -= getViewTotalWidth(child);
         }
 
-        // Show either 1-MAX_ICONS icons, or (MAX_ICONS - 1) icons + overflow
+        // Show either 1-mMaxIcons icons, or (mMaxIcons - 1) icons + overflow
         int totalVisible = mLayoutStates.size();
-        int maxVisible = totalVisible <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
+        int maxVisible = totalVisible <= mMaxIcons ? mMaxIcons : mMaxIcons - 1;
 
         mUnderflowStart = 0;
         int visible = 0;
