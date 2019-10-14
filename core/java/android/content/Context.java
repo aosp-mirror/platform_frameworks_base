@@ -63,6 +63,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.provider.MediaStore;
+import android.telephony.TelephonyRegistryManager;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -4709,7 +4710,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
-     * {@link android.os.telephony.TelephonyRegistryManager}.
+     * {@link TelephonyRegistryManager}.
      * @hide
      */
     @SystemApi
