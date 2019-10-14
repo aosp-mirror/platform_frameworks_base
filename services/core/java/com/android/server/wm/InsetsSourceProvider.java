@@ -210,7 +210,7 @@ class InsetsSourceProvider {
                 new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
     }
 
-    boolean onInsetsModified(WindowState caller, InsetsSource modifiedSource) {
+    boolean onInsetsModified(InsetsControlTarget caller, InsetsSource modifiedSource) {
         if (mControlTarget != caller || modifiedSource.isVisible() == mClientVisible) {
             return false;
         }

@@ -69,7 +69,7 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         mShowImeRunner = () -> {
             // Target should still be the same.
             if (isImeTargetFromDisplayContentAndImeSame()) {
-                mDisplayContent.mInputMethodTarget.showInsets(
+                mDisplayContent.mInputMethodControlTarget.showInsets(
                         WindowInsets.Type.ime(), true /* fromIme */);
             }
             abortShowImePostLayout();
