@@ -78,7 +78,7 @@ class UserSwitchingDialog extends AlertDialog
 
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR |
-            WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
     }
 

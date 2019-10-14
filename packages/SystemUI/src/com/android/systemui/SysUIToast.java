@@ -31,7 +31,7 @@ public class SysUIToast {
     public static Toast makeText(Context context, CharSequence text, @Duration int duration) {
         Toast toast = Toast.makeText(context, text, duration);
         toast.getWindowParams().privateFlags |=
-                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         return toast;
     }
 

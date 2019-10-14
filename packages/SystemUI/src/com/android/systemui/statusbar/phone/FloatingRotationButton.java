@@ -82,7 +82,7 @@ public class FloatingRotationButton implements RotationButton {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(mDiameter, mDiameter,
                 mMargin, mMargin, WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL, flags,
                 PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("FloatingRotationButton");
         switch (mWindowManager.getDefaultDisplay().getRotation()) {
             case Surface.ROTATION_0:

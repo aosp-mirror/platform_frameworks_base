@@ -276,7 +276,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
                             | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                     PixelFormat.TRANSLUCENT);
             mEdgePanelLp.privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                    WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             mEdgePanelLp.setTitle(TAG + mDisplayId);
             mEdgePanelLp.accessibilityTitle = mContext.getString(R.string.nav_bar_edge_panel);
             mEdgePanelLp.windowAnimations = 0;

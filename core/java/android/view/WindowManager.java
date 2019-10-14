@@ -1680,8 +1680,9 @@ public interface WindowManager extends ViewManager {
          * to determine its default behavior.
          *
          * {@hide} */
-        @UnsupportedAppUsage
-        public static final int PRIVATE_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
+        @SystemApi
+        @RequiresPermission(permission.INTERNAL_SYSTEM_WINDOW)
+        public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 0x00000010;
 
         /**
          * Never animate position changes of the window.
@@ -1842,6 +1843,7 @@ public interface WindowManager extends ViewManager {
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
         })
         public @interface SystemFlags {}
 
@@ -1863,8 +1865,8 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS,
                         name = "WANTS_OFFSET_NOTIFICATIONS"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
-                        equals = PRIVATE_FLAG_SHOW_FOR_ALL_USERS,
+                        mask = SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
+                        equals = SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
                         name = "SHOW_FOR_ALL_USERS"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_NO_MOVE_ANIMATION,
