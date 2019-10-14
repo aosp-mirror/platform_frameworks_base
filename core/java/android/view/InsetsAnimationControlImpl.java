@@ -229,6 +229,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             final InsetsSourceConsumer consumer = items.valueAt(i);
             final InsetsSource source = mInitialInsetsState.getSource(consumer.getType());
             final InsetsSourceControl control = consumer.getControl();
+            if (control == null) {
+                // Control may not be available for consumer yet or revoked.
+                continue;
+            }
             final SurfaceControl leash = consumer.getControl().getLeash();
 
             mTmpMatrix.setTranslate(control.getSurfacePosition().x, control.getSurfacePosition().y);

@@ -514,6 +514,13 @@ public abstract class WindowManagerInternal {
     public abstract void showImePostLayout(IBinder imeTargetWindowToken);
 
     /**
+     * Hide IME using imeTargetWindow when requested.
+     *
+     * @param displayId on which IME is shown
+     */
+    public abstract void hideIme(int displayId);
+
+    /**
      * Tell window manager about a package that should not be running with high refresh rate
      * setting until removeNonHighRefreshRatePackage is called for the same package.
      *

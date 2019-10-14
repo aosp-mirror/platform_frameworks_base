@@ -3377,6 +3377,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    @Override
+    public void hideInsets(@InsetType int types, boolean fromIme) {
+        try {
+            mClient.hideInsets(types, fromIme);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to deliver showInsets", e);
+        }
+    }
+
     Rect getBackdropFrame(Rect frame) {
         // When the task is docked, we send fullscreen sized backDropFrame as soon as resizing
         // start even if we haven't received the relayout window, so that the client requests

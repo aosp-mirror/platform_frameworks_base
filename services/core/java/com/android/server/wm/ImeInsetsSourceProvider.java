@@ -25,7 +25,7 @@ import android.view.WindowInsets;
  */
 class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
-    private WindowState mCurImeTarget;
+    private WindowState mImeTargetFromIme;
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
 
@@ -40,8 +40,8 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
     void onPostLayout() {
         super.onPostLayout();
 
-        if (mCurImeTarget != null
-                && mCurImeTarget == mDisplayContent.mInputMethodTarget
+        if (mImeTargetFromIme != null
+                && isImeTargetFromDisplayContentAndImeSame()
                 && mWin != null
                 && mWin.isDrawnLw()
                 && !mWin.mGivenInsetsPending) {
@@ -64,18 +64,33 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
     /**
      * Called from {@link WindowManagerInternal#showImePostLayout} when {@link InputMethodService}
      * requests to show IME on {@param imeTarget}.
-     * @param imeTarget imeTarget on which IME is displayed.
+     * @param imeTarget imeTarget on which IME request is coming from.
      */
     void scheduleShowImePostLayout(WindowState imeTarget) {
-        mCurImeTarget = imeTarget;
+        mImeTargetFromIme = imeTarget;
         mShowImeRunner = () -> {
             // Target should still be the same.
-            if (mCurImeTarget == mDisplayContent.mInputMethodTarget) {
+            if (isImeTargetFromDisplayContentAndImeSame()) {
                 mDisplayContent.mInputMethodTarget.showInsets(
                         WindowInsets.Type.ime(), true /* fromIme */);
             }
-            mCurImeTarget = null;
+            mImeTargetFromIme = null;
         };
+    }
+
+    private boolean isImeTargetFromDisplayContentAndImeSame() {
+        // IMMS#mLastImeTargetWindow always considers focused window as
+        // IME target, however DisplayContent#computeImeTarget() can compute
+        // a different IME target.
+        // Refer to WindowManagerService#applyImeVisibility(token, false).
+        // If IMMS's imeTarget is child of DisplayContent's imeTarget and child window
+        // is above the parent, we will consider it as the same target for now.
+        // TODO(b/139861270): Remove the child & sublayer check once IMMS is aware of
+        //  actual IME target.
+        return mImeTargetFromIme == mDisplayContent.mInputMethodTarget
+                || (mDisplayContent.mInputMethodTarget.getParentWindow() == mImeTargetFromIme
+                        && mDisplayContent.mInputMethodTarget.mSubLayer
+                                > mImeTargetFromIme.mSubLayer);
     }
 
 }
