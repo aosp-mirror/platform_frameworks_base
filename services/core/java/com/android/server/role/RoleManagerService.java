@@ -49,7 +49,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.provider.Telephony;
 import android.service.sms.FinancialSmsService;
 import android.telephony.IFinancialSmsCallback;
 import android.text.TextUtils;
@@ -682,7 +681,7 @@ public class RoleManagerService extends SystemService implements RoleUserState.C
         @Override
         public void getSmsMessagesForFinancialApp(
                 String callingPkg, Bundle params, IFinancialSmsCallback callback) {
-            int mode = PermissionChecker.checkCallingOrSelfPermission(
+            int mode = PermissionChecker.checkCallingOrSelfPermissionForDataDelivery(
                     getContext(),
                     AppOpsManager.OPSTR_SMS_FINANCIAL_TRANSACTIONS);
 
