@@ -23,16 +23,20 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import java.util.Objects;
+
 /**
  * Class to hold the data for the applications that are using the AppOps permissions.
  */
 public class PrivacyApplication {
     private static final String TAG = "PrivacyApplication";
 
+    private String mPackageName;
     private Drawable mIcon;
     private String mApplicationName;
 
     public PrivacyApplication(String packageName, Context context) {
+        mPackageName = packageName;
         try {
             CarUserManagerHelper carUserManagerHelper = new CarUserManagerHelper(context);
             ApplicationInfo app = context.getPackageManager()
@@ -58,5 +62,18 @@ public class PrivacyApplication {
      */
     public String getApplicationName() {
         return mApplicationName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PrivacyApplication that = (PrivacyApplication) o;
+        return mPackageName.equals(that.mPackageName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPackageName);
     }
 }
