@@ -266,7 +266,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
 
         final IWindow focusedWindow = mFocusedWindow.get();
         if (focusedWindow != null) {
-            if (focusedWindow.asBinder() == newFocusedWindow.asBinder()) {
+            if (newFocusedWindow != null
+                    && newFocusedWindow.asBinder() == focusedWindow.asBinder()) {
                 Slog.w(TAG, "notifyFocusChanged called with unchanged mFocusedWindow="
                         + focusedWindow);
                 return false;
