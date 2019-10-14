@@ -168,6 +168,10 @@ public class SystemConfig {
     // These are the permitted backup transport service components
     final ArraySet<ComponentName> mBackupTransportWhitelist = new ArraySet<>();
 
+    // These are packages mapped to maps of component class name to default enabled state.
+    final ArrayMap<String, ArrayMap<String, Boolean>> mPackageComponentEnabledState =
+            new ArrayMap<>();
+
     // Package names that are exempted from private API blacklisting
     final ArraySet<String> mHiddenApiPackageWhitelist = new ArraySet<>();
 
@@ -299,6 +303,10 @@ public class SystemConfig {
 
     public ArraySet<ComponentName> getBackupTransportWhitelist() {
         return mBackupTransportWhitelist;
+    }
+
+    public ArrayMap<String, Boolean> getComponentsEnabledStates(String packageName) {
+        return mPackageComponentEnabledState.get(packageName);
     }
 
     public ArraySet<String> getDisabledUntilUsedPreinstalledCarrierApps() {
@@ -846,6 +854,14 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "component-override": {
+                        if (allowAppConfigs) {
+                            readComponentOverrides(parser, permFile);
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
                     case "backup-transport-whitelisted-service": {
                         if (allowFeatures) {
                             String serviceName = parser.getAttributeValue(null, "service");
@@ -1266,6 +1282,54 @@ public class SystemConfig {
         }
         if (!newPermissions.isEmpty()) {
             mSplitPermissions.add(new SplitPermissionInfo(splitPerm, newPermissions, targetSdk));
+        }
+    }
+
+    private void readComponentOverrides(XmlPullParser parser, File permFile)
+            throws IOException, XmlPullParserException {
+        String pkgname = parser.getAttributeValue(null, "package");
+        if (pkgname == null) {
+            Slog.w(TAG, "<component-override> without package in "
+                    + permFile + " at " + parser.getPositionDescription());
+            return;
+        }
+
+        pkgname = pkgname.intern();
+
+        final int depth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            String name = parser.getName();
+            if ("component".equals(name)) {
+                String clsname = parser.getAttributeValue(null, "class");
+                String enabled = parser.getAttributeValue(null, "enabled");
+                if (clsname == null) {
+                    Slog.w(TAG, "<component> without class in "
+                            + permFile + " at " + parser.getPositionDescription());
+                    return;
+                } else if (enabled == null) {
+                    Slog.w(TAG, "<component> without enabled in "
+                            + permFile + " at " + parser.getPositionDescription());
+                    return;
+                }
+
+                if (clsname.startsWith(".")) {
+                    clsname = pkgname + clsname;
+                }
+
+                clsname = clsname.intern();
+
+                ArrayMap<String, Boolean> componentEnabledStates =
+                        mPackageComponentEnabledState.get(pkgname);
+                if (componentEnabledStates == null) {
+                    componentEnabledStates = new ArrayMap<>();
+                    mPackageComponentEnabledState.put(pkgname,
+                            componentEnabledStates);
+                }
+
+                componentEnabledStates.put(clsname, !"false".equals(enabled));
+            } else {
+                XmlUtils.skipCurrentTag(parser);
+            }
         }
     }
 

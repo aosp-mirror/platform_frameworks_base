@@ -10685,6 +10685,50 @@ public class PackageManagerService extends IPackageManager.Stub
         return changedAbiCodePath;
     }
 
+    /**
+     * Sets the enabled state of components configured through {@link SystemConfig}.
+     * This modifies the {@link PackageSetting} object.
+     **/
+    static void configurePackageComponents(PackageParser.Package pkg) {
+        final ArrayMap<String, Boolean> componentsEnabledStates = SystemConfig.getInstance()
+                .getComponentsEnabledStates(pkg.packageName);
+        if (componentsEnabledStates == null) {
+            return;
+        }
+
+        for (int i = pkg.activities.size() - 1; i >= 0; i--) {
+            final PackageParser.Activity component = pkg.activities.get(i);
+            final Boolean enabled = componentsEnabledStates.get(component.className);
+            if (enabled != null) {
+                component.info.enabled = enabled;
+            }
+        }
+
+        for (int i = pkg.receivers.size() - 1; i >= 0; i--) {
+            final PackageParser.Activity component = pkg.receivers.get(i);
+            final Boolean enabled = componentsEnabledStates.get(component.className);
+            if (enabled != null) {
+                component.info.enabled = enabled;
+            }
+        }
+
+        for (int i = pkg.providers.size() - 1; i >= 0; i--) {
+            final PackageParser.Provider component = pkg.providers.get(i);
+            final Boolean enabled = componentsEnabledStates.get(component.className);
+            if (enabled != null) {
+                component.info.enabled = enabled;
+            }
+        }
+
+        for (int i = pkg.services.size() - 1; i >= 0; i--) {
+            final PackageParser.Service component = pkg.services.get(i);
+            final Boolean enabled = componentsEnabledStates.get(component.className);
+            if (enabled != null) {
+                component.info.enabled = enabled;
+            }
+        }
+    }
+
 
     /**
      * Just scans the package without any side effects.
@@ -10850,6 +10894,10 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!isPlatformPackage) {
             // Get all of our default paths setup
             pkg.applicationInfo.initForUser(UserHandle.USER_SYSTEM);
+        }
+
+        if (pkg.isSystem()) {
+            configurePackageComponents(pkg);
         }
 
         final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
