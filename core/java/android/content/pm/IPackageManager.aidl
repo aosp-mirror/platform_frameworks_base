@@ -678,6 +678,8 @@ interface IPackageManager {
 
     String getSystemTextClassifierPackageName();
 
+    String[] getSystemTextClassifierPackages();
+
     String getAttentionServicePackageName();
 
     String getWellbeingPackageName();

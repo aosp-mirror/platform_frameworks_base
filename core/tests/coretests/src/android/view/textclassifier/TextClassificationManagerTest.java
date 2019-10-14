@@ -61,6 +61,7 @@ public class TextClassificationManagerTest {
     public void testGetLocalTextClassifier() {
         assertTrue(mTcm.getTextClassifier(TextClassifier.LOCAL) instanceof TextClassifierImpl);
     }
+
     @Test
     public void testGetSystemTextClassifier() {
         assertTrue(

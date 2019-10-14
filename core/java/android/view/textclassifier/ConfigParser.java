@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 public final class ConfigParser {
     private static final String TAG = "ConfigParser";
 
-    static final boolean ENABLE_DEVICE_CONFIG = true;
+    public static final boolean ENABLE_DEVICE_CONFIG = true;
 
     private static final String STRING_LIST_DELIMITER = ":";
 

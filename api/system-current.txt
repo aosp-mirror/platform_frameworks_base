@@ -7037,7 +7037,7 @@ package android.service.textclassifier {
     ctor public TextClassifierService();
     method @NonNull public static android.view.textclassifier.TextClassifier getDefaultTextClassifierImplementation(@NonNull android.content.Context);
     method @Deprecated public final android.view.textclassifier.TextClassifier getLocalTextClassifier();
-    method @Nullable public final android.os.IBinder onBind(android.content.Intent);
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @MainThread public abstract void onClassifyText(@Nullable android.view.textclassifier.TextClassificationSessionId, @NonNull android.view.textclassifier.TextClassification.Request, @NonNull android.os.CancellationSignal, @NonNull android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
     method public void onConnected();
     method @MainThread public void onCreateTextClassificationSession(@NonNull android.view.textclassifier.TextClassificationContext, @NonNull android.view.textclassifier.TextClassificationSessionId);
@@ -7053,7 +7053,7 @@ package android.service.textclassifier {
   }
 
   public static interface TextClassifierService.Callback<T> {
-    method public void onFailure(CharSequence);
+    method public void onFailure(@NonNull CharSequence);
     method public void onSuccess(T);
   }
 

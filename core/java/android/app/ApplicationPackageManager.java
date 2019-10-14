@@ -3133,6 +3133,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String[] getSystemTextClassifierPackages() {
+        try {
+            return mPM.getSystemTextClassifierPackages();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public String getAttentionServicePackageName() {
         try {
             return mPM.getAttentionServicePackageName();
