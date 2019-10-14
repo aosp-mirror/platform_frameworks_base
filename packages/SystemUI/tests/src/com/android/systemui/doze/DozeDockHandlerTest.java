@@ -20,13 +20,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.Instrumentation;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,7 +32,6 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -45,23 +42,24 @@ import com.android.systemui.doze.DozeMachine.State;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class DozeDockHandlerTest extends SysuiTestCase {
-    private DozeDockHandler mDockHandler;
+    @Mock
     private DozeMachine mMachine;
-    private DozeHostFake mHost;
+    @Mock
+    private DozeHost mHost;
     private AmbientDisplayConfiguration mConfig;
-    private Instrumentation mInstrumentation;
     private DockManagerFake mDockManagerFake;
+    private DozeDockHandler mDockHandler;
 
     @Before
     public void setUp() throws Exception {
-        mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mMachine = mock(DozeMachine.class);
-        mHost = spy(new DozeHostFake());
+        MockitoAnnotations.initMocks(this);
         mConfig = DozeConfigurationUtil.createMockConfig();
         doReturn(false).when(mConfig).alwaysOnEnabled(anyInt());
 

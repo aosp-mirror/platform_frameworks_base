@@ -4017,6 +4017,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (isPulsing()) {
             mScrimController.transitionTo(ScrimState.PULSING,
                     mDozeScrimController.getScrimCallback());
+        } else if (mDozeServiceHost.hasPendingScreenOffCallback()) {
+            mScrimController.transitionTo(ScrimState.OFF, new ScrimController.Callback() {
+                @Override
+                public void onFinished() {
+                    mDozeServiceHost.executePendingScreenOffCallback();
+                }
+            });
         } else if (mDozing && !unlocking) {
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mIsKeyguard && !unlocking) {
@@ -4043,6 +4050,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean mAnimateWakeup;
         private boolean mAnimateScreenOff;
         private boolean mIgnoreTouchWhilePulsing;
+        private Runnable mPendingScreenOffCallback;
         @VisibleForTesting
         boolean mWakeLockScreenPerformsAuth = SystemProperties.getBoolean(
                 "persist.sysui.wake_performs_auth", true);
@@ -4265,8 +4273,33 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         @Override
-        public void prepareForGentleWakeUp() {
-            mScrimController.prepareForGentleWakeUp();
+        public void prepareForGentleSleep(Runnable onDisplayOffCallback) {
+            if (onDisplayOffCallback != null) {
+                Log.w(TAG, "Overlapping onDisplayOffCallback. Ignoring previous one.");
+            }
+            mPendingScreenOffCallback = onDisplayOffCallback;
+            updateScrimController();
+        }
+
+        /**
+         * When the dozing host is waiting for scrims to fade out to change the display state.
+         */
+        boolean hasPendingScreenOffCallback() {
+            return mPendingScreenOffCallback != null;
+        }
+
+        /**
+         * Executes an nullifies the pending display state callback.
+         *
+         * @see #hasPendingScreenOffCallback()
+         * @see #prepareForGentleSleep(Runnable)
+         */
+        void executePendingScreenOffCallback() {
+            if (mPendingScreenOffCallback == null) {
+                return;
+            }
+            mPendingScreenOffCallback.run();
+            mPendingScreenOffCallback = null;
         }
 
         private void dispatchTap(View view, float x, float y) {

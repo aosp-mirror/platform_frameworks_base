@@ -18,6 +18,8 @@ package com.android.systemui.doze;
 
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_REQUEST_PULSE;
 import static com.android.systemui.doze.DozeMachine.State.FINISH;
@@ -30,6 +32,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Looper;
@@ -46,6 +51,7 @@ import com.android.systemui.utils.os.FakeHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -53,12 +59,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class DozeScreenStateTest extends SysuiTestCase {
 
-    DozeServiceFake mServiceFake;
-    DozeScreenState mScreen;
-    FakeHandler mHandlerFake;
+    private DozeServiceFake mServiceFake;
+    private FakeHandler mHandlerFake;
     @Mock
-    DozeParameters mDozeParameters;
-    WakeLockFake mWakeLock;
+    private DozeHost mDozeHost;
+    @Mock
+    private DozeParameters mDozeParameters;
+    private WakeLockFake mWakeLock;
+    private DozeScreenState mScreen;
 
     @Before
     public void setUp() throws Exception {
@@ -68,7 +76,8 @@ public class DozeScreenStateTest extends SysuiTestCase {
         mServiceFake = new DozeServiceFake();
         mHandlerFake = new FakeHandler(Looper.getMainLooper());
         mWakeLock = new WakeLockFake();
-        mScreen = new DozeScreenState(mServiceFake, mHandlerFake, mDozeParameters, mWakeLock);
+        mScreen = new DozeScreenState(mServiceFake, mHandlerFake, mDozeHost, mDozeParameters,
+                mWakeLock);
     }
 
     @Test
@@ -181,6 +190,22 @@ public class DozeScreenStateTest extends SysuiTestCase {
         mScreen.transitionTo(DOZE_AOD, FINISH);
 
         assertThat(mWakeLock.isHeld(), is(false));
+    }
+
+    @Test
+    public void test_animatesPausing() {
+        ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+        doAnswer(invocation -> null).when(mDozeHost).prepareForGentleSleep(captor.capture());
+        mHandlerFake.setMode(QUEUEING);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD_PAUSING);
+        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
+
+        mHandlerFake.dispatchQueuedMessages();
+        verify(mDozeHost).prepareForGentleSleep(eq(captor.getValue()));
+        captor.getValue().run();
+        assertEquals(Display.STATE_OFF, mServiceFake.screenState);
     }
 
 }
