@@ -113,6 +113,21 @@ public final class ConfigUpdate {
     public static final String ACTION_UPDATE_CARRIER_ID_DB
             = "android.os.action.UPDATE_CARRIER_ID_DB";
 
+    /**
+    * Broadcast intent action indicating that the updated emergency number database is available.
+    * <p>Extra: "VERSION" the numeric version of the new data. Devices should only install if the
+    * update version is newer than the current one.
+    * <p>Extra: "REQUIRED_HASH" the hash of the current update data.
+    * <p>Input: {@link android.content.Intent#getData} is URI of downloaded emergency number file.
+    * Devices should pick up the downloaded file and persist to the database
+    * {@code com.android.internal.telephony.emergency.EmergencyNumberTracker}.
+    *
+    * @hide
+    */
+    @SystemApi
+    public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB =
+            "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
+
     private ConfigUpdate() {
     }
 }
