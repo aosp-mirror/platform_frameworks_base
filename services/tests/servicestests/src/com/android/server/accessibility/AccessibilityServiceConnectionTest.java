@@ -41,12 +41,14 @@ import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.view.Display;
 
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -65,9 +67,14 @@ public class AccessibilityServiceConnectionTest {
             "com.android.server.accessibility", "AccessibilityServiceConnectionTest");
     static final int SERVICE_ID = 42;
 
+    // Mock package-private AccessibilityUserState class
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
     AccessibilityServiceConnection mConnection;
 
-    @Mock AccessibilityManagerService.UserState mMockUserState;
+    @Mock AccessibilityUserState mMockUserState;
     @Mock Context mMockContext;
     @Mock AccessibilityServiceInfo mMockServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;

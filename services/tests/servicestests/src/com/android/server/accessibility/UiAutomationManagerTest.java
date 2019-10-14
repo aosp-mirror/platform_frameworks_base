@@ -56,7 +56,6 @@ public class UiAutomationManagerTest {
 
     MessageCapturingHandler mMessageCapturingHandler;
 
-    @Mock AccessibilityManagerService.UserState mMockUserState;
     @Mock Context mMockContext;
     @Mock AccessibilityServiceInfo mMockServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
