@@ -884,21 +884,24 @@ public class ResourcesManager {
      * @param activityToken optional token to clean up Activity resources
      */
     private void cleanupReferences(IBinder activityToken) {
-        if (activityToken != null) {
-            ActivityResources activityResources = mActivityResourceReferences.get(activityToken);
-            if (activityResources != null) {
-                ArrayUtils.unstableRemoveIf(activityResources.activityResources,
-                        sEmptyReferencePredicate);
+        synchronized (this) {
+            if (activityToken != null) {
+                ActivityResources activityResources = mActivityResourceReferences.get(
+                        activityToken);
+                if (activityResources != null) {
+                    ArrayUtils.unstableRemoveIf(activityResources.activityResources,
+                            sEmptyReferencePredicate);
+                }
+            } else {
+                ArrayUtils.unstableRemoveIf(mResourceReferences, sEmptyReferencePredicate);
             }
-        } else {
-            ArrayUtils.unstableRemoveIf(mResourceReferences, sEmptyReferencePredicate);
-        }
 
-        for (int index = mResourcesWithLoaders.size() - 1; index >= 0; index--) {
-            ResourcesWithLoaders resourcesWithLoaders = mResourcesWithLoaders.get(index);
-            Resources resources = resourcesWithLoaders.resources();
-            if (resources == null) {
-                mResourcesWithLoaders.remove(index);
+            for (int index = mResourcesWithLoaders.size() - 1; index >= 0; index--) {
+                ResourcesWithLoaders resourcesWithLoaders = mResourcesWithLoaders.get(index);
+                Resources resources = resourcesWithLoaders.resources();
+                if (resources == null) {
+                    mResourcesWithLoaders.remove(index);
+                }
             }
         }
     }
