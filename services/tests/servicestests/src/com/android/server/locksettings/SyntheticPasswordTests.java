@@ -16,7 +16,9 @@
 
 package com.android.server.locksettings;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 
@@ -102,7 +104,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final LockscreenCredential password = newPassword("testPasswordMigration-password");
 
         disableSyntheticPassword();
-        mService.setLockCredential(password, nonePassword(), PRIMARY_USER_ID, false);
+        assertTrue(mService.setLockCredential(password, nonePassword(), PRIMARY_USER_ID, false));
         long sid = mGateKeeperService.getSecureUserId(PRIMARY_USER_ID);
         final byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
         enableSyntheticPassword();
@@ -125,6 +127,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
             throws RemoteException {
         enableSyntheticPassword();
         mService.setLockCredential(password, nonePassword(), userId, false);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(userId));
+        assertTrue(mService.isSyntheticPasswordBasedCredential(userId));
     }
 
     public void testSyntheticPasswordChangeCredential() throws RemoteException {
@@ -212,7 +216,6 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     public void testNoSyntheticPasswordOrCredentialDoesNotPassAuthSecret() throws RemoteException {
-        reset(mAuthSecretService);
         mService.onUnlockUser(PRIMARY_USER_ID);
         flushHandlerTasks();
         verify(mAuthSecretService, never()).primaryUserCredential(any(ArrayList.class));
@@ -413,6 +416,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         initializeCredentialUnderSP(newPassword("password"), PRIMARY_USER_ID);
         assertTrue(mService.setLockCredential(nonePassword(), newPassword("password"),
                 PRIMARY_USER_ID, false));
+        assertTrue(mService.isSyntheticPasswordBasedCredential(PRIMARY_USER_ID));
 
         long handle = mLocalService.addEscrowToken(token, PRIMARY_USER_ID, null);
         assertTrue(mLocalService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
@@ -468,7 +472,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         } catch (UnsupportedOperationException e) {
             // Success - the exception was expected.
         }
-        assertFalse(mService.havePassword(PRIMARY_USER_ID));
+        assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(PRIMARY_USER_ID));
 
         try {
             mLocalService.setLockCredentialWithToken(pattern, handle, token, PRIMARY_USER_ID);
@@ -476,7 +480,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         } catch (UnsupportedOperationException e) {
             // Success - the exception was expected.
         }
-        assertFalse(mService.havePattern(PRIMARY_USER_ID));
+        assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(PRIMARY_USER_ID));
     }
 
     public void testGetHashFactorPrimaryUser() throws RemoteException {
@@ -514,7 +518,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         data.scryptN = 11;
         data.scryptR = 22;
         data.scryptP = 33;
-        data.passwordType = CREDENTIAL_TYPE_PASSWORD;
+        data.credentialType = CREDENTIAL_TYPE_PASSWORD;
         data.salt = PAYLOAD;
         data.passwordHandle = PAYLOAD2;
 
@@ -523,7 +527,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(11, deserialized.scryptN);
         assertEquals(22, deserialized.scryptR);
         assertEquals(33, deserialized.scryptP);
-        assertEquals(CREDENTIAL_TYPE_PASSWORD, deserialized.passwordType);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }
@@ -532,7 +536,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // Test that we can deserialize existing PasswordData and don't inadvertently change the
         // wire format.
         byte[] serialized = new byte[] {
-                0, 0, 0, 2, /* CREDENTIAL_TYPE_PASSWORD */
+                0, 0, 0, 2, /* CREDENTIAL_TYPE_PASSWORD_OR_PIN */
                 11, /* scryptN */
                 22, /* scryptR */
                 33, /* scryptP */
@@ -546,7 +550,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertEquals(11, deserialized.scryptN);
         assertEquals(22, deserialized.scryptR);
         assertEquals(33, deserialized.scryptP);
-        assertEquals(CREDENTIAL_TYPE_PASSWORD, deserialized.passwordType);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD_OR_PIN, deserialized.credentialType);
         assertArrayEquals(PAYLOAD, deserialized.salt);
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }

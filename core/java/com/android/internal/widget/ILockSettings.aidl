@@ -50,10 +50,7 @@ interface ILockSettings {
     VerifyCredentialResponse verifyCredential(in LockscreenCredential credential, long challenge, int userId);
     VerifyCredentialResponse verifyTiedProfileChallenge(in LockscreenCredential credential, long challenge, int userId);
     boolean checkVoldPassword(int userId);
-    @UnsupportedAppUsage
-    boolean havePattern(int userId);
-    @UnsupportedAppUsage
-    boolean havePassword(int userId);
+    int getCredentialType(int userId);
     byte[] getHashFactor(in LockscreenCredential currentCredential, int userId);
     void setSeparateProfileChallengeEnabled(int userId, boolean enabled, in LockscreenCredential managedUserPassword);
     boolean getSeparateProfileChallengeEnabled(int userId);

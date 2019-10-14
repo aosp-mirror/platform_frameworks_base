@@ -131,8 +131,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected void verifyPasswordAndUnlock() {
         if (mDismissing) return; // already verified but haven't been dismissed; don't do it again.
 
-        final LockscreenCredential password =
-                LockscreenCredential.createPassword(getPasswordText());
+        final LockscreenCredential password = getEnteredCredential();
         setPasswordEntryInputEnabled(false);
         if (mPendingLockCheck != null) {
             mPendingLockCheck.cancel(false);
@@ -223,7 +222,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected abstract void resetPasswordText(boolean animate, boolean announce);
-    protected abstract CharSequence getPasswordText();
+    protected abstract LockscreenCredential getEnteredCredential();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
     protected abstract void setPasswordEntryInputEnabled(boolean enabled);
 

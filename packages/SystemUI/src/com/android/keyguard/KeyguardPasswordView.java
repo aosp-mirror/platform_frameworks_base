@@ -36,6 +36,7 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.TextViewInputDisabler;
 import com.android.systemui.R;
 
@@ -243,8 +244,8 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected CharSequence getPasswordText() {
-        return mPasswordEntry.getText();
+    protected LockscreenCredential getEnteredCredential() {
+        return LockscreenCredential.createPasswordOrNone(mPasswordEntry.getText());
     }
 
     @Override

@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
 
 /**
@@ -167,8 +168,8 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected CharSequence getPasswordText() {
-        return mPasswordEntry.getText();
+    protected LockscreenCredential getEnteredCredential() {
+        return LockscreenCredential.createPinOrNone(mPasswordEntry.getText());
     }
 
     @Override

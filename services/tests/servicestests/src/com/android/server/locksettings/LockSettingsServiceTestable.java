@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.IActivityManager;
 import android.app.admin.DeviceStateCache;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.os.Handler;
@@ -52,12 +53,14 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
         private UserManagerInternal mUserManagerInternal;
         private DeviceStateCache mDeviceStateCache;
+        private FakeSettings mSettings;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
                 IActivityManager activityManager, LockPatternUtils lockPatternUtils,
                 IStorageManager storageManager, SyntheticPasswordManager spManager,
                 FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager,
-                UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache) {
+                UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache,
+                FakeSettings settings) {
             super(context);
             mLockSettingsStorage = storage;
             mKeyStore = keyStore;
@@ -69,6 +72,7 @@ public class LockSettingsServiceTestable extends LockSettingsService {
             mRecoverableKeyStoreManager = recoverableKeyStoreManager;
             mUserManagerInternal = userManagerInternal;
             mDeviceStateCache = deviceStateCache;
+            mSettings = settings;
         }
 
         @Override
@@ -121,6 +125,12 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
+        public int settingsGlobalGetInt(ContentResolver contentResolver, String keyName,
+                int defaultValue) {
+            return mSettings.globalGetInt(keyName);
+        }
+
+        @Override
         public UserManagerInternal getUserManagerInternal() {
             return mUserManagerInternal;
         }
@@ -146,15 +156,18 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
     }
 
+    public MockInjector mInjector;
+
     protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
             LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager,
             SyntheticPasswordManager spManager, IAuthSecret authSecretService,
             FakeGsiService gsiService, RecoverableKeyStoreManager recoverableKeyStoreManager,
-            UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache) {
+            UserManagerInternal userManagerInternal, DeviceStateCache deviceStateCache,
+            FakeSettings settings) {
         super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
                 storageManager, spManager, gsiService,
-                recoverableKeyStoreManager, userManagerInternal, deviceStateCache));
+                recoverableKeyStoreManager, userManagerInternal, deviceStateCache, settings));
         mGateKeeperService = gatekeeper;
         mAuthSecretService = authSecretService;
     }

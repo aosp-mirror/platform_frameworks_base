@@ -243,9 +243,7 @@ class LockSettingsShellCommand extends ShellCommand {
     }
 
     private boolean checkCredential() {
-        final boolean havePassword = mLockPatternUtils.isLockPasswordEnabled(mCurrentUserId);
-        final boolean havePattern = mLockPatternUtils.isLockPatternEnabled(mCurrentUserId);
-        if (havePassword || havePattern) {
+        if (mLockPatternUtils.isSecure(mCurrentUserId)) {
             if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(mCurrentUserId)) {
                 getOutPrintWriter().println("Profile uses unified challenge");
                 return false;

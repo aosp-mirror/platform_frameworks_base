@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -93,8 +94,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         initializeStorageWithCredential(PRIMARY_USER_ID, newPassword("password"), 1234);
         assertTrue(mService.setLockCredential(nonePassword(), newPassword("password"),
                 PRIMARY_USER_ID, false));
-        assertFalse(mService.havePassword(PRIMARY_USER_ID));
-        assertFalse(mService.havePattern(PRIMARY_USER_ID));
+        assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(PRIMARY_USER_ID));
         assertEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
@@ -420,8 +420,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
             // Success - the exception was expected.
         }
 
-        assertFalse(mService.havePassword(userId));
-        assertFalse(mService.havePattern(userId));
+        assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(userId));
     }
 
     private void testChangeCredentials(int userId, LockscreenCredential newCredential,
@@ -441,14 +440,13 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         assertEquals(GateKeeperResponse.RESPONSE_OK, response.getResponseCode());
         if (sid != -1) assertEquals(sid, mGateKeeperService.getSecureUserId(userId));
         if (credential.isPassword()) {
-            assertTrue(mService.havePassword(userId));
-            assertFalse(mService.havePattern(userId));
+            assertEquals(CREDENTIAL_TYPE_PASSWORD, mService.getCredentialType(userId));
+        } else if (credential.isPin()) {
+            assertEquals(CREDENTIAL_TYPE_PIN, mService.getCredentialType(userId));
         } else if (credential.isPattern()) {
-            assertFalse(mService.havePassword(userId));
-            assertTrue(mService.havePattern(userId));
+            assertEquals(CREDENTIAL_TYPE_PATTERN, mService.getCredentialType(userId));
         } else {
-            assertFalse(mService.havePassword(userId));
-            assertFalse(mService.havePassword(userId));
+            assertEquals(CREDENTIAL_TYPE_NONE, mService.getCredentialType(userId));
         }
         // check for bad credential
         final LockscreenCredential badCredential;
@@ -468,7 +466,7 @@ public class LockSettingsServiceTests extends BaseLockSettingsServiceTests {
         if (mService.shouldMigrateToSyntheticPasswordLocked(userId)) {
             mService.initializeSyntheticPasswordLocked(oldHash, credential, userId);
         } else {
-            if (credential.isPassword()) {
+            if (credential.isPassword() || credential.isPin()) {
                 mStorage.writeCredentialHash(CredentialHash.create(oldHash,
                         LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), userId);
             } else {
