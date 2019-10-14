@@ -241,12 +241,25 @@ message PackageAssociationSourceProcessStatsProto {
     repeated StateStats active_state_stats = 6;
 }
 
-// Next Tag: 3
+// Next Tag: 7
 message PackageAssociationProcessStatsProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Name of the target component.
     optional string component_name = 1;
+
+    // Total count of the times this association appeared.
+    optional int32 total_count = 3;
+
+    // Millisecond uptime total duration this association was around.
+    optional int64 total_duration_ms = 4;
+
+    // Total count of the times this association became actively impacting its target process.
+    optional int32 active_count = 5;
+
+    // Millisecond uptime total duration this association was around.
+    optional int64 active_duration_ms = 6;
+
     // Information on one source in this association.
     repeated PackageAssociationSourceProcessStatsProto sources = 2;
 }
