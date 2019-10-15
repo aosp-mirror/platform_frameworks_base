@@ -120,12 +120,12 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     // TODO: Remove after unification.
     @Override
-    public void onConfigurationChanged(Configuration newParentConfig) {
+    public void onConfigurationChanged(Configuration newParentConfig, boolean forwardToChildren) {
         // Forward configuration changes in cases
         // - children won't get it from TaskRecord
         // - it's a pinned task
-        onConfigurationChanged(newParentConfig,
-                (mTaskRecord == null) || inPinnedWindowingMode() /*forwardToChildren*/);
+        forwardToChildren &= (mTaskRecord == null) || inPinnedWindowingMode();
+        super.onConfigurationChanged(newParentConfig, forwardToChildren);
     }
 
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
