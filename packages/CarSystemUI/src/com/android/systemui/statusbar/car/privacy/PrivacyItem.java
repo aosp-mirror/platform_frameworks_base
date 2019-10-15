@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.car.privacy;
 
+import java.util.Objects;
+
 /**
  * Class for holding the data of each privacy item displayed in {@link OngoingPrivacyDialog}
  */
@@ -42,5 +44,19 @@ public class PrivacyItem {
      */
     public PrivacyType getPrivacyType() {
         return mPrivacyType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PrivacyItem that = (PrivacyItem) o;
+        return mPrivacyType == that.mPrivacyType
+                && mPrivacyApplication.equals(that.mPrivacyApplication);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPrivacyType, mPrivacyApplication);
     }
 }

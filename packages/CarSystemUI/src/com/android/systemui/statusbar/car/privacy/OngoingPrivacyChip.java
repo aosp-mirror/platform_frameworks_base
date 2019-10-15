@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 public class OngoingPrivacyChip extends LinearLayout implements View.OnClickListener {
 
     private Context mContext;
+    private Handler mHandler;
 
     private LinearLayout mIconsContainer;
     private List<PrivacyItem> mPrivacyItems;
@@ -88,6 +89,7 @@ public class OngoingPrivacyChip extends LinearLayout implements View.OnClickList
 
     private void init(Context context) {
         mContext = context;
+        mHandler = new Handler(Looper.getMainLooper());
         mPrivacyItems = new ArrayList<>();
         sAppOpsController = Dependency.get(AppOpsController.class);
         mUserManager = mContext.getSystemService(UserManager.class);
@@ -131,8 +133,7 @@ public class OngoingPrivacyChip extends LinearLayout implements View.OnClickList
     @Override
     public void onClick(View v) {
         updatePrivacyList();
-        Handler mUiHandler = new Handler(Looper.getMainLooper());
-        mUiHandler.post(() -> {
+        mHandler.post(() -> {
             mActivityStarter.postStartActivityDismissingKeyguard(
                     new Intent(Intent.ACTION_REVIEW_ONGOING_PERMISSION_USAGE), 0);
         });
@@ -152,21 +153,17 @@ public class OngoingPrivacyChip extends LinearLayout implements View.OnClickList
     }
 
     private void updatePrivacyList() {
-        mPrivacyItems = mCurrentUserIds.stream()
+        List<PrivacyItem> privacyItems = mCurrentUserIds.stream()
                 .flatMap(item -> sAppOpsController.getActiveAppOpsForUser(item).stream())
                 .filter(Objects::nonNull)
                 .map(item -> toPrivacyItem(item))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        mPrivacyDialogBuilder = new PrivacyDialogBuilder(mContext, mPrivacyItems);
-
-        Handler refresh = new Handler(Looper.getMainLooper());
-        refresh.post(new Runnable() {
-            @Override
-            public void run() {
-                updateView();
-            }
-        });
+        if (!privacyItems.equals(mPrivacyItems)) {
+            mPrivacyItems = privacyItems;
+            mPrivacyDialogBuilder = new PrivacyDialogBuilder(mContext, mPrivacyItems);
+            mHandler.post(this::updateView);
+        }
     }
 
     private PrivacyItem toPrivacyItem(AppOpItem appOpItem) {
