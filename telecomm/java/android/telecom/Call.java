@@ -2048,6 +2048,10 @@ public final class Call {
                 return "DISCONNECTING";
             case STATE_SELECT_PHONE_ACCOUNT:
                 return "SELECT_PHONE_ACCOUNT";
+            case STATE_SIMULATED_RINGING:
+                return "SIMULATED_RINGING";
+            case STATE_AUDIO_PROCESSING:
+                return "AUDIO_PROCESSING";
             default:
                 Log.w(Call.class, "Unknown state %d", state);
                 return "UNKNOWN";
