@@ -117,4 +117,6 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private void reportChange(long changeId, int uid, int state) {
         mChangeReporter.reportChange(uid, changeId, state);
     }
+
+    // TODO(satayev): revert this comment
 }
