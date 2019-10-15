@@ -770,13 +770,13 @@ class ActivityStarter {
         boolean restrictedBgActivity = false;
         if (!abort) {
             try {
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER,
                         "shouldAbortBackgroundActivityStart");
                 restrictedBgActivity = shouldAbortBackgroundActivityStart(callingUid,
                         callingPid, callingPackage, realCallingUid, realCallingPid, callerApp,
                         originatingPendingIntent, allowBackgroundActivityStart, intent);
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }
         }
 
@@ -1401,47 +1401,61 @@ class ActivityStarter {
         final ActivityStack startedActivityStack;
         try {
             mService.deferWindowLayout();
-            result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
+            result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
                     startFlags, doResume, options, inTask, outActivity, restrictedBgActivity);
         } finally {
-            final ActivityStack currentStack = r.getActivityStack();
-            startedActivityStack = currentStack != null ? currentStack : mTargetStack;
-
-            if (ActivityManager.isStartResultSuccessful(result)) {
-                if (startedActivityStack != null) {
-                    // If there is no state change (e.g. a resumed activity is reparented to
-                    // top of another display) to trigger a visibility/configuration checking,
-                    // we have to update the configuration for changing to different display.
-                    final ActivityRecord currentTop =
-                            startedActivityStack.topRunningActivityLocked();
-                    if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
-                        mRootActivityContainer.ensureVisibilityAndConfig(
-                                currentTop, currentTop.getDisplayId(),
-                                true /* markFrozenIfConfigChanged */, false /* deferResume */);
-                    }
-                }
-            } else {
-                // If we are not able to proceed, disassociate the activity from the task.
-                // Leaving an activity in an incomplete state can lead to issues, such as
-                // performing operations without a window container.
-                final ActivityStack stack = mStartActivity.getActivityStack();
-                if (stack != null) {
-                    mStartActivity.finishIfPossible("startActivity", true /* oomAdj */);
-                }
-
-                // Stack should also be detached from display and be removed if it's empty.
-                if (startedActivityStack != null && startedActivityStack.isAttached()
-                        && startedActivityStack.numActivities() == 0
-                        && !startedActivityStack.isActivityTypeHome()) {
-                    startedActivityStack.remove();
-                }
-            }
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+            startedActivityStack = handleStartResult(r, result);
             mService.continueWindowLayout();
         }
 
         postStartActivityProcessing(r, result, startedActivityStack);
 
         return result;
+    }
+
+    /**
+     * If the start result is success, ensure that the configuration of the started activity matches
+     * the current display. Otherwise clean up unassociated containers to avoid leakage.
+     *
+     * @return the stack where the successful started activity resides.
+     */
+    private @Nullable ActivityStack handleStartResult(@NonNull ActivityRecord started, int result) {
+        final ActivityStack currentStack = started.getActivityStack();
+        ActivityStack startedActivityStack = currentStack != null ? currentStack : mTargetStack;
+
+        if (ActivityManager.isStartResultSuccessful(result)) {
+            if (startedActivityStack != null) {
+                // If there is no state change (e.g. a resumed activity is reparented to top of
+                // another display) to trigger a visibility/configuration checking, we have to
+                // update the configuration for changing to different display.
+                final ActivityRecord currentTop = startedActivityStack.topRunningActivityLocked();
+                if (currentTop != null && currentTop.shouldUpdateConfigForDisplayChanged()) {
+                    mRootActivityContainer.ensureVisibilityAndConfig(
+                            currentTop, currentTop.getDisplayId(),
+                            true /* markFrozenIfConfigChanged */, false /* deferResume */);
+                }
+            }
+            return startedActivityStack;
+        }
+
+        // If we are not able to proceed, disassociate the activity from the task. Leaving an
+        // activity in an incomplete state can lead to issues, such as performing operations
+        // without a window container.
+        final ActivityStack stack = mStartActivity.getActivityStack();
+        if (stack != null) {
+            mStartActivity.finishIfPossible("startActivity", true /* oomAdj */);
+        }
+
+        // Stack should also be detached from display and be removed if it's empty.
+        if (startedActivityStack != null && startedActivityStack.isAttached()
+                && startedActivityStack.numActivities() == 0
+                && !startedActivityStack.isActivityTypeHome()) {
+            startedActivityStack.remove();
+            startedActivityStack = null;
+        }
+        return startedActivityStack;
     }
 
     /**
@@ -1469,7 +1483,7 @@ class ActivityStarter {
     }
 
     // Note: This method should only be called from {@link startActivity}.
-    private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
+    private int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
             ActivityRecord[] outActivity, boolean restrictedBgActivity) {
@@ -1592,7 +1606,7 @@ class ActivityStarter {
                 // accordingly.
                 if (mTargetStack.isFocusable()
                         && !mRootActivityContainer.isTopDisplayFocusedStack(mTargetStack)) {
-                    mTargetStack.moveToFront("startActivityUnchecked");
+                    mTargetStack.moveToFront("startActivityInner");
                 }
                 mRootActivityContainer.resumeFocusedStacksTopActivities(
                         mTargetStack, mStartActivity, mOptions);
@@ -1873,7 +1887,7 @@ class ActivityStarter {
                     mTargetStack = computeStackFocus(mSourceRecord, false /* newTask */,
                             mLaunchFlags, mOptions);
                     mTargetStack.addTask(targetTask,
-                            !mLaunchTaskBehind /* toTop */, "startActivityUnchecked");
+                            !mLaunchTaskBehind /* toTop */, "complyActivityFlags");
                 }
             }
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) == 0 && !mAddingToTask

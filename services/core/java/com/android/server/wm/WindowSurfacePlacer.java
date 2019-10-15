@@ -23,7 +23,6 @@ import static com.android.server.wm.WindowManagerService.H.REPORT_WINDOWS_CHANGE
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 
 import android.os.Debug;
-import android.os.Trace;
 import android.util.Slog;
 
 import java.io.PrintWriter;
@@ -52,15 +51,19 @@ class WindowSurfacePlacer {
     /** The number of layout requests when deferring. */
     private int mDeferredRequests;
 
-    private final Runnable mPerformSurfacePlacement;
-
-    public WindowSurfacePlacer(WindowManagerService service) {
-        mService = service;
-        mPerformSurfacePlacement = () -> {
+    private class Traverser implements Runnable {
+        @Override
+        public void run() {
             synchronized (mService.mGlobalLock) {
                 performSurfacePlacement();
             }
-        };
+        }
+    }
+
+    private final Traverser mPerformSurfacePlacement = new Traverser();
+
+    WindowSurfacePlacer(WindowManagerService service) {
+        mService = service;
     }
 
     /**
@@ -152,7 +155,6 @@ class WindowSurfacePlacer {
             return;
         }
 
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "wmLayout");
         mInLayout = true;
 
         boolean recoveringMemory = false;
@@ -198,8 +200,6 @@ class WindowSurfacePlacer {
             mInLayout = false;
             Slog.wtf(TAG, "Unhandled exception while laying out windows", e);
         }
-
-        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     void debugLayoutRepeats(final String msg, int pendingLayoutChanges) {

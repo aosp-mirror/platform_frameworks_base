@@ -33,7 +33,7 @@ import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.INVALID_DISPLAY;
@@ -4342,7 +4342,7 @@ class ActivityStack extends ConfigurationContainer {
             return;
         }
 
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "stack.resize_" + mStackId);
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "stack.resize_" + mStackId);
         mService.deferWindowLayout();
         try {
             // Update override configurations of all tasks in the stack.
@@ -4368,7 +4368,7 @@ class ActivityStack extends ConfigurationContainer {
             }
         } finally {
             mService.continueWindowLayout();
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
