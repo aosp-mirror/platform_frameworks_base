@@ -577,8 +577,6 @@ public class PackageParser {
      */
     public interface Callback {
         boolean hasFeature(String feature);
-        String[] getOverlayPaths(String targetPackageName, String targetPath);
-        String[] getOverlayApks(String targetPackageName);
     }
 
     /**
@@ -594,14 +592,6 @@ public class PackageParser {
 
         @Override public boolean hasFeature(String feature) {
             return mPm.hasSystemFeature(feature);
-        }
-
-        @Override public String[] getOverlayPaths(String targetPackageName, String targetPath) {
-            return null;
-        }
-
-        @Override public String[] getOverlayApks(String targetPackageName) {
-            return null;
         }
     }
 
@@ -1195,19 +1185,7 @@ public class PackageParser {
             }
 
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
-            Package p = fromCacheEntry(bytes);
-            if (mCallback != null) {
-                String[] overlayApks = mCallback.getOverlayApks(p.packageName);
-                if (overlayApks != null && overlayApks.length > 0) {
-                    for (String overlayApk : overlayApks) {
-                        // If a static RRO is updated, return null.
-                        if (!isCacheUpToDate(new File(overlayApk), cacheFile)) {
-                            return null;
-                        }
-                    }
-                }
-            }
-            return p;
+            return fromCacheEntry(bytes);
         } catch (Throwable e) {
             Slog.w(TAG, "Error reading package cache: ", e);
 
@@ -1381,7 +1359,7 @@ public class PackageParser {
             final Resources res = new Resources(assets, mMetrics, null);
 
             final String[] outError = new String[1];
-            final Package pkg = parseBaseApk(apkPath, res, parser, flags, outError);
+            final Package pkg = parseBaseApk(res, parser, flags, outError);
             if (pkg == null) {
                 throw new PackageParserException(mParseError,
                         apkPath + " (at " + parser.getPositionDescription() + "): " + outError[0]);
@@ -1944,7 +1922,6 @@ public class PackageParser {
      * need to consider whether they should be supported by split APKs and child
      * packages.
      *
-     * @param apkPath The package apk file path
      * @param res The resources from which to resolve values
      * @param parser The manifest parser
      * @param flags Flags how to parse
@@ -1954,8 +1931,7 @@ public class PackageParser {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private Package parseBaseApk(String apkPath, Resources res, XmlResourceParser parser, int flags,
+    private Package parseBaseApk(Resources res, XmlResourceParser parser, int flags,
             String[] outError) throws XmlPullParserException, IOException {
         final String splitName;
         final String pkgName;
@@ -1973,15 +1949,6 @@ public class PackageParser {
         } catch (PackageParserException e) {
             mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
             return null;
-        }
-
-        if (mCallback != null) {
-            String[] overlayPaths = mCallback.getOverlayPaths(pkgName, apkPath);
-            if (overlayPaths != null && overlayPaths.length > 0) {
-                for (String overlayPath : overlayPaths) {
-                    res.getAssets().addOverlayPath(overlayPath);
-                }
-            }
         }
 
         final Package pkg = new Package(pkgName);
