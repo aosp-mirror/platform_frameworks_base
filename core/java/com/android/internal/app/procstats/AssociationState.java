@@ -950,6 +950,14 @@ public final class AssociationState {
 
         proto.write(PackageAssociationProcessStatsProto.COMPONENT_NAME, mName);
 
+        proto.write(PackageAssociationProcessStatsProto.TOTAL_COUNT, mTotalCount);
+        proto.write(PackageAssociationProcessStatsProto.TOTAL_DURATION_MS, getTotalDuration(now));
+        if (mTotalActiveCount != 0) {
+            proto.write(PackageAssociationProcessStatsProto.ACTIVE_COUNT, mTotalActiveCount);
+            proto.write(PackageAssociationProcessStatsProto.ACTIVE_DURATION_MS,
+                    getActiveDuration(now));
+        }
+
         final int NSRC = mSources.size();
         for (int isrc = 0; isrc < NSRC; isrc++) {
             final SourceKey key = mSources.keyAt(isrc);

@@ -3570,10 +3570,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             if (!setVisible) {
-                // Client hides the IME directly.
-                if (mCurClient != null && mCurClient.client != null) {
-                    executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
-                            MSG_APPLY_IME_VISIBILITY, setVisible ? 1 : 0, mCurClient));
+                if (mCurClient != null) {
+                    // IMMS only knows of focused window, not the actual IME target.
+                    // e.g. it isn't aware of any window that has both
+                    // NOT_FOCUSABLE, ALT_FOCUSABLE_IM flags set and can the IME target.
+                    // Send it to window manager to hide IME from IME target window.
+                    // TODO(b/139861270): send to mCurClient.client once IMMS is aware of
+                    // actual IME target.
+                    mWindowManagerInternal.hideIme(mCurClient.selfReportedDisplayId);
                 }
             } else {
                 // Send to window manager to show IME after IME layout finishes.
@@ -4208,7 +4212,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // with other IME windows based on type vs. grouping based on whichever token happens
             // to get selected by the system later on.
             attrs.token = mSwitchingDialogToken;
-            attrs.privateFlags |= LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+            attrs.privateFlags |= LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
             updateSystemUiLocked(mImeWindowVis, mBackDisposition);

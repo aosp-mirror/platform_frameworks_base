@@ -199,8 +199,7 @@ public class InputManagerService extends IInputManager.Stub
             int deviceId, int sourceMask, int sw);
     private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
-    private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel,
-            int displayId);
+    private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativeRegisterInputMonitor(long ptr, InputChannel inputChannel,
             int displayId, boolean isGestureMonitor);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
@@ -551,7 +550,7 @@ public class InputManagerService extends IInputManager.Stub
         }
         inputChannel.setToken(new Binder());
 
-        nativeRegisterInputChannel(mPtr, inputChannel, Display.INVALID_DISPLAY);
+        nativeRegisterInputChannel(mPtr, inputChannel);
     }
 
     /**

@@ -251,6 +251,10 @@ public class InsetsController implements WindowInsetsController {
 
     @Override
     public void hide(@InsetType int types) {
+        hide(types, false /* fromIme */);
+    }
+
+    void hide(@InsetType int types, boolean fromIme) {
         int typesReady = 0;
         final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
@@ -265,7 +269,7 @@ public class InsetsController implements WindowInsetsController {
             }
             typesReady |= InsetsState.toPublicType(consumer.getType());
         }
-        applyAnimation(typesReady, false /* show */, false /* fromIme */);
+        applyAnimation(typesReady, false /* show */, fromIme /* fromIme */);
     }
 
     @Override
@@ -331,42 +335,35 @@ public class InsetsController implements WindowInsetsController {
         boolean isReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
-            // Double check for IME that IME target window has focus.
-            if (consumer.getType() != TYPE_IME || consumer.hasWindowFocus()) {
-                boolean setVisible = !consumer.isVisible();
-                if (setVisible) {
-                    // Show request
-                    switch(consumer.requestShow(fromIme)) {
-                        case ShowResult.SHOW_IMMEDIATELY:
-                            typesReady |= InsetsState.toPublicType(consumer.getType());
-                            break;
-                        case ShowResult.SHOW_DELAYED:
-                            isReady = false;
-                            break;
-                        case ShowResult.SHOW_FAILED:
-                            // IME cannot be shown (since it didn't have focus), proceed
-                            // with animation of other types.
-                            if (mPendingTypesToShow != 0) {
-                                // remove IME from pending because view no longer has focus.
-                                mPendingTypesToShow &= ~InsetsState.toPublicType(TYPE_IME);
-                            }
-                            break;
-                    }
-                } else {
-                    // Hide request
-                    // TODO: Move notifyHidden() to beginning of the hide animation
-                    // (when visibility actually changes using hideDirectly()).
-                    consumer.notifyHidden();
-                    typesReady |= InsetsState.toPublicType(consumer.getType());
+            boolean setVisible = !consumer.isVisible();
+            if (setVisible) {
+                // Show request
+                switch(consumer.requestShow(fromIme)) {
+                    case ShowResult.SHOW_IMMEDIATELY:
+                        typesReady |= InsetsState.toPublicType(consumer.getType());
+                        break;
+                    case ShowResult.SHOW_DELAYED:
+                        isReady = false;
+                        break;
+                    case ShowResult.SHOW_FAILED:
+                        // IME cannot be shown (since it didn't have focus), proceed
+                        // with animation of other types.
+                        if (mPendingTypesToShow != 0) {
+                            // remove IME from pending because view no longer has focus.
+                            mPendingTypesToShow &= ~InsetsState.toPublicType(TYPE_IME);
+                        }
+                        break;
                 }
-                consumers.put(consumer.getType(), consumer);
             } else {
-                // window doesnt have focus, no-op.
-                isReady = false;
-                // TODO: Let the calling app know that window has lost focus and
-                //       show()/hide()/controlWindowInsetsAnimation requests will be ignored.
-                typesReady &= ~InsetsState.toPublicType(consumer.getType());
+                // Hide request
+                // TODO: Move notifyHidden() to beginning of the hide animation
+                // (when visibility actually changes using hideDirectly()).
+                if (!fromIme) {
+                    consumer.notifyHidden();
+                }
+                typesReady |= InsetsState.toPublicType(consumer.getType());
             }
+            consumers.put(consumer.getType(), consumer);
         }
         return new Pair<>(typesReady, isReady);
     }

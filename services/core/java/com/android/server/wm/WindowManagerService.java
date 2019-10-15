@@ -236,6 +236,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowContentFrameStats;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
@@ -7308,6 +7309,16 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 displayContent.getInsetsStateController().getImeSourceProvider()
                         .scheduleShowImePostLayout(imeTarget);
+            }
+        }
+
+        @Override
+        public void hideIme(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc != null && dc.mInputMethodTarget != null) {
+                    dc.mInputMethodTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
+                }
             }
         }
 

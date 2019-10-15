@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.telephony.cdma.CdmaSmsCbProgramData;
 
 /**
  * A service which exposes the cell broadcast handling module to the system.
@@ -69,9 +70,11 @@ public abstract class CellBroadcastService extends Service {
     /**
      * Handle a CDMA cell broadcast SMS message forwarded from the system.
      * @param slotIndex the index of the slot which received the message
-     * @param message the SMS PDU
+     * @param bearerData the CDMA SMS bearer data
+     * @param serviceCategory the CDMA SCPT service category
      */
-    public abstract void onCdmaCellBroadcastSms(int slotIndex, byte[] message);
+    public abstract void onCdmaCellBroadcastSms(int slotIndex, byte[] bearerData,
+            @CdmaSmsCbProgramData.Category int serviceCategory);
 
     /**
      * If overriding this method, call through to the super method for any unknown actions.
@@ -102,11 +105,14 @@ public abstract class CellBroadcastService extends Service {
         /**
          * Handle a CDMA cell broadcast SMS.
          * @param slotIndex the index of the slot which received the broadcast
-         * @param message the SMS message PDU
+         * @param bearerData the CDMA SMS bearer data
+         * @param serviceCategory the CDMA SCPT service category
          */
         @Override
-        public void handleCdmaCellBroadcastSms(int slotIndex, byte[] message) {
-            CellBroadcastService.this.onCdmaCellBroadcastSms(slotIndex, message);
+        public void handleCdmaCellBroadcastSms(int slotIndex, byte[] bearerData,
+                int serviceCategory) {
+            CellBroadcastService.this.onCdmaCellBroadcastSms(slotIndex, bearerData,
+                    serviceCategory);
         }
     }
 }

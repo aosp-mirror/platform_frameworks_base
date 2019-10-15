@@ -17,6 +17,7 @@
 package com.android.internal.content;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -552,6 +553,11 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                     flags |= Document.FLAG_SUPPORTS_DELETE;
                     flags |= Document.FLAG_SUPPORTS_RENAME;
                     flags |= Document.FLAG_SUPPORTS_MOVE;
+
+                    if (shouldBlockFromTree(docId)) {
+                        flags |= Document.FLAG_DIR_BLOCKS_TREE;
+                    }
+
                 } else {
                     flags |= Document.FLAG_SUPPORTS_WRITE;
                     flags |= Document.FLAG_SUPPORTS_DELETE;
@@ -590,6 +596,10 @@ public abstract class FileSystemProvider extends DocumentsProvider {
 
         // Return the row builder just in case any subclass want to add more stuff to it.
         return row;
+    }
+
+    protected boolean shouldBlockFromTree(@NonNull String docId) {
+        return false;
     }
 
     protected boolean typeSupportsMetadata(String mimeType) {

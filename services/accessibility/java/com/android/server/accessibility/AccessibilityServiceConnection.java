@@ -35,7 +35,6 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
 
-import com.android.server.accessibility.AccessibilityManagerService.UserState;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.ref.WeakReference;
@@ -52,13 +51,13 @@ import java.util.Set;
 class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
     /*
-     Holding a weak reference so there isn't a loop of references. UserState keeps lists of bound
-     and binding services. These are freed on user changes, but just in case it somehow gets lost
-     the weak reference will let the memory get GCed.
+     Holding a weak reference so there isn't a loop of references. AccessibilityUserState keeps
+     lists of bound and binding services. These are freed on user changes, but just in case it
+     somehow gets lost the weak reference will let the memory get GCed.
 
      Having the reference be null when being called is a very bad sign, but we check the condition.
     */
-    final WeakReference<UserState> mUserStateWeakReference;
+    final WeakReference<AccessibilityUserState> mUserStateWeakReference;
     final Intent mIntent;
 
     private final Handler mMainHandler;
@@ -66,7 +65,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     private boolean mWasConnectedAndDied;
 
 
-    public AccessibilityServiceConnection(UserState userState, Context context,
+    AccessibilityServiceConnection(AccessibilityUserState userState, Context context,
             ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
@@ -74,7 +73,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             SystemActionPerformer systemActionPerfomer, AccessibilityWindowManager awm) {
         super(context, componentName, accessibilityServiceInfo, id, mainHandler, lock,
                 securityPolicy, systemSupport, windowManagerInternal, systemActionPerfomer, awm);
-        mUserStateWeakReference = new WeakReference<UserState>(userState);
+        mUserStateWeakReference = new WeakReference<AccessibilityUserState>(userState);
         mIntent = new Intent().setComponent(mComponentName);
         mMainHandler = mainHandler;
         mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
@@ -89,13 +88,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     public void bindLocked() {
-        UserState userState = mUserStateWeakReference.get();
+        AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         final long identity = Binder.clearCallingIdentity();
         try {
             int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
                     | Context.BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS;
-            if (userState.getBindInstantServiceAllowed()) {
+            if (userState.getBindInstantServiceAllowedLocked()) {
                 flags |= Context.BIND_ALLOW_INSTANT;
             }
             if (mService == null && mContext.bindServiceAsUser(
@@ -109,7 +108,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     public void unbindLocked() {
         mContext.unbindService(this);
-        UserState userState = mUserStateWeakReference.get();
+        AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
         userState.removeServiceLocked(this);
         mSystemSupport.getMagnificationController().resetAllIfNeeded(mId);
@@ -123,7 +122,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     @Override
     public void disableSelf() {
         synchronized (mLock) {
-            UserState userState = mUserStateWeakReference.get();
+            AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
             if (userState.getEnabledServicesLocked().remove(mComponentName)) {
                 final long identity = Binder.clearCallingIdentity();
@@ -156,7 +155,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 }
             }
             mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
-            UserState userState = mUserStateWeakReference.get();
+            AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
             userState.addServiceLocked(this);
             mSystemSupport.onClientChangeLocked(false);
@@ -177,7 +176,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     private void initializeService() {
         IAccessibilityServiceClient serviceInterface = null;
         synchronized (mLock) {
-            UserState userState = mUserStateWeakReference.get();
+            AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
             Set<ComponentName> bindingServices = userState.getBindingServicesLocked();
             if (bindingServices.contains(mComponentName) || mWasConnectedAndDied) {
@@ -240,7 +239,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
-            final UserState userState = mUserStateWeakReference.get();
+            final AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return false;
             return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
         }
@@ -248,8 +247,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public int getSoftKeyboardShowMode() {
-        final UserState userState = mUserStateWeakReference.get();
-        return (userState != null) ? userState.getSoftKeyboardShowMode() : 0;
+        final AccessibilityUserState userState = mUserStateWeakReference.get();
+        return (userState != null) ? userState.getSoftKeyboardShowModeLocked() : 0;
     }
 
     @Override
@@ -258,7 +257,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!hasRightsToCurrentUserLocked()) {
                 return false;
             }
-            UserState userState = mUserStateWeakReference.get();
+            AccessibilityUserState userState = mUserStateWeakReference.get();
             return (userState != null) && isAccessibilityButtonAvailableLocked(userState);
         }
     }
@@ -273,7 +272,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 return;
             }
             mWasConnectedAndDied = true;
-            UserState userState = mUserStateWeakReference.get();
+            AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState != null) {
                 userState.serviceDisconnectedLocked(this);
             }
@@ -283,7 +282,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
     }
 
-    public boolean isAccessibilityButtonAvailableLocked(UserState userState) {
+    public boolean isAccessibilityButtonAvailableLocked(AccessibilityUserState userState) {
         // If the service does not request the accessibility button, it isn't available
         if (!mRequestAccessibilityButton) {
             return false;
@@ -295,8 +294,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         }
 
         // If magnification is on and assigned to the accessibility button, services cannot be
-        if (userState.mIsNavBarMagnificationEnabled
-                && userState.mIsNavBarMagnificationAssignedToAccessibilityButton) {
+        if (userState.isNavBarMagnificationEnabledLocked()
+                && userState.isNavBarMagnificationAssignedToAccessibilityButtonLocked()) {
             return false;
         }
 
@@ -314,13 +313,14 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             return true;
         } else {
             // With more than one active service, we derive the target from the user's settings
-            if (userState.mServiceAssignedToAccessibilityButton == null) {
+            if (userState.getServiceAssignedToAccessibilityButtonLocked() == null) {
                 // If the user has not made an assignment, we treat the button as available to
                 // all services until the user interacts with the button to make an assignment
                 return true;
             } else {
                 // If an assignment was made, it defines availability
-                return mComponentName.equals(userState.mServiceAssignedToAccessibilityButton);
+                return mComponentName.equals(
+                        userState.getServiceAssignedToAccessibilityButtonLocked());
             }
         }
     }

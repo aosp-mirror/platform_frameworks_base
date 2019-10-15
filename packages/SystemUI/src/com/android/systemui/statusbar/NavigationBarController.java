@@ -233,11 +233,13 @@ public class NavigationBarController implements Callbacks {
     }
 
     /** @return {@link NavigationBarFragment} on the default display. */
+    @Nullable
     public NavigationBarFragment getDefaultNavigationBarFragment() {
         return mNavigationBars.get(DEFAULT_DISPLAY);
     }
 
     /** @return {@link AssistHandleViewController} (only on the default display). */
+    @Nullable
     public AssistHandleViewController getAssistHandlerViewController() {
         NavigationBarFragment navBar = getDefaultNavigationBarFragment();
         return navBar == null ? null : navBar.getAssistHandlerViewController();

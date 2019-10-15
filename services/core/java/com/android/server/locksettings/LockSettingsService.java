@@ -118,6 +118,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.CredentialType;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -2058,7 +2059,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             @UserIdInt int userHandle) {
         synchronized (this) {
             mUserPasswordMetrics.put(userHandle,
-                    PasswordMetrics.computeForCredential(credentialType, password));
+                    PasswordMetrics.computeForCredential(
+                            LockscreenCredential.createRaw(credentialType, password)));
         }
     }
 

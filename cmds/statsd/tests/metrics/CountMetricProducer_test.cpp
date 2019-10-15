@@ -396,6 +396,26 @@ TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
             std::ceil(1.0 * event7.GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec));
 }
 
+TEST(CountMetricProducerTest, TestOneWeekTimeUnit) {
+    CountMetric metric;
+    metric.set_id(1);
+    metric.set_bucket(ONE_WEEK);
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    int64_t oneDayNs = 24 * 60 * 60 * 1e9;
+    int64_t fiveWeeksNs = 5 * 7 * oneDayNs;
+
+    CountMetricProducer countProducer(
+            kConfigKey, metric, -1 /* meaning no condition */, wizard, oneDayNs, fiveWeeksNs);
+
+    int64_t fiveWeeksOneDayNs = fiveWeeksNs + oneDayNs;
+
+    EXPECT_EQ(fiveWeeksNs, countProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(4, countProducer.mCurrentBucketNum);
+    EXPECT_EQ(fiveWeeksOneDayNs, countProducer.getCurrentBucketEndTimeNs());
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

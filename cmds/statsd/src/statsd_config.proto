@@ -44,6 +44,7 @@ enum TimeUnit {
   SIX_HOURS = 7;
   TWELVE_HOURS = 8;
   ONE_DAY = 9;
+  ONE_WEEK = 10;
   CTS = 1000;
 }
 

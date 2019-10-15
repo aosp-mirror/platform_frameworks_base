@@ -251,6 +251,7 @@ import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
@@ -5222,28 +5223,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // back in to the service.
         final long ident = mInjector.binderClearCallingIdentity();
         final boolean result;
+        final LockscreenCredential newCredential =
+                LockscreenCredential.createPasswordOrNone(password);
         try {
             if (token == null) {
                 // This is the legacy reset password for DPM. Here we want to be able to override
                 // the old device password without necessarily knowing it.
-                if (!TextUtils.isEmpty(password)) {
-                    mLockPatternUtils.saveLockPassword(password.getBytes(), null, quality,
-                            userHandle, /*allowUntrustedChange */true);
-                } else {
-                    mLockPatternUtils.clearLock(null, userHandle,
-                            /*allowUntrustedChange */ true);
-                }
+                mLockPatternUtils.setLockCredential(
+                        newCredential,
+                        LockscreenCredential.createNone(),
+                        userHandle, /*allowUntrustedChange */true);
                 result = true;
             } else {
-                if (!TextUtils.isEmpty(password)) {
-                    result = mLockPatternUtils.setLockCredentialWithToken(password.getBytes(),
-                            LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
-                            quality, tokenHandle, token, userHandle);
-                } else {
-                    result = mLockPatternUtils.setLockCredentialWithToken(null,
-                            LockPatternUtils.CREDENTIAL_TYPE_NONE,
-                            quality, tokenHandle, token, userHandle);
-                }
+                result = mLockPatternUtils.setLockCredentialWithToken(newCredential, tokenHandle,
+                        token, userHandle);
             }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {

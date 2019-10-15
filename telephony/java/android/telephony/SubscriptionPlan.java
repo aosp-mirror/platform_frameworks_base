@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.NetworkType;
 import android.util.Range;
 import android.util.RecurrenceRule;
 
@@ -33,6 +34,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Period;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -80,6 +82,8 @@ public final class SubscriptionPlan implements Parcelable {
     private int dataLimitBehavior = LIMIT_BEHAVIOR_UNKNOWN;
     private long dataUsageBytes = BYTES_UNKNOWN;
     private long dataUsageTime = TIME_UNKNOWN;
+    private @NetworkType int[] networkTypes;
+    private long networkTypesBitMask;
 
     private SubscriptionPlan(RecurrenceRule cycleRule) {
         this.cycleRule = Preconditions.checkNotNull(cycleRule);
@@ -93,6 +97,7 @@ public final class SubscriptionPlan implements Parcelable {
         dataLimitBehavior = source.readInt();
         dataUsageBytes = source.readLong();
         dataUsageTime = source.readLong();
+        networkTypes = source.createIntArray();
     }
 
     @Override
@@ -109,6 +114,7 @@ public final class SubscriptionPlan implements Parcelable {
         dest.writeInt(dataLimitBehavior);
         dest.writeLong(dataUsageBytes);
         dest.writeLong(dataUsageTime);
+        dest.writeIntArray(networkTypes);
     }
 
     @Override
@@ -121,13 +127,14 @@ public final class SubscriptionPlan implements Parcelable {
                 .append(" dataLimitBehavior=").append(dataLimitBehavior)
                 .append(" dataUsageBytes=").append(dataUsageBytes)
                 .append(" dataUsageTime=").append(dataUsageTime)
+                .append(" networkTypes=").append(Arrays.toString(networkTypes))
                 .append("}").toString();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(cycleRule, title, summary, dataLimitBytes, dataLimitBehavior,
-                dataUsageBytes, dataUsageTime);
+                dataUsageBytes, dataUsageTime, Arrays.hashCode(networkTypes));
     }
 
     @Override
@@ -140,7 +147,8 @@ public final class SubscriptionPlan implements Parcelable {
                     && dataLimitBytes == other.dataLimitBytes
                     && dataLimitBehavior == other.dataLimitBehavior
                     && dataUsageBytes == other.dataUsageBytes
-                    && dataUsageTime == other.dataUsageTime;
+                    && dataUsageTime == other.dataUsageTime
+                    && Arrays.equals(networkTypes, other.networkTypes);
         }
         return false;
     }
@@ -201,6 +209,32 @@ public final class SubscriptionPlan implements Parcelable {
      */
     public @CurrentTimeMillisLong long getDataUsageTime() {
         return dataUsageTime;
+    }
+
+    /**
+     * Return an array containing all {@link NetworkType}s this SubscriptionPlan applies to.
+     * A null array means this SubscriptionPlan applies to all network types.
+     */
+    public @Nullable @NetworkType int[] getNetworkTypes() {
+        return networkTypes;
+    }
+
+    /**
+     * Return the networkTypes array converted to a {@link TelephonyManager.NetworkTypeBitMask}
+     * @hide
+     */
+    public long getNetworkTypesBitMask() {
+        // calculate bitmask the first time and save for future calls
+        if (networkTypesBitMask == 0) {
+            if (networkTypes == null) {
+                networkTypesBitMask = ~0;
+            } else {
+                for (int networkType : networkTypes) {
+                    networkTypesBitMask |= TelephonyManager.getBitMaskForNetworkType(networkType);
+                }
+            }
+        }
+        return networkTypesBitMask;
     }
 
     /**
@@ -333,6 +367,25 @@ public final class SubscriptionPlan implements Parcelable {
             }
             plan.dataUsageBytes = dataUsageBytes;
             plan.dataUsageTime = dataUsageTime;
+            return this;
+        }
+
+        /**
+         * Set the network types this SubscriptionPlan applies to.
+         * The developer must supply at least one plan that applies to all network types (default),
+         * and all additional plans may not include a particular network type more than once.
+         * Plan selection will prefer plans that have specific network types defined
+         * over plans that apply to all network types.
+         *
+         * @param networkTypes a set of all {@link NetworkType}s that apply to this plan.
+         *            A null value or empty array means the plan applies to all network types.
+         */
+        public @NonNull Builder setNetworkTypes(@Nullable @NetworkType int[] networkTypes) {
+            if (networkTypes == null || networkTypes.length == 0) {
+                plan.networkTypes = null;
+            } else {
+                plan.networkTypes = networkTypes;
+            }
             return this;
         }
     }

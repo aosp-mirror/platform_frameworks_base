@@ -80,6 +80,10 @@ public class BaseIWindow extends IWindow.Stub {
     }
 
     @Override
+    public void hideInsets(@InsetType int types, boolean fromIme)  throws RemoteException {
+    }
+
+    @Override
     public void moved(int newX, int newY) {
     }
 

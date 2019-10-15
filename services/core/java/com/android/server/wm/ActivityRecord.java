@@ -144,10 +144,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutLocked;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.ActivityTaskManagerService.getInputDispatchingTimeoutLocked;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -318,6 +318,7 @@ final class ActivityRecord extends AppWindowToken {
     ArrayList<ResultInfo> results; // pending ActivityResult objs we have received
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
     ArrayList<ReferrerIntent> newIntents; // any pending new intents for single-top mode
+    Intent mLastNewIntent;  // the last new intent we delivered to client
     ActivityOptions pendingOptions; // most recently given options
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
@@ -2844,6 +2845,9 @@ final class ActivityRecord extends AppWindowToken {
         }
         idle = false;
         results = null;
+        if (newIntents != null && newIntents.size() > 0) {
+            mLastNewIntent = newIntents.get(newIntents.size() - 1);
+        }
         newIntents = null;
         stopped = false;
 
@@ -4198,12 +4202,19 @@ final class ActivityRecord extends AppWindowToken {
             return true;
         }
 
-        // Restrict task snapshot starting window to launcher start, or there is no intent at all
-        // (eg. task being brought to front). If the intent is something else, likely the app is
-        // going to show some specific page or view, instead of what's left last time.
+        // Restrict task snapshot starting window to launcher start, or is same as the last
+        // delivered intent, or there is no intent at all (eg. task being brought to front). If
+        // the intent is something else, likely the app is going to show some specific page or
+        // view, instead of what's left last time.
         for (int i = newIntents.size() - 1; i >= 0; i--) {
             final Intent intent = newIntents.get(i);
-            if (intent != null && !ActivityRecord.isMainIntent(intent)) {
+            if (intent == null || ActivityRecord.isMainIntent(intent)) {
+                continue;
+            }
+
+            final boolean sameIntent = mLastNewIntent != null ? mLastNewIntent.filterEquals(intent)
+                    : this.intent.filterEquals(intent);
+            if (!sameIntent || intent.getExtras() != null) {
                 return false;
             }
         }

@@ -33,4 +33,13 @@ interface InsetsControlTarget {
      */
     default void showInsets(@InsetType int types, boolean fromIme) {
     }
+
+    /**
+     * Instructs the control target to hide inset sources.
+     *
+     * @param types to specify which types of insets source window should be hidden.
+     * @param fromIme {@code true} if IME hide request originated from {@link InputMethodService}.
+     */
+    default void hideInsets(@InsetType int types, boolean fromIme) {
+    }
 }

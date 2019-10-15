@@ -16,6 +16,7 @@
 
 package com.android.externalstorage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.usage.StorageStatsManager;
 import android.content.ContentResolver;
@@ -296,6 +297,53 @@ public class ExternalStorageProvider extends FileSystemProvider {
 
     private static String[] resolveRootProjection(String[] projection) {
         return projection != null ? projection : DEFAULT_ROOT_PROJECTION;
+    }
+
+    /**
+     * Check that the directory is the root of storage or blocked file from tree.
+     *
+     * @param docId the docId of the directory to be checked
+     * @return true, should be blocked from tree. Otherwise, false.
+     */
+    @Override
+    protected boolean shouldBlockFromTree(@NonNull String docId) {
+        try {
+            final File dir = getFileForDocId(docId, true /* visible */).getCanonicalFile();
+            if (!dir.isDirectory()) {
+                return false;
+            }
+
+            final String path = dir.getAbsolutePath();
+
+            // Block Download folder from tree
+            if (MediaStore.Downloads.isDownloadDir(path)) {
+                return true;
+            }
+
+            final ArrayMap<String, RootInfo> roots = new ArrayMap<>();
+
+            synchronized (mRootsLock) {
+                roots.putAll(mRoots);
+            }
+
+            // block root of storage
+            for (int i = 0; i < roots.size(); i++) {
+                RootInfo rootInfo = roots.valueAt(i);
+                // skip home root
+                if (TextUtils.equals(rootInfo.rootId, ROOT_ID_HOME)) {
+                    continue;
+                }
+
+                // block the root of storage
+                if (TextUtils.equals(path, rootInfo.visiblePath.getAbsolutePath())) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (IOException e) {
+            throw new IllegalArgumentException(
+                    "Failed to determine if " + docId + " should block from tree " + ": " + e);
+        }
     }
 
     @Override
