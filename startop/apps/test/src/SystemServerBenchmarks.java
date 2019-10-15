@@ -18,6 +18,7 @@ package com.android.startop.test;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -157,6 +158,14 @@ class SystemServerBenchmarks {
         ActivityManager am = (ActivityManager) parent.getSystemService(Context.ACTIVITY_SERVICE);
         benchmarks.addBenchmark("getRunningAppProcesses", () -> {
             am.getRunningAppProcesses();
+        });
+
+        // We use PendingIntent.getCreatorPackage, since
+        //  getPackageIntentForSender is not public to us, but getCreatorPackage
+        //  is just a thin wrapper around it.
+        PendingIntent pi = PendingIntent.getActivity(parent, 0, new Intent(), 0);
+        benchmarks.addBenchmark("getPackageIntentForSender", () -> {
+            pi.getCreatorPackage();
         });
     }
 
