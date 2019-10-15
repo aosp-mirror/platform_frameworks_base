@@ -808,15 +808,25 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
 
         boolean isKeyboardVisible = (vis & InputMethodService.IME_VISIBLE) != 0;
-        if (!isKeyboardVisible) {
-            attachBottomNavBarWindow();
-        } else {
-            detachBottomNavBarWindow();
-        }
+        showBottomNavBarWindow(isKeyboardVisible);
     }
 
     private void attachNavBarWindows() {
-        attachBottomNavBarWindow();
+        if (mShowBottom && !mBottomNavBarVisible) {
+            mBottomNavBarVisible = true;
+
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                            | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                            | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                    PixelFormat.TRANSLUCENT);
+            lp.setTitle("CarNavigationBar");
+            lp.windowAnimations = 0;
+            mWindowManager.addView(mNavigationBarWindow, lp);
+        }
 
         if (mShowLeft) {
             int width = mContext.getResources().getDimensionPixelSize(
@@ -854,47 +864,19 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         }
     }
 
-    /**
-     * Attaches the bottom nav bar window. Can be extended to modify the specific behavior of
-     * attaching the bottom nav bar.
-     */
-    protected void attachBottomNavBarWindow() {
+    private void showBottomNavBarWindow(boolean isKeyboardVisible) {
         if (!mShowBottom) {
             return;
         }
 
-        if (mBottomNavBarVisible) {
-            return;
-        }
-        mBottomNavBarVisible = true;
-
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.TRANSLUCENT);
-        lp.setTitle("CarNavigationBar");
-        lp.windowAnimations = 0;
-        mWindowManager.addView(mNavigationBarWindow, lp);
-    }
-
-    /**
-     * Detaches the bottom nav bar window. Can be extended to modify the specific behavior of
-     * detaching the bottom nav bar.
-     */
-    protected void detachBottomNavBarWindow() {
-        if (!mShowBottom) {
+        // If keyboard is visible and bottom nav bar not visible, this is the correct state, so do
+        // nothing. Same with if keyboard is not visible and bottom nav bar is visible.
+        if (isKeyboardVisible ^ mBottomNavBarVisible) {
             return;
         }
 
-        if (!mBottomNavBarVisible) {
-            return;
-        }
-        mBottomNavBarVisible = false;
-        mWindowManager.removeView(mNavigationBarWindow);
+        mNavigationBarWindow.setVisibility(isKeyboardVisible ? View.GONE : View.VISIBLE);
+        mBottomNavBarVisible = !isKeyboardVisible;
     }
 
     private void buildTopBar(int layout) {
