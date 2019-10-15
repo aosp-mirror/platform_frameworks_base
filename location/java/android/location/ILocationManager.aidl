@@ -42,11 +42,11 @@ import com.android.internal.location.ProviderProperties;
 interface ILocationManager
 {
     void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
-            in PendingIntent intent, String packageName);
+            in PendingIntent intent, String packageName, String listenerIdentifier);
     void removeUpdates(in ILocationListener listener, in PendingIntent intent, String packageName);
 
     void requestGeofence(in LocationRequest request, in Geofence geofence,
-            in PendingIntent intent, String packageName);
+            in PendingIntent intent, String packageName, String listenerIdentifier);
     void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
 
     Location getLastLocation(in LocationRequest request, String packageName);
@@ -64,22 +64,23 @@ interface ILocationManager
 
     boolean sendNiResponse(int notifId, int userResponse);
 
-    boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener, in String packageName);
+    boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener,
+             String packageName, String listenerIdentifier);
     void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections,
             in String packageName);
     long getGnssCapabilities(in String packageName);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
-    boolean addGnssNavigationMessageListener(
-            in IGnssNavigationMessageListener listener,
-            in String packageName);
+    boolean addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener,
+             String packageName, String listenerIdentifier);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGnssYearOfHardware();
     String getGnssHardwareModelName();
 
     int getGnssBatchSize(String packageName);
-    boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName);
+    boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName,
+             String listenerIdentifier);
     void removeGnssBatchingCallback();
     boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName);
     void flushGnssBatch(String packageName);
