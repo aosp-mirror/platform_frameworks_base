@@ -34,6 +34,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.settings.backup.DeviceSpecificSettings;
 import android.provider.settings.backup.GlobalSettings;
 import android.provider.settings.backup.SecureSettings;
 import android.provider.settings.backup.SystemSettings;
@@ -641,7 +642,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
             whitelist = ArrayUtils.concatElements(String.class, SecureSettings.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS,
-                    Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
+                    DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
             validators = SecureSettingsValidators.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
             whitelist = ArrayUtils.concatElements(String.class, SystemSettings.SETTINGS_TO_BACKUP,
@@ -1000,7 +1001,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                      getContentResolver()
                              .query(Settings.Secure.CONTENT_URI, PROJECTION, null, null, null)) {
             return extractRelevantValues(
-                    cursor, Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
+                    cursor, DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
         }
     }
 
