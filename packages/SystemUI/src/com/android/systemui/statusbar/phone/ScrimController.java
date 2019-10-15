@@ -595,6 +595,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         setScrimAlpha(mScrimInFront, mInFrontAlpha);
         setScrimAlpha(mScrimBehind, mBehindAlpha);
         setScrimAlpha(mScrimForBubble, mBubbleAlpha);
+        // The animation could have all already finished, let's call onFinished just in case
+        onFinished();
         dispatchScrimsVisible();
     }
 
@@ -693,9 +695,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                scrim.setTag(TAG_KEY_ANIM, null);
                 onFinished(lastCallback);
 
-                scrim.setTag(TAG_KEY_ANIM, null);
                 dispatchScrimsVisible();
 
                 if (!mDeferFinishedListener && mOnAnimationFinished != null) {
@@ -759,9 +761,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     }
 
     private void onFinished(Callback callback) {
-        if (!hasReachedFinalState(mScrimBehind)
-            || !hasReachedFinalState(mScrimInFront)
-            || !hasReachedFinalState(mScrimForBubble)) {
+        if (isAnimating(mScrimBehind)
+            || isAnimating(mScrimInFront)
+            || isAnimating(mScrimForBubble)) {
             if (callback != null && callback != mCallback) {
                 // Since we only notify the callback that we're finished once everything has
                 // finished, we need to make sure that any changing callbacks are also invoked
@@ -792,11 +794,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             updateScrimColor(mScrimBehind, mBehindAlpha, mBehindTint);
             updateScrimColor(mScrimForBubble, mBubbleAlpha, mBubbleTint);
         }
-    }
-
-    private boolean hasReachedFinalState(ScrimView scrim) {
-        return scrim.getViewAlpha() == getCurrentScrimAlpha(scrim)
-                && scrim.getTint() == getCurrentScrimTint(scrim);
     }
 
     private boolean isAnimating(View scrim) {
@@ -854,10 +851,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             } else {
                 // update the alpha directly
                 updateScrimColor(scrim, alpha, getCurrentScrimTint(scrim));
-                onFinished();
             }
-        } else {
-            onFinished();
         }
     }
 
