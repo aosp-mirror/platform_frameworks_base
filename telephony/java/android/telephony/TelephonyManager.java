@@ -5486,7 +5486,8 @@ public class TelephonyManager {
                         public void onError(int errorCode, android.os.ParcelableException detail) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
-                                            errorCode, detail.getCause())));
+                                            errorCode,
+                                            detail == null ? null : detail.getCause())));
                         }
                     }, getOpPackageName());
 
@@ -5526,7 +5527,8 @@ public class TelephonyManager {
                         public void onError(int errorCode, android.os.ParcelableException detail) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
-                                            errorCode, detail.getCause())));
+                                            errorCode,
+                                            detail == null ? null : detail.getCause())));
                         }
                     }, getOpPackageName(), workSource);
         } catch (RemoteException ex) {
