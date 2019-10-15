@@ -2858,6 +2858,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device does not have slices implementation.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SLICES_DISABLED = "android.software.slices_disabled";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports device-unique Keystore attestations.  Only available on devices that
      * also support {@link #FEATURE_STRONGBOX_KEYSTORE}, and can only be used by device owner
      * apps (see {@link android.app.admin.DevicePolicyManager#generateKeyPair}).
