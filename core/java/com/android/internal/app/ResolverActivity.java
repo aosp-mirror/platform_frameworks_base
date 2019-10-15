@@ -1406,13 +1406,17 @@ public class ResolverActivity extends Activity {
 
     public final class DisplayResolveInfo implements TargetInfo {
         private final ResolveInfo mResolveInfo;
-        private final CharSequence mDisplayLabel;
+        private CharSequence mDisplayLabel;
         private Drawable mDisplayIcon;
         private Drawable mBadge;
-        private final CharSequence mExtendedInfo;
+        private CharSequence mExtendedInfo;
         private final Intent mResolvedIntent;
         private final List<Intent> mSourceIntents = new ArrayList<>();
         private boolean mIsSuspended;
+
+        public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, Intent pOrigIntent) {
+            this(originalIntent, pri, null /*mDisplayLabel*/, null /*mExtendedInfo*/, pOrigIntent);
+        }
 
         public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
                 CharSequence pInfo, Intent pOrigIntent) {
@@ -1448,7 +1452,24 @@ public class ResolverActivity extends Activity {
         }
 
         public CharSequence getDisplayLabel() {
+            if (mDisplayLabel == null) {
+                ResolveInfoPresentationGetter pg = makePresentationGetter(mResolveInfo);
+                mDisplayLabel = pg.getLabel();
+                mExtendedInfo = pg.getSubLabel();
+            }
             return mDisplayLabel;
+        }
+
+        public boolean hasDisplayLabel() {
+            return mDisplayLabel != null;
+        }
+
+        public void setDisplayLabel(CharSequence displayLabel) {
+            mDisplayLabel = displayLabel;
+        }
+
+        public void setExtendedInfo(CharSequence extendedInfo) {
+            mExtendedInfo = extendedInfo;
         }
 
         public Drawable getDisplayIcon() {
@@ -1866,9 +1887,7 @@ public class ResolverActivity extends Activity {
                     final ResolveInfo ri = rci.getResolveInfoAt(0);
                     if (ri != null) {
                         mAllTargetsAreBrowsers &= ri.handleAllWebDataURI;
-
-                        ResolveInfoPresentationGetter pg = makePresentationGetter(ri);
-                        addResolveInfoWithAlternates(rci, pg.getSubLabel(), pg.getLabel());
+                        addResolveInfoWithAlternates(rci);
                     }
                 }
             }
@@ -1915,14 +1934,12 @@ public class ResolverActivity extends Activity {
             return mFilterLastUsed;
         }
 
-        private void addResolveInfoWithAlternates(ResolvedComponentInfo rci,
-                CharSequence extraInfo, CharSequence roLabel) {
+        private void addResolveInfoWithAlternates(ResolvedComponentInfo rci) {
             final int count = rci.getCount();
             final Intent intent = rci.getIntentAt(0);
             final ResolveInfo add = rci.getResolveInfoAt(0);
             final Intent replaceIntent = getReplacementIntent(add.activityInfo, intent);
-            final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, roLabel,
-                    extraInfo, replaceIntent);
+            final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, replaceIntent);
             addResolveInfo(dri);
             if (replaceIntent == intent) {
                 // Only add alternates if we didn't get a specific replacement from
@@ -2054,20 +2071,11 @@ public class ResolverActivity extends Activity {
                 return;
             }
 
-            final CharSequence label = info.getDisplayLabel();
-            if (!TextUtils.equals(holder.text.getText(), label)) {
-                holder.text.setText(info.getDisplayLabel());
-            }
-
-            // Always show a subLabel for visual consistency across list items. Show an empty
-            // subLabel if the subLabel is the same as the label
-            CharSequence subLabel = info.getExtendedInfo();
-            if (TextUtils.equals(label, subLabel)) subLabel = null;
-
-            if (!TextUtils.equals(holder.text2.getText(), subLabel)
-                    && !TextUtils.isEmpty(subLabel)) {
-                holder.text2.setVisibility(View.VISIBLE);
-                holder.text2.setText(subLabel);
+            if (info instanceof DisplayResolveInfo
+                    && !((DisplayResolveInfo) info).hasDisplayLabel()) {
+                getLoadLabelTask((DisplayResolveInfo) info, holder).execute();
+            } else {
+                holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo());
             }
 
             if (info.isSuspended()) {
@@ -2085,6 +2093,9 @@ public class ResolverActivity extends Activity {
         }
     }
 
+    protected LoadLabelTask getLoadLabelTask(DisplayResolveInfo info, ViewHolder holder) {
+        return new LoadLabelTask(info, holder);
+    }
 
     @VisibleForTesting
     public static final class ResolvedComponentInfo {
@@ -2148,6 +2159,24 @@ public class ResolverActivity extends Activity {
             text2 = (TextView) view.findViewById(com.android.internal.R.id.text2);
             icon = (ImageView) view.findViewById(R.id.icon);
         }
+
+        public void bindLabel(CharSequence label, CharSequence subLabel) {
+            if (!TextUtils.equals(text.getText(), label)) {
+                text.setText(label);
+            }
+
+            // Always show a subLabel for visual consistency across list items. Show an empty
+            // subLabel if the subLabel is the same as the label
+            if (TextUtils.equals(label, subLabel)) {
+                subLabel = null;
+            }
+
+            if (!TextUtils.equals(text2.getText(), subLabel)
+                    && !TextUtils.isEmpty(subLabel)) {
+                text2.setVisibility(View.VISIBLE);
+                text2.setText(subLabel);
+            }
+        }
     }
 
     class ItemClickListener implements AdapterView.OnItemClickListener,
@@ -2198,6 +2227,34 @@ public class ResolverActivity extends Activity {
             return true;
         }
 
+    }
+
+    protected class LoadLabelTask extends AsyncTask<Void, Void, CharSequence[]> {
+        private final DisplayResolveInfo mDisplayResolveInfo;
+        private final ViewHolder mHolder;
+
+        protected LoadLabelTask(DisplayResolveInfo dri, ViewHolder holder) {
+            mDisplayResolveInfo = dri;
+            mHolder = holder;
+        }
+
+
+        @Override
+        protected CharSequence[] doInBackground(Void... voids) {
+            ResolveInfoPresentationGetter pg =
+                    makePresentationGetter(mDisplayResolveInfo.mResolveInfo);
+            return new CharSequence[] {
+                    pg.getLabel(),
+                    pg.getSubLabel()
+            };
+        }
+
+        @Override
+        protected void onPostExecute(CharSequence[] result) {
+            mDisplayResolveInfo.setDisplayLabel(result[0]);
+            mDisplayResolveInfo.setExtendedInfo(result[1]);
+            mHolder.bindLabel(result[0], result[1]);
+        }
     }
 
     class LoadIconTask extends AsyncTask<Void, Void, Drawable> {
