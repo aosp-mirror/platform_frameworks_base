@@ -93,6 +93,8 @@ interface IWifiManager
 
     boolean disableNetwork(int netId, String packageName);
 
+    void allowAutojoin(int netId, boolean choice);
+
     boolean startScan(String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
