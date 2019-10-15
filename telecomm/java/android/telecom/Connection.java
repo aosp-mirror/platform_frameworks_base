@@ -267,8 +267,13 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Speed up audio setup for MT call.
+     * <p>
+     * Used for IMS calls to indicate that mobile-terminated (incoming) call audio setup should take
+     * place as soon as the device answers the call, but prior to it being connected.  This is an
+     * optimization some IMS stacks depend on to ensure prompt setup of call audio.
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
 
     /**
@@ -305,6 +310,7 @@ public abstract class Connection extends Conferenceable {
      * device.
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 0x00200000;
 
     /**
@@ -346,28 +352,40 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Indicates that the current device callback number should be shown.
-     *
+     * <p>
+     * Supports Telephony calls where CDMA emergency callback mode is active.
      * @hide
      */
+    @SystemApi
     public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1<<0;
 
     /**
      * Whether the call is a generic conference, where we do not know the precise state of
      * participants in the conference (eg. on CDMA).
-     *
+     * <p>
+     * Supports legacy telephony CDMA calls.
      * @hide
      */
+    @SystemApi
     public static final int PROPERTY_GENERIC_CONFERENCE = 1<<1;
 
     /**
      * Connection is using high definition audio.
-     * @hide
+     * <p>
+     * Indicates that the {@link Connection} is using a "high definition" audio codec.  This usually
+     * implies something like AMR wideband, but the interpretation of when a call is considered high
+     * definition is left to the {@link ConnectionService} to decide.
+     * <p>
+     * Translates to {@link android.telecom.Call.Details#PROPERTY_HIGH_DEF_AUDIO}.
      */
     public static final int PROPERTY_HIGH_DEF_AUDIO = 1<<2;
 
     /**
      * Connection is using WIFI.
-     * @hide
+     * <p>
+     * Used to indicate that a call is taking place over WIFI versus a carrier network.
+     * <p>
+     * Translates to {@link android.telecom.Call.Details#PROPERTY_WIFI}.
      */
     public static final int PROPERTY_WIFI = 1<<3;
 
@@ -394,8 +412,12 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Indicates that the connection represents a downgraded IMS conference.
+     * <p>
+     * This property is set when an IMS conference undergoes SRVCC and is re-added to Telecom as a
+     * new entity to indicate that the new connection was a conference.
      * @hide
      */
+    @SystemApi
     public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 1<<6;
 
     /**
@@ -421,7 +443,9 @@ public abstract class Connection extends Conferenceable {
     /**
      * Set by the framework to indicate that the network has identified a Connection as an emergency
      * call.
-     * @hide
+     * <p>
+     * This is used for incoming (mobile-terminated) calls to indicate the call is from emergency
+     * services.
      */
     public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1 << 10;
 
@@ -429,8 +453,11 @@ public abstract class Connection extends Conferenceable {
      * Set by the framework to indicate that a Conference or Connection is hosted by a device other
      * than the current one.  Used in scenarios where the conference originator is the remote device
      * and the current device is a participant of that conference.
+     * <p>
+     * This property is specific to IMS conference calls originating in Telephony.
      * @hide
      */
+    @SystemApi
     public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
 
     //**********************************************************************************************
@@ -483,8 +510,12 @@ public abstract class Connection extends Conferenceable {
     /**
      * Boolean connection extra key on a {@link Connection} which indicates that adding an
      * additional call is disallowed.
+     * <p>
+     * Used for mobile-network calls to identify scenarios where carrier requirements preclude
+     * adding another call at the current time.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_DISABLE_ADD_CALL =
             "android.telecom.extra.DISABLE_ADD_CALL";
 
@@ -508,6 +539,9 @@ public abstract class Connection extends Conferenceable {
      * The TelephonyCS will ALSO try to add the existing connection to Telecom, except with the
      * ID it originally referred to the connection as.  Thus Telecom needs to know that the
      * Connection with ID {@code ConnMan@1} is really the same as {@code TelephonyCS@1}.
+     * <p>
+     * This is an internal Telecom framework concept and is not exposed outside of the Telecom
+     * framework.
      * @hide
      */
     public static final String EXTRA_ORIGINAL_CONNECTION_ID =
@@ -525,7 +559,6 @@ public abstract class Connection extends Conferenceable {
      * Connection event used to inform Telecom that it should play the on hold tone.  This is used
      * to play a tone when the peer puts the current call on hold.  Sent to Telecom via
      * {@link #sendConnectionEvent(String, Bundle)}.
-     * @hide
      */
     public static final String EVENT_ON_HOLD_TONE_START =
             "android.telecom.event.ON_HOLD_TONE_START";
@@ -534,7 +567,6 @@ public abstract class Connection extends Conferenceable {
      * Connection event used to inform Telecom that it should stop the on hold tone.  This is used
      * to stop a tone when the peer puts the current call on hold.  Sent to Telecom via
      * {@link #sendConnectionEvent(String, Bundle)}.
-     * @hide
      */
     public static final String EVENT_ON_HOLD_TONE_END =
             "android.telecom.event.ON_HOLD_TONE_END";
@@ -565,10 +597,9 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Connection event used to inform Telecom when a hold operation on a call has failed.
-     * Not intended for use by the UI at this time.
+     * <p>
      * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
      * expected to be null when this connection event is used.
-     * @hide
      */
     public static final String EVENT_CALL_HOLD_FAILED = "android.telecom.event.CALL_HOLD_FAILED";
 
@@ -578,7 +609,6 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
      * expected to be null when this connection event is used.
-     * @hide
      */
     public static final String EVENT_MERGE_START = "android.telecom.event.MERGE_START";
 
@@ -588,7 +618,6 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * Sent via {@link #sendConnectionEvent(String, Bundle)}.  The {@link Bundle} parameter is
      * expected to be null when this connection event is used.
-     * @hide
      */
     public static final String EVENT_MERGE_COMPLETE = "android.telecom.event.MERGE_COMPLETE";
 
@@ -600,7 +629,6 @@ public abstract class Connection extends Conferenceable {
      * call is being held locally on the device.  When a capable {@link ConnectionService} receives
      * signalling to indicate that the remote party has put the call on hold, it can send this
      * connection event.
-     * @hide
      */
     public static final String EVENT_CALL_REMOTELY_HELD =
             "android.telecom.event.CALL_REMOTELY_HELD";
@@ -613,7 +641,6 @@ public abstract class Connection extends Conferenceable {
      * call is being held locally on the device.  When a capable {@link ConnectionService} receives
      * signalling to indicate that the remote party has taken the call off hold, it can send this
      * connection event.
-     * @hide
      */
     public static final String EVENT_CALL_REMOTELY_UNHELD =
             "android.telecom.event.CALL_REMOTELY_UNHELD";
@@ -656,49 +683,6 @@ public abstract class Connection extends Conferenceable {
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
 
     /**
-     * Whether the given capabilities support the specified capability.
-     *
-     * @param capabilities A capability bit field.
-     * @param capability The capability to check capabilities for.
-     * @return Whether the specified capability is supported.
-     * @hide
-     */
-    public static boolean can(int capabilities, int capability) {
-        return (capabilities & capability) == capability;
-    }
-
-    /**
-     * Whether the capabilities of this {@code Connection} supports the specified capability.
-     *
-     * @param capability The capability to check capabilities for.
-     * @return Whether the specified capability is supported.
-     * @hide
-     */
-    public boolean can(int capability) {
-        return can(mConnectionCapabilities, capability);
-    }
-
-    /**
-     * Removes the specified capability from the set of capabilities of this {@code Connection}.
-     *
-     * @param capability The capability to remove from the set.
-     * @hide
-     */
-    public void removeCapability(int capability) {
-        mConnectionCapabilities &= ~capability;
-    }
-
-    /**
-     * Adds the specified capability to the set of capabilities of this {@code Connection}.
-     *
-     * @param capability The capability to add to the set.
-     * @hide
-     */
-    public void addCapability(int capability) {
-        mConnectionCapabilities |= capability;
-    }
-
-    /**
      * Renders a set of capability bits ({@code CAPABILITY_*}) as a human readable string.
      *
      * @param capabilities A capability bit field.
@@ -727,67 +711,72 @@ public abstract class Connection extends Conferenceable {
             builder.append("Capabilities:");
         }
 
-        if (can(capabilities, CAPABILITY_HOLD)) {
+        if ((capabilities & CAPABILITY_HOLD) == CAPABILITY_HOLD) {
             builder.append(isLong ? " CAPABILITY_HOLD" : " hld");
         }
-        if (can(capabilities, CAPABILITY_SUPPORT_HOLD)) {
+        if ((capabilities & CAPABILITY_SUPPORT_HOLD) == CAPABILITY_SUPPORT_HOLD) {
             builder.append(isLong ? " CAPABILITY_SUPPORT_HOLD" : " sup_hld");
         }
-        if (can(capabilities, CAPABILITY_MERGE_CONFERENCE)) {
+        if ((capabilities & CAPABILITY_MERGE_CONFERENCE) == CAPABILITY_MERGE_CONFERENCE) {
             builder.append(isLong ? " CAPABILITY_MERGE_CONFERENCE" : " mrg_cnf");
         }
-        if (can(capabilities, CAPABILITY_SWAP_CONFERENCE)) {
+        if ((capabilities & CAPABILITY_SWAP_CONFERENCE) == CAPABILITY_SWAP_CONFERENCE) {
             builder.append(isLong ? " CAPABILITY_SWAP_CONFERENCE" : " swp_cnf");
         }
-        if (can(capabilities, CAPABILITY_RESPOND_VIA_TEXT)) {
+        if ((capabilities & CAPABILITY_RESPOND_VIA_TEXT) == CAPABILITY_RESPOND_VIA_TEXT) {
             builder.append(isLong ? " CAPABILITY_RESPOND_VIA_TEXT" : " txt");
         }
-        if (can(capabilities, CAPABILITY_MUTE)) {
+        if ((capabilities & CAPABILITY_MUTE) == CAPABILITY_MUTE) {
             builder.append(isLong ? " CAPABILITY_MUTE" : " mut");
         }
-        if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
+        if ((capabilities & CAPABILITY_MANAGE_CONFERENCE) == CAPABILITY_MANAGE_CONFERENCE) {
             builder.append(isLong ? " CAPABILITY_MANAGE_CONFERENCE" : " mng_cnf");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_RX)) {
+        if ((capabilities & CAPABILITY_SUPPORTS_VT_LOCAL_RX) == CAPABILITY_SUPPORTS_VT_LOCAL_RX) {
             builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_RX" : " VTlrx");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_TX)) {
+        if ((capabilities & CAPABILITY_SUPPORTS_VT_LOCAL_TX) == CAPABILITY_SUPPORTS_VT_LOCAL_TX) {
             builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_TX" : " VTltx");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL)) {
+        if ((capabilities & CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL)
+                == CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL) {
             builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL" : " VTlbi");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_RX)) {
+        if ((capabilities & CAPABILITY_SUPPORTS_VT_REMOTE_RX) == CAPABILITY_SUPPORTS_VT_REMOTE_RX) {
             builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_RX" : " VTrrx");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
+        if ((capabilities & CAPABILITY_SUPPORTS_VT_REMOTE_TX) == CAPABILITY_SUPPORTS_VT_REMOTE_TX) {
             builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_TX" : " VTrtx");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
+        if ((capabilities & CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)
+                == CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL) {
             builder.append(isLong ? " CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL" : " VTrbi");
         }
-        if (can(capabilities, CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)) {
+        if ((capabilities & CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO)
+                == CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO) {
             builder.append(isLong ? " CAPABILITY_CANNOT_DOWNGRADE_VIDEO_TO_AUDIO" : " !v2a");
         }
-        if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
+        if ((capabilities & CAPABILITY_SPEED_UP_MT_AUDIO) == CAPABILITY_SPEED_UP_MT_AUDIO) {
             builder.append(isLong ? " CAPABILITY_SPEED_UP_MT_AUDIO" : " spd_aud");
         }
-        if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
+        if ((capabilities & CAPABILITY_CAN_UPGRADE_TO_VIDEO) == CAPABILITY_CAN_UPGRADE_TO_VIDEO) {
             builder.append(isLong ? " CAPABILITY_CAN_UPGRADE_TO_VIDEO" : " a2v");
         }
-        if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
+        if ((capabilities & CAPABILITY_CAN_PAUSE_VIDEO) == CAPABILITY_CAN_PAUSE_VIDEO) {
             builder.append(isLong ? " CAPABILITY_CAN_PAUSE_VIDEO" : " paus_VT");
         }
-        if (can(capabilities, CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)) {
+        if ((capabilities & CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)
+                == CAPABILITY_CONFERENCE_HAS_NO_CHILDREN) {
             builder.append(isLong ? " CAPABILITY_SINGLE_PARTY_CONFERENCE" : " 1p_cnf");
         }
-        if (can(capabilities, CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)) {
+        if ((capabilities & CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION)
+                == CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION) {
             builder.append(isLong ? " CAPABILITY_CAN_SEND_RESPONSE_VIA_CONNECTION" : " rsp_by_con");
         }
-        if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
+        if ((capabilities & CAPABILITY_CAN_PULL_CALL) == CAPABILITY_CAN_PULL_CALL) {
             builder.append(isLong ? " CAPABILITY_CAN_PULL_CALL" : " pull");
         }
-        if (can(capabilities, CAPABILITY_SUPPORT_DEFLECT)) {
+        if ((capabilities & CAPABILITY_SUPPORT_DEFLECT) == CAPABILITY_SUPPORT_DEFLECT) {
             builder.append(isLong ? " CAPABILITY_SUPPORT_DEFLECT" : " sup_def");
         }
 
@@ -823,43 +812,44 @@ public abstract class Connection extends Conferenceable {
             builder.append("Properties:");
         }
 
-        if (can(properties, PROPERTY_SELF_MANAGED)) {
+        if ((properties & PROPERTY_SELF_MANAGED) == PROPERTY_SELF_MANAGED) {
             builder.append(isLong ? " PROPERTY_SELF_MANAGED" : " self_mng");
         }
 
-        if (can(properties, PROPERTY_EMERGENCY_CALLBACK_MODE)) {
+        if ((properties & PROPERTY_EMERGENCY_CALLBACK_MODE) == PROPERTY_EMERGENCY_CALLBACK_MODE) {
             builder.append(isLong ? " PROPERTY_EMERGENCY_CALLBACK_MODE" : " ecbm");
         }
 
-        if (can(properties, PROPERTY_HIGH_DEF_AUDIO)) {
+        if ((properties & PROPERTY_HIGH_DEF_AUDIO) == PROPERTY_HIGH_DEF_AUDIO) {
             builder.append(isLong ? " PROPERTY_HIGH_DEF_AUDIO" : " HD");
         }
 
-        if (can(properties, PROPERTY_WIFI)) {
+        if ((properties & PROPERTY_WIFI) == PROPERTY_WIFI) {
             builder.append(isLong ? " PROPERTY_WIFI" : " wifi");
         }
 
-        if (can(properties, PROPERTY_GENERIC_CONFERENCE)) {
+        if ((properties & PROPERTY_GENERIC_CONFERENCE) == PROPERTY_GENERIC_CONFERENCE) {
             builder.append(isLong ? " PROPERTY_GENERIC_CONFERENCE" : " gen_conf");
         }
 
-        if (can(properties, PROPERTY_IS_EXTERNAL_CALL)) {
+        if ((properties & PROPERTY_IS_EXTERNAL_CALL) == PROPERTY_IS_EXTERNAL_CALL) {
             builder.append(isLong ? " PROPERTY_IS_EXTERNAL_CALL" : " xtrnl");
         }
 
-        if (can(properties, PROPERTY_HAS_CDMA_VOICE_PRIVACY)) {
+        if ((properties & PROPERTY_HAS_CDMA_VOICE_PRIVACY) == PROPERTY_HAS_CDMA_VOICE_PRIVACY) {
             builder.append(isLong ? " PROPERTY_HAS_CDMA_VOICE_PRIVACY" : " priv");
         }
 
-        if (can(properties, PROPERTY_IS_RTT)) {
+        if ((properties & PROPERTY_IS_RTT) == PROPERTY_IS_RTT) {
             builder.append(isLong ? " PROPERTY_IS_RTT" : " rtt");
         }
 
-        if (can(properties, PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)) {
+        if ((properties & PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL)
+                == PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL) {
             builder.append(isLong ? " PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL" : " ecall");
         }
 
-        if (can(properties, PROPERTY_REMOTELY_HOSTED)) {
+        if ((properties & PROPERTY_REMOTELY_HOSTED) == PROPERTY_REMOTELY_HOSTED) {
             builder.append(isLong ? " PROPERTY_REMOTELY_HOSTED" : " remote_hst");
         }
 
@@ -889,16 +879,10 @@ public abstract class Connection extends Conferenceable {
         public void onConferenceablesChanged(
                 Connection c, List<Conferenceable> conferenceables) {}
         public void onConferenceChanged(Connection c, Conference conference) {}
-        /** @hide */
-        public void onConferenceParticipantsChanged(Connection c,
-                List<ConferenceParticipant> participants) {}
-        public void onConferenceStarted() {}
         public void onConferenceMergeFailed(Connection c) {}
         public void onExtrasChanged(Connection c, Bundle extras) {}
         public void onExtrasRemoved(Connection c, List<String> keys) {}
         public void onConnectionEvent(Connection c, String event, Bundle extras) {}
-        /** @hide */
-        public void onConferenceSupportedChanged(Connection c, boolean isConferenceSupported) {}
         public void onAudioRouteChanged(Connection c, int audioRoute, String bluetoothAddress) {}
         public void onRttInitiationSuccess(Connection c) {}
         public void onRttInitiationFailure(Connection c, int reason) {}
@@ -1815,11 +1799,15 @@ public abstract class Connection extends Conferenceable {
     /**
      * Returns the Telecom internal call ID associated with this connection.  Should only be used
      * for debugging and tracing purposes.
+     * <p>
+     * Note: Access to the Telecom internal call ID is used for logging purposes only; this API is
+     * provided to facilitate debugging of the Telephony stack only.
      *
-     * @return The Telecom call ID.
+     * @return The Telecom call ID, or {@code null} if it was not set.
      * @hide
      */
-    public final String getTelecomCallId() {
+    @SystemApi
+    public final @Nullable String getTelecomCallId() {
         return mTelecomCallId;
     }
 
@@ -1868,9 +1856,8 @@ public abstract class Connection extends Conferenceable {
      * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @return The video state of the connection.
-     * @hide
      */
-    public final int getVideoState() {
+    public final @VideoProfile.VideoState int getVideoState() {
         return mVideoState;
     }
 
@@ -1926,11 +1913,16 @@ public abstract class Connection extends Conferenceable {
      * Retrieves the connection start time of the {@code Connnection}, if specified.  A value of
      * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
      * start time of the conference.
+     * <p>
+     * Note: This is an implementation detail specific to IMS conference calls over a mobile
+     * network.
      *
-     * @return The time at which the {@code Connnection} was connected.
+     * @return The time at which the {@code Connnection} was connected. Will be a value as retrieved
+     * from {@link System#currentTimeMillis()}.
      *
      * @hide
      */
+    @SystemApi
     public final long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
@@ -1939,26 +1931,32 @@ public abstract class Connection extends Conferenceable {
      * Retrieves the connection start time of the {@link Connection}, if specified.  A value of
      * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
      * start time of the conference.
-     *
+     * <p>
      * Based on the value of {@link SystemClock#elapsedRealtime()}, which ensures that wall-clock
      * changes do not impact the call duration.
+     * <p>
+     * Used internally in Telephony when migrating conference participant data for IMS conferences.
      *
      * @return The time at which the {@link Connection} was connected.
      *
      * @hide
      */
+    @SystemApi
     public final long getConnectElapsedTimeMillis() {
         return mConnectElapsedTimeMillis;
     }
 
     /**
      * Returns RIL voice radio technology used for current connection.
+     * <p>
+     * Used by the Telephony {@link ConnectionService}.
      *
      * @return the RIL voice radio technology used for current connection,
      *         see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
      *
      * @hide
      */
+    @SystemApi
     public final @RilRadioTechnology int getCallRadioTech() {
         int voiceNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
         Bundle extras = getExtras();
@@ -2038,11 +2036,16 @@ public abstract class Connection extends Conferenceable {
     /**
      * Sets the telecom call ID associated with this Connection.  The Telecom Call ID should be used
      * ONLY for debugging purposes.
+     * <p>
+     * Note: Access to the Telecom internal call ID is used for logging purposes only; this API is
+     * provided to facilitate debugging of the Telephony stack only.  Changing the ID via this
+     * method does NOT change any functionality in Telephony or Telecom and impacts only logging.
      *
      * @param callId The telecom call ID.
      * @hide
      */
-    public void setTelecomCallId(String callId) {
+    @SystemApi
+    public void setTelecomCallId(@NonNull String callId) {
         mTelecomCallId = callId;
     }
 
@@ -2379,12 +2382,15 @@ public abstract class Connection extends Conferenceable {
     /**
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
+     * <p>
+     * Used by telephony to maintain calls associated with an IMS Conference.
      *
      * @param connectTimeMillis The connection time, in milliseconds.  Should be set using a value
      *                          obtained from {@link System#currentTimeMillis()}.
      *
      * @hide
      */
+    @SystemApi
     public final void setConnectTimeMillis(long connectTimeMillis) {
         mConnectTimeMillis = connectTimeMillis;
     }
@@ -2392,27 +2398,37 @@ public abstract class Connection extends Conferenceable {
     /**
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
-     *
+     * <p>
+     * Used by telephony to maintain calls associated with an IMS Conference.
      * @param connectElapsedTimeMillis The connection time, in milliseconds.  Stored in the format
      *                              {@link SystemClock#elapsedRealtime()}.
      *
      * @hide
      */
+    @SystemApi
     public final void setConnectionStartElapsedRealTime(long connectElapsedTimeMillis) {
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 
     /**
      * Sets RIL voice radio technology used for current connection.
+     * <p>
+     * This property is set by the Telephony {@link ConnectionService}.
      *
      * @param vrat the RIL Voice Radio Technology used for current connection,
      *             see {@code RIL_RADIO_TECHNOLOGY_*} in {@link android.telephony.ServiceState}.
      *
      * @hide
      */
+    @SystemApi
     public final void setCallRadioTech(@RilRadioTechnology int vrat) {
-        putExtra(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
+        Bundle extras = getExtras();
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        extras.putInt(TelecomManager.EXTRA_CALL_NETWORK_TYPE,
                 ServiceState.rilRadioTechnologyToNetworkType(vrat));
+        putExtras(extras);
         // Propagates the call radio technology to its parent {@link android.telecom.Conference}
         // This action only covers non-IMS CS conference calls.
         // For IMS PS call conference call, it can be updated via its host connection
@@ -2480,9 +2496,12 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
+     * Resets the CDMA connection time.
+     * <p>
+     * This is an implementation detail specific to legacy CDMA calls on mobile networks.
      * @hide
-     * Resets the cdma connection time.
      */
+    @SystemApi
     public final void resetConnectionTime() {
         for (Listener l : mListeners) {
             l.onConnectionTimeReset(this);
@@ -2519,13 +2538,6 @@ public abstract class Connection extends Conferenceable {
         } else {
             mConnectionService = null;
         }
-    }
-
-    /**
-     * @hide
-     */
-    public final ConnectionService getConnectionService() {
-        return mConnectionService;
     }
 
     /**
@@ -2635,45 +2647,6 @@ public abstract class Connection extends Conferenceable {
             // each other
             l.onExtrasChanged(this, new Bundle(listenerExtras));
         }
-    }
-
-    /**
-     * Adds a boolean extra to this {@code Connection}.
-     *
-     * @param key The extra key.
-     * @param value The value.
-     * @hide
-     */
-    public final void putExtra(String key, boolean value) {
-        Bundle newExtras = new Bundle();
-        newExtras.putBoolean(key, value);
-        putExtras(newExtras);
-    }
-
-    /**
-     * Adds an integer extra to this {@code Connection}.
-     *
-     * @param key The extra key.
-     * @param value The value.
-     * @hide
-     */
-    public final void putExtra(String key, int value) {
-        Bundle newExtras = new Bundle();
-        newExtras.putInt(key, value);
-        putExtras(newExtras);
-    }
-
-    /**
-     * Adds a string extra to this {@code Connection}.
-     *
-     * @param key The extra key.
-     * @param value The value.
-     * @hide
-     */
-    public final void putExtra(String key, String value) {
-        Bundle newExtras = new Bundle();
-        newExtras.putString(key, value);
-        putExtras(newExtras);
     }
 
     /**
@@ -3242,49 +3215,12 @@ public abstract class Connection extends Conferenceable {
     }
 
     /**
-     * Notifies listeners that the merge request failed.
-     *
-     * @hide
+     * Called by a {@link ConnectionService} to notify Telecom that a {@link Conference#onMerge()}
+     * request failed.
      */
-    protected final void notifyConferenceMergeFailed() {
+    public final void notifyConferenceMergeFailed() {
         for (Listener l : mListeners) {
             l.onConferenceMergeFailed(this);
-        }
-    }
-
-    /**
-     * Notifies listeners of a change to conference participant(s).
-     *
-     * @param conferenceParticipants The participants.
-     * @hide
-     */
-    protected final void updateConferenceParticipants(
-            List<ConferenceParticipant> conferenceParticipants) {
-        for (Listener l : mListeners) {
-            l.onConferenceParticipantsChanged(this, conferenceParticipants);
-        }
-    }
-
-    /**
-     * Notifies listeners that a conference call has been started.
-     * @hide
-     */
-    protected void notifyConferenceStarted() {
-        for (Listener l : mListeners) {
-            l.onConferenceStarted();
-        }
-    }
-
-    /**
-     * Notifies listeners when a change has occurred to the Connection which impacts its ability to
-     * be a part of a conference call.
-     * @param isConferenceSupported {@code true} if the connection supports being part of a
-     *      conference call, {@code false} otherwise.
-     * @hide
-     */
-    protected void notifyConferenceSupportedChanged(boolean isConferenceSupported) {
-        for (Listener l : mListeners) {
-            l.onConferenceSupportedChanged(this, isConferenceSupported);
         }
     }
 
@@ -3302,10 +3238,15 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Sets the {@link PhoneAccountHandle} associated with this connection.
+     * <p>
+     * Used by the Telephony {@link ConnectionService} to handle changes to the {@link PhoneAccount}
+     * which take place after call initiation (important for emergency calling scenarios).
      *
+     * @param phoneAccountHandle the phone account handle to set.
      * @hide
      */
-    public void setPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+    @SystemApi
+    public void setPhoneAccountHandle(@NonNull PhoneAccountHandle phoneAccountHandle) {
         if (mPhoneAccountHandle != phoneAccountHandle) {
             mPhoneAccountHandle = phoneAccountHandle;
             notifyPhoneAccountChanged(phoneAccountHandle);
@@ -3314,10 +3255,16 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Returns the {@link PhoneAccountHandle} associated with this connection.
+     * <p>
+     * Used by the Telephony {@link ConnectionService} to handle changes to the {@link PhoneAccount}
+     * which take place after call initiation (important for emergency calling scenarios).
      *
+     * @return the phone account handle specified via
+     * {@link #setPhoneAccountHandle(PhoneAccountHandle)}, or {@code null} if none was set.
      * @hide
      */
-    public PhoneAccountHandle getPhoneAccountHandle() {
+    @SystemApi
+    public @Nullable PhoneAccountHandle getPhoneAccountHandle() {
         return mPhoneAccountHandle;
     }
 
@@ -3374,9 +3321,14 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Sets the direction of this connection.
+     * <p>
+     * Used when calling {@link ConnectionService#addExistingConnection} to specify the existing
+     * call direction.
+     *
      * @param callDirection The direction of this connection.
      * @hide
      */
+    @SystemApi
     public void setCallDirection(@Call.Details.CallDirection int callDirection) {
         mCallDirection = callDirection;
     }
