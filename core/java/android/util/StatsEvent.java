@@ -20,312 +20,540 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * StatsEvent builds and stores the buffer sent over the statsd socket.
  * This class defines and encapsulates the socket protocol.
+ *
+ * <p>Usage:</p>
+ * <pre>
+ *      StatsEvent statsEvent = StatsEvent.newBuilder()
+ *          .setAtomId(atomId)
+ *          .writeBoolean(false)
+ *          .writeString("annotated String field")
+ *          .addBooleanAnnotation(annotationId, true)
+ *          .build();
+ *
+ *      StatsLog.write(statsEvent);
+ * </pre>
  * @hide
  **/
-public final class StatsEvent implements AutoCloseable {
-    private static final int POS_NUM_ELEMENTS = 1;
-    private static final int POS_TIMESTAMP = POS_NUM_ELEMENTS + 1;
-
+public final class StatsEvent {
     private static final int LOGGER_ENTRY_MAX_PAYLOAD = 4068;
 
-    // Max payload size is 4 KB less 4 bytes which are reserved for statsEventTag.
+    // Max payload size is 4 bytes less as 4 bytes are reserved for statsEventTag.
     // See android_util_StatsLog.cpp.
-    private static final int MAX_EVENT_PAYLOAD = LOGGER_ENTRY_MAX_PAYLOAD - 4;
+    private static final int MAX_PAYLOAD_SIZE = LOGGER_ENTRY_MAX_PAYLOAD - 4;
 
-    private static final byte INT_TYPE = 0;
-    private static final byte LONG_TYPE = 1;
-    private static final byte STRING_TYPE = 2;
-    private static final byte LIST_TYPE = 3;
-    private static final byte FLOAT_TYPE = 4;
+    private final Buffer mBuffer;
+    private final int mNumBytes;
 
-    private static final int INT_TYPE_SIZE = 5;
-    private static final int FLOAT_TYPE_SIZE = 5;
-    private static final int LONG_TYPE_SIZE = 9;
-
-    private static final int STRING_TYPE_OVERHEAD = 5;
-    private static final int LIST_TYPE_OVERHEAD = 2;
-
-    public static final int SUCCESS = 0;
-    public static final int ERROR_BUFFER_LIMIT_EXCEEDED = -1;
-    public static final int ERROR_NO_TIMESTAMP = -2;
-    public static final int ERROR_TIMESTAMP_ALREADY_WRITTEN = -3;
-    public static final int ERROR_NO_ATOM_ID = -4;
-    public static final int ERROR_ATOM_ID_ALREADY_WRITTEN = -5;
-    public static final int ERROR_UID_TAG_COUNT_MISMATCH = -6;
-
-    private static Object sLock = new Object();
-
-    @GuardedBy("sLock")
-    private static StatsEvent sPool;
-
-    private final byte[] mBuffer = new byte[MAX_EVENT_PAYLOAD];
-    private int mPos;
-    private int mNumElements;
-    private int mAtomId;
-
-    private StatsEvent() {
-        // Write LIST_TYPE to buffer
-        mBuffer[0] = LIST_TYPE;
-        reset();
-    }
-
-    private void reset() {
-        // Reset state.
-        mPos = POS_TIMESTAMP;
-        mNumElements = 0;
-        mAtomId = 0;
+    private StatsEvent(@NonNull final Buffer buffer, final int numBytes) {
+        mBuffer = buffer;
+        mNumBytes = numBytes;
     }
 
     /**
-     * Returns a StatsEvent object from the pool.
+     * Returns a new StatsEvent.Builder for building StatsEvent object.
      **/
     @NonNull
-    public static StatsEvent obtain() {
-        final StatsEvent statsEvent;
-        synchronized (sLock) {
-            statsEvent = null == sPool ? new StatsEvent() : sPool;
-            sPool = null;
-        }
-        statsEvent.reset();
-        return statsEvent;
+    public StatsEvent.Builder newBuilder() {
+        return new StatsEvent.Builder(Buffer.obtain());
     }
 
-    @Override
-    public void close() {
-        synchronized (sLock) {
-            if (null == sPool) {
-                sPool = this;
-            }
-        }
+    @NonNull
+    byte[] getBytes() {
+        return mBuffer.getBytes();
     }
 
-    /**
-     * Writes the event timestamp to the buffer.
-     **/
-    public int writeTimestampNs(final long timestampNs) {
-        if (hasTimestamp()) {
-            return ERROR_TIMESTAMP_ALREADY_WRITTEN;
-        }
-        return writeLong(timestampNs);
+    int getNumBytes() {
+        return mNumBytes;
     }
 
-    private boolean hasTimestamp() {
-        return mPos > POS_TIMESTAMP;
-    }
-
-    private boolean hasAtomId() {
-        return mAtomId != 0;
+    void release() {
+        mBuffer.release();
     }
 
     /**
-     * Writes the atom id to the buffer.
+     * Builder for constructing a StatsEvent object.
+     *
+     * <p>This class defines and encapsulates the socket encoding for the buffer.
+     * The write methods must be called in the same order as the order of fields in the
+     * atom definition.</p>
+     *
+     * <p>setAtomId() can be called anytime before build().</p>
+     *
+     * <p>Example:</p>
+     * <pre>
+     *     // Atom definition.
+     *     message MyAtom {
+     *         optional int32 field1 = 1;
+     *         optional int64 field2 = 2;
+     *         optional string field3 = 3 [(annotation1) = true];
+     *     }
+     *
+     *     // StatsEvent construction.
+     *     StatsEvent.newBuilder()
+     *     StatsEvent statsEvent = StatsEvent.newBuilder()
+     *         .setAtomId(atomId)
+     *         .writeInt(3) // field1
+     *         .writeLong(8L) // field2
+     *         .writeString("foo") // field 3
+     *         .addBooleanAnnotation(annotation1Id, true)
+     *         .build();
+     * </pre>
+     * @hide
      **/
-    public int writeAtomId(final int atomId) {
-        if (!hasTimestamp()) {
-            return ERROR_NO_TIMESTAMP;
-        } else if (hasAtomId()) {
-            return ERROR_ATOM_ID_ALREADY_WRITTEN;
+    public static final class Builder {
+        // Type Ids.
+        private static final byte TYPE_INT = 0x00;
+        private static final byte TYPE_LONG = 0x01;
+        private static final byte TYPE_STRING = 0x02;
+        private static final byte TYPE_LIST = 0x03;
+        private static final byte TYPE_FLOAT = 0x04;
+        private static final byte TYPE_BOOLEAN = 0x05;
+        private static final byte TYPE_OBJECT = 0x06;
+        private static final byte TYPE_BYTE_ARRAY = 0x07;
+        private static final byte TYPE_ATTRIBUTION_CHAIN = 0x08;
+        private static final byte TYPE_ERRORS = 0x0F;
+
+        // Error flags.
+        private static final int ERROR_NO_TIMESTAMP = 0x1;
+        private static final int ERROR_NO_ATOM_ID = 0x2;
+        private static final int ERROR_OVERFLOW = 0x4;
+        private static final int ERROR_ATTRIBUTION_CHAIN_TOO_LONG = 0x8;
+        private static final int ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD = 0x10;
+        private static final int ERROR_INVALID_ANNOTATION_ID = 0x20;
+        private static final int ERROR_ANNOTATION_ID_TOO_LARGE = 0x40;
+        private static final int ERROR_TOO_MANY_ANNOTATIONS = 0x80;
+        private static final int ERROR_TOO_MANY_FIELDS = 0x100;
+        private static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x200;
+
+        // Size limits.
+        private static final int MAX_ANNOTATION_COUNT = 15;
+        private static final int MAX_ATTRIBUTION_NODES = 127;
+        private static final int MAX_NUM_ELEMENTS = 127;
+
+        // Fixed positions.
+        private static final int POS_NUM_ELEMENTS = 1;
+        private static final int POS_TIMESTAMP_NS = POS_NUM_ELEMENTS + Byte.BYTES;
+        private static final int POS_ATOM_ID = POS_TIMESTAMP_NS + Byte.BYTES + Long.BYTES;
+
+        private final Buffer mBuffer;
+        private long mTimestampNs;
+        private int mAtomId;
+        private byte mCurrentAnnotationCount;
+        private int mPos;
+        private int mPosLastField;
+        private byte mLastType;
+        private int mNumElements;
+        private int mErrorMask;
+
+        private Builder(final Buffer buffer) {
+            mBuffer = buffer;
+            mCurrentAnnotationCount = 0;
+            mAtomId = 0;
+            mTimestampNs = SystemClock.elapsedRealtimeNanos();
+            mNumElements = 0;
+
+            // Set mPos to 0 for writing TYPE_OBJECT at 0th position.
+            mPos = 0;
+            writeTypeId(TYPE_OBJECT);
+
+            // Set mPos to after atom id's location in the buffer.
+            // First 2 elements in the buffer are event timestamp followed by the atom id.
+            mPos = POS_ATOM_ID + Byte.BYTES + Integer.BYTES;
+            mPosLastField = 0;
+            mLastType = 0;
         }
 
-        final int writeResult = writeInt(atomId);
-        if (SUCCESS == writeResult) {
+        /**
+         * Sets the atom id for this StatsEvent.
+         **/
+        @NonNull
+        public Builder setAtomId(final int atomId) {
             mAtomId = atomId;
-        }
-        return writeResult;
-    }
-
-    /**
-     * Appends the given int to the StatsEvent buffer.
-     **/
-    public int writeInt(final int value) {
-        if (!hasTimestamp()) {
-            return ERROR_NO_TIMESTAMP;
-        } else if (!hasAtomId()) {
-            return ERROR_NO_ATOM_ID;
-        } else if (mPos + INT_TYPE_SIZE > MAX_EVENT_PAYLOAD) {
-            return ERROR_BUFFER_LIMIT_EXCEEDED;
+            return this;
         }
 
-        mBuffer[mPos] = INT_TYPE;
-        copyInt(mBuffer, mPos + 1, value);
-        mPos += INT_TYPE_SIZE;
-        mNumElements++;
-        return SUCCESS;
-    }
-
-    /**
-     * Appends the given long to the StatsEvent buffer.
-     **/
-    public int writeLong(final long value) {
-        if (!hasTimestamp()) {
-            return ERROR_NO_TIMESTAMP;
-        } else if (!hasAtomId()) {
-            return ERROR_NO_ATOM_ID;
-        } else if (mPos + LONG_TYPE_SIZE > MAX_EVENT_PAYLOAD) {
-            return ERROR_BUFFER_LIMIT_EXCEEDED;
+        /**
+         * Sets the timestamp in nanos for this StatsEvent.
+         **/
+        @VisibleForTesting
+        @NonNull
+        public Builder setTimestampNs(final long timestampNs) {
+            mTimestampNs = timestampNs;
+            return this;
         }
 
-        mBuffer[mPos] = LONG_TYPE;
-        copyLong(mBuffer, mPos + 1, value);
-        mPos += LONG_TYPE_SIZE;
-        mNumElements++;
-        return SUCCESS;
-    }
-
-    /**
-     * Appends the given float to the StatsEvent buffer.
-     **/
-    public int writeFloat(final float value) {
-        if (!hasTimestamp()) {
-            return ERROR_NO_TIMESTAMP;
-        } else if (!hasAtomId()) {
-            return ERROR_NO_ATOM_ID;
-        } else if (mPos + FLOAT_TYPE_SIZE > MAX_EVENT_PAYLOAD) {
-            return ERROR_BUFFER_LIMIT_EXCEEDED;
+        /**
+         * Write a boolean field to this StatsEvent.
+         **/
+        @NonNull
+        public Builder writeBoolean(final boolean value) {
+            // Write boolean typeId byte followed by boolean byte representation.
+            writeTypeId(TYPE_BOOLEAN);
+            mPos += mBuffer.putBoolean(mPos, value);
+            mNumElements++;
+            return this;
         }
 
-        mBuffer[mPos] = FLOAT_TYPE;
-        copyInt(mBuffer, mPos + 1, Float.floatToIntBits(value));
-        mPos += FLOAT_TYPE_SIZE;
-        mNumElements++;
-        return SUCCESS;
-    }
-
-    /**
-     * Appends the given boolean to the StatsEvent buffer.
-     **/
-    public int writeBoolean(final boolean value) {
-        return writeInt(value ? 1 : 0);
-    }
-
-    /**
-     * Appends the given byte array to the StatsEvent buffer.
-     **/
-    public int writeByteArray(@NonNull final byte[] value) {
-        if (!hasTimestamp()) {
-            return ERROR_NO_TIMESTAMP;
-        } else if (!hasAtomId()) {
-            return ERROR_NO_ATOM_ID;
-        } else if (mPos + STRING_TYPE_OVERHEAD + value.length > MAX_EVENT_PAYLOAD) {
-            return ERROR_BUFFER_LIMIT_EXCEEDED;
+        /**
+         * Write an integer field to this StatsEvent.
+         **/
+        @NonNull
+        public Builder writeInt(final int value) {
+            // Write integer typeId byte followed by 4-byte representation of value.
+            writeTypeId(TYPE_INT);
+            mPos += mBuffer.putInt(mPos, value);
+            mNumElements++;
+            return this;
         }
 
-        mBuffer[mPos] = STRING_TYPE;
-        copyInt(mBuffer, mPos + 1, value.length);
-        System.arraycopy(value, 0, mBuffer, mPos + STRING_TYPE_OVERHEAD, value.length);
-        mPos += STRING_TYPE_OVERHEAD + value.length;
-        mNumElements++;
-        return SUCCESS;
-    }
-
-    /**
-     * Appends the given String to the StatsEvent buffer.
-     **/
-    public int writeString(@NonNull final String value) {
-        final byte[] valueBytes = stringToBytes(value);
-        return writeByteArray(valueBytes);
-    }
-
-    /**
-     * Appends the AttributionNode specified as array of uids and array of tags.
-     **/
-    public int writeAttributionNode(@NonNull final int[] uids, @NonNull final String[] tags) {
-        if (!hasTimestamp()) {
-            return ERROR_NO_TIMESTAMP;
-        } else if (!hasAtomId()) {
-            return ERROR_NO_ATOM_ID;
-        } else if (mPos + LIST_TYPE_OVERHEAD > MAX_EVENT_PAYLOAD) {
-            return ERROR_BUFFER_LIMIT_EXCEEDED;
+        /**
+         * Write a long field to this StatsEvent.
+         **/
+        @NonNull
+        public Builder writeLong(final long value) {
+            // Write long typeId byte followed by 8-byte representation of value.
+            writeTypeId(TYPE_LONG);
+            mPos += mBuffer.putLong(mPos, value);
+            mNumElements++;
+            return this;
         }
 
-        final int numTags = tags.length;
-        final int numUids = uids.length;
-        if (numTags != numUids) {
-            return ERROR_UID_TAG_COUNT_MISMATCH;
+        /**
+         * Write a float field to this StatsEvent.
+         **/
+        @NonNull
+        public Builder writeFloat(final float value) {
+            // Write float typeId byte followed by 4-byte representation of value.
+            writeTypeId(TYPE_FLOAT);
+            mPos += mBuffer.putFloat(mPos, value);
+            mNumElements++;
+            return this;
         }
 
-        int pos = mPos;
-        mBuffer[pos] = LIST_TYPE;
-        mBuffer[pos + 1] = (byte) numTags;
-        pos += LIST_TYPE_OVERHEAD;
-        for (int i = 0; i < numTags; i++) {
-            final byte[] tagBytes = stringToBytes(tags[i]);
+        /**
+         * Write a String field to this StatsEvent.
+         **/
+        @NonNull
+        public Builder writeString(@NonNull final String value) {
+            // Write String typeId byte, followed by 4-byte representation of number of bytes
+            // in the UTF-8 encoding, followed by the actual UTF-8 byte encoding of value.
+            final byte[] valueBytes = stringToBytes(value);
+            writeByteArray(valueBytes, TYPE_STRING);
+            return this;
+        }
 
-            if (pos + LIST_TYPE_OVERHEAD + INT_TYPE_SIZE
-                    + STRING_TYPE_OVERHEAD + tagBytes.length > MAX_EVENT_PAYLOAD) {
-                return ERROR_BUFFER_LIMIT_EXCEEDED;
+        /**
+         * Write a byte array field to this StatsEvent.
+         **/
+        @NonNull
+        public Builder writeByteArray(@NonNull final byte[] value) {
+            // Write byte array typeId byte, followed by 4-byte representation of number of bytes
+            // in value, followed by the actual byte array.
+            writeByteArray(value, TYPE_BYTE_ARRAY);
+            return this;
+        }
+
+        private void writeByteArray(@NonNull final byte[] value, final byte typeId) {
+            writeTypeId(typeId);
+            final int numBytes = value.length;
+            mPos += mBuffer.putInt(mPos, numBytes);
+            mPos += mBuffer.putByteArray(mPos, value);
+            mNumElements++;
+        }
+
+        /**
+         * Write an attribution chain field to this StatsEvent.
+         *
+         * The sizes of uids and tags must be equal. The AttributionNode at position i is
+         * made up of uids[i] and tags[i].
+         *
+         * @param uids array of uids in the attribution nodes.
+         * @param tags array of tags in the attribution nodes.
+         **/
+        @NonNull
+        public Builder writeAttributionNode(
+                @NonNull final int[] uids, @NonNull final String[] tags) {
+            final byte numUids = (byte) uids.length;
+            final byte numTags = (byte) tags.length;
+
+            if (numUids != numTags) {
+                mErrorMask |= ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL;
+            } else if (numUids > MAX_ATTRIBUTION_NODES) {
+                mErrorMask |= ERROR_ATTRIBUTION_CHAIN_TOO_LONG;
+            } else {
+                // Write attribution chain typeId byte, followed by 1-byte representation of
+                // number of attribution nodes, followed by encoding of each attribution node.
+                writeTypeId(TYPE_ATTRIBUTION_CHAIN);
+                mPos += mBuffer.putByte(mPos, numUids);
+                for (int i = 0; i < numUids; i++) {
+                    // Each uid is encoded as 4-byte representation of its int value.
+                    mPos += mBuffer.putInt(mPos, uids[i]);
+
+                    // Each tag is encoded as 4-byte representation of number of bytes in its
+                    // UTF-8 encoding, followed by the actual UTF-8 bytes.
+                    final byte[] tagBytes = stringToBytes(tags[i]);
+                    mPos += mBuffer.putInt(mPos, tagBytes.length);
+                    mPos += mBuffer.putByteArray(mPos, tagBytes);
+                }
+                mNumElements++;
+            }
+            return this;
+        }
+
+        /**
+         * Write a boolean annotation for the last field written.
+         **/
+        @NonNull
+        public Builder addBooleanAnnotation(
+                final byte annotationId, final boolean value) {
+            // Ensure there's a field written to annotate.
+            if (0 == mPosLastField) {
+                mErrorMask |= ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD;
+            } else if (mCurrentAnnotationCount >= MAX_ANNOTATION_COUNT) {
+                mErrorMask |= ERROR_TOO_MANY_ANNOTATIONS;
+            } else {
+                mPos += mBuffer.putByte(mPos, annotationId);
+                mPos += mBuffer.putByte(mPos, TYPE_BOOLEAN);
+                mPos += mBuffer.putBoolean(mPos, value);
+                mCurrentAnnotationCount++;
+                writeAnnotationCount();
+            }
+            return this;
+        }
+
+        /**
+         * Write an integer annotation for the last field written.
+         **/
+        @NonNull
+        public Builder addIntAnnotation(final byte annotationId, final int value) {
+            if (0 == mPosLastField) {
+                mErrorMask |= ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD;
+            } else if (mCurrentAnnotationCount >= MAX_ANNOTATION_COUNT) {
+                mErrorMask |= ERROR_TOO_MANY_ANNOTATIONS;
+            } else {
+                mPos += mBuffer.putByte(mPos, annotationId);
+                mPos += mBuffer.putByte(mPos, TYPE_INT);
+                mPos += mBuffer.putInt(mPos, value);
+                mCurrentAnnotationCount++;
+                writeAnnotationCount();
+            }
+            return this;
+        }
+
+        /**
+         * Builds a StatsEvent object with values entered in this Builder.
+         **/
+        @NonNull
+        public StatsEvent build() {
+            if (0L == mTimestampNs) {
+                mErrorMask |= ERROR_NO_TIMESTAMP;
+            }
+            if (0 == mAtomId) {
+                mErrorMask |= ERROR_NO_ATOM_ID;
+            }
+            if (mBuffer.hasOverflowed()) {
+                mErrorMask |= ERROR_OVERFLOW;
+            }
+            if (mNumElements > MAX_NUM_ELEMENTS) {
+                mErrorMask |= ERROR_TOO_MANY_FIELDS;
             }
 
-            mBuffer[pos] = LIST_TYPE;
-            mBuffer[pos + 1] = 2;
-            pos += LIST_TYPE_OVERHEAD;
-            mBuffer[pos] = INT_TYPE;
-            copyInt(mBuffer, pos + 1, uids[i]);
-            pos += INT_TYPE_SIZE;
-            mBuffer[pos] = STRING_TYPE;
-            copyInt(mBuffer, pos + 1, tagBytes.length);
-            System.arraycopy(tagBytes, 0, mBuffer, pos + STRING_TYPE_OVERHEAD, tagBytes.length);
-            pos += STRING_TYPE_OVERHEAD + tagBytes.length;
+            int size = mPos;
+            mPos = POS_TIMESTAMP_NS;
+            writeLong(mTimestampNs);
+            writeInt(mAtomId);
+            if (0 == mErrorMask) {
+                mBuffer.putByte(POS_NUM_ELEMENTS, (byte) mNumElements);
+            } else {
+                mBuffer.putByte(0, TYPE_ERRORS);
+                mBuffer.putByte(POS_NUM_ELEMENTS, (byte) 3);
+                mPos += mBuffer.putInt(mPos, mErrorMask);
+                size = mPos;
+            }
+
+            return new StatsEvent(mBuffer, size);
         }
-        mPos = pos;
-        mNumElements++;
-        return SUCCESS;
+
+        private void writeTypeId(final byte typeId) {
+            mPosLastField = mPos;
+            mLastType = typeId;
+            mCurrentAnnotationCount = 0;
+            final byte encodedId = (byte) (typeId & 0x0F);
+            mPos += mBuffer.putByte(mPos, encodedId);
+        }
+
+        private void writeAnnotationCount() {
+            // Use first 4 bits for annotation count and last 4 bits for typeId.
+            final byte encodedId = (byte) ((mCurrentAnnotationCount << 4) | (mLastType & 0x0F));
+            mBuffer.putByte(mPosLastField, encodedId);
+        }
+
+        @NonNull
+        private static byte[] stringToBytes(@Nullable final String value) {
+            return (null == value ? "" : value).getBytes(UTF_8);
+        }
     }
 
-    /**
-     * Returns the byte array containing data in the statsd socket format.
-     * @hide
-     **/
-    @NonNull
-    public byte[] getBuffer() {
-        // Encode number of elements in the buffer.
-        mBuffer[POS_NUM_ELEMENTS] = (byte) mNumElements;
-        return mBuffer;
-    }
+    private static final class Buffer {
+        private static Object sLock = new Object();
 
-    /**
-     * Returns number of bytes used by the buffer.
-     * @hide
-     **/
-    public int size() {
-        return mPos;
-    }
+        @GuardedBy("sLock")
+        private static Buffer sPool;
 
-    /**
-     * Getter for atom id.
-     * @hide
-     **/
-    public int getAtomId() {
-        return mAtomId;
-    }
+        private final byte[] mBytes = new byte[MAX_PAYLOAD_SIZE];
+        private boolean mOverflow = false;
 
-    @NonNull
-    private static byte[] stringToBytes(@Nullable final String value) {
-        return (null == value ? "" : value).getBytes(UTF_8);
-    }
+        @NonNull
+        private static Buffer obtain() {
+            final Buffer buffer;
+            synchronized (sLock) {
+                buffer = null == sPool ? new Buffer() : sPool;
+                sPool = null;
+            }
+            buffer.reset();
+            return buffer;
+        }
 
-    // Helper methods for copying primitives
-    private static void copyInt(@NonNull byte[] buff, int pos, int value) {
-        buff[pos] = (byte) (value);
-        buff[pos + 1] = (byte) (value >> 8);
-        buff[pos + 2] = (byte) (value >> 16);
-        buff[pos + 3] = (byte) (value >> 24);
-    }
+        private Buffer() {
+        }
 
-    private static void copyLong(@NonNull byte[] buff, int pos, long value) {
-        buff[pos] = (byte) (value);
-        buff[pos + 1] = (byte) (value >> 8);
-        buff[pos + 2] = (byte) (value >> 16);
-        buff[pos + 3] = (byte) (value >> 24);
-        buff[pos + 4] = (byte) (value >> 32);
-        buff[pos + 5] = (byte) (value >> 40);
-        buff[pos + 6] = (byte) (value >> 48);
-        buff[pos + 7] = (byte) (value >> 56);
+        @NonNull
+        private byte[] getBytes() {
+            return mBytes;
+        }
+
+        private void release() {
+            synchronized (sLock) {
+                if (null == sPool) {
+                    sPool = this;
+                }
+            }
+        }
+
+        private void reset() {
+            mOverflow = false;
+        }
+
+        private boolean hasOverflowed() {
+            return mOverflow;
+        }
+
+        /**
+         * Checks for available space in the byte array.
+         *
+         * @param index starting position in the buffer to start the check.
+         * @param numBytes number of bytes to check from index.
+         * @return true if space is available, false otherwise.
+         **/
+        private boolean hasEnoughSpace(final int index, final int numBytes) {
+            final boolean result = index + numBytes < MAX_PAYLOAD_SIZE;
+            if (!result) {
+                mOverflow = true;
+            }
+            return result;
+        }
+
+        /**
+         * Writes a byte into the buffer.
+         *
+         * @param index position in the buffer where the byte is written.
+         * @param value the byte to write.
+         * @return number of bytes written to buffer from this write operation.
+         **/
+        private int putByte(final int index, final byte value) {
+            if (hasEnoughSpace(index, Byte.BYTES)) {
+                mBytes[index] = (byte) (value);
+                return Byte.BYTES;
+            }
+            return 0;
+        }
+
+        /**
+         * Writes a boolean into the buffer.
+         *
+         * @param index position in the buffer where the boolean is written.
+         * @param value the boolean to write.
+         * @return number of bytes written to buffer from this write operation.
+         **/
+        private int putBoolean(final int index, final boolean value) {
+            return putByte(index, (byte) (value ? 1 : 0));
+        }
+
+        /**
+         * Writes an integer into the buffer.
+         *
+         * @param index position in the buffer where the integer is written.
+         * @param value the integer to write.
+         * @return number of bytes written to buffer from this write operation.
+         **/
+        private int putInt(final int index, final int value) {
+            if (hasEnoughSpace(index, Integer.BYTES)) {
+                // Use little endian byte order.
+                mBytes[index] = (byte) (value);
+                mBytes[index + 1] = (byte) (value >> 8);
+                mBytes[index + 2] = (byte) (value >> 16);
+                mBytes[index + 3] = (byte) (value >> 24);
+                return Integer.BYTES;
+            }
+            return 0;
+        }
+
+        /**
+         * Writes a long into the buffer.
+         *
+         * @param index position in the buffer where the long is written.
+         * @param value the long to write.
+         * @return number of bytes written to buffer from this write operation.
+         **/
+        private int putLong(final int index, final long value) {
+            if (hasEnoughSpace(index, Long.BYTES)) {
+                // Use little endian byte order.
+                mBytes[index] = (byte) (value);
+                mBytes[index + 1] = (byte) (value >> 8);
+                mBytes[index + 2] = (byte) (value >> 16);
+                mBytes[index + 3] = (byte) (value >> 24);
+                mBytes[index + 4] = (byte) (value >> 32);
+                mBytes[index + 5] = (byte) (value >> 40);
+                mBytes[index + 6] = (byte) (value >> 48);
+                mBytes[index + 7] = (byte) (value >> 56);
+                return Long.BYTES;
+            }
+            return 0;
+        }
+
+        /**
+         * Writes a float into the buffer.
+         *
+         * @param index position in the buffer where the float is written.
+         * @param value the float to write.
+         * @return number of bytes written to buffer from this write operation.
+         **/
+        private int putFloat(final int index, final float value) {
+            return putInt(index, Float.floatToIntBits(value));
+        }
+
+        /**
+         * Copies a byte array into the buffer.
+         *
+         * @param index position in the buffer where the byte array is copied.
+         * @param value the byte array to copy.
+         * @return number of bytes written to buffer from this write operation.
+         **/
+        private int putByteArray(final int index, @NonNull final byte[] value) {
+            final int numBytes = value.length;
+            if (hasEnoughSpace(index, numBytes)) {
+                System.arraycopy(value, 0, mBytes, index, numBytes);
+                return numBytes;
+            }
+            return 0;
+        }
     }
 }
