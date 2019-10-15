@@ -134,11 +134,13 @@ public class SystemUIFactory {
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils,  ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry,
-            KeyguardBouncer.BouncerExpansionCallback expansionCallback) {
+            KeyguardBouncer.BouncerExpansionCallback expansionCallback,
+            KeyguardBypassController bypassController) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
                 dismissCallbackRegistry, FalsingManagerFactory.getInstance(context),
                 expansionCallback, UnlockMethodCache.getInstance(context),
-                KeyguardUpdateMonitor.getInstance(context), new Handler(Looper.getMainLooper()));
+                KeyguardUpdateMonitor.getInstance(context), bypassController,
+                new Handler(Looper.getMainLooper()));
     }
 
     public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,

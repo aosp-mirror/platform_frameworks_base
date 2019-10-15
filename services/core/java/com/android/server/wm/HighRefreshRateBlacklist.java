@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.provider.DeviceConfig.WindowManager.KEY_HIGH_REFRESH_RATE_BLACKLIST;
+import static android.hardware.display.DisplayManager.DeviceConfig.KEY_HIGH_REFRESH_RATE_BLACKLIST;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,9 +58,9 @@ class HighRefreshRateBlacklist {
     @VisibleForTesting
     HighRefreshRateBlacklist(Resources r, DeviceConfigInterface deviceConfig) {
         mDefaultBlacklist = r.getStringArray(R.array.config_highRefreshRateBlacklist);
-        deviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+        deviceConfig.addOnPropertyChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 BackgroundThread.getExecutor(), new OnPropertyChangedListener());
-        final String property = deviceConfig.getProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+        final String property = deviceConfig.getProperty(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                 KEY_HIGH_REFRESH_RATE_BLACKLIST);
         updateBlacklist(property);
     }
