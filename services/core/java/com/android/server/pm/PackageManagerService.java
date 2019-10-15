@@ -16117,10 +16117,6 @@ public class PackageManagerService extends IPackageManager.Stub
      * will be used to scan and reconcile the package.
      */
     private static class PrepareResult {
-        public final int installReason;
-        public final String volumeUuid;
-        public final String installerPackageName;
-        public final UserHandle user;
         public final boolean replace;
         public final int scanFlags;
         public final int parseFlags;
@@ -16129,24 +16125,16 @@ public class PackageManagerService extends IPackageManager.Stub
         public final PackageParser.Package packageToScan;
         public final boolean clearCodeCache;
         public final boolean system;
-        /* The original package name if it was changed during an update, otherwise {@code null}. */
-        @Nullable
-        public final String renamedPackage;
         public final PackageFreezer freezer;
         public final PackageSetting originalPs;
         public final PackageSetting disabledPs;
         public final PackageSetting[] childPackageSettings;
 
-        private PrepareResult(int installReason, String volumeUuid,
-                String installerPackageName, UserHandle user, boolean replace, int scanFlags,
+        private PrepareResult(boolean replace, int scanFlags,
                 int parseFlags, PackageParser.Package existingPackage,
                 PackageParser.Package packageToScan, boolean clearCodeCache, boolean system,
-                String renamedPackage, PackageFreezer freezer, PackageSetting originalPs,
+                PackageFreezer freezer, PackageSetting originalPs,
                 PackageSetting disabledPs, PackageSetting[] childPackageSettings) {
-            this.installReason = installReason;
-            this.volumeUuid = volumeUuid;
-            this.installerPackageName = installerPackageName;
-            this.user = user;
             this.replace = replace;
             this.scanFlags = scanFlags;
             this.parseFlags = parseFlags;
@@ -16154,7 +16142,6 @@ public class PackageManagerService extends IPackageManager.Stub
             this.packageToScan = packageToScan;
             this.clearCodeCache = clearCodeCache;
             this.system = system;
-            this.renamedPackage = renamedPackage;
             this.freezer = freezer;
             this.originalPs = originalPs;
             this.disabledPs = disabledPs;
@@ -16194,8 +16181,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private PrepareResult preparePackageLI(InstallArgs args, PackageInstalledInfo res)
             throws PrepareFailure {
         final int installFlags = args.installFlags;
-        final String installerPackageName = args.installerPackageName;
-        final String volumeUuid = args.volumeUuid;
         final File tmpPackageFile = new File(args.getCodePath());
         final boolean onExternal = args.volumeUuid != null;
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
@@ -16620,14 +16605,12 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageParser.Package existingPackage;
             String renamedPackage = null;
             boolean sysPkg = false;
-            String targetVolumeUuid = volumeUuid;
             int targetScanFlags = scanFlags;
             int targetParseFlags = parseFlags;
             final PackageSetting ps;
             final PackageSetting disabledPs;
             final PackageSetting[] childPackages;
             if (replace) {
-                targetVolumeUuid = null;
                 if (pkg.applicationInfo.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
                     // and cannot be updated as an update would get a new package name,
@@ -16879,9 +16862,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // we're passing the freezer back to be closed in a later phase of install
             shouldCloseFreezerBeforeReturn = false;
 
-            return new PrepareResult(args.installReason, targetVolumeUuid, installerPackageName,
-                    args.user, replace, targetScanFlags, targetParseFlags, existingPackage, pkg,
-                    replace /* clearCodeCache */, sysPkg, renamedPackage, freezer,
+            return new PrepareResult(replace, targetScanFlags, targetParseFlags,
+                    existingPackage, pkg, replace /* clearCodeCache */, sysPkg, freezer,
                     ps, disabledPs, childPackages);
         } finally {
             if (shouldCloseFreezerBeforeReturn) {
