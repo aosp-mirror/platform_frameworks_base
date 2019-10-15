@@ -19,7 +19,6 @@ android_test {
     static_libs: ["androidx.test.rules", "cts-rollback-lib", "cts-install-lib"],
     test_suites: ["general-tests"],
     test_config: "RollbackTest.xml",
-    // TODO: sdk_version: "test_current" when Intent#resolveSystemservice is TestApi
 }
 
 java_test_host {
