@@ -262,6 +262,10 @@ private:
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation);
     FRIEND_TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations);
 
+    FRIEND_TEST(CountMetricE2eTest, TestWithSimpleState);
+    FRIEND_TEST(CountMetricE2eTest, TestWithMappedState);
+    FRIEND_TEST(CountMetricE2eTest, TestWithMultipleStates);
+
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);

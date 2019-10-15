@@ -16,23 +16,25 @@
 
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
-#include "statslog.h"
+
+#include "StatsLogProcessor.h"
 
 #include <android-base/file.h>
 #include <dirent.h>
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
-#include "StatsLogProcessor.h"
+#include <log/log_event_list.h>
+#include <utils/Errors.h>
+#include <utils/SystemClock.h>
+
 #include "android-base/stringprintf.h"
 #include "external/StatsPullerManager.h"
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
+#include "state/StateManager.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
+#include "statslog.h"
 #include "storage/StorageManager.h"
-
-#include <log/log_event_list.h>
-#include <utils/Errors.h>
-#include <utils/SystemClock.h>
 
 using namespace android;
 using android::base::StringPrintf;
@@ -217,6 +219,8 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     if (event->GetTagId() == android::util::ISOLATED_UID_CHANGED) {
         onIsolatedUidChangedEventLocked(*event);
     }
+
+    StateManager::getInstance().onLogEvent(*event);
 
     if (mMetricsManagers.empty()) {
         return;

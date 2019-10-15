@@ -48,7 +48,7 @@ public:
     // Returns the state value mapped to the given query key.
     // If the key isn't mapped to a state or the key size doesn't match the
     // primary key size, the default state is returned.
-    int getState(const HashableDimensionKey& queryKey) const;
+    int getStateValue(const HashableDimensionKey& queryKey) const;
 
     inline int getListenersCount() const {
         return mListeners.size();

@@ -68,6 +68,17 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
                     std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks);
 
+// Initialize State maps using State protos in the config. These maps will
+// eventually be passed to MetricProducers to initialize their state info.
+// input:
+// [config]: the input config
+// output:
+// [stateAtomIdMap]: this map should contain the mapping from state ids to atom ids
+// [allStateGroupMaps]: this map should contain the mapping from states ids and state
+//                      values to state group ids for all states
+bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAtomIdMap,
+                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps);
+
 // Initialize MetricProducers.
 // input:
 // [key]: the config key that this config belongs to
@@ -75,6 +86,9 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 // [timeBaseSec]: start time base for all metrics
 // [logTrackerMap]: LogMatchingTracker name to index mapping from previous step.
 // [conditionTrackerMap]: condition name to index mapping
+// [stateAtomIdMap]: contains the mapping from state ids to atom ids
+// [allStateGroupMaps]: contains the mapping from atom ids and state values to
+//                      state group ids for all states
 // output:
 // [allMetricProducers]: contains the list of sp to the MetricProducers created.
 // [conditionToMetricMap]: contains the mapping from condition tracker index to
@@ -87,6 +101,8 @@ bool initMetrics(
         const std::unordered_map<int64_t, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
         const vector<sp<LogMatchingTracker>>& allAtomMatchers,
+        const unordered_map<int64_t, int>& stateAtomIdMap,
+        const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
         vector<sp<ConditionTracker>>& allConditionTrackers,
         std::vector<sp<MetricProducer>>& allMetricProducers,
         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,

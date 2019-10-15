@@ -20,23 +20,23 @@
 #include "metrics_manager_util.h"
 #include "MetricProducer.h"
 
-#include "../condition/CombinationConditionTracker.h"
-#include "../condition/SimpleConditionTracker.h"
-#include "../condition/StateConditionTracker.h"
-#include "../external/StatsPullerManager.h"
-#include "../matchers/CombinationLogMatchingTracker.h"
-#include "../matchers/SimpleLogMatchingTracker.h"
-#include "../matchers/EventMatcherWizard.h"
-#include "../metrics/CountMetricProducer.h"
-#include "../metrics/DurationMetricProducer.h"
-#include "../metrics/EventMetricProducer.h"
-#include "../metrics/GaugeMetricProducer.h"
-#include "../metrics/ValueMetricProducer.h"
+#include <inttypes.h>
 
+#include "condition/CombinationConditionTracker.h"
+#include "condition/SimpleConditionTracker.h"
+#include "condition/StateConditionTracker.h"
+#include "external/StatsPullerManager.h"
+#include "matchers/CombinationLogMatchingTracker.h"
+#include "matchers/EventMatcherWizard.h"
+#include "matchers/SimpleLogMatchingTracker.h"
+#include "metrics/CountMetricProducer.h"
+#include "metrics/DurationMetricProducer.h"
+#include "metrics/EventMetricProducer.h"
+#include "metrics/GaugeMetricProducer.h"
+#include "metrics/ValueMetricProducer.h"
+#include "state/StateManager.h"
 #include "stats_util.h"
 #include "statslog.h"
-
-#include <inttypes.h>
 
 using std::set;
 using std::string;
@@ -135,6 +135,41 @@ bool handleMetricWithConditions(
     // will create new vector if not exist before.
     auto& metricList = conditionToMetricMap[condition_it->second];
     metricList.push_back(metricIndex);
+    return true;
+}
+
+// Initializes state data structures for a metric.
+// input:
+// [config]: the input config
+// [stateIds]: the slice_by_state ids for this metric
+// [stateAtomIdMap]: this map contains the mapping from all state ids to atom ids
+// [allStateGroupMaps]: this map contains the mapping from state ids and state
+//                      values to state group ids for all states
+// output:
+// [slicedStateAtoms]: a vector of atom ids of all the slice_by_states
+// [stateGroupMap]: this map should contain the mapping from states ids and state
+//                      values to state group ids for all states that this metric
+//                      is interested in
+bool handleMetricWithStates(
+        const StatsdConfig& config, const ::google::protobuf::RepeatedField<int64_t>& stateIds,
+        const unordered_map<int64_t, int>& stateAtomIdMap,
+        const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
+        vector<int>& slicedStateAtoms,
+        unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap) {
+    for (const auto& stateId : stateIds) {
+        auto it = stateAtomIdMap.find(stateId);
+        if (it == stateAtomIdMap.end()) {
+            ALOGW("cannot find State %" PRId64 " in the config", stateId);
+            return false;
+        }
+        int atomId = it->second;
+        slicedStateAtoms.push_back(atomId);
+
+        auto stateIt = allStateGroupMaps.find(stateId);
+        if (stateIt != allStateGroupMaps.end()) {
+            stateGroupMap[atomId] = stateIt->second;
+        }
+    }
     return true;
 }
 
@@ -342,12 +377,32 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
     return true;
 }
 
+bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAtomIdMap,
+                unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps) {
+    for (int i = 0; i < config.state_size(); i++) {
+        const State& state = config.state(i);
+        const int64_t stateId = state.id();
+        stateAtomIdMap[stateId] = state.atom_id();
+
+        const StateMap& stateMap = state.map();
+        for (auto group : stateMap.group()) {
+            for (auto value : group.value()) {
+                allStateGroupMaps[stateId][value] = group.group_id();
+            }
+        }
+    }
+
+    return true;
+}
+
 bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
                  const int64_t currentTimeNs, UidMap& uidMap,
                  const sp<StatsPullerManager>& pullerManager,
                  const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
+                 const unordered_map<int64_t, int>& stateAtomIdMap,
+                 const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
                  vector<sp<MetricProducer>>& allMetricProducers,
                  unordered_map<int, vector<int>>& conditionToMetricMap,
@@ -398,10 +453,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
-            bool good = handleMetricWithConditions(
-                    metric.condition(), metricIndex, conditionTrackerMap, metric.links(),
-                    allConditionTrackers, conditionIndex, conditionToMetricMap);
-            if (!good) {
+            if (!handleMetricWithConditions(metric.condition(), metricIndex, conditionTrackerMap,
+                                            metric.links(), allConditionTrackers, conditionIndex,
+                                            conditionToMetricMap)) {
                 return false;
             }
         } else {
@@ -410,6 +464,18 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                 return false;
             }
         }
+
+        std::vector<int> slicedStateAtoms;
+        unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+        if (metric.slice_by_state_size() > 0) {
+            if (!handleMetricWithStates(config, metric.slice_by_state(), stateAtomIdMap,
+                                        allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
+                return false;
+            }
+        }
+
+        // TODO(tsaichristine): add check for unequal number of MetricStateLinks
+        // and slice_by_states
 
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;
@@ -421,7 +487,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
 
         sp<MetricProducer> countProducer = new CountMetricProducer(
                 key, metric, conditionIndex, wizard, timeBaseTimeNs, currentTimeNs,
-                eventActivationMap, eventDeactivationMap);
+                eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -721,6 +787,13 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
     }
     for (const auto& it : allMetricProducers) {
         uidMap.addListener(it);
+
+        // Register metrics to StateTrackers
+        for (int atomId : it->getSlicedStateAtoms()) {
+            if (!StateManager::getInstance().registerListener(atomId, it)) {
+                return false;
+            }
+        }
     }
     return true;
 }
@@ -846,6 +919,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
     unordered_map<int64_t, int> logTrackerMap;
     unordered_map<int64_t, int> conditionTrackerMap;
     unordered_map<int64_t, int> metricProducerMap;
+    unordered_map<int64_t, int> stateAtomIdMap;
+    unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
 
     if (!initLogTrackers(config, uidMap, logTrackerMap, allAtomMatchers, allTagIds)) {
         ALOGE("initLogMatchingTrackers failed");
@@ -858,9 +933,13 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         ALOGE("initConditionTrackers failed");
         return false;
     }
-
+    if (!initStates(config, stateAtomIdMap, allStateGroupMaps)) {
+        ALOGE("initStates failed");
+        return false;
+    }
     if (!initMetrics(key, config, timeBaseNs, currentTimeNs, uidMap, pullerManager, logTrackerMap,
-                     conditionTrackerMap, allAtomMatchers, allConditionTrackers, allMetricProducers,
+                     conditionTrackerMap, allAtomMatchers, stateAtomIdMap, allStateGroupMaps,
+                     allConditionTrackers, allMetricProducers,
                      conditionToMetricMap, trackerToMetricMap, metricProducerMap,
                      noReportMetricIds, activationAtomTrackerToMetricMap,
                      deactivationAtomTrackerToMetricMap, metricsWithActivation)) {
