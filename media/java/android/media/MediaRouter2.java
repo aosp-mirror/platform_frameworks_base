@@ -310,6 +310,7 @@ public class MediaRouter2 {
             List<MediaRoute2Info> outRoutes) {
         if (provider == null || !provider.isValid()) {
             Log.w(TAG, "Ignoring invalid provider : " + provider);
+            return;
         }
 
         final Collection<MediaRoute2Info> routes = provider.getRoutes();
