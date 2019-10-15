@@ -68,23 +68,23 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testBadApkOnly() throws Exception {
-        runPhase("testBadApkOnlyEnableRollback");
+        runPhase("testBadApkOnly_Phase1");
         getDevice().reboot();
-        runPhase("testBadApkOnlyConfirmEnableRollback");
+        runPhase("testBadApkOnly_Phase2");
         try {
             // This is expected to fail due to the device being rebooted out
             // from underneath the test. If this fails for reasons other than
             // the device reboot, those failures should result in failure of
             // the testApkOnlyConfirmRollback phase.
             CLog.logAndDisplay(LogLevel.INFO, "testBadApkOnlyTriggerRollback is expected to fail");
-            runPhase("testBadApkOnlyTriggerRollback");
+            runPhase("testBadApkOnly_Phase3");
         } catch (AssertionError e) {
             // AssertionError is expected.
         }
 
         getDevice().waitForDeviceAvailable();
 
-        runPhase("testBadApkOnlyConfirmRollback");
+        runPhase("testBadApkOnly_Phase4");
     }
 
     @Test

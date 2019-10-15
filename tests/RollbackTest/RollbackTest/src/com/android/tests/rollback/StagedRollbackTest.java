@@ -92,7 +92,7 @@ public class StagedRollbackTest {
      * Enable rollback phase.
      */
     @Test
-    public void testBadApkOnlyEnableRollback() throws Exception {
+    public void testBadApkOnly_Phase1() throws Exception {
         Uninstall.packages(TestApp.A);
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
 
@@ -101,9 +101,6 @@ public class StagedRollbackTest {
         InstallUtils.processUserData(TestApp.A);
 
         Install.single(TestApp.ACrashing2).setEnableRollback().setStaged().commit();
-
-        // At this point, the host test driver will reboot the device and run
-        // testBadApkOnlyConfirmEnableRollback().
     }
 
     /**
@@ -111,7 +108,7 @@ public class StagedRollbackTest {
      * Confirm that rollback was successfully enabled.
      */
     @Test
-    public void testBadApkOnlyConfirmEnableRollback() throws Exception {
+    public void testBadApkOnly_Phase2() throws Exception {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
         InstallUtils.processUserData(TestApp.A);
 
@@ -122,9 +119,6 @@ public class StagedRollbackTest {
         assertThat(rollback).packagesContainsExactly(
                 Rollback.from(TestApp.A2).to(TestApp.A1));
         assertThat(rollback.isStaged()).isTrue();
-
-        // At this point, the host test driver will run
-        // testBadApkOnlyTriggerRollback().
     }
 
     /**
@@ -133,15 +127,14 @@ public class StagedRollbackTest {
      * rebooting the test out from under it.
      */
     @Test
-    public void testBadApkOnlyTriggerRollback() throws Exception {
+    public void testBadApkOnly_Phase3() throws Exception {
         // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
         RollbackUtils.sendCrashBroadcast(TestApp.A, 5);
 
-        // We expect the device to be rebooted automatically. Wait for that to
-        // happen. At that point, the host test driver will wait for the
-        // device to come back up and run testApkOnlyConfirmRollback().
+        // We expect the device to be rebooted automatically. Wait for that to happen.
         Thread.sleep(30 * 1000);
 
+        // Raise an error anyway if reboot didn't happen.
         fail("watchdog did not trigger reboot");
     }
 
@@ -150,7 +143,7 @@ public class StagedRollbackTest {
      * Confirm rollback phase.
      */
     @Test
-    public void testBadApkOnlyConfirmRollback() throws Exception {
+    public void testBadApkOnly_Phase4() throws Exception {
         assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
         InstallUtils.processUserData(TestApp.A);
 
