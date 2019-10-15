@@ -17,11 +17,12 @@
 android_app {
     name: "startop_test_app",
     srcs: [
+        "src/ComplexLayoutInflationActivity.java",
         "src/CPUIntensive.java",
         "src/EmptyActivity.java",
-        "src/LayoutInflationActivity.java",
-        "src/ComplexLayoutInflationActivity.java",
         "src/FrameLayoutInflationActivity.java",
+        "src/LayoutInflationActivity.java",
+        "src/NonInteractiveSystemServerBenchmarkActivity.java",
         "src/SystemServerBenchmarkActivity.java",
         "src/SystemServerBenchmarks.java",
         "src/TextViewInflationActivity.java",

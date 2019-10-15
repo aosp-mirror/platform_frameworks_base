@@ -84,6 +84,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:label="Non-interactive SystemServer Benchmark"
+            android:name=".NonInteractiveSystemServerBenchmarkActivity"
+            android:exported="true" />
+
     </application>
 
 </manifest>
