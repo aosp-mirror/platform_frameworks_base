@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -33,6 +34,10 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.people.DataListener;
+import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
+import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewBoundary;
+import com.android.systemui.statusbar.notification.people.PersonViewModel;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -41,6 +46,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController.Configurati
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.List;
+
+import kotlin.sequences.Sequence;
 
 /**
  * Manages the boundaries of the two notification sections (high priority and low priority). Also
@@ -58,10 +65,38 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
     private final int mNumberOfSections;
-
     private boolean mInitialized = false;
+
     private SectionHeaderView mGentleHeader;
     private boolean mGentleHeaderVisible = false;
+
+    private boolean mPeopleHubVisible = false;
+    private PeopleHubView mPeopleHubView;
+    private final PeopleHubSectionFooterViewAdapter mPeopleHubViewAdapter;
+    private final PeopleHubSectionFooterViewBoundary mPeopleHubViewBoundary =
+            new PeopleHubSectionFooterViewBoundary() {
+                @Override
+                public void setVisible(boolean isVisible) {
+                    if (mPeopleHubVisible != isVisible) {
+                        mPeopleHubVisible = isVisible;
+                        if (mInitialized) {
+                            updateSectionBoundaries();
+                        }
+                    }
+                }
+
+                @NonNull
+                @Override
+                public View getAssociatedViewForClickAnimation() {
+                    return mPeopleHubView;
+                }
+
+                @NonNull
+                @Override
+                public Sequence<DataListener<PersonViewModel>> getPersonViewAdapters() {
+                    return mPeopleHubView.getPersonViewAdapters();
+                }
+            };
 
     @Nullable private View.OnClickListener mOnClearGentleNotifsClickListener;
 
@@ -70,11 +105,13 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             ActivityStarter activityStarter,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
+            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter,
             int numberOfSections) {
         mParent = parent;
         mActivityStarter = activityStarter;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
+        mPeopleHubViewAdapter = peopleHubViewAdapter;
         mNumberOfSections = numberOfSections;
     }
 
@@ -101,13 +138,22 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
      * Reinflates the entire notification header, including all decoration views.
      */
     void reinflateViews(LayoutInflater layoutInflater) {
-        int oldPos = -1;
+        int oldGentleHeaderPos = -1;
+        int oldPeopleHubPos = -1;
         if (mGentleHeader != null) {
             if (mGentleHeader.getTransientContainer() != null) {
                 mGentleHeader.getTransientContainer().removeView(mGentleHeader);
             } else if (mGentleHeader.getParent() != null) {
-                oldPos = mParent.indexOfChild(mGentleHeader);
+                oldGentleHeaderPos = mParent.indexOfChild(mGentleHeader);
                 mParent.removeView(mGentleHeader);
+            }
+        }
+        if (mPeopleHubView != null) {
+            if (mPeopleHubView.getTransientContainer() != null) {
+                mPeopleHubView.getTransientContainer().removeView(mPeopleHubView);
+            } else if (mPeopleHubView.getParent() != null) {
+                oldPeopleHubPos = mParent.indexOfChild(mPeopleHubView);
+                mParent.removeView(mPeopleHubView);
             }
         }
 
@@ -116,8 +162,19 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         mGentleHeader.setOnHeaderClickListener(this::onGentleHeaderClick);
         mGentleHeader.setOnClearAllClickListener(this::onClearGentleNotifsClick);
 
-        if (oldPos != -1) {
-            mParent.addView(mGentleHeader, oldPos);
+        if (oldGentleHeaderPos != -1) {
+            mParent.addView(mGentleHeader, oldGentleHeaderPos);
+        }
+
+        mPeopleHubView = (PeopleHubView) layoutInflater.inflate(
+                R.layout.people_strip, mParent, false);
+
+        if (oldPeopleHubPos != -1) {
+            mParent.addView(mPeopleHubView, oldPeopleHubPos);
+        }
+
+        if (!mInitialized) {
+            mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
         }
     }
 
@@ -145,7 +202,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
 
         if (!begin) {
-            begin = view == mGentleHeader;
+            begin = view == mGentleHeader || previous == mPeopleHubView;
         }
 
         return begin;
@@ -161,6 +218,8 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             return ((ExpandableNotificationRow) view).getEntry().getBucket();
         } else if (view == mGentleHeader) {
             return BUCKET_SILENT;
+        } else if (view == mPeopleHubView) {
+            return BUCKET_PEOPLE;
         }
 
         throw new IllegalArgumentException("I don't know how to find a bucket for this view :(");
@@ -175,6 +234,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             return;
         }
 
+        int lastPersonIndex = -1;
         int firstGentleNotifIndex = -1;
 
         final int n = mParent.getChildCount();
@@ -183,11 +243,19 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             if (child instanceof ExpandableNotificationRow
                     && child.getVisibility() != View.GONE) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (row.getEntry().getBucket() == BUCKET_PEOPLE) {
+                    lastPersonIndex = i;
+                }
                 if (row.getEntry().getBucket() == BUCKET_SILENT) {
                     firstGentleNotifIndex = i;
                     break;
                 }
             }
+        }
+
+        if (adjustPeopleHubVisibilityAndPosition(lastPersonIndex)) {
+            // make room for peopleHub
+            firstGentleNotifIndex++;
         }
 
         adjustGentleHeaderVisibilityAndPosition(firstGentleNotifIndex);
@@ -230,6 +298,36 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                 mParent.changeViewPosition(mGentleHeader, targetIndex);
             }
         }
+    }
+
+    private boolean adjustPeopleHubVisibilityAndPosition(int lastPersonIndex) {
+        final boolean showPeopleHeader = mPeopleHubVisible
+                && mNumberOfSections > 2
+                && mStatusBarStateController.getState() != StatusBarState.KEYGUARD;
+        final int currentHubIndex = mParent.indexOfChild(mPeopleHubView);
+        final boolean currentlyVisible = currentHubIndex >= 0;
+        int targetIndex = lastPersonIndex + 1;
+
+        if (!showPeopleHeader) {
+            if (currentlyVisible) {
+                mParent.removeView(mPeopleHubView);
+            }
+        } else {
+            if (!currentlyVisible) {
+                if (mPeopleHubView.getTransientContainer() != null) {
+                    mPeopleHubView.getTransientContainer().removeTransientView(mPeopleHubView);
+                    mPeopleHubView.setTransientContainer(null);
+                }
+                mParent.addView(mPeopleHubView, targetIndex);
+                return true;
+            } else if (currentHubIndex != targetIndex - 1) {
+                if (currentHubIndex < targetIndex) {
+                    targetIndex--;
+                }
+                mParent.changeViewPosition(mPeopleHubView, targetIndex);
+            }
+        }
+        return false;
     }
 
     /**
@@ -322,6 +420,10 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         if (mOnClearGentleNotifsClickListener != null) {
             mOnClearGentleNotifsClickListener.onClick(v);
         }
+    }
+
+    private void handlePeopleHubClick(PendingIntent pendingIntent) {
+        mActivityStarter.startPendingIntentDismissingKeyguard(pendingIntent, null, mPeopleHubView);
     }
 
     /**

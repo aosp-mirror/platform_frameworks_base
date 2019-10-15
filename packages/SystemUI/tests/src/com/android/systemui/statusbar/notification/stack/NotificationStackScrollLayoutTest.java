@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
@@ -171,7 +172,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 new FalsingManagerFake(),
                 mock(NotificationLockscreenUserManager.class),
                 mock(NotificationGutsManager.class),
-                new NotificationSectionsFeatureManager(new DeviceConfigProxyFake(), mContext));
+                new NotificationSectionsFeatureManager(new DeviceConfigProxyFake(), mContext),
+                mock(PeopleHubSectionFooterViewAdapter.class));
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelf(notificationShelf);
         mStackScroller.setStatusBar(mBar);

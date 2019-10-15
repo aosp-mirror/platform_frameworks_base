@@ -98,6 +98,9 @@ public class NotificationData {
             int aRank = getRank(a.getKey());
             int bRank = getRank(b.getKey());
 
+            boolean aPeople = isPeopleNotification(a);
+            boolean bPeople = isPeopleNotification(b);
+
             boolean aMedia = isImportantMedia(a);
             boolean bMedia = isImportantMedia(b);
 
@@ -107,8 +110,8 @@ public class NotificationData {
             boolean aHeadsUp = a.isRowHeadsUp();
             boolean bHeadsUp = b.isRowHeadsUp();
 
-            if (mUsePeopleFiltering && a.hasAssociatedPeople() != b.hasAssociatedPeople()) {
-                return a.hasAssociatedPeople() ? -1 : 1;
+            if (mUsePeopleFiltering && aPeople != bPeople) {
+                return aPeople ? -1 : 1;
             } else if (aHeadsUp != bHeadsUp) {
                 return aHeadsUp ? -1 : 1;
             } else if (aHeadsUp) {
@@ -447,13 +450,18 @@ public class NotificationData {
             boolean isHeadsUp,
             boolean isMedia,
             boolean isSystemMax) {
-        if (mUsePeopleFiltering && e.hasAssociatedPeople()) {
+        if (mUsePeopleFiltering && isPeopleNotification(e)) {
             e.setBucket(BUCKET_PEOPLE);
         } else if (isHeadsUp || isMedia || isSystemMax || e.isHighPriority()) {
             e.setBucket(BUCKET_ALERTING);
         } else {
             e.setBucket(BUCKET_SILENT);
         }
+    }
+
+    private boolean isPeopleNotification(NotificationEntry e) {
+        return e.getSbn().getNotification().getNotificationStyle()
+                == Notification.MessagingStyle.class;
     }
 
     public void dump(PrintWriter pw, String indent) {
