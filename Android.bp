@@ -414,6 +414,7 @@ java_library {
         "libcore-platform-compat-config",
         "services-platform-compat-config",
         "media-provider-platform-compat-config",
+        "services-devicepolicy-platform-compat-config",
     ],
     sdk_version: "core_platform",
 }
