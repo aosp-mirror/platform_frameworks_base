@@ -90,13 +90,13 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     @Test
     public void testNativeWatchdogTriggersRollback() throws Exception {
         //Stage install ModuleMetadata package - this simulates a Mainline module update
-        runPhase("installModuleMetadataPackage");
+        runPhase("testNativeWatchdogTriggersRollback_Phase1");
 
         // Reboot device to activate staged package
         getDevice().reboot();
         getDevice().waitForDeviceAvailable();
 
-        runPhase("assertModuleMetadataRollbackAvailable");
+        runPhase("testNativeWatchdogTriggersRollback_Phase2");
 
         // crash system_server enough times to trigger a rollback
         crashProcess("system_server", NATIVE_CRASHES_THRESHOLD);
@@ -113,7 +113,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
 
         // verify rollback committed
-        runPhase("assertModuleMetadataRollbackCommitted");
+        runPhase("testNativeWatchdogTriggersRollback_Phase3");
     }
 
     /**

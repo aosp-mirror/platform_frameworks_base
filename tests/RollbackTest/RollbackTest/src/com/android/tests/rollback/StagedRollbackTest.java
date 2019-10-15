@@ -170,8 +170,11 @@ public class StagedRollbackTest {
                         networkStack)).isNull();
     }
 
+    /**
+     * Stage install ModuleMetadata package to simulate a Mainline module update.
+     */
     @Test
-    public void installModuleMetadataPackage() throws Exception {
+    public void testNativeWatchdogTriggersRollback_Phase1() throws Exception {
         resetModuleMetadataPackage();
         Context context = InstrumentationRegistry.getContext();
         PackageInfo metadataPackageInfo = context.getPackageManager().getPackageInfo(
@@ -183,6 +186,26 @@ public class StagedRollbackTest {
         runShellCommand("pm install "
                 + "-r --enable-rollback --staged --wait "
                 + metadataApkPath);
+    }
+
+    /**
+     * Verify the rollback is available.
+     */
+    @Test
+    public void testNativeWatchdogTriggersRollback_Phase2() throws Exception {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        MODULE_META_DATA_PACKAGE)).isNotNull();
+    }
+
+    /**
+     * Verify the rollback is committed after crashing.
+     */
+    @Test
+    public void testNativeWatchdogTriggersRollback_Phase3() throws Exception {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        MODULE_META_DATA_PACKAGE)).isNotNull();
     }
 
     @Test
@@ -204,20 +227,6 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                         getNetworkStackPackageName())).isNull();
-    }
-
-    @Test
-    public void assertModuleMetadataRollbackAvailable() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
-                        MODULE_META_DATA_PACKAGE)).isNotNull();
-    }
-
-    @Test
-    public void assertModuleMetadataRollbackCommitted() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        MODULE_META_DATA_PACKAGE)).isNotNull();
     }
 
     private String getNetworkStackPackageName() {
