@@ -26,8 +26,10 @@ cc_defaults {
         // a problem
         "-Wno-free-nonheap-object",
 
-        // clang's warning is broken, see: https://llvm.org/bugs/show_bug.cgi?id=21629
-        "-Wno-missing-braces",
+        // Clang is producing non-determistic binary when the new pass manager is
+        // enabled. Disable the new PM as a temporary workaround.
+        // b/142372146
+        "-fno-experimental-new-pass-manager",
     ],
 
     include_dirs: [

@@ -2021,6 +2021,36 @@ public final class SmsManager {
 
     // SMS send failure result codes
 
+    /** @hide */
+    @IntDef(prefix = { "RESULT" }, value = {
+            RESULT_ERROR_NONE,
+            RESULT_ERROR_GENERIC_FAILURE,
+            RESULT_ERROR_RADIO_OFF,
+            RESULT_ERROR_NULL_PDU,
+            RESULT_ERROR_NO_SERVICE,
+            RESULT_ERROR_LIMIT_EXCEEDED,
+            RESULT_ERROR_FDN_CHECK_FAILURE,
+            RESULT_ERROR_SHORT_CODE_NOT_ALLOWED,
+            RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED,
+            RESULT_RADIO_NOT_AVAILABLE,
+            RESULT_NETWORK_REJECT,
+            RESULT_INVALID_ARGUMENTS,
+            RESULT_INVALID_STATE,
+            RESULT_NO_MEMORY,
+            RESULT_INVALID_SMS_FORMAT,
+            RESULT_SYSTEM_ERROR,
+            RESULT_MODEM_ERROR,
+            RESULT_NETWORK_ERROR,
+            RESULT_INVALID_SMSC_ADDRESS,
+            RESULT_OPERATION_NOT_ALLOWED,
+            RESULT_INTERNAL_ERROR,
+            RESULT_NO_RESOURCES,
+            RESULT_CANCELLED,
+            RESULT_REQUEST_NOT_SUPPORTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Result {}
+
     /**
      * No error.
      * @hide

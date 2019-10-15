@@ -1063,4 +1063,13 @@ public class Binder implements IBinder {
         StrictMode.clearGatheredViolations();
         return res;
     }
+
+    /**
+     * Returns the specified service from servicemanager. If the service is not running,
+     * servicemanager will attempt to start it, and this function will wait for it to be ready.
+     * Returns nullptr only if there are permission problems or fatal errors.
+     * @hide
+     */
+    public static final native @Nullable IBinder waitForService(@NonNull String serviceName)
+            throws RemoteException;
 }

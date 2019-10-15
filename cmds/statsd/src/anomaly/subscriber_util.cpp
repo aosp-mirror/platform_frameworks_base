@@ -40,7 +40,7 @@ void triggerSubscribers(int64_t ruleId, int64_t metricId, const MetricDimensionK
 
     for (const Subscription& subscription : subscriptions) {
         if (subscription.probability_of_informing() < 1
-                && ((float)rand() / RAND_MAX) >= subscription.probability_of_informing()) {
+                && ((float)rand() / (float)RAND_MAX) >= subscription.probability_of_informing()) {
             // Note that due to float imprecision, 0.0 and 1.0 might not truly mean never/always.
             // The config writer was advised to use -0.1 and 1.1 for never/always.
             ALOGI("Fate decided that a subscriber would not be informed.");
