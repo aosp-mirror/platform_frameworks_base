@@ -524,7 +524,6 @@ public class InputManagerService extends IInputManager.Stub
             throw new IllegalArgumentException("displayId must >= 0.");
         }
 
-
         final long ident = Binder.clearCallingIdentity();
         try {
             InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
@@ -532,7 +531,7 @@ public class InputManagerService extends IInputManager.Stub
             inputChannels[0].setToken(host.asBinder());
             nativeRegisterInputMonitor(mPtr, inputChannels[0], displayId,
                     true /*isGestureMonitor*/);
-            return new InputMonitor(inputChannelName, inputChannels[1], host);
+            return new InputMonitor(inputChannels[1], host);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
