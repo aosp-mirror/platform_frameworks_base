@@ -341,7 +341,8 @@ import java.util.Map;
    </tr>
    <tr>
     <td>FLAC</td>
-    <td>mandatory metadata block (called the STREAMINFO block),<br>
+    <td>"fLaC", the FLAC stream marker in ASCII,<br>
+        followed by the STREAMINFO block (the mandatory metadata block),<br>
         optionally followed by any number of other metadata blocks</td>
     <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>
