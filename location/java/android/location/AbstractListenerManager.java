@@ -42,8 +42,8 @@ abstract class AbstractListenerManager<T> {
         @Nullable private volatile T mListener;
 
         private Registration(Executor executor, T listener) {
-            Preconditions.checkArgument(listener != null);
-            Preconditions.checkArgument(executor != null);
+            Preconditions.checkArgument(listener != null, "invalid null listener/callback");
+            Preconditions.checkArgument(executor != null, "invalid null executor");
             mExecutor = executor;
             mListener = listener;
         }
@@ -83,16 +83,18 @@ abstract class AbstractListenerManager<T> {
         return addInternal(listener, executor);
     }
 
-    protected final boolean addInternal(Object listener, Handler handler) throws RemoteException {
+    protected final boolean addInternal(@NonNull Object listener, @NonNull Handler handler)
+            throws RemoteException {
         return addInternal(listener, new HandlerExecutor(handler));
     }
 
-    protected final boolean addInternal(Object listener, Executor executor) throws RemoteException {
+    protected final boolean addInternal(@NonNull Object listener, @NonNull Executor executor)
+            throws RemoteException {
+        Preconditions.checkArgument(listener != null, "invalid null listener/callback");
         return addInternal(listener, new Registration<>(executor, convertKey(listener)));
     }
 
     private boolean addInternal(Object key, Registration<T> registration) throws RemoteException {
-        Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(registration);
 
         synchronized (mListeners) {

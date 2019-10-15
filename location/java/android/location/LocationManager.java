@@ -1762,6 +1762,7 @@ public class LocationManager {
      * @param handler  a handler with a looper that the callback runs on
      * @return true if the listener was successfully added
      *
+     * @throws IllegalArgumentException if callback is null
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -1781,10 +1782,12 @@ public class LocationManager {
     /**
      * Registers a GNSS status callback.
      *
-     * @param callback GNSS status callback object to register
      * @param executor the executor that the callback runs on
+     * @param callback GNSS status callback object to register
      * @return true if the listener was successfully added
      *
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -1853,6 +1856,8 @@ public class LocationManager {
      * @param listener a {@link OnNmeaMessageListener} object to register
      * @param handler  a handler with the looper that the listener runs on.
      * @return true if the listener was successfully added
+     *
+     * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -1874,6 +1879,9 @@ public class LocationManager {
      * @param listener a {@link OnNmeaMessageListener} object to register
      * @param executor the {@link Executor} that the listener runs on.
      * @return true if the listener was successfully added
+     *
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if listener is null
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
@@ -1946,6 +1954,9 @@ public class LocationManager {
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
      * @param handler  the handler that the callback runs on.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssMeasurementsCallback(
@@ -1966,6 +1977,10 @@ public class LocationManager {
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
      * @param executor the executor that the callback runs on.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssMeasurementsCallback(
@@ -1983,6 +1998,9 @@ public class LocationManager {
      *
      * @param measurementCorrections a {@link GnssMeasurementCorrections} object with the GNSS
      *     measurement corrections to be injected into the GNSS chipset.
+     *
+     * @throws IllegalArgumentException if measurementCorrections is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      * @hide
      */
     @SystemApi
@@ -2057,6 +2075,9 @@ public class LocationManager {
      * @param callback a {@link GnssNavigationMessage.Callback} object to register.
      * @param handler  the handler that the callback runs on.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssNavigationMessageCallback(
@@ -2078,6 +2099,10 @@ public class LocationManager {
      * @param callback a {@link GnssNavigationMessage.Callback} object to register.
      * @param executor the looper that the callback runs on.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     *
+     * @throws IllegalArgumentException if executor is null
+     * @throws IllegalArgumentException if callback is null
+     * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssNavigationMessageCallback(
