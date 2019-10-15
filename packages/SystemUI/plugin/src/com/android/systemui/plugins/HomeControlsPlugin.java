@@ -33,4 +33,9 @@ public interface HomeControlsPlugin extends Plugin {
       * will add home controls to this space.
       */
     void sendParentGroup(ViewGroup group);
+
+    /**
+     * When visible, will poll for updates.
+     */
+    void setVisible(boolean visible);
 }
