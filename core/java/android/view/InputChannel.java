@@ -61,7 +61,6 @@ public final class InputChannel implements Parcelable {
     private native void nativeWriteToParcel(Parcel parcel);
     private native void nativeDup(InputChannel target);
     private native IBinder nativeGetToken();
-    private native void nativeSetToken(IBinder token);
 
     private native String nativeGetName();
 
@@ -184,9 +183,5 @@ public final class InputChannel implements Parcelable {
 
     public IBinder getToken() {
         return nativeGetToken();
-    }
-
-    public void setToken(IBinder token) {
-        nativeSetToken(token);
     }
 }
