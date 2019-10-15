@@ -2426,4 +2426,9 @@ enum PageId {
     // and under gesture navigation mode.
     DIALOG_TOGGLE_SCREEN_MAGNIFICATION_GESTURE_NAVIGATION = 1802;
 
+    // OPEN: Settings > Security & screen lock -> Encryption & credentials > Install a certificate
+    // CATEGORY: SETTINGS
+    // OS: R
+    INSTALL_CERTIFICATE_FROM_STORAGE = 1803;
+
 }
