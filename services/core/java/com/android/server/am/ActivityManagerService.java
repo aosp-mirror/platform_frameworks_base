@@ -283,7 +283,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.EventLog;
-import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -381,7 +380,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -555,6 +553,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Max character limit for a notification title. If the notification title is larger than this
     // the notification will not be legible to the user.
     private static final int MAX_BUGREPORT_TITLE_SIZE = 50;
+    private static final int MAX_BUGREPORT_DESCRIPTION_SIZE = 150;
 
     private static final int NATIVE_DUMP_TIMEOUT_MS = 2000; // 2 seconds;
     private static final int JAVA_DUMP_MINIMUM_SIZE = 100; // 100 bytes.
@@ -8251,24 +8250,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon start
-     * using bug report API (which will be restricted to a few, pre-defined apps).
-     * No new code should be calling it.
+     * Takes a bugreport using bug report API ({@code BugreportManager}) with no pre-set
+     * title and description
      */
-    // TODO(b/137825297): Remove deprecated annotation and rephrase comments for all
-    // requestBugreport functions below.
-    @Deprecated
     @Override
-    public void requestBugReport(int bugreportType) {
+    public void requestBugReport(@BugreportParams.BugreportMode int bugreportType) {
         requestBugReportWithDescription(null, null, bugreportType);
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon start
-     * using bug report API (which will be restricted to a few, pre-defined apps).
-     * No new code should be calling it.
+     * Takes a bugreport using bug report API ({@code BugreportManager}) which gets
+     * triggered by sending a broadcast to Shell.
      */
-    @Deprecated
     @Override
     public void requestBugReportWithDescription(@Nullable String shareTitle,
             @Nullable String shareDescription, int bugreportType) {
@@ -8303,60 +8296,45 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (!TextUtils.isEmpty(shareTitle)) {
             if (shareTitle.length() > MAX_BUGREPORT_TITLE_SIZE) {
-                String errorStr = "shareTitle should be less than " +
-                        MAX_BUGREPORT_TITLE_SIZE + " characters";
+                String errorStr = "shareTitle should be less than "
+                        + MAX_BUGREPORT_TITLE_SIZE + " characters";
                 throw new IllegalArgumentException(errorStr);
             }
             if (!TextUtils.isEmpty(shareDescription)) {
-                int length = shareDescription.getBytes(StandardCharsets.UTF_8).length;
-                if (length > SystemProperties.PROP_VALUE_MAX) {
-                    String errorStr = "shareTitle should be less than " +
-                            SystemProperties.PROP_VALUE_MAX + " bytes";
+                if (shareDescription.length() > MAX_BUGREPORT_DESCRIPTION_SIZE) {
+                    String errorStr = "shareDescription should be less than "
+                            + MAX_BUGREPORT_DESCRIPTION_SIZE + " characters";
                     throw new IllegalArgumentException(errorStr);
-                } else {
-                    SystemProperties.set("dumpstate.options.description", shareDescription);
                 }
             }
-            SystemProperties.set("dumpstate.options.title", shareTitle);
             Slog.d(TAG, "Bugreport notification title " + shareTitle
                     + " description " + shareDescription);
         }
-        final boolean useApi = FeatureFlagUtils.isEnabled(mContext,
-                FeatureFlagUtils.USE_BUGREPORT_API);
-
-        if (useApi) {
-            // Create intent to trigger Bugreport API via Shell
-            Intent triggerShellBugreport = new Intent();
-            triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
-            triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
-            triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
-            triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-            if (shareTitle != null) {
-                triggerShellBugreport.putExtra(EXTRA_TITLE, shareTitle);
-            }
-            if (shareDescription != null) {
-                triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
-            }
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                // Send broadcast to shell to trigger bugreport using Bugreport API
-                mContext.sendBroadcast(triggerShellBugreport);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        } else {
-            SystemProperties.set("dumpstate.options", type);
-            SystemProperties.set("ctl.start", "bugreport");
+        // Create intent to trigger Bugreport API via Shell
+        Intent triggerShellBugreport = new Intent();
+        triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
+        triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
+        triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, bugreportType);
+        triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        if (shareTitle != null) {
+            triggerShellBugreport.putExtra(EXTRA_TITLE, shareTitle);
+        }
+        if (shareDescription != null) {
+            triggerShellBugreport.putExtra(EXTRA_DESCRIPTION, shareDescription);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            // Send broadcast to shell to trigger bugreport using Bugreport API
+            mContext.sendBroadcast(triggerShellBugreport);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon start
-     * using bug report API (which will be restricted to a few, pre-defined apps).
-     * No new code should be calling it.
+     * Takes a telephony bugreport with title and description
      */
-    @Deprecated
     @Override
     public void requestTelephonyBugReport(String shareTitle, String shareDescription) {
         requestBugReportWithDescription(shareTitle, shareDescription,
@@ -8364,11 +8342,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * @deprecated This method is only used by a few internal components and it will soon start
-     * using bug report API (which will be restricted to a few, pre-defined apps).
-     * No new code should be calling it.
+     * Takes a minimal bugreport of Wifi-related state with pre-set title and description
      */
-    @Deprecated
     @Override
     public void requestWifiBugReport(String shareTitle, String shareDescription) {
         requestBugReportWithDescription(shareTitle, shareDescription,
