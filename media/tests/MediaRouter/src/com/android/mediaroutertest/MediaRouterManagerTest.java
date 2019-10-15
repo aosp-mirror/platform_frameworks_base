@@ -47,8 +47,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -190,17 +192,8 @@ public class MediaRouterManagerTest {
         MediaRouter2Manager.Callback mockCallback = mock(MediaRouter2Manager.Callback.class);
         mManager.registerCallback(mExecutor, mockCallback);
 
-        MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
-
-        mRouter2.setControlCategories(CONTROL_CATEGORIES_SPECIAL);
-        mRouter2.registerCallback(mExecutor, mockRouterCallback);
-        mRouter2.unregisterCallback(mockRouterCallback);
-
-        verify(mockCallback, timeout(TIMEOUT_MS))
-                .onRoutesChanged(argThat(routes -> routes.size() > 0));
-
         Map<String, MediaRoute2Info> routes =
-                createRouteMap(mManager.getAvailableRoutes(mPackageName));
+                waitAndGetRoutesWithManager(CONTROL_CATEGORIES_SPECIAL);
 
         Assert.assertEquals(1, routes.size());
         Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
@@ -214,12 +207,10 @@ public class MediaRouterManagerTest {
     @Test
     public void testGetRoutes() throws Exception {
         MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
-
-        mRouter2.setControlCategories(CONTROL_CATEGORIES_SPECIAL);
         mRouter2.registerCallback(mExecutor, mockCallback);
-        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-                .onRoutesChanged(argThat(routes -> routes.size() > 0));
-        Map<String, MediaRoute2Info> routes = createRouteMap(mRouter2.getRoutes());
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_SPECIAL);
+
         Assert.assertEquals(1, routes.size());
         Assert.assertNotNull(routes.get(ROUTE_ID_SPECIAL_CATEGORY));
 
@@ -228,51 +219,40 @@ public class MediaRouterManagerTest {
 
     @Test
     public void testOnRouteSelected() throws Exception {
-        MediaRouter2.Callback mockRouterCallback = mock(MediaRouter2.Callback.class);
+        MediaRouter2.Callback routerCallback = new MediaRouter2.Callback();
         MediaRouter2Manager.Callback managerCallback = mock(MediaRouter2Manager.Callback.class);
 
         mManager.registerCallback(mExecutor, managerCallback);
-        mRouter2.setControlCategories(CONTROL_CATEGORIES_ALL);
-        mRouter2.registerCallback(mExecutor, mockRouterCallback);
+        mRouter2.registerCallback(mExecutor, routerCallback);
 
-        verify(managerCallback, timeout(TIMEOUT_MS))
-                .onRoutesChanged(argThat(routes -> routes.size() > 0));
-
-        Map<String, MediaRoute2Info> routes =
-                createRouteMap(mManager.getAvailableRoutes(mPackageName));
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
 
         MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
-        mManager.selectRoute(mPackageName, routeToSelect);
-
         assertNotNull(routeToSelect);
+
+        mManager.selectRoute(mPackageName, routeToSelect);
         verify(managerCallback, timeout(TIMEOUT_MS))
                 .onRouteAdded(argThat(route -> route.equals(routeToSelect)));
 
+        mRouter2.unregisterCallback(routerCallback);
         mManager.unregisterCallback(managerCallback);
-        mRouter2.unregisterCallback(mockRouterCallback);
     }
 
     /**
      * Tests selecting and unselecting routes of a single provider.
      */
     @Test
-    public void testSingleProviderSelect() {
+    public void testSingleProviderSelect() throws Exception {
         MediaRouter2Manager.Callback managerCallback = mock(MediaRouter2Manager.Callback.class);
         MediaRouter2.Callback routerCallback = mock(MediaRouter2.Callback.class);
 
         mManager.registerCallback(mExecutor, managerCallback);
-        mRouter2.setControlCategories(CONTROL_CATEGORIES_ALL);
         mRouter2.registerCallback(mExecutor, routerCallback);
 
-        verify(managerCallback, timeout(TIMEOUT_MS))
-                .onRoutesChanged(argThat(routes -> routes.size() > 0));
-
-        Map<String, MediaRoute2Info> routes =
-                createRouteMap(mManager.getAvailableRoutes(mPackageName));
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
 
         mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
-        verify(managerCallback, timeout(TIMEOUT_MS)
-        )
+        verify(managerCallback, timeout(TIMEOUT_MS))
                 .onRouteChanged(argThat(routeInfo -> TextUtils.equals(ROUTE_ID1, routeInfo.getId())
                         && TextUtils.equals(routeInfo.getClientPackageName(), mPackageName)));
 
@@ -291,14 +271,67 @@ public class MediaRouterManagerTest {
     }
 
     @Test
-    public void testVolumeHandling() {
+    public void testControlVolumeWithRouter() throws Exception {
         MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
 
-        mRouter2.setControlCategories(CONTROL_CATEGORIES_ALL);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_ALL);
         mRouter2.registerCallback(mExecutor, mockCallback);
+
+        MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
+        int originalVolume = volRoute.getVolume();
+        int deltaVolume = (originalVolume == volRoute.getVolumeMax() ? -1 : 1);
+        int targetVolume = originalVolume + deltaVolume;
+
+        mRouter2.requestSetVolume(volRoute, targetVolume);
         verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
-                .onRoutesChanged(argThat(routes -> routes.size() > 0));
-        Map<String, MediaRoute2Info> routes = createRouteMap(mRouter2.getRoutes());
+                .onRouteChanged(argThat(route ->
+                        route.getId().equals(volRoute.getId())
+                                && route.getVolume() == targetVolume));
+
+        mRouter2.requestUpdateVolume(volRoute, -deltaVolume);
+        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+                .onRouteChanged(argThat(route ->
+                        route.getId().equals(volRoute.getId())
+                                && route.getVolume() == originalVolume));
+
+        mRouter2.unregisterCallback(mockCallback);
+    }
+
+    @Test
+    public void testControlVolumeWithManager() throws Exception {
+        MediaRouter2Manager.Callback managerCallback = mock(MediaRouter2Manager.Callback.class);
+        MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
+
+        mManager.registerCallback(mExecutor, managerCallback);
+        mRouter2.registerCallback(mExecutor, mockCallback);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(CONTROL_CATEGORIES_ALL);
+
+        MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
+        int originalVolume = volRoute.getVolume();
+        int deltaVolume = (originalVolume == volRoute.getVolumeMax() ? -1 : 1);
+        int targetVolume = originalVolume + deltaVolume;
+
+        mManager.requestSetVolume(volRoute, targetVolume);
+        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+                .onRouteChanged(argThat(route ->
+                        route.getId().equals(volRoute.getId())
+                                && route.getVolume() == targetVolume));
+
+        mManager.requestUpdateVolume(volRoute, -deltaVolume);
+        verify(mockCallback, timeout(TIMEOUT_MS).atLeastOnce())
+                .onRouteChanged(argThat(route ->
+                        route.getId().equals(volRoute.getId())
+                                && route.getVolume() == originalVolume));
+
+        mRouter2.unregisterCallback(mockCallback);
+        mManager.unregisterCallback(managerCallback);
+    }
+
+    @Test
+    public void testVolumeHandling() throws Exception {
+        MediaRouter2.Callback mockCallback = mock(MediaRouter2.Callback.class);
+        mRouter2.registerCallback(mExecutor, mockCallback);
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutes(CONTROL_CATEGORIES_ALL);
 
         MediaRoute2Info fixedVolumeRoute = routes.get(ROUTE_ID_FIXED_VOLUME);
         MediaRoute2Info variableVolumeRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
@@ -308,6 +341,48 @@ public class MediaRouterManagerTest {
         assertEquals(VOLUME_MAX, variableVolumeRoute.getVolumeMax());
 
         mRouter2.unregisterCallback(mockCallback);
+    }
+
+    Map<String, MediaRoute2Info> waitAndGetRoutes(List<String> controlCategories) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        MediaRouter2.Callback callback = new MediaRouter2.Callback() {
+            @Override
+            public void onRoutesChanged(List<MediaRoute2Info> routes) {
+                if (routes.size() > 0) latch.countDown();
+            }
+        };
+        mRouter2.setControlCategories(controlCategories);
+        mRouter2.registerCallback(mExecutor, callback);
+        try {
+            latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            return createRouteMap(mRouter2.getRoutes());
+        } finally {
+            mRouter2.unregisterCallback(callback);
+        }
+    }
+
+    Map<String, MediaRoute2Info> waitAndGetRoutesWithManager(List<String> controlCategories)
+            throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        // Dummy callback is required to send control category info.
+        MediaRouter2.Callback routerCallback = new MediaRouter2.Callback();
+        MediaRouter2Manager.Callback managerCallback = new MediaRouter2Manager.Callback() {
+            @Override
+            public void onRoutesChanged(List<MediaRoute2Info> routes) {
+                if (routes.size() > 0) latch.countDown();
+            }
+        };
+        mManager.registerCallback(mExecutor, managerCallback);
+        mRouter2.setControlCategories(controlCategories);
+        mRouter2.registerCallback(mExecutor, routerCallback);
+        try {
+            latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            return createRouteMap(mManager.getAvailableRoutes(mPackageName));
+        } finally {
+            mRouter2.unregisterCallback(routerCallback);
+            mManager.unregisterCallback(managerCallback);
+        }
     }
 
     // Helper for getting routes easily

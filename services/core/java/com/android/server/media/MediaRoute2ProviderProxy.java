@@ -105,6 +105,20 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
         }
     }
 
+    public void requestSetVolume(MediaRoute2Info route, int volume) {
+        if (mConnectionReady) {
+            mActiveConnection.requestSetVolume(route.getId(), volume);
+            updateBinding();
+        }
+    }
+
+    public void requestUpdateVolume(MediaRoute2Info route, int delta) {
+        if (mConnectionReady) {
+            mActiveConnection.requestUpdateVolume(route.getId(), delta);
+            updateBinding();
+        }
+    }
+
     @Nullable
     public MediaRoute2ProviderInfo getProviderInfo() {
         return mProviderInfo;
@@ -337,6 +351,22 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
                 mProvider.notifyControlRequestSent(routeId, request);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "Failed to deliver request to send control request.", ex);
+            }
+        }
+
+        public void requestSetVolume(String routeId, int volume) {
+            try {
+                mProvider.requestSetVolume(routeId, volume);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to request set volume.", ex);
+            }
+        }
+
+        public void requestUpdateVolume(String routeId, int delta) {
+            try {
+                mProvider.requestUpdateVolume(routeId, delta);
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "Failed to deliver request to request update volume.", ex);
             }
         }
 
