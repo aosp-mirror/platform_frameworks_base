@@ -6917,7 +6917,26 @@ package android.telecom {
 
   public abstract class Connection extends android.telecom.Conferenceable {
     method @Deprecated public final android.telecom.AudioState getAudioState();
+    method public final int getCallRadioTech();
+    method public final long getConnectElapsedTimeMillis();
+    method public final long getConnectTimeMillis();
+    method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
+    method @Nullable public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
+    method public final void resetConnectionTime();
+    method public void setCallDirection(int);
+    method public final void setCallRadioTech(int);
+    method public final void setConnectTimeMillis(long);
+    method public final void setConnectionStartElapsedRealTime(long);
+    method public void setPhoneAccountHandle(@NonNull android.telecom.PhoneAccountHandle);
+    method public void setTelecomCallId(@NonNull String);
+    field public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 2097152; // 0x200000
+    field public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 262144; // 0x40000
+    field public static final String EXTRA_DISABLE_ADD_CALL = "android.telecom.extra.DISABLE_ADD_CALL";
+    field public static final int PROPERTY_EMERGENCY_CALLBACK_MODE = 1; // 0x1
+    field public static final int PROPERTY_GENERIC_CONFERENCE = 2; // 0x2
+    field public static final int PROPERTY_IS_DOWNGRADED_CONFERENCE = 64; // 0x40
+    field public static final int PROPERTY_REMOTELY_HOSTED = 2048; // 0x800
   }
 
   public abstract class InCallService extends android.app.Service {
