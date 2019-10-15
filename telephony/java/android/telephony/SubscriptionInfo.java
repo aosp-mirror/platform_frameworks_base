@@ -38,6 +38,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -147,7 +148,14 @@ public class SubscriptionInfo implements Parcelable {
      * The access rules for this subscription, if it is embedded and defines any.
      */
     @Nullable
-    private UiccAccessRule[] mAccessRules;
+    private UiccAccessRule[] mNativeAccessRules;
+
+    /**
+     * The carrier certificates for this subscription that are saved in carrier configs.
+     * The other carrier certificates are embedded on Uicc and stored as part of mNativeAccessRules.
+     */
+    @Nullable
+    private UiccAccessRule[] mCarrierConfigAccessRules;
 
     /**
      * The string ID of the SIM card. It is the ICCID of the active profile for a UICC card and the
@@ -206,12 +214,12 @@ public class SubscriptionInfo implements Parcelable {
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
-            @Nullable UiccAccessRule[] accessRules, String cardString) {
+            @Nullable UiccAccessRule[] nativeAccessRules, String cardString) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
-                roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
+                roaming, icon, mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString, -1,
                 false, null, false, TelephonyManager.UNKNOWN_CARRIER_ID,
                 SubscriptionManager.PROFILE_CLASS_DEFAULT,
-                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null);
+                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null, null);
     }
 
     /**
@@ -220,12 +228,12 @@ public class SubscriptionInfo implements Parcelable {
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
-            @Nullable UiccAccessRule[] accessRules, String cardString, boolean isOpportunistic,
-            @Nullable String groupUUID, int carrierId, int profileClass) {
+            @Nullable UiccAccessRule[] nativeAccessRules, String cardString,
+            boolean isOpportunistic, @Nullable String groupUUID, int carrierId, int profileClass) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
-                roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardString, -1,
+                roaming, icon, mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString, -1,
                 isOpportunistic, groupUUID, false, carrierId, profileClass,
-                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null);
+                SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM, null, null);
     }
 
     /**
@@ -234,9 +242,10 @@ public class SubscriptionInfo implements Parcelable {
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
-            @Nullable UiccAccessRule[] accessRules, String cardString, int cardId,
+            @Nullable UiccAccessRule[] nativeAccessRules, String cardString, int cardId,
             boolean isOpportunistic, @Nullable String groupUUID, boolean isGroupDisabled,
-            int carrierId, int profileClass, int subType, @Nullable String groupOwner) {
+            int carrierId, int profileClass, int subType, @Nullable String groupOwner,
+            @Nullable UiccAccessRule[] carrierConfigAccessRules) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -251,7 +260,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mMnc = mnc;
         this.mCountryIso = countryIso;
         this.mIsEmbedded = isEmbedded;
-        this.mAccessRules = accessRules;
+        this.mNativeAccessRules = nativeAccessRules;
         this.mCardString = cardString;
         this.mCardId = cardId;
         this.mIsOpportunistic = isOpportunistic;
@@ -261,6 +270,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mProfileClass = profileClass;
         this.mSubscriptionType = subType;
         this.mGroupOwner = groupOwner;
+        this.mCarrierConfigAccessRules = carrierConfigAccessRules;
     }
 
     /**
@@ -566,7 +576,8 @@ public class SubscriptionInfo implements Parcelable {
         if (!isEmbedded()) {
             throw new UnsupportedOperationException("Not an embedded subscription");
         }
-        if (mAccessRules == null) {
+        List<UiccAccessRule> allAccessRules = getAllAccessRules();
+        if (allAccessRules == null) {
             return false;
         }
         PackageManager packageManager = context.getPackageManager();
@@ -576,7 +587,7 @@ public class SubscriptionInfo implements Parcelable {
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException("Unknown package: " + packageName, e);
         }
-        for (UiccAccessRule rule : mAccessRules) {
+        for (UiccAccessRule rule : allAccessRules) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 return true;
@@ -586,7 +597,10 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the {@link UiccAccessRule}s dictating who is authorized to manage this subscription.
+     * @return the {@link UiccAccessRule}s that are stored in Uicc, dictating who
+     * is authorized to manage this subscription.
+     * TODO and fix it properly in R / master: either deprecate this and have 3 APIs
+     *  native + carrier + all, or have this return all by default.
      * @throws UnsupportedOperationException if this subscription is not embedded.
      * @hide
      */
@@ -595,8 +609,25 @@ public class SubscriptionInfo implements Parcelable {
         if (!isEmbedded()) {
             throw new UnsupportedOperationException("Not an embedded subscription");
         }
-        if (mAccessRules == null) return null;
-        return Arrays.asList(mAccessRules);
+        if (mNativeAccessRules == null) return null;
+        return Arrays.asList(mNativeAccessRules);
+    }
+
+    /**
+     * @return the {@link UiccAccessRule}s that are both stored on Uicc and in carrierConfigs
+     * dictating who is authorized to manage this subscription.
+     * @hide
+     */
+    public @Nullable List<UiccAccessRule> getAllAccessRules() {
+        if (!isEmbedded()) {
+            throw new UnsupportedOperationException("Not an embedded subscription");
+        }
+        List<UiccAccessRule> merged = new ArrayList<>();
+        if (mNativeAccessRules != null) merged.addAll(getAccessRules());
+        if (mCarrierConfigAccessRules != null) {
+            merged.addAll(Arrays.asList(mCarrierConfigAccessRules));
+        }
+        return merged.isEmpty() ? null : merged;
     }
 
     /**
@@ -651,7 +682,7 @@ public class SubscriptionInfo implements Parcelable {
             String countryIso = source.readString();
             Bitmap iconBitmap = source.readParcelable(Bitmap.class.getClassLoader());
             boolean isEmbedded = source.readBoolean();
-            UiccAccessRule[] accessRules = source.createTypedArray(UiccAccessRule.CREATOR);
+            UiccAccessRule[] nativeAccessRules = source.createTypedArray(UiccAccessRule.CREATOR);
             String cardString = source.readString();
             int cardId = source.readInt();
             boolean isOpportunistic = source.readBoolean();
@@ -663,11 +694,14 @@ public class SubscriptionInfo implements Parcelable {
             String[] ehplmns = source.readStringArray();
             String[] hplmns = source.readStringArray();
             String groupOwner = source.readString();
+            UiccAccessRule[] carrierConfigAccessRules = source.createTypedArray(
+                UiccAccessRule.CREATOR);
 
             SubscriptionInfo info = new SubscriptionInfo(id, iccId, simSlotIndex, displayName,
                     carrierName, nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc,
-                    countryIso, isEmbedded, accessRules, cardString, cardId, isOpportunistic,
-                    groupUUID, isGroupDisabled, carrierid, profileClass, subType, groupOwner);
+                    countryIso, isEmbedded, nativeAccessRules, cardString, cardId, isOpportunistic,
+                    groupUUID, isGroupDisabled, carrierid, profileClass, subType, groupOwner,
+                    carrierConfigAccessRules);
             info.setAssociatedPlmns(ehplmns, hplmns);
             return info;
         }
@@ -694,7 +728,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeString(mCountryIso);
         dest.writeParcelable(mIconBitmap, flags);
         dest.writeBoolean(mIsEmbedded);
-        dest.writeTypedArray(mAccessRules, flags);
+        dest.writeTypedArray(mNativeAccessRules, flags);
         dest.writeString(mCardString);
         dest.writeInt(mCardId);
         dest.writeBoolean(mIsOpportunistic);
@@ -706,6 +740,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeStringArray(mEhplmns);
         dest.writeStringArray(mHplmns);
         dest.writeString(mGroupOwner);
+        dest.writeTypedArray(mCarrierConfigAccessRules, flags);
     }
 
     @Override
@@ -736,9 +771,9 @@ public class SubscriptionInfo implements Parcelable {
                 + " carrierId=" + mCarrierId + " displayName=" + mDisplayName
                 + " carrierName=" + mCarrierName + " nameSource=" + mNameSource
                 + " iconTint=" + mIconTint + " mNumber=" + Rlog.pii(Build.IS_DEBUGGABLE, mNumber)
-                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc=" + mMcc
-                + " mnc=" + mMnc + " mCountryIso=" + mCountryIso + " isEmbedded=" + mIsEmbedded
-                + " accessRules=" + Arrays.toString(mAccessRules)
+                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
+                + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
+                + " nativeAccessRules " + Arrays.toString(mNativeAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
                 + " isOpportunistic=" + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
                 + " mIsGroupDisabled=" + mIsGroupDisabled
@@ -746,14 +781,15 @@ public class SubscriptionInfo implements Parcelable {
                 + " ehplmns=" + Arrays.toString(mEhplmns)
                 + " hplmns=" + Arrays.toString(mHplmns)
                 + " subscriptionType=" + mSubscriptionType
-                + " mGroupOwner=" + mGroupOwner + "}";
+                + " mGroupOwner=" + mGroupOwner
+                + " carrierConfigAccessRules=" + mCarrierConfigAccessRules + "}";
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
                 mIsOpportunistic, mGroupUUID, mIccId, mNumber, mMcc, mMnc,
-                mCountryIso, mCardString, mCardId, mDisplayName, mCarrierName, mAccessRules,
+                mCountryIso, mCardString, mCardId, mDisplayName, mCarrierName, mNativeAccessRules,
                 mIsGroupDisabled, mCarrierId, mProfileClass, mGroupOwner);
     }
 
@@ -789,7 +825,7 @@ public class SubscriptionInfo implements Parcelable {
                 && Objects.equals(mGroupOwner, toCompare.mGroupOwner)
                 && TextUtils.equals(mDisplayName, toCompare.mDisplayName)
                 && TextUtils.equals(mCarrierName, toCompare.mCarrierName)
-                && Arrays.equals(mAccessRules, toCompare.mAccessRules)
+                && Arrays.equals(mNativeAccessRules, toCompare.mNativeAccessRules)
                 && mProfileClass == toCompare.mProfileClass
                 && Arrays.equals(mEhplmns, toCompare.mEhplmns)
                 && Arrays.equals(mHplmns, toCompare.mHplmns);
