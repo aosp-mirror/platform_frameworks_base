@@ -1794,6 +1794,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             tr.removeTaskActivitiesLocked(pauseImmediately, reason);
             cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
             mService.getLockTaskController().clearLockedTask(tr);
+            mService.getTaskChangeNotificationController().notifyTaskStackChanged();
             if (tr.isPersistable) {
                 mService.notifyTaskPersisterLocked(null, true);
             }
