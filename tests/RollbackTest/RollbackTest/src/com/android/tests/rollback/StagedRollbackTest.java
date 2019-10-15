@@ -209,6 +209,26 @@ public class StagedRollbackTest {
     }
 
     @Test
+    public void testNetworkFailedRollback_Phase1() throws Exception {
+        resetNetworkStack();
+    }
+
+    @Test
+    public void testNetworkFailedRollback_Phase2() throws Exception {
+        assertNetworkStackRollbackAvailable();
+    }
+
+    @Test
+    public void testNetworkFailedRollback_Phase3() throws Exception {
+        assertNoNetworkStackRollbackCommitted();
+    }
+
+    @Test
+    public void testNetworkFailedRollback_Phase4() throws Exception {
+        assertNetworkStackRollbackCommitted();
+    }
+
+    @Test
     public void assertNetworkStackRollbackAvailable() throws Exception {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),

@@ -122,7 +122,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     @Test
     public void testNetworkFailedRollback() throws Exception {
         // Remove available rollbacks and uninstall NetworkStack on /data/
-        runPhase("resetNetworkStack");
+        runPhase("testNetworkFailedRollback_Phase1");
         // Reduce health check deadline
         getDevice().executeShellCommand("device_config put rollback "
                 + "watchdog_request_timeout_millis 300000");
@@ -137,17 +137,17 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
 
         // Verify rollback was enabled
-        runPhase("assertNetworkStackRollbackAvailable");
+        runPhase("testNetworkFailedRollback_Phase2");
 
         // Sleep for < health check deadline
         Thread.sleep(5000);
         // Verify rollback was not executed before health check deadline
-        runPhase("assertNoNetworkStackRollbackCommitted");
+        runPhase("testNetworkFailedRollback_Phase3");
         try {
             // This is expected to fail due to the device being rebooted out
             // from underneath the test. If this fails for reasons other than
             // the device reboot, those failures should result in failure of
-            // the assertNetworkStackExecutedRollback phase.
+            // the testNetworkFailedRollback_Phase4 phase.
             CLog.logAndDisplay(LogLevel.INFO, "Sleep and expect to fail while sleeping");
             // Sleep for > health check deadline
             Thread.sleep(260000);
@@ -157,7 +157,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         getDevice().waitForDeviceAvailable();
         // Verify rollback was executed after health check deadline
-        runPhase("assertNetworkStackRollbackCommitted");
+        runPhase("testNetworkFailedRollback_Phase4");
     }
 
     /**
