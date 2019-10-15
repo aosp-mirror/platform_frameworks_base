@@ -49,6 +49,12 @@ public class WorkLockActivity extends Activity {
     private static final String TAG = "WorkLockActivity";
 
     /**
+     * Add additional extra {@link com.android.settings.password.ConfirmDeviceCredentialActivity} to
+     * enable device policy management enforcement from systemui.
+     */
+    public static final String EXTRA_FROM_WORK_LOCK_ACTIVITY = "from_work_lock_activity";
+
+    /**
      * Contains a {@link TaskDescription} for the activity being covered.
      */
     static final String EXTRA_TASK_DESCRIPTION =
@@ -151,6 +157,7 @@ public class WorkLockActivity extends Activity {
 
         if (target != null) {
             credential.putExtra(Intent.EXTRA_INTENT, target.getIntentSender());
+            credential.putExtra(EXTRA_FROM_WORK_LOCK_ACTIVITY, true);
         }
 
         startActivityForResult(credential, REQUEST_CODE_CONFIRM_CREDENTIALS);
