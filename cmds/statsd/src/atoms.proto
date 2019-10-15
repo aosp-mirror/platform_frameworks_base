@@ -340,6 +340,8 @@ message Atom {
         PerfettoUploaded perfetto_uploaded =
             229 [(log_from_module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
+        GpsLocationStatusReported gps_location_status_reported = 231;
+        GpsTimeToFirstFixReported gps_time_to_first_fix_reported = 232;
     }
 
     // Pulled events will start at field 10000.
@@ -734,6 +736,27 @@ message GpsSignalQualityChanged {
     optional android.server.location.GpsSignalQualityEnum level = 1;
 }
 
+/**
+ * Gps location status report
+ *
+ * Logged from:
+ *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+message GpsLocationStatusReported {
+    // Boolean stating if location was acquired
+    optional bool location_success = 1;
+}
+
+/**
+ * Gps log time to first fix report
+ *
+ * Logged from:
+ *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+message GpsTimeToFirstFixReported {
+    // int32 reporting the time to first fix in milliseconds
+    optional int32 time_to_first_fix_millis = 1;
+}
 
 /**
  * Logs when a sync manager sync state changes.
