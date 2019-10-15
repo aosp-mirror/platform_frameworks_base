@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.car.privacy;
 
-import android.car.userlib.CarUserManagerHelper;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -34,10 +34,9 @@ public class PrivacyApplication {
 
     public PrivacyApplication(String packageName, Context context) {
         try {
-            CarUserManagerHelper carUserManagerHelper = new CarUserManagerHelper(context);
             ApplicationInfo app = context.getPackageManager()
                     .getApplicationInfoAsUser(packageName, 0,
-                            carUserManagerHelper.getCurrentForegroundUserId());
+                            ActivityManager.getCurrentUser());
             mIcon = context.getPackageManager().getApplicationIcon(app);
             mApplicationName = context.getPackageManager().getApplicationLabel(app).toString();
         } catch (PackageManager.NameNotFoundException e) {
