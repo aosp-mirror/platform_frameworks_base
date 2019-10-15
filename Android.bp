@@ -516,7 +516,6 @@ java_library {
     sdk_version: "core_platform",
     static_libs: [
         "libphonenumber-platform",
-        "nist-sip",
         "tagsoup",
         "rappor",
         "libtextclassifier-java",
@@ -1430,6 +1429,11 @@ droidstubs {
             removed_api_file: "api/removed.txt",
             baseline_file: ":public-api-incompatibilities-with-last-released",
         },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-public-api",
+            baseline_file: "api/lint-baseline.txt",
+        },
     },
     jdiff_enabled: true,
 }
@@ -1455,6 +1459,11 @@ droidstubs {
             api_file: ":last-released-system-api",
             removed_api_file: "api/system-removed.txt",
             baseline_file: ":system-api-incompatibilities-with-last-released"
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-system-api",
+            baseline_file: "api/system-lint-baseline.txt",
         },
     },
     jdiff_enabled: true,
