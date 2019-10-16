@@ -297,7 +297,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Critical; after this call the application should never have the permission
             mPackageManagerInt.writeSettings(false);
             final int appId = UserHandle.getAppId(uid);
-            killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+            mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
         }
         @Override
         public void onInstallPermissionRevoked() {
