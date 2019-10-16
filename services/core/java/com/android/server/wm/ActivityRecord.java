@@ -2005,10 +2005,6 @@ final class ActivityRecord extends AppWindowToken {
         if (stopped) {
             clearOptionsLocked();
         }
-
-        if (mAtmService != null) {
-            mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
-        }
     }
 
     /**
