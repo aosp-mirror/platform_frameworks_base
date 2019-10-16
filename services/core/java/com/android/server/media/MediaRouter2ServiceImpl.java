@@ -55,7 +55,7 @@ import java.util.Objects;
  * TODO: Merge this to MediaRouterService once it's finished.
  */
 class MediaRouter2ServiceImpl {
-    private static final String TAG = "MediaRouter2ServiceImpl";
+    private static final String TAG = "MR2ServiceImpl";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
@@ -280,11 +280,11 @@ class MediaRouter2ServiceImpl {
             int uid, int pid, String packageName, int userId, boolean trusted) {
         final IBinder binder = client.asBinder();
         if (mAllClientRecords.get(binder) == null) {
-            boolean newUser = false;
             UserRecord userRecord = mUserRecords.get(userId);
             if (userRecord == null) {
                 userRecord = new UserRecord(userId);
-                newUser = true;
+                mUserRecords.put(userId, userRecord);
+                initializeUserLocked(userRecord);
             }
             Client2Record clientRecord = new Client2Record(userRecord, client, uid, pid,
                     packageName, trusted);
@@ -292,11 +292,6 @@ class MediaRouter2ServiceImpl {
                 binder.linkToDeath(clientRecord, 0);
             } catch (RemoteException ex) {
                 throw new RuntimeException("Media router client died prematurely.", ex);
-            }
-
-            if (newUser) {
-                mUserRecords.put(userId, userRecord);
-                initializeUserLocked(userRecord);
             }
 
             userRecord.mClientRecords.add(clientRecord);
@@ -693,8 +688,6 @@ class MediaRouter2ServiceImpl {
             if (service == null) {
                 return;
             }
-            final List<IMediaRouter2Manager> managers = new ArrayList<>();
-            final List<IMediaRouter2Client> clients = new ArrayList<>();
             final List<MediaRoute2ProviderInfo> providers = new ArrayList<>();
             for (MediaRoute2ProviderProxy mediaProvider : mMediaProviders) {
                 final MediaRoute2ProviderInfo providerInfo =
@@ -707,6 +700,8 @@ class MediaRouter2ServiceImpl {
             }
             mProviderInfos = providers;
 
+            final List<IMediaRouter2Manager> managers = new ArrayList<>();
+            final List<IMediaRouter2Client> clients = new ArrayList<>();
             synchronized (service.mLock) {
                 for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
                     managers.add(managerRecord.mManager);
@@ -756,9 +751,8 @@ class MediaRouter2ServiceImpl {
             }
             List<IMediaRouter2Manager> managers = new ArrayList<>();
             synchronized (service.mLock) {
-                final int count = mUserRecord.mManagerRecords.size();
-                for (int i = 0; i < count; i++) {
-                    managers.add(mUserRecord.mManagerRecords.get(i).mManager);
+                for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
+                    managers.add(managerRecord.mManager);
                 }
             }
             for (IMediaRouter2Manager manager : managers) {

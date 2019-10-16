@@ -44,7 +44,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public class MediaRouter2 {
-    private static final String TAG = "MediaRouter";
+    private static final String TAG = "MR2";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final Object sLock = new Object();
 
@@ -54,7 +54,8 @@ public class MediaRouter2 {
     private Context mContext;
     private final IMediaRouterService mMediaRouterService;
 
-    private CopyOnWriteArrayList<CallbackRecord> mCallbackRecords = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<CallbackRecord> mCallbackRecords =
+            new CopyOnWriteArrayList<>();
     @GuardedBy("sLock")
     private List<String> mControlCategories = Collections.emptyList();
     @GuardedBy("sLock")

@@ -43,7 +43,7 @@ import java.util.Objects;
  * Maintains a connection to a particular media route provider service.
  */
 final class MediaRoute2ProviderProxy implements ServiceConnection {
-    private static final String TAG = "MediaRoute2Provider";
+    private static final String TAG = "MR2ProviderProxy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
@@ -260,7 +260,9 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
                 .setUniqueId(mUniqueId)
                 .build();
         }
-        mHandler.post(mStateChanged);
+        if (mCallback != null) {
+            mCallback.onProviderStateChanged(MediaRoute2ProviderProxy.this);
+        }
     }
 
     private void disconnect() {
@@ -276,15 +278,6 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
     public String toString() {
         return "Service connection " + mComponentName.flattenToShortString();
     }
-
-    private final Runnable mStateChanged = new Runnable() {
-        @Override
-        public void run() {
-            if (mCallback != null) {
-                mCallback.onProviderStateChanged(MediaRoute2ProviderProxy.this);
-            }
-        }
-    };
 
     public interface Callback {
         void onProviderStateChanged(MediaRoute2ProviderProxy provider);
