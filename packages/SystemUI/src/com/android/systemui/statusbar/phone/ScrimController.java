@@ -258,7 +258,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         final ScrimState oldState = mState;
         mState = state;
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "scrim_state", mState.getIndex());
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "scrim_state", mState.ordinal());
 
         if (mCallback != null) {
             mCallback.onCancelled();
@@ -516,22 +516,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         mState.AOD.setAodFrontScrimAlpha(alpha);
         mState.PULSING.setAodFrontScrimAlpha(alpha);
-    }
-
-    /**
-     * Set front scrim to black, cancelling animations, in order to prepare to fade them
-     * away once the display turns on.
-     */
-    public void prepareForGentleWakeUp() {
-        if (mState == ScrimState.AOD && mDozeParameters.getAlwaysOn()) {
-            mInFrontAlpha = 1f;
-            mInFrontTint = Color.BLACK;
-            mBehindTint = Color.BLACK;
-            mAnimateChange = false;
-            updateScrims();
-            mAnimateChange = true;
-            mAnimationDuration = ANIMATION_DURATION_LONG;
-        }
     }
 
     /**

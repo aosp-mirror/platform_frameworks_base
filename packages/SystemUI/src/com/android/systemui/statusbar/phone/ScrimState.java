@@ -30,12 +30,30 @@ public enum ScrimState {
     /**
      * Initial state.
      */
-    UNINITIALIZED(-1),
+    UNINITIALIZED,
+
+    /**
+     * When turned off by sensors (prox, presence.)
+     */
+    OFF {
+        @Override
+        public void prepare(ScrimState previousState) {
+            mFrontTint = Color.BLACK;
+            mBehindTint = previousState.mBehindTint;
+            mBubbleTint = previousState.mBubbleTint;
+
+            mFrontAlpha = 1f;
+            mBehindAlpha = previousState.mBehindAlpha;
+            mBubbleAlpha = previousState.mBubbleAlpha;
+
+            mAnimationDuration = ScrimController.ANIMATION_DURATION_LONG;
+        }
+    },
 
     /**
      * On the lock screen.
      */
-    KEYGUARD(0) {
+    KEYGUARD {
         @Override
         public void prepare(ScrimState previousState) {
             mBlankScreen = false;
@@ -65,7 +83,7 @@ public enum ScrimState {
     /**
      * Showing password challenge on the keyguard.
      */
-    BOUNCER(1) {
+    BOUNCER {
         @Override
         public void prepare(ScrimState previousState) {
             mBehindAlpha = ScrimController.GRADIENT_SCRIM_ALPHA_BUSY;
@@ -77,7 +95,7 @@ public enum ScrimState {
     /**
      * Showing password challenge on top of a FLAG_SHOW_WHEN_LOCKED activity.
      */
-    BOUNCER_SCRIMMED(2) {
+    BOUNCER_SCRIMMED {
         @Override
         public void prepare(ScrimState previousState) {
             mBehindAlpha = 0;
@@ -89,7 +107,7 @@ public enum ScrimState {
     /**
      * Changing screen brightness from quick settings.
      */
-    BRIGHTNESS_MIRROR(3) {
+    BRIGHTNESS_MIRROR {
         @Override
         public void prepare(ScrimState previousState) {
             mBehindAlpha = 0;
@@ -101,7 +119,7 @@ public enum ScrimState {
     /**
      * Always on display or screen off.
      */
-    AOD(4) {
+    AOD {
         @Override
         public void prepare(ScrimState previousState) {
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
@@ -136,7 +154,7 @@ public enum ScrimState {
     /**
      * When phone wakes up because you received a notification.
      */
-    PULSING(5) {
+    PULSING {
         @Override
         public void prepare(ScrimState previousState) {
             mFrontAlpha = mAodFrontScrimAlpha;
@@ -164,7 +182,7 @@ public enum ScrimState {
     /**
      * Unlocked on top of an app (launcher or any other activity.)
      */
-    UNLOCKED(6) {
+    UNLOCKED {
         @Override
         public void prepare(ScrimState previousState) {
             // State that UI will sync to.
@@ -201,7 +219,7 @@ public enum ScrimState {
     /**
      * Unlocked with a bubble expanded.
      */
-    BUBBLE_EXPANDED(7) {
+    BUBBLE_EXPANDED {
         @Override
         public void prepare(ScrimState previousState) {
             mFrontTint = Color.TRANSPARENT;
@@ -237,16 +255,11 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     boolean mDisplayRequiresBlanking;
     boolean mWallpaperSupportsAmbientMode;
-    int mIndex;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
     boolean mWakeLockScreenSensorActive;
     boolean mKeyguardFadingAway;
     long mKeyguardFadingAwayDuration;
-
-    ScrimState(int index) {
-        mIndex = index;
-    }
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, ScrimView scrimForBubble,
             DozeParameters dozeParameters) {
@@ -260,10 +273,6 @@ public enum ScrimState {
 
     /** Prepare state for transition. */
     public void prepare(ScrimState previousState) {
-    }
-
-    public int getIndex() {
-        return mIndex;
     }
 
     public float getFrontAlpha() {
