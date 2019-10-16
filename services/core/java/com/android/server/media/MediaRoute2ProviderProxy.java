@@ -93,7 +93,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
 
     public void unselectRoute(String packageName, String routeId) {
         if (mConnectionReady) {
-            mActiveConnection.unselectRotue(packageName, routeId);
+            mActiveConnection.unselectRoute(packageName, routeId);
             updateBinding();
         }
     }
@@ -324,7 +324,7 @@ final class MediaRoute2ProviderProxy implements ServiceConnection {
             }
         }
 
-        public void unselectRotue(String packageName, String routeId) {
+        public void unselectRoute(String packageName, String routeId) {
             try {
                 mProvider.unselectRoute(packageName, routeId);
             } catch (RemoteException ex) {

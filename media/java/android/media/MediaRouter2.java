@@ -369,7 +369,7 @@ public class MediaRouter2 {
         void notifyRoutes() {
             final List<MediaRoute2Info> routes = mRoutes;
             // notify only when bound to media router service.
-            //TODO: Correct the condition when control category, default rotue, .. are finalized.
+            //TODO: Correct the condition when control category, default route, .. are finalized.
             if (routes.size() > 0) {
                 mExecutor.execute(() -> mCallback.onRoutesChanged(routes));
             }
