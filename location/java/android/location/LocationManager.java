@@ -1971,7 +1971,7 @@ public class LocationManager {
     public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {}
 
     /**
-     * Registers a GPS Measurement callback.
+     * Registers a GPS Measurement callback which will run on a binder threadS.
      *
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
@@ -1983,7 +1983,7 @@ public class LocationManager {
     @RequiresPermission(ACCESS_FINE_LOCATION)
     public boolean registerGnssMeasurementsCallback(
             @NonNull GnssMeasurementsEvent.Callback callback) {
-        return registerGnssMeasurementsCallback(callback, null);
+        return registerGnssMeasurementsCallback(Runnable::run, callback);
     }
 
     /**
