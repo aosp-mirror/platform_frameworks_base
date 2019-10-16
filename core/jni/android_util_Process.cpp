@@ -35,7 +35,6 @@
 #include <limits>
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "core_jni_helpers.h"
@@ -62,44 +61,25 @@
 
 using namespace android;
 
-static const bool kDebugPolicy = false;
-static const bool kDebugProc = false;
+static constexpr bool kDebugPolicy = false;
+static constexpr bool kDebugProc = false;
 
 // Stack reservation for reading small proc files.  Most callers of
 // readProcFile() are reading files under this threshold, e.g.,
 // /proc/pid/stat.  /proc/pid/time_in_state ends up being about 520
 // bytes, so use 1024 for the stack to provide a bit of slack.
-static const ssize_t kProcReadStackBufferSize = 1024;
+static constexpr ssize_t kProcReadStackBufferSize = 1024;
 
 // The other files we read from proc tend to be a bit larger (e.g.,
 // /proc/stat is about 3kB), so once we exhaust the stack buffer,
 // retry with a relatively large heap-allocated buffer.  We double
 // this size and retry until the whole file fits.
-static const ssize_t kProcReadMinHeapBufferSize = 4096;
+static constexpr ssize_t kProcReadMinHeapBufferSize = 4096;
 
 #if GUARD_THREAD_PRIORITY
 Mutex gKeyCreateMutex;
 static pthread_key_t gBgKey = -1;
 #endif
-
-/*
- *  cpuset/sched aggregate profile mappings
- */
-static const std::unordered_map<int, std::string> kCpusetProfileMap = {
-    {SP_DEFAULT, "CPUSET_SP_DEFAULT"}, {SP_BACKGROUND, "CPUSET_SP_BACKGROUND"},
-    {SP_FOREGROUND, "CPUSET_SP_FOREGROUND"},{SP_SYSTEM, "CPUSET_SP_SYSTEM"},
-    {SP_AUDIO_APP, "CPUSET_SP_FOREGROUND"}, {SP_AUDIO_SYS, "CPUSET_SP_FOREGROUND"},
-    {SP_TOP_APP, "CPUSET_SP_TOP_APP"}, {SP_RT_APP, "CPUSET_SP_DEFAULT"},
-    {SP_RESTRICTED, "CPUSET_SP_RESTRICTED"}
-};
-
-static const std::unordered_map<int, std::string> kSchedProfileMap = {
-    {SP_DEFAULT, "SCHED_SP_DEFAULT"}, {SP_BACKGROUND, "SCHED_SP_BACKGROUND"},
-    {SP_FOREGROUND, "SCHED_SP_FOREGROUND"}, {SP_SYSTEM, "SCHED_SP_DEFAULT"},
-    {SP_AUDIO_APP, "SCHED_SP_FOREGROUND"}, {SP_AUDIO_SYS, "SCHED_SP_FOREGROUND"},
-    {SP_TOP_APP, "SCHED_SP_TOP_APP"}, {SP_RT_APP, "SCHED_SP_RT_APP"},
-    {SP_RESTRICTED, "SCHED_SP_DEFAULT"}
-};
 
 // For both of these, err should be in the errno range (positive), not a status_t (negative)
 static void signalExceptionForError(JNIEnv* env, int err, int tid) {
@@ -227,7 +207,7 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int tid, jint
         return;
     }
 
-    int res = SetTaskProfiles(tid, {kSchedProfileMap.at(grp)}, true) ? 0 : -1;
+    int res = SetTaskProfiles(tid, {get_sched_policy_name((SchedPolicy)grp)}, true) ? 0 : -1;
 
     if (res != NO_ERROR) {
         signalExceptionForGroupError(env, -res, tid);
@@ -241,7 +221,7 @@ void android_os_Process_setThreadGroupAndCpuset(JNIEnv* env, jobject clazz, int 
         return;
     }
 
-    int res = SetTaskProfiles(tid, {kCpusetProfileMap.at(grp)}, true) ? 0 : -1;
+    int res = SetTaskProfiles(tid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
 
     if (res != NO_ERROR) {
         signalExceptionForGroupError(env, -res, tid);
@@ -328,7 +308,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
                 // This task wants to stay at background
                 // update its cpuset so it doesn't only run on bg core(s)
-                err = SetTaskProfiles(t_pid, {kCpusetProfileMap.at(grp)}, true) ? 0 : -1;
+                err = SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
                 if (err != NO_ERROR) {
                     signalExceptionForGroupError(env, -err, t_pid);
                     break;
@@ -337,7 +317,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             }
         }
 
-        err = SetTaskProfiles(t_pid, {kCpusetProfileMap.at(grp)}, true) ? 0 : -1;
+        err = SetTaskProfiles(t_pid, {get_cpuset_policy_profile_name((SchedPolicy)grp)}, true) ? 0 : -1;
         if (err != NO_ERROR) {
             signalExceptionForGroupError(env, -err, t_pid);
             break;
