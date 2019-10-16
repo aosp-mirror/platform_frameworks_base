@@ -822,6 +822,7 @@ public abstract class AccessibilityService extends Service {
         GestureResultCallbackInfo callbackInfo;
         synchronized (mLock) {
             callbackInfo = mGestureStatusCallbackInfos.get(sequence);
+            mGestureStatusCallbackInfos.remove(sequence);
         }
         final GestureResultCallbackInfo finalCallbackInfo = callbackInfo;
         if ((callbackInfo != null) && (callbackInfo.gestureDescription != null)
