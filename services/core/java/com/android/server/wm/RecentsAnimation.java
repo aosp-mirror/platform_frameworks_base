@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -158,7 +158,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
     void startRecentsActivity(IRecentsAnimationRunner recentsAnimationRunner) {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "startRecentsActivity(): intent=%s", mTargetIntent);
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RecentsAnimation#startRecentsActivity");
 
         // TODO(multi-display) currently only support recents animation in default display.
         final DisplayContent dc =
@@ -263,7 +263,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             throw e;
         } finally {
             mService.continueWindowLayout();
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
@@ -297,7 +297,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             }
 
             mWindowManager.inSurfaceTransaction(() -> {
-                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mService.deferWindowLayout();
                 try {
@@ -394,7 +394,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     throw e;
                 } finally {
                     mService.continueWindowLayout();
-                    Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 }
             });
         }

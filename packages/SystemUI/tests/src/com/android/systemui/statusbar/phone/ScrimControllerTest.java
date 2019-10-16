@@ -133,6 +133,20 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void transitionToOff() {
+        mScrimController.transitionTo(ScrimState.OFF);
+        mScrimController.finishAnimationsImmediately();
+
+        assertScrimAlpha(OPAQUE /* front */,
+                SEMI_TRANSPARENT /* back */,
+                TRANSPARENT /* bubble */);
+
+        assertScrimTint(true /* front */,
+                true /* behind */,
+                false /* bubble */);
+    }
+
+    @Test
     public void transitionToAod_withRegularWallpaper() {
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();

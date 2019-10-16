@@ -43,8 +43,8 @@ TEST(CountMetricProducerTest, TestFirstBucket) {
     metric.set_bucket(ONE_MINUTE);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      5, 600 * NS_PER_SEC + NS_PER_SEC/2);
+    CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard, 5,
+                                      600 * NS_PER_SEC + NS_PER_SEC / 2);
     EXPECT_EQ(600500000000, countProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(10, countProducer.mCurrentBucketNum);
     EXPECT_EQ(660000000005, countProducer.getCurrentBucketEndTimeNs());
@@ -131,7 +131,8 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs, bucketStartTimeNs);
+    CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs,
+                                      bucketStartTimeNs);
 
     countProducer.onConditionChanged(true, bucketStartTimeNs);
     countProducer.onMatchedLogEvent(1 /*matcher index*/, event1);

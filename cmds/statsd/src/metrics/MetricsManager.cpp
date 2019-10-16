@@ -15,8 +15,12 @@
  */
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
+
 #include "MetricsManager.h"
-#include "statslog.h"
+
+#include <log/logprint.h>
+#include <private/android_filesystem_config.h>
+#include <utils/SystemClock.h>
 
 #include "CountMetricProducer.h"
 #include "condition/CombinationConditionTracker.h"
@@ -25,12 +29,10 @@
 #include "matchers/CombinationLogMatchingTracker.h"
 #include "matchers/SimpleLogMatchingTracker.h"
 #include "metrics_manager_util.h"
-#include "stats_util.h"
+#include "state/StateManager.h"
 #include "stats_log_util.h"
-
-#include <log/logprint.h>
-#include <private/android_filesystem_config.h>
-#include <utils/SystemClock.h>
+#include "stats_util.h"
+#include "statslog.h"
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_INT32;
@@ -149,6 +151,12 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
 }
 
 MetricsManager::~MetricsManager() {
+    for (auto it : mAllMetricProducers) {
+        for (int atomId : it->getSlicedStateAtoms()) {
+            StateManager::getInstance().unregisterListener(atomId, it);
+        }
+    }
+
     VLOG("~MetricsManager()");
 }
 

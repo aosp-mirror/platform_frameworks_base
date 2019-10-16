@@ -17,6 +17,7 @@
 package com.android.internal.statusbar;
 
 import android.app.Notification;
+import android.net.Uri;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -77,6 +78,7 @@ interface IStatusBarService
     void onNotificationSettingsViewed(String key);
     void setSystemUiVisibility(int displayId, int vis, int mask, String cause);
     void onNotificationBubbleChanged(String key, boolean isBubble);
+    void grantInlineReplyUriPermission(String key, in Uri uri);
 
     void onGlobalActionsShown();
     void onGlobalActionsHidden();

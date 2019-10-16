@@ -52,16 +52,15 @@ const int FIELD_ID_DATA = 1;
 const int FIELD_ID_ELAPSED_TIMESTAMP_NANOS = 1;
 const int FIELD_ID_ATOMS = 2;
 
-EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
-                                         const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard,
-                                         const int64_t startTimeNs,
-                                         const unordered_map<int, shared_ptr<Activation>>&
-                                                 eventActivationMap,
-                                         const unordered_map<int, vector<shared_ptr<Activation>>>&
-                                                 eventDeactivationMap)
+EventMetricProducer::EventMetricProducer(
+        const ConfigKey& key, const EventMetric& metric, const int conditionIndex,
+        const sp<ConditionWizard>& wizard, const int64_t startTimeNs,
+        const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
+        const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
+        const vector<int>& slicedStateAtoms,
+        const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard, eventActivationMap,
-                     eventDeactivationMap) {
+                     eventDeactivationMap, slicedStateAtoms, stateGroupMap) {
     if (metric.links().size() > 0) {
         for (const auto& link : metric.links()) {
             Metric2Condition mc;

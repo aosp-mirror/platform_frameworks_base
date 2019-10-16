@@ -974,124 +974,9 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override public final boolean hasFeature(String feature) {
             return PackageManagerService.this.hasSystemFeature(feature, 0);
         }
-
-        final List<PackageParser.Package> getStaticOverlayPackages(
-                Collection<PackageParser.Package> allPackages, String targetPackageName) {
-            if ("android".equals(targetPackageName)) {
-                // Static RROs targeting to "android", ie framework-res.apk, are already applied by
-                // native AssetManager.
-                return null;
-            }
-
-            List<PackageParser.Package> overlayPackages = null;
-            for (PackageParser.Package p : allPackages) {
-                if (targetPackageName.equals(p.mOverlayTarget) && p.mOverlayIsStatic) {
-                    if (overlayPackages == null) {
-                        overlayPackages = new ArrayList<>();
-                    }
-                    overlayPackages.add(p);
-                }
-            }
-            if (overlayPackages != null) {
-                Comparator<PackageParser.Package> cmp =
-                        Comparator.comparingInt(p -> p.mOverlayPriority);
-                overlayPackages.sort(cmp);
-            }
-            return overlayPackages;
-        }
-
-        final String[] getStaticOverlayPaths(List<PackageParser.Package> overlayPackages,
-                String targetPath) {
-            if (overlayPackages == null || overlayPackages.isEmpty()) {
-                return null;
-            }
-            List<String> overlayPathList = null;
-            for (PackageParser.Package overlayPackage : overlayPackages) {
-                if (targetPath == null) {
-                    if (overlayPathList == null) {
-                        overlayPathList = new ArrayList<>();
-                    }
-                    overlayPathList.add(overlayPackage.baseCodePath);
-                    continue;
-                }
-
-                try {
-                    // Creates idmaps for system to parse correctly the Android manifest of the
-                    // target package.
-                    //
-                    // OverlayManagerService will update each of them with a correct gid from its
-                    // target package app id.
-                    mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                            UserHandle.getSharedAppGid(
-                                    UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
-                    if (overlayPathList == null) {
-                        overlayPathList = new ArrayList<>();
-                    }
-                    overlayPathList.add(overlayPackage.baseCodePath);
-                } catch (InstallerException e) {
-                    Slog.e(TAG, "Failed to generate idmap for " + targetPath + " and " +
-                            overlayPackage.baseCodePath);
-                }
-            }
-            return overlayPathList == null ? null : overlayPathList.toArray(new String[0]);
-        }
-
-        String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
-            List<PackageParser.Package> overlayPackages;
-            synchronized (mInstallLock) {
-                synchronized (mLock) {
-                    overlayPackages = getStaticOverlayPackages(
-                            mPackages.values(), targetPackageName);
-                }
-                // It is safe to keep overlayPackages without holding mPackages because static overlay
-                // packages can't be uninstalled or disabled.
-                return getStaticOverlayPaths(overlayPackages, targetPath);
-            }
-        }
-
-        @Override public final String[] getOverlayApks(String targetPackageName) {
-            return getStaticOverlayPaths(targetPackageName, null);
-        }
-
-        @Override public final String[] getOverlayPaths(String targetPackageName,
-                String targetPath) {
-            return getStaticOverlayPaths(targetPackageName, targetPath);
-        }
-    }
-
-    class ParallelPackageParserCallback extends PackageParserCallback {
-        List<PackageParser.Package> mOverlayPackages = null;
-
-        void findStaticOverlayPackages() {
-            synchronized (mLock) {
-                for (PackageParser.Package p : mPackages.values()) {
-                    if (p.mOverlayIsStatic) {
-                        if (mOverlayPackages == null) {
-                            mOverlayPackages = new ArrayList<>();
-                        }
-                        mOverlayPackages.add(p);
-                    }
-                }
-            }
-        }
-
-        @Override
-        synchronized String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
-            // We can trust mOverlayPackages without holding mPackages because package uninstall
-            // can't happen while running parallel parsing.
-            // And we can call mInstaller inside getStaticOverlayPaths without holding mInstallLock
-            // because mInstallLock is held before running parallel parsing.
-            // Moreover holding mPackages or mInstallLock on each parsing thread causes dead-lock.
-            return mOverlayPackages == null ? null :
-                    getStaticOverlayPaths(
-                            getStaticOverlayPackages(mOverlayPackages, targetPackageName),
-                            targetPath);
-        }
     }
 
     final PackageParser.Callback mPackageParserCallback = new PackageParserCallback();
-    final ParallelPackageParserCallback mParallelPackageParserCallback =
-            new ParallelPackageParserCallback();
 
     // Currently known shared libraries.
     final ArrayMap<String, LongSparseArray<SharedLibraryInfo>> mSharedLibraries = new ArrayMap<>();
@@ -2807,8 +2692,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanDirTracedLI(partition.overlayFolder, systemParseFlags,
                         systemScanFlags | partition.scanFlag, 0);
             }
-
-            mParallelPackageParserCallback.findStaticOverlayPackages();
 
             scanDirTracedLI(frameworkDir, systemParseFlags,
                     systemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED, 0);
@@ -8471,7 +8354,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         try (ParallelPackageParser parallelPackageParser = new ParallelPackageParser(
                 mSeparateProcesses, mOnlyCore, mMetrics, mCacheDir,
-                mParallelPackageParserCallback)) {
+                mPackageParserCallback)) {
             // Submit files for parsing in parallel
             int fileCount = 0;
             for (File file : files) {
@@ -16117,10 +16000,6 @@ public class PackageManagerService extends IPackageManager.Stub
      * will be used to scan and reconcile the package.
      */
     private static class PrepareResult {
-        public final int installReason;
-        public final String volumeUuid;
-        public final String installerPackageName;
-        public final UserHandle user;
         public final boolean replace;
         public final int scanFlags;
         public final int parseFlags;
@@ -16129,24 +16008,16 @@ public class PackageManagerService extends IPackageManager.Stub
         public final PackageParser.Package packageToScan;
         public final boolean clearCodeCache;
         public final boolean system;
-        /* The original package name if it was changed during an update, otherwise {@code null}. */
-        @Nullable
-        public final String renamedPackage;
         public final PackageFreezer freezer;
         public final PackageSetting originalPs;
         public final PackageSetting disabledPs;
         public final PackageSetting[] childPackageSettings;
 
-        private PrepareResult(int installReason, String volumeUuid,
-                String installerPackageName, UserHandle user, boolean replace, int scanFlags,
+        private PrepareResult(boolean replace, int scanFlags,
                 int parseFlags, PackageParser.Package existingPackage,
                 PackageParser.Package packageToScan, boolean clearCodeCache, boolean system,
-                String renamedPackage, PackageFreezer freezer, PackageSetting originalPs,
+                PackageFreezer freezer, PackageSetting originalPs,
                 PackageSetting disabledPs, PackageSetting[] childPackageSettings) {
-            this.installReason = installReason;
-            this.volumeUuid = volumeUuid;
-            this.installerPackageName = installerPackageName;
-            this.user = user;
             this.replace = replace;
             this.scanFlags = scanFlags;
             this.parseFlags = parseFlags;
@@ -16154,7 +16025,6 @@ public class PackageManagerService extends IPackageManager.Stub
             this.packageToScan = packageToScan;
             this.clearCodeCache = clearCodeCache;
             this.system = system;
-            this.renamedPackage = renamedPackage;
             this.freezer = freezer;
             this.originalPs = originalPs;
             this.disabledPs = disabledPs;
@@ -16194,8 +16064,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private PrepareResult preparePackageLI(InstallArgs args, PackageInstalledInfo res)
             throws PrepareFailure {
         final int installFlags = args.installFlags;
-        final String installerPackageName = args.installerPackageName;
-        final String volumeUuid = args.volumeUuid;
         final File tmpPackageFile = new File(args.getCodePath());
         final boolean onExternal = args.volumeUuid != null;
         final boolean instantApp = ((installFlags & PackageManager.INSTALL_INSTANT_APP) != 0);
@@ -16620,14 +16488,12 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageParser.Package existingPackage;
             String renamedPackage = null;
             boolean sysPkg = false;
-            String targetVolumeUuid = volumeUuid;
             int targetScanFlags = scanFlags;
             int targetParseFlags = parseFlags;
             final PackageSetting ps;
             final PackageSetting disabledPs;
             final PackageSetting[] childPackages;
             if (replace) {
-                targetVolumeUuid = null;
                 if (pkg.applicationInfo.isStaticSharedLibrary()) {
                     // Static libs have a synthetic package name containing the version
                     // and cannot be updated as an update would get a new package name,
@@ -16879,9 +16745,8 @@ public class PackageManagerService extends IPackageManager.Stub
             // we're passing the freezer back to be closed in a later phase of install
             shouldCloseFreezerBeforeReturn = false;
 
-            return new PrepareResult(args.installReason, targetVolumeUuid, installerPackageName,
-                    args.user, replace, targetScanFlags, targetParseFlags, existingPackage, pkg,
-                    replace /* clearCodeCache */, sysPkg, renamedPackage, freezer,
+            return new PrepareResult(replace, targetScanFlags, targetParseFlags,
+                    existingPackage, pkg, replace /* clearCodeCache */, sysPkg, freezer,
                     ps, disabledPs, childPackages);
         } finally {
             if (shouldCloseFreezerBeforeReturn) {

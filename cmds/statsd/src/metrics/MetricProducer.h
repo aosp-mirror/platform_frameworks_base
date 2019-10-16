@@ -17,19 +17,19 @@
 #ifndef METRIC_PRODUCER_H
 #define METRIC_PRODUCER_H
 
-#include <shared_mutex>
-
 #include <frameworks/base/cmds/statsd/src/active_config_list.pb.h>
+#include <log/logprint.h>
+#include <utils/RefBase.h>
+
+#include <unordered_map>
+
 #include "HashableDimensionKey.h"
 #include "anomaly/AnomalyTracker.h"
 #include "condition/ConditionWizard.h"
 #include "config/ConfigKey.h"
 #include "matchers/matcher_util.h"
 #include "packages/PackageInfoListener.h"
-
-#include <log/logprint.h>
-#include <utils/RefBase.h>
-#include <unordered_map>
+#include "state/StateListener.h"
 
 namespace android {
 namespace os {
@@ -86,13 +86,15 @@ struct Activation {
 // writing the report to dropbox. MetricProducers should respond to package changes as required in
 // PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
 // be a no-op.
-class MetricProducer : public virtual PackageInfoListener {
+class MetricProducer : public virtual PackageInfoListener, public virtual StateListener {
 public:
     MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
                    const int conditionIndex, const sp<ConditionWizard>& wizard,
                    const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
                    const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
-                           eventDeactivationMap);
+                           eventDeactivationMap,
+                   const vector<int>& slicedStateAtoms,
+                   const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap);
 
     virtual ~MetricProducer(){};
 
@@ -150,6 +152,9 @@ public:
         std::lock_guard<std::mutex> lock(mMutex);
         return mConditionSliced;
     };
+
+    void onStateChanged(int atomId, const HashableDimensionKey& primaryKey, int oldState,
+                        int newState){};
 
     // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
     // This method clears all the past buckets.
@@ -228,6 +233,11 @@ public:
     int64_t getBucketSizeInNs() const {
         std::lock_guard<std::mutex> lock(mMutex);
         return mBucketSizeNs;
+    }
+
+    inline const std::vector<int> getSlicedStateAtoms() {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return mSlicedStateAtoms;
     }
 
     /* If alert is valid, adds an AnomalyTracker and returns it. If invalid, returns nullptr. */
@@ -380,6 +390,16 @@ protected:
     std::unordered_map<int, std::vector<std::shared_ptr<Activation>>> mEventDeactivationMap;
 
     bool mIsActive;
+
+    // The slice_by_state atom ids defined in statsd_config.
+    std::vector<int> mSlicedStateAtoms;
+
+    // Maps atom ids and state values to group_ids (<atom_id, <value, group_id>>).
+    std::unordered_map<int, std::unordered_map<int, int64_t>> mStateGroupMap;
+
+    FRIEND_TEST(CountMetricE2eTest, TestWithSimpleState);
+    FRIEND_TEST(CountMetricE2eTest, TestWithMappedState);
+    FRIEND_TEST(CountMetricE2eTest, TestWithMultipleStates);
 
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);

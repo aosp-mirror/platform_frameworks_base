@@ -499,6 +499,32 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         mService2.setControlCategories2(client, categories);
     }
 
+    // Binder call
+    @Override
+    public void requestSetVolume2(IMediaRouter2Client client, MediaRoute2Info route, int volume) {
+        mService2.requestSetVolume2(client, route, volume);
+    }
+
+    // Binder call
+    @Override
+    public void requestUpdateVolume2(IMediaRouter2Client client, MediaRoute2Info route, int delta) {
+        mService2.requestUpdateVolume2(client, route, delta);
+    }
+
+    // Binder call
+    @Override
+    public void requestSetVolume2Manager(IMediaRouter2Manager manager,
+            MediaRoute2Info route, int volume) {
+        mService2.requestSetVolume2Manager(manager, route, volume);
+    }
+
+    // Binder call
+    @Override
+    public void requestUpdateVolume2Manager(IMediaRouter2Manager manager,
+            MediaRoute2Info route, int delta) {
+        mService2.requestUpdateVolume2Manager(manager, route, delta);
+    }
+
     void restoreBluetoothA2dp() {
         try {
             boolean a2dpOn;

@@ -30,13 +30,13 @@ StateTracker::StateTracker(const int atomId,
   : mAtomId(atomId),
     mStateField(getSimpleMatcher(atomId, stateAtomInfo.exclusiveField)) {
     // create matcher for each primary field
-    // TODO(tsaichristine): handle when primary field is first uid in chain
+    // TODO(tsaichristine): b/142108433 handle when primary field is first uid in chain
     for (const auto& primary : stateAtomInfo.primaryFields) {
         Matcher matcher = getSimpleMatcher(atomId, primary);
         mPrimaryFields.push_back(matcher);
     }
 
-    // TODO(tsaichristine): set default state, reset state, and nesting
+    // TODO(tsaichristine): b/142108433 set default state, reset state, and nesting
 }
 
 void StateTracker::onLogEvent(const LogEvent& event) {
@@ -96,7 +96,7 @@ void StateTracker::unregisterListener(wp<StateListener> listener) {
     mListeners.erase(listener);
 }
 
-int StateTracker::getState(const HashableDimensionKey& queryKey) const {
+int StateTracker::getStateValue(const HashableDimensionKey& queryKey) const {
     if (queryKey.getValues().size() == mPrimaryFields.size()) {
         auto it = mStateMap.find(queryKey);
         if (it != mStateMap.end()) {

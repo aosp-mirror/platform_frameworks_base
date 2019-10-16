@@ -18,6 +18,7 @@ package com.android.startop.test;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
+import android.os.PowerManager;
 
 /**
  * An interface for running benchmarks and collecting results. Used so we can have both an
@@ -48,7 +50,7 @@ class SystemServerBenchmarks {
     // Time limit to run benchmarks in seconds
     public static final int TIME_LIMIT = 5;
 
-    static void initializeBenchmarks(BenchmarkRunner benchmarks, Activity parent) {
+    static void initializeBenchmarks(Activity parent, BenchmarkRunner benchmarks) {
         benchmarks.addBenchmark("Empty", () -> {
         });
 
@@ -157,6 +159,21 @@ class SystemServerBenchmarks {
         ActivityManager am = (ActivityManager) parent.getSystemService(Context.ACTIVITY_SERVICE);
         benchmarks.addBenchmark("getRunningAppProcesses", () -> {
             am.getRunningAppProcesses();
+        });
+
+        // We use PendingIntent.getCreatorPackage, since
+        // getPackageIntentForSender is not public to us, but getCreatorPackage
+        // is just a thin wrapper around it.
+        PendingIntent pi = PendingIntent.getActivity(parent, 0, new Intent(), 0);
+        benchmarks.addBenchmark("getPackageIntentForSender", () -> {
+            pi.getCreatorPackage();
+        });
+
+        PowerManager pwr = (PowerManager) parent.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = pwr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "benchmark tag");
+        benchmarks.addBenchmark("WakeLock Acquire/Release", () -> {
+            wl.acquire();
+            wl.release();
         });
     }
 

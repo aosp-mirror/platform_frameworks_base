@@ -1348,13 +1348,16 @@ class WindowStateAnimator {
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
-        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#applyAnimationLocked");
         if (mWin.mToken.okToAnimate()) {
-            int anim = mWin.getDisplayContent().getDisplayPolicy().selectAnimationLw(mWin, transit);
+            int anim = mWin.getDisplayContent().getDisplayPolicy().selectAnimation(mWin, transit);
             int attr = -1;
             Animation a = null;
-            if (anim != 0) {
-                a = anim != -1 ? AnimationUtils.loadAnimation(mContext, anim) : null;
+            if (anim != DisplayPolicy.ANIMATION_STYLEABLE) {
+                if (anim != DisplayPolicy.ANIMATION_NONE) {
+                    Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#loadAnimation");
+                    a = AnimationUtils.loadAnimation(mContext, anim);
+                    Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+                }
             } else {
                 switch (transit) {
                     case WindowManagerPolicy.TRANSIT_ENTER:
@@ -1384,7 +1387,9 @@ class WindowStateAnimator {
                     + " isEntrance=" + isEntrance + " Callers " + Debug.getCallers(3));
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + this);
+                Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#startAnimation");
                 mWin.startAnimation(a);
+                Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
                 mAnimationIsEntrance = isEntrance;
             }
         } else {
@@ -1395,7 +1400,6 @@ class WindowStateAnimator {
             mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
-        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         return mWin.isAnimating();
     }
 

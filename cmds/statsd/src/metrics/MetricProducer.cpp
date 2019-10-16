@@ -45,23 +45,27 @@ MetricProducer::MetricProducer(
         const int conditionIndex, const sp<ConditionWizard>& wizard,
         const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
         const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
-                eventDeactivationMap)
-        : mMetricId(metricId),
-          mConfigKey(key),
-          mTimeBaseNs(timeBaseNs),
-          mCurrentBucketStartTimeNs(timeBaseNs),
-          mCurrentBucketNum(0),
-          mCondition(initialCondition(conditionIndex)),
-          mConditionTrackerIndex(conditionIndex),
-          mConditionSliced(false),
-          mWizard(wizard),
-          mContainANYPositionInDimensionsInWhat(false),
-          mSliceByPositionALL(false),
-          mHasLinksToAllConditionDimensionsInTracker(false),
-          mEventActivationMap(eventActivationMap),
-          mEventDeactivationMap(eventDeactivationMap),
-          mIsActive(mEventActivationMap.empty()) {
-    }
+                eventDeactivationMap,
+        const vector<int>& slicedStateAtoms,
+        const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
+    : mMetricId(metricId),
+      mConfigKey(key),
+      mTimeBaseNs(timeBaseNs),
+      mCurrentBucketStartTimeNs(timeBaseNs),
+      mCurrentBucketNum(0),
+      mCondition(initialCondition(conditionIndex)),
+      mConditionTrackerIndex(conditionIndex),
+      mConditionSliced(false),
+      mWizard(wizard),
+      mContainANYPositionInDimensionsInWhat(false),
+      mSliceByPositionALL(false),
+      mHasLinksToAllConditionDimensionsInTracker(false),
+      mEventActivationMap(eventActivationMap),
+      mEventDeactivationMap(eventDeactivationMap),
+      mIsActive(mEventActivationMap.empty()),
+      mSlicedStateAtoms(slicedStateAtoms),
+      mStateGroupMap(stateGroupMap) {
+}
 
 void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) {
     if (!mIsActive) {

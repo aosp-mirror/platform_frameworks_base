@@ -17,6 +17,7 @@
 
 package com.android.server.location;
 
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.location.Geofence;
 import android.location.Location;
@@ -38,13 +39,14 @@ public class GeofenceState {
     public final int mAllowedResolutionLevel;
     public final int mUid;
     public final String mPackageName;
+    public final @NonNull String mListenerIdentifier;
     public final PendingIntent mIntent;
 
     int mState;  // current state
     double mDistanceToCenter;  // current distance to center of fence
 
-    public GeofenceState(Geofence fence, long expireAt,
-            int allowedResolutionLevel, int uid, String packageName, PendingIntent intent) {
+    public GeofenceState(Geofence fence, long expireAt, int allowedResolutionLevel, int uid,
+            String packageName, @NonNull String listenerIdentifier, PendingIntent intent) {
         mState = STATE_UNKNOWN;
         mDistanceToCenter = Double.MAX_VALUE;
 
@@ -53,6 +55,7 @@ public class GeofenceState {
         mAllowedResolutionLevel = allowedResolutionLevel;
         mUid = uid;
         mPackageName = packageName;
+        mListenerIdentifier = listenerIdentifier;
         mIntent = intent;
 
         mLocation = new Location("");

@@ -38,16 +38,16 @@ namespace statsd {
 
 class DurationMetricProducer : public MetricProducer {
 public:
-    DurationMetricProducer(const ConfigKey& key, const DurationMetric& durationMetric,
-                           const int conditionIndex, const size_t startIndex,
-                           const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
-                           const sp<ConditionWizard>& wizard,
-                           const FieldMatcher& internalDimensions, const int64_t timeBaseNs,
-                           const int64_t startTimeNs,
-                           const unordered_map<int, shared_ptr<Activation>>&
-                                   eventActivationMap = {},
-                           const unordered_map<int, vector<shared_ptr<Activation>>>&
-                                   eventDeactivationMap = {});
+    DurationMetricProducer(
+            const ConfigKey& key, const DurationMetric& durationMetric, const int conditionIndex,
+            const size_t startIndex, const size_t stopIndex, const size_t stopAllIndex,
+            const bool nesting, const sp<ConditionWizard>& wizard,
+            const FieldMatcher& internalDimensions, const int64_t timeBaseNs,
+            const int64_t startTimeNs,
+            const unordered_map<int, shared_ptr<Activation>>& eventActivationMap = {},
+            const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap = {},
+            const vector<int>& slicedStateAtoms = {},
+            const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap = {});
 
     virtual ~DurationMetricProducer();
 

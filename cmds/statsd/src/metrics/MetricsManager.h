@@ -282,6 +282,10 @@ private:
             TestActivationOnBootMultipleActivationsDifferentActivationTypes);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
 
+    FRIEND_TEST(CountMetricE2eTest, TestWithSimpleState);
+    FRIEND_TEST(CountMetricE2eTest, TestWithMappedState);
+    FRIEND_TEST(CountMetricE2eTest, TestWithMultipleStates);
+
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
     FRIEND_TEST(DurationMetricE2eTest, TestWithActivation);

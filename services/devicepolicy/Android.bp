@@ -5,4 +5,13 @@ java_library_static {
     libs: [
         "services.core",
     ],
+
+    plugins: [
+        "compat-changeid-annotation-processor",
+    ],
+}
+
+platform_compat_config {
+    name: "services-devicepolicy-platform-compat-config",
+    src: ":services.devicepolicy",
 }

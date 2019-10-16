@@ -84,6 +84,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:label="Non-interactive SystemServer Benchmark"
+            android:name=".NonInteractiveSystemServerBenchmarkActivity"
+            android:exported="true" />
+
     </application>
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 </manifest>

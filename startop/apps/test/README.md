@@ -24,3 +24,14 @@ spent in view inflation to make it easier to focus on the time spent in view
 inflation.
 
     adb shell am start -n com.android.startop.test/.ComplexLayoutInflationActivity
+
+## NonInteractiveSystemServerBenchmark
+
+This activity is for running microbenchmarks from the command line. Run as follows:
+
+   adb shell am start -W -n com.android.startop.test .NonInteractiveSystemServerBenchmarkActivity
+
+It takes awhile (and there's currently no automated way to make sure it's done),
+but when it finishes, you can get the results like this:
+
+    adb shell cat /sdcard/Android/data/com.android.startop.test/files/benchmark.csv

@@ -48,7 +48,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -553,7 +553,7 @@ class TaskRecord extends ConfigurationContainer {
             // This method assumes that the task is already placed in the right stack.
             // we do not mess with that decision and we only do the resize!
 
-            Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "am.resizeTask_" + mTaskId);
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "resizeTask_" + mTaskId);
 
             boolean updatedConfig = false;
             mTmpConfig.setTo(getResolvedOverrideConfiguration());
@@ -587,7 +587,7 @@ class TaskRecord extends ConfigurationContainer {
 
             saveLaunchingStateIfNeeded();
 
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return kept;
         } finally {
             mAtmService.continueWindowLayout();

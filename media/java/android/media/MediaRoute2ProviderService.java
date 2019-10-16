@@ -81,6 +81,20 @@ public abstract class MediaRoute2ProviderService extends Service {
     public abstract void onControlRequest(String routeId, Intent request);
 
     /**
+     * Called when requestSetVolume is called on a route of the provider
+     * @param routeId the id of the route
+     * @param volume the target volume
+     */
+    public abstract void onSetVolume(String routeId, int volume);
+
+    /**
+     * Called when requestUpdateVolume is called on a route of the provider
+     * @param routeId id of the route
+     * @param delta the delta to add to the current volume
+     */
+    public abstract void onUpdateVolume(String routeId, int delta);
+
+    /**
      * Updates provider info and publishes routes
      */
     public final void setProviderInfo(MediaRoute2ProviderInfo info) {
@@ -129,6 +143,18 @@ public abstract class MediaRoute2ProviderService extends Service {
         public void notifyControlRequestSent(String id, Intent request) {
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onControlRequest,
                     MediaRoute2ProviderService.this, id, request));
+        }
+
+        @Override
+        public void requestSetVolume(String id, int volume) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetVolume,
+                    MediaRoute2ProviderService.this, id, volume));
+        }
+
+        @Override
+        public void requestUpdateVolume(String id, int delta) {
+            mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onUpdateVolume,
+                    MediaRoute2ProviderService.this, id, delta));
         }
     }
 }

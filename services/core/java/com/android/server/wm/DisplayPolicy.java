@@ -196,6 +196,11 @@ public class DisplayPolicy {
     // Nav bar is never forced opaque.
     private static final int NAV_BAR_FORCE_TRANSPARENT = 2;
 
+    /** Don't apply window animation (see {@link #selectAnimation}). */
+    static final int ANIMATION_NONE = -1;
+    /** Use the transit animation in style resource (see {@link #selectAnimation}). */
+    static final int ANIMATION_STYLEABLE = 0;
+
     /**
      * These are the system UI flags that, when changing, can cause the layout
      * of the screen to change.
@@ -1036,9 +1041,9 @@ public class DisplayPolicy {
     }
 
     /**
-     * Control the animation to run when a window's state changes.  Return a
-     * non-0 number to force the animation to a specific resource ID, or 0
-     * to use the default animation.
+     * Control the animation to run when a window's state changes.  Return a positive number to
+     * force the animation to a specific resource ID, {@link #ANIMATION_STYLEABLE} to use the
+     * style resource defining the animation, or {@link #ANIMATION_NONE} for no animation.
      *
      * @param win The window that is changing.
      * @param transit What is happening to the window:
@@ -1047,9 +1052,9 @@ public class DisplayPolicy {
      *                {@link com.android.server.policy.WindowManagerPolicy#TRANSIT_SHOW}, or
      *                {@link com.android.server.policy.WindowManagerPolicy#TRANSIT_HIDE}.
      *
-     * @return Resource ID of the actual animation to use, or 0 for none.
+     * @return Resource ID of the actual animation to use, or {@link #ANIMATION_NONE} for none.
      */
-    public int selectAnimationLw(WindowState win, int transit) {
+    int selectAnimation(WindowState win, int transit) {
         if (DEBUG_ANIM) Slog.i(TAG, "selectAnimation in " + win
                 + ": transit=" + transit);
         if (win == mStatusBar) {
@@ -1057,7 +1062,7 @@ public class DisplayPolicy {
             final boolean expanded = win.getAttrs().height == MATCH_PARENT
                     && win.getAttrs().width == MATCH_PARENT;
             if (isKeyguard || expanded) {
-                return -1;
+                return ANIMATION_NONE;
             }
             if (transit == TRANSIT_EXIT
                     || transit == TRANSIT_HIDE) {
@@ -1068,7 +1073,7 @@ public class DisplayPolicy {
             }
         } else if (win == mNavigationBar) {
             if (win.getAttrs().windowAnimations != 0) {
-                return 0;
+                return ANIMATION_STYLEABLE;
             }
             // This can be on either the bottom or the right or the left.
             if (mNavigationBarPosition == NAV_BAR_BOTTOM) {
@@ -1101,7 +1106,7 @@ public class DisplayPolicy {
                 }
             }
         } else if (win.getAttrs().type == TYPE_DOCK_DIVIDER) {
-            return selectDockedDividerAnimationLw(win, transit);
+            return selectDockedDividerAnimation(win, transit);
         }
 
         if (transit == TRANSIT_PREVIEW_DONE) {
@@ -1115,13 +1120,13 @@ public class DisplayPolicy {
             // is shown.  We don't want an animation on the dream, because
             // we need it shown immediately with the keyguard animating away
             // to reveal it.
-            return -1;
+            return ANIMATION_NONE;
         }
 
-        return 0;
+        return ANIMATION_STYLEABLE;
     }
 
-    private int selectDockedDividerAnimationLw(WindowState win, int transit) {
+    private int selectDockedDividerAnimation(WindowState win, int transit) {
         int insets = mDisplayContent.getDockedDividerController().getContentInsets();
 
         // If the divider is behind the navigation bar, don't animate.
@@ -1140,14 +1145,14 @@ public class DisplayPolicy {
                 || frame.bottom + insets >= win.getDisplayFrameLw().bottom);
         final boolean offscreen = offscreenLandscape || offscreenPortrait;
         if (behindNavBar || offscreen) {
-            return 0;
+            return ANIMATION_STYLEABLE;
         }
         if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
             return R.anim.fade_in;
         } else if (transit == TRANSIT_EXIT) {
             return R.anim.fade_out;
         } else {
-            return 0;
+            return ANIMATION_STYLEABLE;
         }
     }
 

@@ -234,6 +234,54 @@ public class MediaRouter2Manager {
         }
     }
 
+    /**
+     * Requests a volume change for the route asynchronously.
+     * <p>
+     * It may have no effect if the route is currently not selected.
+     * </p>
+     *
+     * @param volume The new volume value between 0 and {@link MediaRoute2Info#getVolumeMax}.
+     */
+    public void requestSetVolume(@NonNull MediaRoute2Info route, int volume) {
+        Objects.requireNonNull(route, "route must not be null");
+
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                mMediaRouterService.requestSetVolume2Manager(client, route, volume);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to send control request.", ex);
+            }
+        }
+    }
+
+    /**
+     * Requests an incremental volume update  for the route asynchronously.
+     * <p>
+     * It may have no effect if the route is currently not selected.
+     * </p>
+     *
+     * @param delta The delta to add to the current volume.
+     */
+    public void requestUpdateVolume(@NonNull MediaRoute2Info route, int delta) {
+        Objects.requireNonNull(route, "route must not be null");
+
+        Client client;
+        synchronized (sLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                mMediaRouterService.requestUpdateVolume2Manager(client, route, delta);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to send control request.", ex);
+            }
+        }
+    }
+
     int findProviderIndex(MediaRoute2ProviderInfo provider) {
         final int count = mProviders.size();
         for (int i = 0; i < count; i++) {
