@@ -5112,8 +5112,8 @@ public class NotificationManagerService extends SystemService {
         }
         if (contentViewSize >= mStripRemoteViewsSizeBytes) {
             mUsageStats.registerImageRemoved(pkg);
-            Slog.w(TAG,
-                    "Removed too large RemoteViews on pkg: " + pkg + " tag: " + tag + " id: " + id);
+            Slog.w(TAG, "Removed too large RemoteViews (" + contentViewSize + " bytes) on pkg: "
+                    + pkg + " tag: " + tag + " id: " + id);
             return true;
         }
         return false;
