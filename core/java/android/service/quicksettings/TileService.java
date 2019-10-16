@@ -126,11 +126,29 @@ public class TileService extends Service {
             = "android.service.quicksettings.ACTIVE_TILE";
 
     /**
+     * Meta-data for a tile to support {@code BooleanState}.
+     * <p>
+     * BooleanState is for tiles that should support switch tile behavior in accessibility. This is
+     * the behavior of most of the framework tiles.
+     *
+     * To make a TileService support BooleanState, set this meta-data to true on the TileService's
+     * manifest declaration.
+     * <pre class="prettyprint">
+     * {@literal
+     * <meta-data android:name="android.service.quicksettings.BOOLEAN_TILE"
+     *      android:value="true" />
+     * }
+     * </pre>
+     */
+    public static final String META_DATA_BOOLEAN_TILE =
+            "android.service.quicksettings.BOOLEAN_TILE";
+
+    /**
      * Used to notify SysUI that Listening has be requested.
      * @hide
      */
-    public static final String ACTION_REQUEST_LISTENING
-            = "android.service.quicksettings.action.REQUEST_LISTENING";
+    public static final String ACTION_REQUEST_LISTENING =
+            "android.service.quicksettings.action.REQUEST_LISTENING";
 
     /**
      * @hide

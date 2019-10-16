@@ -101,6 +101,7 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
             defaultServiceInfo = new ServiceInfo();
             defaultServiceInfo.metaData = new Bundle();
             defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_ACTIVE_TILE, true);
+            defaultServiceInfo.metaData.putBoolean(TileService.META_DATA_BOOLEAN_TILE, true);
         }
         when(mMockPackageManagerAdapter.getServiceInfo(any(), anyInt(), anyInt()))
                 .thenReturn(defaultServiceInfo);
@@ -236,5 +237,10 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         // Two calls: one for the first bind, one for the restart.
         verifyBind(2);
         verify(mMockTileService, times(2)).onStartListening();
+    }
+
+    @Test
+    public void testBooleanTile() throws Exception {
+        assertTrue(mStateManager.isBooleanTile());
     }
 }

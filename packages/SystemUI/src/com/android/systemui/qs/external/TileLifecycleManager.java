@@ -131,6 +131,24 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     }
 
     /**
+     * Determines whether the associated TileService is a Boolean Tile.
+     *
+     * @return true if {@link TileService#META_DATA_BOOLEAN_TILE} is set to {@code true} for this
+     *         tile
+     * @see TileService#META_DATA_BOOLEAN_TILE
+     */
+    public boolean isBooleanTile() {
+        try {
+            ServiceInfo info = mPackageManagerAdapter.getServiceInfo(mIntent.getComponent(),
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES | PackageManager.GET_META_DATA);
+            return info.metaData != null
+                    && info.metaData.getBoolean(TileService.META_DATA_BOOLEAN_TILE, false);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
      * Binds just long enough to send any queued messages, then unbinds.
      */
     public void flushMessagesAndUnbind() {
