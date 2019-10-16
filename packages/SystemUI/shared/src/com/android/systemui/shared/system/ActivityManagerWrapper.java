@@ -78,6 +78,7 @@ public class ActivityManagerWrapper {
 
     // Should match the values in PhoneWindowManager
     public static final String CLOSE_SYSTEM_WINDOWS_REASON_RECENTS = "recentapps";
+    public static final String CLOSE_SYSTEM_WINDOWS_REASON_HOME_KEY = "homekey";
 
     private final PackageManager mPackageManager;
     private final BackgroundExecutor mBackgroundExecutor;
