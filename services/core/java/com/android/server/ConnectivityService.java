@@ -1149,7 +1149,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static NetworkCapabilities createDefaultNetworkCapabilitiesForUid(int uid) {
         final NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
-        netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         netCap.removeCapability(NET_CAPABILITY_NOT_VPN);
         netCap.setSingleUid(uid);
         return netCap;
@@ -1159,7 +1158,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             int transportType, NetworkRequest.Type type) {
         final NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
-        netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         if (transportType > -1) {
             netCap.addTransportType(transportType);
         }
