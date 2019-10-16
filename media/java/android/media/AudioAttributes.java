@@ -670,7 +670,7 @@ public final class AudioAttributes implements Parcelable {
                     mUsage = usage;
                     break;
                 default:
-                    mUsage = USAGE_UNKNOWN;
+                    throw new IllegalArgumentException("Invalid usage " + usage);
             }
             return this;
         }
@@ -696,7 +696,7 @@ public final class AudioAttributes implements Parcelable {
                     mContentType = contentType;
                     break;
                 default:
-                    mContentType = CONTENT_TYPE_UNKNOWN;
+                    throw new IllegalArgumentException("Invalid content type " + contentType);
             }
             return this;
         }
