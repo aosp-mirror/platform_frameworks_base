@@ -13915,6 +13915,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final IPackageInstallObserver2 observer;
         int installFlags;
         final String installerPackageName;
+        final InstallSource installSource;
         final String volumeUuid;
         private boolean mVerificationCompleted;
         private boolean mEnableRollbackCompleted;
@@ -13931,10 +13932,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final long requiredInstalledVersionCode;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
-                int installFlags, String installerPackageName, String volumeUuid,
+                int installFlags, String installerPackageName,
+                InstallSource installSource, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
-                PackageParser.SigningDetails signingDetails, int installReason,
+                SigningDetails signingDetails, int installReason,
                 long requiredInstalledVersionCode) {
             super(user);
             this.origin = origin;
@@ -13942,6 +13944,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.observer = observer;
             this.installFlags = installFlags;
             this.installerPackageName = installerPackageName;
+            this.installSource = installSource;
             this.volumeUuid = volumeUuid;
             this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
@@ -13973,6 +13976,7 @@ public class PackageManagerService extends IPackageManager.Stub
             observer = activeInstallSession.getObserver();
             installFlags = activeInstallSession.getSessionParams().installFlags;
             installerPackageName = activeInstallSession.getInstallerPackageName();
+            installSource = activeInstallSession.getInstallSource();
             volumeUuid = activeInstallSession.getSessionParams().volumeUuid;
             packageAbiOverride = activeInstallSession.getSessionParams().abiOverride;
             grantedRuntimePermissions = activeInstallSession.getSessionParams()
@@ -14455,6 +14459,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Always refers to PackageManager flags only
         final int installFlags;
         final String installerPackageName;
+        final InstallSource installSource;
         final String volumeUuid;
         final UserHandle user;
         final String abiOverride;
@@ -14473,7 +14478,8 @@ public class PackageManagerService extends IPackageManager.Stub
         /* nullable */ String[] instructionSets;
 
         InstallArgs(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
-                int installFlags, String installerPackageName, String volumeUuid,
+                int installFlags, String installerPackageName,
+                InstallSource installSource, String volumeUuid,
                 UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
                 List<String> whitelistedRestrictedPermissions,
@@ -14485,6 +14491,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installFlags = installFlags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
+            this.installSource = installSource;
             this.volumeUuid = volumeUuid;
             this.user = user;
             this.instructionSets = instructionSets;
@@ -14496,6 +14503,16 @@ public class PackageManagerService extends IPackageManager.Stub
             this.signingDetails = signingDetails;
             this.installReason = installReason;
             this.mMultiPackageInstallParams = multiPackageInstallParams;
+        }
+
+        /** New install */
+        InstallArgs(InstallParams params) {
+            this(params.origin, params.move, params.observer, params.installFlags,
+                    params.installerPackageName, params.installSource, params.volumeUuid,
+                    params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
+                    params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
+                    params.traceMethod, params.traceCookie, params.signingDetails,
+                    params.installReason, params.mParentInstallParams);
         }
 
         abstract int copyApk();
@@ -14578,17 +14595,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         /** New install */
         FileInstallArgs(InstallParams params) {
-            super(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.volumeUuid,
-                    params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
-                    params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
-                    params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.mParentInstallParams);
+            super(params);
         }
 
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
-            super(OriginInfo.fromNothing(), null, null, 0, null, null, null, instructionSets,
+            super(OriginInfo.fromNothing(), null, null, 0, null, null, null, null, instructionSets,
                     null, null, null, null, 0, PackageParser.SigningDetails.UNKNOWN,
                     PackageManager.INSTALL_REASON_UNKNOWN, null /* parent */);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
@@ -14767,12 +14779,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         /** New install */
         MoveInstallArgs(InstallParams params) {
-            super(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.volumeUuid,
-                    params.getUser(), null /* instruction sets */, params.packageAbiOverride,
-                    params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
-                    params.traceMethod, params.traceCookie, params.signingDetails,
-                    params.installReason, params.mParentInstallParams);
+            super(params);
         }
 
         int copyApk() {
@@ -15031,38 +15038,38 @@ public class PackageManagerService extends IPackageManager.Stub
         return disabled;
     }
 
-    private void updateSettingsLI(PackageParser.Package newPackage, String installerPackageName,
-            int[] allUsers, PackageInstalledInfo res, UserHandle user, int installReason) {
+    private void updateSettingsLI(PackageParser.Package newPackage,
+            InstallArgs installArgs, int[] allUsers, PackageInstalledInfo res) {
         // Update the parent package setting
-        updateSettingsInternalLI(newPackage, installerPackageName, allUsers, res.origUsers,
-                res, user, installReason);
+        updateSettingsInternalLI(newPackage, installArgs, allUsers, res);
         // Update the child packages setting
         final int childCount = (newPackage.childPackages != null)
                 ? newPackage.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             PackageParser.Package childPackage = newPackage.childPackages.get(i);
             PackageInstalledInfo childRes = res.addedChildPackages.get(childPackage.packageName);
-            updateSettingsInternalLI(childPackage, installerPackageName, allUsers,
-                    childRes.origUsers, childRes, user, installReason);
+            updateSettingsInternalLI(childPackage, installArgs, allUsers, childRes);
         }
     }
 
     private void updateSettingsInternalLI(PackageParser.Package pkg,
-            String installerPackageName, int[] allUsers, int[] installedForUsers,
-            PackageInstalledInfo res, UserHandle user, int installReason) {
+            InstallArgs installArgs, int[] allUsers, PackageInstalledInfo res) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
         final String pkgName = pkg.packageName;
+        final String installerPackageName = installArgs.installerPackageName;
+        final int[] installedForUsers = res.origUsers;
+        final int installReason = installArgs.installReason;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "New package installed in " + pkg.codePath);
         synchronized (mLock) {
 // NOTE: This changes slightly to include UPDATE_PERMISSIONS_ALL regardless of the size of pkg.permissions
-            mPermissionManager.updatePermissions(pkg.packageName, pkg);
+            mPermissionManager.updatePermissions(pkgName, pkg);
             // For system-bundled packages, we assume that installing an upgraded version
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
             PackageSetting ps = mSettings.mPackages.get(pkgName);
-            final int userId = user.getIdentifier();
+            final int userId = installArgs.user.getIdentifier();
             if (ps != null) {
                 if (isSystemApp(pkg)) {
                     if (DEBUG_INSTALL) {
@@ -15097,6 +15104,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
                 }
+
+                ps.setInstallSource(installArgs.installSource);
+
 
                 // When replacing an existing package, preserve the original install reason for all
                 // users that had the package installed before.
@@ -15741,8 +15751,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             commitReconciledScanResultLocked(reconciledPkg);
-            updateSettingsLI(pkg, reconciledPkg.installArgs.installerPackageName, request.mAllUsers,
-                    res, reconciledPkg.installArgs.user, reconciledPkg.installArgs.installReason);
+            updateSettingsLI(pkg, reconciledPkg.installArgs, request.mAllUsers, res);
 
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps != null) {
@@ -15752,8 +15761,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
                 PackageParser.Package childPkg = pkg.childPackages.get(i);
-                PackageInstalledInfo childRes = res.addedChildPackages.get(
-                        childPkg.packageName);
+                PackageInstalledInfo childRes = res.addedChildPackages.get(childPkg.packageName);
                 PackageSetting childPs = mSettings.getPackageLPr(childPkg.packageName);
                 if (childPs != null) {
                     childRes.newUsers = childPs.queryInstalledUsers(
@@ -21869,6 +21877,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String currentVolumeUuid;
         final File codeFile;
         final String installerPackageName;
+        final InstallSource installSource;
         final String packageAbiOverride;
         final int appId;
         final String seinfo;
@@ -21926,6 +21935,7 @@ public class PackageManagerService extends IPackageManager.Stub
             isCurrentLocationExternal = isExternal(pkg);
             codeFile = new File(pkg.codePath);
             installerPackageName = ps.installerPackageName;
+            installSource = ps.installSource;
             packageAbiOverride = ps.cpuAbiOverrideString;
             appId = UserHandle.getAppId(pkg.applicationInfo.uid);
             seinfo = pkg.applicationInfo.seInfo;
@@ -22071,7 +22081,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installerPackageName, volumeUuid, null /*verificationInfo*/, user,
+                installerPackageName, installSource, volumeUuid, null /*verificationInfo*/, user,
                 packageAbiOverride, null /*grantedPermissions*/,
                 null /*whitelistedRestrictedPermissions*/, PackageParser.SigningDetails.UNKNOWN,
                 PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.VERSION_CODE_HIGHEST);
@@ -23958,18 +23968,21 @@ public class PackageManagerService extends IPackageManager.Stub
         private final PackageInstaller.SessionParams mSessionParams;
         private final String mInstallerPackageName;
         private final int mInstallerUid;
+        private final InstallSource mInstallSource;
         private final UserHandle mUser;
         private final SigningDetails mSigningDetails;
 
         ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
                 PackageInstaller.SessionParams sessionParams, String installerPackageName,
-                int installerUid, UserHandle user, SigningDetails signingDetails) {
+                int installerUid, InstallSource installSource,
+                UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
             mObserver = observer;
             mSessionParams = sessionParams;
             mInstallerPackageName = installerPackageName;
             mInstallerUid = installerUid;
+            mInstallSource = installSource;
             mUser = user;
             mSigningDetails = signingDetails;
         }
@@ -23996,6 +24009,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public int getInstallerUid() {
             return mInstallerUid;
+        }
+
+        public InstallSource getInstallSource() {
+            return mInstallSource;
         }
 
         public UserHandle getUser() {

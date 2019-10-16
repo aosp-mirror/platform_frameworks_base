@@ -349,14 +349,7 @@ public class PackageInstaller {
      */
     public int createSession(@NonNull SessionParams params) throws IOException {
         try {
-            final String installerPackage;
-            if (params.installerPackageName == null) {
-                installerPackage = mInstallerPackageName;
-            } else {
-                installerPackage = params.installerPackageName;
-            }
-
-            return mInstaller.createSession(params, installerPackage, mUserId);
+            return mInstaller.createSession(params, mInstallerPackageName, mUserId);
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;

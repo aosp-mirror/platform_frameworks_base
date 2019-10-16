@@ -167,6 +167,7 @@ public class PackageInstallerSessionTest {
                 /* userId */  456,
                 /* installerPackageName */ "testInstaller",
                 /* installerUid */ -1,
+                InstallSource.create("testInstaller"),
                 /* sessionParams */ params,
                 /* createdMillis */ 0L,
                 /* stageDir */ mTmpDir,
