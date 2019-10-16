@@ -16,6 +16,7 @@
 
 package com.android.localtransport;
 
+import android.annotation.Nullable;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
@@ -142,7 +143,14 @@ public class LocalTransport extends BackupTransport {
         return null;
     }
 
+    /** @removed Replaced with dataManagementIntentLabel in the API */
     public String dataManagementLabel() {
+        return TRANSPORT_DATA_MANAGEMENT_LABEL;
+    }
+
+    @Override
+    @Nullable
+    public CharSequence dataManagementIntentLabel() {
         return TRANSPORT_DATA_MANAGEMENT_LABEL;
     }
 
