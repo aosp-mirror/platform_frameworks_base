@@ -30,6 +30,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
@@ -58,9 +59,9 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
-import com.google.android.collect.Lists;
-
 import libcore.util.HexEncoding;
+
+import com.google.android.collect.Lists;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -77,7 +78,6 @@ import java.util.StringJoiner;
  * Utilities for the lock pattern and its settings.
  */
 public class LockPatternUtils {
-
     private static final String TAG = "LockPatternUtils";
     private static final boolean FRP_CREDENTIAL_ENABLED = true;
 
@@ -114,6 +114,7 @@ public class LockPatternUtils {
      */
     public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
 
+    // NOTE: When modifying this, make sure credential sufficiency validation logic is intact.
     public static final int CREDENTIAL_TYPE_NONE = -1;
     public static final int CREDENTIAL_TYPE_PATTERN = 1;
     public static final int CREDENTIAL_TYPE_PASSWORD = 2;
@@ -289,10 +290,10 @@ public class LockPatternUtils {
         return getDevicePolicyManager().getPasswordMaximumLength(quality);
     }
 
-    /**
-     * Gets the device policy password mode. If the mode is non-specific, returns
-     * MODE_PATTERN which allows the user to choose anything.
-     */
+    public PasswordMetrics getRequestedPasswordMetrics(int userId) {
+        return getDevicePolicyManager().getPasswordMinimumMetrics(userId);
+    }
+
     public int getRequestedPasswordQuality(int userId) {
         return getDevicePolicyManager().getPasswordQuality(null, userId);
     }

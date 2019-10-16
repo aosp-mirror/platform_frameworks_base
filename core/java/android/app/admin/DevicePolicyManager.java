@@ -2330,6 +2330,12 @@ public class DevicePolicyManager {
             "android.app.action.ADMIN_POLICY_COMPLIANCE";
 
     /**
+     * Maximum supported password length. Kind-of arbitrary.
+     * @hide
+     */
+    public static final int MAX_PASSWORD_LENGTH = 16;
+
+    /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
      * @param admin The administrator component to check for.
@@ -3233,6 +3239,22 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns minimum PasswordMetrics that satisfies all admin policies.
+     *
+     * @hide
+     */
+    public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getPasswordMinimumMetrics(userHandle);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
      * Called by an application that is administering the device to set the length of the password
      * history. After setting this, the user will not be able to enter a new password that is the
      * same as any password in the history. Note that the current password will remain until the
@@ -3415,8 +3437,7 @@ public class DevicePolicyManager {
         if (!pm.hasSystemFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)) {
             return 0;
         }
-        // Kind-of arbitrary.
-        return 16;
+        return MAX_PASSWORD_LENGTH;
     }
 
     /**

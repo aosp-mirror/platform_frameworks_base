@@ -129,6 +129,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
+import android.app.admin.PasswordPolicy;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.StartInstallingUpdateCallback;
@@ -255,6 +256,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.PasswordValidationError;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
@@ -989,19 +991,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         static final int DEF_PASSWORD_HISTORY_LENGTH = 0;
         int passwordHistoryLength = DEF_PASSWORD_HISTORY_LENGTH;
 
-        static final int DEF_MINIMUM_PASSWORD_LENGTH = 0;
-        static final int DEF_MINIMUM_PASSWORD_LETTERS = 1;
-        static final int DEF_MINIMUM_PASSWORD_UPPER_CASE = 0;
-        static final int DEF_MINIMUM_PASSWORD_LOWER_CASE = 0;
-        static final int DEF_MINIMUM_PASSWORD_NUMERIC = 1;
-        static final int DEF_MINIMUM_PASSWORD_SYMBOLS = 1;
-        static final int DEF_MINIMUM_PASSWORD_NON_LETTER = 0;
         @NonNull
-        PasswordMetrics minimumPasswordMetrics = new PasswordMetrics(
-                PASSWORD_QUALITY_UNSPECIFIED, DEF_MINIMUM_PASSWORD_LENGTH,
-                DEF_MINIMUM_PASSWORD_LETTERS, DEF_MINIMUM_PASSWORD_UPPER_CASE,
-                DEF_MINIMUM_PASSWORD_LOWER_CASE, DEF_MINIMUM_PASSWORD_NUMERIC,
-                DEF_MINIMUM_PASSWORD_SYMBOLS, DEF_MINIMUM_PASSWORD_NON_LETTER);
+        PasswordPolicy mPasswordPolicy = new PasswordPolicy();
 
         static final long DEF_MAXIMUM_TIME_TO_UNLOCK = 0;
         long maximumTimeToUnlock = DEF_MAXIMUM_TIME_TO_UNLOCK;
@@ -1136,36 +1127,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             out.startTag(null, TAG_POLICIES);
             info.writePoliciesToXml(out);
             out.endTag(null, TAG_POLICIES);
-            if (minimumPasswordMetrics.quality != PASSWORD_QUALITY_UNSPECIFIED) {
+            if (mPasswordPolicy.quality != PASSWORD_QUALITY_UNSPECIFIED) {
                 writeAttributeValueToXml(
-                        out, TAG_PASSWORD_QUALITY, minimumPasswordMetrics.quality);
-                if (minimumPasswordMetrics.length != DEF_MINIMUM_PASSWORD_LENGTH) {
+                        out, TAG_PASSWORD_QUALITY, mPasswordPolicy.quality);
+                if (mPasswordPolicy.length != PasswordPolicy.DEF_MINIMUM_LENGTH) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_LENGTH, minimumPasswordMetrics.length);
+                            out, TAG_MIN_PASSWORD_LENGTH, mPasswordPolicy.length);
                 }
-                if (minimumPasswordMetrics.upperCase != DEF_MINIMUM_PASSWORD_UPPER_CASE) {
+                if (mPasswordPolicy.upperCase != PasswordPolicy.DEF_MINIMUM_UPPER_CASE) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_UPPERCASE, minimumPasswordMetrics.upperCase);
+                            out, TAG_MIN_PASSWORD_UPPERCASE, mPasswordPolicy.upperCase);
                 }
-                if (minimumPasswordMetrics.lowerCase != DEF_MINIMUM_PASSWORD_LOWER_CASE) {
+                if (mPasswordPolicy.lowerCase != PasswordPolicy.DEF_MINIMUM_LOWER_CASE) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_LOWERCASE, minimumPasswordMetrics.lowerCase);
+                            out, TAG_MIN_PASSWORD_LOWERCASE, mPasswordPolicy.lowerCase);
                 }
-                if (minimumPasswordMetrics.letters != DEF_MINIMUM_PASSWORD_LETTERS) {
+                if (mPasswordPolicy.letters != PasswordPolicy.DEF_MINIMUM_LETTERS) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_LETTERS, minimumPasswordMetrics.letters);
+                            out, TAG_MIN_PASSWORD_LETTERS, mPasswordPolicy.letters);
                 }
-                if (minimumPasswordMetrics.numeric != DEF_MINIMUM_PASSWORD_NUMERIC) {
+                if (mPasswordPolicy.numeric != PasswordPolicy.DEF_MINIMUM_NUMERIC) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_NUMERIC, minimumPasswordMetrics.numeric);
+                            out, TAG_MIN_PASSWORD_NUMERIC, mPasswordPolicy.numeric);
                 }
-                if (minimumPasswordMetrics.symbols != DEF_MINIMUM_PASSWORD_SYMBOLS) {
+                if (mPasswordPolicy.symbols != PasswordPolicy.DEF_MINIMUM_SYMBOLS) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_SYMBOLS, minimumPasswordMetrics.symbols);
+                            out, TAG_MIN_PASSWORD_SYMBOLS, mPasswordPolicy.symbols);
                 }
-                if (minimumPasswordMetrics.nonLetter > DEF_MINIMUM_PASSWORD_NON_LETTER) {
+                if (mPasswordPolicy.nonLetter > PasswordPolicy.DEF_MINIMUM_NON_LETTER) {
                     writeAttributeValueToXml(
-                            out, TAG_MIN_PASSWORD_NONLETTER, minimumPasswordMetrics.nonLetter);
+                            out, TAG_MIN_PASSWORD_NONLETTER, mPasswordPolicy.nonLetter);
                 }
             }
             if (passwordHistoryLength != DEF_PASSWORD_HISTORY_LENGTH) {
@@ -1404,31 +1395,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         info.readPoliciesFromXml(parser);
                     }
                 } else if (TAG_PASSWORD_QUALITY.equals(tag)) {
-                    minimumPasswordMetrics.quality = Integer.parseInt(
+                    mPasswordPolicy.quality = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_LENGTH.equals(tag)) {
-                    minimumPasswordMetrics.length = Integer.parseInt(
+                    mPasswordPolicy.length = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_PASSWORD_HISTORY_LENGTH.equals(tag)) {
                     passwordHistoryLength = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_UPPERCASE.equals(tag)) {
-                    minimumPasswordMetrics.upperCase = Integer.parseInt(
+                    mPasswordPolicy.upperCase = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_LOWERCASE.equals(tag)) {
-                    minimumPasswordMetrics.lowerCase = Integer.parseInt(
+                    mPasswordPolicy.lowerCase = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_LETTERS.equals(tag)) {
-                    minimumPasswordMetrics.letters = Integer.parseInt(
+                    mPasswordPolicy.letters = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_NUMERIC.equals(tag)) {
-                    minimumPasswordMetrics.numeric = Integer.parseInt(
+                    mPasswordPolicy.numeric = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_SYMBOLS.equals(tag)) {
-                    minimumPasswordMetrics.symbols = Integer.parseInt(
+                    mPasswordPolicy.symbols = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
-                    minimumPasswordMetrics.nonLetter = Integer.parseInt(
+                    mPasswordPolicy.nonLetter = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 }else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
                     maximumTimeToUnlock = Long.parseLong(
@@ -1689,23 +1680,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.decreaseIndent();
             }
             pw.print("passwordQuality=0x");
-                    pw.println(Integer.toHexString(minimumPasswordMetrics.quality));
+                    pw.println(Integer.toHexString(mPasswordPolicy.quality));
             pw.print("minimumPasswordLength=");
-                    pw.println(minimumPasswordMetrics.length);
+                    pw.println(mPasswordPolicy.length);
             pw.print("passwordHistoryLength=");
                     pw.println(passwordHistoryLength);
             pw.print("minimumPasswordUpperCase=");
-                    pw.println(minimumPasswordMetrics.upperCase);
+                    pw.println(mPasswordPolicy.upperCase);
             pw.print("minimumPasswordLowerCase=");
-                    pw.println(minimumPasswordMetrics.lowerCase);
+                    pw.println(mPasswordPolicy.lowerCase);
             pw.print("minimumPasswordLetters=");
-                    pw.println(minimumPasswordMetrics.letters);
+                    pw.println(mPasswordPolicy.letters);
             pw.print("minimumPasswordNumeric=");
-                    pw.println(minimumPasswordMetrics.numeric);
+                    pw.println(mPasswordPolicy.numeric);
             pw.print("minimumPasswordSymbols=");
-                    pw.println(minimumPasswordMetrics.symbols);
+                    pw.println(mPasswordPolicy.symbols);
             pw.print("minimumPasswordNonLetter=");
-                    pw.println(minimumPasswordMetrics.nonLetter);
+                    pw.println(mPasswordPolicy.nonLetter);
             pw.print("maximumTimeToUnlock=");
                     pw.println(maximumTimeToUnlock);
             pw.print("strongAuthUnlockTimeout=");
@@ -4162,15 +4153,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             final long ident = mInjector.binderClearCallingIdentity();
             try {
-                final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-                if (metrics.quality != quality) {
-                    metrics.quality = quality;
+                final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+                if (passwordPolicy.quality != quality) {
+                    passwordPolicy.quality = quality;
                     resetInactivePasswordRequirementsIfRPlus(userId, ap);
                     updatePasswordValidityCheckpointLocked(userId, parent);
                     updatePasswordQualityCacheForUserGroup(userId);
                     saveSettingsLocked(userId);
                 }
-                maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+                maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
@@ -4199,17 +4190,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private void resetInactivePasswordRequirementsIfRPlus(int userId, ActiveAdmin admin) {
         if (passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(), userId)) {
-            final PasswordMetrics metrics = admin.minimumPasswordMetrics;
-            if (metrics.quality < PASSWORD_QUALITY_NUMERIC) {
-                metrics.length = ActiveAdmin.DEF_MINIMUM_PASSWORD_LENGTH;
+            final PasswordPolicy policy = admin.mPasswordPolicy;
+            if (policy.quality < PASSWORD_QUALITY_NUMERIC) {
+                policy.length = PasswordPolicy.DEF_MINIMUM_LENGTH;
             }
-            if (metrics.quality < PASSWORD_QUALITY_COMPLEX) {
-                metrics.letters = ActiveAdmin.DEF_MINIMUM_PASSWORD_LETTERS;
-                metrics.upperCase = ActiveAdmin.DEF_MINIMUM_PASSWORD_UPPER_CASE;
-                metrics.lowerCase = ActiveAdmin.DEF_MINIMUM_PASSWORD_LOWER_CASE;
-                metrics.numeric = ActiveAdmin.DEF_MINIMUM_PASSWORD_NUMERIC;
-                metrics.symbols = ActiveAdmin.DEF_MINIMUM_PASSWORD_SYMBOLS;
-                metrics.nonLetter = ActiveAdmin.DEF_MINIMUM_PASSWORD_NON_LETTER;
+            if (policy.quality < PASSWORD_QUALITY_COMPLEX) {
+                policy.letters = PasswordPolicy.DEF_MINIMUM_LETTERS;
+                policy.upperCase = PasswordPolicy.DEF_MINIMUM_UPPER_CASE;
+                policy.lowerCase = PasswordPolicy.DEF_MINIMUM_LOWER_CASE;
+                policy.numeric = PasswordPolicy.DEF_MINIMUM_NUMERIC;
+                policy.symbols = PasswordPolicy.DEF_MINIMUM_SYMBOLS;
+                policy.nonLetter = PasswordPolicy.DEF_MINIMUM_NON_LETTER;
             }
         }
     }
@@ -4274,7 +4265,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.quality : mode;
+                return admin != null ? admin.mPasswordPolicy.quality : mode;
             }
 
             // Return the strictest policy across all participating admins.
@@ -4283,8 +4274,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = admins.get(i);
-                if (mode < admin.minimumPasswordMetrics.quality) {
-                    mode = admin.minimumPasswordMetrics.quality;
+                if (mode < admin.mPasswordPolicy.quality) {
+                    mode = admin.mPasswordPolicy.quality;
                 }
             }
             return mode;
@@ -4344,14 +4335,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_NUMERIC, "setPasswordMinimumLength");
-            if (metrics.length != length) {
-                metrics.length = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.length != length) {
+                passwordPolicy.length = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LENGTH)
@@ -4362,7 +4353,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void ensureMinimumQuality(
             int userId, ActiveAdmin admin, int minimumQuality, String operation) {
-        if (admin.minimumPasswordMetrics.quality < minimumQuality
+        if (admin.mPasswordPolicy.quality < minimumQuality
                 && passwordQualityInvocationOrderCheckEnabled(admin.info.getPackageName(),
                 userId)) {
             throw new IllegalStateException(String.format(
@@ -4373,7 +4364,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumLength(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.length, PASSWORD_QUALITY_NUMERIC);
+                admin -> admin.mPasswordPolicy.length, PASSWORD_QUALITY_NUMERIC);
     }
 
     @Override
@@ -4602,13 +4593,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             ensureMinimumQuality(
                     userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumUpperCase");
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.upperCase != length) {
-                metrics.upperCase = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.upperCase != length) {
+                passwordPolicy.upperCase = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_UPPER_CASE)
@@ -4620,7 +4611,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumUpperCase(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.upperCase, PASSWORD_QUALITY_COMPLEX);
+                admin -> admin.mPasswordPolicy.upperCase, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4632,13 +4623,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             ensureMinimumQuality(
                     userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumLowerCase");
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.lowerCase != length) {
-                metrics.lowerCase = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.lowerCase != length) {
+                passwordPolicy.lowerCase = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LOWER_CASE)
@@ -4650,7 +4641,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumLowerCase(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.lowerCase, PASSWORD_QUALITY_COMPLEX);
+                admin -> admin.mPasswordPolicy.lowerCase, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4664,13 +4655,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumLetters");
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.letters != length) {
-                metrics.letters = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.letters != length) {
+                passwordPolicy.letters = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_LETTERS)
@@ -4682,7 +4673,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumLetters(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.letters, PASSWORD_QUALITY_COMPLEX);
+                admin -> admin.mPasswordPolicy.letters, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4696,13 +4687,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumNumeric");
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.numeric != length) {
-                metrics.numeric = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.numeric != length) {
+                passwordPolicy.numeric = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_NUMERIC)
@@ -4714,7 +4705,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumNumeric(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.numeric, PASSWORD_QUALITY_COMPLEX);
+                admin -> admin.mPasswordPolicy.numeric, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4728,13 +4719,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             ActiveAdmin ap = getActiveAdminForCallerLocked(
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             ensureMinimumQuality(userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumSymbols");
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.symbols != length) {
-                ap.minimumPasswordMetrics.symbols = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.symbols != length) {
+                ap.mPasswordPolicy.symbols = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_SYMBOLS)
@@ -4746,7 +4737,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumSymbols(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.symbols, PASSWORD_QUALITY_COMPLEX);
+                admin -> admin.mPasswordPolicy.symbols, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4761,13 +4752,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             ensureMinimumQuality(
                     userId, ap, PASSWORD_QUALITY_COMPLEX, "setPasswordMinimumNonLetter");
-            final PasswordMetrics metrics = ap.minimumPasswordMetrics;
-            if (metrics.nonLetter != length) {
-                ap.minimumPasswordMetrics.nonLetter = length;
+            final PasswordPolicy passwordPolicy = ap.mPasswordPolicy;
+            if (passwordPolicy.nonLetter != length) {
+                ap.mPasswordPolicy.nonLetter = length;
                 updatePasswordValidityCheckpointLocked(userId, parent);
                 saveSettingsLocked(userId);
             }
-            maybeLogPasswordComplexitySet(who, userId, parent, metrics);
+            maybeLogPasswordComplexitySet(who, userId, parent, passwordPolicy);
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PASSWORD_MINIMUM_NON_LETTER)
@@ -4779,7 +4770,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordMinimumNonLetter(ComponentName who, int userHandle, boolean parent) {
         return getStrictestPasswordRequirement(who, userHandle, parent,
-                admin -> admin.minimumPasswordMetrics.nonLetter, PASSWORD_QUALITY_COMPLEX);
+                admin -> admin.mPasswordPolicy.nonLetter, PASSWORD_QUALITY_COMPLEX);
     }
 
     /**
@@ -4815,6 +4806,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * Calculates strictest (maximum) value for a given password property enforced by admin[s].
+     */
+    @Override
+    public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
+        return getPasswordMinimumMetrics(userHandle, false /* parent */);
+    }
+
+    /**
+     * Calculates strictest (maximum) value for a given password property enforced by admin[s].
+     */
+    private PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle, boolean parent) {
+        if (!mHasFeature) {
+            new PasswordMetrics(LockPatternUtils.CREDENTIAL_TYPE_NONE);
+        }
+        enforceFullCrossUsersPermission(userHandle);
+        ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
+        synchronized (getLockObject()) {
+            List<ActiveAdmin> admins =
+                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
+            for (ActiveAdmin admin : admins) {
+                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
+            }
+        }
+        return PasswordMetrics.merge(adminMetrics);
+    }
+
     @Override
     public boolean isActivePasswordSufficient(int userHandle, boolean parent) {
         if (!mHasFeature) {
@@ -4830,8 +4848,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             int credentialOwner = getCredentialOwner(userHandle, parent);
             DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(credentialOwner);
-            return isActivePasswordSufficientForUserLocked(
+            boolean activePasswordSufficientForUserLocked = isActivePasswordSufficientForUserLocked(
                     policy.mPasswordValidAtLastCheckpoint, metrics, userHandle, parent);
+            return activePasswordSufficientForUserLocked;
         }
     }
 
@@ -4894,25 +4913,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
             @NonNull PasswordMetrics metrics, @UserIdInt int userId, boolean parent) {
-        final int requiredQuality = getPasswordQuality(null, userId, parent);
-
-        if (requiredQuality >= PASSWORD_QUALITY_NUMERIC
-                && metrics.length < getPasswordMinimumLength(null, userId, parent)) {
-            return false;
-        }
-
-        // PASSWORD_QUALITY_COMPLEX doesn't represent actual password quality, it means that number
-        // of characters of each class should be checked instead of quality itself.
-        if (requiredQuality == PASSWORD_QUALITY_COMPLEX) {
-            return metrics.upperCase >= getPasswordMinimumUpperCase(null, userId, parent)
-                    && metrics.lowerCase >= getPasswordMinimumLowerCase(null, userId, parent)
-                    && metrics.letters >= getPasswordMinimumLetters(null, userId, parent)
-                    && metrics.numeric >= getPasswordMinimumNumeric(null, userId, parent)
-                    && metrics.symbols >= getPasswordMinimumSymbols(null, userId, parent)
-                    && metrics.nonLetter >= getPasswordMinimumNonLetter(null, userId, parent);
-        } else {
-            return metrics.quality >= requiredQuality;
-        }
+        PasswordMetrics minMetrics = getPasswordMinimumMetrics(userId, parent);
+        final List<PasswordValidationError> passwordValidationErrors =
+                PasswordMetrics.validatePasswordMetrics(
+                        minMetrics, PASSWORD_COMPLEXITY_NONE, false, metrics);
+        return passwordValidationErrors.isEmpty();
     }
 
     @Override
@@ -5170,76 +5175,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean resetPasswordInternal(String password, long tokenHandle, byte[] token,
             int flags, int callingUid, int userHandle) {
-        int quality;
         synchronized (getLockObject()) {
-            quality = getPasswordQuality(null, userHandle, /* parent */ false);
-            if (quality == PASSWORD_QUALITY_MANAGED) {
-                quality = PASSWORD_QUALITY_UNSPECIFIED;
-            }
             // TODO(b/120484642): remove getBytes() below
-            final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password.getBytes());
-            final int realQuality = metrics.quality;
-            if (realQuality < quality && quality != PASSWORD_QUALITY_COMPLEX) {
-                Slog.w(LOG_TAG, "resetPassword: password quality 0x"
-                        + Integer.toHexString(realQuality)
-                        + " does not meet required quality 0x"
-                        + Integer.toHexString(quality));
+            final PasswordMetrics minMetrics = getPasswordMinimumMetrics(userHandle);
+            final List<PasswordValidationError> validationErrors =
+                    PasswordMetrics.validatePassword(
+                            minMetrics, PASSWORD_COMPLEXITY_NONE, false, password.getBytes());
+            if (!validationErrors.isEmpty()) {
+                Log.w(LOG_TAG, "Failed to reset password due to constraint violation: "
+                        + validationErrors.get(0));
                 return false;
-            }
-            quality = Math.max(realQuality, quality);
-            int length = getPasswordMinimumLength(null, userHandle, /* parent */ false);
-            if (password.length() < length) {
-                Slog.w(LOG_TAG, "resetPassword: password length " + password.length()
-                        + " does not meet required length " + length);
-                return false;
-            }
-            if (quality == PASSWORD_QUALITY_COMPLEX) {
-                int neededLetters = getPasswordMinimumLetters(null, userHandle, /* parent */ false);
-                if(metrics.letters < neededLetters) {
-                    Slog.w(LOG_TAG, "resetPassword: number of letters " + metrics.letters
-                            + " does not meet required number of letters " + neededLetters);
-                    return false;
-                }
-                int neededNumeric = getPasswordMinimumNumeric(null, userHandle, /* parent */ false);
-                if (metrics.numeric < neededNumeric) {
-                    Slog.w(LOG_TAG, "resetPassword: number of numerical digits " + metrics.numeric
-                            + " does not meet required number of numerical digits "
-                            + neededNumeric);
-                    return false;
-                }
-                int neededLowerCase = getPasswordMinimumLowerCase(
-                        null, userHandle, /* parent */ false);
-                if (metrics.lowerCase < neededLowerCase) {
-                    Slog.w(LOG_TAG, "resetPassword: number of lowercase letters "
-                            + metrics.lowerCase
-                            + " does not meet required number of lowercase letters "
-                            + neededLowerCase);
-                    return false;
-                }
-                int neededUpperCase = getPasswordMinimumUpperCase(
-                        null, userHandle, /* parent */ false);
-                if (metrics.upperCase < neededUpperCase) {
-                    Slog.w(LOG_TAG, "resetPassword: number of uppercase letters "
-                            + metrics.upperCase
-                            + " does not meet required number of uppercase letters "
-                            + neededUpperCase);
-                    return false;
-                }
-                int neededSymbols = getPasswordMinimumSymbols(null, userHandle, /* parent */ false);
-                if (metrics.symbols < neededSymbols) {
-                    Slog.w(LOG_TAG, "resetPassword: number of special symbols " + metrics.symbols
-                            + " does not meet required number of special symbols " + neededSymbols);
-                    return false;
-                }
-                int neededNonLetter = getPasswordMinimumNonLetter(
-                        null, userHandle, /* parent */ false);
-                if (metrics.nonLetter < neededNonLetter) {
-                    Slog.w(LOG_TAG, "resetPassword: number of non-letter characters "
-                            + metrics.nonLetter
-                            + " does not meet required number of non-letter characters "
-                            + neededNonLetter);
-                    return false;
-                }
             }
         }
 
@@ -11604,10 +11549,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Returns true if specified admin is allowed to limit passwords and has a
-     * {@code minimumPasswordMetrics.quality} of at least {@code minPasswordQuality}
+     * {@code mPasswordPolicy.quality} of at least {@code minPasswordQuality}
      */
     private static boolean isLimitPasswordAllowed(ActiveAdmin admin, int minPasswordQuality) {
-        if (admin.minimumPasswordMetrics.quality < minPasswordQuality) {
+        if (admin.mPasswordPolicy.quality < minPasswordQuality) {
             return false;
         }
         return admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
@@ -14226,13 +14171,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void maybeLogPasswordComplexitySet(ComponentName who, int userId, boolean parent,
-            PasswordMetrics metrics) {
+            PasswordPolicy passwordPolicy) {
         if (SecurityLog.isLoggingEnabled()) {
             final int affectedUserId = parent ? getProfileParentId(userId) : userId;
             SecurityLog.writeEvent(SecurityLog.TAG_PASSWORD_COMPLEXITY_SET, who.getPackageName(),
-                    userId, affectedUserId, metrics.length, metrics.quality, metrics.letters,
-                    metrics.nonLetter, metrics.numeric, metrics.upperCase, metrics.lowerCase,
-                    metrics.symbols);
+                    userId, affectedUserId, passwordPolicy.length, passwordPolicy.quality,
+                    passwordPolicy.letters, passwordPolicy.nonLetter, passwordPolicy.numeric,
+                    passwordPolicy.upperCase, passwordPolicy.lowerCase, passwordPolicy.symbols);
         }
     }
 
