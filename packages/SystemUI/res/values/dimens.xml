@@ -1164,4 +1164,11 @@
 
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
+
+    <dimen name="new_qs_vertical_margin">8dp</dimen>
+
+    <!-- Size of media cards in the QSPanel carousel -->
+    <dimen name="qs_media_height">150dp</dimen>
+    <dimen name="qs_media_width">350dp</dimen>
+    <dimen name="qs_media_padding">8dp</dimen>
 </resources>

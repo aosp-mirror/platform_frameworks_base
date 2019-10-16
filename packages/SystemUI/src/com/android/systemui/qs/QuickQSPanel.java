@@ -21,6 +21,7 @@ import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEX
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -55,6 +56,7 @@ public class QuickQSPanel extends QSPanel {
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
+    private QuickQSMediaPlayer mMediaPlayer;
 
     @Inject
     public QuickQSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
@@ -69,11 +71,43 @@ public class QuickQSPanel extends QSPanel {
             }
             removeView((View) mTileLayout);
         }
-        sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
-        mTileLayout = new HeaderTileLayout(context);
-        mTileLayout.setListening(mListening);
-        addView((View) mTileLayout, 0 /* Between brightness and footer */);
-        super.setPadding(0, 0, 0, 0);
+
+        int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_player", 0);
+        if (flag == 1) {
+            LinearLayout mHorizontalLinearLayout = new LinearLayout(mContext);
+            mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            mHorizontalLinearLayout.setClipChildren(false);
+            mHorizontalLinearLayout.setClipToPadding(false);
+
+            LayoutParams lp = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
+
+            mTileLayout = new DoubleLineTileLayout(context);
+            lp.setMarginEnd(10);
+            lp.setMarginStart(0);
+            mHorizontalLinearLayout.addView((View) mTileLayout, lp);
+
+            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout);
+
+            lp.setMarginEnd(0);
+            lp.setMarginStart(10);
+            mHorizontalLinearLayout.addView(mMediaPlayer.getView(), lp);
+
+            sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+
+            mTileLayout.setListening(mListening);
+            addView(mHorizontalLinearLayout, 0 /* Between brightness and footer */);
+            super.setPadding(0, 0, 0, 0);
+        } else {
+            sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
+            mTileLayout = new HeaderTileLayout(context);
+            mTileLayout.setListening(mListening);
+            addView((View) mTileLayout, 0 /* Between brightness and footer */);
+            super.setPadding(0, 0, 0, 0);
+        }
+    }
+
+    public QuickQSMediaPlayer getMediaPlayer() {
+        return mMediaPlayer;
     }
 
     @Override
