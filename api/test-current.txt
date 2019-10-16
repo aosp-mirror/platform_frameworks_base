@@ -2253,8 +2253,11 @@ package android.os.strictmode {
 package android.permission {
 
   public final class PermissionControllerManager {
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.RESTORE_RUNTIME_PERMISSIONS"}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("android.permission.GET_RUNTIME_PERMISSIONS") public void getAppPermissions(@NonNull String, @NonNull android.permission.PermissionControllerManager.OnGetAppPermissionResultCallback, @Nullable android.os.Handler);
+    method @RequiresPermission("android.permission.GET_RUNTIME_PERMISSIONS") public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
     method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    method @RequiresPermission(anyOf={"android.permission.GRANT_RUNTIME_PERMISSIONS", "android.permission.RESTORE_RUNTIME_PERMISSIONS"}) public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[], @NonNull android.os.UserHandle);
     field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
     field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
     field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2

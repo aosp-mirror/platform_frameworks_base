@@ -172,6 +172,7 @@ package android {
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
+    field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
     field public static final String RESTRICTED_VR_ACCESS = "android.permission.RESTRICTED_VR_ACCESS";
     field public static final String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
@@ -5701,7 +5702,10 @@ package android.os.telephony {
 package android.permission {
 
   public final class PermissionControllerManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[], @NonNull android.os.UserHandle);
     field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
     field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
     field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
@@ -5715,17 +5719,19 @@ package android.permission {
 
   public abstract class PermissionControllerService extends android.app.Service {
     ctor public PermissionControllerService();
+    method @BinderThread public void onApplyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @NonNull public final android.os.IBinder onBind(android.content.Intent);
     method @BinderThread public abstract void onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGetAppPermissions(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionPresentationInfo>>);
     method @BinderThread public abstract void onGetPermissionUsages(boolean, long, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionUsageInfo>>);
     method @BinderThread public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream, @NonNull Runnable);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
-    method @BinderThread public abstract void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @BinderThread public abstract void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
+    method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public void onUpdateUserSensitive();
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }

@@ -62,6 +62,7 @@ import libcore.util.EmptyArray;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -136,20 +137,6 @@ public final class PermissionControllerManager {
          *                {@code Map<packageName, List<permission>>}
          */
         public abstract void onRevokeRuntimePermissions(@NonNull Map<String, List<String>> revoked);
-    }
-
-    /**
-     * Callback for delivering the result of {@link #getRuntimePermissionBackup}.
-     *
-     * @hide
-     */
-    public interface OnGetRuntimePermissionBackupCallback {
-        /**
-         * The result for {@link #getRuntimePermissionBackup}.
-         *
-         * @param backup The backup file
-         */
-        void onGetRuntimePermissionsBackup(@NonNull byte[] backup);
     }
 
     /**
@@ -246,6 +233,24 @@ public final class PermissionControllerManager {
     }
 
     /**
+     * Throw a {@link SecurityException} if not at least one of the permissions is granted.
+     *
+     * @param requiredPermissions A list of permissions. Any of of them if sufficient to pass the
+     *                            check
+     */
+    private void enforceSomePermissionsGrantedToSelf(@NonNull String... requiredPermissions) {
+        for (String requiredPermission : requiredPermissions) {
+            if (mContext.checkSelfPermission(requiredPermission)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+
+        throw new SecurityException("At lest one of the following permissions is required: "
+                + Arrays.toString(requiredPermissions));
+    }
+
+    /**
      * Revoke a set of runtime permissions for various apps.
      *
      * @param request The permissions to revoke as {@code Map<packageName, List<permission>>}
@@ -268,11 +273,7 @@ public final class PermissionControllerManager {
         }
 
         // Check required permission to fail immediately instead of inside the oneway binder call
-        if (mContext.checkSelfPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
-                    + " required");
-        }
+        enforceSomePermissionsGrantedToSelf(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
 
         mRemoteService.postAsync(service -> {
             Bundle bundledizedRequest = new Bundle();
@@ -358,46 +359,61 @@ public final class PermissionControllerManager {
      *
      * @param user The user to be backed up
      * @param executor Executor on which to invoke the callback
-     * @param callback Callback to receive the result
-     *
-     * @hide
+     * @param callback Callback to receive the result. The resulting backup-file is opaque and no
+     *                 guarantees are made other than that the file can be send to
+     *                 {@link #restoreRuntimePermissionBackup} in this and future versions of
+     *                 Android.
      */
     @RequiresPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS)
     public void getRuntimePermissionBackup(@NonNull UserHandle user,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull OnGetRuntimePermissionBackupCallback callback) {
+            @NonNull Consumer<byte[]> callback) {
         checkNotNull(user);
         checkNotNull(executor);
         checkNotNull(callback);
+
+        // Check required permission to fail immediately instead of inside the oneway binder call
+        enforceSomePermissionsGrantedToSelf(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
         mRemoteService.postAsync(service -> RemoteStream.receiveBytes(remotePipe -> {
             service.getRuntimePermissionBackup(user, remotePipe);
         })).whenCompleteAsync((bytes, err) -> {
             if (err != null) {
                 Log.e(TAG, "Error getting permission backup", err);
-                callback.onGetRuntimePermissionsBackup(EmptyArray.BYTE);
+                callback.accept(EmptyArray.BYTE);
             } else {
-                callback.onGetRuntimePermissionsBackup(bytes);
+                callback.accept(bytes);
             }
         }, executor);
     }
 
     /**
-     * Restore a backup of the runtime permissions.
+     * Restore a {@link #getRuntimePermissionBackup backup-file} of the runtime permissions.
      *
-     * @param backup the backup to restore. The backup is sent asynchronously, hence it should not
-     *               be modified after calling this method.
+     * <p>This might leave some part of the backup-file unapplied if an package mentioned in the
+     * backup-file is not yet installed. It is required that
+     * {@link #applyStagedRuntimePermissionBackup} is called after any package is installed to
+     * apply the rest of the backup-file.
+     *
+     * @param backup the backup-file to restore. The backup is sent asynchronously, hence it should
+     *               not be modified after calling this method.
      * @param user The user to be restore
-     *
-     * @hide
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
-    public void restoreRuntimePermissionBackup(@NonNull byte[] backup, @NonNull UserHandle user) {
+    @RequiresPermission(anyOf = {
+            Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            Manifest.permission.RESTORE_RUNTIME_PERMISSIONS
+    })
+    public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[] backup,
+            @NonNull UserHandle user) {
         checkNotNull(backup);
         checkNotNull(user);
 
+        // Check required permission to fail immediately instead of inside the oneway binder call
+        enforceSomePermissionsGrantedToSelf(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                Manifest.permission.RESTORE_RUNTIME_PERMISSIONS);
+
         mRemoteService.postAsync(service -> RemoteStream.sendBytes(remotePipe -> {
-            service.restoreRuntimePermissionBackup(user, remotePipe);
+            service.stageAndApplyRuntimePermissionsBackup(user, remotePipe);
         }, backup))
                 .whenComplete((nullResult, err) -> {
                     if (err != null) {
@@ -407,17 +423,22 @@ public final class PermissionControllerManager {
     }
 
     /**
-     * Restore a backup of the runtime permissions that has been delayed.
+     * Restore unapplied parts of a {@link #stageAndApplyRuntimePermissionsBackup previously staged}
+     * backup-file of the runtime permissions.
+     *
+     * <p>This should be called every time after a package is installed until the callback
+     * reports that there is no more unapplied backup left.
      *
      * @param packageName The package that is ready to have it's permissions restored.
-     * @param user The user to restore
+     * @param user The user the package belongs to
      * @param executor Executor to execute the callback on
-     * @param callback Is called with {@code true} iff there is still more delayed backup left
-     *
-     * @hide
+     * @param callback Is called with {@code true} iff there is still more unapplied backup left
      */
-    @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS)
-    public void restoreDelayedRuntimePermissionBackup(@NonNull String packageName,
+    @RequiresPermission(anyOf = {
+            Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            Manifest.permission.RESTORE_RUNTIME_PERMISSIONS
+    })
+    public void applyStagedRuntimePermissionBackup(@NonNull String packageName,
             @NonNull UserHandle user,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<Boolean> callback) {
@@ -426,13 +447,17 @@ public final class PermissionControllerManager {
         checkNotNull(executor);
         checkNotNull(callback);
 
+        // Check required permission to fail immediately instead of inside the oneway binder call
+        enforceSomePermissionsGrantedToSelf(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                Manifest.permission.RESTORE_RUNTIME_PERMISSIONS);
+
         mRemoteService.postAsync(service -> {
-            AndroidFuture<Boolean> restoreDelayedRuntimePermissionBackupResult =
+            AndroidFuture<Boolean> applyStagedRuntimePermissionBackupResult =
                     new AndroidFuture<>();
-            service.restoreDelayedRuntimePermissionBackup(packageName, user,
-                    restoreDelayedRuntimePermissionBackupResult);
-            return restoreDelayedRuntimePermissionBackupResult;
-        }).whenCompleteAsync((restoreDelayedRuntimePermissionBackupResult, err) -> {
+            service.applyStagedRuntimePermissionBackup(packageName, user,
+                    applyStagedRuntimePermissionBackupResult);
+            return applyStagedRuntimePermissionBackupResult;
+        }).whenCompleteAsync((applyStagedRuntimePermissionBackupResult, err) -> {
             long token = Binder.clearCallingIdentity();
             try {
                 if (err != null) {
@@ -440,7 +465,7 @@ public final class PermissionControllerManager {
                     callback.accept(true);
                 } else {
                     callback.accept(
-                            Boolean.TRUE.equals(restoreDelayedRuntimePermissionBackupResult));
+                            Boolean.TRUE.equals(applyStagedRuntimePermissionBackupResult));
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);

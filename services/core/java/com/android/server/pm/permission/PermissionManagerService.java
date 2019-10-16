@@ -1902,7 +1902,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
         synchronized (mLock) {
             mHasNoDelayedPermBackup.delete(user.getIdentifier());
-            mPermissionControllerManager.restoreRuntimePermissionBackup(backup, user);
+            mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup, user);
         }
     }
 
@@ -1923,7 +1923,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return;
             }
 
-            mPermissionControllerManager.restoreDelayedRuntimePermissionBackup(packageName, user,
+            mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName, user,
                     mContext.getMainExecutor(), (hasMoreBackup) -> {
                         if (hasMoreBackup) {
                             return;
