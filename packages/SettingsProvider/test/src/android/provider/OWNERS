@@ -1,0 +1,4 @@
+per-file * = *
+
+# Please reach out to the Android B&R team for settings backup changes
+per-file SettingsBackupTest.java = br-framework-team+reviews@google.com
