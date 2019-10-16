@@ -284,7 +284,7 @@ public class ChooserActivityTest {
         waitForIdle();
         UsageStatsManager usm = activity.getUsageStatsManager();
         verify(sOverrides.resolverListController, times(1))
-                .sort(Mockito.any(List.class));
+                .topK(Mockito.any(List.class), Mockito.anyInt());
         assertThat(activity.getIsSelected(), is(false));
         sOverrides.onSafelyStartCallback = targetInfo -> {
             return true;
