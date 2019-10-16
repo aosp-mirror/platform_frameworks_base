@@ -129,6 +129,9 @@
     <!-- Prompt for the USB device confirm dialog [CHAR LIMIT=80] -->
     <string name="usb_device_confirm_prompt">Open <xliff:g id="application">%1$s</xliff:g> to handle <xliff:g id="usb_device">%2$s</xliff:g>?</string>
 
+    <!-- Prompt for the USB device confirm dialog with warning text for USB device dialogs.  [CHAR LIMIT=200] -->
+    <string name="usb_device_confirm_prompt_warn">Open <xliff:g id="application" example= "Usb Mega Player">%1$s</xliff:g> to handle <xliff:g id="usb_device" example="USB Headphones">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device.</string>
+
     <!-- Prompt for the USB accessory confirm dialog [CHAR LIMIT=80] -->
     <string name="usb_accessory_confirm_prompt">Open <xliff:g id="application">%1$s</xliff:g> to handle <xliff:g id="usb_accessory">%2$s</xliff:g>?</string>
 

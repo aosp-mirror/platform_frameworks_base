@@ -21,6 +21,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.hardware.usb.IUsbManager;
@@ -63,6 +64,7 @@ public class UsbConfirmActivity extends AlertActivity
         mDevice = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         mAccessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
         mResolveInfo = (ResolveInfo) intent.getParcelableExtra("rinfo");
+        String packageName = intent.getStringExtra(UsbManager.EXTRA_PACKAGE);
 
         PackageManager packageManager = getPackageManager();
         String appName = mResolveInfo.loadLabel(packageManager).toString();
@@ -74,8 +76,20 @@ public class UsbConfirmActivity extends AlertActivity
                     mAccessory.getDescription());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mAccessory);
         } else {
-            ap.mMessage = getString(R.string.usb_device_confirm_prompt, appName,
-                    mDevice.getProductName());
+            int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+            boolean hasRecordPermission =
+                    PermissionChecker.checkPermissionForPreflight(
+                            this, android.Manifest.permission.RECORD_AUDIO, -1, uid,
+                            packageName)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED;
+            boolean isAudioCaptureDevice = mDevice.getHasAudioCapture();
+            boolean useRecordWarning = isAudioCaptureDevice && !hasRecordPermission;
+
+            int strID = useRecordWarning
+                    ? R.string.usb_device_confirm_prompt_warn
+                    : R.string.usb_device_confirm_prompt;
+
+            ap.mMessage = getString(strID, appName, mDevice.getProductName());
             mDisconnectedReceiver = new UsbDisconnectedReceiver(this, mDevice);
         }
         ap.mPositiveButtonText = getString(android.R.string.ok);
