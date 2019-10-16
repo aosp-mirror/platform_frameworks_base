@@ -22,6 +22,8 @@
     android:layout_height="match_parent"
     android:background="@drawable/system_bar_background"
     android:orientation="vertical">
+    <!--The 20dp padding is the difference between the background selected icon size and the ripple
+        that was chosen, thus it's a hack to make it look pretty and not an official margin value-->
     <LinearLayout
         android:id="@id/nav_buttons"
         android:layout_width="match_parent"
@@ -37,7 +39,6 @@
             systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
             systemui:icon="@drawable/car_ic_overview"
             systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
-            systemui:longIntent="intent:#Intent;action=com.google.android.demandspace.START;end"
             systemui:selectedIcon="@drawable/car_ic_overview_selected"
             systemui:useMoreIcon="false"
         />
@@ -108,13 +109,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <!-- Click handling will be initialized in CarNavigationBarView because its
-             id = notifications which is treated special for the opening of the notification panel
-         -->
         <com.android.systemui.statusbar.car.CarNavigationButton
             android:id="@+id/notifications"
             style="@style/NavigationBarButton"
-            android:src="@drawable/car_ic_notification"
+            systemui:icon="@drawable/car_ic_notification"
+            systemui:longIntent="intent:#Intent;component=com.android.car.bugreport/.BugReportActivity;end"
             systemui:selectedIcon="@drawable/car_ic_notification_selected"
             systemui:useMoreIcon="false"
         />
@@ -124,13 +123,13 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.statusbar.car.AssitantButton
             android:id="@+id/assist"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/ic_mic_white"
-            systemui:intent="intent:#Intent;action=com.google.android.demandspace.START;end"
             systemui:useMoreIcon="false"
         />
+
     </LinearLayout>
 
     <LinearLayout
@@ -138,10 +137,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:paddingStart="@*android:dimen/car_keyline_1"
-        android:paddingEnd="@*android:dimen/car_keyline_1"
+        android:paddingStart="@dimen/car_keyline_1"
+        android:paddingEnd="@dimen/car_keyline_1"
         android:gravity="center"
         android:visibility="gone">
+
     </LinearLayout>
 
 </com.android.systemui.statusbar.car.CarNavigationBarView>
