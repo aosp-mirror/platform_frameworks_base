@@ -18,11 +18,13 @@ package com.android.server.contentcapture;
 
 import static android.Manifest.permission.MANAGE_CONTENT_CAPTURE;
 import static android.content.Context.CONTENT_CAPTURE_MANAGER_SERVICE;
+import static android.service.contentcapture.ContentCaptureService.setClientState;
 import static android.view.contentcapture.ContentCaptureHelper.toList;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_OK;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_SECURITY_EXCEPTION;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_TRUE;
+import static android.view.contentcapture.ContentCaptureSession.STATE_DISABLED;
 
 import static com.android.internal.util.SyncResultReceiver.bundleFor;
 
@@ -520,6 +522,17 @@ public final class ContentCaptureManagerService extends
         return true;
     }
 
+    @GuardedBy("mLock")
+    private boolean isDefaultServiceLocked(int userId) {
+        final String defaultServiceName = mServiceNameResolver.getDefaultServiceName(userId);
+        if (defaultServiceName == null) {
+            return false;
+        }
+
+        final String currentServiceName = mServiceNameResolver.getServiceName(userId);
+        return defaultServiceName.equals(currentServiceName);
+    }
+
     @Override // from AbstractMasterSystemService
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
@@ -557,6 +570,10 @@ public final class ContentCaptureManagerService extends
 
             synchronized (mLock) {
                 final ContentCapturePerUserService service = getServiceForUserLocked(userId);
+                if (!isDefaultServiceLocked(userId) && !isCalledByServiceLocked("startSession()")) {
+                    setClientState(result, STATE_DISABLED, /* binder= */ null);
+                    return;
+                }
                 service.startSessionLocked(activityToken, activityPresentationInfo, sessionId,
                         Binder.getCallingUid(), flags, result);
             }
