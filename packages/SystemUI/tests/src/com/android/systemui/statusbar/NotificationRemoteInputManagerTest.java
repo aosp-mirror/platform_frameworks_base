@@ -97,7 +97,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testPerformOnRemoveNotification() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
-        mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.key());
+        mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.getKey());
 
         verify(mController).removeRemoteInput(mEntry, null);
     }

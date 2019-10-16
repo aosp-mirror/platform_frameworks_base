@@ -111,7 +111,7 @@ public class NotifLog extends SysuiLog {
      * @return true if successfully logged, else false
      */
     public boolean log(@NotifEvent.EventType int eventType, NotificationEntry entry) {
-        return log(eventType, entry.sbn(), entry.ranking(), "");
+        return log(eventType, entry.getSbn(), entry.getRanking(), "");
     }
 
     /**
@@ -120,6 +120,6 @@ public class NotifLog extends SysuiLog {
      */
     public boolean log(@NotifEvent.EventType int eventType, NotificationEntry entry,
             String msg) {
-        return log(eventType, entry.sbn(), entry.ranking(), msg);
+        return log(eventType, entry.getSbn(), entry.getRanking(), msg);
     }
 }

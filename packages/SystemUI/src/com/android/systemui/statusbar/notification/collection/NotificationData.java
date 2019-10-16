@@ -184,7 +184,7 @@ public class NotificationData {
         }
         mGroupManager.onEntryAdded(entry);
 
-        updateRankingAndSort(mRankingMap, "addEntry=" + entry.sbn());
+        updateRankingAndSort(mRankingMap, "addEntry=" + entry.getSbn());
     }
 
     public NotificationEntry remove(String key, RankingMap ranking) {
@@ -194,7 +194,7 @@ public class NotificationData {
         }
         if (removed == null) return null;
         mGroupManager.onEntryRemoved(removed);
-        updateRankingAndSort(ranking, "removeEntry=" + removed.sbn());
+        updateRankingAndSort(ranking, "removeEntry=" + removed.getSbn());
         return removed;
     }
 
@@ -338,7 +338,7 @@ public class NotificationData {
     }
 
     private boolean isImportantMedia(NotificationEntry e) {
-        int importance = e.ranking().getImportance();
+        int importance = e.getRanking().getImportance();
         boolean media = e.key.equals(getMediaManager().getMediaNotificationKey())
                 && importance > NotificationManager.IMPORTANCE_MIN;
 
@@ -346,7 +346,7 @@ public class NotificationData {
     }
 
     private boolean isSystemMax(NotificationEntry e) {
-        int importance = e.ranking().getImportance();
+        int importance = e.getRanking().getImportance();
         boolean sys = importance  >= NotificationManager.IMPORTANCE_HIGH
                 && isSystemNotification(e.notification);
 

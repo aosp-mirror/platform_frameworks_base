@@ -173,7 +173,7 @@ public class NotifCollection {
         checkNotNull(stats);
         checkForReentrantCall();
 
-        removeNotification(entry.key(), null, reason, stats);
+        removeNotification(entry.getKey(), null, reason, stats);
     }
 
     private void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
@@ -244,16 +244,16 @@ public class NotifCollection {
         mAmDispatchingToOtherCode = false;
 
         if (!isLifetimeExtended(entry)) {
-            mNotificationSet.remove(entry.key());
+            mNotificationSet.remove(entry.getKey());
 
             if (dismissedByUserStats != null) {
                 try {
                     mStatusBarService.onNotificationClear(
-                            entry.sbn().getPackageName(),
-                            entry.sbn().getTag(),
-                            entry.sbn().getId(),
-                            entry.sbn().getUser().getIdentifier(),
-                            entry.sbn().getKey(),
+                            entry.getSbn().getPackageName(),
+                            entry.getSbn().getTag(),
+                            entry.getSbn().getId(),
+                            entry.getSbn().getUser().getIdentifier(),
+                            entry.getSbn().getKey(),
                             dismissedByUserStats.dismissalSurface,
                             dismissedByUserStats.dismissalSentiment,
                             dismissedByUserStats.notificationVisibility);
@@ -275,7 +275,7 @@ public class NotifCollection {
     private void applyRanking(RankingMap rankingMap) {
         for (NotificationEntry entry : mNotificationSet.values()) {
             if (!isLifetimeExtended(entry)) {
-                Ranking ranking = requireRanking(rankingMap, entry.key());
+                Ranking ranking = requireRanking(rankingMap, entry.getKey());
                 entry.setRanking(ranking);
             }
         }
@@ -305,7 +305,7 @@ public class NotifCollection {
         if (!isLifetimeExtended(entry)) {
             // TODO: This doesn't need to be undefined -- we can set either EXTENDER_EXPIRED or
             // save the original reason
-            removeNotification(entry.key(), null, REASON_UNKNOWN, null);
+            removeNotification(entry.getKey(), null, REASON_UNKNOWN, null);
         }
     }
 

@@ -181,7 +181,7 @@ public final class NotificationEntry {
     }
 
     /** The key for this notification. Guaranteed to be immutable and unique */
-    public String key() {
+    public String getKey() {
         return key;
     }
 
@@ -189,7 +189,7 @@ public final class NotificationEntry {
      * The StatusBarNotification that represents one half of a NotificationEntry (the other half
      * being the Ranking). This object is swapped out whenever a notification is updated.
      */
-    public StatusBarNotification sbn() {
+    public StatusBarNotification getSbn() {
         return notification;
     }
 
@@ -211,7 +211,7 @@ public final class NotificationEntry {
      * StatusBarNotification). This object is swapped out whenever a the ranking is updated (which
      * generally occurs whenever anything changes in the notification list).
      */
-    public Ranking ranking() {
+    public Ranking getRanking() {
         return mRanking;
     }
 
