@@ -16,14 +16,22 @@
 
 package com.android.server.locksettings;
 
+import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
+
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+
 import android.app.ActivityManager;
+import android.app.admin.PasswordMetrics;
 import android.os.ShellCommand;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
 import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.PasswordValidationError;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 class LockSettingsShellCommand extends ShellCommand {
 
@@ -70,18 +78,19 @@ class LockSettingsShellCommand extends ShellCommand {
             if (!checkCredential()) {
                 return -1;
             }
+            boolean success = true;
             switch (cmd) {
                 case COMMAND_SET_PATTERN:
-                    runSetPattern();
+                    success = runSetPattern();
                     break;
                 case COMMAND_SET_PASSWORD:
-                    runSetPassword();
+                    success = runSetPassword();
                     break;
                 case COMMAND_SET_PIN:
-                    runSetPin();
+                    success = runSetPin();
                     break;
                 case COMMAND_CLEAR:
-                    runClear();
+                    success = runClear();
                     break;
                 case COMMAND_SP:
                     runChangeSp();
@@ -102,7 +111,7 @@ class LockSettingsShellCommand extends ShellCommand {
                     getErrPrintWriter().println("Unknown command: " + cmd);
                     break;
             }
-            return 0;
+            return success ? 0 : -1;
         } catch (Exception e) {
             getErrPrintWriter().println("Error while executing command: " + cmd);
             e.printStackTrace(getErrPrintWriter());
@@ -201,34 +210,66 @@ class LockSettingsShellCommand extends ShellCommand {
         }
     }
 
-    private void runSetPattern() {
-        mLockPatternUtils.setLockCredential(
-                LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
-                        mNew.getBytes())),
-                getOldCredential(),
-                mCurrentUserId);
+    private boolean runSetPattern() {
+        final LockscreenCredential pattern = LockscreenCredential.createPattern(
+                LockPatternUtils.byteArrayToPattern(mNew.getBytes()));
+        if (!isNewCredentialSufficient(pattern)) {
+            return false;
+        }
+        mLockPatternUtils.setLockCredential(pattern, getOldCredential(), mCurrentUserId);
         getOutPrintWriter().println("Pattern set to '" + mNew + "'");
+        return true;
     }
 
-    private void runSetPassword() {
-        mLockPatternUtils.setLockCredential(LockscreenCredential.createPassword(mNew),
-                getOldCredential(),
-                mCurrentUserId);
+    private boolean runSetPassword() {
+        final LockscreenCredential password = LockscreenCredential.createPassword(mNew);
+        if (!isNewCredentialSufficient(password)) {
+            return false;
+        }
+        mLockPatternUtils.setLockCredential(password, getOldCredential(), mCurrentUserId);
         getOutPrintWriter().println("Password set to '" + mNew + "'");
+        return true;
     }
 
-    private void runSetPin() {
-        mLockPatternUtils.setLockCredential(LockscreenCredential.createPin(mNew),
-                getOldCredential(),
-                mCurrentUserId);
+    private boolean runSetPin() {
+        final LockscreenCredential pin = LockscreenCredential.createPin(mNew);
+        if (!isNewCredentialSufficient(pin)) {
+            return false;
+        }
+        mLockPatternUtils.setLockCredential(pin, getOldCredential(), mCurrentUserId);
         getOutPrintWriter().println("Pin set to '" + mNew + "'");
+        return true;
     }
 
-    private void runClear() {
-        mLockPatternUtils.setLockCredential(LockscreenCredential.createNone(),
-                getOldCredential(),
-                mCurrentUserId);
+    private boolean runClear() {
+        LockscreenCredential none = LockscreenCredential.createNone();
+        if (!isNewCredentialSufficient(none)) {
+            return false;
+        }
+        mLockPatternUtils.setLockCredential(none, getOldCredential(), mCurrentUserId);
         getOutPrintWriter().println("Lock credential cleared");
+        return true;
+    }
+
+    private boolean isNewCredentialSufficient(LockscreenCredential credential) {
+        final PasswordMetrics requiredMetrics =
+                mLockPatternUtils.getRequestedPasswordMetrics(mCurrentUserId);
+        final List<PasswordValidationError> errors;
+        if (credential.isPassword() || credential.isPin()) {
+            errors = PasswordMetrics.validatePassword(requiredMetrics, PASSWORD_COMPLEXITY_NONE,
+                    credential.isPin(), credential.getCredential());
+        } else {
+            PasswordMetrics metrics = new PasswordMetrics(
+                    credential.isPattern() ? CREDENTIAL_TYPE_PATTERN : CREDENTIAL_TYPE_NONE);
+            errors = PasswordMetrics.validatePasswordMetrics(
+                    requiredMetrics, PASSWORD_COMPLEXITY_NONE, false /* isPin */, metrics);
+        }
+        if (!errors.isEmpty()) {
+            getOutPrintWriter().println(
+                    "New credential doesn't satisfy admin policies: " + errors.get(0));
+            return false;
+        }
+        return true;
     }
 
     private void runSetDisabled() {

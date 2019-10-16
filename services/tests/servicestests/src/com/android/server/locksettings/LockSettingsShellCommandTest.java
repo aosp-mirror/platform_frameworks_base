@@ -17,11 +17,13 @@
 package com.android.server.locksettings;
 
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
 import static junit.framework.Assert.assertEquals;
 
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -34,6 +36,8 @@ import static java.io.FileDescriptor.in;
 import static java.io.FileDescriptor.out;
 
 import android.app.ActivityManager;
+import android.app.admin.PasswordMetrics;
+import android.app.admin.PasswordPolicy;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Handler;
@@ -96,8 +100,7 @@ public class LockSettingsShellCommandTest {
         assertEquals(-1, mCommand.exec(mBinder, in, out, err,
                 new String[] { "set-pin", "--old", "1234" },
                 mShellCallback, mResultReceiver));
-        verify(mLockPatternUtils, never()).setLockCredential(any(), any(),
-                anyInt(), anyBoolean());
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
     }
 
     @Test
@@ -109,6 +112,8 @@ public class LockSettingsShellCommandTest {
                 PASSWORD_QUALITY_NUMERIC);
         when(mLockPatternUtils.checkCredential(
                 LockscreenCredential.createPin("1234"), mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_NUMERIC));
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "set-pin", "--old", "1234", "4321" },
                 mShellCallback, mResultReceiver));
@@ -116,6 +121,23 @@ public class LockSettingsShellCommandTest {
                 LockscreenCredential.createPin("4321"),
                 LockscreenCredential.createPin("1234"),
                 mUserId);
+    }
+
+    @Test
+    public void testChangePin_nonCompliant() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)).thenReturn(
+                PASSWORD_QUALITY_NUMERIC);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPin("1234"), mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_ALPHABETIC));
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pin", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
     }
 
     @Test
@@ -137,13 +159,32 @@ public class LockSettingsShellCommandTest {
                 PASSWORD_QUALITY_ALPHABETIC);
         when(mLockPatternUtils.checkCredential(
                 LockscreenCredential.createPassword("1234"), mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_ALPHABETIC));
         assertEquals(0,  mCommand.exec(new Binder(), in, out, err,
-                new String[] { "set-password", "--old", "1234", "4321" },
+                new String[] { "set-password", "--old", "1234", "abcd" },
                 mShellCallback, mResultReceiver));
         verify(mLockPatternUtils).setLockCredential(
-                LockscreenCredential.createPassword("4321"),
+                LockscreenCredential.createPassword("abcd"),
                 LockscreenCredential.createPassword("1234"),
                 mUserId);
+    }
+
+    @Test
+    public void testChangePassword_nonCompliant() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)).thenReturn(
+                PASSWORD_QUALITY_ALPHABETIC);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPassword("1234"), mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_COMPLEX));
+        assertEquals(-1,  mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-password", "--old", "1234", "weakpassword" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
     }
 
     @Test
@@ -164,6 +205,8 @@ public class LockSettingsShellCommandTest {
         when(mLockPatternUtils.checkCredential(
                 LockscreenCredential.createPattern(stringToPattern("1234")),
                 mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_SOMETHING));
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "set-pattern", "--old", "1234", "4321" },
                 mShellCallback, mResultReceiver));
@@ -171,6 +214,22 @@ public class LockSettingsShellCommandTest {
                 LockscreenCredential.createPattern(stringToPattern("4321")),
                 LockscreenCredential.createPattern(stringToPattern("1234")),
                 mUserId);
+    }
+
+    @Test
+    public void testChangePattern_nonCompliant() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPattern(stringToPattern("1234")),
+                mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_NUMERIC));
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "set-pattern", "--old", "1234", "4321" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
     }
 
     @Test
@@ -191,6 +250,8 @@ public class LockSettingsShellCommandTest {
         when(mLockPatternUtils.checkCredential(
                 LockscreenCredential.createPattern(stringToPattern("1234")),
                 mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_UNSPECIFIED));
         assertEquals(0, mCommand.exec(new Binder(), in, out, err,
                 new String[] { "clear", "--old", "1234" },
                 mShellCallback, mResultReceiver));
@@ -200,7 +261,29 @@ public class LockSettingsShellCommandTest {
                 mUserId);
     }
 
+    @Test
+    public void testClear_nonCompliant() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
+        when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
+        when(mLockPatternUtils.checkCredential(
+                LockscreenCredential.createPattern(stringToPattern("1234")),
+                mUserId, null)).thenReturn(true);
+        when(mLockPatternUtils.getRequestedPasswordMetrics(mUserId))
+                .thenReturn(metricsForAdminQuality(PASSWORD_QUALITY_SOMETHING));
+        assertEquals(-1, mCommand.exec(new Binder(), in, out, err,
+                new String[] { "clear", "--old", "1234" },
+                mShellCallback, mResultReceiver));
+        verify(mLockPatternUtils, never()).setLockCredential(any(), any(), anyInt());
+    }
+
     private List<LockPatternView.Cell> stringToPattern(String str) {
         return LockPatternUtils.byteArrayToPattern(str.getBytes());
+    }
+
+    private PasswordMetrics metricsForAdminQuality(int quality) {
+        PasswordPolicy policy = new PasswordPolicy();
+        policy.quality = quality;
+        return policy.getMinMetrics();
     }
 }
