@@ -728,6 +728,7 @@ public final class Call {
         }
 
         /** {@hide} */
+        @TestApi
         public String getTelecomCallId() {
             return mTelecomCallId;
         }
@@ -2137,6 +2138,9 @@ public final class Call {
         }
 
         int state = parcelableCall.getState();
+        if (mTargetSdkVersion < Phone.SDK_VERSION_R && state == Call.STATE_SIMULATED_RINGING) {
+            state = Call.STATE_RINGING;
+        }
         boolean stateChanged = mState != state;
         if (stateChanged) {
             mState = state;
