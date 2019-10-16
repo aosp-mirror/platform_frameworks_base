@@ -350,7 +350,7 @@ public final class KeyChain {
      * access manually.
      */
     public static final String KEY_ALIAS_SELECTION_DENIED =
-            "alias-selection-denied-ef829e15-210a-409d-96c9-ee684fc41972";
+            "android:alias-selection-denied";
 
     /**
      * Returns an {@code Intent} that can be used for credential
