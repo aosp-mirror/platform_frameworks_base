@@ -18,6 +18,7 @@ package com.android.server.connectivity.tethering;
 
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
+import static android.hardware.usb.UsbManager.USB_FUNCTION_NCM;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
 import static android.net.ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
@@ -27,6 +28,7 @@ import static android.net.TetheringManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.TetheringManager.EXTRA_ACTIVE_LOCAL_ONLY;
 import static android.net.TetheringManager.EXTRA_ACTIVE_TETHER;
 import static android.net.TetheringManager.EXTRA_AVAILABLE_TETHER;
+import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
@@ -151,6 +153,7 @@ public class TetheringTest {
     private static final String TEST_USB_IFNAME = "test_rndis0";
     private static final String TEST_WLAN_IFNAME = "test_wlan0";
     private static final String TEST_P2P_IFNAME = "test_p2p-p2p0-0";
+    private static final String TEST_NCM_IFNAME = "test_ncm0";
     private static final String TETHERING_NAME = "Tethering";
 
     private static final int DHCPSERVER_START_TIMEOUT_MS = 1000;
@@ -252,9 +255,11 @@ public class TetheringTest {
                     ifName.equals(TEST_USB_IFNAME)
                             || ifName.equals(TEST_WLAN_IFNAME)
                             || ifName.equals(TEST_MOBILE_IFNAME)
-                            || ifName.equals(TEST_P2P_IFNAME));
+                            || ifName.equals(TEST_P2P_IFNAME)
+                            || ifName.equals(TEST_NCM_IFNAME));
             final String[] ifaces = new String[] {
-                    TEST_USB_IFNAME, TEST_WLAN_IFNAME, TEST_MOBILE_IFNAME, TEST_P2P_IFNAME};
+                    TEST_USB_IFNAME, TEST_WLAN_IFNAME, TEST_MOBILE_IFNAME, TEST_P2P_IFNAME,
+                    TEST_NCM_IFNAME};
             return new InterfaceParams(ifName, ArrayUtils.indexOf(ifaces, ifName) + IFINDEX_OFFSET,
                     MacAddress.ALL_ZEROS_ADDRESS);
         }
@@ -428,13 +433,16 @@ public class TetheringTest {
                 .thenReturn(new String[]{ "test_p2p-p2p\\d-.*" });
         when(mResources.getStringArray(R.array.config_tether_bluetooth_regexs))
                 .thenReturn(new String[0]);
+        when(mResources.getStringArray(R.array.config_tether_ncm_regexs))
+                .thenReturn(new String[] { "test_ncm\\d" });
         when(mResources.getIntArray(R.array.config_tether_upstream_types)).thenReturn(new int[0]);
         when(mResources.getBoolean(R.bool.config_tether_upstream_automatic)).thenReturn(false);
         when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
                 false);
         when(mNetd.interfaceGetList())
                 .thenReturn(new String[] {
-                        TEST_MOBILE_IFNAME, TEST_WLAN_IFNAME, TEST_USB_IFNAME, TEST_P2P_IFNAME});
+                        TEST_MOBILE_IFNAME, TEST_WLAN_IFNAME, TEST_USB_IFNAME, TEST_P2P_IFNAME,
+                        TEST_NCM_IFNAME});
         when(mResources.getString(R.string.config_wifi_tether_enable)).thenReturn("");
         mInterfaceConfiguration = new InterfaceConfigurationParcel();
         mInterfaceConfiguration.flags = new String[0];
@@ -522,11 +530,16 @@ public class TetheringTest {
                 P2P_RECEIVER_PERMISSIONS_FOR_BROADCAST);
     }
 
-    private void sendUsbBroadcast(boolean connected, boolean configured, boolean rndisFunction) {
+    private void sendUsbBroadcast(boolean connected, boolean configured, boolean function,
+            int type) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
         intent.putExtra(USB_CONNECTED, connected);
         intent.putExtra(USB_CONFIGURED, configured);
-        intent.putExtra(USB_FUNCTION_RNDIS, rndisFunction);
+        if (type == TETHERING_USB) {
+            intent.putExtra(USB_FUNCTION_RNDIS, function);
+        } else {
+            intent.putExtra(USB_FUNCTION_NCM, function);
+        }
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
@@ -576,6 +589,15 @@ public class TetheringTest {
         verifyNoMoreInteractions(mWifiManager);
     }
 
+    private void prepareNcmTethering() {
+        // Emulate startTethering(TETHERING_NCM) called
+        mTethering.startTethering(createTetheringRquestParcel(TETHERING_NCM), null);
+        mLooper.dispatchAll();
+        verify(mUsbManager, times(1)).setCurrentFunctions(UsbManager.FUNCTION_NCM);
+
+        mTethering.interfaceStatusChanged(TEST_NCM_IFNAME, true);
+    }
+
     private void prepareUsbTethering(UpstreamNetworkState upstreamState) {
         when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
         when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
@@ -598,7 +620,7 @@ public class TetheringTest {
         verifyNoMoreInteractions(mNetd);
 
         // Pretend we then receive USB configured broadcast.
-        sendUsbBroadcast(true, true, true);
+        sendUsbBroadcast(true, true, true, TETHERING_USB);
         mLooper.dispatchAll();
         // Now we should see the start of tethering mechanics (in this case:
         // tetherMatchingInterfaces() which starts by fetching all interfaces).
@@ -689,7 +711,7 @@ public class TetheringTest {
 
     private void runUsbTethering(UpstreamNetworkState upstreamState) {
         prepareUsbTethering(upstreamState);
-        sendUsbBroadcast(true, true, true);
+        sendUsbBroadcast(true, true, true, TETHERING_USB);
         mLooper.dispatchAll();
     }
 
@@ -810,6 +832,29 @@ public class TetheringTest {
         verify(mUpstreamNetworkMonitor, never()).selectPreferredUpstreamType(any());
 
         verify(mUpstreamNetworkMonitor, times(1)).setCurrentUpstream(upstreamState.network);
+    }
+
+    private void runNcmTethering() {
+        prepareNcmTethering();
+        sendUsbBroadcast(true, true, true, TETHERING_NCM);
+        mLooper.dispatchAll();
+    }
+
+    @Test
+    public void workingNcmTethering() throws Exception {
+        runNcmTethering();
+
+        verify(mDhcpServer, timeout(DHCPSERVER_START_TIMEOUT_MS).times(1)).start(any());
+    }
+
+    @Test
+    public void workingNcmTethering_LegacyDhcp() {
+        when(mResources.getBoolean(R.bool.config_tether_enable_legacy_dhcp_server)).thenReturn(
+                true);
+        sendConfigurationChanged();
+        runNcmTethering();
+
+        verify(mIpServerDependencies, never()).makeDhcpServer(any(), any(), any());
     }
 
     @Test

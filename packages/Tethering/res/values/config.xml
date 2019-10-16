@@ -29,6 +29,12 @@
     </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         NCM interfaces.  If the device doesn't want to support tethering over NCM this should
+         be empty. -->
+    <string-array translatable="false" name="config_tether_ncm_regexs">
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
          Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
          should be empty.  An example would be "softap.*" -->
     <string-array translatable="false" name="config_tether_wifi_regexs">

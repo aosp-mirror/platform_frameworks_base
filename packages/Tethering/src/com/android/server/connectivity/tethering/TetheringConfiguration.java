@@ -83,6 +83,7 @@ public class TetheringConfiguration {
     public final String[] tetherableWifiRegexs;
     public final String[] tetherableWifiP2pRegexs;
     public final String[] tetherableBluetoothRegexs;
+    public final String[] tetherableNcmRegexs;
     public final boolean isDunRequired;
     public final boolean chooseUpstreamAutomatically;
     public final Collection<Integer> preferredUpstreamIfaceTypes;
@@ -103,6 +104,7 @@ public class TetheringConfiguration {
         Resources res = getResources(ctx, activeDataSubId);
 
         tetherableUsbRegexs = getResourceStringArray(res, R.array.config_tether_usb_regexs);
+        tetherableNcmRegexs = getResourceStringArray(res, R.array.config_tether_ncm_regexs);
         // TODO: Evaluate deleting this altogether now that Wi-Fi always passes
         // us an interface name. Careful consideration needs to be given to
         // implications for Settings and for provisioning checks.
@@ -156,6 +158,11 @@ public class TetheringConfiguration {
         return matchesDownstreamRegexs(iface, tetherableBluetoothRegexs);
     }
 
+    /** Check if interface is ncm */
+    public boolean isNcm(String iface) {
+        return matchesDownstreamRegexs(iface, tetherableNcmRegexs);
+    }
+
     /** Check whether no ui entitlement application is available.*/
     public boolean hasMobileHotspotProvisionApp() {
         return !TextUtils.isEmpty(provisioningAppNoUi);
@@ -170,6 +177,7 @@ public class TetheringConfiguration {
         dumpStringArray(pw, "tetherableWifiRegexs", tetherableWifiRegexs);
         dumpStringArray(pw, "tetherableWifiP2pRegexs", tetherableWifiP2pRegexs);
         dumpStringArray(pw, "tetherableBluetoothRegexs", tetherableBluetoothRegexs);
+        dumpStringArray(pw, "tetherableNcmRegexs", tetherableNcmRegexs);
 
         pw.print("isDunRequired: ");
         pw.println(isDunRequired);
