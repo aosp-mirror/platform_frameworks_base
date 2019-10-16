@@ -15,17 +15,13 @@
 //
 
 android_app {
-    name: "BackupEncryption",
+    name: "EncryptedLocalTransport",
     srcs: ["src/**/*.java"],
-    static_libs: ["backup-encryption-protos", "backuplib"],
-    optimize: { enabled: false },
+    optimize: {
+        proguard_flags_files: ["proguard.flags"],
+    },
+    static_libs: ["LocalTransport"],
     platform_apis: true,
     certificate: "platform",
     privileged: true,
-}
-
-java_library {
-    name: "backup-encryption-protos",
-    proto: { type: "nano" },
-    srcs: ["proto/**/*.proto"],
 }
