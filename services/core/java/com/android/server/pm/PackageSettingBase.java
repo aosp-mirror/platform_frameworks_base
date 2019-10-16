@@ -36,6 +36,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -122,13 +123,8 @@ public abstract class PackageSettingBase extends SettingBase {
      */
     Set<String> mOldCodePaths;
 
-    /** Package name of the app that installed this package */
-    String installerPackageName;
-    /** Indicates if the package that installed this app has been uninstalled */
-    boolean isOrphaned;
-    /** Information about the initial install of this package. */
-    @NonNull
-    InstallSource installSource;
+    /** Information about how this package was installed/updated. */
+    @NonNull InstallSource installSource;
     /** UUID of {@link VolumeInfo} hosting this app */
     String volumeUuid;
     /** The category of this app, as hinted by the installer */
@@ -162,7 +158,7 @@ public abstract class PackageSettingBase extends SettingBase {
         this.cpuAbiOverrideString = cpuAbiOverrideString;
         this.versionCode = pVersionCode;
         this.signatures = new PackageSignatures();
-        this.installSource = InstallSource.create(null);
+        this.installSource = InstallSource.EMPTY;
     }
 
     /**
@@ -180,26 +176,19 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     public void setInstallerPackageName(String packageName) {
-        installerPackageName = packageName;
-    }
-
-    public String getInstallerPackageName() {
-        return installerPackageName;
+        installSource = installSource.setInstallerPackage(packageName);
     }
 
     public void setInstallSource(InstallSource installSource) {
-        this.installSource = installSource == null ? InstallSource.create(null) : installSource;
+        this.installSource = Preconditions.checkNotNull(installSource);
     }
 
     void removeInstallerPackage(String packageName) {
-        if (packageName == null) {
-            return;
-        }
-        if (packageName.equals(installerPackageName)) {
-            installerPackageName = null;
-            isOrphaned = true;
-        }
         installSource = installSource.removeInstallerPackage(packageName);
+    }
+
+    public void setIsOrphaned(boolean isOrphaned) {
+        installSource = installSource.setIsOrphaned(isOrphaned);
     }
 
     public void setVolumeUuid(String volumeUuid) {
@@ -253,9 +242,7 @@ public abstract class PackageSettingBase extends SettingBase {
         cpuAbiOverrideString = orig.cpuAbiOverrideString;
         firstInstallTime = orig.firstInstallTime;
         installPermissionsFixed = orig.installPermissionsFixed;
-        installerPackageName = orig.installerPackageName;
         installSource = orig.installSource;
-        isOrphaned = orig.isOrphaned;
         keySetData = orig.keySetData;
         lastUpdateTime = orig.lastUpdateTime;
         legacyNativeLibraryPathString = orig.legacyNativeLibraryPathString;
@@ -703,8 +690,7 @@ public abstract class PackageSettingBase extends SettingBase {
         this.signatures = other.signatures;
         this.installPermissionsFixed = other.installPermissionsFixed;
         this.keySetData = other.keySetData;
-        this.installerPackageName = other.installerPackageName;
-        this.isOrphaned = other.isOrphaned;
+        this.installSource = other.installSource;
         this.volumeUuid = other.volumeUuid;
         this.categoryHint = other.categoryHint;
         this.updateAvailable = other.updateAvailable;

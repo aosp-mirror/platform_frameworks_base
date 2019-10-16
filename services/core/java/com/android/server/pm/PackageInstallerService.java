@@ -623,10 +623,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 stageCid = buildExternalStageCid(sessionId);
             }
         }
-        InstallSource installSource = InstallSource.create(installerPackageName);
+        InstallSource installSource = InstallSource.create(installerPackageName,
+                requestedInstallerPackageName);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
-                mInstallThread.getLooper(), mStagingManager, sessionId, userId,
-                requestedInstallerPackageName, callingUid, installSource, params, createdMillis,
+                mInstallThread.getLooper(), mStagingManager, sessionId, userId, callingUid,
+                installSource, params, createdMillis,
                 stageDir, stageCid, false, false, false, null, SessionInfo.INVALID_ID,
                 false, false, false, SessionInfo.STAGED_SESSION_NO_ERROR, "");
 

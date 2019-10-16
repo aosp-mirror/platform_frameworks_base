@@ -187,7 +187,7 @@ public final class PackageSetting extends PackageSettingBase {
         proto.write(PackageProto.VERSION_CODE, versionCode);
         proto.write(PackageProto.INSTALL_TIME_MS, firstInstallTime);
         proto.write(PackageProto.UPDATE_TIME_MS, lastUpdateTime);
-        proto.write(PackageProto.INSTALLER_NAME, installerPackageName);
+        proto.write(PackageProto.INSTALLER_NAME, installSource.installerPackageName);
 
         if (pkg != null) {
             proto.write(PackageProto.VERSION_STRING, pkg.mVersionName);
