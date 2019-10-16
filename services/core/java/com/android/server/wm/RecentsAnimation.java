@@ -452,7 +452,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 .setCallingUid(mRecentsUid)
                 .setCallingPackage(mRecentsComponent.getPackageName())
                 .setActivityOptions(new SafeActivityOptions(options))
-                .setMayWait(mUserId)
+                .setUserId(mUserId)
                 .execute();
     }
 

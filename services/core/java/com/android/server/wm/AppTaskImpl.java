@@ -155,7 +155,7 @@ class AppTaskImpl extends IAppTask.Stub {
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
                 .setActivityOptions(bOptions)
-                .setMayWait(callingUser)
+                .setUserId(callingUser)
                 .setInTask(tr)
                 .execute();
     }

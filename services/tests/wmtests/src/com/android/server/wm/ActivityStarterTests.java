@@ -44,6 +44,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityDisplay.POSITION_BOTTOM;
@@ -99,6 +100,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     private ActivityStarter mStarter;
     private ActivityStartController mController;
     private ActivityMetricsLogger mActivityMetricsLogger;
+    private PackageManagerInternal mMockPackageManager;
 
     private static final int PRECONDITION_NO_CALLER_APP = 1;
     private static final int PRECONDITION_NO_INTENT_COMPONENT = 1 << 1;
@@ -359,17 +361,20 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
 
         // Set up mock package manager internal and make sure no unmocked methods are called
-        PackageManagerInternal mockPackageManager = mock(PackageManagerInternal.class,
+        mMockPackageManager = mock(PackageManagerInternal.class,
                 invocation -> {
                     throw new RuntimeException("Not stubbed");
                 });
-        doReturn(mockPackageManager).when(mService).getPackageManagerInternalLocked();
+        doReturn(mMockPackageManager).when(mService).getPackageManagerInternalLocked();
+        doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
+        doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyInt(), anyInt(),
+                anyBoolean(), anyInt());
 
         // Never review permissions
-        doReturn(false).when(mockPackageManager).isPermissionsReviewRequired(any(), anyInt());
-        doNothing().when(mockPackageManager).grantImplicitAccess(
+        doReturn(false).when(mMockPackageManager).isPermissionsReviewRequired(any(), anyInt());
+        doNothing().when(mMockPackageManager).grantImplicitAccess(
                 anyInt(), any(), anyInt(), anyInt());
-        doNothing().when(mockPackageManager).notifyPackageUse(anyString(), anyInt());
+        doNothing().when(mMockPackageManager).notifyPackageUse(anyString(), anyInt());
 
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);
@@ -912,5 +917,47 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         verify(recentTasks, times(1)).setFreezeTaskListReordering();
         verify(recentTasks, times(1)).resetFreezeTaskListReorderingOnTimeout();
+    }
+
+    @Test
+    public void testNoActivityInfo() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        spyOn(starter.mRequest);
+
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        starter.setReason("testNoActivityInfo").setIntent(intent)
+                .setActivityInfo(null).execute();
+        verify(starter.mRequest).resolveActivity(any());
+    }
+
+    @Test
+    public void testResolveEphemeralInstaller() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final Intent intent = new Intent();
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+
+        doReturn(true).when(mMockPackageManager).isInstantAppInstallerComponent(any());
+        starter.setIntent(intent).mRequest.resolveActivity(mService.mStackSupervisor);
+
+        // Make sure the client intent won't be modified.
+        assertThat(intent.getComponent()).isNotNull();
+        assertThat(starter.getIntent().getComponent()).isNull();
+    }
+
+    @Test
+    public void testNotAllowIntentWithFd() {
+        final ActivityStarter starter = prepareStarter(0 /* flags */);
+        final Intent intent = spy(new Intent());
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+        doReturn(true).when(intent).hasFileDescriptors();
+
+        boolean exceptionCaught = false;
+        try {
+            starter.setIntent(intent).execute();
+        } catch (IllegalArgumentException ex) {
+            exceptionCaught = true;
+        }
+        assertThat(exceptionCaught).isTrue();
     }
 }
