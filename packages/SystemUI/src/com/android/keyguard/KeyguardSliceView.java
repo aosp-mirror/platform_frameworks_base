@@ -31,6 +31,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.text.LineBreaker;
 import android.net.Uri;
 import android.os.Trace;
 import android.provider.Settings;
@@ -152,6 +153,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         mRowWithHeaderTextSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.header_row_font_size);
         mTitle.setOnClickListener(this);
+        mTitle.setBreakStrategy(LineBreaker.BREAK_STRATEGY_BALANCED);
     }
 
     @Override
