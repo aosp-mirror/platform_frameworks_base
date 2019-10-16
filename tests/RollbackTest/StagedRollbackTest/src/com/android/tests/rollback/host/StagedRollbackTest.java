@@ -68,35 +68,35 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testBadApkOnly() throws Exception {
-        runPhase("testBadApkOnlyEnableRollback");
+        runPhase("testBadApkOnly_Phase1");
         getDevice().reboot();
-        runPhase("testBadApkOnlyConfirmEnableRollback");
+        runPhase("testBadApkOnly_Phase2");
         try {
             // This is expected to fail due to the device being rebooted out
             // from underneath the test. If this fails for reasons other than
             // the device reboot, those failures should result in failure of
             // the testApkOnlyConfirmRollback phase.
             CLog.logAndDisplay(LogLevel.INFO, "testBadApkOnlyTriggerRollback is expected to fail");
-            runPhase("testBadApkOnlyTriggerRollback");
+            runPhase("testBadApkOnly_Phase3");
         } catch (AssertionError e) {
             // AssertionError is expected.
         }
 
         getDevice().waitForDeviceAvailable();
 
-        runPhase("testBadApkOnlyConfirmRollback");
+        runPhase("testBadApkOnly_Phase4");
     }
 
     @Test
     public void testNativeWatchdogTriggersRollback() throws Exception {
         //Stage install ModuleMetadata package - this simulates a Mainline module update
-        runPhase("installModuleMetadataPackage");
+        runPhase("testNativeWatchdogTriggersRollback_Phase1");
 
         // Reboot device to activate staged package
         getDevice().reboot();
         getDevice().waitForDeviceAvailable();
 
-        runPhase("assertModuleMetadataRollbackAvailable");
+        runPhase("testNativeWatchdogTriggersRollback_Phase2");
 
         // crash system_server enough times to trigger a rollback
         crashProcess("system_server", NATIVE_CRASHES_THRESHOLD);
@@ -113,7 +113,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
 
         // verify rollback committed
-        runPhase("assertModuleMetadataRollbackCommitted");
+        runPhase("testNativeWatchdogTriggersRollback_Phase3");
     }
 
     /**
