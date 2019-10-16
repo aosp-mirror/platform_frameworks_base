@@ -314,7 +314,6 @@ public class UserSwitcherController implements Dumpable {
         // adb shell settings put system enable_fullscreen_user_switcher 1  # Turn it on.
         // Restart SystemUI or adb reboot.
         final int DEFAULT = -1;
-        // TODO(b/140061064)
         final int overrideUseFullscreenUserSwitcher =
                 whitelistIpcs(() -> Settings.System.getInt(mContext.getContentResolver(),
                         "enable_fullscreen_user_switcher", DEFAULT));
