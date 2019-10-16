@@ -404,7 +404,7 @@ public class TelephonyManager {
      * TODO: b/139642279 publicize and rename.
      * @hide
      */
-    public static int getMaxPhoneCount() {
+    public int getMaxPhoneCount() {
         // TODO: b/139642279 when turning on this feature, remove dependency of
         // PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE and always return result based on
         // PROPERTY_MAX_ACTIVE_MODEMS.
@@ -413,9 +413,9 @@ public class TelephonyManager {
         if (rebootRequired.equals("false")) {
             // If no reboot is required, return max possible active modems.
             return SystemProperties.getInt(
-                    TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS, getDefault().getPhoneCount());
+                    TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS, getPhoneCount());
         } else {
-            return getDefault().getPhoneCount();
+            return getPhoneCount();
         }
     }
 
@@ -5455,7 +5455,8 @@ public class TelephonyManager {
                         public void onError(int errorCode, android.os.ParcelableException detail) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
-                                            errorCode, detail.getCause())));
+                                            errorCode,
+                                            detail == null ? null : detail.getCause())));
                         }
                     }, getOpPackageName());
 
@@ -5495,7 +5496,8 @@ public class TelephonyManager {
                         public void onError(int errorCode, android.os.ParcelableException detail) {
                             Binder.withCleanCallingIdentity(() ->
                                     executor.execute(() -> callback.onError(
-                                            errorCode, detail.getCause())));
+                                            errorCode,
+                                            detail == null ? null : detail.getCause())));
                         }
                     }, getOpPackageName(), workSource);
         } catch (RemoteException ex) {
