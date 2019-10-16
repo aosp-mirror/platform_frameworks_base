@@ -2563,9 +2563,12 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Report to the system that your app is now fully drawn, purely for diagnostic
-     * purposes (calling it does not impact the visible behavior of the activity).
-     * This is only used to help instrument application launch times, so that the
+     * Report to the system that your app is now fully drawn, for diagnostic and
+     * optimization purposes.  The system may adjust optimizations to prioritize
+     * work that happens before reportFullyDrawn is called, to improve app startup.
+     * Misrepresenting the startup window by calling reportFullyDrawn too late or too
+     * early may decrease application and startup performance.<p>
+     * This is also used to help instrument application launch times, so that the
      * app can report when it is fully in a usable state; without this, the only thing
      * the system itself can determine is the point at which the activity's window
      * is <em>first</em> drawn and displayed.  To participate in app launch time
