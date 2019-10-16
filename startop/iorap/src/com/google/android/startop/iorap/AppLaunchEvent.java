@@ -86,10 +86,14 @@ public abstract class AppLaunchEvent implements Parcelable {
     public static final class IntentStarted extends AppLaunchEvent {
         @NonNull
         public final Intent intent;
+        public final long timestampNs;
 
-        public IntentStarted(@SequenceId long sequenceId, Intent intent) {
+        public IntentStarted(@SequenceId long sequenceId,
+                             Intent intent,
+                             long timestampNs) {
             super(sequenceId);
             this.intent = intent;
+            this.timestampNs = timestampNs;
 
             Objects.requireNonNull(intent, "intent");
         }
@@ -98,14 +102,16 @@ public abstract class AppLaunchEvent implements Parcelable {
         public boolean equals(Object other) {
             if (other instanceof IntentStarted) {
                 return intent.equals(((IntentStarted)other).intent) &&
-                        super.equals(other);
+                       timestampNs == ((IntentStarted)other).timestampNs &&
+                       super.equals(other);
             }
             return false;
         }
 
         @Override
         protected String toStringBody() {
-            return ", intent=" + intent.toString();
+            return ", intent=" + intent.toString() +
+                   " , timestampNs=" + Long.toString(timestampNs);
         }
 
 
@@ -113,11 +119,13 @@ public abstract class AppLaunchEvent implements Parcelable {
         protected void writeToParcelImpl(Parcel p, int flags) {
             super.writeToParcelImpl(p, flags);
             IntentProtoParcelable.write(p, intent, flags);
+            p.writeLong(timestampNs);
         }
 
         IntentStarted(Parcel p) {
             super(p);
             intent = IntentProtoParcelable.create(p);
+            timestampNs = p.readLong();
         }
     }
 
@@ -216,17 +224,38 @@ public abstract class AppLaunchEvent implements Parcelable {
     }
 
     public static final class ActivityLaunchFinished extends BaseWithActivityRecordData {
+        public final long timestampNs;
+
         public ActivityLaunchFinished(@SequenceId long sequenceId,
-                @NonNull @ActivityRecordProto byte[] snapshot) {
+                @NonNull @ActivityRecordProto byte[] snapshot,
+                long timestampNs) {
             super(sequenceId, snapshot);
+            this.timestampNs = timestampNs;
         }
 
         @Override
         public boolean equals(Object other) {
             if (other instanceof ActivityLaunched) {
-                return super.equals(other);
+                return timestampNs == ((ActivityLaunchFinished)other).timestampNs &&
+                       super.equals(other);
             }
             return false;
+        }
+
+        @Override
+        protected String toStringBody() {
+            return ", timestampNs=" + Long.toString(timestampNs);
+        }
+
+        @Override
+        protected void writeToParcelImpl(Parcel p, int flags) {
+           super.writeToParcelImpl(p, flags);
+           p.writeLong(timestampNs);
+        }
+
+        ActivityLaunchFinished(Parcel p) {
+            super(p);
+            timestampNs = p.readLong();
         }
     }
 
@@ -272,6 +301,42 @@ public abstract class AppLaunchEvent implements Parcelable {
             } else {
                 activityRecordSnapshot = null;
             }
+        }
+    }
+
+    public static final class ReportFullyDrawn extends BaseWithActivityRecordData {
+        public final long timestampNs;
+
+        public ReportFullyDrawn(@SequenceId long sequenceId,
+                @NonNull @ActivityRecordProto byte[] snapshot,
+                long timestampNs) {
+            super(sequenceId, snapshot);
+            this.timestampNs = timestampNs;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof ReportFullyDrawn) {
+                return timestampNs == ((ReportFullyDrawn)other).timestampNs &&
+                        super.equals(other);
+            }
+            return false;
+        }
+
+        @Override
+        protected String toStringBody() {
+            return ", timestampNs=" + Long.toString(timestampNs);
+        }
+
+        @Override
+        protected void writeToParcelImpl(Parcel p, int flags) {
+           super.writeToParcelImpl(p, flags);
+           p.writeLong(timestampNs);
+        }
+
+        ReportFullyDrawn(Parcel p) {
+            super(p);
+            timestampNs = p.readLong();
         }
     }
 
@@ -348,6 +413,7 @@ public abstract class AppLaunchEvent implements Parcelable {
             ActivityLaunched.class,
             ActivityLaunchFinished.class,
             ActivityLaunchCancelled.class,
+            ReportFullyDrawn.class,
     };
 
     public static class ActivityRecordProtoParcelable {

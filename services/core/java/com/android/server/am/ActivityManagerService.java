@@ -900,7 +900,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // The other observer methods are unused
         @Override
-        public void onIntentStarted(Intent intent) {
+        public void onIntentStarted(Intent intent, long timestampNs) {
         }
 
         @Override
@@ -912,7 +912,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onActivityLaunchFinished(byte[] finalActivity) {
+        public void onActivityLaunchFinished(byte[] finalActivity, long timestampNs) {
+        }
+
+        @Override
+        public void onReportFullyDrawn(byte[] finalActivity, long timestampNs) {
         }
     };
 

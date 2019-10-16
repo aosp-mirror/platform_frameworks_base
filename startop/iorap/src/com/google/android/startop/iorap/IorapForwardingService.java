@@ -315,19 +315,19 @@ public class IorapForwardingService extends SystemService {
         // All callbacks occur on the same background thread. Don't synchronize explicitly.
 
         @Override
-        public void onIntentStarted(@NonNull Intent intent) {
+        public void onIntentStarted(@NonNull Intent intent, long timestampNs) {
             // #onIntentStarted [is the only transition that] initiates a new launch sequence.
             ++mSequenceId;
 
             if (DEBUG) {
-                Log.v(TAG, String.format("AppLaunchObserver#onIntentStarted(%d, %s)",
-                        mSequenceId, intent));
+                Log.v(TAG, String.format("AppLaunchObserver#onIntentStarted(%d, %s, %d)",
+                        mSequenceId, intent, timestampNs));
             }
 
             invokeRemote(mIorapRemote,
                 (IIorap remote) ->
                     remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
-                        new AppLaunchEvent.IntentStarted(mSequenceId, intent))
+                        new AppLaunchEvent.IntentStarted(mSequenceId, intent, timestampNs))
             );
         }
 
@@ -374,16 +374,34 @@ public class IorapForwardingService extends SystemService {
         }
 
         @Override
-        public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] activity) {
+        public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] activity,
+            long timestampNs) {
             if (DEBUG) {
-                Log.v(TAG, String.format("AppLaunchObserver#onActivityLaunchFinished(%d, %s)",
-                        mSequenceId, activity));
+                Log.v(TAG, String.format("AppLaunchObserver#onActivityLaunchFinished(%d, %s, %d)",
+                        mSequenceId, activity, timestampNs));
             }
 
             invokeRemote(mIorapRemote,
                 (IIorap remote) ->
                     remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
-                        new AppLaunchEvent.ActivityLaunchFinished(mSequenceId, activity))
+                        new AppLaunchEvent.ActivityLaunchFinished(mSequenceId,
+                            activity,
+                            timestampNs))
+            );
+        }
+
+        @Override
+        public void onReportFullyDrawn(@NonNull @ActivityRecordProto byte[] activity,
+            long timestampNs) {
+            if (DEBUG) {
+                Log.v(TAG, String.format("AppLaunchObserver#onReportFullyDrawn(%d, %s, %d)",
+                        mSequenceId, activity, timestampNs));
+            }
+
+            invokeRemote(mIorapRemote,
+                (IIorap remote) ->
+                    remote.onAppLaunchEvent(RequestId.nextValueForSequence(),
+                        new AppLaunchEvent.ReportFullyDrawn(mSequenceId, activity, timestampNs))
             );
         }
     }

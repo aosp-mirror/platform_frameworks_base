@@ -6012,10 +6012,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void notifyAppTransitionStarting(SparseIntArray reasons,
-                long timestamp) {
+                long timestampNs) {
             synchronized (mGlobalLock) {
                 mStackSupervisor.getActivityMetricsLogger().notifyTransitionStarting(
-                        reasons, timestamp);
+                        reasons, timestampNs);
             }
         }
 
