@@ -121,6 +121,7 @@ public class DozeUi implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD:
+            case DOZE_AOD_DOCKED:
                 if (oldState == DOZE_AOD_PAUSED || oldState == DOZE) {
                     // Whenever turning on the display, it's necessary to push a new frame.
                     // The display buffers will be empty and need to be filled.

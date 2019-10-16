@@ -53,6 +53,11 @@ public interface DockManager {
     */
     boolean isDocked();
 
+    /**
+     * Returns true if it is hiding docking UI.
+     */
+    boolean isHidden();
+
     /** Callback for receiving dock events */
     interface DockEventListener {
         /**

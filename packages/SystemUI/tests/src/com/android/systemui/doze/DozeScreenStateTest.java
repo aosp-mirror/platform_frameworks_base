@@ -18,6 +18,7 @@ package com.android.systemui.doze;
 
 import static com.android.systemui.doze.DozeMachine.State.DOZE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_DOCKED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSING;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSING;
@@ -125,6 +126,14 @@ public class DozeScreenStateTest extends SysuiTestCase {
         mScreen.transitionTo(DOZE, DOZE_REQUEST_PULSE);
 
         assertEquals(Display.STATE_OFF, mServiceFake.screenState);
+    }
+
+    @Test
+    public void testScreen_onInDockedAod() {
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD_DOCKED);
+
+        assertEquals(Display.STATE_ON, mServiceFake.screenState);
     }
 
     @Test

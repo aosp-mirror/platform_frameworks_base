@@ -304,9 +304,7 @@ public class DozeTriggers implements DozeMachine.Part {
             case INITIALIZED:
                 mBroadcastReceiver.register(mBroadcastDispatcher);
                 mDozeHost.addCallback(mHostCallback);
-                if (mDockManager != null) {
-                    mDockManager.addListener(mDockEventListener);
-                }
+                mDockManager.addListener(mDockEventListener);
                 mDozeSensors.requestTemporaryDisable();
                 checkTriggersAtInit();
                 break;
@@ -326,6 +324,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE_PULSING:
             case DOZE_PULSING_BRIGHT:
+            case DOZE_AOD_DOCKED:
                 mDozeSensors.setTouchscreenSensorsListening(false);
                 mDozeSensors.setProxListening(true);
                 mDozeSensors.setPaused(false);
@@ -339,9 +338,7 @@ public class DozeTriggers implements DozeMachine.Part {
             case FINISH:
                 mBroadcastReceiver.unregister(mBroadcastDispatcher);
                 mDozeHost.removeCallback(mHostCallback);
-                if (mDockManager != null) {
-                    mDockManager.removeListener(mDockEventListener);
-                }
+                mDockManager.removeListener(mDockEventListener);
                 mDozeSensors.setListening(false);
                 mDozeSensors.setProxListening(false);
                 break;
@@ -399,7 +396,8 @@ public class DozeTriggers implements DozeMachine.Part {
 
     private boolean canPulse() {
         return mMachine.getState() == DozeMachine.State.DOZE
-                || mMachine.getState() == DozeMachine.State.DOZE_AOD;
+                || mMachine.getState() == DozeMachine.State.DOZE_AOD
+                || mMachine.getState() == DozeMachine.State.DOZE_AOD_DOCKED;
     }
 
     private void continuePulseRequest(int reason) {
