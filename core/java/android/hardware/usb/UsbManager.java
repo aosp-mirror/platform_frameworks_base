@@ -262,6 +262,15 @@ public class UsbManager {
     public static final String USB_FUNCTION_ACCESSORY = "accessory";
 
     /**
+     * Name of the NCM USB function.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
+     */
+    @SystemApi
+    public static final String USB_FUNCTION_NCM = "ncm";
+
+    /**
      * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
      * containing the {@link UsbPort} object for the port.
      *
@@ -367,8 +376,15 @@ public class UsbManager {
      */
     public static final long FUNCTION_ADB = GadgetFunction.ADB;
 
+    /**
+     * Code for the ncm source usb function.
+     * {@hide}
+     */
+    @SystemApi
+    public static final long FUNCTION_NCM = 1 << 10;
+
     private static final long SETTABLE_FUNCTIONS = FUNCTION_MTP | FUNCTION_PTP | FUNCTION_RNDIS
-            | FUNCTION_MIDI;
+            | FUNCTION_MIDI | FUNCTION_NCM;
 
     private static final Map<String, Long> FUNCTION_NAME_TO_CODE = new HashMap<>();
 
@@ -380,6 +396,7 @@ public class UsbManager {
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_ACCESSORY, FUNCTION_ACCESSORY);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_AUDIO_SOURCE, FUNCTION_AUDIO_SOURCE);
         FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_ADB, FUNCTION_ADB);
+        FUNCTION_NAME_TO_CODE.put(UsbManager.USB_FUNCTION_NCM, FUNCTION_NCM);
     }
 
     private final Context mContext;
@@ -934,6 +951,9 @@ public class UsbManager {
         }
         if ((functions & FUNCTION_AUDIO_SOURCE) != 0) {
             joiner.add(UsbManager.USB_FUNCTION_AUDIO_SOURCE);
+        }
+        if ((functions & FUNCTION_NCM) != 0) {
+            joiner.add(UsbManager.USB_FUNCTION_NCM);
         }
         if ((functions & FUNCTION_ADB) != 0) {
             joiner.add(UsbManager.USB_FUNCTION_ADB);

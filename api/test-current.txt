@@ -1541,6 +1541,7 @@ package android.net {
     field public static final String EXTRA_ERRORED_TETHER = "erroredArray";
     field public static final int TETHERING_BLUETOOTH = 2; // 0x2
     field public static final int TETHERING_INVALID = -1; // 0xffffffff
+    field public static final int TETHERING_NCM = 4; // 0x4
     field public static final int TETHERING_USB = 1; // 0x1
     field public static final int TETHERING_WIFI = 0; // 0x0
     field public static final int TETHERING_WIFI_P2P = 3; // 0x3

@@ -416,7 +416,8 @@ public class IpServer extends StateMachine {
         final Inet4Address srvAddr;
         int prefixLen = 0;
         try {
-            if (mInterfaceType == TetheringManager.TETHERING_USB) {
+            if (mInterfaceType == TetheringManager.TETHERING_USB
+                    || mInterfaceType == TetheringManager.TETHERING_NCM) {
                 srvAddr = (Inet4Address) parseNumericAddress(USB_NEAR_IFACE_ADDR);
                 prefixLen = USB_PREFIX_LENGTH;
             } else if (mInterfaceType == TetheringManager.TETHERING_WIFI) {
