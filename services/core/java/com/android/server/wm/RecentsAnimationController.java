@@ -98,8 +98,10 @@ public class RecentsAnimationController implements DeathRecipient {
     private final ArrayList<WallpaperAnimationAdapter> mPendingWallpaperAnimations =
             new ArrayList<>();
     private final int mDisplayId;
-    private final Runnable mFailsafeRunnable = () ->
-            cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "failSafeRunnable");
+    private boolean mWillFinishToHome = false;
+    private final Runnable mFailsafeRunnable = () -> cancelAnimation(
+            mWillFinishToHome ? REORDER_MOVE_TO_TOP : REORDER_MOVE_TO_ORIGINAL_POSITION,
+            "failSafeRunnable");
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mTargetAppToken;
@@ -324,6 +326,13 @@ public class RecentsAnimationController implements DeathRecipient {
                     mRecentScreenshotAnimator.cancelAnimation();
                     mRecentScreenshotAnimator = null;
                 }
+            }
+        }
+
+        @Override
+        public void setWillFinishToHome(boolean willFinishToHome) {
+            synchronized (mService.getWindowManagerLock()) {
+                mWillFinishToHome = willFinishToHome;
             }
         }
     };

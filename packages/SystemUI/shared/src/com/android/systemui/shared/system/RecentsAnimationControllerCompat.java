@@ -115,4 +115,15 @@ public class RecentsAnimationControllerCompat {
             Log.e(TAG, "Failed to clean up screenshot of recents animation", e);
         }
     }
+
+    /**
+     * @see {{@link IRecentsAnimationController#setWillFinishToHome(boolean)}}.
+     */
+    public void setWillFinishToHome(boolean willFinishToHome) {
+        try {
+            mAnimationController.setWillFinishToHome(willFinishToHome);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set overview reached state", e);
+        }
+    }
 }
