@@ -16,20 +16,19 @@
 
 package com.android.systemui;
 
-import javax.inject.Singleton;
+import com.android.systemui.navigationbar.car.CarNavigationBar;
 
-import dagger.Component;
+import dagger.Binds;
+import dagger.Module;
+import dagger.multibindings.ClassKey;
+import dagger.multibindings.IntoMap;
 
-@Singleton
-@Component(
-        modules = {
-                DependencyProvider.class,
-                DependencyBinder.class,
-                SystemUIFactory.ContextHolder.class,
-                SystemUIModule.class,
-                CarSystemUIModule.class,
-                CarSystemUIBinder.class
-        })
-interface CarSystemUIRootComponent extends SystemUIRootComponent {
-
+/** Binder for car specific {@link SystemUI} modules. */
+@Module
+public abstract class CarSystemUIBinder {
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(CarNavigationBar.class)
+    public abstract SystemUI bindCarNavigationBar(CarNavigationBar sysui);
 }

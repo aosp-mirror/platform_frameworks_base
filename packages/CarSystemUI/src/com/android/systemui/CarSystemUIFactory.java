@@ -20,7 +20,7 @@ import android.content.Context;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.statusbar.car.CarFacetButtonController;
+import com.android.systemui.navigationbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
@@ -41,7 +41,6 @@ public class CarSystemUIFactory extends SystemUIFactory {
                 .contextHolder(new ContextHolder(context))
                 .build();
         return DaggerCarSystemUIRootComponent.builder()
-                .dependencyProvider(new com.android.systemui.DependencyProvider())
                 .contextHolder(new ContextHolder(context))
                 .build();
     }

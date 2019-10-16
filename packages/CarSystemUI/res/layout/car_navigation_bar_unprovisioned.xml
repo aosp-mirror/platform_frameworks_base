@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.car.CarNavigationBarView
+<com.android.systemui.navigationbar.car.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -31,7 +31,7 @@
         android:paddingStart="@*android:dimen/car_padding_5"
         android:paddingEnd="@*android:dimen/car_padding_5">
 
-        <com.android.systemui.statusbar.car.CarNavigationButton
+        <com.android.systemui.navigationbar.car.CarNavigationButton
             android:id="@+id/home"
             android:layout_width="@*android:dimen/car_touch_target_size"
             android:layout_height="match_parent"
@@ -40,5 +40,5 @@
             systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
         />
     </LinearLayout>
-</com.android.systemui.statusbar.car.CarNavigationBarView>
+</com.android.systemui.navigationbar.car.CarNavigationBarView>
 

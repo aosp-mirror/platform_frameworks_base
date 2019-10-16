@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.car;
+package com.android.systemui.navigationbar.car;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -24,6 +24,7 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 /**
@@ -32,7 +33,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
  * The navigation bar in the automotive use case is more like a list of shortcuts, rendered
  * in a linear layout.
  */
-class CarNavigationBarView extends LinearLayout {
+public class CarNavigationBarView extends LinearLayout {
     private View mNavButtons;
     private CarNavigationButton mNotificationsButton;
     private CarStatusBar mCarStatusBar;
@@ -81,7 +82,7 @@ class CarNavigationBarView extends LinearLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
-    void setStatusBar(CarStatusBar carStatusBar) {
+    public void setStatusBar(CarStatusBar carStatusBar) {
         mCarStatusBar = carStatusBar;
     }
 
@@ -90,7 +91,7 @@ class CarNavigationBarView extends LinearLayout {
      *
      * @param statusBarWindowTouchListener The listener to call from touch and intercept touch
      */
-    void setStatusBarWindowTouchListener(OnTouchListener statusBarWindowTouchListener) {
+    public void setStatusBarWindowTouchListener(OnTouchListener statusBarWindowTouchListener) {
         mStatusBarWindowTouchListener = statusBarWindowTouchListener;
     }
 
@@ -134,7 +135,7 @@ class CarNavigationBarView extends LinearLayout {
      *
      * @param hasUnseen true if the unseen notification count is great than 0.
      */
-    void toggleNotificationUnseenIndicator(Boolean hasUnseen) {
+    public void toggleNotificationUnseenIndicator(Boolean hasUnseen) {
         if (mNotificationsButton == null) return;
 
         mNotificationsButton.setUnseen(hasUnseen);

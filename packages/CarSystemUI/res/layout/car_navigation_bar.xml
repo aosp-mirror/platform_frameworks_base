@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.statusbar.car.CarNavigationBarView
+<com.android.systemui.navigationbar.car.CarNavigationBarView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -33,7 +33,7 @@
         android:paddingEnd="20dp"
         android:gravity="center">
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.navigationbar.car.CarFacetButton
             android:id="@+id/home"
             style="@style/NavigationBarButton"
             systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -48,7 +48,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.navigationbar.car.CarFacetButton
             android:id="@+id/maps_nav"
             style="@style/NavigationBarButton"
             systemui:categories="android.intent.category.APP_MAPS"
@@ -63,7 +63,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.navigationbar.car.CarFacetButton
             android:id="@+id/music_nav"
             style="@style/NavigationBarButton"
             systemui:categories="android.intent.category.APP_MUSIC"
@@ -79,7 +79,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.navigationbar.car.CarFacetButton
             android:id="@+id/phone_nav"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/car_ic_phone"
@@ -94,7 +94,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarFacetButton
+        <com.android.systemui.navigationbar.car.CarFacetButton
             android:id="@+id/grid_nav"
             style="@style/NavigationBarButton"
             systemui:componentNames="com.android.car.carlauncher/.AppGridActivity"
@@ -109,7 +109,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.CarNavigationButton
+        <com.android.systemui.navigationbar.car.CarNavigationButton
             android:id="@+id/notifications"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/car_ic_notification"
@@ -123,7 +123,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.systemui.statusbar.car.AssitantButton
+        <com.android.systemui.navigationbar.car.AssitantButton
             android:id="@+id/assist"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/ic_mic_white"
@@ -144,4 +144,4 @@
 
     </LinearLayout>
 
-</com.android.systemui.statusbar.car.CarNavigationBarView>
+</com.android.systemui.navigationbar.car.CarNavigationBarView>

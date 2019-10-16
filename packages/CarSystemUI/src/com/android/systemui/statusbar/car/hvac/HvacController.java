@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 /**
  * Manages the connection to the Car service and delegates value changes to the registered
  * {@link TemperatureView}s
@@ -119,6 +121,7 @@ public class HvacController {
         }
     };
 
+    @Inject
     public HvacController(Context context) {
         mContext = context;
     }
