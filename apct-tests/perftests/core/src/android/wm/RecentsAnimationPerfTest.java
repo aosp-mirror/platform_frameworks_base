@@ -16,16 +16,13 @@
 
 package android.wm;
 
-import static android.perftests.utils.ManualBenchmarkState.STATS_REPORT_COEFFICIENT_VAR;
-import static android.perftests.utils.ManualBenchmarkState.STATS_REPORT_ITERATION;
-import static android.perftests.utils.ManualBenchmarkState.STATS_REPORT_MEAN;
+import static android.perftests.utils.ManualBenchmarkState.StatsReport;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 
-import android.app.Activity;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -39,23 +36,16 @@ import android.os.SystemClock;
 import android.perftests.utils.ManualBenchmarkState;
 import android.perftests.utils.ManualBenchmarkState.ManualBenchmarkTest;
 import android.perftests.utils.PerfManualStatusReporter;
-import android.perftests.utils.StubActivity;
 import android.util.Pair;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
-import android.view.WindowManager;
 
 import androidx.test.filters.LargeTest;
-import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
-import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
 import androidx.test.runner.lifecycle.Stage;
 
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -77,11 +67,10 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
     public final PerfManualStatusReporter mPerfStatusReporter = new PerfManualStatusReporter();
 
     @Rule
-    public final ActivityTestRule<StubActivity> mActivityRule = new ActivityTestRule<>(
-            StubActivity.class, false /* initialTouchMode */, false /* launchActivity */);
+    public final PerfTestActivityRule mActivityRule =
+            new PerfTestActivityRule(true /* launchActivity */);
 
     private long mMeasuredTimeNs;
-    private LifecycleListener mLifecycleListener;
 
     @Parameterized.Parameter(0)
     public int intervalBetweenOperations;
@@ -127,24 +116,6 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
         sUiAutomation.dropShellPermissionIdentity();
     }
 
-    @Before
-    @Override
-    public void setUp() {
-        super.setUp();
-        final Activity testActivity = mActivityRule.launchActivity(null /* intent */);
-        try {
-            mActivityRule.runOnUiThread(() -> testActivity.getWindow()
-                    .addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON));
-        } catch (Throwable ignored) { }
-        mLifecycleListener = new LifecycleListener(testActivity);
-        ActivityLifecycleMonitorRegistry.getInstance().addLifecycleCallback(mLifecycleListener);
-    }
-
-    @After
-    public void tearDown() {
-        ActivityLifecycleMonitorRegistry.getInstance().removeLifecycleCallback(mLifecycleListener);
-    }
-
     /** Simulate the timing of touch. */
     private void makeInterval() {
         SystemClock.sleep(intervalBetweenOperations);
@@ -167,8 +138,8 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
     @ManualBenchmarkTest(
             warmupDurationNs = TIME_1_S_IN_NS,
             targetTestDurationNs = TIME_5_S_IN_NS,
-            statsReportFlags =
-                    STATS_REPORT_ITERATION | STATS_REPORT_MEAN | STATS_REPORT_COEFFICIENT_VAR)
+            statsReport = @StatsReport(flags = StatsReport.FLAG_ITERATION | StatsReport.FLAG_MEAN
+                    | StatsReport.FLAG_COEFFICIENT_VAR))
     public void testRecentsAnimation() throws Throwable {
         final ManualBenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         final IActivityTaskManager atm = ActivityTaskManager.getService();
@@ -201,7 +172,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
                 state.addExtraResult(finishCase.first, elapsedTimeNsOfFinish);
 
                 if (moveRecentsToTop) {
-                    mLifecycleListener.waitForIdleSync(Stage.STOPPED);
+                    mActivityRule.waitForIdleSync(Stage.STOPPED);
 
                     startTime = SystemClock.elapsedRealtimeNanos();
                     atm.startActivityFromRecents(testActivityTaskId, null /* options */);
@@ -209,7 +180,7 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
                     mMeasuredTimeNs += elapsedTimeNs;
                     state.addExtraResult("startFromRecents", elapsedTimeNs);
 
-                    mLifecycleListener.waitForIdleSync(Stage.RESUMED);
+                    mActivityRule.waitForIdleSync(Stage.RESUMED);
                 }
 
                 makeInterval();
@@ -223,55 +194,18 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
             }
         };
 
+        recentsSemaphore.tryAcquire();
         while (state.keepRunning(mMeasuredTimeNs)) {
-            Assume.assumeTrue(recentsSemaphore.tryAcquire(TIME_5_S_IN_NS, TimeUnit.NANOSECONDS));
+            mMeasuredTimeNs = 0;
 
             final long startTime = SystemClock.elapsedRealtimeNanos();
             atm.startRecentsActivity(sRecentsIntent, null /* unused */, anim);
             final long elapsedTimeNsOfStart = SystemClock.elapsedRealtimeNanos() - startTime;
             mMeasuredTimeNs += elapsedTimeNsOfStart;
             state.addExtraResult("start", elapsedTimeNsOfStart);
-        }
 
-        // Ensure the last round of animation callback is done.
-        recentsSemaphore.tryAcquire(TIME_5_S_IN_NS, TimeUnit.NANOSECONDS);
-        recentsSemaphore.release();
-    }
-
-    private static class LifecycleListener implements ActivityLifecycleCallback {
-        private final Activity mTargetActivity;
-        private Stage mWaitingStage;
-        private Stage mReceivedStage;
-
-        LifecycleListener(Activity activity) {
-            mTargetActivity = activity;
-        }
-
-        void waitForIdleSync(Stage state) {
-            synchronized (this) {
-                if (state != mReceivedStage) {
-                    mWaitingStage = state;
-                    try {
-                        wait(TimeUnit.NANOSECONDS.toMillis(TIME_5_S_IN_NS));
-                    } catch (InterruptedException impossible) { }
-                }
-                mWaitingStage = mReceivedStage = null;
-            }
-            getInstrumentation().waitForIdleSync();
-        }
-
-        @Override
-        public void onActivityLifecycleChanged(Activity activity, Stage stage) {
-            if (mTargetActivity != activity) {
-                return;
-            }
-
-            synchronized (this) {
-                mReceivedStage = stage;
-                if (mWaitingStage == mReceivedStage) {
-                    notifyAll();
-                }
-            }
+            // Ensure the animation callback is done.
+            Assume.assumeTrue(recentsSemaphore.tryAcquire(TIME_5_S_IN_NS, TimeUnit.NANOSECONDS));
         }
     }
 }
