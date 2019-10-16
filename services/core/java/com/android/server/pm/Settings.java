@@ -4725,6 +4725,22 @@ public final class Settings {
                 }
             }
 
+            Map<String, String[]> sharedLibraryOverlayPaths =
+                    ps.getOverlayPathsForLibrary(user.id);
+            if (sharedLibraryOverlayPaths != null) {
+                for (Map.Entry<String, String[]> libOverlayPaths :
+                        sharedLibraryOverlayPaths.entrySet()) {
+                    if (libOverlayPaths.getValue() == null) {
+                        continue;
+                    }
+                    pw.print(prefix); pw.print("  ");
+                    pw.print(libOverlayPaths.getKey()); pw.println(" overlay paths:");
+                    for (String path : libOverlayPaths.getValue()) {
+                        pw.print(prefix); pw.print("    "); pw.println(path);
+                    }
+                }
+            }
+
             String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
             if (lastDisabledAppCaller != null) {
                 pw.print(prefix); pw.print("    lastDisabledCaller: ");

@@ -33,6 +33,8 @@ namespace android::idmap2 {
 
 namespace {
 
+#define REWRITE_PACKAGE(resid, package_id) \
+  (((resid)&0x00ffffffU) | (((uint32_t)(package_id)) << 24U))
 #define EXTRACT_PACKAGE(resid) ((0xff000000 & (resid)) >> 24)
 
 std::string ConcatPolicies(const std::vector<std::string>& policies) {
@@ -154,6 +156,7 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
     return Error("root element is not <overlay> tag");
   }
 
+  const uint8_t target_package_id = target_package->GetPackageId();
   const uint8_t overlay_package_id = overlay_package->GetPackageId();
   auto overlay_it_end = root_it.end();
   for (auto overlay_it = root_it.begin(); overlay_it != overlay_it_end; ++overlay_it) {
@@ -187,6 +190,9 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMapping(const AssetManage
       continue;
     }
 
+    // Retrieve the compile-time resource id of the target resource.
+    target_id = REWRITE_PACKAGE(target_id, target_package_id);
+
     if (overlay_resource->dataType == Res_value::TYPE_STRING) {
       overlay_resource->data += string_pool_offset;
     }
@@ -214,6 +220,7 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMappingLegacy(
     const AssetManager2* target_am, const AssetManager2* overlay_am,
     const LoadedPackage* target_package, const LoadedPackage* overlay_package) {
   ResourceMapping resource_mapping;
+  const uint8_t target_package_id = target_package->GetPackageId();
   const auto end = overlay_package->end();
   for (auto iter = overlay_package->begin(); iter != end; ++iter) {
     const ResourceId overlay_resid = *iter;
@@ -225,10 +232,13 @@ Result<ResourceMapping> ResourceMapping::CreateResourceMappingLegacy(
     // Find the resource with the same type and entry name within the target package.
     const std::string full_name =
         base::StringPrintf("%s:%s", target_package->GetPackageName().c_str(), name->c_str());
-    const ResourceId target_resource = target_am->GetResourceId(full_name);
+    ResourceId target_resource = target_am->GetResourceId(full_name);
     if (target_resource == 0U) {
       continue;
     }
+
+    // Retrieve the compile-time resource id of the target resource.
+    target_resource = REWRITE_PACKAGE(target_resource, target_package_id);
 
     resource_mapping.AddMapping(target_resource, Res_value::TYPE_REFERENCE, overlay_resid,
                                 /* rewrite_overlay_reference */ false);

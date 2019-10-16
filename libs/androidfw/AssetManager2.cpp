@@ -141,7 +141,10 @@ void AssetManager2::BuildDynamicRefTable() {
           // to take effect.
           const auto& loaded_idmap = apk_assets->GetLoadedIdmap();
           auto target_package_iter = apk_assets_package_ids.find(loaded_idmap->TargetApkPath());
-          if (target_package_iter != apk_assets_package_ids.end()) {
+          if (target_package_iter == apk_assets_package_ids.end()) {
+             LOG(INFO) << "failed to find target package for overlay "
+                       << loaded_idmap->OverlayApkPath();
+          } else {
             const uint8_t target_package_id = target_package_iter->second;
             const uint8_t target_idx = package_ids_[target_package_id];
             CHECK(target_idx != 0xff) << "overlay added to apk_assets_package_ids but does not"
@@ -591,7 +594,7 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
       if (resource_resolution_logging_enabled_) {
         last_resolution_.steps.push_back(
             Resolution::Step{Resolution::Step::Type::OVERLAID, overlay_result.config.toString(),
-                             &package_group.packages_[0].loaded_package_->GetPackageName()});
+                             overlay_result.package_name});
       }
     }
   }

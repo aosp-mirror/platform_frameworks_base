@@ -11595,6 +11595,23 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         SharedLibraryInfo libraryInfo = versionedLib.valueAt(libIdx);
+
+        // Remove the shared library overlays from its dependent packages.
+        for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
+            final List<VersionedPackage> dependents = getPackagesUsingSharedLibraryLPr(
+                    libraryInfo, 0, currentUserId);
+            if (dependents == null) {
+                continue;
+            }
+            for (VersionedPackage dependentPackage : dependents) {
+                final PackageSetting ps = mSettings.mPackages.get(
+                        dependentPackage.getPackageName());
+                if (ps != null) {
+                    ps.setOverlayPathsForLibrary(libraryInfo.getName(), null, currentUserId);
+                }
+            }
+        }
+
         versionedLib.remove(version);
         if (versionedLib.size() <= 0) {
             mSharedLibraries.remove(name);
@@ -15200,6 +15217,29 @@ public class PackageManagerService extends IPackageManager.Stub
                         // upcoming call to mSettings.writeLPr().
                     }
                 }
+
+                // Retrieve the overlays for shared libraries of the package.
+                if (pkg.getUsesLibraryInfos() != null) {
+                    for (SharedLibraryInfo sharedLib : pkg.getUsesLibraryInfos()) {
+                        for (int currentUserId : UserManagerService.getInstance().getUserIds()) {
+                            if (!sharedLib.isDynamic()) {
+                                // TODO(146804378): Support overlaying static shared libraries
+                                continue;
+                            }
+                            final PackageSetting libPs = mSettings.mPackages.get(
+                                    sharedLib.getPackageName());
+                            if (libPs == null) {
+                                continue;
+                            }
+                            final String[] overlayPaths = libPs.getOverlayPaths(currentUserId);
+                            if (overlayPaths != null) {
+                                ps.setOverlayPathsForLibrary(sharedLib.getName(),
+                                        Arrays.asList(overlayPaths), currentUserId);
+                            }
+                        }
+                    }
+                }
+
                 // It's implied that when a user requests installation, they want the app to be
                 // installed and enabled.
                 if (userId != UserHandle.USER_ALL) {
@@ -23226,9 +23266,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public boolean setEnabledOverlayPackages(int userId, @NonNull String targetPackageName,
-                @Nullable List<String> overlayPackageNames) {
+                @Nullable List<String> overlayPackageNames,
+                @NonNull Collection<String> outUpdatedPackageNames) {
             synchronized (mLock) {
-                if (targetPackageName == null || mPackages.get(targetPackageName) == null) {
+                final AndroidPackage targetPkg = mPackages.get(targetPackageName);
+                if (targetPackageName == null || targetPkg == null) {
                     Slog.e(TAG, "failed to find package " + targetPackageName);
                     return false;
                 }
@@ -23247,8 +23289,41 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
+                ArraySet<String> updatedPackageNames = null;
+                if (targetPkg.getLibraryNames() != null) {
+                    // Set the overlay paths for dependencies of the shared library.
+                    updatedPackageNames = new ArraySet<>();
+                    for (String libName : targetPkg.getLibraryNames()) {
+                        final SharedLibraryInfo info = getSharedLibraryInfoLPr(libName,
+                                SharedLibraryInfo.VERSION_UNDEFINED);
+                        if (info == null) {
+                            continue;
+                        }
+                        final List<VersionedPackage> dependents = getPackagesUsingSharedLibraryLPr(
+                                info, 0, userId);
+                        if (dependents == null) {
+                            continue;
+                        }
+                        for (VersionedPackage dependent : dependents) {
+                            final PackageSetting ps = mSettings.mPackages.get(
+                                    dependent.getPackageName());
+                            if (ps == null) {
+                                continue;
+                            }
+                            ps.setOverlayPathsForLibrary(libName, overlayPaths, userId);
+                            updatedPackageNames.add(dependent.getPackageName());
+                        }
+                    }
+                }
+
                 final PackageSetting ps = mSettings.mPackages.get(targetPackageName);
                 ps.setOverlayPaths(overlayPaths, userId);
+
+                outUpdatedPackageNames.add(targetPackageName);
+                if (updatedPackageNames != null) {
+                    outUpdatedPackageNames.addAll(updatedPackageNames);
+                }
+
                 return true;
             }
         }
