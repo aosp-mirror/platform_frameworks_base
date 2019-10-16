@@ -21,6 +21,7 @@ import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
@@ -55,6 +56,7 @@ import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.UserHandle.USER_NULL;
@@ -1233,7 +1235,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    private void clearSoundLocked() {
+    void clearSoundLocked() {
         mSoundNotificationKey = null;
         long identity = Binder.clearCallingIdentity();
         try {
@@ -1248,7 +1250,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    private void clearVibrateLocked() {
+    void clearVibrateLocked() {
         mVibrateNotificationKey = null;
         long identity = Binder.clearCallingIdentity();
         try {
@@ -4545,13 +4547,13 @@ public class NotificationManagerService extends SystemService {
         if (record != null && record.getAudioAttributes() != null) {
             if ((mListenerHints & HINT_HOST_DISABLE_NOTIFICATION_EFFECTS) != 0) {
                 if (record.getAudioAttributes().getUsage()
-                        != AudioAttributes.USAGE_VOICE_COMMUNICATION) {
+                        != AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
                     return "listenerNoti";
                 }
             }
             if ((mListenerHints & HINT_HOST_DISABLE_CALL_EFFECTS) != 0) {
                 if (record.getAudioAttributes().getUsage()
-                        == AudioAttributes.USAGE_VOICE_COMMUNICATION) {
+                        == AudioAttributes.USAGE_NOTIFICATION_RINGTONE) {
                     return "listenerCall";
                 }
             }
@@ -6110,7 +6112,6 @@ public class NotificationManagerService extends SystemService {
                 mIsAutomotive
                         ? record.getImportance() > NotificationManager.IMPORTANCE_DEFAULT
                         : record.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT;
-
         // Remember if this notification already owns the notification channels.
         boolean wasBeep = key != null && key.equals(mSoundNotificationKey);
         boolean wasBuzz = key != null && key.equals(mVibrateNotificationKey);
@@ -6126,7 +6127,6 @@ public class NotificationManagerService extends SystemService {
         }
 
         if (aboveThreshold && isNotificationForCurrentUser(record)) {
-
             if (mSystemReady && mAudioManager != null) {
                 Uri soundUri = record.getSound();
                 hasValidSound = soundUri != null && !Uri.EMPTY.equals(soundUri);
@@ -6141,7 +6141,6 @@ public class NotificationManagerService extends SystemService {
                     vibration = mFallbackVibrationPattern;
                 }
                 hasValidVibrate = vibration != null;
-
                 boolean hasAudibleAlert = hasValidSound || hasValidVibrate;
                 if (hasAudibleAlert && !shouldMuteNotificationLocked(record)) {
                     if (!sentAccessibilityEvent) {
@@ -6298,11 +6297,29 @@ public class NotificationManagerService extends SystemService {
             return true;
         }
 
+        // A looping ringtone, such as an incoming call is playing
+        if (isLoopingRingtoneNotification(mNotificationsByKey.get(mSoundNotificationKey))
+                || isLoopingRingtoneNotification(
+                        mNotificationsByKey.get(mVibrateNotificationKey))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @GuardedBy("mNotificationLock")
+    private boolean isLoopingRingtoneNotification(final NotificationRecord playingRecord) {
+        if (playingRecord != null) {
+            if (playingRecord.getAudioAttributes().getUsage() == USAGE_NOTIFICATION_RINGTONE
+                    && (playingRecord.getNotification().flags & FLAG_INSISTENT) != 0) {
+                return true;
+            }
+        }
         return false;
     }
 
     private boolean playSound(final NotificationRecord record, Uri soundUri) {
-        boolean looping = (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+        boolean looping = (record.getNotification().flags & FLAG_INSISTENT) != 0;
         // play notifications if there is no user of exclusive audio focus
         // and the stream volume is not 0 (non-zero volume implies not silenced by SILENT or
         //   VIBRATE ringer mode)
@@ -6354,7 +6371,6 @@ public class NotificationManagerService extends SystemService {
                     try {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
-
                     // Notifications might be canceled before it actually vibrates due to waitMs,
                     // so need to check the notification still valide for vibrate.
                     synchronized (mNotificationLock) {
