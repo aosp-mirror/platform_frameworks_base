@@ -526,6 +526,15 @@ public class CarrierConfigManager {
             "default_vm_number_roaming_string";
 
     /**
+     * Where there is no preloaded voicemail number on a SIM card, specifies the carrier's default
+     * voicemail number while the device is both roaming and not registered for IMS.
+     * When empty string, no default voicemail number is specified for roaming network and
+     * unregistered state in IMS.
+     */
+    public static final String KEY_DEFAULT_VM_NUMBER_ROAMING_AND_IMS_UNREGISTERED_STRING =
+            "default_vm_number_roaming_and_ims_unregistered_string";
+
+    /**
      * Flag that specifies to use the user's own phone number as the voicemail number when there is
      * no pre-loaded voicemail number on the SIM card.
      * <p>
@@ -3226,6 +3235,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_ROAMING_STRING, "");
+        sDefaults.putString(KEY_DEFAULT_VM_NUMBER_ROAMING_AND_IMS_UNREGISTERED_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_TELEPHONY_USE_OWN_NUMBER_FOR_VOICEMAIL_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS, true);
         sDefaults.putBoolean(KEY_VILTE_DATA_IS_METERED_BOOL, true);
