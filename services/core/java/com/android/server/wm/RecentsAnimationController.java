@@ -358,7 +358,8 @@ public class RecentsAnimationController implements DeathRecipient {
      * because it may call cancelAnimation() which needs to properly clean up the controller
      * in the window manager.
      */
-    public void initialize(int targetActivityType, SparseBooleanArray recentTaskIds) {
+    public void initialize(int targetActivityType, SparseBooleanArray recentTaskIds,
+            ActivityRecord targetActivity) {
         mTargetActivityType = targetActivityType;
         mDisplayContent.mAppTransition.registerListenerLocked(mAppTransitionListener);
 
@@ -400,16 +401,12 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Adjust the wallpaper visibility for the showing target activity
-        final ActivityRecord recentsComponentActivity =
-                targetStack.getTopChild().getTopFullscreenActivity();
-        if (recentsComponentActivity != null) {
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                    "setHomeApp(%s)", recentsComponentActivity.getName());
-            mTargetActivityRecord = recentsComponentActivity;
-            if (recentsComponentActivity.windowsCanBeWallpaperTarget()) {
-                mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                mDisplayContent.setLayoutNeeded();
-            }
+        ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                "setHomeApp(%s)", targetActivity.getName());
+        mTargetActivityRecord = targetActivity;
+        if (targetActivity.windowsCanBeWallpaperTarget()) {
+            mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+            mDisplayContent.setLayoutNeeded();
         }
 
         // Save the minimized home height
