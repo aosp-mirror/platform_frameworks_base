@@ -8241,20 +8241,6 @@ public final class Settings {
         public static final String AWARE_LOCK_ENABLED = "aware_lock_enabled";
 
         /**
-         * The settings values which should only be restored if the target device is the
-         * same as the source device
-         *
-         * NOTE: Settings are backed up and restored in the order they appear
-         *       in this array. If you have one setting depending on another,
-         *       make sure that they are ordered appropriately.
-         *
-         * @hide
-         */
-        public static final String[] DEVICE_SPECIFIC_SETTINGS_TO_BACKUP = {
-                DISPLAY_DENSITY_FORCED,
-        };
-
-        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
