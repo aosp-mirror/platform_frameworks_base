@@ -120,4 +120,73 @@
     <dimen name="notification_shade_handle_bar_margin_bottom">10dp</dimen>
     <dimen name="notification_shade_list_padding_bottom">50dp</dimen>
 
+    <!-- The alpha for the scrim behind the notification shade. This value is 1 so that the
+     scrim has no transparency. -->
+    <item name="scrim_behind_alpha" format="float" type="dimen">1.0</item>
+
+    <!-- The width of panel holding the notification card. -->
+    <dimen name="notification_panel_width">522dp</dimen>
+
+    <!-- The width of the quick settings panel. -1 for match_parent. -->
+    <dimen name="qs_panel_width">-1px</dimen>
+
+    <!-- Height of a small notification in the status bar-->
+    <dimen name="notification_min_height">192dp</dimen>
+
+    <!-- Height of a small notification in the status bar which was used before android N -->
+    <dimen name="notification_min_height_legacy">192dp</dimen>
+
+    <!-- Height of a large notification in the status bar -->
+    <dimen name="notification_max_height">400dp</dimen>
+
+    <!-- Height of a heads up notification in the status bar for legacy custom views -->
+    <dimen name="notification_max_heads_up_height_legacy">400dp</dimen>
+
+    <!-- Height of a heads up notification in the status bar -->
+    <dimen name="notification_max_heads_up_height">400dp</dimen>
+
+    <!-- Height of the status bar header bar -->
+    <dimen name="status_bar_header_height">54dp</dimen>
+
+    <!-- The height of the divider between the individual notifications. -->
+    <dimen name="notification_divider_height">16dp</dimen>
+
+    <!-- The height of the divider between the individual notifications when the notification
+         wants it to be increased. This value is the same as notification_divider_height so that
+         the spacing between all notifications will always be the same. -->
+    <dimen name="notification_divider_height_increased">@dimen/notification_divider_height</dimen>
+
+    <!-- The alpha of the dividing line between child notifications of a notification group. -->
+    <item name="notification_divider_alpha" format="float" type="dimen">1.0</item>
+
+    <!-- The width of each individual notification card. -->
+    <dimen name="notification_child_width">522dp</dimen>
+
+    <!-- The top margin of the notification panel. -->
+    <dimen name="notification_panel_margin_top">32dp</dimen>
+
+    <!-- The bottom margin of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_margin_bottom">@dimen/notification_divider_height</dimen>
+
+    <!-- The corner radius of the shadow behind the notification. -->
+    <dimen name="notification_shadow_radius">16dp</dimen>
+
+    <!-- The amount of space below the notification list. This value is 0 so the list scrolls
+         all the way to the bottom. -->
+    <dimen name="close_handle_underlap">0dp</dimen>
+
+    <!-- The height of the divider between the individual notifications in a notification group. -->
+    <dimen name="notification_children_container_divider_height">1dp</dimen>
+
+    <!-- The height of the header for a container containing child notifications. -->
+    <dimen name="notification_children_container_header_height">76dp</dimen>
+
+    <!-- The top margin for the notification children container in its non-expanded form. This
+         value is smaller than notification_children_container_header_height to bring the first
+         child closer so there is less wasted space. -->
+    <dimen name="notification_children_container_margin_top">68dp</dimen>
+
+    <!-- The height of the quick settings footer that holds the user switcher, settings icon,
+         etc. in the car setting.-->
+    <dimen name="qs_footer_height">74dp</dimen>
 </resources>
