@@ -35,6 +35,7 @@ import android.view.ViewStub;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -75,10 +76,10 @@ public class StatusBarWindowViewController {
     private PhoneStatusBarView mStatusBarView;
     private StatusBar mService;
     private DragDownHelper mDragDownHelper;
-    private boolean mSuppressingWakeUpGesture;
     private boolean mDoubleTapEnabled;
     private boolean mSingleTapEnabled;
     private boolean mExpandingBelowNotch;
+    private final DockManager mDockManager;
 
     private StatusBarWindowViewController(
             StatusBarWindowView view,
@@ -97,9 +98,11 @@ public class StatusBarWindowViewController {
             SysuiStatusBarStateController statusBarStateController,
             DozeLog dozeLog,
             DozeParameters dozeParameters,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            DockManager dockManager) {
         mView = view;
         mFalsingManager = falsingManager;
+        mDockManager = dockManager;
 
         // TODO: create controller for NotificationPanelView
         NotificationPanelView notificationPanelView = new NotificationPanelView(
@@ -158,7 +161,7 @@ public class StatusBarWindowViewController {
                 new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onSingleTapConfirmed(MotionEvent e) {
-                        if (mSingleTapEnabled && !mSuppressingWakeUpGesture) {
+                        if (mSingleTapEnabled && !mDockManager.isDocked()) {
                             mService.wakeUpIfDozing(
                                     SystemClock.uptimeMillis(), mView, "SINGLE_TAP");
                             return true;
@@ -243,7 +246,7 @@ public class StatusBarWindowViewController {
 
             @Override
             public boolean shouldInterceptTouchEvent(MotionEvent ev) {
-                if (mService.isDozing() && !mService.isPulsing()) {
+                if (mService.isDozing() && !mService.isPulsing() && !mDockManager.isDocked()) {
                     // Capture all touch events in always-on.
                     return true;
                 }
@@ -445,10 +448,6 @@ public class StatusBarWindowViewController {
         mDragDownHelper = dragDownHelper;
     }
 
-    public void suppressWakeUpGesture(boolean suppress) {
-        mSuppressingWakeUpGesture = suppress;
-    }
-
     /**
      * When we're launching an affordance, like double pressing power to open camera.
      */
@@ -495,6 +494,7 @@ public class StatusBarWindowViewController {
         private final CommandQueue mCommandQueue;
         private final SuperStatusBarViewFactory mSuperStatusBarViewFactory;
         private final StatusBarWindowView mView;
+        private final DockManager mDockManager;
 
         @Inject
         public Builder(
@@ -513,7 +513,8 @@ public class StatusBarWindowViewController {
                 DozeLog dozeLog,
                 DozeParameters dozeParameters,
                 CommandQueue commandQueue,
-                SuperStatusBarViewFactory superStatusBarViewFactory) {
+                SuperStatusBarViewFactory superStatusBarViewFactory,
+                DockManager dockManager) {
             mInjectionInflationController = injectionInflationController;
             mCoordinator = coordinator;
             mPulseExpansionHandler = pulseExpansionHandler;
@@ -530,8 +531,8 @@ public class StatusBarWindowViewController {
             mDozeParameters = dozeParameters;
             mCommandQueue = commandQueue;
             mSuperStatusBarViewFactory = superStatusBarViewFactory;
-
             mView = mSuperStatusBarViewFactory.getStatusBarWindowView();
+            mDockManager = dockManager;
         }
 
         /**
@@ -563,7 +564,8 @@ public class StatusBarWindowViewController {
                     mStatusBarStateController,
                     mDozeLog,
                     mDozeParameters,
-                    mCommandQueue);
+                    mCommandQueue,
+                    mDockManager);
         }
     }
 }

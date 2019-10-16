@@ -233,10 +233,6 @@ public final class DozeServiceHost implements DozeHost {
             mScrimController.setWakeLockScreenSensorActive(true);
         }
 
-        if (reason == DozeEvent.PULSE_REASON_DOCKING && mStatusBarWindow != null) {
-            mStatusBarWindowViewController.suppressWakeUpGesture(true);
-        }
-
         boolean passiveAuthInterrupt = reason == DozeEvent.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN
                         && mWakeLockScreenPerformsAuth;
         // Set the state to pulsing, so ScrimController will know what to do once we ask it to
@@ -257,9 +253,6 @@ public final class DozeServiceHost implements DozeHost {
                 callback.onPulseFinished();
                 mStatusBar.updateNotificationPanelTouchState();
                 mScrimController.setWakeLockScreenSensorActive(false);
-                if (mStatusBarWindow != null) {
-                    mStatusBarWindowViewController.suppressWakeUpGesture(false);
-                }
                 setPulsing(false);
             }
 
