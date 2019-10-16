@@ -27,6 +27,11 @@ public class MediaOutputSliceConstants {
     public static final String KEY_MEDIA_OUTPUT = "media_output";
 
     /**
+     * Key for the Remote Media slice.
+     */
+    public static final String KEY_REMOTE_MEDIA = "remote_media";
+
+    /**
      * Activity Action: Show a settings dialog containing {@link MediaDevice} to transfer media.
      */
     public static final String ACTION_MEDIA_OUTPUT =
