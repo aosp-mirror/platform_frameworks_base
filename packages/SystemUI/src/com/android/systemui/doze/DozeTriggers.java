@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
@@ -80,6 +81,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final DockEventListener mDockEventListener = new DockEventListener();
     private final DockManager mDockManager;
     private final ProximitySensor.ProximityCheck mProxCheck;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private long mNotificationPulseTime;
     private boolean mPulsePending;
@@ -91,7 +93,7 @@ public class DozeTriggers implements DozeMachine.Part {
             DozeParameters dozeParameters, AsyncSensorManager sensorManager, Handler handler,
             WakeLock wakeLock, boolean allowPulseTriggers, DockManager dockManager,
             ProximitySensor proximitySensor,
-            DozeLog dozeLog) {
+            DozeLog dozeLog, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mMachine = machine;
         mDozeHost = dozeHost;
@@ -107,6 +109,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mDockManager = dockManager;
         mProxCheck = new ProximitySensor.ProximityCheck(proximitySensor, handler);
         mDozeLog = dozeLog;
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     private void onNotification(Runnable onPulseSuppressedListener) {
@@ -299,7 +302,7 @@ public class DozeTriggers implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case INITIALIZED:
-                mBroadcastReceiver.register(mContext);
+                mBroadcastReceiver.register(mBroadcastDispatcher);
                 mDozeHost.addCallback(mHostCallback);
                 if (mDockManager != null) {
                     mDockManager.addListener(mDockEventListener);
@@ -334,7 +337,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeSensors.updateListening();
                 break;
             case FINISH:
-                mBroadcastReceiver.unregister(mContext);
+                mBroadcastReceiver.unregister(mBroadcastDispatcher);
                 mDozeHost.removeCallback(mHostCallback);
                 if (mDockManager != null) {
                     mDockManager.removeListener(mDockEventListener);
@@ -437,22 +440,22 @@ public class DozeTriggers implements DozeMachine.Part {
             }
         }
 
-        public void register(Context context) {
+        public void register(BroadcastDispatcher broadcastDispatcher) {
             if (mRegistered) {
                 return;
             }
             IntentFilter filter = new IntentFilter(PULSE_ACTION);
             filter.addAction(UiModeManager.ACTION_ENTER_CAR_MODE);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
-            context.registerReceiver(this, filter);
+            broadcastDispatcher.registerReceiver(this, filter);
             mRegistered = true;
         }
 
-        public void unregister(Context context) {
+        public void unregister(BroadcastDispatcher broadcastDispatcher) {
             if (!mRegistered) {
                 return;
             }
-            context.unregisterReceiver(this);
+            broadcastDispatcher.unregisterReceiver(this);
             mRegistered = false;
         }
     }

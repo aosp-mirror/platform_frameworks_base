@@ -45,6 +45,7 @@ import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.assist.ui.DefaultUiController;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -161,14 +162,15 @@ public class AssistManager implements ConfigurationChangedReceiver {
             Context context,
             AssistUtils assistUtils,
             AssistHandleBehaviorController handleController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAssistUtils = assistUtils;
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
-        mPhoneStateMonitor = new PhoneStateMonitor(context);
+        mPhoneStateMonitor = new PhoneStateMonitor(context, broadcastDispatcher);
         mHandleController = handleController;
 
         registerVoiceInteractionSessionListener();

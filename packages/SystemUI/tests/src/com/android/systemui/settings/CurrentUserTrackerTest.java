@@ -21,9 +21,12 @@ import android.content.Intent;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Testing functionality of the current user tracker
@@ -33,10 +36,13 @@ public class CurrentUserTrackerTest extends SysuiTestCase {
 
     private CurrentUserTracker mTracker;
     private CurrentUserTracker.UserReceiver mReceiver;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     @Before
     public void setUp() {
-        mReceiver = new CurrentUserTracker.UserReceiver(getContext());
+        MockitoAnnotations.initMocks(this);
+        mReceiver = new CurrentUserTracker.UserReceiver(mBroadcastDispatcher);
         mTracker = new CurrentUserTracker(mReceiver) {
             @Override
             public void onUserSwitched(int newUserId) {

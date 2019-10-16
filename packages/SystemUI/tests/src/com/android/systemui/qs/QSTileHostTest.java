@@ -41,6 +41,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.systemui.DumpController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
@@ -84,6 +85,8 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private DumpController mDumpController;
     @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock
     private QSTile.State mMockState;
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -96,7 +99,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mHandler = new Handler(mLooper.getLooper());
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(),
-                mPluginManager, mTunerService, mAutoTiles, mDumpController);
+                mPluginManager, mTunerService, mAutoTiles, mDumpController, mBroadcastDispatcher);
         setUpTileFactory();
         Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
                 "", ActivityManager.getCurrentUser());
@@ -168,9 +171,10 @@ public class QSTileHostTest extends SysuiTestCase {
         TestQSTileHost(Context context, StatusBarIconController iconController,
                 QSFactoryImpl defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
-                Provider<AutoTileManager> autoTiles, DumpController dumpController) {
+                Provider<AutoTileManager> autoTiles, DumpController dumpController,
+                BroadcastDispatcher broadcastDispatcher) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
-                    tunerService, autoTiles, dumpController);
+                    tunerService, autoTiles, dumpController, broadcastDispatcher);
         }
 
         @Override

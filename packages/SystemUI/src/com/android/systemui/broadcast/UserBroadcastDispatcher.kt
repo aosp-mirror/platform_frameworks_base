@@ -31,6 +31,7 @@ import com.android.systemui.Dumpable
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 private const val MSG_REGISTER_RECEIVER = 0
 private const val MSG_UNREGISTER_RECEIVER = 1
@@ -49,6 +50,13 @@ class UserBroadcastDispatcher(
     private val mainHandler: Handler,
     private val bgLooper: Looper
 ) : BroadcastReceiver(), Dumpable {
+
+    companion object {
+        // Used only for debugging. If not debugging, this variable will not be accessed and all
+        // received broadcasts will be tagged with 0. However, as DEBUG is false, nothing will be
+        // logged
+        val index = AtomicInteger(0)
+    }
 
     private val bgHandler = object : Handler(bgLooper) {
         override fun handleMessage(msg: Message) {
@@ -97,7 +105,10 @@ class UserBroadcastDispatcher(
     private val receiverToReceiverData = ArrayMap<BroadcastReceiver, MutableSet<ReceiverData>>()
 
     override fun onReceive(context: Context, intent: Intent) {
-        bgHandler.post(HandleBroadcastRunnable(actionsToReceivers, context, intent, pendingResult))
+        val id = if (DEBUG) index.getAndIncrement() else 0
+        if (DEBUG) Log.w(TAG, "[$id] Received $intent")
+        bgHandler.post(
+                HandleBroadcastRunnable(actionsToReceivers, context, intent, pendingResult, id))
     }
 
     /**
@@ -161,17 +172,19 @@ class UserBroadcastDispatcher(
         val actionsToReceivers: Map<String, Set<ReceiverData>>,
         val context: Context,
         val intent: Intent,
-        val pendingResult: PendingResult
+        val pendingResult: PendingResult,
+        val index: Int
     ) : Runnable {
         override fun run() {
-            if (DEBUG) Log.w(TAG, "Dispatching $intent")
+            if (DEBUG) Log.w(TAG, "[$index] Dispatching $intent")
             actionsToReceivers.get(intent.action)
                     ?.filter {
                         it.filter.hasAction(intent.action) &&
                             it.filter.matchCategories(intent.categories) == null }
                     ?.forEach {
                         it.handler.post {
-                            if (DEBUG) Log.w(TAG, "Dispatching to ${it.receiver}")
+                            if (DEBUG) Log.w(TAG,
+                                    "[$index] Dispatching ${intent.action} to ${it.receiver}")
                             it.receiver.pendingResult = pendingResult
                             it.receiver.onReceive(context, intent)
                         }

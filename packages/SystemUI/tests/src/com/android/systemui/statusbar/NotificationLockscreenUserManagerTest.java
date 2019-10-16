@@ -47,6 +47,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -74,6 +75,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock private NotificationData mNotificationData;
     @Mock private DeviceProvisionedController mDeviceProvisionedController;
     @Mock private StatusBarKeyguardViewManager mKeyguardViewManager;
+    @Mock private BroadcastDispatcher mBroadcastDispatcher;
 
     private int mCurrentUserId;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
@@ -194,7 +196,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     private class TestNotificationLockscreenUserManager
             extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
-            super(context);
+            super(context, mBroadcastDispatcher);
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

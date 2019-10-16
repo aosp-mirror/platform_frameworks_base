@@ -17,6 +17,7 @@ package com.android.systemui;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -34,11 +35,14 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.SliceBroadcastRelay;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -47,11 +51,15 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
     private static final String TEST_ACTION = "com.android.systemui.action.TEST_ACTION";
     private SliceBroadcastRelayHandler mRelayHandler;
     private Context mSpyContext;
+    @Mock
+    private BroadcastDispatcher mBroadcastDispatcher;
+
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         mSpyContext = spy(mContext);
 
-        mRelayHandler = new SliceBroadcastRelayHandler(mSpyContext);
+        mRelayHandler = new SliceBroadcastRelayHandler(mSpyContext, mBroadcastDispatcher);
     }
 
     @Test
@@ -134,6 +142,16 @@ public class SliceBroadcastRelayHandlerTest extends SysuiTestCase {
         relay.getValue().onReceive(mSpyContext, new Intent(TEST_ACTION));
 
         verify(Receiver.sReceiver, timeout(2000)).onReceive(any(), any());
+    }
+
+    @Test
+    public void testRegisteredWithDispatcher() {
+        mRelayHandler.start();
+
+        verify(mBroadcastDispatcher)
+                .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
+        verify(mSpyContext, never())
+                .registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class));
     }
 
     public static class Receiver extends BroadcastReceiver {

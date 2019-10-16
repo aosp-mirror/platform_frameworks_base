@@ -92,6 +92,7 @@ import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.tv.TvStatusBar;
+import com.android.systemui.theme.ThemeOverlayController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.systemui.util.leak.GarbageMonitor;
 import com.android.systemui.volume.VolumeUI;
@@ -181,6 +182,18 @@ public abstract class CarSystemUIBinder {
     @ClassKey(SizeCompatModeActivityController.class)
     public abstract SystemUI bindsSizeCompatModeActivityController(
             SizeCompatModeActivityController sysui);
+
+    /** Inject into SliceBroadcastRelayHandler. */
+    @Binds
+    @IntoMap
+    @ClassKey(SliceBroadcastRelayHandler.class)
+    public abstract SystemUI bindSliceBroadcastRelayHandler(SliceBroadcastRelayHandler sysui);
+
+    /** Inject into ThemeOverlayController. */
+    @Binds
+    @IntoMap
+    @ClassKey(ThemeOverlayController.class)
+    public abstract SystemUI bindThemeOverlayController(ThemeOverlayController sysui);
 
     /** Inject into StatusBar. */
     @Binds

@@ -87,6 +87,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -319,6 +320,7 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private boolean mWaitingUntilKeyguardVisible = false;
     private final LockPatternUtils mLockPatternUtils;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private boolean mKeyguardDonePending = false;
     private boolean mHideAnimationRun = false;
     private boolean mHideAnimationRunning = false;
@@ -685,8 +687,10 @@ public class KeyguardViewMediator extends SystemUI {
     public KeyguardViewMediator(
             Context context,
             FalsingManager falsingManager,
-            LockPatternUtils lockPatternUtils) {
-        this(context, falsingManager, lockPatternUtils, SystemUIFactory.getInstance());
+            LockPatternUtils lockPatternUtils,
+            BroadcastDispatcher broadcastDispatcher) {
+        this(context, falsingManager, lockPatternUtils, broadcastDispatcher,
+                SystemUIFactory.getInstance());
     }
 
     @VisibleForTesting
@@ -694,10 +698,12 @@ public class KeyguardViewMediator extends SystemUI {
             Context context,
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
+            BroadcastDispatcher broadcastDispatcher,
             SystemUIFactory systemUIFactory) {
         super(context);
         mFalsingManager = falsingManager;
         mLockPatternUtils = lockPatternUtils;
+        mBroadcastDispatcher = broadcastDispatcher;
         mStatusBarKeyguardViewManager = systemUIFactory.createStatusBarKeyguardViewManager(
                 mContext,
                 mViewMediatorCallback,
@@ -722,7 +728,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SHUTDOWN);
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
 
         final IntentFilter delayedActionFilter = new IntentFilter();
         delayedActionFilter.addAction(DELAYED_KEYGUARD_ACTION);

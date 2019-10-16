@@ -42,6 +42,9 @@ import android.widget.Toast;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
+import javax.inject.Inject;
 
 public class UsbDebuggingActivity extends AlertActivity
                                   implements DialogInterface.OnClickListener {
@@ -49,12 +52,20 @@ public class UsbDebuggingActivity extends AlertActivity
 
     private CheckBox mAlwaysAllow;
     private UsbDisconnectedReceiver mDisconnectedReceiver;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private String mKey;
+
+    @Inject
+    public UsbDebuggingActivity(BroadcastDispatcher broadcastDispatcher) {
+        super();
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
 
     @Override
     public void onCreate(Bundle icicle) {
         Window window = getWindow();
-        window.addSystemFlags(WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        window.addSystemFlags(
+                WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
 
         super.onCreate(icicle);
@@ -138,13 +149,13 @@ public class UsbDebuggingActivity extends AlertActivity
     public void onStart() {
         super.onStart();
         IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
-        registerReceiver(mDisconnectedReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
     }
 
     @Override
     protected void onStop() {
         if (mDisconnectedReceiver != null) {
-            unregisterReceiver(mDisconnectedReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
         }
         super.onStop();
     }

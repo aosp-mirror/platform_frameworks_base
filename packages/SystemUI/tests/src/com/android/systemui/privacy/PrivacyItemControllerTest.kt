@@ -36,6 +36,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
+import com.android.systemui.broadcast.BroadcastDispatcher
 import org.hamcrest.Matchers.hasItem
 import org.hamcrest.Matchers.not
 import org.hamcrest.Matchers.nullValue
@@ -62,7 +63,6 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
@@ -89,6 +89,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     private lateinit var callback: PrivacyItemController.Callback
     @Mock
     private lateinit var userManager: UserManager
+    @Mock
+    private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Captor
     private lateinit var argCaptor: ArgumentCaptor<List<PrivacyItem>>
     @Captor
@@ -99,7 +101,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     private lateinit var handler: Handler
 
     fun PrivacyItemController(context: Context) =
-            PrivacyItemController(context, appOpsController, handler, handler)
+            PrivacyItemController(context, appOpsController, handler, handler, broadcastDispatcher)
 
     @Before
     fun setup() {
@@ -180,14 +182,12 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
     @Test
     fun testRegisterReceiver_allUsers() {
-        val spiedContext = spy(mContext)
-        val itemController = PrivacyItemController(spiedContext)
-        itemController.addCallback(callback)
+        privacyItemController.addCallback(callback)
         testableLooper.processAllMessages()
-        verify(spiedContext, atLeastOnce()).registerReceiverAsUser(
-                eq(itemController.userSwitcherReceiver), eq(UserHandle.ALL), any(), eq(null),
-                eq(null))
-        verify(spiedContext, never()).unregisterReceiver(eq(itemController.userSwitcherReceiver))
+        verify(broadcastDispatcher, atLeastOnce()).registerReceiver(
+                eq(privacyItemController.userSwitcherReceiver), any(), eq(null), eq(UserHandle.ALL))
+        verify(broadcastDispatcher, never())
+                .unregisterReceiver(eq(privacyItemController.userSwitcherReceiver))
     }
 
     @Test

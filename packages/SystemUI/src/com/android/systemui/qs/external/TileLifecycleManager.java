@@ -38,6 +38,8 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
 import java.util.Objects;
 import java.util.Set;
 
@@ -72,6 +74,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private final UserHandle mUser;
     private final IBinder mToken = new Binder();
     private final PackageManagerAdapter mPackageManagerAdapter;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private Set<Integer> mQueuedMessages = new ArraySet<>();
     private QSTileServiceWrapper mWrapper;
@@ -88,13 +91,15 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     private boolean mIsBound;
 
     public TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
-            Intent intent, UserHandle user) {
-        this(handler, context, service, tile, intent, user, new PackageManagerAdapter(context));
+            Intent intent, UserHandle user, BroadcastDispatcher broadcastDispatcher) {
+        this(handler, context, service, tile, intent, user, new PackageManagerAdapter(context),
+                broadcastDispatcher);
     }
 
     @VisibleForTesting
     TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
-            Intent intent, UserHandle user, PackageManagerAdapter packageManagerAdapter) {
+            Intent intent, UserHandle user, PackageManagerAdapter packageManagerAdapter,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
@@ -102,6 +107,7 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mIntent.putExtra(TileService.EXTRA_TOKEN, mToken);
         mUser = user;
         mPackageManagerAdapter = packageManagerAdapter;
+        mBroadcastDispatcher = broadcastDispatcher;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
     }
 
@@ -306,13 +312,14 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         filter.addDataScheme("package");
         mContext.registerReceiverAsUser(this, mUser, filter, null, mHandler);
         filter = new IntentFilter(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiverAsUser(this, mUser, filter, null, mHandler);
+        mBroadcastDispatcher.registerReceiver(this, filter, mHandler, mUser);
         mReceiverRegistered = true;
     }
 
     private void stopPackageListening() {
         if (DEBUG) Log.d(TAG, "stopPackageListening");
         mContext.unregisterReceiver(this);
+        mBroadcastDispatcher.unregisterReceiver(this);
         mReceiverRegistered = false;
     }
 

@@ -29,10 +29,19 @@ import android.os.SystemProperties;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+
+import javax.inject.Inject;
 
 public class UsbDebuggingSecondaryUserActivity extends AlertActivity
         implements DialogInterface.OnClickListener {
     private UsbDisconnectedReceiver mDisconnectedReceiver;
+    private final BroadcastDispatcher mBroadcastDispatcher;
+
+    @Inject
+    public UsbDebuggingSecondaryUserActivity(BroadcastDispatcher broadcastDispatcher) {
+        mBroadcastDispatcher = broadcastDispatcher;
+    }
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -74,13 +83,13 @@ public class UsbDebuggingSecondaryUserActivity extends AlertActivity
         super.onStart();
 
         IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
-        registerReceiver(mDisconnectedReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
     }
 
     @Override
     protected void onStop() {
         if (mDisconnectedReceiver != null) {
-            unregisterReceiver(mDisconnectedReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
         }
         super.onStop();
     }

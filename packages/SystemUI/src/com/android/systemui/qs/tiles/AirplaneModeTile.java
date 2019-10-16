@@ -33,6 +33,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.GlobalSetting;
@@ -46,13 +47,16 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     private final Icon mIcon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_airplane);
     private final GlobalSetting mSetting;
     private final ActivityStarter mActivityStarter;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private boolean mListening;
 
     @Inject
-    public AirplaneModeTile(QSHost host, ActivityStarter activityStarter) {
+    public AirplaneModeTile(QSHost host, ActivityStarter activityStarter,
+            BroadcastDispatcher broadcastDispatcher) {
         super(host);
         mActivityStarter = activityStarter;
+        mBroadcastDispatcher = broadcastDispatcher;
 
         mSetting = new GlobalSetting(mContext, mHandler, Global.AIRPLANE_MODE_ON) {
             @Override
@@ -133,9 +137,9 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
         if (listening) {
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-            mContext.registerReceiver(mReceiver, filter);
+            mBroadcastDispatcher.registerReceiver(mReceiver, filter);
         } else {
-            mContext.unregisterReceiver(mReceiver);
+            mBroadcastDispatcher.unregisterReceiver(mReceiver);
         }
         mSetting.setListening(listening);
     }

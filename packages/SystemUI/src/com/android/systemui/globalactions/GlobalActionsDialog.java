@@ -146,6 +146,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final DevicePolicyManager mDevicePolicyManager;
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardManager mKeyguardManager;
+    private final BroadcastDispatcher mBroadcastDispatcher;
 
     private ArrayList<Action> mItems;
     private ActionsDialog mDialog;
@@ -183,13 +184,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Context.DEVICE_POLICY_SERVICE);
         mLockPatternUtils = new LockPatternUtils(mContext);
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mBroadcastDispatcher = Dependency.get(BroadcastDispatcher.class);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
-        Dependency.get(BroadcastDispatcher.class).registerReceiver(mBroadcastReceiver, filter);
+        mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter);
 
         ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -901,7 +903,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mAdapter.notifyDataSetChanged();
         if (mShowSilentToggle) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
-            mContext.registerReceiver(mRingerModeReceiver, filter);
+            mBroadcastDispatcher.registerReceiver(mRingerModeReceiver, filter);
         }
     }
 
@@ -919,7 +921,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mWindowManagerFuncs.onGlobalActionsHidden();
         if (mShowSilentToggle) {
             try {
-                mContext.unregisterReceiver(mRingerModeReceiver);
+                mBroadcastDispatcher.unregisterReceiver(mRingerModeReceiver);
             } catch (IllegalArgumentException ie) {
                 // ignore this
                 Log.w(TAG, ie);

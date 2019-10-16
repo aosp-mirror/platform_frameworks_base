@@ -44,6 +44,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dependency;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import java.util.ArrayList;
 
@@ -281,12 +282,13 @@ public class BrightnessController implements ToggleSlider.Listener {
         }
     };
 
-    public BrightnessController(Context context, ToggleSlider control) {
+    public BrightnessController(Context context, ToggleSlider control,
+            BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mControl = control;
         mControl.setMax(GAMMA_SPACE_MAX);
         mBackgroundHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
-        mUserTracker = new CurrentUserTracker(mContext) {
+        mUserTracker = new CurrentUserTracker(broadcastDispatcher) {
             @Override
             public void onUserSwitched(int newUserId) {
                 mBackgroundHandler.post(mUpdateModeRunnable);

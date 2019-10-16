@@ -34,6 +34,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.BgHandler
 import com.android.systemui.dagger.qualifiers.MainHandler
 import java.io.FileDescriptor
@@ -47,10 +48,11 @@ fun isPermissionsHubEnabled() = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_P
 
 @Singleton
 class PrivacyItemController @Inject constructor(
-    val context: Context,
+    private val context: Context,
     private val appOpsController: AppOpsController,
     @MainHandler private val uiHandler: Handler,
-    @BgHandler private val bgHandler: Handler
+    @BgHandler private val bgHandler: Handler,
+    private val broadcastDispatcher: BroadcastDispatcher
 ) : Dumpable {
 
     @VisibleForTesting
@@ -138,15 +140,15 @@ class PrivacyItemController @Inject constructor(
     }
 
     private fun unregisterReceiver() {
-        context.unregisterReceiver(userSwitcherReceiver)
+        broadcastDispatcher.unregisterReceiver(userSwitcherReceiver)
     }
 
     private fun registerReceiver() {
-        context.registerReceiverAsUser(userSwitcherReceiver, UserHandle.ALL, IntentFilter().apply {
+        broadcastDispatcher.registerReceiver(userSwitcherReceiver, IntentFilter().apply {
             intents.forEach {
                 addAction(it)
             }
-        }, null, null)
+        }, null /* handler */, UserHandle.ALL)
     }
 
     private fun update(updateUsers: Boolean) {

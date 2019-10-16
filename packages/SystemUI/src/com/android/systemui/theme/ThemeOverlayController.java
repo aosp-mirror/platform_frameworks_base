@@ -36,6 +36,7 @@ import android.util.Log;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 
 import com.google.android.collect.Sets;
 
@@ -44,6 +45,9 @@ import org.json.JSONObject;
 
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Controls the application of theme overlays across the system for all users.
@@ -54,15 +58,19 @@ import java.util.Set;
  * - Observing work profile changes and applying overlays from the primary user to their
  * associated work profiles
  */
+@Singleton
 public class ThemeOverlayController extends SystemUI {
     private static final String TAG = "ThemeOverlayController";
     private static final boolean DEBUG = false;
 
     private ThemeOverlayManager mThemeManager;
     private UserManager mUserManager;
+    private BroadcastDispatcher mBroadcastDispatcher;
 
-    public ThemeOverlayController(Context context) {
+    @Inject
+    public ThemeOverlayController(Context context, BroadcastDispatcher broadcastDispatcher) {
         super(context);
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     @Override
@@ -78,13 +86,13 @@ public class ThemeOverlayController extends SystemUI {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+        mBroadcastDispatcher.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (DEBUG) Log.d(TAG, "Updating overlays for user switch / profile added.");
                 updateThemeOverlays();
             }
-        }, UserHandle.ALL, filter, null, bgHandler);
+        }, filter, bgHandler, UserHandle.ALL);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 false,

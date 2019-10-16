@@ -41,6 +41,7 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.PrivacyItemControllerKt;
@@ -138,7 +139,7 @@ public class PhoneStatusBarPolicy
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
     public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
-            CommandQueue commandQueue) {
+            CommandQueue commandQueue, BroadcastDispatcher broadcastDispatcher) {
         mContext = context;
         mIconController = iconController;
         mCast = Dependency.get(CastController.class);
@@ -184,7 +185,7 @@ public class PhoneStatusBarPolicy
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-        mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+        broadcastDispatcher.registerReceiver(mIntentReceiver, filter, mHandler);
 
         // listen for user / profile change.
         try {
