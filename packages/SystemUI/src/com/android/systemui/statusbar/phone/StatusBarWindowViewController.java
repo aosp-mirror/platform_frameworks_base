@@ -93,7 +93,8 @@ public class StatusBarWindowViewController {
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
-            DozeLog dozeLog) {
+            DozeLog dozeLog,
+            DozeParameters dozeParameters) {
         mView = view;
         mFalsingManager = falsingManager;
 
@@ -113,7 +114,8 @@ public class StatusBarWindowViewController {
                 notificationEntryManager,
                 keyguardStateController,
                 statusBarStateController,
-                dozeLog);
+                dozeLog,
+                dozeParameters);
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         notificationPanelView.setVisibility(View.INVISIBLE);
@@ -485,6 +487,7 @@ public class StatusBarWindowViewController {
         private final NotificationLockscreenUserManager mNotificationLockScreenUserManager;
         private final NotificationEntryManager mNotificationEntryManager;
         private final DozeLog mDozeLog;
+        private final DozeParameters mDozeParameters;
         private StatusBarWindowView mView;
 
         @Inject
@@ -501,7 +504,8 @@ public class StatusBarWindowViewController {
                 NotificationEntryManager notificationEntryManager,
                 KeyguardStateController keyguardStateController,
                 StatusBarStateController statusBarStateController,
-                DozeLog dozeLog) {
+                DozeLog dozeLog,
+                DozeParameters dozeParameters) {
             mInjectionInflationController = injectionInflationController;
             mCoordinator = coordinator;
             mPulseExpansionHandler = pulseExpansionHandler;
@@ -515,6 +519,7 @@ public class StatusBarWindowViewController {
             mKeyguardStateController = keyguardStateController;
             mStatusBarStateController = (SysuiStatusBarStateController) statusBarStateController;
             mDozeLog = dozeLog;
+            mDozeParameters = dozeParameters;
         }
 
         /**
@@ -552,7 +557,8 @@ public class StatusBarWindowViewController {
                     mNotificationEntryManager,
                     mKeyguardStateController,
                     mStatusBarStateController,
-                    mDozeLog);
+                    mDozeLog,
+                    mDozeParameters);
         }
     }
 }

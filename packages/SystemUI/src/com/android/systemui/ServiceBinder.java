@@ -40,6 +40,12 @@ public abstract class ServiceBinder {
     /** */
     @Binds
     @IntoMap
+    @ClassKey(ImageWallpaper.class)
+    public abstract Service bindImageWallpaper(ImageWallpaper service);
+
+    /** */
+    @Binds
+    @IntoMap
     @ClassKey(KeyguardService.class)
     public abstract Service bindKeyguardService(KeyguardService service);
 }

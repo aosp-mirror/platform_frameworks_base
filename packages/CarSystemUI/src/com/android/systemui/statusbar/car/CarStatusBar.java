@@ -113,6 +113,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -304,7 +305,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
-            NotifLog notifLog) {
+            NotifLog notifLog,
+            DozeParameters dozeParameters) {
         super(
                 context,
                 lightBarController,
@@ -360,7 +362,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 configurationController,
                 statusBarWindowController,
                 statusBarWindowViewControllerBuild,
-                notifLog);
+                notifLog,
+                dozeParameters);
         mNavigationBarController = navigationBarController;
     }
 

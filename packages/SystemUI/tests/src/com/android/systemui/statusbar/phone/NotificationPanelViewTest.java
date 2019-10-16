@@ -116,6 +116,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private FalsingManager mFalsingManager;
     @Mock
     private KeyguardBypassController mKeyguardBypassController;
+    @Mock private DozeParameters mDozeParameters;
     private NotificationPanelView mNotificationPanelView;
 
     @Before
@@ -130,10 +131,11 @@ public class NotificationPanelViewTest extends SysuiTestCase {
         mDependency.injectMockDependency(ConfigurationController.class);
         mDependency.injectMockDependency(ZenModeController.class);
         NotificationWakeUpCoordinator coordinator =
-                new NotificationWakeUpCoordinator(mContext,
+                new NotificationWakeUpCoordinator(
                         mock(HeadsUpManagerPhone.class),
                         new StatusBarStateControllerImpl(),
-                        mKeyguardBypassController);
+                        mKeyguardBypassController,
+                        mDozeParameters);
         PulseExpansionHandler expansionHandler = new PulseExpansionHandler(
                 mContext,
                 coordinator,
@@ -239,7 +241,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                             mock(NotifLog.class)),
                     mock(KeyguardStateController.class),
                     statusBarStateController,
-                    mock(DozeLog.class));
+                    mock(DozeLog.class),
+                    mDozeParameters);
             mNotificationStackScroller = mNotificationStackScrollLayout;
             mKeyguardStatusView = NotificationPanelViewTest.this.mKeyguardStatusView;
             mKeyguardStatusBar = NotificationPanelViewTest.this.mKeyguardStatusBar;

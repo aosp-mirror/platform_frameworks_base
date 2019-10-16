@@ -37,10 +37,10 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationWakeUpCoordinator @Inject constructor(
-        private val mContext: Context,
         private val mHeadsUpManagerPhone: HeadsUpManagerPhone,
         private val statusBarStateController: StatusBarStateController,
-        private val bypassController: KeyguardBypassController)
+        private val bypassController: KeyguardBypassController,
+        private val dozeParameters: DozeParameters)
     : OnHeadsUpChangedListener, StatusBarStateController.StateListener,
         PanelExpansionListener {
 
@@ -67,7 +67,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
     private var mVisibilityAmount = 0.0f
     private var mLinearVisibilityAmount = 0.0f
     private val mEntrySetToClearWhenFinished = mutableSetOf<NotificationEntry>()
-    private val mDozeParameters: DozeParameters
     private var pulseExpanding: Boolean = false
     private val wakeUpListeners = arrayListOf<WakeUpListener>()
     private var state: Int = StatusBarState.KEYGUARD
@@ -146,7 +145,6 @@ class NotificationWakeUpCoordinator @Inject constructor(
     init {
         mHeadsUpManagerPhone.addListener(this)
         statusBarStateController.addCallback(this)
-        mDozeParameters = DozeParameters.getInstance(mContext)
         addListener(object : WakeUpListener {
             override fun onFullyHiddenChanged(isFullyHidden: Boolean) {
                 if (isFullyHidden && mNotificationsVisibleForExpansion) {
@@ -377,7 +375,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     }
 
     private fun shouldAnimateVisibility() =
-            mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking()
+            dozeParameters.getAlwaysOn() && !dozeParameters.getDisplayNeedsBlanking()
 
     interface WakeUpListener {
         /**

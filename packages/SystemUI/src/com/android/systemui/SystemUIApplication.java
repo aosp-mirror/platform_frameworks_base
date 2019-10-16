@@ -237,7 +237,7 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                                 if (statusBar != null) {
                                     plugin.setup(statusBar.getStatusBarWindow(),
                                             statusBar.getNavigationBarView(), new Callback(plugin),
-                                            DozeParameters.getInstance(getBaseContext()));
+                                            Dependency.get(DozeParameters.class));
                                 }
                             }
                         });

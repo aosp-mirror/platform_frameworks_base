@@ -146,6 +146,7 @@ public class NotificationPanelView extends PanelView implements
      * Fling until QS is completely hidden.
      */
     public static final int FLING_HIDE = 2;
+    private final DozeParameters mDozeParameters;
 
     private double mQqsSplitFraction;
 
@@ -454,18 +455,15 @@ public class NotificationPanelView extends PanelView implements
     @Inject
     public NotificationPanelView(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             InjectionInflationController injectionInflationController,
-            NotificationWakeUpCoordinator coordinator,
-            PulseExpansionHandler pulseExpansionHandler,
+            NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
-            KeyguardBypassController bypassController,
-            FalsingManager falsingManager,
-            PluginManager pluginManager,
-            ShadeController shadeController,
+            KeyguardBypassController bypassController, FalsingManager falsingManager,
+            PluginManager pluginManager, ShadeController shadeController,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationEntryManager notificationEntryManager,
             KeyguardStateController keyguardStateController,
-            StatusBarStateController statusBarStateController,
-            DozeLog dozeLog) {
+            StatusBarStateController statusBarStateController, DozeLog dozeLog,
+            DozeParameters dozeParameters) {
         super(context, attrs, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController);
         setWillNotDraw(!DEBUG);
@@ -480,6 +478,7 @@ public class NotificationPanelView extends PanelView implements
         mCommandQueue = getComponent(context, CommandQueue.class);
         mDisplayId = context.getDisplayId();
         mPulseExpansionHandler = pulseExpansionHandler;
+        mDozeParameters = dozeParameters;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
@@ -3435,9 +3434,8 @@ public class NotificationPanelView extends PanelView implements
 
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
-        DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
-        final boolean animatePulse = !dozeParameters.getDisplayNeedsBlanking()
-                && dozeParameters.getAlwaysOn();
+        final boolean animatePulse = !mDozeParameters.getDisplayNeedsBlanking()
+                && mDozeParameters.getAlwaysOn();
         if (animatePulse) {
             mAnimateNextPositionUpdate = true;
         }
