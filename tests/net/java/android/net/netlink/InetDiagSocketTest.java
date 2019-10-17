@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -281,6 +282,107 @@ public class InetDiagSocketTest {
                 NLM_F_REQUEST);
 
         assertArrayEquals(INET_DIAG_REQ_V2_TCP_INET6_BYTES, msg);
+    }
+
+    // Hexadecimal representation of InetDiagReqV2 request with extension, INET_DIAG_INFO.
+    private static final String INET_DIAG_REQ_V2_TCP_INET_INET_DIAG_HEX =
+            // struct nlmsghdr
+            "48000000" +     // length = 72
+            "1400" +         // type = SOCK_DIAG_BY_FAMILY
+            "0100" +         // flags = NLM_F_REQUEST
+            "00000000" +     // seqno
+            "00000000" +     // pid (0 == kernel)
+            // struct inet_diag_req_v2
+            "02" +           // family = AF_INET
+            "06" +           // protcol = IPPROTO_TCP
+            "02" +           // idiag_ext = INET_DIAG_INFO
+            "00" +           // pad
+            "ffffffff" +   // idiag_states
+            // inet_diag_sockid
+            "3039" +         // idiag_sport = 12345
+            "d431" +         // idiag_dport = 54321
+            "01020304000000000000000000000000" + // idiag_src = 1.2.3.4
+            "08080404000000000000000000000000" + // idiag_dst = 8.8.4.4
+            "00000000" +     // idiag_if
+            "ffffffffffffffff"; // idiag_cookie = INET_DIAG_NOCOOKIE
+
+    private static final byte[] INET_DIAG_REQ_V2_TCP_INET_INET_DIAG_BYTES =
+            HexEncoding.decode(INET_DIAG_REQ_V2_TCP_INET_INET_DIAG_HEX.toCharArray(), false);
+    private static final int TCP_ALL_STATES = 0xffffffff;
+    @Test
+    public void testInetDiagReqV2TcpInetWithExt() throws Exception {
+        InetSocketAddress local = new InetSocketAddress(
+                InetAddress.getByName("1.2.3.4"), 12345);
+        InetSocketAddress remote = new InetSocketAddress(InetAddress.getByName("8.8.4.4"),
+                54321);
+        byte[] msg = InetDiagMessage.InetDiagReqV2(IPPROTO_TCP, local, remote, AF_INET,
+                NLM_F_REQUEST, 0 /* pad */, 2 /* idiagExt */, TCP_ALL_STATES);
+
+        assertArrayEquals(INET_DIAG_REQ_V2_TCP_INET_INET_DIAG_BYTES, msg);
+
+        local = new InetSocketAddress(
+                InetAddress.getByName("fe80::86c9:b2ff:fe6a:ed4b"), 42462);
+        remote = new InetSocketAddress(InetAddress.getByName("8.8.8.8"),
+                47473);
+        msg = InetDiagMessage.InetDiagReqV2(IPPROTO_TCP, local, remote, AF_INET6,
+                NLM_F_REQUEST, 0 /* pad */, 0 /* idiagExt */, TCP_ALL_STATES);
+
+        assertArrayEquals(INET_DIAG_REQ_V2_TCP_INET6_BYTES, msg);
+    }
+
+    // Hexadecimal representation of InetDiagReqV2 request with no socket specified.
+    private static final String INET_DIAG_REQ_V2_TCP_INET6_NO_ID_SPECIFIED_HEX =
+            // struct nlmsghdr
+            "48000000" +     // length = 72
+            "1400" +         // type = SOCK_DIAG_BY_FAMILY
+            "0100" +         // flags = NLM_F_REQUEST
+            "00000000" +     // seqno
+            "00000000" +     // pid (0 == kernel)
+            // struct inet_diag_req_v2
+            "0a" +           // family = AF_INET6
+            "06" +           // protcol = IPPROTO_TCP
+            "00" +           // idiag_ext
+            "00" +           // pad
+            "ffffffff" +     // idiag_states
+            // inet_diag_sockid
+            "0000" +         // idiag_sport
+            "0000" +         // idiag_dport
+            "00000000000000000000000000000000" + // idiag_src
+            "00000000000000000000000000000000" + // idiag_dst
+            "00000000" +     // idiag_if
+            "0000000000000000"; // idiag_cookie
+
+    private static final byte[] INET_DIAG_REQ_V2_TCP_INET6_NO_ID_SPECIFED_BYTES =
+            HexEncoding.decode(INET_DIAG_REQ_V2_TCP_INET6_NO_ID_SPECIFIED_HEX.toCharArray(), false);
+
+    @Test
+    public void testInetDiagReqV2TcpInet6NoIdSpecified() throws Exception {
+        InetSocketAddress local = new InetSocketAddress(
+                InetAddress.getByName("fe80::fe6a:ed4b"), 12345);
+        InetSocketAddress remote = new InetSocketAddress(InetAddress.getByName("8.8.4.4"),
+                54321);
+        // Verify no socket specified if either local or remote socket address is null.
+        byte[] msgExt = InetDiagMessage.InetDiagReqV2(IPPROTO_TCP, null, null, AF_INET6,
+                NLM_F_REQUEST, 0 /* pad */, 0 /* idiagExt */, TCP_ALL_STATES);
+        byte[] msg;
+        try {
+            msg = InetDiagMessage.InetDiagReqV2(IPPROTO_TCP, null, remote, AF_INET6,
+                    NLM_F_REQUEST);
+            fail("Both remote and local should be null, expected UnknownHostException");
+        } catch (NullPointerException e) {
+        }
+
+        try {
+            msg = InetDiagMessage.InetDiagReqV2(IPPROTO_TCP, local, null, AF_INET6,
+                    NLM_F_REQUEST, 0 /* pad */, 0 /* idiagExt */, TCP_ALL_STATES);
+            fail("Both remote and local should be null, expected UnknownHostException");
+        } catch (NullPointerException e) {
+        }
+
+        msg = InetDiagMessage.InetDiagReqV2(IPPROTO_TCP, null, null, AF_INET6,
+                NLM_F_REQUEST, 0 /* pad */, 0 /* idiagExt */, TCP_ALL_STATES);
+        assertArrayEquals(INET_DIAG_REQ_V2_TCP_INET6_NO_ID_SPECIFED_BYTES, msg);
+        assertArrayEquals(INET_DIAG_REQ_V2_TCP_INET6_NO_ID_SPECIFED_BYTES, msgExt);
     }
 
     // Hexadecimal representation of InetDiagReqV2 request.
