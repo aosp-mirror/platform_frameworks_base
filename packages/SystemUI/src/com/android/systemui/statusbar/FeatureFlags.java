@@ -16,16 +16,19 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.Dependency.BG_HANDLER_NAME;
+
 import android.annotation.NonNull;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Class to manage simple DeviceConfig-based feature flags.
@@ -36,16 +39,22 @@ import javax.inject.Inject;
  *  $ adb shell device_config put systemui <key> <true|false>
 *  }
  *
- * You will probably need to @{$ adb reboot} afterwards in order for the code to pick up the change.
+ * You will probably need to restart systemui for the changes to be picked up:
+ *
+ * {@code
+ *  $ adb shell am crash com.android.systemui
+ * }
  */
+@Singleton
 public class FeatureFlags {
     private final Map<String, Boolean> mCachedDeviceConfigFlags = new ArrayMap<>();
 
     @Inject
-    public FeatureFlags() {
+    public FeatureFlags(
+            @Named(BG_HANDLER_NAME) Handler bgHandler) {
         DeviceConfig.addOnPropertiesChangedListener(
                 "systemui",
-                new HandlerExecutor(new Handler(Looper.getMainLooper())),
+                new HandlerExecutor(bgHandler),
                 this::onPropertiesChanged);
     }
 
