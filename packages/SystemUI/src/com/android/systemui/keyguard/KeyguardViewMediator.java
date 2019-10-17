@@ -68,6 +68,7 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
@@ -685,16 +686,22 @@ public class KeyguardViewMediator extends SystemUI {
             Context context,
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils) {
+        this(context, falsingManager, lockPatternUtils, SystemUIFactory.getInstance());
+    }
+
+    @VisibleForTesting
+    KeyguardViewMediator(
+            Context context,
+            FalsingManager falsingManager,
+            LockPatternUtils lockPatternUtils,
+            SystemUIFactory systemUIFactory) {
         super(context);
-
         mFalsingManager = falsingManager;
-
         mLockPatternUtils = lockPatternUtils;
-        mStatusBarKeyguardViewManager =
-                SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(
-                        mContext,
-                        mViewMediatorCallback,
-                        mLockPatternUtils);
+        mStatusBarKeyguardViewManager = systemUIFactory.createStatusBarKeyguardViewManager(
+                mContext,
+                mViewMediatorCallback,
+                mLockPatternUtils);
     }
 
     public void userActivity() {
@@ -825,6 +832,9 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (this) {
             mDeviceInteractive = false;
             mGoingToSleep = true;
+
+            // Reset keyguard going away state so we can start listening for biometric auth
+            setKeyguardGoingAway(false);
 
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
@@ -1572,12 +1582,14 @@ public class KeyguardViewMediator extends SystemUI {
                     handleNotifyFinishedGoingToSleep();
                     break;
                 case NOTIFY_SCREEN_TURNING_ON:
-                    Trace.beginSection("KeyguardViewMediator#handleMessage NOTIFY_SCREEN_TURNING_ON");
+                    Trace.beginSection(
+                            "KeyguardViewMediator#handleMessage NOTIFY_SCREEN_TURNING_ON");
                     handleNotifyScreenTurningOn((IKeyguardDrawnCallback) msg.obj);
                     Trace.endSection();
                     break;
                 case NOTIFY_SCREEN_TURNED_ON:
-                    Trace.beginSection("KeyguardViewMediator#handleMessage NOTIFY_SCREEN_TURNED_ON");
+                    Trace.beginSection(
+                            "KeyguardViewMediator#handleMessage NOTIFY_SCREEN_TURNED_ON");
                     handleNotifyScreenTurnedOn();
                     Trace.endSection();
                     break;
@@ -1585,7 +1597,8 @@ public class KeyguardViewMediator extends SystemUI {
                     handleNotifyScreenTurnedOff();
                     break;
                 case NOTIFY_STARTED_WAKING_UP:
-                    Trace.beginSection("KeyguardViewMediator#handleMessage NOTIFY_STARTED_WAKING_UP");
+                    Trace.beginSection(
+                            "KeyguardViewMediator#handleMessage NOTIFY_STARTED_WAKING_UP");
                     handleNotifyStartedWakingUp();
                     Trace.endSection();
                     break;
@@ -1614,14 +1627,16 @@ public class KeyguardViewMediator extends SystemUI {
                     handleDismiss(message.getCallback(), message.getMessage());
                     break;
                 case START_KEYGUARD_EXIT_ANIM:
-                    Trace.beginSection("KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
+                    Trace.beginSection(
+                            "KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
                     mFalsingManager.onSucccessfulUnlock();
                     Trace.endSection();
                     break;
                 case KEYGUARD_DONE_PENDING_TIMEOUT:
-                    Trace.beginSection("KeyguardViewMediator#handleMessage KEYGUARD_DONE_PENDING_TIMEOUT");
+                    Trace.beginSection("KeyguardViewMediator#handleMessage"
+                            + " KEYGUARD_DONE_PENDING_TIMEOUT");
                     Log.w(TAG, "Timeout while waiting for activity drawn!");
                     Trace.endSection();
                     break;
@@ -1799,8 +1814,7 @@ public class KeyguardViewMediator extends SystemUI {
             mHideAnimationRun = false;
             adjustStatusBarLocked();
             userActivity();
-            mUpdateMonitor.setKeyguardGoingAway(false /* away */);
-            mStatusBarWindowController.setKeyguardGoingAway(false /* goingAway */);
+            setKeyguardGoingAway(false);
             mShowKeyguardWakeLock.release();
         }
         mKeyguardDisplayManager.show();
@@ -1832,8 +1846,7 @@ public class KeyguardViewMediator extends SystemUI {
                         .KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
             }
 
-            mUpdateMonitor.setKeyguardGoingAway(true /* goingAway */);
-            mStatusBarWindowController.setKeyguardGoingAway(true /* goingAway */);
+            setKeyguardGoingAway(true);
 
             // Don't actually hide the Keyguard at the moment, wait for window
             // manager until it tells us it's safe to do so with
@@ -2066,6 +2079,11 @@ public class KeyguardViewMediator extends SystemUI {
     private void resetKeyguardDonePendingLocked() {
         mKeyguardDonePending = false;
         mHandler.removeMessages(KEYGUARD_DONE_PENDING_TIMEOUT);
+    }
+
+    private void setKeyguardGoingAway(boolean goingAway) {
+        mUpdateMonitor.setKeyguardGoingAway(goingAway);
+        mStatusBarWindowController.setKeyguardGoingAway(goingAway);
     }
 
     @Override
