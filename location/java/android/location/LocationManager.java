@@ -1971,7 +1971,7 @@ public class LocationManager {
     public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {}
 
     /**
-     * Registers a GPS Measurement callback which will run on a binder threadS.
+     * Registers a GPS Measurement callback which will run on a binder thread.
      *
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
