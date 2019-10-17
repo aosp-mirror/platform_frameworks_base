@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
+import android.os.PatternMatcher
 import android.os.UserHandle
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -48,6 +50,10 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         val user1 = UserHandle.of(1)
 
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+        const val TEST_ACTION = "TEST_ACTION"
+        const val TEST_SCHEME = "TEST_SCHEME"
+        const val TEST_PATH = "TEST_PATH"
+        const val TEST_TYPE = "test/type"
     }
 
     @Mock
@@ -83,6 +89,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
                 Handler(testableLooper.looper),
                 testableLooper.looper,
                 mapOf(0 to mockUBRUser0, 1 to mockUBRUser1))
+
+        // These should be valid filters
+        `when`(intentFilter.countActions()).thenReturn(1)
+        `when`(intentFilterOther.countActions()).thenReturn(1)
+        `when`(mockContext.user).thenReturn(user0)
     }
 
     @Test
@@ -127,6 +138,44 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         verify(mockUBRUser0).unregisterReceiver(broadcastReceiver)
         verify(mockUBRUser1, never()).unregisterReceiver(broadcastReceiver)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testFilterMustContainActions() {
+        val testFilter = IntentFilter()
+        broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testFilterMustNotContainDataScheme() {
+        val testFilter = IntentFilter(TEST_ACTION).apply {
+            addDataScheme(TEST_SCHEME)
+        }
+        broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testFilterMustNotContainDataAuthority() {
+        val testFilter = IntentFilter(TEST_ACTION).apply {
+            addDataAuthority(mock(IntentFilter.AuthorityEntry::class.java))
+        }
+        broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testFilterMustNotContainDataPath() {
+        val testFilter = IntentFilter(TEST_ACTION).apply {
+            addDataPath(TEST_PATH, PatternMatcher.PATTERN_LITERAL)
+        }
+        broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testFilterMustNotContainDataType() {
+        val testFilter = IntentFilter(TEST_ACTION).apply {
+            addDataType(TEST_TYPE)
+        }
+        broadcastDispatcher.registerReceiver(broadcastReceiver, testFilter)
     }
 
     private class TestBroadcastDispatcher(

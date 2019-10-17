@@ -23,6 +23,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.UserHandle
+import android.text.TextUtils
 import android.util.Log
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
@@ -55,7 +56,8 @@ private const val DEBUG = false
  * a given broadcast.
  *
  * Use only for IntentFilters with actions and optionally categories. It does not support,
- * permissions, schemes or data types. Cannot be used for getting sticky broadcasts.
+ * permissions, schemes, data types or data authorities.
+ * Cannot be used for getting sticky broadcasts.
  */
 @Singleton
 open class BroadcastDispatcher @Inject constructor (
@@ -72,11 +74,14 @@ open class BroadcastDispatcher @Inject constructor (
      *
      * @param receiver A receiver to dispatch the [Intent]
      * @param filter A filter to determine what broadcasts should be dispatched to this receiver.
-     *               It will only take into account actions and categories for filtering.
+     *               It will only take into account actions and categories for filtering. It must
+     *               have at least one action.
      * @param handler A handler to dispatch [BroadcastReceiver.onReceive]. By default, it is the
      *                main handler. Pass `null` to use the default.
      * @param user A user handle to determine which broadcast should be dispatched to this receiver.
      *             By default, it is the current user.
+     * @throws IllegalArgumentException if the filter has other constraints that are not actions or
+     *                                  categories or the filter has no actions.
      */
     @JvmOverloads
     fun registerReceiver(
@@ -85,10 +90,21 @@ open class BroadcastDispatcher @Inject constructor (
         handler: Handler? = mainHandler,
         user: UserHandle = context.user
     ) {
+        checkFilter(filter)
         this.handler
                 .obtainMessage(MSG_ADD_RECEIVER,
                 ReceiverData(receiver, filter, handler ?: mainHandler, user))
                 .sendToTarget()
+    }
+
+    private fun checkFilter(filter: IntentFilter) {
+        val sb = StringBuilder()
+        if (filter.countActions() == 0) sb.append("Filter must contain at least one action. ")
+        if (filter.countDataAuthorities() != 0) sb.append("Filter cannot contain DataAuthorities. ")
+        if (filter.countDataPaths() != 0) sb.append("Filter cannot contain DataPaths. ")
+        if (filter.countDataSchemes() != 0) sb.append("Filter cannot contain DataSchemes. ")
+        if (filter.countDataTypes() != 0) sb.append("Filter cannot contain DataTypes. ")
+        if (!TextUtils.isEmpty(sb)) throw IllegalArgumentException(sb.toString())
     }
 
     /**
