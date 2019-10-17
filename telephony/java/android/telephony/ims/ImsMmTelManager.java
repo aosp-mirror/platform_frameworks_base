@@ -25,14 +25,13 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
@@ -42,6 +41,7 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
 
 import java.lang.annotation.Retention;
@@ -49,6 +49,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * A manager for the MmTel (Multimedia Telephony) feature of an IMS network, given an associated
@@ -63,8 +64,6 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 public class ImsMmTelManager {
-
-    private static final String TAG = "ImsMmTelManager";
 
     /**
      * @hide
@@ -311,7 +310,7 @@ public class ImsMmTelManager {
         }
     }
 
-    private int mSubId;
+    private final int mSubId;
 
     /**
      * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
@@ -366,10 +365,6 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        if (!isImsAvailableOnDevice()) {
-            throw new ImsException("IMS not available on device.",
-                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
-        }
         c.setExecutor(executor);
         try {
             getITelephony().registerImsRegistrationCallback(mSubId, c.getBinder());
@@ -378,7 +373,7 @@ public class ImsMmTelManager {
                 // Rethrow as runtime error to keep API compatible.
                 throw new IllegalArgumentException(e.getMessage());
             } else {
-                throw new RuntimeException(e.getMessage());
+                throw new ImsException(e.getMessage(), e.errorCode);
             }
         } catch (RemoteException | IllegalStateException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
@@ -441,10 +436,6 @@ public class ImsMmTelManager {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
-        if (!isImsAvailableOnDevice()) {
-            throw new ImsException("IMS not available on device.",
-                    ImsException.CODE_ERROR_UNSUPPORTED_OPERATION);
-        }
         c.setExecutor(executor);
         try {
             getITelephony().registerMmTelCapabilityCallback(mSubId, c.getBinder());
@@ -453,7 +444,7 @@ public class ImsMmTelManager {
                 // Rethrow as runtime error to keep API compatible.
                 throw new IllegalArgumentException(e.getMessage());
             } else {
-                throw new RuntimeException(e.getMessage());
+                throw new ImsException(e.getMessage(), e.errorCode);
             }
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
@@ -614,6 +605,46 @@ public class ImsMmTelManager {
             return getITelephony().isAvailable(mSubId, capability, imsRegTech);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Query whether or not the requested MmTel capability is supported by the carrier on the
+     * specified network transport.
+     * <p>
+     * This is a configuration option and does not change. The only time this may change is if a
+     * new IMS configuration is loaded when there is a
+     * {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED} broadcast for this subscription.
+     * @param capability The capability that is being queried for support on the carrier network.
+     * @param transportType The transport type of the capability to check support for.
+     * @param callback A consumer containing a Boolean result specifying whether or not the
+     *                 capability is supported on this carrier network for the transport specified.
+     * @param executor The executor that the callback will be called with.
+     * @throws ImsException if the subscription is no longer valid or the IMS service is not
+     * available.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void isSupported(@MmTelFeature.MmTelCapabilities.MmTelCapability int capability,
+            @AccessNetworkConstants.TransportType int transportType,
+            @NonNull Consumer<Boolean> callback,
+            @NonNull @CallbackExecutor Executor executor) throws ImsException {
+        if (callback == null) {
+            throw new IllegalArgumentException("Must include a non-null Consumer.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        try {
+            getITelephony().isMmTelCapabilitySupported(mSubId, new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> callback.accept(result == 1));
+                }
+            }, capability, transportType);
+        } catch (ServiceSpecificException sse) {
+            throw new ImsException(sse.getMessage(), sse.errorCode);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -940,7 +971,7 @@ public class ImsMmTelManager {
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    boolean isTtyOverVolteEnabled() {
+    public boolean isTtyOverVolteEnabled() {
         try {
             return getITelephony().isTtyOverVolteEnabled(mSubId);
         } catch (ServiceSpecificException e) {
@@ -955,20 +986,39 @@ public class ImsMmTelManager {
         }
     }
 
-    private static boolean isImsAvailableOnDevice() {
-        IPackageManager pm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
-        if (pm == null) {
-            // For some reason package manger is not available.. This will fail internally anyways,
-            // so do not throw error and allow.
-            return true;
+    /**
+     * Get the status of the MmTel Feature registered on this subscription.
+     * @param callback A callback containing an Integer describing the current state of the
+     *                 MmTel feature, Which will be one of the following:
+     *                 {@link ImsFeature#STATE_UNAVAILABLE},
+     *                {@link ImsFeature#STATE_INITIALIZING},
+     *                {@link ImsFeature#STATE_READY}. Will be called using the executor
+     *                 specified when the service state has been retrieved from the IMS service.
+     * @param executor The executor that will be used to call the callback.
+     * @throws ImsException if the IMS service associated with this subscription is not available or
+     * the IMS service is not available.
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public void getFeatureState(@NonNull @ImsFeature.ImsState Consumer<Integer> callback,
+            @NonNull @CallbackExecutor Executor executor) throws ImsException {
+        if (callback == null) {
+            throw new IllegalArgumentException("Must include a non-null Consumer.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
         }
         try {
-            return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS, 0);
+            getITelephony().getImsMmTelFeatureState(mSubId, new IIntegerConsumer.Stub() {
+                @Override
+                public void accept(int result) {
+                    executor.execute(() -> callback.accept(result));
+                }
+            });
+        } catch (ServiceSpecificException sse) {
+            throw new ImsException(sse.getMessage(), sse.errorCode);
         } catch (RemoteException e) {
-            // For some reason package manger is not available.. This will fail internally anyways,
-            // so do not throw error and allow.
+            e.rethrowAsRuntimeException();
         }
-        return true;
     }
 
     private static ITelephony getITelephony() {
