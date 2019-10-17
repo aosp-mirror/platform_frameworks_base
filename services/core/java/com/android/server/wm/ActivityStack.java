@@ -2951,9 +2951,9 @@ class ActivityStack extends Task {
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                     getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
                     false /* deferResume */);
+        } else {
+            mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
-
-        mRootWindowContainer.resumeFocusedStacksTopActivities();
         return true;
     }
 
