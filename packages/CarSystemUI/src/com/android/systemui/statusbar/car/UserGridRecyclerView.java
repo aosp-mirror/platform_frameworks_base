@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Displays a GridLayout with icons for the users in the system to allow switching between users.
@@ -108,21 +107,16 @@ public class UserGridRecyclerView extends RecyclerView {
      * @return the adapter
      */
     public void buildAdapter() {
-        List<UserRecord> userRecords = createUserRecords(getAllUsers());
+        List<UserRecord> userRecords = createUserRecords(getUsersForUserGrid());
         mAdapter = new UserAdapter(mContext, userRecords);
         super.setAdapter(mAdapter);
     }
 
-    private List<UserInfo> getAllUsers() {
-        Stream<UserInfo> userListStream =
-                mUserManager.getUsers(/* excludeDying= */ true).stream();
-
-        if (UserManager.isHeadlessSystemUserMode()) {
-            userListStream =
-                    userListStream.filter(userInfo -> userInfo.id != UserHandle.USER_SYSTEM);
-        }
-        userListStream = userListStream.filter(userInfo -> userInfo.supportsSwitchToByUser());
-        return userListStream.collect(Collectors.toList());
+    private List<UserInfo> getUsersForUserGrid() {
+        return mUserManager.getUsers(/* excludeDying= */ true)
+                .stream()
+                .filter(UserInfo::supportsSwitchToByUser)
+                .collect(Collectors.toList());
     }
 
     private List<UserRecord> createUserRecords(List<UserInfo> userInfoList) {
@@ -189,7 +183,7 @@ public class UserGridRecyclerView extends RecyclerView {
 
     private void onUsersUpdate() {
         mAdapter.clearUsers();
-        mAdapter.updateUsers(createUserRecords(getAllUsers()));
+        mAdapter.updateUsers(createUserRecords(getUsersForUserGrid()));
         mAdapter.notifyDataSetChanged();
     }
 
