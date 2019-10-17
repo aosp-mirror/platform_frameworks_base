@@ -303,11 +303,11 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testPrepareWindowToDisplayDuringRelayout() {
         // Call prepareWindowToDisplayDuringRelayout for a window without FLAG_TURN_SCREEN_ON before
-        // calling setCurrentLaunchCanTurnScreenOn for windows with flag in the same appWindowToken.
-        final AppWindowToken appWindowToken = createAppWindowToken(mDisplayContent,
+        // calling setCurrentLaunchCanTurnScreenOn for windows with flag in the same activity.
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState first = createWindow(null, TYPE_APPLICATION, appWindowToken, "first");
-        final WindowState second = createWindow(null, TYPE_APPLICATION, appWindowToken, "second");
+        final WindowState first = createWindow(null, TYPE_APPLICATION, activity, "first");
+        final WindowState second = createWindow(null, TYPE_APPLICATION, activity, "second");
         second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
         testPrepareWindowToDisplayDuringRelayout(first, false /* expectedWakeupCalled */,
@@ -316,8 +316,8 @@ public class WindowStateTests extends WindowTestsBase {
                 false /* expectedCurrentLaunchCanTurnScreenOn */);
 
         // Call prepareWindowToDisplayDuringRelayout for two window that have FLAG_TURN_SCREEN_ON
-        // from the same appWindowToken. Only one should trigger the wakeup.
-        appWindowToken.setCurrentLaunchCanTurnScreenOn(true);
+        // from the same activity. Only one should trigger the wakeup.
+        activity.setCurrentLaunchCanTurnScreenOn(true);
         first.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
@@ -328,15 +328,15 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Without window flags, the state of ActivityRecord.canTurnScreenOn should still be able to
         // turn on the screen.
-        appWindowToken.setCurrentLaunchCanTurnScreenOn(true);
+        activity.setCurrentLaunchCanTurnScreenOn(true);
         first.mAttrs.flags &= ~WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-        doReturn(true).when(appWindowToken).canTurnScreenOn();
+        doReturn(true).when(activity).canTurnScreenOn();
 
         testPrepareWindowToDisplayDuringRelayout(first, true /* expectedWakeupCalled */,
                 false /* expectedCurrentLaunchCanTurnScreenOn */);
 
         // Call prepareWindowToDisplayDuringRelayout for a windows that are not children of an
-        // appWindowToken. Both windows have the FLAG_TURNS_SCREEN_ON so both should call wakeup
+        // activity. Both windows have the FLAG_TURNS_SCREEN_ON so both should call wakeup
         final WindowToken windowToken = WindowTestUtils.createTestWindowToken(FIRST_SUB_WINDOW,
                 mDisplayContent);
         final WindowState firstWindow = createWindow(null, TYPE_APPLICATION, windowToken,
@@ -371,7 +371,7 @@ public class WindowStateTests extends WindowTestsBase {
         }
         // If wakeup is expected to be called, the currentLaunchCanTurnScreenOn should be false
         // because the state will be consumed.
-        assertThat(appWindow.mAppToken.currentLaunchCanTurnScreenOn(),
+        assertThat(appWindow.mActivityRecord.currentLaunchCanTurnScreenOn(),
                 is(expectedCurrentLaunchCanTurnScreenOn));
     }
 
@@ -555,7 +555,7 @@ public class WindowStateTests extends WindowTestsBase {
 
         // Mock active recents animation
         RecentsAnimationController recentsController = mock(RecentsAnimationController.class);
-        when(recentsController.isAnimatingTask(win0.mAppToken.getTask())).thenReturn(true);
+        when(recentsController.isAnimatingTask(win0.mActivityRecord.getTask())).thenReturn(true);
         mWm.setRecentsAnimationController(recentsController);
         assertTrue(win0.cantReceiveTouchInput());
     }
@@ -563,14 +563,14 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCantReceiveTouchWhenAppTokenHiddenRequested() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mAppToken.hiddenRequested = true;
+        win0.mActivityRecord.hiddenRequested = true;
         assertTrue(win0.cantReceiveTouchInput());
     }
 
     @Test
     public void testCantReceiveTouchWhenShouldIgnoreInput() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mAppToken.getStack().setAdjustedForMinimizedDock(1 /* Any non 0 value works */);
+        win0.mActivityRecord.getStack().setAdjustedForMinimizedDock(1 /* Any non 0 value works */);
         assertTrue(win0.cantReceiveTouchInput());
     }
 }

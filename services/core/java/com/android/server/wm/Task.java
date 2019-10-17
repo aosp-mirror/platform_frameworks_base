@@ -291,7 +291,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         super.removeChild(child);
 
         if (mChildren.isEmpty()) {
-            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeAppToken: last token");
+            EventLog.writeEvent(WM_TASK_REMOVED, mTaskId, "removeActivity: last activity");
             if (mDeferRemoval) {
                 removeIfPossible();
             }
@@ -413,7 +413,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
 
     /**
      * Prepares the task bounds to be frozen with the current size. See
-     * {@link AppWindowToken#freezeBounds}.
+     * {@link ActivityRecord#freezeBounds}.
      */
     void prepareFreezingBounds() {
         mPreparedFrozenBounds.set(getBounds());
@@ -474,7 +474,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     private boolean getMaxVisibleBounds(Rect out) {
         boolean foundTop = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final AppWindowToken token = mChildren.get(i);
+            final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
             if (token.mIsExiting || token.isClientHidden() || token.hiddenRequested) {
                 continue;
@@ -651,24 +651,24 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
     }
 
     WindowState getTopVisibleAppMainWindow() {
-        final AppWindowToken token = getTopVisibleAppToken();
-        return token != null ? token.findMainWindow() : null;
+        final ActivityRecord activity = getTopVisibleActivity();
+        return activity != null ? activity.findMainWindow() : null;
     }
 
-    AppWindowToken getTopFullscreenAppToken() {
+    ActivityRecord getTopFullscreenActivity() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final AppWindowToken token = mChildren.get(i);
-            final WindowState win = token.findMainWindow();
+            final ActivityRecord activity = mChildren.get(i);
+            final WindowState win = activity.findMainWindow();
             if (win != null && win.mAttrs.isFullscreen()) {
-                return token;
+                return activity;
             }
         }
         return null;
     }
 
-    AppWindowToken getTopVisibleAppToken() {
+    ActivityRecord getTopVisibleActivity() {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final AppWindowToken token = mChildren.get(i);
+            final ActivityRecord token = mChildren.get(i);
             // skip hidden (or about to hide) apps
             if (!token.mIsExiting && !token.isClientHidden() && !token.hiddenRequested) {
                 return token;
@@ -786,8 +786,8 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         super.writeToProto(proto, WINDOW_CONTAINER, logLevel);
         proto.write(ID, mTaskId);
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final AppWindowToken appWindowToken = mChildren.get(i);
-            appWindowToken.writeToProto(proto, APP_WINDOW_TOKENS, logLevel);
+            final ActivityRecord activity = mChildren.get(i);
+            activity.writeToProto(proto, APP_WINDOW_TOKENS, logLevel);
         }
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, BOUNDS);
@@ -813,9 +813,9 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
         final String quadruplePrefix = triplePrefix + "  ";
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final AppWindowToken wtoken = mChildren.get(i);
-            pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
-            wtoken.dump(pw, quadruplePrefix, dumpAll);
+            final ActivityRecord activity = mChildren.get(i);
+            pw.println(triplePrefix + "Activity #" + i + " " + activity);
+            activity.dump(pw, quadruplePrefix, dumpAll);
         }
     }
 

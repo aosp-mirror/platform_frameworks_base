@@ -4984,7 +4984,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 pw.println("(not running)");
             }
             if (dumpAll) {
-                r.dump(pw, innerPrefix);
+                r.dump(pw, innerPrefix, true /* dumpAll */);
             }
         }
         if (appThread != null) {

@@ -338,8 +338,8 @@ public class AppTransition implements Dump {
         updateBooster();
     }
 
-    void setLastAppTransition(int transit, AppWindowToken openingApp, AppWindowToken closingApp,
-            AppWindowToken changingApp) {
+    void setLastAppTransition(int transit, ActivityRecord openingApp, ActivityRecord closingApp,
+            ActivityRecord changingApp) {
         mLastUsedAppTransition = transit;
         mLastOpeningApp = "" + openingApp;
         mLastClosingApp = "" + closingApp;
@@ -430,7 +430,7 @@ public class AppTransition implements Dump {
      * @return bit-map of WindowManagerPolicy#FINISH_LAYOUT_REDO_* to indicate whether another
      *         layout pass needs to be done
      */
-    int goodToGo(int transit, AppWindowToken topOpeningApp, ArraySet<AppWindowToken> openingApps) {
+    int goodToGo(int transit, ActivityRecord topOpeningApp, ArraySet<ActivityRecord> openingApps) {
         mNextAppTransition = TRANSIT_UNSET;
         mNextAppTransitionFlags = 0;
         setAppTransitionState(APP_STATE_RUNNING);

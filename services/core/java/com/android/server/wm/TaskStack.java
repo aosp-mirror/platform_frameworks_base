@@ -78,6 +78,7 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskStack extends WindowContainer<Task> implements
@@ -110,9 +111,9 @@ public class TaskStack extends WindowContainer<Task> implements
      */
     private final Rect mFullyAdjustedImeBounds = new Rect();
 
-    /** Application tokens that are exiting, but still on screen for animations. */
-    final AppTokenList mExitingAppTokens = new AppTokenList();
-    final AppTokenList mTmpAppTokens = new AppTokenList();
+    /** ActivityRecords that are exiting, but still on screen for animations. */
+    final ArrayList<ActivityRecord> mExitingActivities = new ArrayList<>();
+    final ArrayList<ActivityRecord> mTmpActivities = new ArrayList<>();
 
     /** Detach this stack from its display when animation completes. */
     // TODO: maybe tie this to WindowContainer#removeChild some how...
@@ -153,8 +154,8 @@ public class TaskStack extends WindowContainer<Task> implements
     final Rect mTmpDimBoundsRect = new Rect();
     private final Point mLastSurfaceSize = new Point();
 
-    private final AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry =
-            new AnimatingAppWindowTokenRegistry();
+    private final AnimatingActivityRegistry mAnimatingActivityRegistry =
+            new AnimatingActivityRegistry();
 
     TaskStack(WindowManagerService service, int stackId, ActivityStack activityStack) {
         super(service);
@@ -676,11 +677,11 @@ public class TaskStack extends WindowContainer<Task> implements
             }
             mDisplayContent.setLayoutNeeded();
         }
-        for (int appNdx = mExitingAppTokens.size() - 1; appNdx >= 0; --appNdx) {
-            final AppWindowToken wtoken = mExitingAppTokens.get(appNdx);
-            if (wtoken.getTask() == task) {
-                wtoken.mIsExiting = false;
-                mExitingAppTokens.remove(appNdx);
+        for (int appNdx = mExitingActivities.size() - 1; appNdx >= 0; --appNdx) {
+            final ActivityRecord activity = mExitingActivities.get(appNdx);
+            if (activity.getTask() == task) {
+                activity.mIsExiting = false;
+                mExitingActivities.remove(appNdx);
             }
         }
     }
@@ -1327,18 +1328,18 @@ public class TaskStack extends WindowContainer<Task> implements
         for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
             mChildren.get(taskNdx).dump(pw, prefix + "  ", dumpAll);
         }
-        if (!mExitingAppTokens.isEmpty()) {
+        if (!mExitingActivities.isEmpty()) {
             pw.println();
             pw.println("  Exiting application tokens:");
-            for (int i = mExitingAppTokens.size() - 1; i >= 0; i--) {
-                WindowToken token = mExitingAppTokens.get(i);
+            for (int i = mExitingActivities.size() - 1; i >= 0; i--) {
+                WindowToken token = mExitingActivities.get(i);
                 pw.print("  Exiting App #"); pw.print(i);
                 pw.print(' '); pw.print(token);
                 pw.println(':');
                 token.dump(pw, "    ", dumpAll);
             }
         }
-        mAnimatingAppWindowTokenRegistry.dump(pw, "AnimatingApps:", prefix);
+        mAnimatingActivityRegistry.dump(pw, "AnimatingApps:", prefix);
     }
 
     @Override
@@ -1435,8 +1436,8 @@ public class TaskStack extends WindowContainer<Task> implements
             Rect contentRect, Rect postExclude) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final Task task = mChildren.get(i);
-            AppWindowToken token = task.getTopVisibleAppToken();
-            if (token == null || !token.hasContentToDisplay()) {
+            ActivityRecord topVisibleActivity = task.getTopVisibleActivity();
+            if (topVisibleActivity == null || !topVisibleActivity.hasContentToDisplay()) {
                 continue;
             }
 
@@ -1747,7 +1748,7 @@ public class TaskStack extends WindowContainer<Task> implements
             if (homeTask == null) {
                 return true;
             }
-            final AppWindowToken homeApp = homeTask.getTopVisibleAppToken();
+            final ActivityRecord homeApp = homeTask.getTopVisibleActivity();
             if (!homeTask.isVisible() || homeApp == null) {
                 return true;
             }
@@ -1862,7 +1863,7 @@ public class TaskStack extends WindowContainer<Task> implements
         scheduleAnimation();
     }
 
-    AnimatingAppWindowTokenRegistry getAnimatingAppWindowTokenRegistry() {
-        return mAnimatingAppWindowTokenRegistry;
+    AnimatingActivityRegistry getAnimatingActivityRegistry() {
+        return mAnimatingActivityRegistry;
     }
 }

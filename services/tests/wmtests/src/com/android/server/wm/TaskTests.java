@@ -46,22 +46,22 @@ public class TaskTests extends WindowTestsBase {
     public void testRemoveContainer() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
-        final AppWindowToken appToken =
-                WindowTestUtils.createAppWindowTokenInTask(mDisplayContent, task);
+        final ActivityRecord activity =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
 
         task.removeIfPossible();
         // Assert that the container was removed.
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
-        assertNull(appToken.getParent());
+        assertNull(activity.getParent());
     }
 
     @Test
     public void testRemoveContainer_deferRemoval() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
-        final AppWindowToken appToken =
-                WindowTestUtils.createAppWindowTokenInTask(mDisplayContent, task);
+        final ActivityRecord activity =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
 
         task.mShouldDeferRemoval = true;
 
@@ -70,12 +70,12 @@ public class TaskTests extends WindowTestsBase {
         // until the task window container is removed.
         assertNotNull(task.getParent());
         assertNotEquals(0, task.getChildCount());
-        assertNotNull(appToken.getParent());
+        assertNotNull(activity.getParent());
 
         task.removeImmediately();
         assertNull(task.getParent());
         assertEquals(0, task.getChildCount());
-        assertNull(appToken.getParent());
+        assertNull(activity.getParent());
     }
 
     @Test

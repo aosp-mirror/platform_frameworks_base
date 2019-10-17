@@ -113,13 +113,13 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testForAllWindows() {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
-        final AppWindowToken exitingAppToken = exitingAppWindow.mAppToken;
+        final ActivityRecord exitingApp = exitingAppWindow.mActivityRecord;
         // Wait until everything in animation handler get executed to prevent the exiting window
         // from being removed during WindowSurfacePlacer Traversal.
         waitUntilHandlersIdle();
 
-        exitingAppToken.mIsExiting = true;
-        exitingAppToken.getTask().mStack.mExitingAppTokens.add(exitingAppToken);
+        exitingApp.mIsExiting = true;
+        exitingApp.getTask().mStack.mExitingActivities.add(exitingApp);
 
         assertForAllWindowsOrder(Arrays.asList(
                 mWallpaperWindow,
@@ -241,10 +241,10 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc, stack.getDisplayContent());
 
         final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord token = WindowTestUtils.createTestAppWindowToken(dc);
-        task.addChild(token, 0);
+        final ActivityRecord activity = WindowTestUtils.createTestActivityRecord(dc);
+        task.addChild(activity, 0);
         assertEquals(dc, task.getDisplayContent());
-        assertEquals(dc, token.getDisplayContent());
+        assertEquals(dc, activity.getDisplayContent());
 
         // Move stack to first display.
         mDisplayContent.moveStackToDisplay(stack, true /* onTop */);
@@ -252,7 +252,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(mDisplayContent, stack.getParent().getParent());
         assertEquals(mDisplayContent, stack.getDisplayContent());
         assertEquals(mDisplayContent, task.getDisplayContent());
-        assertEquals(mDisplayContent, token.getDisplayContent());
+        assertEquals(mDisplayContent, activity.getDisplayContent());
     }
 
     /**
@@ -313,17 +313,17 @@ public class DisplayContentTests extends WindowTestsBase {
         // Add stack with activity.
         final TaskStack stack0 = createTaskStackOnDisplay(dc0);
         final Task task0 = createTaskInStack(stack0, 0 /* userId */);
-        final ActivityRecord token =
-                WindowTestUtils.createTestAppWindowToken(dc0);
-        task0.addChild(token, 0);
+        final ActivityRecord activity =
+                WindowTestUtils.createTestActivityRecord(dc0);
+        task0.addChild(activity, 0);
         dc0.configureDisplayPolicy();
         assertNotNull(dc0.mTapDetector);
 
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
-        final ActivityRecord token1 =
-                WindowTestUtils.createTestAppWindowToken(dc0);
-        task1.addChild(token1, 0);
+        final ActivityRecord activity1 =
+                WindowTestUtils.createTestActivityRecord(dc0);
+        task1.addChild(activity1, 0);
         dc1.configureDisplayPolicy();
         assertNotNull(dc1.mTapDetector);
 
@@ -362,7 +362,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Create a focusable window and check that focus is calculated correctly
         final WindowState window1 =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "window1");
-        window1.mAppToken.mTargetSdk = targetSdk;
+        window1.mActivityRecord.mTargetSdk = targetSdk;
         updateFocusedWindow();
         assertTrue(window1.isFocused());
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
@@ -375,7 +375,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // Add a window to the second display, and it should be focused
         final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, dc, "window2");
-        window2.mAppToken.mTargetSdk = targetSdk;
+        window2.mActivityRecord.mTargetSdk = targetSdk;
         updateFocusedWindow();
         assertTrue(window2.isFocused());
         assertEquals(perDisplayFocusEnabled && targetSdk >= Q, window1.isFocused());
@@ -389,8 +389,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(window1, mWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Make sure top focused display not changed if there is a focused app.
-        window1.mAppToken.hiddenRequested = true;
-        window1.getDisplayContent().setFocusedApp(window1.mAppToken);
+        window1.mActivityRecord.hiddenRequested = true;
+        window1.getDisplayContent().setFocusedApp(window1.mActivityRecord);
         updateFocusedWindow();
         assertTrue(!window1.isFocused());
         assertEquals(window1.getDisplayId(),
@@ -569,7 +569,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Create a window that requests landscape orientation. It will define device orientation
         // by default.
         final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
-        window.mAppToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        window.mActivityRecord.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR, dc, "keyguard");
         keyguard.mHasSurface = true;
@@ -747,7 +747,7 @@ public class DisplayContentTests extends WindowTestsBase {
                      new InsetsModeSession(ViewRootImpl.NEW_INSETS_MODE_IME)) {
             final DisplayContent dc = createNewDisplay();
             dc.mInputMethodTarget = createWindow(null, TYPE_BASE_APPLICATION, "app");
-            assertEquals(dc.mInputMethodTarget.mAppToken.getSurfaceControl(),
+            assertEquals(dc.mInputMethodTarget.mActivityRecord.getSurfaceControl(),
                     dc.computeImeParent());
         }
     }
@@ -766,8 +766,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testComputeImeParent_app_notMatchParentBounds() {
-        spyOn(mAppWindow.mAppToken);
-        doReturn(false).when(mAppWindow.mAppToken).matchParentBounds();
+        spyOn(mAppWindow.mActivityRecord);
+        doReturn(false).when(mAppWindow.mActivityRecord).matchParentBounds();
         mDisplayContent.mInputMethodTarget = mAppWindow;
         // The surface parent of IME should be the display instead of app window.
         assertEquals(mDisplayContent.getWindowingLayer(), mDisplayContent.computeImeParent());
@@ -881,7 +881,7 @@ public class DisplayContentTests extends WindowTestsBase {
         win.getAttrs().subtreeSystemUiVisibility = win.mSystemUiVisibility =
                 SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        win.mAppToken.mTargetSdk = P;
+        win.mActivityRecord.mTargetSdk = P;
 
         dc.setLayoutNeeded();
         dc.performLayout(true /* initial */, false /* updateImeWindows */);

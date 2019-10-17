@@ -34,7 +34,7 @@ class TaskSnapshotCache {
 
     private final WindowManagerService mService;
     private final TaskSnapshotLoader mLoader;
-    private final ArrayMap<AppWindowToken, Integer> mAppTaskMap = new ArrayMap<>();
+    private final ArrayMap<ActivityRecord, Integer> mAppTaskMap = new ArrayMap<>();
     private final ArrayMap<Integer, CacheEntry> mRunningCache = new ArrayMap<>();
 
     TaskSnapshotCache(WindowManagerService service, TaskSnapshotLoader loader) {
@@ -47,7 +47,7 @@ class TaskSnapshotCache {
         if (entry != null) {
             mAppTaskMap.remove(entry.topApp);
         }
-        final AppWindowToken top = task.getTopChild();
+        final ActivityRecord top = task.getTopChild();
         mAppTaskMap.put(top, task.mTaskId);
         mRunningCache.put(task.mTaskId, new CacheEntry(snapshot, task.getTopChild()));
     }
@@ -87,8 +87,8 @@ class TaskSnapshotCache {
     /**
      * Called when an app token has been removed
      */
-    void onAppRemoved(AppWindowToken wtoken) {
-        final Integer taskId = mAppTaskMap.get(wtoken);
+    void onAppRemoved(ActivityRecord activity) {
+        final Integer taskId = mAppTaskMap.get(activity);
         if (taskId != null) {
             removeRunningEntry(taskId);
         }
@@ -97,8 +97,8 @@ class TaskSnapshotCache {
     /**
      * Callend when an app window token's process died.
      */
-    void onAppDied(AppWindowToken wtoken) {
-        final Integer taskId = mAppTaskMap.get(wtoken);
+    void onAppDied(ActivityRecord activity) {
+        final Integer taskId = mAppTaskMap.get(activity);
         if (taskId != null) {
             removeRunningEntry(taskId);
         }
@@ -134,9 +134,9 @@ class TaskSnapshotCache {
         final TaskSnapshot snapshot;
 
         /** The app token that was on top of the task when the snapshot was taken */
-        final AppWindowToken topApp;
+        final ActivityRecord topApp;
 
-        CacheEntry(TaskSnapshot snapshot, AppWindowToken topApp) {
+        CacheEntry(TaskSnapshot snapshot, ActivityRecord topApp) {
             this.snapshot = snapshot;
             this.topApp = topApp;
         }

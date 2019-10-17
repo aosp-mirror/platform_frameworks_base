@@ -1294,14 +1294,14 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         if (mDisplayContent == null) {
             return;
         }
-        final AppWindowToken newFocus;
+        final ActivityRecord newFocus;
         final IBinder token = r.appToken;
         if (token == null) {
             ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Clearing focused app, displayId=%d",
                     mDisplayId);
             newFocus = null;
         } else {
-            newFocus = mService.mWindowManager.mRoot.getAppWindowToken(token);
+            newFocus = mService.mWindowManager.mRoot.getActivityRecord(token);
             if (newFocus == null) {
                 Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token
                         + ", displayId=" + mDisplayId);

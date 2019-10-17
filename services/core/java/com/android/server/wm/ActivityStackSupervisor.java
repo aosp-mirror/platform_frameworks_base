@@ -2254,7 +2254,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             pw.print(" #"); pw.print(i); pw.print(": ");
             pw.println(r);
             if (full) {
-                r.dump(pw, innerPrefix);
+                r.dump(pw, innerPrefix, true /* dumpAll */);
             } else if (complete) {
                 // Complete + brief == give a summary.  Isn't that obvious?!?
                 pw.print(innerPrefix); pw.println(r.intent.toInsecureString());

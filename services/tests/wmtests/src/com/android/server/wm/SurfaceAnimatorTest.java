@@ -237,7 +237,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         mDeferFinishAnimatable.mFinishedCallbackCalled = false;
 
         // Simulate the first deferred callback is executed from
-        // {@link AnimatingAppWindowTokenRegistry#endDeferringFinished}.
+        // {@link AnimatingActivityRegistry#endDeferringFinished}.
         firstDeferFinishCallback.run();
         // The second animation should not be finished.
         assertFalse(mDeferFinishAnimatable.mFinishedCallbackCalled);

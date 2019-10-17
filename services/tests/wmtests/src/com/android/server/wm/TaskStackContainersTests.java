@@ -55,7 +55,7 @@ public class TaskStackContainersTests extends WindowTestsBase {
         final Task pinnedTask = createTaskInStack(mPinnedStack, 0 /* userId */);
         assertFalse(mPinnedStack.isVisible());
         final ActivityRecord pinnedApp =
-                WindowTestUtils.createTestAppWindowToken(mDisplayContent);
+                WindowTestUtils.createTestActivityRecord(mDisplayContent);
         pinnedTask.addChild(pinnedApp, 0 /* addPos */);
         assertTrue(mPinnedStack.isVisible());
     }

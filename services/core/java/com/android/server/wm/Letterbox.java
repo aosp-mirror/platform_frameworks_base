@@ -174,7 +174,7 @@ public class Letterbox {
 
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
-            final String name = namePrefix + (win.mAppToken != null ? win.mAppToken : win);
+            final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
             final InputChannel[] channels = InputChannel.openInputChannelPair(name);
             mServerChannel = channels[0];
             mClientChannel = channels[1];

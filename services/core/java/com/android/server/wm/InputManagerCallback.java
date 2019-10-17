@@ -81,7 +81,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      */
     @Override
     public long notifyANR(IBinder token, String reason) {
-        AppWindowToken appWindowToken = null;
+        ActivityRecord activity = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
         //TODO(b/141764879) Limit scope of wm lock when input calls notifyANR
@@ -89,7 +89,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             if (token != null) {
                 windowState = mService.mInputToWindowMap.get(token);
                 if (windowState != null) {
-                    appWindowToken = windowState.mAppToken;
+                    activity = windowState.mActivityRecord;
                 }
             }
 
@@ -103,30 +103,30 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 int systemAlertLayer = mService.mPolicy.getWindowLayerFromTypeLw(
                         TYPE_APPLICATION_OVERLAY, windowState.mOwnerCanAddInternalSystemWindow);
                 aboveSystem = windowState.mBaseLayer > systemAlertLayer;
-            } else if (appWindowToken != null) {
+            } else if (activity != null) {
                 Slog.i(TAG_WM, "Input event dispatching timed out "
-                        + "sending to application " + appWindowToken.stringName
+                        + "sending to application " + activity.stringName
                         + ".  Reason: " + reason);
             } else {
                 Slog.i(TAG_WM, "Input event dispatching timed out "
                         + ".  Reason: " + reason);
             }
 
-            mService.saveANRStateLocked(appWindowToken, windowState, reason);
+            mService.saveANRStateLocked(activity, windowState, reason);
         }
 
         // All the calls below need to happen without the WM lock held since they call into AM.
         mService.mAtmInternal.saveANRState(reason);
 
-        if (appWindowToken != null && appWindowToken.appToken != null) {
+        if (activity != null && activity.appToken != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
-            final boolean abort = appWindowToken.keyDispatchingTimedOut(reason,
+            final boolean abort = activity.keyDispatchingTimedOut(reason,
                     windowState.mSession.mPid);
             if (!abort) {
                 // The activity manager declined to abort dispatching.
                 // Wait a bit longer and timeout again later.
-                return appWindowToken.mInputDispatchingTimeoutNanos;
+                return activity.mInputDispatchingTimeoutNanos;
             }
         } else if (windowState != null) {
             // Notify the activity manager about the timeout and let it decide whether

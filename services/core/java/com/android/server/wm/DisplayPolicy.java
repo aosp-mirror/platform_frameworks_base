@@ -3707,7 +3707,7 @@ public class DisplayPolicy {
     @VisibleForTesting
     static boolean isOverlappingWithNavBar(WindowState targetWindow, WindowState navBarWindow) {
         if (navBarWindow == null || !navBarWindow.isVisibleLw()
-                || targetWindow.mAppToken == null || !targetWindow.isVisibleLw()) {
+                || targetWindow.mActivityRecord == null || !targetWindow.isVisibleLw()) {
             return false;
         }
 

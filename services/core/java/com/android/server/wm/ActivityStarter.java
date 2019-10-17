@@ -2843,12 +2843,12 @@ class ActivityStarter {
         if (r != null) {
             pw.print(prefix);
             pw.println("mLastStartActivityRecord:");
-            r.dump(pw, prefix + "  ");
+            r.dump(pw, prefix + "  ", true /* dumpAll */);
         }
         if (mStartActivity != null) {
             pw.print(prefix);
             pw.println("mStartActivity:");
-            mStartActivity.dump(pw, prefix + "  ");
+            mStartActivity.dump(pw, prefix + "  ", true /* dumpAll */);
         }
         if (mIntent != null) {
             pw.print(prefix);
