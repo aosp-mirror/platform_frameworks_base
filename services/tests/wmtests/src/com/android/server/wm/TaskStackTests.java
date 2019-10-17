@@ -23,12 +23,13 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 import android.graphics.Rect;
@@ -141,7 +142,7 @@ public class TaskStackTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Stack removal is deferred if one of its child is animating.
-        doReturn(true).when(task).isSelfAnimating();
+        doReturn(true).when(task).isAnimating(TRANSITION | CHILDREN);
 
         stack.removeIfPossible();
         // For the case of deferred removal the task controller will still be connected to the its

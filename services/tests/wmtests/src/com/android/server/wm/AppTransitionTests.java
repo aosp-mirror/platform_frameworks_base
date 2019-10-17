@@ -147,8 +147,8 @@ public class AppTransitionTests extends WindowTestsBase {
         // Make sure each display is in animating stage.
         assertTrue(dc1.mOpeningApps.size() > 0);
         assertTrue(dc2.mClosingApps.size() > 0);
-        assertTrue(dc1.isAppAnimating());
-        assertTrue(dc2.isAppAnimating());
+        assertTrue(dc1.isAppTransitioning());
+        assertTrue(dc2.isAppTransitioning());
     }
 
     @Test
@@ -219,10 +219,10 @@ public class AppTransitionTests extends WindowTestsBase {
         assertTrue(dc.mClosingApps.size() > 0);
 
         // Make sure window is in animating stage before freeze, and cancel after freeze.
-        assertTrue(dc.isAppAnimating());
+        assertTrue(dc.isAppTransitioning());
         assertFalse(runner.mCancelled);
         dc.mAppTransition.freeze();
-        assertFalse(dc.isAppAnimating());
+        assertFalse(dc.isAppTransitioning());
         assertTrue(runner.mCancelled);
     }
 

@@ -28,13 +28,14 @@ import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.TaskProto.APP_WINDOW_TOKENS;
 import static com.android.server.wm.TaskProto.BOUNDS;
-import static com.android.server.wm.TaskProto.DEFER_REMOVAL;
 import static com.android.server.wm.TaskProto.DISPLAYED_BOUNDS;
 import static com.android.server.wm.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.TaskProto.ID;
 import static com.android.server.wm.TaskProto.SURFACE_HEIGHT;
 import static com.android.server.wm.TaskProto.SURFACE_WIDTH;
 import static com.android.server.wm.TaskProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -204,7 +205,7 @@ class Task extends WindowContainer<ActivityRecord> implements ConfigurationConta
             // No reason to defer removal of a Task that doesn't have any child.
             return false;
         }
-        return hasWindowsAlive() && mStack.isSelfOrChildAnimating();
+        return hasWindowsAlive() && mStack.isAnimating(TRANSITION | CHILDREN);
     }
 
     @Override

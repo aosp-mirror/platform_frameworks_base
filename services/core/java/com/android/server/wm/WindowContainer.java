@@ -26,6 +26,9 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.SurfaceControl.Transaction;
 
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
@@ -154,6 +157,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     private boolean mCommittedReparentToAnimationLeash;
 
     private final Configuration mTmpConfig = new Configuration();
+
+    /** Interface for {@link #isAnimating} to check which cases for the container is animating. */
+    public interface AnimationFlags {
+        /**
+         * A bit flag indicates that {@link #isAnimating} should also return {@code true}
+         * even though the container is not yet animating, but the window container or its
+         * relatives as specified by PARENTS or CHILDREN are part of an {@link AppTransition}
+         * that is pending so an animation starts soon.
+         */
+        int TRANSITION = 1;
+
+        /**
+         * A bit flag indicates that {@link #isAnimating} should also check if one of the
+         * ancestors of the container are animating in addition to the container itself.
+         */
+        int PARENTS = 2;
+
+        /**
+         * A bit flag indicates that {@link #isAnimating} should also check if one of the
+         * descendants of the container are animating in addition to the container itself.
+         */
+        int CHILDREN = 4;
+    }
 
     /**
      * Callback which is triggered while changing the parent, after setting up the surface but
@@ -642,51 +668,71 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * @return Whether our own container is running an animation or any child, no matter how deep in
-     *         the hierarchy, is animating.
+     * @return {@code true} when this container or its related containers are running an
+     * animation, {@code false} otherwise.
+     *
+     * By default this predicate only checks if this container itself is actually running an
+     * animation, but you can extend the check target over its relatives, or relax the condition
+     * so that this can return {@code true} if an animation starts soon by giving a combination
+     * of {@link #AnimationFlags}.
+     *
+     * Note that you can give a combination of bitmask flags to specify targets and condition for
+     * checking animating status.
+     * e.g. {@code isAnimating(TRANSITION | PARENT)} returns {@code true} if either this
+     * container itself or one of its parents is running an animation or waiting for an app
+     * transition.
+     *
+     * Note that TRANSITION propagates to parents and children as well.
+     *
+     * {@see AnimationFlags#TRANSITION}
+     * {@see AnimationFlags#PARENTS}
+     * {@see AnimationFlags#CHILDREN}
      */
-    boolean isSelfOrChildAnimating() {
-        if (isSelfAnimating()) {
+    final boolean isAnimating(int flags) {
+        if (mSurfaceAnimator.isAnimating()) {
             return true;
         }
-        for (int j = mChildren.size() - 1; j >= 0; j--) {
-            final WindowContainer wc = mChildren.get(j);
-            if (wc.isSelfOrChildAnimating()) {
+        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
+            return true;
+        }
+        if ((flags & PARENTS) != 0) {
+            final WindowContainer parent = getParent();
+            if (parent != null && parent.isAnimating(flags & ~CHILDREN)) {
                 return true;
+            }
+        }
+        if ((flags & CHILDREN) != 0) {
+            for (int i = 0; i < mChildren.size(); ++i) {
+                final WindowContainer wc = mChildren.get(i);
+                if (wc.isAnimating(flags & ~PARENTS)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     /**
-     * @return Whether our own container is running an animation or our parent is animating. This
-     *         doesn't consider whether children are animating.
+     * @return {@code true} when the container is waiting the app transition start, {@code false}
+     *         otherwise.
      */
-    boolean isAnimating() {
-
-        // We are animating if we ourselves are animating or if our parent is animating.
-        return isSelfAnimating() || mParent != null && mParent.isAnimating();
+    boolean isWaitingForTransitionStart() {
+        return false;
     }
 
     /**
-     * @return {@code true} if in this subtree of the hierarchy we have an {@link AppWindowToken}
-     *         that is {@link #isSelfAnimating}; {@code false} otherwise.
+     * @return {@code true} if in this subtree of the hierarchy we have an
+     *         {@ode ActivityRecord#isAnimating(TRANSITION)}, {@code false} otherwise.
      */
-    boolean isAppAnimating() {
-        for (int j = mChildren.size() - 1; j >= 0; j--) {
-            final WindowContainer wc = mChildren.get(j);
-            if (wc.isAppAnimating()) {
-                return true;
-            }
-        }
-        return false;
+    boolean isAppTransitioning() {
+        return forAllActivities(app -> app.isAnimating(TRANSITION));
     }
 
     /**
      * @return Whether our own container running an animation at the moment.
      */
-    boolean isSelfAnimating() {
-        return mSurfaceAnimator.isAnimating();
+    final boolean isAnimating() {
+        return isAnimating(0 /* self only */);
     }
 
     void sendAppVisibilityToClients() {
@@ -988,10 +1034,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         wrapper.release();
     }
 
-    void forAllActivities(Consumer<ActivityRecord> callback) {
+    boolean forAllActivities(ToBooleanFunction<ActivityRecord> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).forAllActivities(callback);
+            if (mChildren.get(i).forAllActivities(callback)) {
+                return true;
+            }
         }
+        return false;
     }
 
     void forAllWallpaperWindows(Consumer<WallpaperWindowToken> callback) {

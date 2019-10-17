@@ -787,7 +787,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 }
             }
 
-            if (curDisplay.mAppTransition.isRunning() && !curDisplay.isAppAnimating()) {
+            if (curDisplay.mAppTransition.isRunning() && !curDisplay.isAppTransitioning()) {
                 // We have finished the animation of an app transition. To do this, we have
                 // delayed a lot of operations like showing and hiding apps, moving apps in
                 // Z-order, etc.

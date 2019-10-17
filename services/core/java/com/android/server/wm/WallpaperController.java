@@ -24,6 +24,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
@@ -118,7 +120,8 @@ class WallpaperController {
         }
 
         mFindResults.resetTopWallpaper = true;
-        if (w.mActivityRecord != null && w.mActivityRecord.isHidden() && !w.mActivityRecord.isSelfAnimating()) {
+        if (w.mActivityRecord != null && w.mActivityRecord.isHidden()
+                && !w.mActivityRecord.isAnimating(TRANSITION)) {
 
             // If this window's app token is hidden and not animating, it is of no interest to us.
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Skipping hidden and not animating token: " + w);
@@ -136,7 +139,7 @@ class WallpaperController {
         }
 
         final boolean keyguardGoingAwayWithWallpaper = (w.mActivityRecord != null
-                && w.mActivityRecord.isSelfAnimating()
+                && w.mActivityRecord.isAnimating(TRANSITION)
                 && AppTransition.isKeyguardGoingAwayTransit(w.mActivityRecord.getTransit())
                 && (w.mActivityRecord.getTransitFlags()
                         & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
@@ -173,7 +176,7 @@ class WallpaperController {
                 && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
-            if (w == mWallpaperTarget && w.isAnimating()) {
+            if (w == mWallpaperTarget && w.isAnimating(TRANSITION | PARENTS)) {
                 // The current wallpaper target is animating, so we'll look behind it for
                 // another possible target and figure out what is going on later.
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
@@ -224,19 +227,19 @@ class WallpaperController {
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
                 + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
                 + " animating=" + ((wallpaperTarget != null && wallpaperTarget.mActivityRecord != null)
-                ? wallpaperTarget.mActivityRecord.isSelfAnimating() : null)
+                ? wallpaperTarget.mActivityRecord.isAnimating(TRANSITION) : null)
                 + " prev=" + mPrevWallpaperTarget
                 + " recentsAnimationWallpaperVisible=" + isAnimatingWithRecentsComponent);
         return (wallpaperTarget != null
                 && (!wallpaperTarget.mObscured
                         || isAnimatingWithRecentsComponent
                         || (wallpaperTarget.mActivityRecord != null
-                                && wallpaperTarget.mActivityRecord.isSelfAnimating())))
+                        && wallpaperTarget.mActivityRecord.isAnimating(TRANSITION))))
                 || mPrevWallpaperTarget != null;
     }
 
     boolean isWallpaperTargetAnimating() {
-        return mWallpaperTarget != null && mWallpaperTarget.isAnimating()
+        return mWallpaperTarget != null && mWallpaperTarget.isAnimating(TRANSITION | PARENTS)
                 && (mWallpaperTarget.mActivityRecord == null
                         || !mWallpaperTarget.mActivityRecord.isWaitingForTransitionStart());
     }

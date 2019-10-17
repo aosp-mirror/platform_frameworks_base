@@ -52,6 +52,8 @@ import static com.android.server.wm.StackProto.ID;
 import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.StackProto.TASKS;
 import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -934,7 +936,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     void removeIfPossible() {
-        if (isSelfOrChildAnimating()) {
+        if (isAnimating(TRANSITION | CHILDREN)) {
             mDeferRemoval = true;
             return;
         }
@@ -1792,7 +1794,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     /** Returns true if a removal action is still being deferred. */
     boolean checkCompleteDeferredRemoval() {
-        if (isSelfOrChildAnimating()) {
+        if (isAnimating(TRANSITION | CHILDREN)) {
             return true;
         }
         if (mDeferRemoval) {

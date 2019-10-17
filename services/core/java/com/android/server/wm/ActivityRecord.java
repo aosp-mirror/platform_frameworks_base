@@ -179,7 +179,7 @@ import static com.android.server.wm.AppWindowTokenProto.FILLS_PARENT;
 import static com.android.server.wm.AppWindowTokenProto.FROZEN_BOUNDS;
 import static com.android.server.wm.AppWindowTokenProto.HIDDEN_REQUESTED;
 import static com.android.server.wm.AppWindowTokenProto.HIDDEN_SET_FROM_TRANSFERRED_STARTING_WINDOW;
-import static com.android.server.wm.AppWindowTokenProto.IS_REALLY_ANIMATING;
+import static com.android.server.wm.AppWindowTokenProto.IS_ANIMATING;
 import static com.android.server.wm.AppWindowTokenProto.IS_WAITING_FOR_TRANSITION_START;
 import static com.android.server.wm.AppWindowTokenProto.LAST_ALL_DRAWN;
 import static com.android.server.wm.AppWindowTokenProto.LAST_SURFACE_SHOWING;
@@ -205,6 +205,9 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.TaskPersister.DEBUG;
 import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
@@ -297,10 +300,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
@@ -332,7 +335,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * An entry in the history stack, representing an activity.
@@ -2305,7 +2307,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * 2. App is delayed closing since it might enter PIP.
      */
     boolean isClosingOrEnteringPip() {
-        return (isAnimating() && hiddenRequested) || mWillCloseOrEnterPip;
+        return (isAnimating(TRANSITION | PARENTS) && hiddenRequested) || mWillCloseOrEnterPip;
     }
     /**
      * @return Whether AppOps allows this package to enter picture-in-picture.
@@ -3108,7 +3110,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "Removing app %s delayed=%b animation=%s animating=%b", this, delayed,
-                getAnimation(), isSelfAnimating());
+                getAnimation(), isAnimating(TRANSITION));
 
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "removeAppToken: %s"
                 + " delayed=%b Callers=%s", this, delayed, Debug.getCallers(4));
@@ -3120,7 +3122,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If this window was animating, then we need to ensure that the app transition notifies
         // that animations have completed in DisplayContent.handleAnimatingStoppedAndTransition(),
         // so add to that list now
-        if (isSelfAnimating()) {
+        if (isAnimating(TRANSITION)) {
             getDisplayContent().mNoAnimationNotifyOnTransitionFinished.add(token);
         }
 
@@ -3468,7 +3470,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         color mode set to avoid jank in the middle of the transition.
      */
     boolean canShowWindows() {
-        return allDrawn && !(isReallyAnimating() && hasNonDefaultColorWindow());
+        return allDrawn && !(isAnimating() && hasNonDefaultColorWindow());
     }
 
     /**
@@ -3530,14 +3532,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return forAllWindowsUnchecked(callback, traverseTopToBottom);
     }
 
-    @Override
-    void forAllActivities(Consumer<ActivityRecord> callback) {
-        callback.accept(this);
-    }
-
     boolean forAllWindowsUnchecked(ToBooleanFunction<WindowState> callback,
             boolean traverseTopToBottom) {
         return super.forAllWindows(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllActivities(ToBooleanFunction<ActivityRecord> callback) {
+        return callback.apply(this);
     }
 
     @Override
@@ -4121,7 +4123,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             if (transit != WindowManager.TRANSIT_UNSET) {
                 if (mUseTransferredAnimation) {
-                    runningAppAnimation = isReallyAnimating();
+                    runningAppAnimation = isAnimating();
                 } else if (applyAnimationLocked(lp, transit, visible, isVoiceInteraction)) {
                     runningAppAnimation = true;
                 }
@@ -4173,19 +4175,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mUseTransferredAnimation = false;
 
-        if (isReallyAnimating()) {
-            delayed = true;
-        } else {
+        delayed = isAnimating(CHILDREN);
+        if (!delayed) {
             // We aren't animating anything, but exiting windows rely on the animation finished
             // callback being called in case the ActivityRecord was pretending to be animating,
             // which we might have done because we were in closing/opening apps list.
             onAnimationFinished();
-        }
-
-        for (int i = mChildren.size() - 1; i >= 0 && !delayed; i--) {
-            if ((mChildren.get(i)).isSelfOrChildAnimating()) {
-                delayed = true;
-            }
         }
 
         if (visibilityChanged) {
@@ -4202,7 +4197,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // updated.
             // If we're becoming invisible, update the client visibility if we are not running an
             // animation. Otherwise, we'll update client visibility in onAnimationFinished.
-            if (visible || !isReallyAnimating()) {
+            if (visible || !isAnimating()) {
                 setClientHidden(!visible);
             }
 
@@ -5286,13 +5281,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!allDrawn && w.mightAffectAllDrawn()) {
             if (DEBUG_VISIBILITY || WM_DEBUG_ORIENTATION.isLogToLogcat()) {
                 Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()
-                        + ", isAnimationSet=" + isSelfAnimating());
+                        + ", isAnimationSet=" + isAnimating(TRANSITION));
                 if (!w.isDrawnLw()) {
                     Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceController
                             + " pv=" + w.isVisibleByPolicy()
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + hiddenRequested
-                            + " a=" + isSelfAnimating());
+                            + " a=" + isAnimating(TRANSITION));
                 }
             }
 
@@ -5838,7 +5833,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
-        return isReallyAnimating();
+        return isAnimating();
     }
 
     private Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
@@ -5925,6 +5920,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return (prevWinMode == WINDOWING_MODE_FREEFORM) != (newWinMode == WINDOWING_MODE_FREEFORM);
     }
 
+    @Override
     boolean isWaitingForTransitionStart() {
         final DisplayContent dc = getDisplayContent();
         // TODO: Test for null can be removed once unification is done.
@@ -6053,10 +6049,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void prepareSurfaces() {
-        // isSelfAnimating also returns true when we are about to start a transition, so we need
-        // to check super here.
-        final boolean reallyAnimating = super.isSelfAnimating();
-        final boolean show = !isHidden() || reallyAnimating;
+        final boolean show = !isHidden() || isAnimating();
 
         if (mSurfaceControl != null) {
             if (show && !mLastSurfaceShowing) {
@@ -6084,7 +6077,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void attachThumbnailAnimation() {
-        if (!isReallyAnimating()) {
+        if (!isAnimating()) {
             return;
         }
         final int taskId = getTask().mTaskId;
@@ -6105,7 +6098,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * {@link android.app.ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} animation.
      */
     void attachCrossProfileAppsThumbnailAnimation() {
-        if (!isReallyAnimating()) {
+        if (!isAnimating()) {
             return;
         }
         clearThumbnail();
@@ -6147,17 +6140,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return getDisplayContent().mAppTransition.createThumbnailAspectScaleAnimationLocked(
                 appRect, insets, thumbnailHeader, getTask().mTaskId, displayConfig.uiMode,
                 displayConfig.orientation);
-    }
-
-    @Override
-    boolean isAppAnimating() {
-        return isSelfAnimating();
-    }
-
-    @Override
-    boolean isSelfAnimating() {
-        // If we are about to start a transition, we also need to be considered animating.
-        return isWaitingForTransitionStart() || isReallyAnimating();
     }
 
     @Override
@@ -6263,15 +6245,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (wallpaperMightChange) {
             requestUpdateWallpaperIfNeeded();
         }
-    }
-
-    /**
-     * @return True if and only if we are actually running an animation. Note that
-     *         {@link #isSelfAnimating} also returns true if we are waiting for an animation to
-     *         start.
-     */
-    private boolean isReallyAnimating() {
-        return super.isSelfAnimating();
     }
 
     @Override
@@ -7627,7 +7600,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         super.writeToProto(proto, WINDOW_TOKEN, logLevel);
         proto.write(LAST_SURFACE_SHOWING, mLastSurfaceShowing);
         proto.write(IS_WAITING_FOR_TRANSITION_START, isWaitingForTransitionStart());
-        proto.write(IS_REALLY_ANIMATING, isReallyAnimating());
+        proto.write(IS_ANIMATING, isAnimating());
         if (mThumbnail != null){
             mThumbnail.writeToProto(proto, THUMBNAIL);
         }

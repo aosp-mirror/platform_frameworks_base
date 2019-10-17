@@ -22,6 +22,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_WINDOW_MOVEMENT;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
@@ -159,13 +162,10 @@ class WindowToken extends WindowContainer<WindowState> {
 
         final int count = mChildren.size();
         boolean changed = false;
-        boolean delayed = false;
+        final boolean delayed = isAnimating(TRANSITION | PARENTS | CHILDREN);
 
         for (int i = 0; i < count; i++) {
             final WindowState win = mChildren.get(i);
-            if (win.isAnimating()) {
-                delayed = true;
-            }
             changed |= win.onSetAppExiting();
         }
 

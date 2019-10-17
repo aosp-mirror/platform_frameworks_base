@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -192,7 +194,7 @@ public class WindowAnimator {
                 mService.mWindowPlacerLocked.requestTraversal();
             }
 
-            final boolean rootAnimating = mService.mRoot.isSelfOrChildAnimating();
+            final boolean rootAnimating = mService.mRoot.isAnimating(TRANSITION | CHILDREN);
             if (rootAnimating && !mLastRootAnimating) {
 
                 // Usually app transitions but quite a load onto the system already (with all the
