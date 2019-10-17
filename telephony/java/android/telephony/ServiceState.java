@@ -102,7 +102,7 @@ public class ServiceState implements Parcelable {
      * Indicates frequency range is unknown.
      * @hide
      */
-    public static final int FREQUENCY_RANGE_UNKNOWN = -1;
+    public static final int FREQUENCY_RANGE_UNKNOWN = 0;
 
     /**
      * Indicates the frequency range is below 1GHz.
