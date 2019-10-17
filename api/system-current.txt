@@ -5691,14 +5691,6 @@ package android.os.storage {
 
 }
 
-package android.os.telephony {
-
-  public class TelephonyRegistryManager {
-    method public void notifyCarrierNetworkChange(boolean);
-  }
-
-}
-
 package android.permission {
 
   public final class PermissionControllerManager {
@@ -8377,6 +8369,14 @@ package android.telephony {
     field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
     field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
     field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
+  }
+
+  public class TelephonyRegistryManager {
+    method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
+    method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
+    method public void notifyCarrierNetworkChange(boolean);
+    method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
+    method public void removeOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {

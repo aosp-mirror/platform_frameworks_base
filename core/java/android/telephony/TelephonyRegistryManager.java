@@ -13,12 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.os.telephony;
+package android.telephony;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.content.Context;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.Annotation.ApnType;
@@ -40,8 +46,15 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.telephony.ims.ImsReasonInfo;
+import android.util.Log;
+
 import com.android.internal.telephony.ITelephonyRegistry;
+import com.android.internal.telephony.IOnSubscriptionsChangedListener;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * A centralized place to notify telephony related status changes, e.g, {@link ServiceState} update
@@ -58,12 +71,136 @@ public class TelephonyRegistryManager {
 
     private static final String TAG = "TelephonyRegistryManager";
     private static ITelephonyRegistry sRegistry;
+    private final Context mContext;
+
+    /**
+     * A mapping between {@link SubscriptionManager.OnSubscriptionsChangedListener} and
+     * its callback IOnSubscriptionsChangedListener.
+     */
+    private final Map<SubscriptionManager.OnSubscriptionsChangedListener,
+                IOnSubscriptionsChangedListener> mSubscriptionChangedListenerMap = new HashMap<>();
+    /**
+     * A mapping between {@link SubscriptionManager.OnOpportunisticSubscriptionsChangedListener} and
+     * its callback IOnSubscriptionsChangedListener.
+     */
+    private final Map<SubscriptionManager.OnOpportunisticSubscriptionsChangedListener,
+            IOnSubscriptionsChangedListener> mOpportunisticSubscriptionChangedListenerMap
+            = new HashMap<>();
+
 
     /** @hide **/
-    public TelephonyRegistryManager() {
+    public TelephonyRegistryManager(@NonNull Context context) {
+        mContext = context;
         if (sRegistry == null) {
             sRegistry = ITelephonyRegistry.Stub.asInterface(
                 ServiceManager.getService("telephony.registry"));
+        }
+    }
+
+    /**
+     * Register for changes to the list of active {@link SubscriptionInfo} records or to the
+     * individual records themselves. When a change occurs the onSubscriptionsChanged method of
+     * the listener will be invoked immediately if there has been a notification. The
+     * onSubscriptionChanged method will also be triggered once initially when calling this
+     * function.
+     *
+     * @param listener an instance of {@link SubscriptionManager.OnSubscriptionsChangedListener}
+     *                 with onSubscriptionsChanged overridden.
+     * @param executor the executor that will execute callbacks.
+     */
+    public void addOnSubscriptionsChangedListener(
+            @NonNull SubscriptionManager.OnSubscriptionsChangedListener listener,
+            @NonNull Executor executor) {
+        IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
+            @Override
+            public void onSubscriptionsChanged () {
+                Log.d(TAG, "onSubscriptionsChangedListener callback received.");
+                executor.execute(() -> listener.onSubscriptionsChanged());
+            }
+        };
+        mSubscriptionChangedListenerMap.put(listener, callback);
+        try {
+            sRegistry.addOnSubscriptionsChangedListener(mContext.getOpPackageName(), callback);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Unregister the {@link SubscriptionManager.OnSubscriptionsChangedListener}. This is not
+     * strictly necessary as the listener will automatically be unregistered if an attempt to
+     * invoke the listener fails.
+     *
+     * @param listener that is to be unregistered.
+     */
+    public void removeOnSubscriptionsChangedListener(
+            @NonNull SubscriptionManager.OnSubscriptionsChangedListener listener) {
+        if (mSubscriptionChangedListenerMap.get(listener) == null) {
+            return;
+        }
+        try {
+            sRegistry.removeOnSubscriptionsChangedListener(mContext.getOpPackageName(),
+                    mSubscriptionChangedListenerMap.get(listener));
+            mSubscriptionChangedListenerMap.remove(listener);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Register for changes to the list of opportunistic subscription records or to the
+     * individual records themselves. When a change occurs the onOpportunisticSubscriptionsChanged
+     * method of the listener will be invoked immediately if there has been a notification.
+     *
+     * @param listener an instance of
+     * {@link SubscriptionManager.OnOpportunisticSubscriptionsChangedListener} with
+     *                 onOpportunisticSubscriptionsChanged overridden.
+     * @param executor an Executor that will execute callbacks.
+     */
+    public void addOnOpportunisticSubscriptionsChangedListener(
+            @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener,
+            @NonNull Executor executor) {
+        /**
+         * The callback methods need to be called on the executor thread where
+         * this object was created.  If the binder did that for us it'd be nice.
+         */
+        IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
+            @Override
+            public void onSubscriptionsChanged() {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    Log.d(TAG, "onOpportunisticSubscriptionsChanged callback received.");
+                    executor.execute(() -> listener.onOpportunisticSubscriptionsChanged());
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        };
+        mOpportunisticSubscriptionChangedListenerMap.put(listener, callback);
+        try {
+            sRegistry.addOnOpportunisticSubscriptionsChangedListener(mContext.getOpPackageName(),
+                    callback);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
+    /**
+     * Unregister the {@link SubscriptionManager.OnOpportunisticSubscriptionsChangedListener}
+     * that is currently listening opportunistic subscriptions change. This is not strictly
+     * necessary as the listener will automatically be unregistered if an attempt to invoke the
+     * listener fails.
+     *
+     * @param listener that is to be unregistered.
+     */
+    public void removeOnOpportunisticSubscriptionsChangedListener(
+            @NonNull SubscriptionManager.OnOpportunisticSubscriptionsChangedListener listener) {
+        try {
+            sRegistry.removeOnSubscriptionsChangedListener(mContext.getOpPackageName(),
+                    mOpportunisticSubscriptionChangedListenerMap.get(listener));
+            mOpportunisticSubscriptionChangedListenerMap.remove(listener);
+        } catch (RemoteException ex) {
+            // system server crash
         }
     }
 
@@ -546,4 +683,15 @@ public class TelephonyRegistryManager {
         }
     }
 
+    /**
+     * @param activeDataSubId
+     * @hide
+     */
+    public void notifyActiveDataSubIdChanged(int activeDataSubId) {
+        try {
+            sRegistry.notifyActiveDataSubIdChanged(activeDataSubId);
+        } catch (RemoteException ex) {
+
+        }
+    }
 }
