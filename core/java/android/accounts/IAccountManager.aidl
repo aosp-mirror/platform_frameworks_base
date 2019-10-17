@@ -34,7 +34,6 @@ interface IAccountManager {
     String getPassword(in Account account);
     String getUserData(in Account account, String key);
     AuthenticatorDescription[] getAuthenticatorTypes(int userId);
-    Account[] getAccounts(String accountType, String opPackageName);
     Account[] getAccountsForPackage(String packageName, int uid, String opPackageName);
     Account[] getAccountsByTypeForPackage(String type, String packageName, String opPackageName);
     Account[] getAccountsAsUser(String accountType, int userId, String opPackageName);
@@ -45,8 +44,6 @@ interface IAccountManager {
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType,
         in String[] features, String opPackageName);
     boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
-    void removeAccount(in IAccountManagerResponse response, in Account account,
-        boolean expectActivityLaunch);
     void removeAccountAsUser(in IAccountManagerResponse response, in Account account,
         boolean expectActivityLaunch, int userId);
     boolean removeAccountExplicitly(in Account account);
