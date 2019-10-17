@@ -79,6 +79,8 @@ public final class MediaRoute2Info implements Parcelable {
     @Nullable
     final Bundle mExtras;
 
+    private final String mUniqueId;
+
     MediaRoute2Info(@NonNull Builder builder) {
         mId = builder.mId;
         mProviderId = builder.mProviderId;
@@ -90,6 +92,7 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeMax = builder.mVolumeMax;
         mVolumeHandling = builder.mVolumeHandling;
         mExtras = builder.mExtras;
+        mUniqueId = createUniqueId();
     }
 
     MediaRoute2Info(@NonNull Parcel in) {
@@ -103,6 +106,15 @@ public final class MediaRoute2Info implements Parcelable {
         mVolumeMax = in.readInt();
         mVolumeHandling = in.readInt();
         mExtras = in.readBundle();
+        mUniqueId = createUniqueId();
+    }
+
+    private String createUniqueId() {
+        String uniqueId = null;
+        if (mProviderId != null) {
+            uniqueId = mProviderId + ":" + mId;
+        }
+        return uniqueId;
     }
 
     /**
@@ -147,13 +159,33 @@ public final class MediaRoute2Info implements Parcelable {
         return Objects.hash(mId, mName, mDescription, mSupportedCategories);
     }
 
+    /**
+     * Gets the id of the route.
+     * Use {@link #getUniqueId()} if you need a unique identifier.
+     *
+     * @see #getUniqueId()
+     */
     @NonNull
     public String getId() {
         return mId;
     }
 
     /**
-     * Gets the provider id of the route.
+     * Gets the unique id of the route. A route obtained from
+     * {@link com.android.server.media.MediaRouterService} always has a unique id.
+     *
+     * @return unique id of the route or null if it has no unique id.
+     */
+    @Nullable
+    public String getUniqueId() {
+        return mUniqueId;
+    }
+
+    /**
+     * Gets the provider id of the route. It is assigned automatically by
+     * {@link com.android.server.media.MediaRouterService}.
+     *
+     * @return provider id of the route or null if it's not set.
      * @hide
      */
     @Nullable
