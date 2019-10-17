@@ -38,7 +38,8 @@ public class PackageManagerPerfTest {
     private static final String PERMISSION_NAME_DOESNT_EXIST =
             "com.android.perftests.core.TestBadPermission";
     private static final ComponentName TEST_ACTIVITY =
-            new ComponentName("com.android.perftests.core", "android.perftests.utils.StubActivity");
+            new ComponentName("com.android.perftests.core",
+                    "android.perftests.utils.PerfTestActivity");
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
