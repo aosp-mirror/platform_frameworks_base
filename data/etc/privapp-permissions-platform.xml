@@ -325,6 +325,7 @@ applications that come with the platform
         <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
         <!-- Permission required to test ExplicitHealthCheckServiceImpl. -->
         <permission name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE"/>
+        <permission name="android.permission.WRITE_DEVICE_CONFIG"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
