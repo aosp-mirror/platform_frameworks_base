@@ -18,7 +18,6 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.annotation.NonNull;
 import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -70,13 +69,11 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private Runnable mOnTransitionComplete;
 
     EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
-            ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask,
-            @NonNull Runnable onTransitionComplete) {
+            ArrayList<String> sharedElementNames, boolean isReturning, boolean isCrossTask) {
         super(activity.getWindow(), sharedElementNames,
                 getListener(activity, isReturning && !isCrossTask), isReturning);
         mActivity = activity;
         mIsCrossTask = isCrossTask;
-        mOnTransitionComplete = onTransitionComplete;
         setResultReceiver(resultReceiver);
         prepareEnter();
         Bundle resultReceiverBundle = new Bundle();
@@ -568,6 +565,14 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             transitionStarted();
         }
         return transition;
+    }
+
+    public void runAfterTransitionsComplete(Runnable onTransitionComplete) {
+        if (!isTransitionRunning()) {
+            onTransitionsComplete();
+        } else {
+            mOnTransitionComplete = onTransitionComplete;
+        }
     }
 
     @Override
