@@ -34,9 +34,9 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.server.am.ActivityManagerInternalTest.CustomThread;
 import static com.android.server.am.ActivityManagerService.DISPATCH_UIDS_CHANGED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.Injector;
-import static com.android.server.am.ActivityManagerService.NETWORK_STATE_BLOCK;
-import static com.android.server.am.ActivityManagerService.NETWORK_STATE_NO_CHANGE;
-import static com.android.server.am.ActivityManagerService.NETWORK_STATE_UNBLOCK;
+import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
+import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
+import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -274,7 +274,7 @@ public class ActivityManagerServiceTest {
 
         uidRec.setProcState = prevState;
         uidRec.setCurProcState(curState);
-        mAms.incrementProcStateSeqAndNotifyAppsLocked();
+        mAms.mProcessList.incrementProcStateSeqAndNotifyAppsLocked(mAms.mProcessList.mActiveUids);
 
         // @SuppressWarnings("GuardedBy")
         assertEquals(expectedGlobalCounter, mAms.mProcessList.mProcStateSeqCounter);
@@ -429,42 +429,42 @@ public class ActivityManagerServiceTest {
         uidRec.setCurProcState(PROCESS_STATE_RECEIVER);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Foreground to foreground
         uidRec.setProcState = PROCESS_STATE_FOREGROUND_SERVICE;
         uidRec.setCurProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_CACHED_ACTIVITY;
         uidRec.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_NONEXISTENT;
         uidRec.setCurProcState(PROCESS_STATE_CACHED_ACTIVITY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Background to foreground
         uidRec.setProcState = PROCESS_STATE_SERVICE;
         uidRec.setCurProcState(PROCESS_STATE_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_BLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
 
         // Foreground to background
         uidRec.setProcState = PROCESS_STATE_TOP;
         uidRec.setCurProcState(PROCESS_STATE_LAST_ACTIVITY);
         expectedBlockState = NETWORK_STATE_UNBLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
-                expectedBlockState, mAms.getBlockStateForUid(uidRec));
+                expectedBlockState, mAms.mProcessList.getBlockStateForUid(uidRec));
     }
 
     /**

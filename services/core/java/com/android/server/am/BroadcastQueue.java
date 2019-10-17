@@ -309,7 +309,7 @@ public final class BroadcastQueue {
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
         mService.mProcessList.updateLruProcessLocked(app, false, null);
         if (!skipOomAdj) {
-            mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+            mService.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_NONE);
         }
 
         // Tell the application to launch this receiver.
