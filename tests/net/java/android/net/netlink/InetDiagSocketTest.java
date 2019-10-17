@@ -45,7 +45,6 @@ import androidx.test.runner.AndroidJUnit4;
 import libcore.util.HexEncoding;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -201,14 +200,29 @@ public class InetDiagSocketTest {
         checkGetConnectionOwnerUid("::1", "::1");
     }
 
-    @Ignore("Times out on Marlin/Sailfish")
     /* Verify fix for b/141603906 */
     @Test
     public void testB141603906() throws Exception {
         final InetSocketAddress src = new InetSocketAddress(0);
         final InetSocketAddress dst = new InetSocketAddress(0);
-        for (int i = 1; i <= 100000; i++) {
-            mCm.getConnectionOwnerUid(IPPROTO_TCP, src, dst);
+        final int numThreads = 8;
+        final int numSockets = 5000;
+        final Thread[] threads = new Thread[numThreads];
+
+        for (int i = 0; i < numThreads; i++) {
+            threads[i] = new Thread(() -> {
+                for (int j = 0; j < numSockets; j++) {
+                    mCm.getConnectionOwnerUid(IPPROTO_TCP, src, dst);
+                }
+            });
+        }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
+            thread.join();
         }
     }
 
