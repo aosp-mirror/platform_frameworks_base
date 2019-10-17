@@ -66,7 +66,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
-        topBar.setInsetProvider(getController().getSourceProvider(TYPE_TOP_BAR));
+        topBar.setControllableInsetProvider(getController().getSourceProvider(TYPE_TOP_BAR));
         assertNotNull(getController().getInsetsForDispatch(app).getSource(TYPE_TOP_BAR));
     }
 
@@ -75,7 +75,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
                 .setWindow(topBar, null);
-        topBar.setInsetProvider(getController().getSourceProvider(TYPE_TOP_BAR));
+        topBar.setControllableInsetProvider(getController().getSourceProvider(TYPE_TOP_BAR));
         final InsetsState state = getController().getInsetsForDispatch(topBar);
         for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
             final InsetsSource source = state.sourceAt(i);
@@ -101,7 +101,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
         getController().getSourceProvider(TYPE_NAVIGATION_BAR).setWindow(navBar, null);
-        getController().onBarControlTargetChanged(app, app);
+        getController().onBarControlTargetChanged(app, null, app, null);
         InsetsSourceControl[] controls = getController().getControlsForDispatch(app);
         assertEquals(2, controls.length);
     }
@@ -111,9 +111,9 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
-        getController().onBarControlTargetChanged(app, null);
+        getController().onBarControlTargetChanged(app, null, null, null);
         assertNotNull(getController().getControlsForDispatch(app));
-        getController().onBarControlTargetChanged(null, null);
+        getController().onBarControlTargetChanged(null, null, null, null);
         assertNull(getController().getControlsForDispatch(app));
     }
 
@@ -123,7 +123,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState topBar = createWindow(null, TYPE_APPLICATION, "topBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(TYPE_TOP_BAR).setWindow(topBar, null);
-        getController().onBarControlTargetChanged(app, null);
+        getController().onBarControlTargetChanged(app, null, null, null);
         assertNotNull(getController().getControlsForDispatch(app));
         topBar.cancelAnimation();
         assertNull(getController().getControlsForDispatch(app));
