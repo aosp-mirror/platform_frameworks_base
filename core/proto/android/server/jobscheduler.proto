@@ -43,7 +43,7 @@ message JobSchedulerServiceDumpProto {
     reserved 15; // next_heartbeat
     reserved 16; // last_heartbeat_time_millis
     reserved 17; // next_heartbeat_time_millis
-    optional bool in_parole = 18;
+    reserved 18; // in_parole
     optional bool in_thermal = 19;
 
     repeated int32 started_users = 2;
@@ -534,7 +534,7 @@ message StateControllerProto {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
         optional bool is_charging = 1;
-        optional bool is_in_parole = 2;
+        reserved 2; // is_in_parole
         optional int64 elapsed_realtime = 6;
 
         // List of UIDs currently in the foreground.

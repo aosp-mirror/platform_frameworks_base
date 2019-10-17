@@ -64,6 +64,9 @@ import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 import android.util.Pair;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.AppStateTracker.Listener;
@@ -85,14 +88,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 /**
  * Tests for {@link AppStateTracker}
  *
- * Run with:
- atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/mockingservicestests/src/com/android/server/AppStateTrackerTest.java
+ * Run with: atest com.android.server.AppStateTrackerTest
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)

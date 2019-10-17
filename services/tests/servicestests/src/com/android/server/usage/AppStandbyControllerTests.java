@@ -47,7 +47,6 @@ import static org.mockito.Mockito.mock;
 
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -77,7 +76,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,8 +106,6 @@ public class AppStandbyControllerTests {
     private static final long WORKING_SET_THRESHOLD = 12 * HOUR_MS;
     private static final long FREQUENT_THRESHOLD = 24 * HOUR_MS;
     private static final long RARE_THRESHOLD = 48 * HOUR_MS;
-    // Short STABLE_CHARGING_THRESHOLD for testing purposes
-    private static final long STABLE_CHARGING_THRESHOLD = 2000;
 
     /** Mock variable used in {@link MyInjector#isPackageInstalled(String, int, int)} */
     private static boolean isPackageInstalled = true;
@@ -132,7 +128,6 @@ public class AppStandbyControllerTests {
     static class MyInjector extends AppStandbyController.Injector {
         long mElapsedRealtime;
         boolean mIsAppIdleEnabled = true;
-        boolean mIsCharging;
         List<String> mPowerSaveWhitelistExceptIdle = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
@@ -164,11 +159,6 @@ public class AppStandbyControllerTests {
         @Override
         boolean isAppIdleEnabled() {
             return mIsAppIdleEnabled;
-        }
-
-        @Override
-        boolean isCharging() {
-            return mIsCharging;
         }
 
         @Override
@@ -228,8 +218,7 @@ public class AppStandbyControllerTests {
             return "screen_thresholds=0/0/0/" + HOUR_MS + ",elapsed_thresholds=0/"
                     + WORKING_SET_THRESHOLD + "/"
                     + FREQUENT_THRESHOLD + "/"
-                    + RARE_THRESHOLD + ","
-                    + "stable_charging_threshold=" + STABLE_CHARGING_THRESHOLD;
+                    + RARE_THRESHOLD;
         }
 
         @Override
@@ -273,13 +262,6 @@ public class AppStandbyControllerTests {
         } catch (PackageManager.NameNotFoundException nnfe) {}
     }
 
-    private void setChargingState(AppStandbyController controller, boolean charging) {
-        mInjector.mIsCharging = charging;
-        if (controller != null) {
-            controller.setChargingState(charging);
-        }
-    }
-
     private void setAppIdleEnabled(AppStandbyController controller, boolean enabled) {
         mInjector.mIsAppIdleEnabled = enabled;
         if (controller != null) {
@@ -296,7 +278,6 @@ public class AppStandbyControllerTests {
         controller.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mInjector.setDisplayOn(false);
         mInjector.setDisplayOn(true);
-        setChargingState(controller, false);
         controller.checkIdleStates(USER_ID);
         assertNotEquals(STANDBY_BUCKET_EXEMPTED,
                 controller.getAppStandbyBucket(PACKAGE_1, USER_ID,
@@ -314,65 +295,6 @@ public class AppStandbyControllerTests {
         MyContextWrapper myContext = new MyContextWrapper(InstrumentationRegistry.getContext());
         mInjector = new MyInjector(myContext, Looper.getMainLooper());
         mController = setupController();
-        setChargingState(mController, false);
-    }
-
-    private class TestParoleListener extends UsageStatsManagerInternal.AppIdleStateChangeListener {
-        private boolean mOnParole = false;
-        private CountDownLatch mLatch;
-        private long mLastParoleChangeTime;
-        private boolean mIsExpecting = false;
-        private boolean mExpectedParoleState;
-
-        public boolean getParoleState() {
-            synchronized (this) {
-                return mOnParole;
-            }
-        }
-
-        public void rearmLatch() {
-            synchronized (this) {
-                mLatch = new CountDownLatch(1);
-                mIsExpecting = false;
-            }
-        }
-
-        public void rearmLatch(boolean expectedParoleState) {
-            synchronized (this) {
-                mLatch = new CountDownLatch(1);
-                mIsExpecting = true;
-                mExpectedParoleState = expectedParoleState;
-            }
-        }
-
-        public void awaitOnLatch(long time) throws Exception {
-            mLatch.await(time, TimeUnit.MILLISECONDS);
-        }
-
-        public long getLastParoleChangeTime() {
-            synchronized (this) {
-                return mLastParoleChangeTime;
-            }
-        }
-
-        @Override
-        public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
-                int bucket, int reason) {
-        }
-
-        @Override
-        public void onParoleStateChanged(boolean isParoleOn) {
-            synchronized (this) {
-                // Only record information if it is being looked for
-                if (mLatch != null && mLatch.getCount() > 0) {
-                    mOnParole = isParoleOn;
-                    mLastParoleChangeTime = getCurrentTime();
-                    if (!mIsExpecting || isParoleOn == mExpectedParoleState) {
-                        mLatch.countDown();
-                    }
-                }
-            }
-        }
     }
 
     @Test
@@ -381,133 +303,6 @@ public class AppStandbyControllerTests {
         assertEquals(STANDBY_BUCKET_EXEMPTED,
                 mController.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
                         mInjector.mElapsedRealtime, false));
-    }
-
-    @Test
-    public void testCharging() throws Exception {
-        long startTime;
-        TestParoleListener paroleListener = new TestParoleListener();
-        long marginOfError = 200;
-
-        // Charging
-        paroleListener.rearmLatch();
-        mController.addListener(paroleListener);
-        startTime = getCurrentTime();
-        setChargingState(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        // Parole will only be granted after device has been charging for a sufficient amount of
-        // time.
-        assertEquals(STABLE_CHARGING_THRESHOLD,
-                paroleListener.getLastParoleChangeTime() - startTime,
-                marginOfError);
-
-        // Discharging
-        paroleListener.rearmLatch();
-        startTime = getCurrentTime();
-        setChargingState(mController, false);
-        mController.checkIdleStates(USER_ID);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.getParoleState());
-        // Parole should be revoked immediately
-        assertEquals(0,
-                paroleListener.getLastParoleChangeTime() - startTime,
-                marginOfError);
-
-        // Brief Charging
-        paroleListener.rearmLatch();
-        setChargingState(mController, true);
-        setChargingState(mController, false);
-        // Device stopped charging before the stable charging threshold.
-        // Parole should not be granted at the end of the threshold
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.getParoleState());
-
-        // Charging Again
-        paroleListener.rearmLatch();
-        startTime = getCurrentTime();
-        setChargingState(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.getParoleState());
-        assertTrue(paroleListener.mOnParole);
-        assertEquals(STABLE_CHARGING_THRESHOLD,
-                paroleListener.getLastParoleChangeTime() - startTime,
-                marginOfError);
-    }
-
-    @Test
-    public void testEnabledState() throws Exception {
-        TestParoleListener paroleListener = new TestParoleListener();
-        paroleListener.rearmLatch(true);
-        mController.addListener(paroleListener);
-        long lastUpdateTime;
-
-        // Test that listeners are notified if enabled changes when the device is not in parole.
-        setChargingState(mController, false);
-
-        // Start off not enabled. Device is effectively in permanent parole.
-        setAppIdleEnabled(mController, false);
-        // Since AppStandbyController uses a handler to notify listeners of a state change, there is
-        // some inherent latency between changing the state and getting the notification. We need to
-        // wait until the paroleListener has been notified that parole is on before continuing with
-        // the test.
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-
-        // Enable controller
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.mOnParole);
-        lastUpdateTime = paroleListener.getLastParoleChangeTime();
-
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertFalse(paroleListener.mOnParole);
-        // Make sure AppStandbyController doesn't notify listeners when there's no change.
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
-
-        // Disable controller
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        lastUpdateTime = paroleListener.getLastParoleChangeTime();
-
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        // Make sure AppStandbyController doesn't notify listeners when there's no change.
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
-
-
-        // Test that listeners aren't notified if enabled status changes when the device is already
-        // in parole.
-
-        // A device is in parole whenever it's charging.
-        setChargingState(mController, true);
-
-        // Start off not enabled.
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        lastUpdateTime = paroleListener.getLastParoleChangeTime();
-
-        // Test that toggling doesn't notify the listener.
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, true);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
-
-        paroleListener.rearmLatch();
-        setAppIdleEnabled(mController, false);
-        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
-        assertTrue(paroleListener.mOnParole);
-        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
     }
 
     private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket) {
@@ -804,8 +599,6 @@ public class AppStandbyControllerTests {
 
     @Test
     public void testSystemInteractionTimeout() throws Exception {
-        setChargingState(mController, false);
-
         reportEvent(mController, USER_INTERACTION, 0, PACKAGE_1);
         // Fast forward to RARE
         mInjector.mElapsedRealtime = RARE_THRESHOLD + 100;
@@ -829,8 +622,6 @@ public class AppStandbyControllerTests {
 
     @Test
     public void testInitialForegroundServiceTimeout() throws Exception {
-        setChargingState(mController, false);
-
         mInjector.mElapsedRealtime = 1 * RARE_THRESHOLD + 100;
         // Make sure app is in NEVER bucket
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
