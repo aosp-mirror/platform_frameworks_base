@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService {
-    private static final String TAG = "SampleMediaRoute2Serv";
+    private static final String TAG = "SampleMR2ProviderSvc";
 
     public static final String ROUTE_ID1 = "route_id1";
     public static final String ROUTE_NAME1 = "Sample Route 1";

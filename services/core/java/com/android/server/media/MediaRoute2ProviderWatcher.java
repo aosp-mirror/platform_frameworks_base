@@ -35,9 +35,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
+ * Watches changes of packages, or scan them for finding media route providers.
  */
 final class MediaRoute2ProviderWatcher {
-    private static final String TAG = "MediaRouteProvider";  // max. 23 chars
+    private static final String TAG = "MR2ProviderWatcher";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;

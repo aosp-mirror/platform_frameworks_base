@@ -369,7 +369,7 @@ public final class MediaRoute2Info implements Parcelable {
         @NonNull
         public Builder setProviderId(@NonNull String providerId) {
             if (TextUtils.isEmpty(providerId)) {
-                throw new IllegalArgumentException("id must not be null or empty");
+                throw new IllegalArgumentException("providerId must not be null or empty");
             }
             mProviderId = providerId;
             return this;
