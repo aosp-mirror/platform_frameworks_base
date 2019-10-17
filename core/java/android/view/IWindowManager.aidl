@@ -306,11 +306,6 @@ interface IWindowManager
     oneway void statusBarVisibilityChanged(int displayId, int visibility);
 
     /**
-     * Called by System UI to notify Window Manager to hide transient bars.
-     */
-    oneway void hideTransientBars(int displayId);
-
-    /**
     * When set to {@code true} the system bars will always be shown. This is true even if an app
     * requests to be fullscreen by setting the system ui visibility flags. The
     * functionality was added for the automotive case as a way to guarantee required content stays

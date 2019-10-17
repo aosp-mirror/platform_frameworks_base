@@ -3450,14 +3450,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return win != null;
     }
 
-    void hideTransientBars() {
-        // TODO(b/118118435): Remove this after migration
-        final int transientFlags = View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
-        statusBarVisibilityChanged(mLastStatusBarVisibility & ~transientFlags);
-
-        getInsetsPolicy().hideTransient();
-    }
-
     void statusBarVisibilityChanged(int visibility) {
         mLastStatusBarVisibility = visibility;
         visibility = getDisplayPolicy().adjustSystemUiVisibilityLw(visibility);

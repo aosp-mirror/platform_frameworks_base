@@ -320,6 +320,18 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
+    public void setSystemUiVisibility(int visibility) {
+        if (mSystemUiVisibility != visibility) {
+            mSystemUiVisibility = visibility;
+            synchronized (mListeners) {
+                for (RankedListener rl : new ArrayList<>(mListeners)) {
+                    rl.mListener.onSystemUiVisibilityChanged(mSystemUiVisibility);
+                }
+            }
+        }
+    }
+
+    @Override
     public void setPulsing(boolean pulsing) {
         if (mPulsing != pulsing) {
             mPulsing = pulsing;

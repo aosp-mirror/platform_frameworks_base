@@ -24,11 +24,6 @@ import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.view.InsetsFlags.getAppearance;
-import static android.view.InsetsState.TYPE_TOP_BAR;
-import static android.view.InsetsState.containsType;
-import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_TOP_BAR;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.Dependency.BG_HANDLER;
@@ -80,6 +75,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -108,7 +104,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
-import android.view.InsetsState.InternalInsetType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -117,7 +112,6 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -130,7 +124,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
-import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -431,13 +424,10 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
 
-    /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int) */
-    private @Appearance int mAppearance;
-
-    private boolean mTransientShown;
-
-    private boolean mAppFullscreen;
-    private boolean mAppImmersive;
+    // tracking calls to View.setSystemUiVisibility()
+    private int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+    private final Rect mLastFullscreenStackBounds = new Rect();
+    private final Rect mLastDockedStackBounds = new Rect();
 
     private final DisplayMetrics mDisplayMetrics;
 
@@ -829,22 +819,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         // Set up the initial notification state. This needs to happen before CommandQueue.disable()
         setUpPresenter();
 
-        if ((result.mSystemUiVisibility & View.STATUS_BAR_TRANSIENT) != 0) {
-            showTransientUnchecked();
-        }
-        final int fullscreenAppearance = getAppearance(result.mFullscreenStackSysUiVisibility);
-        final int dockedAppearance = getAppearance(result.mDockedStackSysUiVisibility);
-        final AppearanceRegion[] appearanceRegions = result.mDockedStackBounds.isEmpty()
-                ? new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, result.mFullscreenStackBounds)}
-                : new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, result.mFullscreenStackBounds),
-                        new AppearanceRegion(dockedAppearance, result.mDockedStackBounds)};
-        onSystemBarAppearanceChanged(mDisplayId, getAppearance(result.mSystemUiVisibility),
-                appearanceRegions, result.mNavbarColorManagedByIme);
-        mAppFullscreen = result.mAppFullscreen;
-        mAppImmersive = result.mAppImmersive;
-
+        setSystemUiVisibility(mDisplayId, result.mSystemUiVisibility,
+                result.mFullscreenStackSysUiVisibility, result.mDockedStackSysUiVisibility,
+                0xffffffff, result.mFullscreenStackBounds, result.mDockedStackBounds,
+                result.mNavbarColorManagedByIme);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
                 result.mImeBackDisposition, result.mShowImeSwitcher);
@@ -2244,103 +2222,49 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    @Override
-    public void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+    @Override // CommandQueue
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
-        boolean barModeChanged = false;
-        final int diff = mAppearance ^ appearance;
-        if (mAppearance != appearance) {
-            mAppearance = appearance;
+        final int oldVal = mSystemUiVisibility;
+        final int newVal = (oldVal&~mask) | (vis&mask);
+        final int diff = newVal ^ oldVal;
+        if (DEBUG) Log.d(TAG, String.format(
+                "setSystemUiVisibility displayId=%d vis=%s mask=%s oldVal=%s newVal=%s diff=%s",
+                displayId, Integer.toHexString(vis), Integer.toHexString(mask),
+                Integer.toHexString(oldVal), Integer.toHexString(newVal),
+                Integer.toHexString(diff)));
+        boolean sbModeChanged = false;
+        if (diff != 0) {
+            mSystemUiVisibility = newVal;
 
             // update low profile
-            if ((diff & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+            if ((diff & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
                 updateAreThereNotifications();
             }
-            barModeChanged = updateBarMode(barMode(mTransientShown, appearance));
-        }
-        mLightBarController.onStatusBarAppearanceChanged(appearanceRegions, barModeChanged,
-                mStatusBarMode, navbarColorManagedByIme);
-    }
 
-    @Override
-    public void showTransient(int displayId, @InternalInsetType int[] types) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if (!containsType(types, TYPE_TOP_BAR)) {
-            return;
-        }
-        showTransientUnchecked();
-    }
+            // ready to unhide
+            if ((vis & View.STATUS_BAR_UNHIDE) != 0) {
+                mNoAnimationOnNextBarModeChange = true;
+            }
 
-    private void showTransientUnchecked() {
-        if (!mTransientShown) {
-            mTransientShown = true;
-            mNoAnimationOnNextBarModeChange = true;
-            handleTransientChanged();
-        }
-    }
+            // update status bar mode
+            final int sbMode = computeStatusBarMode(oldVal, newVal);
 
-    @Override
-    public void abortTransient(int displayId, @InternalInsetType int[] types) {
-        if (displayId != mDisplayId) {
-            return;
+            sbModeChanged = sbMode != -1;
+            if (sbModeChanged && sbMode != mStatusBarMode) {
+                mStatusBarMode = sbMode;
+                checkBarModes();
+                mAutoHideController.touchAutoHide();
+            }
+            mStatusBarStateController.setSystemUiVisibility(mSystemUiVisibility);
         }
-        if (!containsType(types, TYPE_TOP_BAR)) {
-            return;
-        }
-        clearTransient();
-    }
-
-    void clearTransient() {
-        if (mTransientShown) {
-            mTransientShown = false;
-            handleTransientChanged();
-        }
-    }
-
-    private void handleTransientChanged() {
-        final int barMode = barMode(mTransientShown, mAppearance);
-        if (updateBarMode(barMode)) {
-            mLightBarController.onStatusBarModeChanged(barMode);
-        }
-    }
-
-    private boolean updateBarMode(int barMode) {
-        if (mStatusBarMode != barMode) {
-            mStatusBarMode = barMode;
-            checkBarModes();
-            mAutoHideController.touchAutoHide();
-            return true;
-        }
-        return false;
-    }
-
-    private static @TransitionMode int barMode(boolean isTransient, int appearance) {
-        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_TOP_BAR;
-        if (isTransient) {
-            return MODE_SEMI_TRANSPARENT;
-        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
-            return MODE_LIGHTS_OUT;
-        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
-            return MODE_LIGHTS_OUT_TRANSPARENT;
-        } else if ((appearance & APPEARANCE_OPAQUE_TOP_BAR) != 0) {
-            return MODE_OPAQUE;
-        } else {
-            return MODE_TRANSPARENT;
-        }
-    }
-
-    @Override
-    public void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        mAppFullscreen = isFullscreen;
-        mAppImmersive = isImmersive;
+        mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
+                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode,
+                navbarColorManagedByIme);
     }
 
     @Override
@@ -2371,8 +2295,38 @@ public class StatusBar extends SystemUI implements DemoMode,
         setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, running);
     }
 
+    protected @TransitionMode int computeStatusBarMode(int oldVal, int newVal) {
+        return computeBarMode(oldVal, newVal);
+    }
+
     protected BarTransitions getStatusBarTransitions() {
         return mStatusBarView.getBarTransitions();
+    }
+
+    protected @TransitionMode int computeBarMode(int oldVis, int newVis) {
+        final int oldMode = barMode(oldVis);
+        final int newMode = barMode(newVis);
+        if (oldMode == newMode) {
+            return -1; // no mode change
+        }
+        return newMode;
+    }
+
+    private @TransitionMode int barMode(int vis) {
+        int lightsOutTransparent = View.SYSTEM_UI_FLAG_LOW_PROFILE | View.STATUS_BAR_TRANSPARENT;
+        if ((vis & View.STATUS_BAR_TRANSIENT) != 0) {
+            return MODE_SEMI_TRANSPARENT;
+        } else if ((vis & View.STATUS_BAR_TRANSLUCENT) != 0) {
+            return MODE_TRANSLUCENT;
+        } else if ((vis & lightsOutTransparent) == lightsOutTransparent) {
+            return MODE_LIGHTS_OUT_TRANSPARENT;
+        } else if ((vis & View.STATUS_BAR_TRANSPARENT) != 0) {
+            return MODE_TRANSPARENT;
+        } else if ((vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+            return MODE_LIGHTS_OUT;
+        } else {
+            return MODE_OPAQUE;
+        }
     }
 
     void checkBarModes() {
@@ -2430,16 +2384,20 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     /** Returns whether the top activity is in fullscreen mode. */
     public boolean inFullscreenMode() {
-        return mAppFullscreen;
+        return 0
+                != (mSystemUiVisibility
+                        & (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION));
     }
 
     /** Returns whether the top activity is in immersive mode. */
     public boolean inImmersiveMode() {
-        return mAppImmersive;
+        return 0
+                != (mSystemUiVisibility
+                        & (View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY));
     }
 
     private boolean areLightsOn() {
-        return 0 == (mAppearance & APPEARANCE_LOW_PROFILE_BARS);
+        return 0 == (mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
 
     public static String viewInfo(View v) {
@@ -4764,8 +4722,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         void createStatusBar(StatusBar statusbar);
     }
 
-    boolean isTransientShown() {
-        return mTransientShown;
+    public @TransitionMode int getStatusBarMode() {
+        return mStatusBarMode;
     }
 
 }

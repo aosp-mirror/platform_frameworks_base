@@ -397,15 +397,14 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testVisibleWithInsetsProvider() {
+    public void testVisibleWithInsetsProvider() throws Exception {
         final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         topBar.mHasSurface = true;
         assertTrue(topBar.isVisible());
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
-                .setWindow(topBar, null /* frameProvider */);
-        mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
-                app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
+                .setWindow(topBar, null);
+        mDisplayContent.getInsetsStateController().onBarControlTargetChanged(app, app);
         mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
                 .onInsetsModified(app, new InsetsSource(TYPE_TOP_BAR));
         waitUntilHandlersIdle();

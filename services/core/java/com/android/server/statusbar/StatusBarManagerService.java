@@ -47,7 +47,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -57,7 +56,6 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.view.AppearanceRegion;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.policy.GlobalActionsProvider;
@@ -258,8 +256,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
-            StatusBarManagerService.this.topAppWindowChanged(displayId, isFullscreen, isImmersive);
+        public void topAppWindowChanged(int displayId, boolean menuVisible) {
+            StatusBarManagerService.this.topAppWindowChanged(displayId, menuVisible);
         }
 
         @Override
@@ -468,36 +466,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } catch (RemoteException ex) {}
             }
 
-        }
-
-        @Override
-        public void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-                AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
-            // TODO (b/118118435): save the information to UiState
-            if (mBar != null) {
-                try {
-                    mBar.onSystemBarAppearanceChanged(displayId, appearance, appearanceRegions,
-                            navbarColorManagedByIme);
-                } catch (RemoteException ex) { }
-            }
-        }
-
-        @Override
-        public void showTransient(int displayId, int[] types) {
-            if (mBar != null) {
-                try {
-                    mBar.showTransient(displayId, types);
-                } catch (RemoteException ex) { }
-            }
-        }
-
-        @Override
-        public void abortTransient(int displayId, int[] types) {
-            if (mBar != null) {
-                try {
-                    mBar.abortTransient(displayId, types);
-                } catch (RemoteException ex) { }
-            }
         }
     };
 
@@ -849,19 +817,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     /**
-     * Enables System UI to know whether the top app is fullscreen or not, and whether this app is
-     * in immersive mode or not.
+     * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
+     * response to a window with {@link android.view.WindowManager.LayoutParams#needsMenuKey} set
+     * to {@link android.view.WindowManager.LayoutParams#NEEDS_MENU_SET_TRUE}.
      */
-    private void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
+    private void topAppWindowChanged(int displayId, final boolean menuVisible) {
         enforceStatusBar();
 
+        if (SPEW) {
+            Slog.d(TAG, "display#" + displayId + ": "
+                    + (menuVisible ? "showing" : "hiding") + " MENU key");
+        }
         synchronized(mLock) {
-            getUiState(displayId).setFullscreen(isFullscreen);
-            getUiState(displayId).setImmersive(isImmersive);
+            getUiState(displayId).setMenuVisible(menuVisible);
             mHandler.post(() -> {
                 if (mBar != null) {
                     try {
-                        mBar.topAppWindowChanged(displayId, isFullscreen, isImmersive);
+                        mBar.topAppWindowChanged(displayId, menuVisible);
                     } catch (RemoteException ex) {
                     }
                 }
@@ -970,8 +942,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         private int mDockedStackSysUiVisibility = 0;
         private final Rect mFullscreenStackBounds = new Rect();
         private final Rect mDockedStackBounds = new Rect();
-        private boolean mFullscreen = false;
-        private boolean mImmersive = false;
+        private boolean mMenuVisible = false;
         private int mDisabled1 = 0;
         private int mDisabled2 = 0;
         private int mImeWindowVis = 0;
@@ -993,12 +964,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mDisabled2 = disabled2;
         }
 
-        private void setFullscreen(boolean isFullscreen) {
-            mFullscreen = isFullscreen;
+        private boolean isMenuVisible() {
+            return mMenuVisible;
         }
 
-        private void setImmersive(boolean immersive) {
-            mImmersive = immersive;
+        private void setMenuVisible(boolean menuVisible) {
+            mMenuVisible = menuVisible;
         }
 
         private boolean disableEquals(int disabled1, int disabled2) {
@@ -1085,12 +1056,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             // Make it aware of multi-display if needed.
             final UiState state = mDisplayUiState.get(DEFAULT_DISPLAY);
             return new RegisterStatusBarResult(icons, gatherDisableActionsLocked(mCurrentUserId, 1),
-                    state.mSystemUiVisibility, state.mImeWindowVis,
+                    state.mSystemUiVisibility, state.mMenuVisible, state.mImeWindowVis,
                     state.mImeBackDisposition, state.mShowImeSwitcher,
                     gatherDisableActionsLocked(mCurrentUserId, 2),
                     state.mFullscreenStackSysUiVisibility, state.mDockedStackSysUiVisibility,
                     state.mImeToken, state.mFullscreenStackBounds, state.mDockedStackBounds,
-                    state.mNavbarColorManagedByIme, state.mFullscreen, state.mImmersive);
+                    state.mNavbarColorManagedByIme);
         }
     }
 

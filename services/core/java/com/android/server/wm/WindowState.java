@@ -31,7 +31,6 @@ import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
@@ -192,7 +191,6 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
-import android.view.InsetsState;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -635,19 +633,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean mIsDimming = false;
 
-    private @Nullable InsetsSourceProvider mControllableInsetProvider;
-    private InsetsState mClientInsetsState = new InsetsState();
+    private @Nullable InsetsSourceProvider mInsetProvider;
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
-
-    InsetsState getClientInsetsState() {
-        return mClientInsetsState;
-    }
-
-    void setClientInsetsState(InsetsState state) {
-        mClientInsetsState = state;
-    }
 
     void seamlesslyRotateIfAllowed(Transaction transaction, @Rotation int oldRotation,
             @Rotation int rotation, boolean requested) {
@@ -1503,8 +1492,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return wouldBeVisibleIfPolicyIgnored() && isVisibleByPolicy()
                 // If we don't have a provider, this window isn't used as a window generating
                 // insets, so nobody can hide it over the inset APIs.
-                && (mControllableInsetProvider == null
-                        || mControllableInsetProvider.isClientVisible());
+                && (mInsetProvider == null || mInsetProvider.isClientVisible());
     }
 
     /**
@@ -3362,7 +3350,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void notifyInsetsChanged() {
         try {
             mClient.insetsChanged(
-                    getDisplayContent().getInsetsPolicy().getInsetsForDispatch(this));
+                    getDisplayContent().getInsetsStateController().getInsetsForDispatch(this));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change", e);
         }
@@ -3372,9 +3360,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void notifyInsetsControlChanged() {
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
-        final InsetsPolicy policy = getDisplayContent().getInsetsPolicy();
         try {
-            mClient.insetsControlChanged(policy.getInsetsForDispatch(this),
+            mClient.insetsControlChanged(stateController.getInsetsForDispatch(this),
                     stateController.getControlsForDispatch(this));
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver inset state change", e);
@@ -3397,11 +3384,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to deliver showInsets", e);
         }
-    }
-
-    @Override
-    public boolean canShowTransient() {
-        return (mAttrs.insetsFlags.behavior & BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE) != 0;
     }
 
     Rect getBackdropFrame(Rect frame) {
@@ -4832,7 +4814,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void startAnimation(Animation anim) {
 
         // If we are an inset provider, all our animations are driven by the inset client.
-        if (mControllableInsetProvider != null) {
+        if (mInsetProvider != null && mInsetProvider.isControllable()) {
             return;
         }
 
@@ -4852,7 +4834,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void startMoveAnimation(int left, int top) {
 
         // If we are an inset provider, all our animations are driven by the inset client.
-        if (mControllableInsetProvider != null) {
+        if (mInsetProvider != null && mInsetProvider.isControllable()) {
             return;
         }
 
@@ -5336,22 +5318,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.setContentChanged(false);
     }
 
-    /**
-     * Set's an {@link InsetsSourceProvider} to be associated with this window, but only if the
-     * provider itself is controllable, as one window can be the provider of more than one inset
-     * type (i.e. gesture insets). If this window is controllable, all its animations must be
-     * controlled by its control target, and the visibility of this window should be taken account
-     * into the state of the control target.
-     *
-     * @param insetProvider the provider which should not be visible to the client.
-     * @see InsetsStateController#getInsetsForDispatch(WindowState)
-     */
-    void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
-        mControllableInsetProvider = insetProvider;
+    void setInsetProvider(InsetsSourceProvider insetProvider) {
+        mInsetProvider = insetProvider;
     }
 
-    InsetsSourceProvider getControllableInsetProvider() {
-        return mControllableInsetProvider;
+    InsetsSourceProvider getInsetProvider() {
+        return mInsetProvider;
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {

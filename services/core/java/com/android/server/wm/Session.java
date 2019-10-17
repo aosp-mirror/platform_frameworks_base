@@ -465,8 +465,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final WindowState windowState = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (windowState != null) {
-                windowState.setClientInsetsState(state);
-                windowState.getDisplayContent().getInsetsPolicy().onInsetsModified(
+                windowState.getDisplayContent().getInsetsStateController().onInsetsModified(
                         windowState, state);
             }
         }

@@ -366,8 +366,8 @@ public class NavigationBarView extends FrameLayout implements
         return super.onTouchEvent(event);
     }
 
-    void onTransientStateChanged(boolean isTransient) {
-        mEdgeBackGestureHandler.onNavBarTransientStateChanged(isTransient);
+    void onSystemUiVisibilityChanged(int systemUiVisibility) {
+        mEdgeBackGestureHandler.onSystemUiVisibilityChanged(systemUiVisibility);
     }
 
     void onBarTransition(int newMode) {

@@ -41,7 +41,6 @@ public final class FrameworksTestsFilter extends SelectTest {
             "android.view.DisplayCutoutTest",
             "android.view.InsetsAnimationControlImplTest",
             "android.view.InsetsControllerTest",
-            "android.view.InsetsFlagsTest",
             "android.view.InsetsSourceTest",
             "android.view.InsetsSourceConsumerTest",
             "android.view.InsetsStateTest",

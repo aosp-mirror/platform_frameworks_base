@@ -16,6 +16,8 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+import static android.view.View.NAVIGATION_BAR_TRANSIENT;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -131,7 +133,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
     private boolean mIsAttached;
     private boolean mIsGesturalModeEnabled;
     private boolean mIsEnabled;
-    private boolean mIsNavBarShownTransiently;
+    private boolean mIsInTransientImmersiveStickyState;
 
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
@@ -196,8 +198,10 @@ public class EdgeBackGestureHandler implements DisplayListener {
         updateCurrentUserResources(currentUserContext.getResources());
     }
 
-    public void onNavBarTransientStateChanged(boolean isTransient) {
-        mIsNavBarShownTransiently = isTransient;
+    public void onSystemUiVisibilityChanged(int systemUiVisibility) {
+        mIsInTransientImmersiveStickyState =
+                (systemUiVisibility & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
+                && (systemUiVisibility & NAVIGATION_BAR_TRANSIENT) != 0;
     }
 
     private void disposeInputChannel() {
@@ -312,7 +316,7 @@ public class EdgeBackGestureHandler implements DisplayListener {
         }
 
         // Always allow if the user is in a transient sticky immersive state
-        if (mIsNavBarShownTransiently) {
+        if (mIsInTransientImmersiveStickyState) {
             return true;
         }
 

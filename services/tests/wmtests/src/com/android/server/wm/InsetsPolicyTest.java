@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -33,9 +32,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import android.platform.test.annotations.Presubmit;
-import android.util.IntArray;
 import android.view.InsetsSourceControl;
-import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
 
 import androidx.test.filters.FlakyTest;
@@ -152,91 +149,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         // The app must not control the navigation bar.
         assertNotNull(controls);
         assertEquals(1, controls.length);
-    }
-
-    @Test
-    public void testShowTransientBars_bothCanBeTransient_appGetsBothFakeControls() {
-        addWindow(TYPE_STATUS_BAR, "topBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-        addWindow(TYPE_NAVIGATION_BAR, "navBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
-
-        final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        policy.updateBarControlTarget(app);
-        policy.showTransient(
-                IntArray.wrap(new int[]{TYPE_TOP_BAR, InsetsState.TYPE_NAVIGATION_BAR}));
-        final InsetsSourceControl[] controls =
-                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
-
-        // The app must get both fake controls.
-        assertEquals(2, controls.length);
-        for (int i = controls.length - 1; i >= 0; i--) {
-            assertNull(controls[i].getLeash());
-        }
-    }
-
-    @Test
-    public void testShowTransientBars_topCanBeTransient_appGetsTopFakeControl() {
-        addWindow(TYPE_STATUS_BAR, "topBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-        addWindow(TYPE_NAVIGATION_BAR, "navBar")
-                .getControllableInsetProvider().getSource().setVisible(true);
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
-
-        final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        policy.updateBarControlTarget(app);
-        policy.showTransient(
-                IntArray.wrap(new int[]{TYPE_TOP_BAR, InsetsState.TYPE_NAVIGATION_BAR}));
-        final InsetsSourceControl[] controls =
-                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
-
-        // The app must get the fake control of the top bar, and must get the real control of the
-        // navigation bar.
-        assertEquals(2, controls.length);
-        for (int i = controls.length - 1; i >= 0; i--) {
-            final InsetsSourceControl control = controls[i];
-            if (control.getType() == TYPE_TOP_BAR) {
-                assertNull(controls[i].getLeash());
-            } else {
-                assertNotNull(controls[i].getLeash());
-            }
-        }
-    }
-
-    @Test
-    public void testAbortTransientBars_bothCanBeAborted_appGetsBothRealControls() {
-        addWindow(TYPE_STATUS_BAR, "topBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-        addWindow(TYPE_NAVIGATION_BAR, "navBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-        final WindowState app = addWindow(TYPE_APPLICATION, "app");
-
-        final InsetsPolicy policy = mDisplayContent.getInsetsPolicy();
-        policy.updateBarControlTarget(app);
-        policy.showTransient(
-                IntArray.wrap(new int[]{TYPE_TOP_BAR, InsetsState.TYPE_NAVIGATION_BAR}));
-        InsetsSourceControl[] controls =
-                mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
-
-        // The app must get both fake controls.
-        assertEquals(2, controls.length);
-        for (int i = controls.length - 1; i >= 0; i--) {
-            assertNull(controls[i].getLeash());
-        }
-
-        final InsetsState state = policy.getInsetsForDispatch(app);
-        state.setSourceVisible(TYPE_TOP_BAR, true);
-        state.setSourceVisible(InsetsState.TYPE_NAVIGATION_BAR, true);
-        policy.onInsetsModified(app, state);
-
-        controls = mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
-
-        // The app must get both real controls.
-        assertEquals(2, controls.length);
-        for (int i = controls.length - 1; i >= 0; i--) {
-            assertNotNull(controls[i].getLeash());
-        }
     }
 
     private WindowState addWindow(int type, String name) {
