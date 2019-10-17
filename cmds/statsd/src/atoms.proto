@@ -5760,6 +5760,8 @@ message PermissionGrantRequestResultReported {
         AUTO_DENIED = 8;
         // permission request was ignored because permission is restricted
         IGNORED_RESTRICTED_PERMISSION = 9;
+        // one time permission was granted by user action
+        USER_GRANTED_ONE_TIME = 10;
     }
     // The result of the permission grant
     optional Result result = 6;
