@@ -19,6 +19,8 @@ package android.net.wifi;
 import static org.junit.Assert.*;
 
 import android.net.MacAddress;
+import android.net.wifi.hotspot2.PasspointConfiguration;
+import android.net.wifi.hotspot2.PasspointTestUtils;
 import android.os.Parcel;
 import android.os.Process;
 
@@ -39,6 +41,7 @@ public class WifiNetworkSuggestionTest {
     private static final String TEST_BSSID = "12:12:12:12:12:12";
     private static final String TEST_SSID_1 = "\"Test1234\"";
     private static final String TEST_PRESHARED_KEY = "Test123";
+    private static final String TEST_FQDN = "fqdn";
 
     /**
      * Validate correctness of WifiNetworkSuggestion object created by
@@ -186,6 +189,25 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkSuggestion.Builder#build()} for Passpoint network which requires
+     *  app interaction and metered.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForPasspointNetworkWithReqAppInteractionMetered() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .setIsAppInteractionRequired(true)
+                .setIsMetered(true)
+                .build();
+        assertEquals(TEST_FQDN, suggestion.wifiConfiguration.FQDN);
+        assertTrue(suggestion.isAppInteractionRequired);
+        assertEquals(suggestion.wifiConfiguration.meteredOverride,
+                WifiConfiguration.METERED_OVERRIDE_METERED);
+    }
+
+    /**
      * Ensure {@link WifiNetworkSuggestion.Builder#setSsid(String)} throws an exception
      * when the string is not Unicode.
      */
@@ -205,6 +227,18 @@ public class WifiNetworkSuggestionTest {
         new WifiNetworkSuggestion.Builder()
                 .setSsid(TEST_SSID)
                 .setWpa2Passphrase("salvē")
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)}}
+     * throws an exception when the PasspointConfiguration is not valid.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testWifiNetworkSuggestionBuilderSetPasspointConfigWithNonValid() {
+        PasspointConfiguration passpointConfiguration = new PasspointConfiguration();
+        new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
                 .build();
     }
 
@@ -311,6 +345,91 @@ public class WifiNetworkSuggestionTest {
     }
 
     /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSuggestion.Builder#setSsid(String)} and
+     * {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBothSsidAndPasspointConfig() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setSsid(TEST_SSID)
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSuggestion.Builder#setWpa2Passphrase(String)} and
+     * {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBothWpa2PassphraseAndPasspointConfig() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setWpa2Passphrase(TEST_PRESHARED_KEY)
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSuggestion.Builder#setWpa3Passphrase(String)} and
+     * {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBothWpa3PassphraseAndPasspointConfig() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setWpa3Passphrase(TEST_PRESHARED_KEY)
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSuggestion.Builder#setWpa3EnterpriseConfig(WifiEnterpriseConfig)}
+     * and {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are
+     * invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBothEnterpriseAndPasspointConfig() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setWpa3EnterpriseConfig(new WifiEnterpriseConfig())
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSuggestion.Builder#setIsEnhancedOpen(boolean)} and
+     * {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBothEnhancedOpenAndPasspointConfig() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setIsEnhancedOpen(true)
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkSuggestion.Builder#build()} throws an exception
+     * when both {@link WifiNetworkSuggestion.Builder#setIsHiddenSsid(boolean)} and
+     * {@link WifiNetworkSuggestion.Builder#setPasspointConfig(PasspointConfiguration)} are invoked.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBothHiddenSsidAndPasspointConfig() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        new WifiNetworkSuggestion.Builder()
+                .setIsHiddenSsid(true)
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+    }
+
+    /**
      * Check that parcel marshalling/unmarshalling works
      */
     @Test
@@ -319,8 +438,8 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, true, TEST_UID, TEST_PACKAGE_NAME);
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion(
+                configuration, null, false, true, TEST_UID, TEST_PACKAGE_NAME);
 
         Parcel parcelW = Parcel.obtain();
         suggestion.writeToParcel(parcelW, 0);
@@ -337,6 +456,39 @@ public class WifiNetworkSuggestionTest {
         // SSID + keyMgmt + same UID). |isAppInteractionRequired| & |isUserInteractionRequired| are
         // not considered for equality and hence needs to be checked for explicitly below.
         assertEquals(suggestion, parcelSuggestion);
+        assertEquals(suggestion.hashCode(), parcelSuggestion.hashCode());
+        assertEquals(suggestion.isAppInteractionRequired,
+                parcelSuggestion.isAppInteractionRequired);
+        assertEquals(suggestion.isUserInteractionRequired,
+                parcelSuggestion.isUserInteractionRequired);
+    }
+
+    /**
+     * Check that parcel marshalling/unmarshalling works
+     */
+    @Test
+    public void testPasspointNetworkSuggestionParcel() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+
+        Parcel parcelW = Parcel.obtain();
+        suggestion.writeToParcel(parcelW, 0);
+        byte[] bytes = parcelW.marshall();
+        parcelW.recycle();
+
+        Parcel parcelR = Parcel.obtain();
+        parcelR.unmarshall(bytes, 0, bytes.length);
+        parcelR.setDataPosition(0);
+        WifiNetworkSuggestion parcelSuggestion =
+                WifiNetworkSuggestion.CREATOR.createFromParcel(parcelR);
+
+        // Two suggestion objects are considered equal if they point to the same network (i.e same
+        // SSID + keyMgmt + same UID). |isAppInteractionRequired| & |isUserInteractionRequired| are
+        // not considered for equality and hence needs to be checked for explicitly below.
+        assertEquals(suggestion, parcelSuggestion);
+        assertEquals(suggestion.hashCode(), parcelSuggestion.hashCode());
         assertEquals(suggestion.isAppInteractionRequired,
                 parcelSuggestion.isAppInteractionRequired);
         assertEquals(suggestion.isUserInteractionRequired,
@@ -354,7 +506,7 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, true, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, true, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
@@ -362,10 +514,11 @@ public class WifiNetworkSuggestionTest {
         configuration1.BSSID = TEST_BSSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, true, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, true, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertEquals(suggestion, suggestion1);
+        assertEquals(suggestion.hashCode(), suggestion1.hashCode());
     }
 
     /**
@@ -378,14 +531,14 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID_1;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -402,14 +555,14 @@ public class WifiNetworkSuggestionTest {
         configuration.BSSID = TEST_BSSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null,  false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -425,14 +578,14 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiConfiguration configuration1 = new WifiConfiguration();
         configuration1.SSID = TEST_SSID;
         configuration1.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration1, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration1, null, false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -448,11 +601,11 @@ public class WifiNetworkSuggestionTest {
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
+                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID,
                         TEST_PACKAGE_NAME);
 
         WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID_OTHER,
+                new WifiNetworkSuggestion(configuration, null, false, false, TEST_UID_OTHER,
                         TEST_PACKAGE_NAME);
 
         assertNotEquals(suggestion, suggestion1);
@@ -467,13 +620,48 @@ public class WifiNetworkSuggestionTest {
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = TEST_SSID;
         configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        WifiNetworkSuggestion suggestion =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID, TEST_PACKAGE_NAME);
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion(
+                configuration, null, false, false, TEST_UID, TEST_PACKAGE_NAME);
 
-        WifiNetworkSuggestion suggestion1 =
-                new WifiNetworkSuggestion(configuration, false, false, TEST_UID,
-                        TEST_PACKAGE_NAME_OTHER);
+        WifiNetworkSuggestion suggestion1 = new WifiNetworkSuggestion(
+                configuration, null, false, false, TEST_UID, TEST_PACKAGE_NAME_OTHER);
 
+        assertNotEquals(suggestion, suggestion1);
+    }
+    /**
+     * Check NetworkSuggestion equals returns {@code true} for 2 Passpoint network suggestions with
+     * same FQDN.
+     */
+    @Test
+    public void testPasspointNetworkSuggestionEqualsSameWithSameFQDN() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        PasspointConfiguration passpointConfiguration1 = PasspointTestUtils.createConfig();
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+        WifiNetworkSuggestion suggestion1 = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration1)
+                .build();
+        assertEquals(suggestion, suggestion1);
+        assertEquals(suggestion.hashCode(), suggestion1.hashCode());
+    }
+
+    /**
+     * Check NetworkSuggestion equals returns {@code false} for 2 Passpoint network suggestions with
+     * different FQDN.
+     */
+    @Test
+    public void testPasspointNetworkSuggestionNotEqualsSameWithDifferentFQDN() {
+        PasspointConfiguration passpointConfiguration = PasspointTestUtils.createConfig();
+        PasspointConfiguration passpointConfiguration1 = PasspointTestUtils.createConfig();
+        passpointConfiguration1.getHomeSp().setFqdn(TEST_FQDN + 1);
+
+        WifiNetworkSuggestion suggestion = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration)
+                .build();
+        WifiNetworkSuggestion suggestion1 = new WifiNetworkSuggestion.Builder()
+                .setPasspointConfig(passpointConfiguration1)
+                .build();
         assertNotEquals(suggestion, suggestion1);
     }
 }

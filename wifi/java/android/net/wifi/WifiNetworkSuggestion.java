@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.net.MacAddress;
+import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -80,6 +81,10 @@ public final class WifiNetworkSuggestion implements Parcelable {
          */
         private @Nullable WifiEnterpriseConfig mWpa3EnterpriseConfig;
         /**
+         * The passpoint config for use with Hotspot 2.0 network
+         */
+        private @Nullable PasspointConfiguration mPasspointConfiguration;
+        /**
          * This is a network that does not broadcast its SSID, so an
          * SSID-specific probe request must be used for scans.
          */
@@ -110,6 +115,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
             mWpa3SaePassphrase = null;
             mWpa2EnterpriseConfig = null;
             mWpa3EnterpriseConfig = null;
+            mPasspointConfiguration = null;
             mIsHiddenSSID = false;
             mIsAppInteractionRequired = false;
             mIsUserInteractionRequired = false;
@@ -230,6 +236,24 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
             mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
+            return this;
+        }
+
+        /**
+         * Set the associated Passpoint configuration for this network. Needed for authenticating
+         * to Hotspot 2.0 networks. See {@link PasspointConfiguration} for description.
+         *
+         * @param passpointConfig Instance of {@link PasspointConfiguration}.
+         * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @throws IllegalArgumentException if passpoint configuration is invalid.
+         */
+        public @NonNull Builder setPasspointConfig(
+                @NonNull PasspointConfiguration passpointConfig) {
+            checkNotNull(passpointConfig);
+            if (!passpointConfig.validate()) {
+                throw new IllegalArgumentException("Passpoint configuration is invalid");
+            }
+            mPasspointConfiguration = passpointConfig;
             return this;
         }
 
@@ -366,11 +390,22 @@ public final class WifiNetworkSuggestion implements Parcelable {
             numSecurityTypes += !TextUtils.isEmpty(mWpa3SaePassphrase) ? 1 : 0;
             numSecurityTypes += mWpa2EnterpriseConfig != null ? 1 : 0;
             numSecurityTypes += mWpa3EnterpriseConfig != null ? 1 : 0;
+            numSecurityTypes += mPasspointConfiguration != null ? 1 : 0;
             if (numSecurityTypes > 1) {
                 throw new IllegalStateException("only one of setIsEnhancedOpen, setWpa2Passphrase,"
-                        + "setWpa3Passphrase, setWpa2EnterpriseConfig or setWpa3EnterpriseConfig"
-                        + " can be invoked for network specifier");
+                        + "setWpa3Passphrase, setWpa2EnterpriseConfig, setWpa3EnterpriseConfig"
+                        + "or setPasspointConfig can be invoked for network suggestion");
             }
+        }
+
+        private WifiConfiguration buildWifiConfigurationForPasspoint() {
+            WifiConfiguration wifiConfiguration = new WifiConfiguration();
+            wifiConfiguration.FQDN = mPasspointConfiguration.getHomeSp().getFqdn();
+            wifiConfiguration.priority = mPriority;
+            wifiConfiguration.meteredOverride =
+                    mIsMetered ? WifiConfiguration.METERED_OVERRIDE_METERED
+                            : WifiConfiguration.METERED_OVERRIDE_NONE;
+            return wifiConfiguration;
         }
 
         /**
@@ -384,29 +419,36 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * </p>
          *
          * For example:
-         * To provide credentials for one open, one WPA2 and one WPA3 network with their
-         * corresponding SSID's:
+         * To provide credentials for one open, one WPA2, one WPA3 network with their
+         * corresponding SSID's and one with Passpoint config:
          *
          * <pre>{@code
          * final WifiNetworkSuggestion suggestion1 =
          *      new Builder()
          *      .setSsid("test111111")
-         *      .build()
+         *      .build();
          * final WifiNetworkSuggestion suggestion2 =
          *      new Builder()
          *      .setSsid("test222222")
          *      .setWpa2Passphrase("test123456")
-         *      .build()
+         *      .build();
          * final WifiNetworkSuggestion suggestion3 =
          *      new Builder()
          *      .setSsid("test333333")
          *      .setWpa3Passphrase("test6789")
-         *      .build()
+         *      .build();
+         * final PasspointConfiguration passpointConfig= new PasspointConfiguration();
+         * // configure passpointConfig to include a valid Passpoint configuration
+         * final WifiNetworkSuggestion suggestion4 =
+         *      new Builder()
+         *      .setPasspointConfig(passpointConfig)
+         *      .build();
          * final List<WifiNetworkSuggestion> suggestionsList =
          *      new ArrayList<WifiNetworkSuggestion> { {
          *          add(suggestion1);
          *          add(suggestion2);
          *          add(suggestion3);
+         *          add(suggestion4);
          *      } };
          * final WifiManager wifiManager =
          *      context.getSystemService(Context.WIFI_SERVICE);
@@ -419,21 +461,37 @@ public final class WifiNetworkSuggestion implements Parcelable {
          * @see WifiNetworkSuggestion
          */
         public @NonNull WifiNetworkSuggestion build() {
-            if (mSsid == null) {
-                throw new IllegalStateException("setSsid should be invoked for suggestion");
-            }
-            if (TextUtils.isEmpty(mSsid)) {
-                throw new IllegalStateException("invalid ssid for suggestion");
-            }
-            if (mBssid != null
-                    && (mBssid.equals(MacAddress.BROADCAST_ADDRESS)
-                    || mBssid.equals(MacAddress.ALL_ZEROS_ADDRESS))) {
-                throw new IllegalStateException("invalid bssid for suggestion");
-            }
             validateSecurityParams();
+            WifiConfiguration wifiConfiguration;
+            if (mPasspointConfiguration != null) {
+                if (mSsid != null) {
+                    throw new IllegalStateException("setSsid should not be invoked for suggestion "
+                            + "with Passpoint configuration");
+                }
+                if (mIsHiddenSSID) {
+                    throw new IllegalStateException("setIsHiddenSsid should not be invoked for "
+                            + "suggestion with Passpoint configuration");
+                }
+                wifiConfiguration = buildWifiConfigurationForPasspoint();
+
+            } else {
+                if (mSsid == null) {
+                    throw new IllegalStateException("setSsid should be invoked for suggestion");
+                }
+                if (TextUtils.isEmpty(mSsid)) {
+                    throw new IllegalStateException("invalid ssid for suggestion");
+                }
+                if (mBssid != null
+                        && (mBssid.equals(MacAddress.BROADCAST_ADDRESS)
+                        || mBssid.equals(MacAddress.ALL_ZEROS_ADDRESS))) {
+                    throw new IllegalStateException("invalid bssid for suggestion");
+                }
+                wifiConfiguration = buildWifiConfiguration();
+            }
 
             return new WifiNetworkSuggestion(
-                    buildWifiConfiguration(),
+                    wifiConfiguration,
+                    mPasspointConfiguration,
                     mIsAppInteractionRequired,
                     mIsUserInteractionRequired,
                     Process.myUid(),
@@ -446,6 +504,12 @@ public final class WifiNetworkSuggestion implements Parcelable {
      * @hide
      */
     public final WifiConfiguration wifiConfiguration;
+
+    /**
+     * Passpoint configuration for the provided network.
+     * @hide
+     */
+    public final PasspointConfiguration passpointConfiguration;
 
     /**
      * Whether app needs to log in to captive portal to obtain Internet access.
@@ -474,6 +538,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
     /** @hide */
     public WifiNetworkSuggestion() {
         this.wifiConfiguration = null;
+        this.passpointConfiguration = null;
         this.isAppInteractionRequired = false;
         this.isUserInteractionRequired = false;
         this.suggestorUid = -1;
@@ -481,14 +546,16 @@ public final class WifiNetworkSuggestion implements Parcelable {
     }
 
     /** @hide */
-    public WifiNetworkSuggestion(@NonNull WifiConfiguration wifiConfiguration,
+    public WifiNetworkSuggestion(@NonNull WifiConfiguration networkConfiguration,
+                                 @Nullable PasspointConfiguration passpointConfiguration,
                                  boolean isAppInteractionRequired,
                                  boolean isUserInteractionRequired,
                                  int suggestorUid, @NonNull String suggestorPackageName) {
-        checkNotNull(wifiConfiguration);
+        checkNotNull(networkConfiguration);
         checkNotNull(suggestorPackageName);
+        this.wifiConfiguration = networkConfiguration;
+        this.passpointConfiguration = passpointConfiguration;
 
-        this.wifiConfiguration = wifiConfiguration;
         this.isAppInteractionRequired = isAppInteractionRequired;
         this.isUserInteractionRequired = isUserInteractionRequired;
         this.suggestorUid = suggestorUid;
@@ -501,6 +568,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                 public WifiNetworkSuggestion createFromParcel(Parcel in) {
                     return new WifiNetworkSuggestion(
                             in.readParcelable(null), // wifiConfiguration
+                            in.readParcelable(null), // PasspointConfiguration
                             in.readBoolean(), // isAppInteractionRequired
                             in.readBoolean(), // isUserInteractionRequired
                             in.readInt(), // suggestorUid
@@ -522,6 +590,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(wifiConfiguration, flags);
+        dest.writeParcelable(passpointConfiguration, flags);
         dest.writeBoolean(isAppInteractionRequired);
         dest.writeBoolean(isUserInteractionRequired);
         dest.writeInt(suggestorUid);
@@ -531,7 +600,8 @@ public final class WifiNetworkSuggestion implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(wifiConfiguration.SSID, wifiConfiguration.BSSID,
-                wifiConfiguration.allowedKeyManagement, suggestorUid, suggestorPackageName);
+                wifiConfiguration.allowedKeyManagement, wifiConfiguration.FQDN,
+                suggestorUid, suggestorPackageName);
     }
 
     /**
@@ -546,12 +616,17 @@ public final class WifiNetworkSuggestion implements Parcelable {
             return false;
         }
         WifiNetworkSuggestion lhs = (WifiNetworkSuggestion) obj;
-        return Objects.equals(this.wifiConfiguration.SSID, lhs.wifiConfiguration.SSID)
-                && Objects.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
+        if (this.passpointConfiguration == null ^ lhs.passpointConfiguration == null) {
+            return false;
+        }
+
+        return TextUtils.equals(this.wifiConfiguration.SSID, lhs.wifiConfiguration.SSID)
+                && TextUtils.equals(this.wifiConfiguration.BSSID, lhs.wifiConfiguration.BSSID)
                 && Objects.equals(this.wifiConfiguration.allowedKeyManagement,
-                                  lhs.wifiConfiguration.allowedKeyManagement)
-                && suggestorUid == lhs.suggestorUid
-                && TextUtils.equals(suggestorPackageName, lhs.suggestorPackageName);
+                lhs.wifiConfiguration.allowedKeyManagement)
+                && TextUtils.equals(this.wifiConfiguration.FQDN, lhs.wifiConfiguration.FQDN)
+                && this.suggestorUid == lhs.suggestorUid
+                && TextUtils.equals(this.suggestorPackageName, lhs.suggestorPackageName);
     }
 
     @Override
@@ -559,6 +634,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
         StringBuilder sb = new StringBuilder("WifiNetworkSuggestion [")
                 .append(", SSID=").append(wifiConfiguration.SSID)
                 .append(", BSSID=").append(wifiConfiguration.BSSID)
+                .append(", FQDN=").append(wifiConfiguration.FQDN)
                 .append(", isAppInteractionRequired=").append(isAppInteractionRequired)
                 .append(", isUserInteractionRequired=").append(isUserInteractionRequired)
                 .append(", suggestorUid=").append(suggestorUid)
