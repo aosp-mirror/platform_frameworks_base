@@ -1970,6 +1970,7 @@
   <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
   <java-symbol type="bool" name="config_wifi_connected_mac_randomization_supported" />
   <java-symbol type="bool" name="config_wifi_p2p_mac_randomization_supported" />
+  <java-symbol type="bool" name="config_wifi_ap_mac_randomization_supported" />
   <java-symbol type="bool" name="config_wifi_aggressive_randomization_ssid_whitelist_enabled" />
   <java-symbol type="bool" name="config_wifi_link_probing_supported" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
