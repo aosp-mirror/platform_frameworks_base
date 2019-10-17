@@ -4037,7 +4037,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private PackageInfo getPackageInfoInternal(String packageName, long versionCode,
             int flags, int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForPackage(flags, userId, packageName);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "get package info");
 
@@ -4339,7 +4339,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public int getPackageUid(String packageName, int flags, int userId) {
         if (!mUserManager.exists(userId)) return -1;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForPackage(flags, userId, packageName);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getPackageUid");
 
@@ -4369,7 +4369,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public int[] getPackageGids(String packageName, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForPackage(flags, userId, packageName);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getPackageGids");
 
@@ -4451,7 +4451,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
             int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForApplication(flags, userId, packageName);
+        flags = updateFlagsForApplication(flags, userId);
 
         if (!isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId)) {
             mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -4738,7 +4738,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Update given flags when being used to request {@link PackageInfo}.
      */
-    private int updateFlagsForPackage(int flags, int userId, Object cookie) {
+    private int updateFlagsForPackage(int flags, int userId) {
         final boolean isCallerSystemUser = UserHandle.getCallingUserId() == UserHandle.USER_SYSTEM;
         if ((flags & PackageManager.MATCH_ANY_USER) != 0) {
             // require the permission to be held; the calling uid and given user id referring
@@ -4762,14 +4762,14 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Update given flags when being used to request {@link ApplicationInfo}.
      */
-    private int updateFlagsForApplication(int flags, int userId, Object cookie) {
-        return updateFlagsForPackage(flags, userId, cookie);
+    private int updateFlagsForApplication(int flags, int userId) {
+        return updateFlagsForPackage(flags, userId);
     }
 
     /**
      * Update given flags when being used to request {@link ComponentInfo}.
      */
-    private int updateFlagsForComponent(int flags, int userId, Object cookie) {
+    private int updateFlagsForComponent(int flags, int userId) {
         return updateFlags(flags, userId);
     }
 
@@ -4798,16 +4798,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * action and a {@code android.intent.category.BROWSABLE} category</li>
      * </ul>
      */
-    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid) {
-        return updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*wantInstantApps*/, false /*onlyExposedExplicitly*/);
-    }
-    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid,
-            boolean wantInstantApps) {
-        return updateFlagsForResolve(flags, userId, intent, callingUid,
+    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps) {
+        return updateFlagsForResolve(flags, userId, callingUid,
                 wantInstantApps, false /*onlyExposedExplicitly*/);
     }
-    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid,
+
+    int updateFlagsForResolve(int flags, int userId, int callingUid,
             boolean wantInstantApps, boolean onlyExposedExplicitly) {
         // Safe mode means we shouldn't match any third-party components
         if (mSafeMode) {
@@ -4830,7 +4826,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 flags &= ~PackageManager.MATCH_INSTANT;
             }
         }
-        return updateFlagsForComponent(flags, userId, intent /*cookie*/);
+        return updateFlagsForComponent(flags, userId);
     }
 
     @Override
@@ -4847,7 +4843,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
             int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
 
         if (!isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId)) {
             mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -4928,7 +4924,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */, "get receiver info");
         synchronized (mLock) {
@@ -4958,7 +4954,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        flags = updateFlagsForPackage(flags, userId, null);
+        flags = updateFlagsForPackage(flags, userId);
 
         final boolean canSeeStaticLibraries =
                 mContext.checkCallingOrSelfPermission(INSTALL_PACKAGES)
@@ -5143,7 +5139,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */, "get service info");
         synchronized (mLock) {
@@ -5168,7 +5164,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ProviderInfo getProviderInfo(ComponentName component, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */, "get provider info");
         synchronized (mLock) {
@@ -5868,7 +5864,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
-            flags = updateFlagsForResolve(flags, userId, intent, filterCallingUid, resolveForStart);
+            flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart);
             mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
@@ -5898,7 +5894,7 @@ public class PackageManagerService extends IPackageManager.Stub
         intent = updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
         final int flags = updateFlagsForResolve(
-                0, userId, intent, callingUid, false /*includeInstantApps*/);
+                0, userId, callingUid, false /*includeInstantApps*/);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mLock) {
@@ -6212,7 +6208,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                         android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
         flags = updateFlagsForResolve(
-                flags, userId, intent, callingUid, false /*includeInstantApps*/);
+                flags, userId, callingUid, false /*includeInstantApps*/);
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mLock) {
@@ -6420,7 +6416,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUid = Binder.getCallingUid();
             final UserInfo parent = getProfileParent(sourceUserId);
             synchronized (mLock) {
-                int flags = updateFlagsForResolve(0, parent.id, intent, callingUid,
+                int flags = updateFlagsForResolve(0, parent.id, callingUid,
                         false /*includeInstantApps*/);
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
@@ -6506,7 +6502,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        flags = updateFlagsForResolve(flags, userId, intent, filterCallingUid, resolveForStart,
+        flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
                 comp != null || pkgName != null /*onlyExposedExplicitly*/);
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<>(1);
@@ -7273,8 +7269,7 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent activity options");
@@ -7460,8 +7455,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7551,8 +7545,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ResolveInfo resolveServiceInternal(Intent intent, String resolvedType, int flags,
             int userId, int callingUid) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(
-                flags, userId, intent, callingUid, false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         List<ResolveInfo> query = queryIntentServicesInternal(
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
         if (query != null) {
@@ -7581,7 +7574,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
+        flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7708,8 +7701,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7831,7 +7823,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return ParceledListSlice.emptyList();
         }
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
-        flags = updateFlagsForPackage(flags, userId, null);
+        flags = updateFlagsForPackage(flags, userId);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
         final boolean listApex = (flags & MATCH_APEX) != 0;
         final boolean listFactory = (flags & MATCH_FACTORY_ONLY) != 0;
@@ -7931,7 +7923,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
             String[] permissions, int flags, int userId) {
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
-        flags = updateFlagsForPackage(flags, userId, permissions);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "get packages holding permissions");
@@ -7973,7 +7965,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return Collections.emptyList();
         }
         if (!mUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForApplication(flags, userId, null);
+        flags = updateFlagsForApplication(flags, userId);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
 
         mPermissionManager.enforceCrossUserPermission(
@@ -8208,7 +8200,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForComponent(flags, userId, name);
+        flags = updateFlagsForComponent(flags, userId);
         final int callingUid = Binder.getCallingUid();
         final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
         if (providerInfo == null) {
@@ -8247,7 +8239,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int userId = processName != null ? UserHandle.getUserId(uid)
                 : UserHandle.getCallingUserId();
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
-        flags = updateFlagsForComponent(flags, userId, processName);
+        flags = updateFlagsForComponent(flags, userId);
         ArrayList<ProviderInfo> finalList = null;
         final List<ProviderInfo> matchList =
                 mComponentResolver.queryProviders(processName, metaDataKey, uid, flags, userId);
