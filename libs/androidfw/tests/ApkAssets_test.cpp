@@ -79,39 +79,6 @@ TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
   EXPECT_TRUE(loaded_arsc->GetPackages()[0]->IsDynamic());
 }
 
-TEST(ApkAssetsTest, LoadApkWithIdmap) {
-  std::string contents;
-  ResTable target_table;
-  const std::string target_path = GetTestDataPath() + "/basic/basic.apk";
-  ASSERT_TRUE(ReadFileFromZipToString(target_path, "resources.arsc", &contents));
-  ASSERT_THAT(target_table.add(contents.data(), contents.size(), 0, true /*copyData*/),
-              Eq(NO_ERROR));
-
-  ResTable overlay_table;
-  const std::string overlay_path = GetTestDataPath() + "/overlay/overlay.apk";
-  ASSERT_TRUE(ReadFileFromZipToString(overlay_path, "resources.arsc", &contents));
-  ASSERT_THAT(overlay_table.add(contents.data(), contents.size(), 0, true /*copyData*/),
-              Eq(NO_ERROR));
-
-  util::unique_cptr<void> idmap_data;
-  void* temp_data;
-  size_t idmap_len;
-
-  ASSERT_THAT(target_table.createIdmap(overlay_table, 0u, 0u, target_path.c_str(),
-                                       overlay_path.c_str(), &temp_data, &idmap_len),
-              Eq(NO_ERROR));
-  idmap_data.reset(temp_data);
-
-  TemporaryFile tf;
-  ASSERT_TRUE(base::WriteFully(tf.fd, idmap_data.get(), idmap_len));
-  close(tf.fd);
-
-  // Open something so that the destructor of TemporaryFile closes a valid fd.
-  tf.fd = open("/dev/null", O_WRONLY);
-
-  ASSERT_THAT(ApkAssets::LoadOverlay(tf.path), NotNull());
-}
-
 TEST(ApkAssetsTest, CreateAndDestroyAssetKeepsApkAssetsOpen) {
   std::unique_ptr<const ApkAssets> loaded_apk =
       ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");

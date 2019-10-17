@@ -180,11 +180,11 @@ Result<Unit> Scan(const std::vector<std::string>& args) {
 
     // Note that conditional property enablement/exclusion only applies if
     // the attribute is present. In its absence, all overlays are presumed enabled.
-    if (!overlay_info->requiredSystemPropertyName.empty()
-        && !overlay_info->requiredSystemPropertyValue.empty()) {
+    if (!overlay_info->requiredSystemPropertyName.empty() &&
+        !overlay_info->requiredSystemPropertyValue.empty()) {
       // if property set & equal to value, then include overlay - otherwise skip
-      if (android::base::GetProperty(overlay_info->requiredSystemPropertyName, "")
-          != overlay_info->requiredSystemPropertyValue) {
+      if (android::base::GetProperty(overlay_info->requiredSystemPropertyName, "") !=
+          overlay_info->requiredSystemPropertyValue) {
         continue;
       }
     }

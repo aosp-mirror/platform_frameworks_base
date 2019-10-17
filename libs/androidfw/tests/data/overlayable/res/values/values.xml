@@ -20,4 +20,15 @@
     <string name="overlayable2">Overlayable Two</string>
     <string name="overlayable3">Overlayable Three</string>
     <string name="overlayable4">Overlayable Four</string>
+    <string name="overlayable5">Overlayable Five</string>
+    <string name="overlayable6">Overlayable Six</string>
+    <string name="overlayable7">Overlayable Seven</string>
+    <string name="overlayable8">Overlayable Eight</string>
+    <string name="overlayable9">Overlayable Nine</string>
+    <string name="overlayable10">Overlayable Ten</string>
+    <string name="overlayable11">Overlayable Eleven</string>
+
+    <integer name="config_int">0</integer>
+    <bool name="config_bool">false</bool>
+    <attr name="max_lines" format="integer" />
 </resources>

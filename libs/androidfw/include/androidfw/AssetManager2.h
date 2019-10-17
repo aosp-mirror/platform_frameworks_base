@@ -122,7 +122,7 @@ class AssetManager2 {
 
   // Returns the DynamicRefTable for the ApkAssets represented by the cookie.
   // This may be nullptr if the APK represented by `cookie` has no resource table.
-  const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
+  std::shared_ptr<const DynamicRefTable> GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
 
   // Returns a string representation of the overlayable API of a package.
   bool GetOverlayablesToString(const android::StringPiece& package_name,
@@ -236,12 +236,14 @@ class AssetManager2 {
                                    ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
                                    uint32_t* out_last_reference) const;
 
-  // Enables or disables resource resolution logging. Clears stored steps when
-  // disabled.
+  // Resets the resource resolution structures in preparation for the next resource retrieval.
+  void ResetResourceResolution() const;
+
+  // Enables or disables resource resolution logging. Clears stored steps when disabled.
   void SetResourceResolutionLoggingEnabled(bool enabled);
 
-  // Returns formatted log of last resource resolution path, or empty if no
-  // resource has been resolved yet.
+  // Returns formatted log of last resource resolution path, or empty if no resource has been
+  // resolved yet.
   std::string GetLastResourceResolution() const;
 
   const std::vector<uint32_t> GetBagResIdStack(uint32_t resid);
@@ -264,7 +266,7 @@ class AssetManager2 {
   void ForEachPackage(const std::function<bool(const std::string&, uint8_t)> func) const {
     for (const PackageGroup& package_group : package_groups_) {
       if (!func(package_group.packages_.front().loaded_package_->GetPackageName(),
-           package_group.dynamic_ref_table.mAssignedPackageId)) {
+           package_group.dynamic_ref_table->mAssignedPackageId)) {
         return;
       }
     }
@@ -274,6 +276,50 @@ class AssetManager2 {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AssetManager2);
+
+  // A collection of configurations and their associated ResTable_type that match the current
+  // AssetManager configuration.
+  struct FilteredConfigGroup {
+      std::vector<ResTable_config> configurations;
+      std::vector<const ResTable_type*> types;
+  };
+
+  // Represents an single package.
+  struct ConfiguredPackage {
+      // A pointer to the immutable, loaded package info.
+      const LoadedPackage* loaded_package_;
+
+      // A mutable AssetManager-specific list of configurations that match the AssetManager's
+      // current configuration. This is used as an optimization to avoid checking every single
+      // candidate configuration when looking up resources.
+      ByteBucketArray<FilteredConfigGroup> filtered_configs_;
+  };
+
+  // Represents a Runtime Resource Overlay that overlays resources in the logical package.
+  struct ConfiguredOverlay {
+      // The set of package groups that overlay this package group.
+      IdmapResMap overlay_res_maps_;
+
+      // The cookie of the overlay assets.
+      ApkAssetsCookie cookie;
+  };
+
+  // Represents a logical package, which can be made up of many individual packages. Each package
+  // in a PackageGroup shares the same package name and package ID.
+  struct PackageGroup {
+      // The set of packages that make-up this group.
+      std::vector<ConfiguredPackage> packages_;
+
+      // The cookies associated with each package in the group. They share the same order as
+      // packages_.
+      std::vector<ApkAssetsCookie> cookies_;
+
+      // Runtime Resource Overlays that overlay resources in this package group.
+      std::vector<ConfiguredOverlay> overlays_;
+
+      // A library reference table that contains build-package ID to runtime-package ID mappings.
+      std::shared_ptr<DynamicRefTable> dynamic_ref_table = std::make_shared<DynamicRefTable>();
+  };
 
   // Finds the best entry for `resid` from the set of ApkAssets. The entry can be a simple
   // Res_value, or a complex map/bag type. If successful, it is available in `out_entry`.
@@ -295,6 +341,11 @@ class AssetManager2 {
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
                             bool ignore_configuration, FindEntryResult* out_entry) const;
 
+  ApkAssetsCookie FindEntryInternal(const PackageGroup& package_group, uint8_t type_idx,
+                                    uint16_t entry_idx, const ResTable_config& desired_config,
+                                    bool /*stop_at_first_match*/,
+                                    bool ignore_configuration, FindEntryResult* out_entry) const;
+
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
   void BuildDynamicRefTable();
@@ -307,6 +358,9 @@ class AssetManager2 {
   // This should always be called when mutating the AssetManager's configuration or ApkAssets set.
   void RebuildFilterList(bool filter_incompatible_configs = true);
 
+  // Retrieves the APK paths of overlays that overlay non-system packages.
+  std::set<std::string> GetNonSystemOverlayPaths() const;
+
   // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
   // been seen while traversing bag parents.
   const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
@@ -317,38 +371,6 @@ class AssetManager2 {
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
   std::vector<const ApkAssets*> apk_assets_;
-
-  // A collection of configurations and their associated ResTable_type that match the current
-  // AssetManager configuration.
-  struct FilteredConfigGroup {
-    std::vector<ResTable_config> configurations;
-    std::vector<const ResTable_type*> types;
-  };
-
-  // Represents an single package.
-  struct ConfiguredPackage {
-    // A pointer to the immutable, loaded package info.
-    const LoadedPackage* loaded_package_;
-
-    // A mutable AssetManager-specific list of configurations that match the AssetManager's
-    // current configuration. This is used as an optimization to avoid checking every single
-    // candidate configuration when looking up resources.
-    ByteBucketArray<FilteredConfigGroup> filtered_configs_;
-  };
-
-  // Represents a logical package, which can be made up of many individual packages. Each package
-  // in a PackageGroup shares the same package name and package ID.
-  struct PackageGroup {
-    // The set of packages that make-up this group.
-    std::vector<ConfiguredPackage> packages_;
-
-    // The cookies associated with each package in the group. They share the same order as
-    // packages_.
-    std::vector<ApkAssetsCookie> cookies_;
-
-    // A library reference table that contains build-package ID to runtime-package ID mappings.
-    DynamicRefTable dynamic_ref_table;
-  };
 
   // DynamicRefTables for shared library package resolution.
   // These are ordered according to apk_assets_. The mappings may change depending on what is
@@ -418,7 +440,7 @@ class AssetManager2 {
   };
 
   // Record of the last resolved resource's resolution path.
-  mutable Resolution last_resolution;
+  mutable Resolution last_resolution_;
 };
 
 class Theme {

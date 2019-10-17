@@ -41,29 +41,33 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
   }
 }
 
-void PrettyPrintVisitor::visit(const IdmapData& data ATTRIBUTE_UNUSED) {
-}
-
 void PrettyPrintVisitor::visit(const IdmapData::Header& header ATTRIBUTE_UNUSED) {
-  last_seen_package_id_ = header.GetTargetPackageId();
 }
 
-void PrettyPrintVisitor::visit(const IdmapData::TypeEntry& type_entry) {
+void PrettyPrintVisitor::visit(const IdmapData& data) {
   const bool target_package_loaded = !target_am_.GetApkAssets().empty();
-  for (uint16_t i = 0; i < type_entry.GetEntryCount(); i++) {
-    const EntryId entry = type_entry.GetEntry(i);
-    if (entry == kNoEntry) {
-      continue;
+  const ResStringPool string_pool(data.GetStringPoolData(),
+                                  data.GetHeader()->GetStringPoolLength());
+  const size_t string_pool_offset = data.GetHeader()->GetStringPoolIndexOffset();
+
+  for (auto& target_entry : data.GetTargetEntries()) {
+    stream_ << base::StringPrintf("0x%08x ->", target_entry.target_id);
+
+    if (target_entry.data_type != Res_value::TYPE_REFERENCE &&
+        target_entry.data_type != Res_value::TYPE_DYNAMIC_REFERENCE) {
+      stream_ << " " << utils::DataTypeToString(target_entry.data_type);
     }
 
-    const ResourceId target_resid =
-        RESID(last_seen_package_id_, type_entry.GetTargetTypeId(), type_entry.GetEntryOffset() + i);
-    const ResourceId overlay_resid =
-        RESID(last_seen_package_id_, type_entry.GetOverlayTypeId(), entry);
+    if (target_entry.data_type == Res_value::TYPE_STRING) {
+      stream_ << " \""
+              << string_pool.string8ObjectAt(target_entry.data_value - string_pool_offset).c_str()
+              << "\"";
+    } else {
+      stream_ << " " << base::StringPrintf("0x%08x", target_entry.data_value);
+    }
 
-    stream_ << base::StringPrintf("0x%08x -> 0x%08x", target_resid, overlay_resid);
     if (target_package_loaded) {
-      Result<std::string> name = utils::ResToTypeEntryName(target_am_, target_resid);
+      Result<std::string> name = utils::ResToTypeEntryName(target_am_, target_entry.target_id);
       if (name) {
         stream_ << " " << *name;
       }

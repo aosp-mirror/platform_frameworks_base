@@ -24,6 +24,7 @@
 #include "android-base/unique_fd.h"
 
 #include "androidfw/Asset.h"
+#include "androidfw/Idmap.h"
 #include "androidfw/LoadedArsc.h"
 #include "androidfw/misc.h"
 
@@ -95,8 +96,16 @@ class ApkAssets {
     return loaded_arsc_.get();
   }
 
+  inline const LoadedIdmap* GetLoadedIdmap() const {
+    return loaded_idmap_.get();
+  }
+
   inline bool IsOverlay() const {
     return idmap_asset_.get() != nullptr;
+  }
+
+  inline bool IsLoader() const {
+    return for_loader_;
   }
 
   bool IsUpToDate() const;
@@ -127,10 +136,11 @@ class ApkAssets {
   ZipArchivePtr zip_handle_;
   const std::string path_;
   time_t last_mod_time_;
-  bool for_loader;
+  bool for_loader_;
   std::unique_ptr<Asset> resources_asset_;
   std::unique_ptr<Asset> idmap_asset_;
   std::unique_ptr<const LoadedArsc> loaded_arsc_;
+  std::unique_ptr<const LoadedIdmap> loaded_idmap_;
 };
 
 }  // namespace android
