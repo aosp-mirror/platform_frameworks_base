@@ -1469,9 +1469,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * This method can be called from multiple threads, as described in
      * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
      * and Threads</a>.
-     * @param uri The content:// URI of the insertion request. This must not be {@code null}.
+     * @param uri The content:// URI of the insertion request.
      * @param values A set of column_name/value pairs to add to the database.
-     *     This must not be {@code null}.
      * @return The URI for the newly inserted item.
      */
     @Override
@@ -1538,7 +1537,6 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @param uri The URI to query. This can potentially have a record ID if this
      * is an update request for a specific record.
      * @param values A set of column_name/value pairs to update in the database.
-     *     This must not be {@code null}.
      * @param selection An optional filter to match rows to update.
      * @return the number of rows affected.
      */
