@@ -438,7 +438,7 @@ public class AccessibilityServiceInfo implements Parcelable {
 
     /**
      * Whether or not the service has crashed and is awaiting restart. Only valid from {@link
-     * android.view.accessibility.AccessibilityManager#getEnabledAccessibilityServiceList(int)},
+     * android.view.accessibility.AccessibilityManager#getInstalledAccessibilityServiceList()},
      * because that is populated from the internal list of running services.
      *
      * @hide
