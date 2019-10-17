@@ -41,6 +41,8 @@ import android.util.ArrayMap;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,11 +114,28 @@ public class ResolverListControllerTest {
         when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
         mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
                 refererPackage, UserHandle.USER_CURRENT);
-        mController.sort(new ArrayList<ResolverActivity.ResolvedComponentInfo>());
+        mController.sort(new ArrayList<ResolvedComponentInfo>());
         long beforeReport = getCount(mUsm, packageName, action, annotation);
         mController.updateChooserCounts(packageName, UserHandle.USER_CURRENT, action);
         long afterReport = getCount(mUsm, packageName, action, annotation);
         assertThat(afterReport, is(beforeReport + 1l));
+    }
+
+    @Test
+    public void topKEqualsToSort() {
+        String annotation = "test_annotation";
+        Intent sendIntent = createSendImageIntent(annotation);
+        String refererPackage = "test_referer_package";
+        List<ResolvedComponentInfo> resolvedComponents = createResolvedComponentsForTest(15);
+        mUsm = new UsageStatsManager(mMockContext, mMockService);
+        when(mMockContext.getSystemService(Context.USAGE_STATS_SERVICE)).thenReturn(mUsm);
+        mController = new ResolverListController(mMockContext, mMockPackageManager, sendIntent,
+                refererPackage, UserHandle.USER_CURRENT);
+        List<ResolvedComponentInfo> topKList = new ArrayList<>(resolvedComponents);
+        mController.topK(topKList, 5);
+        List<ResolvedComponentInfo> sortList = new ArrayList<>(topKList);
+        mController.sort(sortList);
+        assertThat(sortList.subList(0, 5), is(topKList.subList(0, 5)));
     }
 
     private UsageStats initStats(String packageName, String action,
@@ -155,5 +174,13 @@ public class ResolverListControllerTest {
             return 0;
         }
         return packageStats.mChooserCounts.get(action).getOrDefault(annotation, 0);
+    }
+
+    private List<ResolvedComponentInfo> createResolvedComponentsForTest(int numberOfResults) {
+        List<ResolvedComponentInfo> infoList = new ArrayList<>(numberOfResults);
+        for (int i = 0; i < numberOfResults; i++) {
+            infoList.add(ResolverDataProvider.createResolvedComponentInfo(i));
+        }
+        return infoList;
     }
 }
