@@ -548,12 +548,16 @@ public final class PowerManagerService extends SystemService
 
     private final class ForegroundProfileObserver extends SynchronousUserSwitchObserver {
         @Override
-        public void onUserSwitching(int newUserId) throws RemoteException {}
+        public void onUserSwitching(@UserIdInt int newUserId) throws RemoteException {
+            synchronized (mLock) {
+                mUserId = newUserId;
+            }
+        }
 
         @Override
         public void onForegroundProfileSwitch(@UserIdInt int newProfileId) throws RemoteException {
             final long now = SystemClock.uptimeMillis();
-            synchronized(mLock) {
+            synchronized (mLock) {
                 mForegroundProfile = newProfileId;
                 maybeUpdateForegroundProfileLastActivityLocked(now);
             }
@@ -562,6 +566,8 @@ public final class PowerManagerService extends SystemService
 
     // User id corresponding to activity the user is currently interacting with.
     private @UserIdInt int mForegroundProfile;
+    // User id of main profile for the current user (doesn't include managed profiles)
+    private @UserIdInt int mUserId;
 
     // Per-profile state to track when a profile should be locked.
     private final SparseArray<ProfilePowerState> mProfilePowerState = new SparseArray<>();
@@ -1792,9 +1798,9 @@ public final class PowerManagerService extends SystemService
                 if (mBootCompleted) {
                     if (mIsPowered && !BatteryManager.isPlugWired(oldPlugType)
                             && BatteryManager.isPlugWired(mPlugType)) {
-                        mNotifier.onWiredChargingStarted(mForegroundProfile);
+                        mNotifier.onWiredChargingStarted(mUserId);
                     } else if (dockedOnWirelessCharger) {
-                        mNotifier.onWirelessChargingStarted(mBatteryLevel, mForegroundProfile);
+                        mNotifier.onWirelessChargingStarted(mBatteryLevel, mUserId);
                     }
                 }
             }
@@ -3493,6 +3499,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDoubleTapWakeEnabled=" + mDoubleTapWakeEnabled);
             pw.println("  mIsVrModeEnabled=" + mIsVrModeEnabled);
             pw.println("  mForegroundProfile=" + mForegroundProfile);
+            pw.println("  mUserId=" + mUserId);
 
             final long sleepTimeout = getSleepTimeoutLocked();
             final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
