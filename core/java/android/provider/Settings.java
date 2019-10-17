@@ -8241,20 +8241,6 @@ public final class Settings {
         public static final String AWARE_LOCK_ENABLED = "aware_lock_enabled";
 
         /**
-         * The settings values which should only be restored if the target device is the
-         * same as the source device
-         *
-         * NOTE: Settings are backed up and restored in the order they appear
-         *       in this array. If you have one setting depending on another,
-         *       make sure that they are ordered appropriately.
-         *
-         * @hide
-         */
-        public static final String[] DEVICE_SPECIFIC_SETTINGS_TO_BACKUP = {
-                DISPLAY_DENSITY_FORCED,
-        };
-
-        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
@@ -10877,16 +10863,13 @@ public final class Settings {
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>
-         * "idle_duration=5000,parole_interval=4500,screen_thresholds=0/0/60000/120000"
+         * "idle_duration=5000,prediction_timeout=4500,screen_thresholds=0/0/60000/120000"
          * <p>
          * All durations are in millis.
          * Array values are separated by forward slashes
          * The following keys are supported:
          *
          * <pre>
-         * parole_interval                  (long)
-         * parole_window                    (long)
-         * parole_duration                  (long)
          * screen_thresholds                (long[4])
          * elapsed_thresholds               (long[4])
          * strong_usage_duration            (long)
@@ -10897,17 +10880,12 @@ public final class Settings {
          * exempted_sync_duration           (long)
          * system_interaction_duration      (long)
          * initial_foreground_service_start_duration (long)
-         * stable_charging_threshold        (long)
-         *
-         * idle_duration        (long) // This is deprecated and used to circumvent b/26355386.
-         * idle_duration2       (long) // deprecated
-         * wallclock_threshold  (long) // deprecated
          * </pre>
          *
          * <p>
          * Type: string
          * @hide
-         * @see com.android.server.usage.UsageStatsService.SettingsObserver
+         * @see com.android.server.usage.AppStandbyController
          */
         public static final String APP_IDLE_CONSTANTS = "app_idle_constants";
 

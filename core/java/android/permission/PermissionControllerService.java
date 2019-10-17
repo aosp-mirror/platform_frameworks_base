@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -105,31 +106,54 @@ public abstract class PermissionControllerService extends Service {
     public abstract void onGetRuntimePermissionsBackup(@NonNull UserHandle user,
             @NonNull OutputStream backup, @NonNull Runnable callback);
 
+
+    /**
+     * @deprecated Implement {@link #onStageAndApplyRuntimePermissionsBackup} instead
+     */
+    @Deprecated
+    @BinderThread
+    public void onRestoreRuntimePermissionsBackup(@NonNull UserHandle user,
+            @NonNull InputStream backup, @NonNull Runnable callback) {
+    }
+
     /**
      * Restore a backup of the runtime permissions.
      *
      * <p>If an app mentioned in the backup is not installed the state should be saved to later
-     * be restored via {@link #onRestoreDelayedRuntimePermissionsBackup}.
+     * be restored via {@link #onApplyStagedRuntimePermissionBackup}.
      *
      * @param user The user to restore
      * @param backup The stream to read the backup from
      * @param callback Callback waiting for operation to be complete
      */
     @BinderThread
-    public abstract void onRestoreRuntimePermissionsBackup(@NonNull UserHandle user,
-            @NonNull InputStream backup, @NonNull Runnable callback);
+    public void onStageAndApplyRuntimePermissionsBackup(@NonNull UserHandle user,
+            @NonNull InputStream backup, @NonNull Runnable callback) {
+        onRestoreRuntimePermissionsBackup(user, backup, callback);
+    }
+
+    /**
+     * @deprecated Implement {@link #onApplyStagedRuntimePermissionBackup} instead
+     */
+    @Deprecated
+    @BinderThread
+    public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String packageName,
+            @NonNull UserHandle user, @NonNull Consumer<Boolean> callback) {
+    }
 
     /**
      * Restore the permission state of an app that was provided in
-     * {@link #onRestoreRuntimePermissionsBackup} but could not be restored back then.
+     * {@link #onStageAndApplyRuntimePermissionsBackup} but could not be restored back then.
      *
      * @param packageName The app to restore
      * @param user The user to restore
      * @param callback Callback waiting for whether there is still delayed backup left
      */
     @BinderThread
-    public abstract void onRestoreDelayedRuntimePermissionsBackup(@NonNull String packageName,
-            @NonNull UserHandle user, @NonNull Consumer<Boolean> callback);
+    public void onApplyStagedRuntimePermissionBackup(@NonNull String packageName,
+            @NonNull UserHandle user, @NonNull Consumer<Boolean> callback) {
+        onRestoreDelayedRuntimePermissionsBackup(packageName, user, callback);
+    }
 
     /**
      * Gets the runtime permissions for an app.
@@ -238,7 +262,8 @@ public abstract class PermissionControllerService extends Service {
                     request.put(packageName, permissions);
                 }
 
-                enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
 
                 // Verify callerPackageName
                 try {
@@ -258,12 +283,33 @@ public abstract class PermissionControllerService extends Service {
                         });
             }
 
+            /**
+             * Throw a {@link SecurityException} if not at least one of the permissions is granted.
+             *
+             * @param requiredPermissions A list of permissions. Any of of them if sufficient to
+             *                            pass the check
+             */
+            private void enforceSomePermissionsGrantedToCaller(
+                    @NonNull String... requiredPermissions) {
+                for (String requiredPermission : requiredPermissions) {
+                    if (checkCallingPermission(requiredPermission)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                }
+
+                throw new SecurityException(
+                        "At lest one of the following permissions is required: " + Arrays.toString(
+                                requiredPermissions));
+            }
+
+
             @Override
             public void getRuntimePermissionBackup(UserHandle user, ParcelFileDescriptor pipe) {
                 checkNotNull(user);
                 checkNotNull(pipe);
 
-                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
                 try (OutputStream backup = new ParcelFileDescriptor.AutoCloseOutputStream(pipe)) {
                     CountDownLatch latch = new CountDownLatch(1);
@@ -277,15 +323,17 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void restoreRuntimePermissionBackup(UserHandle user, ParcelFileDescriptor pipe) {
+            public void stageAndApplyRuntimePermissionsBackup(UserHandle user,
+                    ParcelFileDescriptor pipe) {
                 checkNotNull(user);
                 checkNotNull(pipe);
 
-                enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                        Manifest.permission.RESTORE_RUNTIME_PERMISSIONS);
 
                 try (InputStream backup = new ParcelFileDescriptor.AutoCloseInputStream(pipe)) {
                     CountDownLatch latch = new CountDownLatch(1);
-                    onRestoreRuntimePermissionsBackup(user, backup, latch::countDown);
+                    onStageAndApplyRuntimePermissionsBackup(user, backup, latch::countDown);
                     latch.await();
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Could not open pipe to read backup from", e);
@@ -295,15 +343,16 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void restoreDelayedRuntimePermissionBackup(String packageName, UserHandle user,
+            public void applyStagedRuntimePermissionBackup(String packageName, UserHandle user,
                     AndroidFuture callback) {
                 checkNotNull(packageName);
                 checkNotNull(user);
                 checkNotNull(callback);
 
-                enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+                        Manifest.permission.RESTORE_RUNTIME_PERMISSIONS);
 
-                onRestoreDelayedRuntimePermissionsBackup(packageName, user, callback::complete);
+                onApplyStagedRuntimePermissionBackup(packageName, user, callback::complete);
             }
 
             @Override
@@ -311,7 +360,7 @@ public abstract class PermissionControllerService extends Service {
                 checkNotNull(packageName, "packageName");
                 checkNotNull(callback, "callback");
 
-                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
                 onGetAppPermissions(packageName, callback::complete);
             }
@@ -321,7 +370,8 @@ public abstract class PermissionControllerService extends Service {
                 checkNotNull(packageName, "packageName");
                 checkNotNull(permissionName, "permissionName");
 
-                enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
 
                 CountDownLatch latch = new CountDownLatch(1);
                 PermissionControllerService.this.onRevokeRuntimePermission(packageName,
@@ -340,7 +390,7 @@ public abstract class PermissionControllerService extends Service {
                 checkFlagsArgument(flags, COUNT_WHEN_SYSTEM | COUNT_ONLY_WHEN_GRANTED);
                 checkNotNull(callback, "callback");
 
-                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
                 onCountPermissionApps(permissionNames, flags, callback::complete);
             }
@@ -351,7 +401,7 @@ public abstract class PermissionControllerService extends Service {
                 checkArgumentNonnegative(numMillis);
                 checkNotNull(callback, "callback");
 
-                enforceCallingPermission(Manifest.permission.GET_RUNTIME_PERMISSIONS, null);
+                enforceSomePermissionsGrantedToCaller(Manifest.permission.GET_RUNTIME_PERMISSIONS);
 
                 onGetPermissionUsages(countSystem, numMillis, callback::complete);
             }
@@ -369,15 +419,17 @@ public abstract class PermissionControllerService extends Service {
                 checkNotNull(callback);
 
                 if (grantState == PERMISSION_GRANT_STATE_DENIED) {
-                    enforceCallingPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS, null);
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.GRANT_RUNTIME_PERMISSIONS);
                 }
 
                 if (grantState == PERMISSION_GRANT_STATE_DENIED) {
-                    enforceCallingPermission(Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, null);
+                    enforceSomePermissionsGrantedToCaller(
+                            Manifest.permission.REVOKE_RUNTIME_PERMISSIONS);
                 }
 
-                enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                        null);
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
 
                 onSetRuntimePermissionGrantStateByDeviceAdmin(callerPackageName,
                         packageName, permission, grantState, callback::complete);
@@ -387,8 +439,8 @@ public abstract class PermissionControllerService extends Service {
             public void grantOrUpgradeDefaultRuntimePermissions(@NonNull AndroidFuture callback) {
                 checkNotNull(callback, "callback");
 
-                enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                        null);
+                enforceSomePermissionsGrantedToCaller(
+                        Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
 
                 onGrantOrUpgradeDefaultRuntimePermissions(() -> callback.complete(true));
             }

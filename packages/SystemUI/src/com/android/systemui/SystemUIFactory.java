@@ -160,7 +160,8 @@ public class SystemUIFactory {
             StatusBarStateController statusBarStateController) {
         return new NotificationIconAreaController(context, statusBar, statusBarStateController,
                 wakeUpCoordinator, keyguardBypassController,
-                Dependency.get(NotificationMediaManager.class));
+                Dependency.get(NotificationMediaManager.class),
+                Dependency.get(DozeParameters.class));
     }
 
     public KeyguardIndicationController createKeyguardIndicationController(Context context,

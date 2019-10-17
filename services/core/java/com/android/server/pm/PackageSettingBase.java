@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
@@ -125,6 +126,9 @@ public abstract class PackageSettingBase extends SettingBase {
     String installerPackageName;
     /** Indicates if the package that installed this app has been uninstalled */
     boolean isOrphaned;
+    /** Information about the initial install of this package. */
+    @NonNull
+    InstallSource installSource;
     /** UUID of {@link VolumeInfo} hosting this app */
     String volumeUuid;
     /** The category of this app, as hinted by the installer */
@@ -148,8 +152,17 @@ public abstract class PackageSettingBase extends SettingBase {
                 ? new ArrayList<>(childPackageNames) : null;
         this.usesStaticLibraries = usesStaticLibraries;
         this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
-        init(codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbiString,
-                secondaryCpuAbiString, cpuAbiOverrideString, pVersionCode);
+        this.codePath = codePath;
+        this.codePathString = codePath.toString();
+        this.resourcePath = resourcePath;
+        this.resourcePathString = resourcePath.toString();
+        this.legacyNativeLibraryPathString = legacyNativeLibraryPathString;
+        this.primaryCpuAbiString = primaryCpuAbiString;
+        this.secondaryCpuAbiString = secondaryCpuAbiString;
+        this.cpuAbiOverrideString = cpuAbiOverrideString;
+        this.versionCode = pVersionCode;
+        this.signatures = new PackageSignatures();
+        this.installSource = InstallSource.create(null);
     }
 
     /**
@@ -166,27 +179,27 @@ public abstract class PackageSettingBase extends SettingBase {
         doCopy(base);
     }
 
-    void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
-              String primaryCpuAbiString, String secondaryCpuAbiString,
-              String cpuAbiOverrideString, long pVersionCode) {
-        this.codePath = codePath;
-        this.codePathString = codePath.toString();
-        this.resourcePath = resourcePath;
-        this.resourcePathString = resourcePath.toString();
-        this.legacyNativeLibraryPathString = legacyNativeLibraryPathString;
-        this.primaryCpuAbiString = primaryCpuAbiString;
-        this.secondaryCpuAbiString = secondaryCpuAbiString;
-        this.cpuAbiOverrideString = cpuAbiOverrideString;
-        this.versionCode = pVersionCode;
-        this.signatures = new PackageSignatures();
-    }
-
     public void setInstallerPackageName(String packageName) {
         installerPackageName = packageName;
     }
 
     public String getInstallerPackageName() {
         return installerPackageName;
+    }
+
+    public void setInstallSource(InstallSource installSource) {
+        this.installSource = installSource == null ? InstallSource.create(null) : installSource;
+    }
+
+    void removeInstallerPackage(String packageName) {
+        if (packageName == null) {
+            return;
+        }
+        if (packageName.equals(installerPackageName)) {
+            installerPackageName = null;
+            isOrphaned = true;
+        }
+        installSource = installSource.removeInstallerPackage(packageName);
     }
 
     public void setVolumeUuid(String volumeUuid) {
@@ -241,6 +254,7 @@ public abstract class PackageSettingBase extends SettingBase {
         firstInstallTime = orig.firstInstallTime;
         installPermissionsFixed = orig.installPermissionsFixed;
         installerPackageName = orig.installerPackageName;
+        installSource = orig.installSource;
         isOrphaned = orig.isOrphaned;
         keySetData = orig.keySetData;
         lastUpdateTime = orig.lastUpdateTime;

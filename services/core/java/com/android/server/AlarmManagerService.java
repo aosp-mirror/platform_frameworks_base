@@ -47,6 +47,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -1564,6 +1565,7 @@ class AlarmManagerService extends SystemService {
                     Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT, UserHandle.ALL);
 
             mClockReceiver = mInjector.getClockReceiver(this);
+            new ChargingReceiver();
             new InteractiveStateReceiver();
             new UninstallReceiver();
 
@@ -4148,7 +4150,7 @@ class AlarmManagerService extends SystemService {
         public static final int LISTENER_TIMEOUT = 3;
         public static final int REPORT_ALARMS_ACTIVE = 4;
         public static final int APP_STANDBY_BUCKET_CHANGED = 5;
-        public static final int APP_STANDBY_PAROLE_CHANGED = 6;
+        public static final int CHARGING_STATUS_CHANGED = 6;
         public static final int REMOVE_FOR_STOPPED = 7;
         public static final int UNREGISTER_CANCEL_LISTENER = 8;
 
@@ -4206,7 +4208,7 @@ class AlarmManagerService extends SystemService {
                     }
                     break;
 
-                case APP_STANDBY_PAROLE_CHANGED:
+                case CHARGING_STATUS_CHANGED:
                     synchronized (mLock) {
                         mAppStandbyParole = (Boolean) msg.obj;
                         if (reorderAlarmsBasedOnStandbyBuckets(null)) {
@@ -4247,6 +4249,37 @@ class AlarmManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    class ChargingReceiver extends BroadcastReceiver {
+        ChargingReceiver() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(BatteryManager.ACTION_CHARGING);
+            filter.addAction(BatteryManager.ACTION_DISCHARGING);
+            getContext().registerReceiver(this, filter);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final boolean charging;
+            if (BatteryManager.ACTION_CHARGING.equals(action)) {
+                if (DEBUG_STANDBY) {
+                    Slog.d(TAG, "Device is charging.");
+                }
+                charging = true;
+            } else {
+                if (DEBUG_STANDBY) {
+                    Slog.d(TAG, "Disconnected from power.");
+                }
+                charging = false;
+            }
+            mHandler.removeMessages(AlarmHandler.CHARGING_STATUS_CHANGED);
+            mHandler.obtainMessage(AlarmHandler.CHARGING_STATUS_CHANGED, charging)
+                    .sendToTarget();
+        }
+    }
+
+    @VisibleForTesting
     class ClockReceiver extends BroadcastReceiver {
         public ClockReceiver() {
             IntentFilter filter = new IntentFilter();
@@ -4429,7 +4462,7 @@ class AlarmManagerService extends SystemService {
 
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
-    };
+    }
 
     /**
      * Tracking of app assignments to standby buckets
@@ -4447,18 +4480,7 @@ class AlarmManagerService extends SystemService {
             mHandler.obtainMessage(AlarmHandler.APP_STANDBY_BUCKET_CHANGED, userId, -1, packageName)
                     .sendToTarget();
         }
-
-        @Override
-        public void onParoleStateChanged(boolean isParoleOn) {
-            if (DEBUG_STANDBY) {
-                Slog.d(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
-            }
-            mHandler.removeMessages(AlarmHandler.APP_STANDBY_BUCKET_CHANGED);
-            mHandler.removeMessages(AlarmHandler.APP_STANDBY_PAROLE_CHANGED);
-            mHandler.obtainMessage(AlarmHandler.APP_STANDBY_PAROLE_CHANGED,
-                    Boolean.valueOf(isParoleOn)).sendToTarget();
-        }
-    };
+    }
 
     private final Listener mForceAppStandbyListener = new Listener() {
         @Override

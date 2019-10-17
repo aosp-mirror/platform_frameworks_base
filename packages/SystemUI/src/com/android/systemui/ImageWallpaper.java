@@ -38,6 +38,8 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 /**
  * Default built-in wallpaper that simply shows a static image.
  */
@@ -50,7 +52,14 @@ public class ImageWallpaper extends WallpaperService {
     private static final int INTERVAL_WAIT_FOR_RENDERING = 100;
     private static final int PATIENCE_WAIT_FOR_RENDERING = 10;
     private static final boolean DEBUG = true;
+    private final DozeParameters mDozeParameters;
     private HandlerThread mWorker;
+
+    @Inject
+    public ImageWallpaper(DozeParameters dozeParameters) {
+        super();
+        mDozeParameters = dozeParameters;
+    }
 
     @Override
     public void onCreate() {
@@ -61,7 +70,7 @@ public class ImageWallpaper extends WallpaperService {
 
     @Override
     public Engine onCreateEngine() {
-        return new GLEngine(this);
+        return new GLEngine(this, mDozeParameters);
     }
 
     @Override
@@ -89,9 +98,9 @@ public class ImageWallpaper extends WallpaperService {
         // This variable can only be accessed in synchronized block.
         private boolean mWaitingForRendering;
 
-        GLEngine(Context context) {
+        GLEngine(Context context, DozeParameters dozeParameters) {
             mNeedTransition = ActivityManager.isHighEndGfx()
-                    && !DozeParameters.getInstance(context).getDisplayNeedsBlanking();
+                    && !dozeParameters.getDisplayNeedsBlanking();
 
             // We will preserve EGL context when we are in lock screen or aod
             // to avoid janking in following transition, we need to release when back to home.
@@ -339,9 +348,9 @@ public class ImageWallpaper extends WallpaperService {
             boolean isHighEndGfx = ActivityManager.isHighEndGfx();
             out.print(prefix); out.print("isHighEndGfx="); out.println(isHighEndGfx);
 
-            DozeParameters dozeParameters = DozeParameters.getInstance(getApplicationContext());
             out.print(prefix); out.print("displayNeedsBlanking=");
-            out.println(dozeParameters != null ? dozeParameters.getDisplayNeedsBlanking() : "null");
+            out.println(
+                    mDozeParameters != null ? mDozeParameters.getDisplayNeedsBlanking() : "null");
 
             out.print(prefix); out.print("mNeedTransition="); out.println(mNeedTransition);
             out.print(prefix); out.print("StatusBarState=");

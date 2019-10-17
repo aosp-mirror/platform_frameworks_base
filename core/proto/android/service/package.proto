@@ -114,6 +114,13 @@ message PackageProto {
         optional int32 distraction_flags = 10;
     }
 
+    message InstallSourceProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // The package that requested the installation of this one.
+        optional string initiating_package_name = 1;
+    }
+
     // Name of package. e.g. "com.android.providers.telephony".
     optional string name = 1;
     // UID for this package as assigned by Android OS.
@@ -133,4 +140,6 @@ message PackageProto {
     repeated SplitProto splits = 8;
     // Per-user package info.
     repeated UserInfoProto users = 9;
+    // Where the request to install this package came from,
+    optional InstallSourceProto install_source = 10;
 }

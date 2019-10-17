@@ -297,7 +297,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             // Critical; after this call the application should never have the permission
             mPackageManagerInt.writeSettings(false);
             final int appId = UserHandle.getAppId(uid);
-            killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED);
+            mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
         }
         @Override
         public void onInstallPermissionRevoked() {
@@ -1902,7 +1902,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private void restoreRuntimePermissions(@NonNull byte[] backup, @NonNull UserHandle user) {
         synchronized (mLock) {
             mHasNoDelayedPermBackup.delete(user.getIdentifier());
-            mPermissionControllerManager.restoreRuntimePermissionBackup(backup, user);
+            mPermissionControllerManager.stageAndApplyRuntimePermissionsBackup(backup, user);
         }
     }
 
@@ -1923,7 +1923,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 return;
             }
 
-            mPermissionControllerManager.restoreDelayedRuntimePermissionBackup(packageName, user,
+            mPermissionControllerManager.applyStagedRuntimePermissionBackup(packageName, user,
                     mContext.getMainExecutor(), (hasMoreBackup) -> {
                         if (hasMoreBackup) {
                             return;

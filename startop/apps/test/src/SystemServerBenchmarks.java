@@ -18,6 +18,7 @@ package com.android.startop.test;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,8 +26,11 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.PowerManager;
+import android.os.Process;
+import android.os.UserManager;
 
 /**
  * An interface for running benchmarks and collecting results. Used so we can have both an
@@ -51,6 +55,8 @@ class SystemServerBenchmarks {
     public static final int TIME_LIMIT = 5;
 
     static void initializeBenchmarks(Activity parent, BenchmarkRunner benchmarks) {
+        final String packageName = parent.getPackageName();
+
         benchmarks.addBenchmark("Empty", () -> {
         });
 
@@ -81,7 +87,7 @@ class SystemServerBenchmarks {
 
         benchmarks.addBenchmark("getPackageInfo", () -> {
             try {
-                pm.getPackageInfo("com.android.startop.test", 0);
+                pm.getPackageInfo(packageName, 0);
             } catch (NameNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -89,14 +95,14 @@ class SystemServerBenchmarks {
 
         benchmarks.addBenchmark("getApplicationInfo", () -> {
             try {
-                pm.getApplicationInfo("com.android.startop.test", 0);
+                pm.getApplicationInfo(packageName, 0);
             } catch (NameNotFoundException e) {
                 throw new RuntimeException(e);
             }
         });
 
         try {
-            ApplicationInfo app = pm.getApplicationInfo("com.android.startop.test", 0);
+            ApplicationInfo app = pm.getApplicationInfo(packageName, 0);
             benchmarks.addBenchmark("getResourcesForApplication", () -> {
                 try {
                     pm.getResourcesForApplication(app);
@@ -122,12 +128,12 @@ class SystemServerBenchmarks {
         });
 
         benchmarks.addBenchmark("getLaunchIntentForPackage", () -> {
-            pm.getLaunchIntentForPackage("com.android.startop.test");
+            pm.getLaunchIntentForPackage(packageName);
         });
 
         benchmarks.addBenchmark("getPackageUid", () -> {
             try {
-                pm.getPackageUid("com.android.startop.test", 0);
+                pm.getPackageUid(packageName, 0);
             } catch (NameNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -135,12 +141,12 @@ class SystemServerBenchmarks {
 
         benchmarks.addBenchmark("checkPermission", () -> {
             // Check for the first permission I could find.
-            pm.checkPermission("android.permission.SEND_SMS", "com.android.startop.test");
+            pm.checkPermission("android.permission.SEND_SMS", packageName);
         });
 
         benchmarks.addBenchmark("checkSignatures", () -> {
             // Compare with settings, since settings is on both AOSP and Master builds
-            pm.checkSignatures("com.android.settings", "com.android.startop.test");
+            pm.checkSignatures("com.android.settings", packageName);
         });
 
         Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED);
@@ -174,6 +180,39 @@ class SystemServerBenchmarks {
         benchmarks.addBenchmark("WakeLock Acquire/Release", () -> {
             wl.acquire();
             wl.release();
+        });
+
+        AppOpsManager appOps = (AppOpsManager) parent.getSystemService(Context.APP_OPS_SERVICE);
+        int uid = Process.myUid();
+        benchmarks.addBenchmark("AppOpsService.checkOperation", () -> {
+            appOps.checkOp(AppOpsManager.OPSTR_READ_EXTERNAL_STORAGE, uid, packageName);
+        });
+
+        benchmarks.addBenchmark("AppOpsService.checkPackage", () -> {
+            appOps.checkPackage(uid, packageName);
+        });
+
+        benchmarks.addBenchmark("AppOpsService.noteOperation", () -> {
+            appOps.noteOp(AppOpsManager.OPSTR_READ_EXTERNAL_STORAGE, uid, packageName);
+        });
+
+        benchmarks.addBenchmark("AppOpsService.noteProxyOperation", () -> {
+            appOps.noteProxyOp(AppOpsManager.OPSTR_READ_EXTERNAL_STORAGE, packageName);
+        });
+
+        UserManager userManager = (UserManager) parent.getSystemService(Context.USER_SERVICE);
+        benchmarks.addBenchmark("isUserUnlocked", () -> {
+            userManager.isUserUnlocked();
+        });
+
+        benchmarks.addBenchmark("getIntentSender", () -> {
+            pi.getIntentSender();
+        });
+
+        ConnectivityManager cm = (ConnectivityManager) parent
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        benchmarks.addBenchmark("getActiveNetworkInfo", () -> {
+            cm.getActiveNetworkInfo();
         });
     }
 

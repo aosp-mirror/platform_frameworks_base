@@ -16,6 +16,7 @@ package com.android.systemui.qs.tileimpl;
 
 import android.content.Context;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 
@@ -32,6 +33,7 @@ import com.android.systemui.qs.tiles.BluetoothTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
+import com.android.systemui.qs.tiles.ControlsTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
@@ -58,6 +60,7 @@ public class QSFactoryImpl implements QSFactory {
 
     private final Provider<WifiTile> mWifiTileProvider;
     private final Provider<BluetoothTile> mBluetoothTileProvider;
+    private final Provider<ControlsTile> mControlsTileProvider;
     private final Provider<CellularTile> mCellularTileProvider;
     private final Provider<DndTile> mDndTileProvider;
     private final Provider<ColorInversionTile> mColorInversionTileProvider;
@@ -81,6 +84,7 @@ public class QSFactoryImpl implements QSFactory {
     @Inject
     public QSFactoryImpl(Provider<WifiTile> wifiTileProvider,
             Provider<BluetoothTile> bluetoothTileProvider,
+            Provider<ControlsTile> controlsTileProvider,
             Provider<CellularTile> cellularTileProvider,
             Provider<DndTile> dndTileProvider,
             Provider<ColorInversionTile> colorInversionTileProvider,
@@ -100,6 +104,7 @@ public class QSFactoryImpl implements QSFactory {
             Provider<UiModeNightTile> uiModeNightTileProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
+        mControlsTileProvider = controlsTileProvider;
         mCellularTileProvider = cellularTileProvider;
         mDndTileProvider = dndTileProvider;
         mColorInversionTileProvider = colorInversionTileProvider;
@@ -138,6 +143,11 @@ public class QSFactoryImpl implements QSFactory {
                 return mWifiTileProvider.get();
             case "bt":
                 return mBluetoothTileProvider.get();
+            case "controls":
+                if (Settings.System.getInt(mHost.getContext().getContentResolver(),
+                        "qs_controls_tile_enabled", 0) == 1) {
+                    return mControlsTileProvider.get();
+                } else return null;
             case "cell":
                 return mCellularTileProvider.get();
             case "dnd":

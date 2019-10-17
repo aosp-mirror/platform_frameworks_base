@@ -266,11 +266,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     boolean mReportedActive;
 
     /**
-     * Are we currently in device-wide standby parole?
-     */
-    volatile boolean mInParole;
-
-    /**
      * A mapping of which uids are currently in the foreground to their effective priority.
      */
     final SparseIntArray mUidPriorityOverride = new SparseIntArray();
@@ -2361,14 +2356,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public void onParoleStateChanged(boolean isParoleOn) {
-            if (DEBUG_STANDBY) {
-                Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
-            }
-            mInParole = isParoleOn;
-        }
-
-        @Override
         public void onUserInteractionStarted(String packageName, int userId) {
             final int uid = mLocalPM.getPackageUid(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
@@ -3031,10 +3018,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             pw.println();
 
-            pw.print("    In parole?: ");
-            pw.print(mInParole);
-            pw.println();
-
             for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                 pw.print("    ");
                 mJobRestrictions.get(i).dumpConstants(pw);
@@ -3222,7 +3205,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             proto.end(settingsToken);
 
-            proto.write(JobSchedulerServiceDumpProto.IN_PAROLE, mInParole);
             for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                 mJobRestrictions.get(i).dumpConstants(proto);
             }

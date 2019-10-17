@@ -39,6 +39,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+import android.widget.Switch;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
@@ -82,6 +83,11 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mTile = new Tile();
         updateDefaultTileAndIcon();
         mServiceManager = host.getTileServices().getTileWrapper(this);
+        if (mServiceManager.isBooleanTile()) {
+            // Replace states with BooleanState
+            resetStates();
+        }
+
         mService = mServiceManager.getTileService();
         mServiceManager.setTileChangeListener(this);
         mUser = ActivityManager.getCurrentUser();
@@ -246,8 +252,10 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
 
     @Override
     public State newTileState() {
-        State state = new State();
-        return state;
+        if (mServiceManager != null && mServiceManager.isBooleanTile()) {
+            return new BooleanState();
+        }
+        return new State();
     }
 
     @Override
@@ -336,6 +344,12 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         } else {
             state.contentDescription = state.label;
         }
+
+        if (state instanceof BooleanState) {
+            state.expandedAccessibilityClassName = Switch.class.getName();
+            ((BooleanState) state).value = (state.state == Tile.STATE_ACTIVE);
+        }
+
     }
 
     @Override

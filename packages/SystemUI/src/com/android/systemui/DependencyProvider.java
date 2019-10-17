@@ -22,26 +22,36 @@ import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.IActivityManager;
 import android.app.INotificationManager;
+import android.app.IWallpaperManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.view.IWindowManager;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginManagerImpl;
@@ -59,7 +69,11 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.leak.LeakDetector;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
 import javax.inject.Named;
+import javax.inject.Qualifier;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -71,6 +85,12 @@ import dagger.Provides;
  */
 @Module
 public class DependencyProvider {
+    @Qualifier
+    @Documented
+    @Retention(RUNTIME)
+    public @interface MainResources {
+        // TODO: use attribute to get other, non-main resources?
+    }
 
     @Singleton
     @Provides
@@ -248,5 +268,49 @@ public class DependencyProvider {
     @Provides
     public LockPatternUtils provideLockPatternUtils(Context context) {
         return new LockPatternUtils(context);
+    }
+
+    /** */
+    @Provides
+    public AmbientDisplayConfiguration provideAmbientDispalyConfiguration(Context context) {
+        return new AmbientDisplayConfiguration(context);
+    }
+
+    /** */
+    @Provides
+    public AlwaysOnDisplayPolicy provideAlwaysOnDisplayPolicy(Context context) {
+        return new AlwaysOnDisplayPolicy(context);
+    }
+
+    /** */
+    @Provides
+    public PowerManager providePowerManager(Context context) {
+        return context.getSystemService(PowerManager.class);
+    }
+
+    /** */
+    @Provides
+    @MainResources
+    public Resources provideResources(Context context) {
+        return context.getResources();
+    }
+
+    /** */
+    @Provides
+    public IWallpaperManager provideWallPaperManager() {
+        return IWallpaperManager.Stub.asInterface(
+                ServiceManager.getService(Context.WALLPAPER_SERVICE));
+    }
+
+    /** */
+    @Provides
+    public WindowManager providesWindowManager(Context context) {
+        return context.getSystemService(WindowManager.class);
+    }
+
+    /** */
+    @Provides
+    public IActivityManager providesIActivityManager() {
+        return ActivityManager.getService();
     }
 }

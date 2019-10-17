@@ -159,10 +159,10 @@ public abstract class ActivityTaskManagerInternal {
      *
      * @param reasons A map from windowing mode to a reason integer why the transition was started,
      *                which must be one of the APP_TRANSITION_* values.
-     * @param timestamp The time at which the app transition started in
-     *                  {@link SystemClock#uptimeMillis()} timebase.
+     * @param timestampNs The time at which the app transition started in
+     *                  {@link SystemClock#elapsedRealtimeNs()} ()} timebase.
      */
-    public abstract void notifyAppTransitionStarting(SparseIntArray reasons, long timestamp);
+    public abstract void notifyAppTransitionStarting(SparseIntArray reasons, long timestampNs);
 
     /**
      * Callback for window manager to let activity manager know that the app transition was

@@ -28,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMor
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -128,7 +129,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         mActivityMetricsLogger.notifyActivityLaunching(intent);
 
-        verifyAsync(mLaunchObserver).onIntentStarted(eq(intent));
+        verifyAsync(mLaunchObserver).onIntentStarted(eq(intent), anyLong());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -163,12 +164,12 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
        testOnActivityLaunched();
 
        mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
        mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecord.getWindowingMode(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
-       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecord));
+       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecord), anyLong());
        verifyNoMoreInteractions(mLaunchObserver);
     }
 
@@ -183,6 +184,16 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mActivityRecord));
        verifyNoMoreInteractions(mLaunchObserver);
+    }
+
+    @Test
+    public void testOnReportFullyDrawn() throws Exception {
+        testOnActivityLaunched();
+
+        mActivityMetricsLogger.logAppTransitionReportedDrawn(mActivityRecord, false);
+
+        verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mActivityRecord), anyLong());
+        verifyNoMoreInteractions(mLaunchObserver);
     }
 
     @Test
@@ -206,12 +217,13 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
        testOnActivityLaunchedTrampoline();
 
        mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
        mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecordTrampoline.getWindowingMode(),
-               SystemClock.uptimeMillis());
+               SystemClock.elapsedRealtimeNanos());
 
-       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecordTrampoline));
+       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecordTrampoline),
+                                                             anyLong());
        verifyNoMoreInteractions(mLaunchObserver);
     }
 

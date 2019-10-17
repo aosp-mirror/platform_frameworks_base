@@ -59,27 +59,37 @@ import java.util.concurrent.TimeUnit;
 public final class ManualBenchmarkState {
     private static final String TAG = ManualBenchmarkState.class.getSimpleName();
 
-    @IntDef(prefix = {"STATS_REPORT"}, value = {
-            STATS_REPORT_MEDIAN,
-            STATS_REPORT_MEAN,
-            STATS_REPORT_MIN,
-            STATS_REPORT_MAX,
-            STATS_REPORT_PERCENTILE90,
-            STATS_REPORT_PERCENTILE95,
-            STATS_REPORT_STDDEV,
-            STATS_REPORT_ITERATION,
-    })
-    public @interface StatsReport {}
+    @Target(ElementType.ANNOTATION_TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface StatsReport {
+        int FLAG_MEDIAN = 0x00000001;
+        int FLAG_MEAN = 0x00000002;
+        int FLAG_MIN = 0x00000004;
+        int FLAG_MAX = 0x00000008;
+        int FLAG_STDDEV = 0x00000010;
+        int FLAG_COEFFICIENT_VAR = 0x00000020;
+        int FLAG_ITERATION = 0x00000040;
 
-    public static final int STATS_REPORT_MEDIAN = 0x00000001;
-    public static final int STATS_REPORT_MEAN = 0x00000002;
-    public static final int STATS_REPORT_MIN = 0x00000004;
-    public static final int STATS_REPORT_MAX = 0x00000008;
-    public static final int STATS_REPORT_PERCENTILE90 = 0x00000010;
-    public static final int STATS_REPORT_PERCENTILE95 = 0x00000020;
-    public static final int STATS_REPORT_STDDEV = 0x00000040;
-    public static final int STATS_REPORT_COEFFICIENT_VAR = 0x00000080;
-    public static final int STATS_REPORT_ITERATION = 0x00000100;
+        @Retention(RetentionPolicy.RUNTIME)
+        @IntDef(value = {
+                FLAG_MEDIAN,
+                FLAG_MEAN,
+                FLAG_MIN,
+                FLAG_MAX,
+                FLAG_STDDEV,
+                FLAG_COEFFICIENT_VAR,
+                FLAG_ITERATION,
+        })
+        @interface Flag {}
+
+        /** Defines which type of statistics should output. */
+        @Flag int flags() default -1;
+        /** An array with value 0~100 to provide the percentiles. */
+        int[] percentiles() default {};
+    }
+
+    /** It means the entire {@link StatsReport} is not given. */
+    private static final int DEFAULT_STATS_REPORT = -2;
 
     // TODO: Tune these values.
     // warm-up for duration
@@ -116,8 +126,9 @@ public final class ManualBenchmarkState {
     // The computation needs double precision, but long int is fine for final reporting.
     private Stats mStats;
 
-    private int mStatsReportFlags = STATS_REPORT_MEDIAN | STATS_REPORT_MEAN
-            | STATS_REPORT_PERCENTILE90 | STATS_REPORT_PERCENTILE95 | STATS_REPORT_STDDEV;
+    private int mStatsReportFlags =
+            StatsReport.FLAG_MEDIAN | StatsReport.FLAG_MEAN | StatsReport.FLAG_STDDEV;
+    private int[] mStatsReportPercentiles = {90 , 95};
 
     private boolean shouldReport(int statsReportFlag) {
         return (mStatsReportFlags & statsReportFlag) != 0;
@@ -136,9 +147,10 @@ public final class ManualBenchmarkState {
         if (targetTestDurationNs >= 0) {
             mTargetTestDurationNs = targetTestDurationNs;
         }
-        final int statsReportFlags = testAnnotation.statsReportFlags();
-        if (statsReportFlags >= 0) {
-            mStatsReportFlags = statsReportFlags;
+        final StatsReport statsReport = testAnnotation.statsReport();
+        if (statsReport != null && statsReport.flags() != DEFAULT_STATS_REPORT) {
+            mStatsReportFlags = statsReport.flags();
+            mStatsReportPercentiles = statsReport.percentiles();
         }
     }
 
@@ -189,11 +201,20 @@ public final class ManualBenchmarkState {
     }
 
     /**
-     * Adds additional result while this benchmark is running. It is used when a sequence of
+     * @return {@code true} if the benchmark is in warmup state. It can be used to skip the
+     *         operations or measurements that are unnecessary while the test isn't running the
+     *         actual benchmark.
+     */
+    public boolean isWarmingUp() {
+        return mState == WARMUP;
+    }
+
+    /**
+     * Adds additional result while this benchmark isn't warming up. It is used when a sequence of
      * operations is executed consecutively, the duration of each operation can also be recorded.
      */
     public void addExtraResult(String key, long duration) {
-        if (mState != RUNNING) {
+        if (isWarmingUp()) {
             return;
         }
         if (mExtraResults == null) {
@@ -221,31 +242,30 @@ public final class ManualBenchmarkState {
     }
 
     private void fillStatus(Bundle status, String key, Stats stats) {
-        if (shouldReport(STATS_REPORT_ITERATION)) {
+        if (shouldReport(StatsReport.FLAG_ITERATION)) {
             status.putLong(key + "_iteration", stats.getSize());
         }
-        if (shouldReport(STATS_REPORT_MEDIAN)) {
+        if (shouldReport(StatsReport.FLAG_MEDIAN)) {
             status.putLong(key + "_median", stats.getMedian());
         }
-        if (shouldReport(STATS_REPORT_MEAN)) {
+        if (shouldReport(StatsReport.FLAG_MEAN)) {
             status.putLong(key + "_mean", Math.round(stats.getMean()));
         }
-        if (shouldReport(STATS_REPORT_MIN)) {
+        if (shouldReport(StatsReport.FLAG_MIN)) {
             status.putLong(key + "_min", stats.getMin());
         }
-        if (shouldReport(STATS_REPORT_MAX)) {
+        if (shouldReport(StatsReport.FLAG_MAX)) {
             status.putLong(key + "_max", stats.getMax());
         }
-        if (shouldReport(STATS_REPORT_PERCENTILE90)) {
-            status.putLong(key + "_percentile90", stats.getPercentile90());
+        if (mStatsReportPercentiles != null) {
+            for (int percentile : mStatsReportPercentiles) {
+                status.putLong(key + "_percentile" + percentile, stats.getPercentile(percentile));
+            }
         }
-        if (shouldReport(STATS_REPORT_PERCENTILE95)) {
-            status.putLong(key + "_percentile95", stats.getPercentile95());
-        }
-        if (shouldReport(STATS_REPORT_STDDEV)) {
+        if (shouldReport(StatsReport.FLAG_STDDEV)) {
             status.putLong(key + "_stddev", Math.round(stats.getStandardDeviation()));
         }
-        if (shouldReport(STATS_REPORT_COEFFICIENT_VAR)) {
+        if (shouldReport(StatsReport.FLAG_COEFFICIENT_VAR)) {
             status.putLong(key + "_cv",
                     Math.round((100 * stats.getStandardDeviation() / stats.getMean())));
         }
@@ -276,6 +296,6 @@ public final class ManualBenchmarkState {
     public @interface ManualBenchmarkTest {
         long warmupDurationNs() default -1;
         long targetTestDurationNs() default -1;
-        @StatsReport int statsReportFlags() default -1;
+        StatsReport statsReport() default @StatsReport(flags = DEFAULT_STATS_REPORT);
     }
 }

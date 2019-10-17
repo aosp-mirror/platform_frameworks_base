@@ -51,17 +51,7 @@
             systemui:viewType="com.android.systemui.plugins.qs.QS" />
 
         <!-- Temporary area to test out home controls -->
-        <LinearLayout
-            android:id="@+id/home_controls_layout"
-            android:layout_width="match_parent"
-            android:layout_height="125dp"
-            android:layout_gravity="@integer/notification_panel_layout_gravity"
-            android:visibility="gone"
-            android:padding="8dp"
-            android:layout_margin="5dp"
-            android:background="?android:attr/colorBackgroundFloating"
-            android:orientation="vertical">
-        </LinearLayout>
+        <include layout="@layout/home_controls" />
 
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"

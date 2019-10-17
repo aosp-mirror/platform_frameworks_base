@@ -70,6 +70,7 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private StatusBar mStatusBar;
     @Mock private DozeLog mDozeLog;
+    @Mock private DozeParameters mDozeParameters;
 
     @Before
     public void setUp() {
@@ -94,7 +95,8 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
                 mNotificationEntryManager,
                 mKeyguardStateController,
                 mStatusBarStateController,
-                mDozeLog)
+                mDozeLog,
+                mDozeParameters)
                 .setShadeController(mShadeController)
                 .setStatusBarWindowView(mView)
                 .build();

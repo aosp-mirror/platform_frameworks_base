@@ -394,13 +394,9 @@ final class Constants {
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
 
-
     // TODO(OEM): Set this to false to keep the playback device in sleep upon hotplug event.
     //            True by default.
     static final String PROPERTY_WAKE_ON_HOTPLUG = "ro.hdmi.wake_on_hotplug";
-
-    // TODO(OEM): Set this to true to enable 'Set Menu Language' feature. False by default.
-    static final String PROPERTY_SET_MENU_LANGUAGE = "ro.hdmi.set_menu_language";
 
     /**
      * Property to save the ARC port id on system audio device.

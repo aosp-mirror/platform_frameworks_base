@@ -154,12 +154,6 @@ public abstract class UsageStatsManagerInternal {
     public abstract int[] getIdleUidsForUser(@UserIdInt int userId);
 
     /**
-     * @return True if currently app idle parole mode is on.  This means all idle apps are allow to
-     * run for a short period of time.
-     */
-    public abstract boolean isAppIdleParoleOn();
-
-    /**
      * Sets up a listener for changes to packages being accessed.
      * @param listener A listener within the system process.
      */
@@ -178,12 +172,6 @@ public abstract class UsageStatsManagerInternal {
         /** Callback to inform listeners that the idle state has changed to a new bucket. */
         public abstract void onAppIdleStateChanged(String packageName, @UserIdInt int userId,
                 boolean idle, int bucket, int reason);
-
-        /**
-         * Callback to inform listeners that the parole state has changed. This means apps are
-         * allowed to do work even if they're idle or in a low bucket.
-         */
-        public abstract void onParoleStateChanged(boolean isParoleOn);
 
         /**
          * Optional callback to inform the listener that the app has transitioned into

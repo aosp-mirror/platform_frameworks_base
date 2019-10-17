@@ -21,7 +21,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 
-import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -39,8 +38,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
@@ -94,24 +91,14 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final ArrayList<WeakReference<StatusBarWindowCallback>>
             mCallbacks = Lists.newArrayList();
 
-    private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
+    private final SysuiColorExtractor mColorExtractor;
 
     @Inject
-    public StatusBarWindowController(Context context,
-            StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController,
-            KeyguardBypassController keyguardBypassController) {
-        this(context, context.getSystemService(WindowManager.class), ActivityManager.getService(),
-                DozeParameters.getInstance(context), statusBarStateController,
-                configurationController, keyguardBypassController);
-    }
-
-    @VisibleForTesting
     public StatusBarWindowController(Context context, WindowManager windowManager,
             IActivityManager activityManager, DozeParameters dozeParameters,
             StatusBarStateController statusBarStateController,
             ConfigurationController configurationController,
-            KeyguardBypassController keyguardBypassController) {
+            KeyguardBypassController keyguardBypassController, SysuiColorExtractor colorExtractor) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
@@ -120,6 +107,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardBypassController = keyguardBypassController;
+        mColorExtractor = colorExtractor;
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
         ((SysuiStatusBarStateController) statusBarStateController)

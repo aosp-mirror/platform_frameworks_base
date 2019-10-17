@@ -20,52 +20,44 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.PasswordMetrics.complexityLevelToMinQuality;
-import static android.app.admin.PasswordMetrics.getActualRequiredQuality;
-import static android.app.admin.PasswordMetrics.getMinimumMetrics;
-import static android.app.admin.PasswordMetrics.getTargetQualityMetrics;
 import static android.app.admin.PasswordMetrics.sanitizeComplexityLevel;
+import static android.app.admin.PasswordMetrics.validatePasswordMetrics;
+
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.widget.PasswordValidationError;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /** Unit tests for {@link PasswordMetrics}. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class PasswordMetricsTest {
-
-    @Test
-    public void testIsDefault() {
-        final PasswordMetrics metrics = new PasswordMetrics();
-        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, metrics.quality);
-        assertEquals(0, metrics.length);
-        assertEquals(0, metrics.letters);
-        assertEquals(0, metrics.upperCase);
-        assertEquals(0, metrics.lowerCase);
-        assertEquals(0, metrics.numeric);
-        assertEquals(0, metrics.symbols);
-        assertEquals(0, metrics.nonLetter);
-    }
-
     @Test
     public void testParceling() {
-        final int quality = 0;
+        final int credType = CREDENTIAL_TYPE_PASSWORD;
         final int length = 1;
         final int letters = 2;
         final int upperCase = 3;
@@ -73,20 +65,21 @@ public class PasswordMetricsTest {
         final int numeric = 5;
         final int symbols = 6;
         final int nonLetter = 7;
+        final int nonNumeric = 8;
+        final int seqLength = 9;
 
         final Parcel parcel = Parcel.obtain();
-        final PasswordMetrics metrics;
+        PasswordMetrics metrics = new PasswordMetrics(credType, length, letters, upperCase,
+                lowerCase, numeric, symbols, nonLetter, nonNumeric, seqLength);
         try {
-            new PasswordMetrics(
-                    quality, length, letters, upperCase, lowerCase, numeric, symbols, nonLetter)
-                    .writeToParcel(parcel, 0);
+            metrics.writeToParcel(parcel, 0);
             parcel.setDataPosition(0);
             metrics = PasswordMetrics.CREATOR.createFromParcel(parcel);
         } finally {
             parcel.recycle();
         }
 
-        assertEquals(quality, metrics.quality);
+        assertEquals(credType, metrics.credType);
         assertEquals(length, metrics.length);
         assertEquals(letters, metrics.letters);
         assertEquals(upperCase, metrics.upperCase);
@@ -94,7 +87,8 @@ public class PasswordMetricsTest {
         assertEquals(numeric, metrics.numeric);
         assertEquals(symbols, metrics.symbols);
         assertEquals(nonLetter, metrics.nonLetter);
-
+        assertEquals(nonNumeric, metrics.nonNumeric);
+        assertEquals(seqLength, metrics.seqLength);
     }
 
     @Test
@@ -108,23 +102,6 @@ public class PasswordMetricsTest {
         assertEquals(5, metrics.numeric);
         assertEquals(2, metrics.symbols);
         assertEquals(7, metrics.nonLetter);
-    }
-
-    @Test
-    public void testComputeForPassword_quality() {
-        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC,
-                PasswordMetrics.computeForPassword("a1".getBytes()).quality);
-        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC,
-                PasswordMetrics.computeForPassword("a".getBytes()).quality);
-        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC,
-                PasswordMetrics.computeForPassword("*~&%$".getBytes()).quality);
-        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX,
-                PasswordMetrics.computeForPassword("1".getBytes()).quality);
-        // contains a long sequence so isn't complex
-        assertEquals(PASSWORD_QUALITY_NUMERIC,
-                PasswordMetrics.computeForPassword("1234".getBytes()).quality);
-        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
-                PasswordMetrics.computeForPassword("".getBytes()).quality);
     }
 
     @Test
@@ -142,69 +119,15 @@ public class PasswordMetricsTest {
     }
 
     @Test
-    public void testEquals() {
-        PasswordMetrics metrics0 = new PasswordMetrics();
-        PasswordMetrics metrics1 = new PasswordMetrics();
-        assertNotEquals(metrics0, null);
-        assertNotEquals(metrics0, new Object());
-        assertEquals(metrics0, metrics0);
-        assertEquals(metrics0, metrics1);
-
-        assertEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
-                new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4));
-
-        assertNotEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
-                new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 5));
-
-        assertNotEquals(new PasswordMetrics(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, 4),
-                new PasswordMetrics(PASSWORD_QUALITY_COMPLEX, 4));
-
-        metrics0 = PasswordMetrics.computeForPassword("1234abcd,./".getBytes());
-        metrics1 = PasswordMetrics.computeForPassword("1234abcd,./".getBytes());
-        assertEquals(metrics0, metrics1);
-        metrics1.letters++;
-        assertNotEquals(metrics0, metrics1);
-        metrics1.letters--;
-        metrics1.upperCase++;
-        assertNotEquals(metrics0, metrics1);
-        metrics1.upperCase--;
-        metrics1.lowerCase++;
-        assertNotEquals(metrics0, metrics1);
-        metrics1.lowerCase--;
-        metrics1.numeric++;
-        assertNotEquals(metrics0, metrics1);
-        metrics1.numeric--;
-        metrics1.symbols++;
-        assertNotEquals(metrics0, metrics1);
-        metrics1.symbols--;
-        metrics1.nonLetter++;
-        assertNotEquals(metrics0, metrics1);
-        metrics1.nonLetter--;
-        assertEquals(metrics0, metrics1);
-
-
-    }
-
-    @Test
-    public void testConstructQuality() {
-        PasswordMetrics expected = new PasswordMetrics();
-        expected.quality = PASSWORD_QUALITY_COMPLEX;
-
-        PasswordMetrics actual = new PasswordMetrics(PASSWORD_QUALITY_COMPLEX);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
     public void testDetermineComplexity_none() {
         assertEquals(PASSWORD_COMPLEXITY_NONE,
-                PasswordMetrics.computeForPassword("".getBytes()).determineComplexity());
+                new PasswordMetrics(CREDENTIAL_TYPE_NONE).determineComplexity());
     }
 
     @Test
     public void testDetermineComplexity_lowSomething() {
         assertEquals(PASSWORD_COMPLEXITY_LOW,
-                new PasswordMetrics(PASSWORD_QUALITY_SOMETHING).determineComplexity());
+                new PasswordMetrics(CREDENTIAL_TYPE_PATTERN).determineComplexity());
     }
 
     @Test
@@ -324,122 +247,84 @@ public class PasswordMetricsTest {
     }
 
     @Test
-    public void testGetTargetQualityMetrics_noneComplexityReturnsDefaultMetrics() {
-        PasswordMetrics metrics =
-                getTargetQualityMetrics(PASSWORD_COMPLEXITY_NONE, PASSWORD_QUALITY_ALPHANUMERIC);
-
-        assertTrue(metrics.isDefault());
+    public void testMerge_single() {
+        PasswordMetrics metrics = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD,
+                PasswordMetrics.merge(Collections.singletonList(metrics)).credType);
     }
 
     @Test
-    public void testGetTargetQualityMetrics_qualityNotAllowedReturnsMinQualityMetrics() {
-        PasswordMetrics metrics =
-                getTargetQualityMetrics(PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_QUALITY_NUMERIC);
-
-        assertEquals(PASSWORD_QUALITY_NUMERIC_COMPLEX, metrics.quality);
-        assertEquals(/* expected= */ 4, metrics.length);
+    public void testMerge_credentialTypes() {
+        PasswordMetrics none = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        PasswordMetrics pattern = new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
+        PasswordMetrics password = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
+        assertEquals(CREDENTIAL_TYPE_PATTERN,
+                PasswordMetrics.merge(Arrays.asList(new PasswordMetrics[]{none, pattern}))
+                        .credType);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD,
+                PasswordMetrics.merge(Arrays.asList(new PasswordMetrics[]{none, password}))
+                        .credType);
+        assertEquals(CREDENTIAL_TYPE_PASSWORD,
+                PasswordMetrics.merge(Arrays.asList(new PasswordMetrics[]{password, pattern}))
+                        .credType);
     }
 
     @Test
-    public void testGetTargetQualityMetrics_highComplexityNumericComplex() {
-        PasswordMetrics metrics = getTargetQualityMetrics(
-                PASSWORD_COMPLEXITY_HIGH, PASSWORD_QUALITY_NUMERIC_COMPLEX);
+    public void testValidatePasswordMetrics_credentialTypes() {
+        PasswordMetrics none = new PasswordMetrics(CREDENTIAL_TYPE_NONE);
+        PasswordMetrics pattern = new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);
+        PasswordMetrics password = new PasswordMetrics(CREDENTIAL_TYPE_PASSWORD);
 
-        assertEquals(PASSWORD_QUALITY_NUMERIC_COMPLEX, metrics.quality);
-        assertEquals(/* expected= */ 8, metrics.length);
+        // To pass minimal length check.
+        password.length = 4;
+
+        // No errors expected, credential is of stronger or equal type.
+        assertValidationErrors(
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, none));
+        assertValidationErrors(
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, pattern));
+        assertValidationErrors(
+                validatePasswordMetrics(none, PASSWORD_COMPLEXITY_NONE, false, password));
+        assertValidationErrors(
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, pattern));
+        assertValidationErrors(
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, password));
+        assertValidationErrors(
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, password));
+
+        // Now actual credential type is weaker than required:
+        assertValidationErrors(
+                validatePasswordMetrics(pattern, PASSWORD_COMPLEXITY_NONE, false, none),
+                PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
+        assertValidationErrors(
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, none),
+                PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
+        assertValidationErrors(
+                validatePasswordMetrics(password, PASSWORD_COMPLEXITY_NONE, false, pattern),
+                PasswordValidationError.WEAK_CREDENTIAL_TYPE, 0);
     }
 
-    @Test
-    public void testGetTargetQualityMetrics_mediumComplexityAlphabetic() {
-        PasswordMetrics metrics = getTargetQualityMetrics(
-                PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_QUALITY_ALPHABETIC);
+    /**
+     * @param expected sequense of validation error codes followed by requirement values, must have
+     *                even number of elements. Empty means no errors.
+     */
+    private void assertValidationErrors(
+            List<PasswordValidationError> actualErrors, int... expected) {
+        assertEquals("Test programming error: content shoud have even number of elements",
+                0, expected.length % 2);
+        assertEquals("wrong number of validation errors", expected.length / 2, actualErrors.size());
+        HashMap<Integer, Integer> errorMap = new HashMap<>();
+        for (PasswordValidationError error : actualErrors) {
+            errorMap.put(error.errorCode, error.requirement);
+        }
 
-        assertEquals(PASSWORD_QUALITY_ALPHABETIC, metrics.quality);
-        assertEquals(/* expected= */ 4, metrics.length);
-    }
-
-    @Test
-    public void testGetTargetQualityMetrics_lowComplexityAlphanumeric() {
-        PasswordMetrics metrics = getTargetQualityMetrics(
-                PASSWORD_COMPLEXITY_MEDIUM, PASSWORD_QUALITY_ALPHANUMERIC);
-
-        assertEquals(PASSWORD_QUALITY_ALPHANUMERIC, metrics.quality);
-        assertEquals(/* expected= */ 4, metrics.length);
-    }
-
-    @Test
-    public void testGetActualRequiredQuality_nonComplex() {
-        int actual = getActualRequiredQuality(
-                PASSWORD_QUALITY_NUMERIC_COMPLEX,
-                /* requiresNumeric= */ false,
-                /* requiresLettersOrSymbols= */ false);
-
-        assertEquals(PASSWORD_QUALITY_NUMERIC_COMPLEX, actual);
-    }
-
-    @Test
-    public void testGetActualRequiredQuality_complexRequiresNone() {
-        int actual = getActualRequiredQuality(
-                PASSWORD_QUALITY_COMPLEX,
-                /* requiresNumeric= */ false,
-                /* requiresLettersOrSymbols= */ false);
-
-        assertEquals(PASSWORD_QUALITY_UNSPECIFIED, actual);
-    }
-
-    @Test
-    public void testGetActualRequiredQuality_complexRequiresNumeric() {
-        int actual = getActualRequiredQuality(
-                PASSWORD_QUALITY_COMPLEX,
-                /* requiresNumeric= */ true,
-                /* requiresLettersOrSymbols= */ false);
-
-        assertEquals(PASSWORD_QUALITY_NUMERIC, actual);
-    }
-
-    @Test
-    public void testGetActualRequiredQuality_complexRequiresLetters() {
-        int actual = getActualRequiredQuality(
-                PASSWORD_QUALITY_COMPLEX,
-                /* requiresNumeric= */ false,
-                /* requiresLettersOrSymbols= */ true);
-
-        assertEquals(PASSWORD_QUALITY_ALPHABETIC, actual);
-    }
-
-    @Test
-    public void testGetActualRequiredQuality_complexRequiresNumericAndLetters() {
-        int actual = getActualRequiredQuality(
-                PASSWORD_QUALITY_COMPLEX,
-                /* requiresNumeric= */ true,
-                /* requiresLettersOrSymbols= */ true);
-
-        assertEquals(PASSWORD_QUALITY_ALPHANUMERIC, actual);
-    }
-
-    @Test
-    public void testGetMinimumMetrics_userInputStricter() {
-        PasswordMetrics metrics = getMinimumMetrics(
-                PASSWORD_COMPLEXITY_HIGH,
-                PASSWORD_QUALITY_ALPHANUMERIC,
-                PASSWORD_QUALITY_NUMERIC,
-                /* requiresNumeric= */ false,
-                /* requiresLettersOrSymbols= */ false);
-
-        assertEquals(PASSWORD_QUALITY_ALPHANUMERIC, metrics.quality);
-        assertEquals(/* expected= */ 6, metrics.length);
-    }
-
-    @Test
-    public void testGetMinimumMetrics_actualRequiredQualityStricter() {
-        PasswordMetrics metrics = getMinimumMetrics(
-                PASSWORD_COMPLEXITY_HIGH,
-                PASSWORD_QUALITY_UNSPECIFIED,
-                PASSWORD_QUALITY_NUMERIC,
-                /* requiresNumeric= */ false,
-                /* requiresLettersOrSymbols= */ false);
-
-        assertEquals(PASSWORD_QUALITY_NUMERIC_COMPLEX, metrics.quality);
-        assertEquals(/* expected= */ 8, metrics.length);
+        for (int i = 0; i < expected.length / 2; i++) {
+            final int expectedError = expected[i * 2];
+            final int expectedRequirement = expected[i * 2 + 1];
+            assertTrue("error expected but not reported: " + expectedError,
+                    errorMap.containsKey(expectedError));
+            assertEquals("unexpected requirement for error: " + expectedError,
+                    Integer.valueOf(expectedRequirement), errorMap.get(expectedError));
+        }
     }
 }

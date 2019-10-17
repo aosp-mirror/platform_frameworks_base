@@ -854,6 +854,7 @@ private fun ClassPrinter.generateFieldValidation(field: FieldInfo) = field.run {
         it.nameAsString == intOrStringDef?.AnnotationName
                 || it.nameAsString in knownNonValidationAnnotations
                 || it in perElementValidations
+                || it.args.any { (_, value) -> value is ArrayInitializerExpr }
     }.forEach { annotation ->
         appendValidateCall(annotation,
                 valueToValidate = if (annotation.nameAsString == Size) sizeExpr else name)
@@ -874,14 +875,7 @@ fun ClassPrinter.appendValidateCall(annotation: AnnotationExpr, valueToValidate:
     val validate = memberRef("com.android.internal.util.AnnotationValidations.validate")
     "$validate(" {
         !"${annotation.nameAsString}.class, null, $valueToValidate"
-        val params = when (annotation) {
-            is MarkerAnnotationExpr -> emptyMap()
-            is SingleMemberAnnotationExpr -> mapOf("value" to annotation.memberValue)
-            is NormalAnnotationExpr ->
-                annotation.pairs.map { it.name.asString() to it.value }.toMap()
-            else -> throw IllegalStateException()
-        }
-        params.forEach { name, value ->
+        annotation.args.forEach { name, value ->
             !",\n\"$name\", $value"
         }
     }

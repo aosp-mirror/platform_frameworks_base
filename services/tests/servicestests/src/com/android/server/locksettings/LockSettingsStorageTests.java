@@ -434,35 +434,6 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals(2, PersistentData.TYPE_SP_WEAVER);
     }
 
-    public void testCredentialHash_serializeUnserialize() {
-        byte[] serialized = CredentialHash.create(
-                PAYLOAD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD).toBytes();
-        CredentialHash deserialized = CredentialHash.fromBytes(serialized);
-
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
-        assertArrayEquals(PAYLOAD, deserialized.hash);
-    }
-
-    public void testCredentialHash_unserialize_versionGatekeeper() {
-        // This test ensures that we can read serialized VERSION_GATEKEEPER CredentialHashes
-        // even if we change the wire format in the future.
-        byte[] serialized = new byte[] {
-                1, /* VERSION_GATEKEEPER */
-                2, /* CREDENTIAL_TYPE_PASSWORD */
-                0, 0, 0, 5, /* hash length */
-                1, 2, -1, -2, 33, /* hash */
-        };
-        CredentialHash deserialized = CredentialHash.fromBytes(serialized);
-
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, deserialized.type);
-        assertArrayEquals(PAYLOAD, deserialized.hash);
-
-        // Make sure the constants we use on the wire do not change.
-        assertEquals(-1, LockPatternUtils.CREDENTIAL_TYPE_NONE);
-        assertEquals(1, LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
-        assertEquals(2, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
-    }
-
     private static void assertArrayEquals(byte[] expected, byte[] actual) {
         if (!Arrays.equals(expected, actual)) {
             fail("expected:<" + Arrays.toString(expected) +

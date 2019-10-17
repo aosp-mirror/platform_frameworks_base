@@ -95,8 +95,6 @@ class LockSettingsStorage {
 
     @VisibleForTesting
     public static class CredentialHash {
-        /** Deprecated private static final int VERSION_LEGACY = 0; */
-        private static final int VERSION_GATEKEEPER = 1;
 
         private CredentialHash(byte[] hash, @CredentialType int type) {
             if (type != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
@@ -126,42 +124,6 @@ class LockSettingsStorage {
 
         byte[] hash;
         @CredentialType int type;
-
-        public byte[] toBytes() {
-            try {
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                DataOutputStream dos = new DataOutputStream(os);
-                dos.write(VERSION_GATEKEEPER);
-                dos.write(type);
-                if (hash != null && hash.length > 0) {
-                    dos.writeInt(hash.length);
-                    dos.write(hash);
-                } else {
-                    dos.writeInt(0);
-                }
-                dos.close();
-                return os.toByteArray();
-            } catch (IOException e) {
-                throw new IllegalStateException("Fail to serialze credential hash", e);
-            }
-        }
-
-        public static CredentialHash fromBytes(byte[] bytes) {
-            try {
-                DataInputStream is = new DataInputStream(new ByteArrayInputStream(bytes));
-                /* int version = */ is.read();
-                int type = is.read();
-                int hashSize = is.readInt();
-                byte[] hash = null;
-                if (hashSize > 0) {
-                    hash = new byte[hashSize];
-                    is.readFully(hash);
-                }
-                return new CredentialHash(hash, type);
-            } catch (IOException e) {
-                throw new IllegalStateException("Fail to deserialze credential hash", e);
-            }
-        }
     }
 
     public LockSettingsStorage(Context context) {

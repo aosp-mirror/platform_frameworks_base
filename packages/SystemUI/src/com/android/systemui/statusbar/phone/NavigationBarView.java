@@ -1212,8 +1212,11 @@ public class NavigationBarView extends FrameLayout implements
         setClipChildren(shouldClip);
         setClipToPadding(shouldClip);
 
-        AssistHandleViewController controller = Dependency.get(NavigationBarController.class)
-                .getAssistHandlerViewController();
+        NavigationBarController navigationBarController =
+                Dependency.get(NavigationBarController.class);
+        AssistHandleViewController controller =
+                navigationBarController == null
+                        ? null : navigationBarController.getAssistHandlerViewController();
         if (controller != null) {
             controller.setBottomOffset(insets.getSystemWindowInsetBottom());
         }

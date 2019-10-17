@@ -2412,4 +2412,18 @@ enum PageId {
     // OS: R
     SETTINGS_WIFI_CONFIGURE_NETWORK = 1800;
 
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: R
+    // Note: Shows up only when Magnify with shortcut is enabled
+    // and under accessibility button mode.
+    DIALOG_TOGGLE_SCREEN_MAGNIFICATION_ACCESSIBILITY_BUTTON = 1801;
+
+    // OPEN: Settings > Accessibility > Magnification
+    // CATEGORY: SETTINGS
+    // OS: R
+    // Note: Shows up only when Magnify with shortcut is enabled.
+    // and under gesture navigation mode.
+    DIALOG_TOGGLE_SCREEN_MAGNIFICATION_GESTURE_NAVIGATION = 1802;
+
 }

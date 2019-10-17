@@ -131,7 +131,7 @@ public class AppsFilter {
 
     private static class FeatureConfigImpl implements FeatureConfig {
         private static final String FILTERING_ENABLED_NAME = "package_query_filtering_enabled";
-        private volatile boolean mFeatureEnabled = true;
+        private volatile boolean mFeatureEnabled = false;
         private CompatConfig mCompatibility;
 
         private FeatureConfigImpl(PackageManagerService.Injector injector) {
@@ -141,12 +141,12 @@ public class AppsFilter {
         @Override
         public void onSystemReady() {
             mFeatureEnabled = DeviceConfig.getBoolean(
-                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME, true);
+                    NAMESPACE_PACKAGE_MANAGER_SERVICE, FILTERING_ENABLED_NAME, false);
             DeviceConfig.addOnPropertiesChangedListener(
                     NAMESPACE_PACKAGE_MANAGER_SERVICE, FgThread.getExecutor(),
                     properties -> {
                         synchronized (FeatureConfigImpl.this) {
-                            mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME, true);
+                            mFeatureEnabled = properties.getBoolean(FILTERING_ENABLED_NAME, false);
                         }
                     });
         }

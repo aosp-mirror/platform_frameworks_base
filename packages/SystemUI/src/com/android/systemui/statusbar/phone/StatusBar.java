@@ -387,6 +387,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final ConfigurationController mConfigurationController;
     private final StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
     private final NotifLog mNotifLog;
+    private final DozeParameters mDozeParameters;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -497,8 +498,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean deviceSupportsAodWallpaper = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_dozeSupportsAodWallpaper);
-            final boolean imageWallpaperInAmbient =
-                    !DozeParameters.getInstance(mContext).getDisplayNeedsBlanking();
+            final boolean imageWallpaperInAmbient = !mDozeParameters.getDisplayNeedsBlanking();
             // If WallpaperInfo is null, it must be ImageWallpaper.
             final boolean supportsAmbientMode = deviceSupportsAodWallpaper
                     && ((info == null && imageWallpaperInAmbient)
@@ -674,7 +674,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             ConfigurationController configurationController,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
-            NotifLog notifLog) {
+            NotifLog notifLog,
+            DozeParameters dozeParameters) {
         super(context);
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
@@ -730,6 +731,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowController = statusBarWindowController;
         mStatusBarWindowViewControllerBuilder = statusBarWindowViewControllerBuilder;
         mNotifLog = notifLog;
+        mDozeParameters = dozeParameters;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -750,7 +752,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyguardSliceProvider sliceProvider = KeyguardSliceProvider.getAttachedInstance();
         if (sliceProvider != null) {
             sliceProvider.initDependencies(mMediaManager, mStatusBarStateController,
-                    mKeyguardBypassController, DozeParameters.getInstance(mContext));
+                    mKeyguardBypassController, mDozeParameters);
         } else {
             Log.w(TAG, "Cannot init KeyguardSliceProvider dependencies");
         }
@@ -1032,13 +1034,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                     if (mStatusBarWindow != null) {
                         mStatusBarWindowViewController.onScrimVisibilityChanged(scrimsVisible);
                     }
-                }, DozeParameters.getInstance(mContext),
+                }, mDozeParameters,
                 mContext.getSystemService(AlarmManager.class),
                 mKeyguardStateController);
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
-        mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context),
-                mDozeLog);
+        mDozeScrimController = new DozeScrimController(mDozeParameters, mDozeLog);
 
         BackDropView backdrop = mStatusBarWindow.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
@@ -1343,7 +1344,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mBiometricUnlockController = new BiometricUnlockController(mContext,
                 mDozeScrimController, mKeyguardViewMediator,
                 mScrimController, this, mKeyguardStateController, new Handler(),
-                mKeyguardUpdateMonitor, mKeyguardBypassController);
+                mKeyguardUpdateMonitor, mKeyguardBypassController, mDozeParameters);
         putComponent(BiometricUnlockController.class, mBiometricUnlockController);
         mStatusBarKeyguardViewManager = mKeyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
@@ -3571,8 +3572,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozing = isDozing;
 
         // Collapse the notification panel if open
-        boolean dozingAnimated = mDozingRequested
-                && DozeParameters.getInstance(mContext).shouldControlScreenOff();
+        boolean dozingAnimated = mDozingRequested && mDozeParameters.shouldControlScreenOff();
         mNotificationPanel.resetViews(dozingAnimated);
 
         updateQsExpansionEnabled();
@@ -3828,7 +3828,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     private void updateNotificationPanelTouchState() {
         boolean goingToSleepWithoutAnimation = isGoingToSleep()
-                && !DozeParameters.getInstance(mContext).shouldControlScreenOff();
+                && !mDozeParameters.shouldControlScreenOff();
         boolean disabled = (!mDeviceInteractive && !mPulsing) || goingToSleepWithoutAnimation;
         mNotificationPanel.setTouchAndAnimationDisabled(disabled);
         mNotificationIconAreaController.setAnimationsEnabled(!disabled);

@@ -17,8 +17,7 @@
 android_app {
     name: "BackupEncryption",
     srcs: ["src/**/*.java"],
-    libs: ["backup-encryption-protos"],
-    static_libs: ["backuplib"],
+    static_libs: ["backup-encryption-protos", "backuplib"],
     optimize: { enabled: false },
     platform_apis: true,
     certificate: "platform",

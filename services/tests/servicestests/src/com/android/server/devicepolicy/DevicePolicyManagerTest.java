@@ -25,10 +25,12 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
+import static android.app.admin.PasswordMetrics.computeForPassword;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_GLOBALLY;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_LOCALLY;
 import static android.os.UserManagerInternal.CAMERA_NOT_DISABLED;
 
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
@@ -4295,11 +4297,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         reset(mContext.spiedContext);
 
-        PasswordMetrics passwordMetricsNoSymbols = new PasswordMetrics(
-                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
-                8, 2,
-                6, 1,
-                0, 1);
+        PasswordMetrics passwordMetricsNoSymbols = computeForPassword("abcdXYZ5".getBytes());
 
         setActivePasswordState(passwordMetricsNoSymbols);
         assertTrue(dpm.isActivePasswordSufficient());
@@ -4326,11 +4324,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(mContext.spiedContext);
         assertFalse(dpm.isActivePasswordSufficient());
 
-        PasswordMetrics passwordMetricsWithSymbols = new PasswordMetrics(
-                DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
-                7, 2,
-                5, 1,
-                1, 2);
+        PasswordMetrics passwordMetricsWithSymbols = computeForPassword("abcd.XY5".getBytes());
 
         setActivePasswordState(passwordMetricsWithSymbols);
         assertTrue(dpm.isActivePasswordSufficient());
@@ -4347,7 +4341,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int userHandle = UserHandle.getUserId(mContext.binder.callingUid);
         // When there is no lockscreen, user password metrics is always empty.
         when(getServices().lockSettingsInternal.getUserPasswordMetrics(userHandle))
-                .thenReturn(new PasswordMetrics());
+                .thenReturn(new PasswordMetrics(CREDENTIAL_TYPE_NONE));
 
         // If no password requirements are set, isActivePasswordSufficient should succeed.
         assertTrue(dpm.isActivePasswordSufficient());
@@ -5314,7 +5308,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(DpmMockContext.CALLER_USER_HANDLE);
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(DpmMockContext.CALLER_USER_HANDLE))
-                .thenReturn(PasswordMetrics.computeForPassword("asdf".getBytes()));
+                .thenReturn(computeForPassword("asdf".getBytes()));
 
         assertEquals(PASSWORD_COMPLEXITY_MEDIUM, dpm.getPasswordComplexity());
     }
@@ -5331,10 +5325,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(DpmMockContext.CALLER_USER_HANDLE))
-                .thenReturn(PasswordMetrics.computeForPassword("asdf".getBytes()));
+                .thenReturn(computeForPassword("asdf".getBytes()));
         when(getServices().lockSettingsInternal
                 .getUserPasswordMetrics(parentUser.id))
-                .thenReturn(PasswordMetrics.computeForPassword("parentUser".getBytes()));
+                .thenReturn(computeForPassword("parentUser".getBytes()));
 
         assertEquals(PASSWORD_COMPLEXITY_HIGH, dpm.getPasswordComplexity());
     }

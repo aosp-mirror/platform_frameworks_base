@@ -56,8 +56,10 @@ import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -141,6 +143,10 @@ public class BubbleControllerTest extends SysuiTestCase {
     private BubbleController.BubbleExpandListener mBubbleExpandListener;
     @Mock
     private PendingIntent mDeleteIntent;
+    @Mock
+    private SysuiColorExtractor mColorExtractor;
+    @Mock
+    ColorExtractor.GradientColors mGradientColors;
 
     private BubbleData mBubbleData;
 
@@ -150,11 +156,12 @@ public class BubbleControllerTest extends SysuiTestCase {
         mStatusBarView = new FrameLayout(mContext);
         mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
+        when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
         // Bubbles get added to status bar window view
         mStatusBarWindowController = new StatusBarWindowController(mContext, mWindowManager,
                 mActivityManager, mDozeParameters, mStatusBarStateController,
-                mConfigurationController, mKeyguardBypassController);
+                mConfigurationController, mKeyguardBypassController, mColorExtractor);
         mStatusBarWindowController.add(mStatusBarView, 120 /* height */);
 
         // Need notifications for bubbles

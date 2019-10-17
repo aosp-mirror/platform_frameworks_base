@@ -554,10 +554,6 @@ public final class Settings {
         return null;
     }
 
-    void addAppOpPackage(String permName, String packageName) {
-        mPermissions.addAppOpPackage(permName, packageName);
-    }
-
     SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s != null) {
@@ -1052,13 +1048,7 @@ public final class Settings {
             return;
         }
         for (int i = 0; i < mPackages.size(); i++) {
-            final PackageSetting ps = mPackages.valueAt(i);
-            final String installerPackageName = ps.getInstallerPackageName();
-            if (installerPackageName != null
-                    && installerPackageName.equals(packageName)) {
-                ps.setInstallerPackageName(null);
-                ps.isOrphaned = true;
-            }
+            mPackages.valueAt(i).removeInstallerPackage(packageName);
         }
         mInstallerPackages.remove(packageName);
     }
@@ -2854,12 +2844,15 @@ public final class Settings {
         if (pkg.isOrphaned) {
             serializer.attribute(null, "isOrphaned", "true");
         }
+        InstallSource installSource = pkg.installSource;
+        if (installSource.initiatingPackageName != null) {
+            serializer.attribute(null, "installInitiator", installSource.initiatingPackageName);
+        }
         if (pkg.volumeUuid != null) {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
         if (pkg.categoryHint != ApplicationInfo.CATEGORY_UNDEFINED) {
-            serializer.attribute(null, "categoryHint",
-                    Integer.toString(pkg.categoryHint));
+            serializer.attribute(null, "categoryHint", Integer.toString(pkg.categoryHint));
         }
         if (pkg.parentPackageName != null) {
             serializer.attribute(null, "parentPackageName", pkg.parentPackageName);
@@ -2874,8 +2867,7 @@ public final class Settings {
 
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
 
-        writePermissionsLPr(serializer, pkg.getPermissionsState()
-                    .getInstallPermissionStates());
+        writePermissionsLPr(serializer, pkg.getPermissionsState().getInstallPermissionStates());
 
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
@@ -3613,6 +3605,7 @@ public final class Settings {
         String systemStr = null;
         String installerPackageName = null;
         String isOrphaned = null;
+        String installInitiatingPackageName = null;
         String volumeUuid = null;
         String categoryHintString = null;
         String updateAvailable = null;
@@ -3659,6 +3652,7 @@ public final class Settings {
             }
             installerPackageName = parser.getAttributeValue(null, "installer");
             isOrphaned = parser.getAttributeValue(null, "isOrphaned");
+            installInitiatingPackageName = parser.getAttributeValue(null, "installInitiator");
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHintString = parser.getAttributeValue(null, "categoryHint");
             if (categoryHintString != null) {
@@ -3815,6 +3809,7 @@ public final class Settings {
             packageSetting.uidError = "true".equals(uidError);
             packageSetting.installerPackageName = installerPackageName;
             packageSetting.isOrphaned = "true".equals(isOrphaned);
+            packageSetting.installSource = InstallSource.create(installInitiatingPackageName);
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.categoryHint = categoryHint;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;

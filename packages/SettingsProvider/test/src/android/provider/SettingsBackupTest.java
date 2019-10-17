@@ -16,6 +16,8 @@
 
 package android.provider;
 
+import static android.provider.settings.backup.DeviceSpecificSettings.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP;
+
 import static com.google.android.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -750,7 +752,7 @@ public class SettingsBackupTest {
     public void secureSettingsBackedUpOrBlacklisted() {
         HashSet<String> keys = new HashSet<String>();
         Collections.addAll(keys, SecureSettings.SETTINGS_TO_BACKUP);
-        Collections.addAll(keys, Settings.Secure.DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
+        Collections.addAll(keys, DEVICE_SPECIFIC_SETTINGS_TO_BACKUP);
         checkSettingsBackedUpOrBlacklisted(
                 getCandidateSettings(Settings.Secure.class),
                 keys,

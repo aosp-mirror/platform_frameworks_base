@@ -164,8 +164,11 @@ public class DefaultUiController implements AssistManager.UiController {
     }
 
     private void updateAssistHandleVisibility() {
-        AssistHandleViewController controller = Dependency.get(NavigationBarController.class)
-                .getAssistHandlerViewController();
+        NavigationBarController navigationBarController =
+                Dependency.get(NavigationBarController.class);
+        AssistHandleViewController controller =
+                navigationBarController == null
+                        ? null : navigationBarController.getAssistHandlerViewController();
         if (controller != null) {
             controller.setAssistHintBlocked(mInvocationInProgress);
         }

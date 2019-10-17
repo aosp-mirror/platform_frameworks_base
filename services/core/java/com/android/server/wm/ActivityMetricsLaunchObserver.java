@@ -39,8 +39,13 @@ import java.lang.annotation.RetentionPolicy;
  * If an activity is successfully started, the launch sequence's state will transition into
  * {@code STARTED} via {@link #onActivityLaunched}. This is a transient state.
  *
- * It must then transition to either {@code CANCELLED} with {@link #onActivityLaunchCancelled}
- * or into {@code FINISHED} with {@link #onActivityLaunchFinished}. These are terminal states.
+ * It must then transition to either {@code CANCELLED} with {@link #onActivityLaunchCancelled},
+ * which is a terminal state or into {@code FINISHED} with {@link #onActivityLaunchFinished}.
+ *
+ * The {@code FINISHED} with {@link #onActivityLaunchFinished} then may transition to
+ * {@code FULLY_DRAWN} with {@link #onReportFullyDrawn}, which is a terminal state.
+ * Note this transition may not happen if the reportFullyDrawn event is not receivied,
+ * in which case {@code FINISHED} is terminal.
  *
  * Note that the {@code ActivityRecordProto} provided as a parameter to some state transitions isn't
  * necessarily the same within a single launch sequence: it is only the top-most activity at the
@@ -51,15 +56,15 @@ import java.lang.annotation.RetentionPolicy;
  * until a subsequent transition into {@code INTENT_STARTED} initiates a new launch sequence.
  *
  * <pre>
- *        ┌⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┐     ┌⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┐     ╔══════════════════════════╗
- *    ╴╴▶ ⋮ INTENT_STARTED ⋮ ──▶ ⋮     ACTIVITY_LAUNCHED     ⋮ ──▶ ║ ACTIVITY_LAUNCH_FINISHED ║
- *        └⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┘     └⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┘     ╚══════════════════════════╝
- *          :                      :
- *          :                      :
- *          ▼                      ▼
- *        ╔════════════════╗     ╔═══════════════════════════╗
- *        ║ INTENT_FAILED  ║     ║ ACTIVITY_LAUNCH_CANCELLED ║
- *        ╚════════════════╝     ╚═══════════════════════════╝
+ *        ┌⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┐     ┌⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┐     ┌--------------------------┐
+ *    ╴╴▶  INTENT_STARTED    ──▶      ACTIVITY_LAUNCHED        ──▶   ACTIVITY_LAUNCH_FINISHED
+ *        └⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┘     └⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯⋯┘     └--------------------------┘
+ *          :                      :                                 :
+ *          :                      :                                 :
+ *          ▼                      ▼                                 ▼
+ *        ╔════════════════╗     ╔═══════════════════════════╗     ╔═══════════════════════════╗
+ *        ║ INTENT_FAILED  ║     ║ ACTIVITY_LAUNCH_CANCELLED ║     ║    REPORT_FULLY_DRAWN     ║
+ *        ╚════════════════╝     ╚═══════════════════════════╝     ╚═══════════════════════════╝
  * </pre>
  */
 public interface ActivityMetricsLaunchObserver {
@@ -111,7 +116,7 @@ public interface ActivityMetricsLaunchObserver {
      * Multiple calls to this method cannot occur without first terminating the current
      * launch sequence.
      */
-    public void onIntentStarted(@NonNull Intent intent);
+    public void onIntentStarted(@NonNull Intent intent, long timestampNanos);
 
     /**
      * Notifies the observer that the current launch sequence has failed to launch an activity.
@@ -177,6 +182,9 @@ public interface ActivityMetricsLaunchObserver {
      * drawn for the first time: the top-most activity at the time is what's reported here.
      *
      * @param finalActivity the top-most activity whose windows were first to fully draw
+     * @param timestampNanos the timestamp of ActivityLaunchFinished event in nanoseconds.
+     *        To compute the TotalTime duration, deduct the timestamp {@link #onIntentStarted}
+     *        from {@code timestampNanos}.
      *
      * Multiple calls to this method cannot occur without first terminating the current
      * launch sequence.
@@ -186,5 +194,22 @@ public interface ActivityMetricsLaunchObserver {
      *          and only the latest activity that was top-most during first-frame drawn
      *          is reported here.
      */
-    public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] finalActivity);
+    public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] finalActivity,
+                                         long timestampNanos);
+
+    /**
+     * Notifies the observer that the application self-reported itself as being fully drawn.
+     *
+     * @param activity the activity that triggers the ReportFullyDrawn event.
+     * @param timestampNanos the timestamp of ReportFullyDrawn event in nanoseconds.
+     *        To compute the duration, deduct the deduct the timestamp {@link #onIntentStarted}
+     *        from {@code timestampNanos}.
+     *
+     * @apiNote The behavior of ReportFullyDrawn mostly depends on the app.
+     *          It is used as an accurate estimate of meanfully app startup time.
+     *          This event may be missing for many apps.
+     */
+    public void onReportFullyDrawn(@NonNull @ActivityRecordProto byte[] activity,
+        long timestampNanos);
+
 }

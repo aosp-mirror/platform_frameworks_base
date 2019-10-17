@@ -191,7 +191,7 @@ data class FieldInfo(
      * Parcel.write* and Parcel.read* method name wildcard values
      */
     val ParcelMethodsSuffix = when {
-        FieldClass in PRIMITIVE_TYPES - "char" - "boolean" +
+        FieldClass in PRIMITIVE_TYPES - "char" - "boolean" + BOXED_PRIMITIVE_TYPES +
                 listOf("String", "CharSequence", "Exception", "Size", "SizeF", "Bundle",
                         "FileDescriptor", "SparseBooleanArray", "SparseIntArray", "SparseArray") ->
             FieldClass

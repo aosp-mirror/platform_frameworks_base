@@ -34,7 +34,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.AlarmManagerService.ACTIVE_INDEX;
 import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
-import static com.android.server.AlarmManagerService.AlarmHandler.APP_STANDBY_PAROLE_CHANGED;
+import static com.android.server.AlarmManagerService.AlarmHandler.CHARGING_STATUS_CHANGED;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
@@ -53,6 +53,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
@@ -68,6 +69,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -107,6 +109,7 @@ public class AlarmManagerServiceTest {
     private long mAppStandbyWindow;
     private AlarmManagerService mService;
     private UsageStatsManagerInternal.AppIdleStateChangeListener mAppStandbyListener;
+    private AlarmManagerService.ChargingReceiver mChargingReceiver;
     @Mock
     private ContentResolver mMockResolver;
     @Mock
@@ -290,6 +293,13 @@ public class AlarmManagerServiceTest {
                 ArgumentCaptor.forClass(UsageStatsManagerInternal.AppIdleStateChangeListener.class);
         verify(mUsageStatsManagerInternal).addAppIdleStateChangeListener(captor.capture());
         mAppStandbyListener = captor.getValue();
+
+        ArgumentCaptor<AlarmManagerService.ChargingReceiver> chargingReceiverCaptor =
+                ArgumentCaptor.forClass(AlarmManagerService.ChargingReceiver.class);
+        verify(mMockContext).registerReceiver(chargingReceiverCaptor.capture(),
+                argThat((filter) -> filter.hasAction(BatteryManager.ACTION_CHARGING)
+                        && filter.hasAction(BatteryManager.ACTION_DISCHARGING)));
+        mChargingReceiver = chargingReceiverCaptor.getValue();
     }
 
     private void setTestAlarm(int type, long triggerTime, PendingIntent operation) {
@@ -724,17 +734,19 @@ public class AlarmManagerServiceTest {
     }
 
     private void assertAndHandleParoleChanged(boolean parole) {
-        mAppStandbyListener.onParoleStateChanged(parole);
+        mChargingReceiver.onReceive(mMockContext,
+                new Intent(parole ? BatteryManager.ACTION_CHARGING
+                        : BatteryManager.ACTION_DISCHARGING));
         final ArgumentCaptor<Message> messageCaptor = ArgumentCaptor.forClass(Message.class);
         verify(mService.mHandler, atLeastOnce()).sendMessage(messageCaptor.capture());
         final Message lastMessage = messageCaptor.getValue();
         assertEquals("Unexpected message send to handler", lastMessage.what,
-                APP_STANDBY_PAROLE_CHANGED);
+                CHARGING_STATUS_CHANGED);
         mService.mHandler.handleMessage(lastMessage);
     }
 
     @Test
-    public void testParole() throws Exception {
+    public void testCharging() throws Exception {
         setQuotasEnabled(true);
         final int workingQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_WORKING_SET);
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),

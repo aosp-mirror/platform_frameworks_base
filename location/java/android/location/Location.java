@@ -1211,7 +1211,8 @@ public class Location implements Parcelable {
     }
 
     /**
-     * Attaches an extra {@link Location} to this Location.
+     * Attaches an extra {@link Location} to this Location. This is useful for location providers
+     * to set the {@link #EXTRA_NO_GPS_LOCATION} extra to provide coarse locations for clients.
      *
      * @param key the key associated with the Location extra
      * @param value the Location to attach

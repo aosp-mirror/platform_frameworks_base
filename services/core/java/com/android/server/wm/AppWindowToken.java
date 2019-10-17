@@ -512,7 +512,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (DEBUG_VISIBILITY) Slog.v(TAG, "VIS " + this + ": interesting="
                 + numInteresting + " visible=" + numVisible);
         if (nowDrawn != reportedDrawn) {
-            onWindowsDrawn(nowDrawn, SystemClock.uptimeMillis());
+            onWindowsDrawn(nowDrawn, SystemClock.elapsedRealtimeNanos());
             reportedDrawn = nowDrawn;
         }
         if (nowVisible != reportedVisible) {
