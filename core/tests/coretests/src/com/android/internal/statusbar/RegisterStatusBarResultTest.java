@@ -48,6 +48,7 @@ public class RegisterStatusBarResultTest {
         final RegisterStatusBarResult original = new RegisterStatusBarResult(iconMap,
                 0x2 /* disabledFlags1 */,
                 0x4 /* systemUiVisibility */,
+                true /* menuVisible */,
                 0x8 /* imeWindowVis */,
                 0x10 /* imeBackDisposition */,
                 false /* showImeSwitcher */,
@@ -57,9 +58,7 @@ public class RegisterStatusBarResultTest {
                 new Binder() /* imeToken */,
                 new Rect(0x100, 0x200, 0x400, 0x800) /* fullscreenStackBounds */,
                 new Rect(0x1000, 0x2000, 0x4000, 0x8000) /* dockedStackBounds */,
-                true /* navbarColorManagedByIme */,
-                true /* appFullscreen */,
-                true /* appImmersive */);
+                true /* navbarColorManagedByIme */);
 
         final RegisterStatusBarResult copy = clone(original);
 
@@ -70,6 +69,7 @@ public class RegisterStatusBarResultTest {
 
         assertThat(copy.mDisabledFlags1).isEqualTo(original.mDisabledFlags1);
         assertThat(copy.mSystemUiVisibility).isEqualTo(original.mSystemUiVisibility);
+        assertThat(copy.mMenuVisible).isEqualTo(original.mMenuVisible);
         assertThat(copy.mImeWindowVis).isEqualTo(original.mImeWindowVis);
         assertThat(copy.mImeBackDisposition).isEqualTo(original.mImeBackDisposition);
         assertThat(copy.mShowImeSwitcher).isEqualTo(original.mShowImeSwitcher);
@@ -82,8 +82,6 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mFullscreenStackBounds).isEqualTo(original.mFullscreenStackBounds);
         assertThat(copy.mDockedStackBounds).isEqualTo(original.mDockedStackBounds);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
-        assertThat(copy.mAppFullscreen).isEqualTo(original.mAppFullscreen);
-        assertThat(copy.mAppImmersive).isEqualTo(original.mAppImmersive);
     }
 
     private RegisterStatusBarResult clone(RegisterStatusBarResult original) {

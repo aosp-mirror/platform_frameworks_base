@@ -95,6 +95,11 @@ public interface StatusBarStateController {
         default void onDozeAmountChanged(float linear, float eased) {}
 
         /**
+         * Callback to be notified when the sysui visibility changes
+         */
+        default void onSystemUiVisibilityChanged(int visibility) {}
+
+        /**
          * Callback to be notified when the pulsing state changes
          */
         default void onPulsingChanged(boolean pulsing) {}

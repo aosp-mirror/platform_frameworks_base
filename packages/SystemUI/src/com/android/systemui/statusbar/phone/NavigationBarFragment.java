@@ -21,10 +21,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
-import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.containsType;
-import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_SIDE_BARS;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -35,6 +31,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OU
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
@@ -55,6 +52,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
@@ -69,14 +67,12 @@ import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
-import android.view.InsetsState.InternalInsetType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
@@ -88,7 +84,6 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
-import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
@@ -133,8 +128,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private static final boolean DEBUG = false;
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
     private static final String EXTRA_DISABLE2_STATE = "disabled2_state";
-    private static final String EXTRA_APPEARANCE = "appearance";
-    private static final String EXTRA_TRANSIENT_STATE = "transient_state";
+    private static final String EXTRA_SYSTEM_UI_VISIBILITY = "system_ui_visibility";
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
@@ -171,10 +165,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private Locale mLocale;
     private int mLayoutDirection;
 
-    /** @see android.view.WindowInsetsController#setSystemBarsAppearance(int) */
-    private @Appearance int mAppearance;
-
-    private boolean mTransientShown;
+    private int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
     private int mNavBarMode = NAV_BAR_MODE_3BUTTON;
     private LightBarController mLightBarController;
     private AutoHideController mAutoHideController;
@@ -304,8 +295,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
             mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
-            mAppearance = savedInstanceState.getInt(EXTRA_APPEARANCE, 0);
-            mTransientShown = savedInstanceState.getBoolean(EXTRA_TRANSIENT_STATE, false);
+            mSystemUiVisibility = savedInstanceState.getInt(EXTRA_SYSTEM_UI_VISIBILITY, 0);
         }
         mAccessibilityManagerWrapper.addCallback(mAccessibilityListener);
 
@@ -407,8 +397,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         super.onSaveInstanceState(outState);
         outState.putInt(EXTRA_DISABLE_STATE, mDisabledFlags1);
         outState.putInt(EXTRA_DISABLE2_STATE, mDisabledFlags2);
-        outState.putInt(EXTRA_APPEARANCE, mAppearance);
-        outState.putBoolean(EXTRA_TRANSIENT_STATE, mTransientShown);
+        outState.putInt(EXTRA_SYSTEM_UI_VISIBILITY, mSystemUiVisibility);
         if (mNavigationBarView != null) {
             mNavigationBarView.getLightTransitionsController().saveState(outState);
         }
@@ -529,107 +518,80 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         rotationButtonController.onRotationProposal(rotation, winRotation, isValid);
     }
 
-    /** Restores the appearance and the transient saved state to {@link NavigationBarFragment}. */
-    public void restoreAppearanceAndTransientState() {
-        final int barMode = barMode(mTransientShown, mAppearance);
-        mNavigationBarMode = barMode;
+    /** Restores the System UI flags saved state to {@link NavigationBarFragment}. */
+    public void restoreSystemUiVisibilityState() {
+        final int barMode = computeBarMode(0, mSystemUiVisibility);
+        if (barMode != -1) {
+            mNavigationBarMode = barMode;
+        }
         checkNavBarModes();
         mAutoHideController.touchAutoHide();
 
-        mLightBarController.onNavigationBarAppearanceChanged(mAppearance, true /* nbModeChanged */,
-                barMode, false /* navbarColorManagedByIme */);
+        mLightBarController.onNavigationVisibilityChanged(mSystemUiVisibility, 0 /* mask */,
+                true /* nbModeChanged */, mNavigationBarMode, false /* navbarColorManagedByIme */);
     }
 
     @Override
-    public void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+    public void setSystemUiVisibility(int displayId, int vis, int fullscreenStackVis,
+            int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds,
+            boolean navbarColorManagedByIme) {
         if (displayId != mDisplayId) {
             return;
         }
+        final int oldVal = mSystemUiVisibility;
+        final int newVal = (oldVal & ~mask) | (vis & mask);
+        final int diff = newVal ^ oldVal;
         boolean nbModeChanged = false;
-        if (mAppearance != appearance) {
-            mAppearance = appearance;
-            if (getView() == null) {
-                return;
+        if (diff != 0) {
+            mSystemUiVisibility = newVal;
+
+            // update navigation bar mode
+            final int nbMode = getView() == null
+                    ? -1 : computeBarMode(oldVal, newVal);
+            nbModeChanged = nbMode != -1;
+            if (nbModeChanged) {
+                if (mNavigationBarMode != nbMode) {
+                    if (mNavigationBarMode == MODE_TRANSPARENT
+                            || mNavigationBarMode == MODE_LIGHTS_OUT_TRANSPARENT) {
+                        mNavigationBarView.hideRecentsOnboarding();
+                    }
+                    mNavigationBarMode = nbMode;
+                    checkNavBarModes();
+                }
+                mAutoHideController.touchAutoHide();
             }
-            nbModeChanged = updateBarMode(barMode(mTransientShown, appearance));
-        }
-        mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
-                mNavigationBarMode, navbarColorManagedByIme);
-    }
-
-    @Override
-    public void showTransient(int displayId, @InternalInsetType int[] types) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if (!containsType(types, TYPE_NAVIGATION_BAR)) {
-            return;
-        }
-        if (!mTransientShown) {
-            mTransientShown = true;
-            handleTransientChanged();
-        }
-    }
-
-    @Override
-    public void abortTransient(int displayId, @InternalInsetType int[] types) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        if (!containsType(types, TYPE_NAVIGATION_BAR)) {
-            return;
-        }
-        clearTransient();
-    }
-
-    void clearTransient() {
-        if (mTransientShown) {
-            mTransientShown = false;
-            handleTransientChanged();
-        }
-    }
-
-    private void handleTransientChanged() {
-        if (getView() == null) {
-            return;
-        }
-        if (mNavigationBarView != null) {
-            mNavigationBarView.onTransientStateChanged(mTransientShown);
-        }
-        final int barMode = barMode(mTransientShown, mAppearance);
-        if (updateBarMode(barMode)) {
-            mLightBarController.onNavigationBarModeChanged(barMode);
-        }
-    }
-
-    // Returns true if the bar mode is changed.
-    private boolean updateBarMode(int barMode) {
-        if (mNavigationBarMode != barMode) {
-            if (mNavigationBarMode == MODE_TRANSPARENT
-                    || mNavigationBarMode == MODE_LIGHTS_OUT_TRANSPARENT) {
-                mNavigationBarView.hideRecentsOnboarding();
+            if (mNavigationBarView != null) {
+                mNavigationBarView.onSystemUiVisibilityChanged(mSystemUiVisibility);
             }
-            mNavigationBarMode = barMode;
-            checkNavBarModes();
-            mAutoHideController.touchAutoHide();
-            return true;
         }
-        return false;
+        mLightBarController.onNavigationVisibilityChanged(
+                vis, mask, nbModeChanged, mNavigationBarMode, navbarColorManagedByIme);
     }
 
-    private static @TransitionMode int barMode(boolean isTransient, int appearance) {
-        final int lightsOutOpaque = APPEARANCE_LOW_PROFILE_BARS | APPEARANCE_OPAQUE_SIDE_BARS;
-        if (isTransient) {
+    private @TransitionMode int computeBarMode(int oldVis, int newVis) {
+        final int oldMode = barMode(oldVis);
+        final int newMode = barMode(newVis);
+        if (oldMode == newMode) {
+            return -1; // no mode change
+        }
+        return newMode;
+    }
+
+    private @TransitionMode int barMode(int vis) {
+        final int lightsOutTransparent =
+                View.SYSTEM_UI_FLAG_LOW_PROFILE | View.NAVIGATION_BAR_TRANSIENT;
+        if ((vis & View.NAVIGATION_BAR_TRANSIENT) != 0) {
             return MODE_SEMI_TRANSPARENT;
-        } else if ((appearance & lightsOutOpaque) == lightsOutOpaque) {
-            return MODE_LIGHTS_OUT;
-        } else if ((appearance & APPEARANCE_LOW_PROFILE_BARS) != 0) {
+        } else if ((vis & View.NAVIGATION_BAR_TRANSLUCENT) != 0) {
+            return MODE_TRANSLUCENT;
+        } else if ((vis & lightsOutTransparent) == lightsOutTransparent) {
             return MODE_LIGHTS_OUT_TRANSPARENT;
-        } else if ((appearance & APPEARANCE_OPAQUE_SIDE_BARS) != 0) {
-            return MODE_OPAQUE;
-        } else {
+        } else if ((vis & View.NAVIGATION_BAR_TRANSPARENT) != 0) {
             return MODE_TRANSPARENT;
+        } else if ((vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+            return MODE_LIGHTS_OUT;
+        } else {
+            return MODE_OPAQUE;
         }
     }
 
@@ -1028,8 +990,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mAutoHideController.setNavigationBar(this);
     }
 
-    boolean isTransientShown() {
-        return mTransientShown;
+    public boolean isSemiTransparent() {
+        return mNavigationBarMode == MODE_SEMI_TRANSPARENT;
     }
 
     private void checkBarModes() {

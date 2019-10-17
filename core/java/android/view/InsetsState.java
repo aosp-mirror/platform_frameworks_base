@@ -270,21 +270,8 @@ public class InsetsState implements Parcelable {
      *
      * @param type The {@link InternalInsetType} of the source to remove
      */
-    public void removeSource(@InternalInsetType int type) {
+    public void removeSource(int type) {
         mSources.remove(type);
-    }
-
-    /**
-     * A shortcut for setting the visibility of the source.
-     *
-     * @param type The {@link InternalInsetType} of the source to set the visibility
-     * @param visible {@code true} for visible
-     */
-    public void setSourceVisible(@InternalInsetType int type, boolean visible) {
-        InsetsSource source = mSources.get(type);
-        if (source != null) {
-            source.setVisible(visible);
-        }
     }
 
     public void set(InsetsState other) {
@@ -370,19 +357,6 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static boolean containsType(@InternalInsetType int[] types,
-            @InternalInsetType int type) {
-        if (types == null) {
-            return false;
-        }
-        for (int t : types) {
-            if (t == type) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "InsetsState");
         for (int i = mSources.size() - 1; i >= 0; i--) {
@@ -390,7 +364,7 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static String typeToString(@InternalInsetType int type) {
+    public static String typeToString(int type) {
         switch (type) {
             case TYPE_TOP_BAR:
                 return "TYPE_TOP_BAR";

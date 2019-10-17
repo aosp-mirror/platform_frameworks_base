@@ -29,6 +29,7 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final ArrayMap<String, StatusBarIcon> mIcons;
     public final int mDisabledFlags1;                  // switch[0]
     public final int mSystemUiVisibility;              // switch[1]
+    public final boolean mMenuVisible;                 // switch[2]
     public final int mImeWindowVis;                    // switch[3]
     public final int mImeBackDisposition;              // switch[4]
     public final boolean mShowImeSwitcher;             // switch[5]
@@ -39,18 +40,16 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final Rect mFullscreenStackBounds;
     public final Rect mDockedStackBounds;
     public final boolean mNavbarColorManagedByIme;
-    public final boolean mAppFullscreen;
-    public final boolean mAppImmersive;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
-            int systemUiVisibility, int imeWindowVis, int imeBackDisposition,
+            int systemUiVisibility, boolean menuVisible, int imeWindowVis, int imeBackDisposition,
             boolean showImeSwitcher, int disabledFlags2, int fullscreenStackSysUiVisibility,
             int dockedStackSysUiVisibility, IBinder imeToken, Rect fullscreenStackBounds,
-            Rect dockedStackBounds, boolean navbarColorManagedByIme, boolean appFullscreen,
-            boolean appImmersive) {
+            Rect dockedStackBounds, boolean navbarColorManagedByIme) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
         mSystemUiVisibility = systemUiVisibility;
+        mMenuVisible = menuVisible;
         mImeWindowVis = imeWindowVis;
         mImeBackDisposition = imeBackDisposition;
         mShowImeSwitcher = showImeSwitcher;
@@ -61,8 +60,6 @@ public final class RegisterStatusBarResult implements Parcelable {
         mFullscreenStackBounds = fullscreenStackBounds;
         mDockedStackBounds = dockedStackBounds;
         mNavbarColorManagedByIme = navbarColorManagedByIme;
-        mAppFullscreen = appFullscreen;
-        mAppImmersive = appImmersive;
     }
 
     @Override
@@ -75,6 +72,7 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeTypedArrayMap(mIcons, flags);
         dest.writeInt(mDisabledFlags1);
         dest.writeInt(mSystemUiVisibility);
+        dest.writeBoolean(mMenuVisible);
         dest.writeInt(mImeWindowVis);
         dest.writeInt(mImeBackDisposition);
         dest.writeBoolean(mShowImeSwitcher);
@@ -85,8 +83,6 @@ public final class RegisterStatusBarResult implements Parcelable {
         dest.writeTypedObject(mFullscreenStackBounds, flags);
         dest.writeTypedObject(mDockedStackBounds, flags);
         dest.writeBoolean(mNavbarColorManagedByIme);
-        dest.writeBoolean(mAppFullscreen);
-        dest.writeBoolean(mAppImmersive);
     }
 
     /**
@@ -100,6 +96,7 @@ public final class RegisterStatusBarResult implements Parcelable {
                             source.createTypedArrayMap(StatusBarIcon.CREATOR);
                     final int disabledFlags1 = source.readInt();
                     final int systemUiVisibility = source.readInt();
+                    final boolean menuVisible = source.readBoolean();
                     final int imeWindowVis = source.readInt();
                     final int imeBackDisposition = source.readInt();
                     final boolean showImeSwitcher = source.readBoolean();
@@ -110,13 +107,11 @@ public final class RegisterStatusBarResult implements Parcelable {
                     final Rect fullscreenStackBounds = source.readTypedObject(Rect.CREATOR);
                     final Rect dockedStackBounds = source.readTypedObject(Rect.CREATOR);
                     final boolean navbarColorManagedByIme = source.readBoolean();
-                    final boolean appFullscreen = source.readBoolean();
-                    final boolean appImmersive = source.readBoolean();
                     return new RegisterStatusBarResult(icons, disabledFlags1, systemUiVisibility,
-                            imeWindowVis, imeBackDisposition, showImeSwitcher, disabledFlags2,
-                            fullscreenStackSysUiVisibility, dockedStackSysUiVisibility, imeToken,
-                            fullscreenStackBounds, dockedStackBounds, navbarColorManagedByIme,
-                            appFullscreen, appImmersive);
+                            menuVisible, imeWindowVis, imeBackDisposition, showImeSwitcher,
+                            disabledFlags2, fullscreenStackSysUiVisibility,
+                            dockedStackSysUiVisibility, imeToken, fullscreenStackBounds,
+                            dockedStackBounds, navbarColorManagedByIme);
                 }
 
                 @Override

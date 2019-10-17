@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.InternalInsetType;
 import static android.view.InsetsState.TYPE_IME;
 import static android.view.InsetsState.TYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.TYPE_TOP_BAR;
@@ -30,7 +31,6 @@ import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
-import android.view.InsetsState.InternalInsetType;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ class InsetsStateController {
      * @return The state stripped of the necessary information.
      */
     InsetsState getInsetsForDispatch(WindowState target) {
-        final InsetsSourceProvider provider = target.getControllableInsetProvider();
+        final InsetsSourceProvider provider = target.getInsetProvider();
         if (provider == null) {
             return mState;
         }
@@ -123,13 +123,6 @@ class InsetsStateController {
     }
 
     /**
-     * @return The provider of a specific type or null if we don't have it.
-     */
-    @Nullable InsetsSourceProvider peekSourceProvider(@InternalInsetType int type) {
-        return mProviders.get(type);
-    }
-
-    /**
      * Called when a layout pass has occurred.
      */
     void onPostLayout() {
@@ -159,10 +152,6 @@ class InsetsStateController {
         }
     }
 
-    boolean isFakeTarget(@InternalInsetType int type, InsetsControlTarget target) {
-        return mTypeFakeControlTargetMap.get(type) == target;
-    }
-
     void onImeTargetChanged(@Nullable InsetsControlTarget imeTarget) {
         onControlChanged(TYPE_IME, imeTarget);
         notifyPendingInsetsControlChanged();
@@ -177,13 +166,9 @@ class InsetsStateController {
      *                       and visibility.
      */
     void onBarControlTargetChanged(@Nullable InsetsControlTarget topControlling,
-            @Nullable InsetsControlTarget fakeTopControlling,
-            @Nullable InsetsControlTarget navControlling,
-            @Nullable InsetsControlTarget fakeNavControlling) {
+            @Nullable InsetsControlTarget navControlling) {
         onControlChanged(TYPE_TOP_BAR, topControlling);
         onControlChanged(TYPE_NAVIGATION_BAR, navControlling);
-        onControlFakeTargetChanged(TYPE_TOP_BAR, fakeTopControlling);
-        onControlFakeTargetChanged(TYPE_NAVIGATION_BAR, fakeNavControlling);
         notifyPendingInsetsControlChanged();
     }
 
@@ -294,7 +279,7 @@ class InsetsStateController {
         });
     }
 
-    void notifyInsetsChanged() {
+    private void notifyInsetsChanged() {
         mDisplayContent.forAllWindows(mDispatchInsetsChanged, true /* traverseTopToBottom */);
     }
 

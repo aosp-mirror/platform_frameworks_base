@@ -44,11 +44,11 @@ public class BarTransitions {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_COLORS = false;
 
-    public static final int MODE_TRANSPARENT = 0;
+    public static final int MODE_OPAQUE = 0;
     public static final int MODE_SEMI_TRANSPARENT = 1;
     public static final int MODE_TRANSLUCENT = 2;
     public static final int MODE_LIGHTS_OUT = 3;
-    public static final int MODE_OPAQUE = 4;
+    public static final int MODE_TRANSPARENT = 4;
     public static final int MODE_WARNING = 5;
     public static final int MODE_LIGHTS_OUT_TRANSPARENT = 6;
 
@@ -72,7 +72,7 @@ public class BarTransitions {
     private final View mView;
     protected final BarBackgroundDrawable mBarBackground;
 
-    private @TransitionMode int mMode;
+    private int mMode;
     private boolean mAlwaysOpaque = false;
 
     public BarTransitions(View view, int gradientResourceId) {

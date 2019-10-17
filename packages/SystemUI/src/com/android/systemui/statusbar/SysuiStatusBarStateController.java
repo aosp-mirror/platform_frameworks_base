@@ -111,6 +111,11 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     boolean isKeyguardRequested();
 
     /**
+     * Set systemui visibility
+     */
+    void setSystemUiVisibility(int visibility);
+
+    /**
      * Set pulsing
      */
     void setPulsing(boolean visibility);
