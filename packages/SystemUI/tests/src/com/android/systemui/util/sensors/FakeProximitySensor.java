@@ -16,14 +16,14 @@
 
 package com.android.systemui.util.sensors;
 
-import android.content.Context;
+import android.content.res.Resources;
 
 public class FakeProximitySensor extends ProximitySensor {
     private boolean mAvailable;
     private boolean mPaused;
 
-    public FakeProximitySensor(Context context, AsyncSensorManager sensorManager) {
-        super(context, sensorManager);
+    public FakeProximitySensor(Resources resources, AsyncSensorManager sensorManager) {
+        super(resources, sensorManager);
 
         mAvailable = true;
     }
