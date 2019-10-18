@@ -326,7 +326,7 @@ public class NotificationTestHelper {
                 .build();
 
         entry.setRow(row);
-        entry.createIcons(mContext, entry.sbn());
+        entry.createIcons(mContext, entry.getSbn());
         row.setEntry(entry);
         row.getNotificationInflater().addInflationFlags(extraInflationFlags);
         NotificationContentInflaterTest.runThenWaitForInflation(

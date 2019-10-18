@@ -244,7 +244,7 @@ public class NotificationDataTest extends SysuiTestCase {
     public void testIsExemptFromDndVisualSuppression_foreground() {
         initStatusBarNotification(false);
 
-        mEntry.sbn().getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
+        mEntry.getSbn().getNotification().flags = Notification.FLAG_FOREGROUND_SERVICE;
         mEntry.setRow(mRow);
         mNotificationData.add(mEntry);
         Bundle override = new Bundle();
@@ -258,7 +258,7 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testIsExemptFromDndVisualSuppression_media() {
         initStatusBarNotification(false);
-        Notification n = mEntry.sbn().getNotification();
+        Notification n = mEntry.getSbn().getNotification();
         Notification.Builder nb = Notification.Builder.recoverBuilder(mContext, n);
         nb.setStyle(new Notification.MediaStyle().setMediaSession(mock(MediaSession.Token.class)));
         n = nb.build();
@@ -594,7 +594,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_DEFAULT);
-        mNotificationData.rankingOverrides.put(entry.key(), override);
+        mNotificationData.rankingOverrides.put(entry.getKey(), override);
 
         entry.setRow(mRow);
         mNotificationData.add(entry);
@@ -618,7 +618,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
         Bundle override = new Bundle();
         override.putInt(OVERRIDE_IMPORTANCE, IMPORTANCE_LOW);
-        mNotificationData.rankingOverrides.put(entry.key(), override);
+        mNotificationData.rankingOverrides.put(entry.getKey(), override);
 
         entry.setRow(mRow);
         mNotificationData.add(entry);

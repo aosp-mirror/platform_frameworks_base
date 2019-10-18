@@ -116,9 +116,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener).onEntryAdded(mEntryCaptor.capture());
 
         NotificationEntry entry = mEntryCaptor.getValue();
-        assertEquals(notif1.key, entry.key());
-        assertEquals(notif1.sbn, entry.sbn());
-        assertEquals(notif1.ranking, entry.ranking());
+        assertEquals(notif1.key, entry.getKey());
+        assertEquals(notif1.sbn, entry.getSbn());
+        assertEquals(notif1.ranking, entry.getRanking());
     }
 
     @Test
@@ -135,9 +135,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mCollectionListener).onEntryUpdated(mEntryCaptor.capture());
 
         NotificationEntry entry = mEntryCaptor.getValue();
-        assertEquals(notif2.key, entry.key());
-        assertEquals(notif2.sbn, entry.sbn());
-        assertEquals(notif2.ranking, entry.ranking());
+        assertEquals(notif2.key, entry.getKey());
+        assertEquals(notif2.sbn, entry.getSbn());
+        assertEquals(notif2.ranking, entry.getRanking());
     }
 
     @Test
@@ -155,8 +155,8 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // THEN the listener is notified
         verify(mCollectionListener).onEntryRemoved(entry, REASON_APP_CANCEL, false);
-        assertEquals(notif.sbn, entry.sbn());
-        assertEquals(notif.ranking, entry.ranking());
+        assertEquals(notif.sbn, entry.getSbn());
+        assertEquals(notif.ranking, entry.getRanking());
     }
 
     @Test
@@ -173,7 +173,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mNoMan.postNotif(buildNotif(TEST_PACKAGE2, 77));
 
         // THEN the ranking is updated on the first entry
-        assertEquals(56, entry1.ranking().getRank());
+        assertEquals(56, entry1.getRanking().getRank());
     }
 
     @Test
@@ -210,9 +210,9 @@ public class NotifCollectionTest extends SysuiTestCase {
         mNoMan.issueRankingUpdate();
 
         // THEN all of the NotifEntries have their rankings properly updated
-        assertEquals(newRanking1, entry1.ranking());
-        assertEquals(newRanking2, entry2.ranking());
-        assertEquals(newRanking3, entry3.ranking());
+        assertEquals(newRanking1, entry1.getRanking());
+        assertEquals(newRanking2, entry2.getRanking());
+        assertEquals(newRanking3, entry3.getRanking());
     }
 
     @Test
@@ -243,7 +243,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         DismissedByUserStats stats = new DismissedByUserStats(
                 NotificationStats.DISMISSAL_SHADE,
                 NotificationStats.DISMISS_SENTIMENT_NEUTRAL,
-                NotificationVisibility.obtain(entry2.key(), 7, 2, true));
+                NotificationVisibility.obtain(entry2.getKey(), 7, 2, true));
 
         mCollection.dismissNotification(entry2, REASON_CLICK, stats);
 
@@ -497,7 +497,7 @@ public class NotifCollectionTest extends SysuiTestCase {
                 .setExplanation("Some new explanation"));
 
         // THEN the notification's ranking is properly updated
-        assertEquals(notif2a.ranking, entry2.ranking());
+        assertEquals(notif2a.ranking, entry2.getRanking());
     }
 
     private static NotificationEntryBuilder buildNotif(String pkg, int id, String tag) {
@@ -524,9 +524,9 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         PostedNotif postNotif(NotificationEntryBuilder builder) {
             NotificationEntry entry = builder.build();
-            mRankings.put(entry.key(), entry.ranking());
-            mListener.onNotificationPosted(entry.sbn(), buildRankingMap());
-            return new PostedNotif(entry.sbn(), entry.ranking());
+            mRankings.put(entry.getKey(), entry.getRanking());
+            mListener.onNotificationPosted(entry.getSbn(), buildRankingMap());
+            return new PostedNotif(entry.getSbn(), entry.getRanking());
         }
 
         void retractNotif(StatusBarNotification sbn, int reason) {
@@ -565,7 +565,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         @Override
         public void onEntryAdded(NotificationEntry entry) {
-            mLastSeenEntries.put(entry.key(), entry);
+            mLastSeenEntries.put(entry.getKey(), entry);
         }
 
         @Override

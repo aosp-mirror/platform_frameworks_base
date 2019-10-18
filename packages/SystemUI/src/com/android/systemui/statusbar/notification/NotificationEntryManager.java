@@ -212,13 +212,13 @@ public class NotificationEntryManager implements
             NotificationEntry entry = mPendingNotifications.get(key);
             entry.abortTask();
             mPendingNotifications.remove(key);
-            mNotifLog.log(NotifEvent.INFLATION_ABORTED, entry.sbn(), null,
+            mNotifLog.log(NotifEvent.INFLATION_ABORTED, entry.getSbn(), null,
                     "PendingNotification aborted. " + reason);
         }
         NotificationEntry addedEntry = mNotificationData.get(key);
         if (addedEntry != null) {
             addedEntry.abortTask();
-            mNotifLog.log(NotifEvent.INFLATION_ABORTED, addedEntry.sbn(),
+            mNotifLog.log(NotifEvent.INFLATION_ABORTED, addedEntry.getSbn(),
                     null, reason);
         }
     }
@@ -302,7 +302,7 @@ public class NotificationEntryManager implements
                         lifetimeExtended = true;
                         mNotifLog.log(
                                 NotifEvent.LIFETIME_EXTENDED,
-                                pendingEntry.sbn(),
+                                pendingEntry.getSbn(),
                                 "pendingEntry extendedBy=" + extender.toString());
                     }
                 }
@@ -325,7 +325,7 @@ public class NotificationEntryManager implements
                         lifetimeExtended = true;
                         mNotifLog.log(
                                 NotifEvent.LIFETIME_EXTENDED,
-                                entry.sbn(),
+                                entry.getSbn(),
                                 "entry extendedBy=" + extender.toString());
                         break;
                     }
@@ -350,7 +350,7 @@ public class NotificationEntryManager implements
                 Dependency.get(LeakDetector.class).trackGarbage(entry);
                 removedByUser |= entryDismissed;
 
-                mNotifLog.log(NotifEvent.NOTIF_REMOVED, entry.sbn(),
+                mNotifLog.log(NotifEvent.NOTIF_REMOVED, entry.getSbn(),
                         "removedByUser=" + removedByUser);
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryRemoved(entry, visibility, removedByUser);
@@ -421,7 +421,7 @@ public class NotificationEntryManager implements
 
         abortExistingInflation(key, "addNotification");
         mPendingNotifications.put(key, entry);
-        mNotifLog.log(NotifEvent.NOTIF_ADDED, entry.sbn());
+        mNotifLog.log(NotifEvent.NOTIF_ADDED, entry.getSbn());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPendingEntryAdded(entry);
         }
@@ -453,7 +453,7 @@ public class NotificationEntryManager implements
         cancelLifetimeExtension(entry);
 
         mNotificationData.update(entry, ranking, notification, "updateNotificationInternal");
-        mNotifLog.log(NotifEvent.NOTIF_UPDATED, entry.sbn(), entry.ranking());
+        mNotifLog.log(NotifEvent.NOTIF_UPDATED, entry.getSbn(), entry.getRanking());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
             listener.onPreEntryUpdated(entry);
         }
@@ -538,7 +538,7 @@ public class NotificationEntryManager implements
         }
         for (NotificationEntry pendingNotification : mPendingNotifications.values()) {
             Ranking ranking = new Ranking();
-            if (rankingMap.getRanking(pendingNotification.key(), ranking)) {
+            if (rankingMap.getRanking(pendingNotification.getKey(), ranking)) {
                 pendingNotification.setRanking(ranking);
             }
         }

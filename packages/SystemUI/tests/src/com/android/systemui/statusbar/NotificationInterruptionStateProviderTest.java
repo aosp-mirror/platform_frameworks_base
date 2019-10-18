@@ -523,7 +523,7 @@ public class NotificationInterruptionStateProviderTest extends SysuiTestCase {
         modifyRanking(entry)
                 .setCanBubble(true)
                 .build();
-        entry.sbn().getNotification().flags |= FLAG_BUBBLE;
+        entry.getSbn().getNotification().flags |= FLAG_BUBBLE;
 
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(entry)).isFalse();
     }
