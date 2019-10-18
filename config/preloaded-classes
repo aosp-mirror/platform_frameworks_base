@@ -514,6 +514,7 @@ android.app.admin.SystemUpdateInfo$1
 android.app.admin.SystemUpdateInfo
 android.app.admin.SystemUpdatePolicy$1
 android.app.admin.SystemUpdatePolicy
+android.app.appsearch.AppSearchManagerFrameworkInitializer
 android.app.assist.AssistContent$1
 android.app.assist.AssistContent
 android.app.assist.AssistStructure$1

@@ -212,6 +212,7 @@ filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
+        ":framework-appsearch-sources",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
