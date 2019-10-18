@@ -465,9 +465,16 @@ public class ScanResult implements Parcelable {
         public static final int EID_VHT_OPERATION = 192;
         @UnsupportedAppUsage
         public static final int EID_VSA = 221;
+        public static final int EID_EXTENSION_PRESENT = 255;
+
+        /**
+         * Extension IDs
+         */
+        public static final int EID_EXT_HE_OPERATION = 36;
 
         @UnsupportedAppUsage
         public int id;
+        public int idExt;
         @UnsupportedAppUsage
         public byte[] bytes;
 
@@ -476,6 +483,7 @@ public class ScanResult implements Parcelable {
 
         public InformationElement(InformationElement rhs) {
             this.id = rhs.id;
+            this.idExt = rhs.idExt;
             this.bytes = rhs.bytes.clone();
         }
     }
@@ -717,6 +725,7 @@ public class ScanResult implements Parcelable {
             dest.writeInt(informationElements.length);
             for (int i = 0; i < informationElements.length; i++) {
                 dest.writeInt(informationElements[i].id);
+                dest.writeInt(informationElements[i].idExt);
                 dest.writeInt(informationElements[i].bytes.length);
                 dest.writeByteArray(informationElements[i].bytes);
             }
@@ -799,6 +808,7 @@ public class ScanResult implements Parcelable {
                     for (int i = 0; i < n; i++) {
                         sr.informationElements[i] = new InformationElement();
                         sr.informationElements[i].id = in.readInt();
+                        sr.informationElements[i].idExt = in.readInt();
                         int len = in.readInt();
                         sr.informationElements[i].bytes = new byte[len];
                         in.readByteArray(sr.informationElements[i].bytes);
