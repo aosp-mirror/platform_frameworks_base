@@ -1729,6 +1729,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
     },
+    "1460759282": {
+      "message": "getAnimationTarget in=%s, out=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
+      "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
     "1469292670": {
       "message": "Changing focus from %s to %s displayId=%d Callers=%s",
       "level": "VERBOSE",
