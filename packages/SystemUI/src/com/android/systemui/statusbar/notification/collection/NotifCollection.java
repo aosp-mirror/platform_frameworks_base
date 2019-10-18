@@ -95,7 +95,7 @@ public class NotifCollection {
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
             Collections.unmodifiableCollection(mNotificationSet.values());
 
-    @Nullable private NotifListBuilder mListBuilder;
+    @Nullable private CollectionReadyForBuildListener mBuildListener;
     private final List<NotifCollectionListener> mNotifCollectionListeners = new ArrayList<>();
     private final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
 
@@ -123,9 +123,9 @@ public class NotifCollection {
      * Sets the class responsible for converting the collection into the list of currently-visible
      * notifications.
      */
-    public void setListBuilder(NotifListBuilder listBuilder) {
+    public void setBuildListener(CollectionReadyForBuildListener buildListener) {
         Assert.isMainThread();
-        mListBuilder = listBuilder;
+        mBuildListener = buildListener;
     }
 
     /**
@@ -282,8 +282,8 @@ public class NotifCollection {
     }
 
     private void rebuildList() {
-        if (mListBuilder != null) {
-            mListBuilder.onBuildList(mReadOnlyNotificationSet);
+        if (mBuildListener != null) {
+            mBuildListener.onBuildList(mReadOnlyNotificationSet);
         }
     }
 
@@ -339,8 +339,8 @@ public class NotifCollection {
 
     private void dispatchOnEntryAdded(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
-        if (mListBuilder != null) {
-            mListBuilder.onBeginDispatchToListeners();
+        if (mBuildListener != null) {
+            mBuildListener.onBeginDispatchToListeners();
         }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryAdded(entry);
@@ -350,8 +350,8 @@ public class NotifCollection {
 
     private void dispatchOnEntryUpdated(NotificationEntry entry) {
         mAmDispatchingToOtherCode = true;
-        if (mListBuilder != null) {
-            mListBuilder.onBeginDispatchToListeners();
+        if (mBuildListener != null) {
+            mBuildListener.onBeginDispatchToListeners();
         }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryUpdated(entry);
@@ -364,8 +364,8 @@ public class NotifCollection {
             @CancellationReason int reason,
             boolean removedByUser) {
         mAmDispatchingToOtherCode = true;
-        if (mListBuilder != null) {
-            mListBuilder.onBeginDispatchToListeners();
+        if (mBuildListener != null) {
+            mBuildListener.onBeginDispatchToListeners();
         }
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onEntryRemoved(entry, reason, removedByUser);

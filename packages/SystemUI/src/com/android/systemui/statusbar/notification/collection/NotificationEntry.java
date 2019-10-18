@@ -60,6 +60,8 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.InflationException;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
@@ -84,7 +86,7 @@ import java.util.Objects;
  * At the moment, there are many things here that shouldn't be and vice-versa. Hopefully we can
  * clean this up in the future.
  */
-public final class NotificationEntry {
+public final class NotificationEntry extends ListEntry {
 
     private final String mKey;
     private StatusBarNotification mSbn;
@@ -97,6 +99,12 @@ public final class NotificationEntry {
 
     /** List of lifetime extenders that are extending the lifetime of this notification. */
     final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
+
+    /** If this notification was filtered out, then the filter that did the filtering. */
+    @Nullable NotifFilter mExcludingFilter;
+
+    /** If this was a group child that was promoted to the top level, then who did the promoting. */
+    @Nullable NotifPromoter mNotifPromoter;
 
 
     /*
@@ -164,13 +172,18 @@ public final class NotificationEntry {
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking) {
-        checkNotNull(sbn);
-        checkNotNull(sbn.getKey());
+        super(checkNotNull(checkNotNull(sbn).getKey()));
+
         checkNotNull(ranking);
 
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
+    }
+
+    @Override
+    public NotificationEntry getRepresentativeEntry() {
+        return this;
     }
 
     /** The key for this notification. Guaranteed to be immutable and unique */

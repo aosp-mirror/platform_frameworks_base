@@ -16,7 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import android.annotation.Nullable;
 import android.app.Notification;
+import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
@@ -32,7 +34,8 @@ public class SbnBuilder {
     private String mTag;
     private int mUid;
     private int mInitialPid;
-    private Notification mNotification = new Notification();
+    @Nullable private Notification mNotification;
+    @Nullable private Notification.Builder mNotificationBuilder;
     private Notification.BubbleMetadata mBubbleMetadata;
     private UserHandle mUser = UserHandle.of(0);
     private String mOverrideGroupKey;
@@ -55,9 +58,19 @@ public class SbnBuilder {
     }
 
     public StatusBarNotification build() {
-        if (mBubbleMetadata != null) {
-            mNotification.setBubbleMetadata(mBubbleMetadata);
+        Notification notification;
+        if (mNotificationBuilder != null) {
+            notification = mNotificationBuilder.build();
+        } else if (mNotification != null) {
+            notification = mNotification;
+        } else {
+            notification = new Notification();
         }
+
+        if (mBubbleMetadata != null) {
+            notification.setBubbleMetadata(mBubbleMetadata);
+        }
+
         return new StatusBarNotification(
                 mPkg,
                 mOpPkg,
@@ -65,7 +78,7 @@ public class SbnBuilder {
                 mTag,
                 mUid,
                 mInitialPid,
-                mNotification,
+                notification,
                 mUser,
                 mOverrideGroupKey,
                 mPostTime);
@@ -104,6 +117,17 @@ public class SbnBuilder {
     public SbnBuilder setNotification(Notification notification) {
         mNotification = notification;
         return this;
+    }
+
+    public Notification.Builder modifyNotification(Context context) {
+        if (mNotification != null) {
+            mNotificationBuilder = new Notification.Builder(context, mNotification);
+            mNotification = null;
+        } else if (mNotificationBuilder == null) {
+            mNotificationBuilder = new Notification.Builder(context);
+        }
+
+        return mNotificationBuilder;
     }
 
     public SbnBuilder setUser(UserHandle user) {

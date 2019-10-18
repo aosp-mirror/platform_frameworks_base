@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification;
+package com.android.systemui.statusbar.notification.collection.init;
 
 import android.util.Log;
 
+import com.android.systemui.DumpController;
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
+import com.android.systemui.statusbar.notification.collection.NotifListBuilderImpl;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -28,21 +34,38 @@ import javax.inject.Singleton;
  * Initialization code for the new notification pipeline.
  */
 @Singleton
-public class NewNotifPipeline {
+public class NewNotifPipeline implements Dumpable {
     private final NotifCollection mNotifCollection;
+    private final NotifListBuilderImpl mNotifPipeline;
+    private final DumpController mDumpController;
+
+    private final FakePipelineConsumer mFakePipelineConsumer = new FakePipelineConsumer();
 
     @Inject
     public NewNotifPipeline(
-            NotifCollection notifCollection) {
+            NotifCollection notifCollection,
+            NotifListBuilderImpl notifPipeline,
+            DumpController dumpController) {
         mNotifCollection = notifCollection;
+        mNotifPipeline = notifPipeline;
+        mDumpController = dumpController;
     }
 
     /** Hooks the new pipeline up to NotificationManager */
     public void initialize(
             NotificationListener notificationService) {
+        mFakePipelineConsumer.attach(mNotifPipeline);
+        mNotifPipeline.attach(mNotifCollection);
         mNotifCollection.attach(notificationService);
 
         Log.d(TAG, "Notif pipeline initialized");
+
+        mDumpController.registerDumpable("NotifPipeline", this);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        mFakePipelineConsumer.dump(fd, pw, args);
     }
 
     private static final String TAG = "NewNotifPipeline";
