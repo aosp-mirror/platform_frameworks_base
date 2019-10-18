@@ -345,6 +345,7 @@ public final class OomAdjuster {
                 Slog.i(TAG_OOM_ADJ, "No oomadj changes for " + app);
             }
             mService.mOomAdjProfiler.oomAdjEnded();
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
             return success;
         }
 
