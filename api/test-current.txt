@@ -2738,6 +2738,10 @@ package android.telecom {
     method public void exitBackgroundAudioProcessing(boolean);
   }
 
+  public static class Call.Details {
+    method public String getTelecomCallId();
+  }
+
   public final class CallAudioState implements android.os.Parcelable {
     ctor public CallAudioState(boolean, int, int, @Nullable android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.bluetooth.BluetoothDevice>);
   }
