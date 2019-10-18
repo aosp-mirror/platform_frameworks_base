@@ -41,14 +41,12 @@ public class FeatureFlagUtils {
     public static final String SCREENRECORD_LONG_PRESS = "settings_screenrecord_long_press";
     public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     public static final String SETTINGS_WIFITRACKER2 = "settings_wifitracker2";
-    public static final String USE_BUGREPORT_API = "settings_use_bugreport_api";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
-        DEFAULT_FLAGS.put("settings_use_bugreport_api", "true");
         DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
         DEFAULT_FLAGS.put("settings_network_and_internet_v2", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
