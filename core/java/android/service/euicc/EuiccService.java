@@ -21,6 +21,7 @@ import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -104,6 +105,26 @@ public abstract class EuiccService extends Service {
             "android.service.euicc.action.BIND_CARRIER_PROVISIONING_SERVICE";
 
     /**
+     * Intent action sent by the LPA to launch a carrier app Activity for eSIM activation, e.g. a
+     * carrier login screen. Carrier apps wishing to support this activation method must implement
+     * an Activity that responds to this intent action. Upon completion, the Activity must return
+     * one of the following results to the LPA:
+     *
+     * <p>{@code Activity.RESULT_CANCELED}: The LPA should treat this as an back button and abort
+     * the activation flow.
+     * <p>{@code Activity.RESULT_OK}: The LPA should try to get an activation code from the carrier
+     * app by binding to the carrier app service implementing
+     * {@link #ACTION_BIND_CARRIER_PROVISIONING_SERVICE}.
+     * <p>{@code Activity.RESULT_OK} with
+     * {@link android.telephony.euicc.EuiccManager#EXTRA_USE_QR_SCANNER} set to true: The LPA should
+     * start a QR scanner for the user to scan an eSIM profile QR code.
+     * <p>For other results: The LPA should treat this as an error.
+     **/
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_START_CARRIER_ACTIVATION =
+            "android.service.euicc.action.START_CARRIER_ACTIVATION";
+
+    /**
      * @see android.telephony.euicc.EuiccManager#ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS
      * The difference is this one is used by system to bring up the LUI.
      */
@@ -137,6 +158,15 @@ public abstract class EuiccService extends Service {
      */
     public static final String ACTION_RENAME_SUBSCRIPTION_PRIVILEGED =
             "android.service.euicc.action.RENAME_SUBSCRIPTION_PRIVILEGED";
+
+    /**
+     * @see android.telephony.euicc.EuiccManager#ACTION_START_EUICC_ACTIVATION. This is
+     * a protected intent that can only be sent by the system, and requires the
+     * {@link android.Manifest.permission#BIND_EUICC_SERVICE} permission.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_START_EUICC_ACTIVATION =
+            "android.service.euicc.action.START_EUICC_ACTIVATION";
 
     // LUI resolution actions. These are called by the platform to resolve errors in situations that
     // require user interaction.
