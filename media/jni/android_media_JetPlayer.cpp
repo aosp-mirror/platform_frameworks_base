@@ -27,7 +27,7 @@
 #include "core_jni_helpers.h"
 
 #include <utils/Log.h>
-#include <media/JetPlayer.h>
+#include "JetPlayer.h"
 
 
 using namespace android;

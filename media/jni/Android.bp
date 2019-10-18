@@ -4,6 +4,7 @@ cc_library_shared {
     srcs: [
         "android_media_ImageWriter.cpp",
         "android_media_ImageReader.cpp",
+        "android_media_JetPlayer.cpp",
         "android_media_MediaCrypto.cpp",
         "android_media_MediaCodec.cpp",
         "android_media_MediaCodecList.cpp",
@@ -25,10 +26,12 @@ cc_library_shared {
         "android_mtp_MtpDatabase.cpp",
         "android_mtp_MtpDevice.cpp",
         "android_mtp_MtpServer.cpp",
+        "JetPlayer.cpp",
     ],
 
     shared_libs: [
         "libandroid_runtime",
+        "libaudioclient",
         "libnativehelper",
         "libnativewindow",
         "libutils",
@@ -53,6 +56,7 @@ cc_library_shared {
         "libandroidfw",
         "libhidlallocatorutils",
         "libhidlbase",
+        "libsonivox",
         "android.hardware.cas@1.0",
         "android.hardware.cas.native@1.0",
         "android.hidl.memory@1.0",
@@ -64,7 +68,10 @@ cc_library_shared {
         "libmediadrm_headers",
     ],
 
-    static_libs: ["libgrallocusage"],
+    static_libs: [
+        "libgrallocusage",
+        "libmedia_midiiowrapper",
+    ],
 
     include_dirs: [
         "frameworks/base/core/jni",
