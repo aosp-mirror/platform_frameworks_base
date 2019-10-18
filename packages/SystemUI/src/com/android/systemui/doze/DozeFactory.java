@@ -53,13 +53,15 @@ public class DozeFactory {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DockManager mDockManager;
     private final IWallpaperManager mWallpaperManager;
+    private final ProximitySensor mProximitySensor;
 
     @Inject
     public DozeFactory(FalsingManager falsingManager, DozeLog dozeLog,
             DozeParameters dozeParameters, BatteryController batteryController,
             AsyncSensorManager asyncSensorManager, AlarmManager alarmManager,
             WakefulnessLifecycle wakefulnessLifecycle, KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DockManager dockManager, IWallpaperManager wallpaperManager) {
+            DockManager dockManager, IWallpaperManager wallpaperManager,
+            ProximitySensor proximitySensor) {
         mFalsingManager = falsingManager;
         mDozeLog = dozeLog;
         mDozeParameters = dozeParameters;
@@ -70,6 +72,7 @@ public class DozeFactory {
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDockManager = dockManager;
         mWallpaperManager = wallpaperManager;
+        mProximitySensor = proximitySensor;
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
@@ -126,7 +129,7 @@ public class DozeFactory {
         boolean allowPulseTriggers = true;
         return new DozeTriggers(context, machine, host, alarmManager, config, params,
                 sensorManager, handler, wakeLock, allowPulseTriggers, dockManager,
-                new ProximitySensor(context, sensorManager), dozeLog);
+                mProximitySensor, dozeLog);
 
     }
 
