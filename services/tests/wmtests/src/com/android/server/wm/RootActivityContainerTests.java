@@ -115,16 +115,15 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     public void testReplacingTaskInPinnedStack() {
         final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(mFullscreenStack).build();
-        final TaskRecord firstTask = firstActivity.getTaskRecord();
+        final TaskRecord task = firstActivity.getTaskRecord();
 
-        final ActivityRecord secondActivity = new ActivityBuilder(mService).setCreateTask(true)
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(task)
                 .setStack(mFullscreenStack).build();
-        final TaskRecord secondTask = secondActivity.getTaskRecord();
 
         mFullscreenStack.moveToFront("testReplacingTaskInPinnedStack");
 
         // Ensure full screen stack has both tasks.
-        ensureStackPlacement(mFullscreenStack, firstTask, secondTask);
+        ensureStackPlacement(mFullscreenStack, firstActivity, secondActivity);
 
         // Move first activity to pinned stack.
         final Rect sourceBounds = new Rect();
@@ -134,8 +133,8 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         final ActivityDisplay display = mFullscreenStack.getDisplay();
         ActivityStack pinnedStack = display.getPinnedStack();
         // Ensure a task has moved over.
-        ensureStackPlacement(pinnedStack, firstTask);
-        ensureStackPlacement(mFullscreenStack, secondTask);
+        ensureStackPlacement(pinnedStack, firstActivity);
+        ensureStackPlacement(mFullscreenStack, secondActivity);
 
         // Move second activity to pinned stack.
         mRootActivityContainer.moveActivityToPinnedStack(secondActivity, sourceBounds,
@@ -145,21 +144,27 @@ public class RootActivityContainerTests extends ActivityTestsBase {
         pinnedStack = display.getPinnedStack();
         mFullscreenStack = display.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         // Ensure stacks have swapped tasks.
-        ensureStackPlacement(pinnedStack, secondTask);
-        ensureStackPlacement(mFullscreenStack, firstTask);
+        ensureStackPlacement(pinnedStack, secondActivity);
+        ensureStackPlacement(mFullscreenStack, firstActivity);
     }
 
-    private static void ensureStackPlacement(ActivityStack stack, TaskRecord... tasks) {
-        final ArrayList<TaskRecord> stackTasks = stack.getAllTasks();
-        assertEquals("Expecting " + Arrays.deepToString(tasks) + " got " + stackTasks,
-                stackTasks.size(), tasks != null ? tasks.length : 0);
+    private static void ensureStackPlacement(ActivityStack stack, ActivityRecord... activities) {
+        final TaskRecord task = stack.getAllTasks().get(0);
+        final ArrayList<ActivityRecord> stackActivities = new ArrayList<>();
 
-        if (tasks == null) {
+        for (int i = 0; i < task.getChildCount(); i++) {
+            stackActivities.add(task.getChildAt(i));
+        }
+
+        assertEquals("Expecting " + Arrays.deepToString(activities) + " got " + stackActivities,
+                stackActivities.size(), activities != null ? activities.length : 0);
+
+        if (activities == null) {
             return;
         }
 
-        for (TaskRecord task : tasks) {
-            assertTrue(stackTasks.contains(task));
+        for (ActivityRecord activity : activities) {
+            assertTrue(stackActivities.contains(activity));
         }
     }
 

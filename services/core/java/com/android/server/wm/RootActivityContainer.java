@@ -48,7 +48,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityStackSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityStackSupervisor.printThisActivity;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
@@ -964,30 +963,29 @@ class RootActivityContainer extends ConfigurationContainer
         mService.deferWindowLayout();
 
         final ActivityDisplay display = r.getActivityStack().getDisplay();
-        ActivityStack stack = display.getPinnedStack();
-
-        // This will clear the pinned stack by moving an existing task to the full screen stack,
-        // ensuring only one task is present.
-        if (stack != null) {
-            mStackSupervisor.moveTasksToFullscreenStackLocked(stack, !ON_TOP);
-        }
-
-        // Need to make sure the pinned stack exist so we can resize it below...
-        stack = display.getOrCreateStack(WINDOWING_MODE_PINNED, r.getActivityType(), ON_TOP);
 
         try {
             final TaskRecord task = r.getTaskRecord();
-            // Resize the pinned stack to match the current size of the task the activity we are
-            // going to be moving is currently contained in. We do this to have the right starting
-            // animation bounds for the pinned stack to the desired bounds the caller wants.
-            stack.resize(task.getRequestedOverrideBounds(), null /* tempTaskBounds */,
-                    null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS, !DEFER_RESUME);
 
-            if (task.getChildCount() == 1) {
-                // Defer resume until below, and do not schedule PiP changes until we animate below
-                task.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE, DEFER_RESUME,
-                        false /* schedulePictureInPictureModeChange */, reason);
+            final ActivityStack pinnedStack = display.getPinnedStack();
+            // This will change the pinned stack's windowing mode to its original mode, ensuring
+            // we only have one stack that is in pinned mode.
+            if (pinnedStack != null) {
+                pinnedStack.dismissPip();
+            }
+
+            final boolean singleActivity = task.getChildCount() == 1;
+
+            final ActivityStack stack;
+            if (singleActivity) {
+                stack = r.getActivityStack();
             } else {
+                // In the case of multiple activities, we will create a new stack for it and then
+                // move the PIP activity into the stack.
+                // We will then perform a windowing mode change for both scenarios.
+                stack = display.createStack(
+                        r.getActivityStack().getRequestedOverrideWindowingMode(),
+                        r.getActivityType(), ON_TOP);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
 
@@ -1005,6 +1003,8 @@ class RootActivityContainer extends ConfigurationContainer
                 newTask.reparent(stack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
                         DEFER_RESUME, false /* schedulePictureInPictureModeChange */, reason);
             }
+
+            stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the pinned stack

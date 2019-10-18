@@ -149,6 +149,7 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
@@ -793,14 +794,6 @@ class ActivityStack extends ConfigurationContainer {
             if (creating) {
                 // Nothing else to do if we don't have a window container yet. E.g. call from ctor.
                 return;
-            }
-
-            if (windowingMode == WINDOWING_MODE_PINNED || currentMode == WINDOWING_MODE_PINNED) {
-                // TODO: Need to remove use of PinnedActivityStack for this to be supported.
-                // NOTE: Need to ASS.scheduleUpdatePictureInPictureModeIfNeeded() in
-                // setWindowModeUnchecked() when this support is added. See TaskRecord.reparent()
-                throw new IllegalArgumentException(
-                        "Changing pinned windowing mode not currently supported");
             }
 
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && splitScreenStack != null) {
@@ -4957,13 +4950,41 @@ class ActivityStack extends ConfigurationContainer {
                 // The final orientation of this activity will change after moving to full screen.
                 // Start freezing screen here to prevent showing a temporary full screen window.
                 top.startFreezingScreenLocked(CONFIG_SCREEN_LAYOUT);
-                mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
+                dismissPip();
                 return;
             }
         }
         if (getTaskStack() == null) return;
         getTaskStack().animateResizePinnedStack(toBounds, sourceHintBounds,
                 animationDuration, fromFullscreen);
+    }
+
+    void dismissPip() {
+        if (!isActivityTypeStandardOrUndefined()) {
+            throw new IllegalArgumentException(
+                    "You can't move tasks from non-standard stacks.");
+        }
+        if (getWindowingMode() != WINDOWING_MODE_PINNED) {
+            throw new IllegalArgumentException(
+                    "Can't exit pinned mode if it's not pinned already.");
+        }
+
+        final ArrayList<TaskRecord> tasks = getAllTasks();
+
+        if (tasks.size() != 1) {
+            throw new RuntimeException("There should be only one task in a pinned stack.");
+        }
+
+        mWindowManager.inSurfaceTransaction(() -> {
+            final TaskRecord task = tasks.get(0);
+            setWindowingMode(WINDOWING_MODE_UNDEFINED);
+
+            getDisplay().positionChildAtTop(this, false /* includingParents */);
+
+            mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
+            MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext,
+                    task.effectiveUid, task.realActivity.flattenToString());
+        });
     }
 
     /**

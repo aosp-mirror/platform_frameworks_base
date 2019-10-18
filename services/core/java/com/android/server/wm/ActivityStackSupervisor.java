@@ -1499,7 +1499,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         mService.deferWindowLayout();
         try {
             final int windowingMode = fromStack.getWindowingMode();
-            final boolean inPinnedWindowingMode = windowingMode == WINDOWING_MODE_PINNED;
             final ActivityDisplay toDisplay =
                     mRootActivityContainer.getActivityDisplay(toDisplayId);
 
@@ -1526,7 +1525,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             // If we are moving from the pinned stack, then the animation takes care of updating
             // the picture-in-picture mode.
-            final boolean schedulePictureInPictureModeChange = inPinnedWindowingMode;
+            final boolean schedulePictureInPictureModeChange =
+                    windowingMode == WINDOWING_MODE_PINNED;
             final ArrayList<TaskRecord> tasks = fromStack.getAllTasks();
 
             if (!tasks.isEmpty()) {

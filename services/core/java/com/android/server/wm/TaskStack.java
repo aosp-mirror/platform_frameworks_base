@@ -1585,7 +1585,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
             mActivityStack.mService.notifyPinnedStackAnimationEnded();
             if (moveToFullscreen) {
-                mActivityStack.mService.moveTasksToFullscreenStack(mStackId, true /* onTop */);
+                mActivityStack.dismissPip();
             }
         } else {
             // No PiP animation, just run the normal animation-end logic
