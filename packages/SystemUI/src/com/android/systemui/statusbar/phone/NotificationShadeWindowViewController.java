@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+
 import android.app.StatusBarManager;
+import android.graphics.RectF;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.media.AudioManager;
 import android.media.session.MediaSessionLegacyHelper;
@@ -56,9 +59,9 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 
 /**
- * Controller for {@link StatusBarWindowView}.
+ * Controller for {@link NotificationShadeWindowView}.
  */
-public class StatusBarWindowViewController {
+public class NotificationShadeWindowViewController {
     private final InjectionInflationController mInjectionInflationController;
     private final NotificationWakeUpCoordinator mCoordinator;
     private final PulseExpansionHandler mPulseExpansionHandler;
@@ -74,7 +77,7 @@ public class StatusBarWindowViewController {
     private final DozeLog mDozeLog;
     private final DozeParameters mDozeParameters;
     private final CommandQueue mCommandQueue;
-    private final StatusBarWindowView mView;
+    private final NotificationShadeWindowView mView;
     private final ShadeController mShadeController;
 
     private GestureDetector mGestureDetector;
@@ -93,8 +96,13 @@ public class StatusBarWindowViewController {
     private final DockManager mDockManager;
     private final NotificationPanelViewController mNotificationPanelViewController;
 
+    // Used for determining view / touch intersection
+    private int[] mTempLocation = new int[2];
+    private RectF mTempRect = new RectF();
+    private boolean mIsTrackingBarGesture = false;
+
     @Inject
-    public StatusBarWindowViewController(
+    public NotificationShadeWindowViewController(
             InjectionInflationController injectionInflationController,
             NotificationWakeUpCoordinator coordinator,
             PulseExpansionHandler pulseExpansionHandler,
@@ -112,7 +120,7 @@ public class StatusBarWindowViewController {
             CommandQueue commandQueue,
             ShadeController shadeController,
             DockManager dockManager,
-            StatusBarWindowView statusBarWindowView,
+            NotificationShadeWindowView statusBarWindowView,
             NotificationPanelViewController notificationPanelViewController) {
         mInjectionInflationController = injectionInflationController;
         mCoordinator = coordinator;
@@ -182,7 +190,7 @@ public class StatusBarWindowViewController {
                 };
         mGestureDetector = new GestureDetector(mView.getContext(), gestureListener);
 
-        mView.setInteractionEventHandler(new StatusBarWindowView.InteractionEventHandler() {
+        mView.setInteractionEventHandler(new NotificationShadeWindowView.InteractionEventHandler() {
             @Override
             public Boolean handleDispatchTouchEvent(MotionEvent ev) {
                 boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
@@ -242,6 +250,26 @@ public class StatusBarWindowViewController {
                 }
                 if (expandingBelowNotch) {
                     return mStatusBarView.dispatchTouchEvent(ev);
+                }
+
+                if (!mIsTrackingBarGesture && isDown
+                        && mNotificationPanelViewController.isFullyCollapsed()) {
+                    float x = ev.getRawX();
+                    float y = ev.getRawY();
+                    if (isIntersecting(mStatusBarView, x, y)) {
+                        if (mService.isSameStatusBarState(WINDOW_STATE_SHOWING)) {
+                            mIsTrackingBarGesture = true;
+                            return mStatusBarView.dispatchTouchEvent(ev);
+                        } else { // it's hidden or hiding, don't send to notification shade.
+                            return true;
+                        }
+                    }
+                } else if (mIsTrackingBarGesture) {
+                    final boolean sendToNotification = mStatusBarView.dispatchTouchEvent(ev);
+                    if (isUp || isCancel) {
+                        mIsTrackingBarGesture = false;
+                    }
+                    return sendToNotification;
                 }
 
                 return null;
@@ -357,7 +385,7 @@ public class StatusBarWindowViewController {
                         dragDownCallback, mFalsingManager));
     }
 
-    public StatusBarWindowView getView() {
+    public NotificationShadeWindowView getView() {
         return mView;
     }
 
@@ -413,5 +441,12 @@ public class StatusBarWindowViewController {
     @VisibleForTesting
     void setDragDownHelper(DragDownHelper dragDownHelper) {
         mDragDownHelper = dragDownHelper;
+    }
+
+    private boolean isIntersecting(View view, float x, float y) {
+        mTempLocation = view.getLocationOnScreen();
+        mTempRect.set(mTempLocation[0], mTempLocation[1], mTempLocation[0] + view.getWidth(),
+                mTempLocation[1] + view.getHeight());
+        return mTempRect.contains(x, y);
     }
 }

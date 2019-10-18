@@ -17,15 +17,13 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.NonNull;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -38,60 +36,62 @@ public final class StatusBarTouchableRegionManager implements
         OnComputeInternalInsetsListener, ConfigurationListener {
 
     private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
-    private final Context mContext;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
     private final StatusBar mStatusBar;
-    private int mStatusBarHeight;
-    private final View mStatusBarWindowView;
+    private final View mNotificationShadeWindowView;
+    private View mNotificationPanelView;
     private boolean mForceCollapsedUntilLayout = false;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
 
-    public StatusBarTouchableRegionManager(@NonNull Context context,
-                                           HeadsUpManagerPhone headsUpManager,
+    public StatusBarTouchableRegionManager(HeadsUpManagerPhone headsUpManager,
                                            @NonNull StatusBar statusBar,
-                                           @NonNull View statusBarWindowView) {
-        mContext = context;
+                                           @NonNull View notificationShadeWindowView) {
         mHeadsUpManager = headsUpManager;
         mStatusBar = statusBar;
-        mStatusBarWindowView = statusBarWindowView;
-        mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
-
-        initResources();
+        mNotificationShadeWindowView = notificationShadeWindowView;
+        mNotificationShadeWindowController =
+                Dependency.get(NotificationShadeWindowController.class);
 
         mBubbleController.setBubbleStateChangeListener((hasBubbles) -> {
             updateTouchableRegion();
         });
 
-        mStatusBarWindowController.setForcePluginOpenListener((forceOpen) -> {
+        mNotificationShadeWindowController.setForcePluginOpenListener((forceOpen) -> {
             updateTouchableRegion();
         });
         Dependency.get(ConfigurationController.class).addCallback(this);
+        if (mNotificationShadeWindowView != null) {
+            mNotificationPanelView = mNotificationShadeWindowView.findViewById(
+                    R.id.notification_panel);
+        }
     }
 
     /**
      * Set the touchable portion of the status bar based on what elements are visible.
      */
     public void updateTouchableRegion() {
-        boolean hasCutoutInset = (mStatusBarWindowView != null)
-                && (mStatusBarWindowView.getRootWindowInsets() != null)
-                && (mStatusBarWindowView.getRootWindowInsets().getDisplayCutout() != null);
+        boolean hasCutoutInset = (mNotificationShadeWindowView != null)
+                && (mNotificationShadeWindowView.getRootWindowInsets() != null)
+                && (mNotificationShadeWindowView.getRootWindowInsets().getDisplayCutout() != null);
         boolean shouldObserve =
                 mHeadsUpManager.hasPinnedHeadsUp() || mHeadsUpManager.isHeadsUpGoingAway()
                         || mBubbleController.hasBubbles()
                         || mForceCollapsedUntilLayout
                         || hasCutoutInset
-                        || mStatusBarWindowController.getForcePluginOpen();
+                        || mNotificationShadeWindowController.getForcePluginOpen();
         if (shouldObserve == mShouldAdjustInsets) {
             return;
         }
 
         if (shouldObserve) {
-            mStatusBarWindowView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
-            mStatusBarWindowView.requestLayout();
+            mNotificationShadeWindowView.getViewTreeObserver()
+                    .addOnComputeInternalInsetsListener(this);
+            mNotificationShadeWindowView.requestLayout();
         } else {
-            mStatusBarWindowView.getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+            mNotificationShadeWindowView.getViewTreeObserver()
+                    .removeOnComputeInternalInsetsListener(this);
         }
         mShouldAdjustInsets = shouldObserve;
     }
@@ -100,19 +100,20 @@ public final class StatusBarTouchableRegionManager implements
      * Calls {@code updateTouchableRegion()} after a layout pass completes.
      */
     public void updateTouchableRegionAfterLayout() {
-        mForceCollapsedUntilLayout = true;
-        mStatusBarWindowView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                       int oldLeft,
-                                       int oldTop, int oldRight, int oldBottom) {
-                if (mStatusBarWindowView.getHeight() <= mStatusBarHeight) {
-                    mStatusBarWindowView.removeOnLayoutChangeListener(this);
-                    mForceCollapsedUntilLayout = false;
-                    updateTouchableRegion();
+        if (mNotificationPanelView != null) {
+            mForceCollapsedUntilLayout = true;
+            mNotificationPanelView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    if (!mNotificationPanelView.isVisibleToUser()) {
+                        mNotificationPanelView.removeOnLayoutChangeListener(this);
+                        mForceCollapsedUntilLayout = false;
+                        updateTouchableRegion();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -144,26 +145,5 @@ public final class StatusBarTouchableRegionManager implements
         if (bubbleRect != null) {
             info.touchableRegion.union(bubbleRect);
         }
-    }
-
-    @Override
-    public void onConfigChanged(Configuration newConfig) {
-        initResources();
-    }
-
-    @Override
-    public void onDensityOrFontScaleChanged() {
-        initResources();
-    }
-
-    @Override
-    public void onOverlayChanged() {
-        initResources();
-    }
-
-    private void initResources() {
-        Resources resources = mContext.getResources();
-        mStatusBarHeight = resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
     }
 }

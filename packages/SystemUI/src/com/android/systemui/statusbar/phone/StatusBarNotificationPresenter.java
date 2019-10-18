@@ -134,7 +134,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     public StatusBarNotificationPresenter(Context context,
             NotificationPanelViewController panel,
             HeadsUpManagerPhone headsUp,
-            StatusBarWindowView statusBarWindow,
+            NotificationShadeWindowView statusBarWindow,
             ViewGroup stackScroller,
             DozeScrimController dozeScrimController,
             ScrimController scrimController,
@@ -191,7 +191,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                 Dependency.get(NotificationRemoteInputManager.Callback.class),
                 mNotificationPanel.createRemoteInputDelegate());
         remoteInputManager.getController().addCallback(
-                Dependency.get(StatusBarWindowController.class));
+                Dependency.get(NotificationShadeWindowController.class));
 
         NotificationListContainer notifListContainer = (NotificationListContainer) stackScroller;
         initController.addPostInitTask(() -> {

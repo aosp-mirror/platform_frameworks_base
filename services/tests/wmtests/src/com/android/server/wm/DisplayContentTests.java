@@ -39,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -139,6 +140,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mChildAppWindowAbove,
                 mDockedDividerWindow,
                 mStatusBarWindow,
+                mNotificationShadeWindow,
                 mNavBarWindow,
                 mImeWindow,
                 mImeDialogWindow));
@@ -161,6 +163,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mImeDialogWindow,
                 mDockedDividerWindow,
                 mStatusBarWindow,
+                mNotificationShadeWindow,
                 mNavBarWindow));
     }
 
@@ -177,6 +180,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mImeDialogWindow,
                 mDockedDividerWindow,
                 mStatusBarWindow,
+                mNotificationShadeWindow,
                 mNavBarWindow));
     }
 
@@ -191,6 +195,24 @@ public class DisplayContentTests extends WindowTestsBase {
                 mChildAppWindowAbove,
                 mDockedDividerWindow,
                 mStatusBarWindow,
+                mImeWindow,
+                mImeDialogWindow,
+                mNotificationShadeWindow,
+                mNavBarWindow));
+    }
+
+    @Test
+    public void testForAllWindows_WithNotificationShadeImeTarget() throws Exception {
+        mDisplayContent.mInputMethodTarget = mNotificationShadeWindow;
+
+        assertForAllWindowsOrder(Arrays.asList(
+                mWallpaperWindow,
+                mChildAppWindowBelow,
+                mAppWindow,
+                mChildAppWindowAbove,
+                mDockedDividerWindow,
+                mStatusBarWindow,
+                mNotificationShadeWindow,
                 mImeWindow,
                 mImeDialogWindow,
                 mNavBarWindow));
@@ -211,6 +233,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 mDockedDividerWindow,
                 voiceInteractionWindow,
                 mStatusBarWindow,
+                mNotificationShadeWindow,
                 mNavBarWindow,
                 mImeWindow,
                 mImeDialogWindow));
@@ -585,7 +608,7 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
         window.mActivityRecord.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
-        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR, dc, "keyguard");
+        final WindowState keyguard = createWindow(null, TYPE_NOTIFICATION_SHADE , dc, "keyguard");
         keyguard.mHasSurface = true;
         keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 

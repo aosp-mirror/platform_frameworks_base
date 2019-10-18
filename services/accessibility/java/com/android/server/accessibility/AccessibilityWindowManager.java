@@ -701,6 +701,7 @@ public class AccessibilityWindowManager {
                 case WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL:
                 case WindowManager.LayoutParams.TYPE_SEARCH_BAR:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR:
+                case WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL:
                 case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:

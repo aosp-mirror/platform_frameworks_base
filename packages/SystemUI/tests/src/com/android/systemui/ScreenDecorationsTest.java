@@ -53,6 +53,7 @@ import com.android.systemui.ScreenDecorations.TunablePaddingTagListener;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.tuner.TunablePadding;
@@ -80,7 +81,8 @@ public class ScreenDecorationsTest extends SysuiTestCase {
     private WindowManager mWindowManager;
     private FragmentService mFragmentService;
     private FragmentHostManager mFragmentHostManager;
-    private StatusBarWindowView mView;
+    private NotificationShadeWindowView mView;
+    private StatusBarWindowView mStatusBarWindowView;
     private TunablePaddingService mTunablePaddingService;
     private Handler mMainHandler;
     @Mock
@@ -99,9 +101,11 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mFragmentService = mDependency.injectMockDependency(FragmentService.class);
 
         mWindowManager = mock(WindowManager.class);
-        mView = spy(new StatusBarWindowView(mContext, null));
+        mView = spy(new NotificationShadeWindowView(mContext, null));
+        mStatusBarWindowView = spy(new StatusBarWindowView(mContext, null));
         when(mStatusBarLazy.get()).thenReturn(mStatusBar);
-        when(mStatusBar.getStatusBarWindow()).thenReturn(mView);
+        when(mStatusBar.getNotificationShadeWindowView()).thenReturn(mView);
+        when(mStatusBar.getStatusBarWindow()).thenReturn(mStatusBarWindowView);
 
         Display display = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
         when(mWindowManager.getDefaultDisplay()).thenReturn(display);

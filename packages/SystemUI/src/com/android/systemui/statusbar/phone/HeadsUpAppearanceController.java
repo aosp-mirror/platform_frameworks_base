@@ -92,21 +92,22 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
 
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
-            HeadsUpManagerPhone headsUpManager, View statusbarView,
+            HeadsUpManagerPhone headsUpManager,
+            View notificationShadeView,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardBypassController keyguardBypassController,
             KeyguardStateController keyguardStateController,
             NotificationWakeUpCoordinator wakeUpCoordinator, CommandQueue commandQueue,
-            NotificationPanelViewController notificationPanelViewController) {
+            NotificationPanelViewController notificationPanelViewController, View statusBarView) {
         this(notificationIconAreaController, headsUpManager, statusBarStateController,
                 keyguardBypassController, wakeUpCoordinator, keyguardStateController,
                 commandQueue,
-                statusbarView.findViewById(R.id.heads_up_status_bar_view),
-                statusbarView.findViewById(R.id.notification_stack_scroller),
+                statusBarView.findViewById(R.id.heads_up_status_bar_view),
+                notificationShadeView.findViewById(R.id.notification_stack_scroller),
                 notificationPanelViewController,
-                statusbarView.findViewById(R.id.clock),
-                statusbarView.findViewById(R.id.operator_name_frame),
-                statusbarView.findViewById(R.id.centered_icon_area));
+                statusBarView.findViewById(R.id.clock),
+                statusBarView.findViewById(R.id.operator_name_frame),
+                statusBarView.findViewById(R.id.centered_icon_area));
     }
 
     @VisibleForTesting

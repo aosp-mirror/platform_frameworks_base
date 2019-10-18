@@ -23,7 +23,6 @@ import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
@@ -527,7 +526,7 @@ final class InputMonitor {
                 mDisableWallpaperTouchEvents = true;
             }
             final boolean hasWallpaper = wallpaperController.isWallpaperTarget(w)
-                    && (privateFlags & PRIVATE_FLAG_KEYGUARD) == 0
+                    && !mService.mPolicy.isKeyguardShowing()
                     && !mDisableWallpaperTouchEvents;
 
             // If there's a drag in progress and 'child' is a potential drop target,

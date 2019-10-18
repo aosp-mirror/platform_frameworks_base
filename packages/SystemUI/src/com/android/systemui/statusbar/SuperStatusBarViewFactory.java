@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
 import com.android.systemui.util.InjectionInflationController;
 
@@ -30,8 +31,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Creates a single instance of super_status_bar that can be shared across various system ui
- * objects.
+ * Creates a single instance of super_status_bar and super_notification_shade that can be shared
+ * across various system ui objects.
  */
 @Singleton
 public class SuperStatusBarViewFactory {
@@ -39,6 +40,7 @@ public class SuperStatusBarViewFactory {
     private final Context mContext;
     private final InjectionInflationController mInjectionInflationController;
 
+    private NotificationShadeWindowView mNotificationShadeWindowView;
     private StatusBarWindowView mStatusBarWindowView;
     private NotificationShelf mNotificationShelf;
 
@@ -50,15 +52,42 @@ public class SuperStatusBarViewFactory {
     }
 
     /**
-     * Gets the inflated {@link StatusBarWindowView} from {@link R.layout#super_status_bar}. Returns
-     * a cached instance, if it has already been inflated.
+     * Gets the inflated {@link NotificationShadeWindowView} from
+     * {@link R.layout#super_notification_shade}.
+     * Returns a cached instance, if it has already been inflated.
+     */
+    public NotificationShadeWindowView getNotificationShadeWindowView() {
+        if (mNotificationShadeWindowView != null) {
+            return mNotificationShadeWindowView;
+        }
+
+        mNotificationShadeWindowView = (NotificationShadeWindowView)
+                mInjectionInflationController.injectable(
+                LayoutInflater.from(mContext)).inflate(R.layout.super_notification_shade,
+                /* root= */ null);
+        if (mNotificationShadeWindowView == null) {
+            throw new IllegalStateException(
+                    "R.layout.super_notification_shade could not be properly inflated");
+        }
+        return mNotificationShadeWindowView;
+    }
+
+    /** Gets the {@link LockIcon} inside of {@link R.layout#super_status_bar}. */
+    public LockIcon getLockIcon() {
+        return getNotificationShadeWindowView().findViewById(R.id.lock_icon);
+    }
+
+    /**
+     * Gets the inflated {@link StatusBarWindowView} from {@link R.layout#super_status_bar}.
+     * Returns a cached instance, if it has already been inflated.
      */
     public StatusBarWindowView getStatusBarWindowView() {
         if (mStatusBarWindowView != null) {
             return mStatusBarWindowView;
         }
 
-        mStatusBarWindowView = (StatusBarWindowView) mInjectionInflationController.injectable(
+        mStatusBarWindowView =
+                (StatusBarWindowView) mInjectionInflationController.injectable(
                 LayoutInflater.from(mContext)).inflate(R.layout.super_status_bar,
                 /* root= */ null);
         if (mStatusBarWindowView == null) {
@@ -66,11 +95,6 @@ public class SuperStatusBarViewFactory {
                     "R.layout.super_status_bar could not be properly inflated");
         }
         return mStatusBarWindowView;
-    }
-
-    /** Gets the {@link LockIcon} inside of {@link R.layout#super_status_bar}. */
-    public LockIcon getLockIcon() {
-        return getStatusBarWindowView().findViewById(R.id.lock_icon);
     }
 
     /**
@@ -98,11 +122,11 @@ public class SuperStatusBarViewFactory {
     }
 
     public NotificationPanelView getNotificationPanelView() {
-        StatusBarWindowView statusBarWindowView = getStatusBarWindowView();
-        if (statusBarWindowView == null) {
+        NotificationShadeWindowView notificationShadeWindowView = getNotificationShadeWindowView();
+        if (notificationShadeWindowView == null) {
             return null;
         }
 
-        return mStatusBarWindowView.findViewById(R.id.notification_panel);
+        return mNotificationShadeWindowView.findViewById(R.id.notification_panel);
     }
 }

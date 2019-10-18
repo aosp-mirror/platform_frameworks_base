@@ -128,7 +128,7 @@ public class NotificationIconAreaController implements DarkReceiver,
             mAodIcons.setAnimationsEnabled(false);
             mAodIcons.removeAllViews();
         }
-        mAodIcons = mStatusBar.getStatusBarWindow().findViewById(
+        mAodIcons = mStatusBar.getNotificationShadeWindowView().findViewById(
                 R.id.clock_notification_icon_container);
         mAodIcons.setOnLockScreen(true);
         updateAodIconsVisibility(false /* animate */);

@@ -68,9 +68,9 @@ import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
 import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.NavigationModeController;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -109,7 +109,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private SysUiState mSysUiState;
     private final Handler mHandler;
     private final NavigationBarController mNavBarController;
-    private final StatusBarWindowController mStatusBarWinController;
+    private final NotificationShadeWindowController mStatusBarWinController;
     private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
     private final ComponentName mRecentsComponentName;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -476,8 +476,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     @Inject
     public OverviewProxyService(Context context, DeviceProvisionedController provisionController,
             NavigationBarController navBarController, NavigationModeController navModeController,
-            StatusBarWindowController statusBarWinController, SysUiState sysUiState, PipUI pipUI,
-            Optional<Divider> dividerOptional, Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
+            NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
+            PipUI pipUI, Optional<Divider> dividerOptional,
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
         mContext = context;
         mPipUI = pipUI;
         mStatusBarOptionalLazy = statusBarOptionalLazy;

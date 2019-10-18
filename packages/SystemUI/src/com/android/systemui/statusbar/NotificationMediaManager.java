@@ -59,10 +59,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
@@ -105,7 +105,7 @@ public class NotificationMediaManager implements Dumpable {
     private final NotificationEntryManager mEntryManager;
 
     @Nullable
-    private Lazy<StatusBarWindowController> mStatusBarWindowController;
+    private Lazy<NotificationShadeWindowController> mStatusBarWindowController;
 
     @Nullable
     private BiometricUnlockController mBiometricUnlockController;
@@ -180,7 +180,7 @@ public class NotificationMediaManager implements Dumpable {
     public NotificationMediaManager(
             Context context,
             Lazy<StatusBar> statusBarLazy,
-            Lazy<StatusBarWindowController> statusBarWindowController,
+            Lazy<NotificationShadeWindowController> statusBarWindowController,
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController) {
@@ -525,7 +525,7 @@ public class NotificationMediaManager implements Dumpable {
             }
         }
 
-        StatusBarWindowController windowController = mStatusBarWindowController.get();
+        NotificationShadeWindowController windowController = mStatusBarWindowController.get();
         boolean hideBecauseOccluded = mStatusBarLazy.get().isOccluded();
 
         final boolean hasArtwork = artworkDrawable != null;

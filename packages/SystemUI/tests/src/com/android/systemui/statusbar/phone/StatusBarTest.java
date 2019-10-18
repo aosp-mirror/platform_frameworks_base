@@ -201,7 +201,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
-    @Mock private StatusBarWindowView mStatusBarWindowView;
+    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
     @Mock private NotificationGutsManager mNotificationGutsManager;
@@ -224,9 +224,9 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private BubbleController mBubbleController;
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
-    @Mock private StatusBarWindowController mStatusBarWindowController;
+    @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
-    @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
+    @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
@@ -324,11 +324,11 @@ public class StatusBarTest extends SysuiTestCase {
 
         when(mStatusBarComponentBuilderProvider.get()).thenReturn(mStatusBarComponentBuilder);
         when(mStatusBarComponentBuilder.build()).thenReturn(mStatusBarComponent);
-        when(mStatusBarComponent.getStatusBarWindowViewController()).thenReturn(
-                mStatusBarWindowViewController);
+        when(mStatusBarComponent.getNotificationShadeWindowViewController()).thenReturn(
+                mNotificationShadeWindowViewController);
 
         mShadeController = new ShadeControllerImpl(mCommandQueue,
-                mStatusBarStateController, mStatusBarWindowController,
+                mStatusBarStateController, mNotificationShadeWindowController,
                 mStatusBarKeyguardViewManager, mContext.getSystemService(WindowManager.class),
                 () -> mStatusBar, () -> mAssistManager, () -> mBubbleController);
 
@@ -384,7 +384,7 @@ public class StatusBarTest extends SysuiTestCase {
                 () -> mAssistManager,
                 mNotificationListener,
                 configurationController,
-                mStatusBarWindowController,
+                mNotificationShadeWindowController,
                 mLockscreenLockIconController,
                 mDozeParameters,
                 mScrimController,
@@ -417,7 +417,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationRowBinder,
                 mDismissCallbackRegistry);
 
-        when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
+        when(mNotificationShadeWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
                 mLockIconContainer);
 
         when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
@@ -430,7 +430,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
-        mStatusBar.mStatusBarWindow = mStatusBarWindowView;
+        mStatusBar.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
         mStatusBar.mDozeScrimController = mDozeScrimController;
         mStatusBar.mNotificationIconAreaController = mNotificationIconAreaController;

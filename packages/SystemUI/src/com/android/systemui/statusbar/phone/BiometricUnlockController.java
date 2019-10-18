@@ -141,7 +141,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final KeyguardUpdateMonitor mUpdateMonitor;
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
-    private final StatusBarWindowController mStatusBarWindowController;
+    private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final Context mContext;
     private final int mWakeUpDelay;
     private int mMode;
@@ -162,7 +162,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public BiometricUnlockController(Context context, DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator, ScrimController scrimController,
             StatusBar statusBar, ShadeController shadeController,
-            StatusBarWindowController statusBarWindowController,
+            NotificationShadeWindowController notificationShadeWindowController,
             KeyguardStateController keyguardStateController, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             @Main Resources resources,
@@ -177,7 +177,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         Dependency.get(WakefulnessLifecycle.class).addObserver(mWakefulnessObserver);
         Dependency.get(ScreenLifecycle.class).addObserver(mScreenObserver);
-        mStatusBarWindowController = statusBarWindowController;
+
+        mNotificationShadeWindowController = notificationShadeWindowController;
         mDozeScrimController = dozeScrimController;
         mKeyguardViewMediator = keyguardViewMediator;
         mScrimController = scrimController;
@@ -284,7 +285,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             // notifications would light up first, creating an unpleasant animation.
             // Defer changing the screen brightness by forcing doze brightness on our window
             // until the clock and the notifications are faded out.
-            mStatusBarWindowController.setForceDozeBrightness(true);
+            mNotificationShadeWindowController.setForceDozeBrightness(true);
         }
         // During wake and unlock, we need to draw black before waking up to avoid abrupt
         // brightness changes due to display state transitions.
@@ -340,7 +341,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_FROM_DREAM");
                     mUpdateMonitor.awakenFromDream();
                 }
-                mStatusBarWindowController.setStatusBarFocusable(false);
+                mNotificationShadeWindowController.setNotificationShadeFocusable(false);
                 if (delayWakeUp) {
                     mHandler.postDelayed(wakeUp, mWakeUpDelay);
                 } else {
@@ -508,7 +509,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mStatusBarWindowController.setForceDozeBrightness(false);
+                mNotificationShadeWindowController.setForceDozeBrightness(false);
             }
         }, StatusBar.FADE_KEYGUARD_DURATION_PULSING);
     }
@@ -522,7 +523,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     private void resetMode() {
         mMode = MODE_NONE;
-        mStatusBarWindowController.setForceDozeBrightness(false);
+        mNotificationShadeWindowController.setForceDozeBrightness(false);
         if (mStatusBar.getNavigationBarView() != null) {
             mStatusBar.getNavigationBarView().setWakeAndUnlocking(false);
         }

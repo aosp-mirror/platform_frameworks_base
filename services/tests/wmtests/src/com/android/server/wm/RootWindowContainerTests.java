@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
@@ -85,9 +86,12 @@ public class RootWindowContainerTests extends WindowTestsBase {
     public void testIsAnyNonToastWindowVisibleForUid_aFewNonToastButNoneVisible() {
         final WindowState statusBar =
                 createWindow(null, TYPE_STATUS_BAR, "statusBar", FAKE_CALLING_UID);
+        final WindowState notificationShade = createWindow(null, TYPE_NOTIFICATION_SHADE,
+                "notificationShade", FAKE_CALLING_UID);
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app", FAKE_CALLING_UID);
 
         assertFalse(statusBar.isVisibleNow());
+        assertFalse(notificationShade.isVisibleNow());
         assertFalse(app.isVisibleNow());
         assertFalse(mWm.mRoot.isAnyNonToastWindowVisibleForUid(FAKE_CALLING_UID));
     }

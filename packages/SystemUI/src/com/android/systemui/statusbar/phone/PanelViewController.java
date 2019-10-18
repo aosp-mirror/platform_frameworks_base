@@ -783,8 +783,7 @@ public abstract class PanelViewController {
                             mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             return;
                         }
-                        if (mStatusBar.getStatusBarWindow().getHeight()
-                                != mStatusBar.getStatusBarHeight()) {
+                        if (mStatusBar.getNotificationShadeWindowView().isVisibleToUser()) {
                             mView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                             if (mAnimateAfterExpanding) {
                                 notifyExpandingStarted();
