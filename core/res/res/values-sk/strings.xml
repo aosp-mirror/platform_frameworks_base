@@ -330,7 +330,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Gestá"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Je možné použiť klepnutie, prejdenie, stiahnutie prstami a ďalšie gestá."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkom prstu"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Gestá odtlačkom prsta"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
@@ -350,10 +350,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Umožňuje aplikácii prijímať a spracovávať správy SMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prijímať textové správy (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikácii prijímať a spracovávať správy MMS. Znamená to, že aplikácia môže sledovať správy odoslané na vaše zariadenie alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Preposielanie správ informačných služieb"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Umožňuje aplikácii spojiť sa s modulom správ informačných služieb s cieľom preposielať prichádzajúce správy informačných služieb. Správy informačných služieb sa doručujú na určitých miestach a upozorňujú na tiesňové situácie. Škodlivé aplikácie môžu pri prijatí správy informačnej služby narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čítať správy informačných služieb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikácii čítať správy informačných služieb prijaté vaším zariadením. Správy informačných služieb sa doručujú na určitých miestach a upozorňujú na tiesňové situácie. Škodlivé aplikácie môžu pri prijatí správy informačnej služby narušiť výkonnosť alebo prevádzku vášho zariadenia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čítať odoberané informačné kanály"</string>
@@ -542,17 +540,17 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Nie je nastavený PIN, vzor ani heslo"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Podarilo sa rozpoznať iba časť odtlačku prsta. Skúste to znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Snímač odtlačkov je špinavý. Vyčistite ho a skúste to znova."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Snímač odtlačkov prstov je špinavý. Vyčistite ho a skúste to znova."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Pohli ste prstom príliš rýchlo. Skúste to znova."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Odtlačok bol overený"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Odtlačok prsta bol overený"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Tvár bola overená"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Tvár bola overená, stlačte tlačidlo potvrdenia"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardvér na snímanie odtlačku prsta nie je k dispozícii"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Odtlačok prsta nie je možné uložiť. Odstráňte existujúci odtlačok."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Časový limit rozpoznania odtlačku vypršal. Skúste to znova."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Časový limit rozpoznania odtlačku prsta vypršal. Skúste to znova."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Overenie odtlačku prsta zrušil používateľ."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Príliš veľa pokusov. Skúste to znova neskôr."</string>
@@ -665,8 +663,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikácii čítať a zapisovať konfiguráciu režimu bez vyrušení."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"spustenie používania povolenia na zobrazenie"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Umožňuje držiteľovi spustiť používanie povolenia aplikáciou. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cieľ skratky dostupnosti"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Umožňuje aplikácii definovať cieľ skratky dostupnosti."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Sledovanie pokusov o odomknutie obrazovky"</string>

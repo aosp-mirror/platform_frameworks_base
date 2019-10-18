@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允許應用程式接收和處理短訊。這表示應用程式可監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收短訊 (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允許應用程式接收和處理 MMS 訊息。這表示應用程式可監控傳送至您裝置的訊息，或在您閱讀訊息前擅自刪除訊息。"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"轉寄區域廣播訊息"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"允許應用程式繫結至區域廣播模組，以在收到區域廣播訊息時轉寄訊息。在某些地點，系統會發出區域廣播通知，提示您有緊急狀況發生。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的效能或運作。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"讀取區域廣播訊息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允許應用程式讀取您裝置接收的區域廣播訊息。某些地點會發出區域廣播警報，警告您發生緊急狀況。惡意應用程式可能會在裝置收到緊急區域廣播時，干擾裝置的性能或運作。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"讀取訂閱的資訊提供"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允許應用程式讀取和寫入「請勿騷擾」設定。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"開始查看權限使用情況"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"允許應用程式開始查看應用程式的權限使用情況 (一般應用程式並不需要)。"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"無障礙功能捷徑目標位置"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"允許應用程式定義無障礙功能捷徑目標位置。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制螢幕鎖定密碼和 PIN 所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"監控螢幕解鎖嘗試次數"</string>

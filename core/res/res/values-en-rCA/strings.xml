@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Allows the app to receive and process SMS messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"receive text messages (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Allows the app to receive and process MMS messages. This means that the app could monitor or delete messages sent to your device without showing them to you."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Forward cell broadcast messages"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Allows the app to bind to the cell broadcast module in order to forward cell broadcast messages as they are received. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency cell broadcast is received."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"read mobile broadcast messages"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Allows the app to read mobile broadcast messages received by your device. Cell broadcast alerts are delivered in some locations to warn you of emergency situations. Malicious apps may interfere with the performance or operation of your device when an emergency mobile broadcast is received."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"read subscribed feeds"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Allows the app to read and write Do Not Disturb configuration."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"start view permission usage"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Allows the holder to start the permission usage for an app. Should never be needed for normal apps."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"accessibility shortcut target"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Allows an app to define the accessibility shortcut target."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Control the length and the characters allowed in screen lock passwords and PINs."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitor screen unlock attempts"</string>

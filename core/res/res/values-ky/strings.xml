@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Колдонмого SMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"билдирүүлөрдү (MMS) кабыл алуу"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Колдонмого MMS билдирүүлөрүн кабыл алууга жана аларды иштетип чыгууга уруксат берет. Бул, колдонмо сизге билгизбестен түзмөгүңүзгө жөнөтүлгөн билдирүүлөрдү мониторлой же жок кыла алат дегенди билдирет."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Уюк жөнөтүүлөрүнүн билдирүүлөрүн башка номерге багыттоо"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Уюк жөнөтүүлөрүнүн билдирүүлөрү келген сайын башка номерге багыттап туруу үчүн колдонмого уюк жөнөтүүлөрүнүн модулу менен байланышууга уруксат берет. Шашылыш уюк жөнөтүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралуу сизге эскертүү үчүн жөнөтүлөт. Зыянкеч колдонмолор шашылыш уюк жөнөтүүлөрү кабыл алынганда түзмөктүн майнаптуулугуна же иштешине жолтоо болушу мүмкүн."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"уюктук берүү билдирүүлөрүн окуу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Колдонмого түзмөгүңүз кабыл алган уюк берүүнүн билдирүүлөрүн окууга жол берет. Шашылыш эскертүү билдирүүлөрү кээ бир жерлердеги өзгөчө кырдаалдар тууралу сизди эскертүү үчүн жөнөтүлөт. Зыяндуу колдономолор шашылыш эскертүүлөр берилип жатканда, сиздин түзмөктүн иштешине жолтоо болушу мүмкүн."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылган түрмөктөрдү окуу"</string>
@@ -541,14 +539,14 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Манжа өтө жай жылды. Кайра аракет кылыңыз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Манжа изинин аныктыгы текшерилди"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Манжа изи текшерилди"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Жүздүн аныктыгы текшерилди"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Жүздүн аныктыгы текшерилди, эми \"Ырастоону\" басыңыз"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Манжа изинин аппараттык камсыздоосу жеткиликтүү эмес."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Манжа изин сактоо мүмкүн эмес. Учурдагы манжа изин алып салыңыз."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Манжа изин күтүү мөөнөтү бүттү. Кайра аракет кылыңыз."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Манжа изи иш-аракети жокко чыгарылды."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Манжа изи менен аныктыгын текшерүүнү колдонуучу жокко чыгарды."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Манжа изи операциясын колдонуучу жокко чыгарды."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Аракеттер өтө көп болду. Кийинчерээк кайра аракет кылыңыз."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Өтө көп жолу аракет жасадыңыз. Манжа изинин сенсору өчүрүлдү."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Кайра бир аракеттениңиз."</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Колдонмого \"Тынчымды алба\" режиминин конфигурациясын окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"уруксаттын колдонулушун көрүп баштоо"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Колдонмонун пайдаланылышына уруксат берүүгө мүмкүнчүлүк берет. Кадимки колдонмолорго эч качан талап кылынбашы керек."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"максаттуу атайын мүмкүнчүлүк аракетине кыска жол"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Колдонмого максаттуу атайын мүмкүнчүлүк аракетине кыска жолду аныктоого уруксат берет."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Сырсөз эрежелерин коюу"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Экран кулпусун ачуу аракеттерин көзөмөлдөө"</string>
@@ -1591,7 +1587,7 @@
     <string name="fingerprints" msgid="4516019619850763049">"Манжа издери:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 манжа изи:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 манжа изи:"</string>
-    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Бардыгын көрүү"</string>
+    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Баарын көрүү"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Аракетти тандаңыз"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Төмөнкү менен бөлүшүү"</string>
     <string name="sending" msgid="3245653681008218030">"Жөнөтүлүүдө…"</string>

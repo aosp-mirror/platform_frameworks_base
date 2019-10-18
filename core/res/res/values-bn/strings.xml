@@ -283,7 +283,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার পরিচিতিতে অ্যাক্সেস দেবেন?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"লোকেশন"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"এই ডিভাইসের লোকেশন অ্যাক্সেস"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে এই ডিভাইসের লোকেশন অ্যাক্সেস করতে দেবেন?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অ্যাপকে এই ডিভাইসের লোকেশন অ্যাক্সেস করতে দেবেন?"</string>
     <string name="permgrouprequestdetail_location" msgid="1347189607421252902">"আপনি এই অ্যাপ ব্যবহার করার সময়েই শুধু সেটি আপনার লোকেশন অ্যাক্সেস করতে পারবে"</string>
     <string name="permgroupbackgroundrequest_location" msgid="5039063878675613235">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অ্যাপকে এই ডিভাইসের লোকেশন &lt;b&gt;সব সময়&lt;/b&gt; অ্যাক্সেস করার অনুমতি দিতে চান?"</string>
     <string name="permgroupbackgroundrequestdetail_location" msgid="4597006851453417387">"আপনি যখন অ্যাপটি ব্যবহার করবেন শুধুমাত্র তখনই অ্যাপটি বর্তমান লোকেশন অ্যাক্সেস করতে পারবে।"</string>
@@ -298,7 +298,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার ডিভাইসের ফটো, মিডিয়া এবং ফাইলে অ্যাক্সেস দেবেন?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"মাইক্রোফোন"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"অডিও রেকর্ড"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে অডিও রেকর্ড করতে দেবেন?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; অ্যাপকে অডিও রেকর্ড করতে দেবেন?"</string>
     <string name="permgrouplab_activityRecognition" msgid="1565108047054378642">"শারীরিক অ্যাক্টিভিটি"</string>
     <string name="permgroupdesc_activityRecognition" msgid="6949472038320473478">"শারীরিক অ্যাক্টিভিটি অ্যাক্সেস করা"</string>
     <string name="permgrouprequest_activityRecognition" msgid="7626438016904799383">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে আপনার শারীরিক অ্যাক্টিভিটি অ্যাক্সেস করার অনুমতি দিতে চান?"</string>
@@ -324,7 +324,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"প্রদর্শনের জুমের স্তর এবং লোকেশন নির্ধারন নিয়ন্ত্রণ করুন৷"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"অঙ্গভঙ্গির কাজগুলি সম্পাদন"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"আলতো চাপ দেওয়া, সোয়াইপ, পিঞ্চ করা এবং অন্যান্য ইঙ্গিতের কাজগুলি সম্পাদন করতে পারবেন৷"</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"ফিঙ্গারপ্রিন্ট সেন্সরের উপর করা অঙ্গভঙ্গিগুলি"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"আঙ্গুলের ছাপ সেন্সরের উপর করা জেসচার"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"অ্যাপ্লিকেশানটিকে এসএমএস প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো বার্তাগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"টেক্সট মেসেজ পান (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"অ্যাপ্লিকেশানটিকে MMS মেসেজ প্রাপ্ত করার এবং প্রক্রিয়া করার অনুমতি দেয়৷ এর মানে হল অ্যাপ্লিকেশানটি আপনার ডিভাইস থেকে পাঠানো মেসেজগুলিকে পর্যবেক্ষণ করতে পারে এবং মুছতে পারে সেগুলিকে আপনাকে না দেখিয়ে৷"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"সেল ব্রডকাস্টের মাধ্যমে মেসেজ ফরওয়ার্ড করুন"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"সেল ব্রডকাস্ট মেসেজ পেলে এটি সেল ব্রডকাস্ট মডিউলের সাথে তা যুক্ত করে যাতে সেই মেসেজ ফরওয়ার্ড করা যায়। আপনাকে জরুরি অবস্থা সম্পর্কে সাবধান করতে কিছু লোকেশনে সেল ব্রডকাস্ট অ্যালার্ট মেসেজ ডেলিভার করা হয়। জরুরি সেল ব্রডকাস্ট পাওয়া গেলে ক্ষতিকারক অ্যাপ আপনার ডিভাইসের পারফর্ম্যান্স ও অপারেশনে বাধা সৃষ্টি করতে পারে।"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"সেল সম্প্রচার মেসেজ পড়ুন"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"আপনার ডিভাইস দ্বারা প্রাপ্ত সেল সম্প্রচার পড়তে অ্যাপ্লিকেশানটিকে অনুমতি দেয়৷ কয়েকটি স্থানে আপনাকে জরুরি অবস্থার জন্য সতর্ক করতে জরুরি সতর্কতাগুলি বিতরণ করা হয়৷ যখন একটি জরুরি সেল সম্প্রচার প্রাপ্ত হয় তখন ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার ডিভাইসের কার্য সম্পাদনা বা কার্যকলাপে প্রতিবন্ধকতার সৃষ্টি করতে পারে৷"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"গ্রাহক হিসেবে নেওয়া ফিডগুলি পড়ে"</string>
@@ -553,7 +551,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"বহুবার চেষ্টা করেছেন। আঙ্গুলের ছাপ নেওয়ার সেন্সর অক্ষম করা হয়েছে।"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"কোনও আঙ্গুলের ছাপ নথিভুক্ত করা হয়নি।"</string>
-    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"এই ডিভাইসে ফিঙ্গারপ্রিন্ট সেন্সর নেই।"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"এই ডিভাইসে আঙ্গুলের ছাপ নেওয়ার সেন্সর নেই।"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"আঙ্গুল <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"অ্যাপটিকে \'বিরক্ত করবে না\' কনফিগারেশন পড়া এবং লেখার অনুমতি দেয়।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"দেখার অনুমতি কাজে লাগানো শুরু করুন"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"কোনও অ্যাপের কোনও নির্দিষ্ট অনুমতির ব্যবহার শুরু করার ক্ষেত্রে হোল্ডারকে সাহায্য করে। সাধারণ অ্যাপের জন্য এটির পরিবর্তন হওয়ার কথা নয়।"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"অ্যাক্সেসিবিলিটির শর্টকাটের টার্গেট"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"এটি একটি অ্যাপকে অ্যাক্সেসিবিলিটির শর্টকাটের টার্গেটকে ব্যাখ্যা করতে অনুমতি দেয়।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"পাসওয়ার্ড নিয়মগুলি সেট করে"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"স্ক্রিন লক করার পাসওয়ার্ডগুলিতে অনুমতিপ্রাপ্ত অক্ষর এবং দৈর্ঘ্য নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"স্ক্রিন আনলক করার প্রচেষ্টাগুলির উপরে নজর রাখুন"</string>

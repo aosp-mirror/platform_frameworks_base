@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng SMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"tumanggap ng mga text message (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Pinapayagan ang app na tumanggap at magproseso ng mga mensaheng MMS. Nangangahulugan ito na maaaring sumubaybay o magtanggal ang app ng mga mensaheng ipinapadala sa iyong device nang hindi ipinapakita ang mga ito sa iyo."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Magpasa ng mga mensahe ng cell broadcast"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Nagbibigay-daan sa app na mag-bind sa module ng cell broadcast para makapagpasa ng mga mensahe ng cell broadcast pagkatanggap sa mga ito. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon para balaan ka tungkol sa mga emergency na sitwasyon. Posibleng makasagabal ang mga nakakahamak na app sa performance o pagpapatakbo ng iyong device kapag nakatanggap ito ng emergency na cell broadcast."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"basahin ang mga mensahe ng cell broadcast"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Binibigyang-daan ang app na magbasa ng mga mensahe ng cell broadcast na natanggap ng iyong device. Inihahatid ang mga alerto ng cell broadcast sa ilang lokasyon upang balaan ka tungkol sa mga emergency na sitwasyon. Maaaring makaabala ang nakakahamak na apps sa performance o pagpapatakbo ng iyong device kapag nakatanggap ng emergency na cell broadcast."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"magbasa ng mga na-subscribe na feed"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"Target ng shortcut sa pagiging accessible"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Nagbibigay-daan sa isang app na tukuyin ang target ng shortcut sa pagiging accessible."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolin ang haba at ang mga character na pinapayagan sa mga password at PIN sa screen lock."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -1351,7 +1347,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Walang mga kinakailangang pahintulot"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"maaari itong magdulot ng gastos sa iyo"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1595122345358177163">"China-charge ang device na ito sa pamamagitan ng USB"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"China-charge ang device sa USB"</string>
     <string name="usb_supplying_notification_title" msgid="4631045789893086181">"China-charge ang nakakonektang device sa pamamagitan ng USB"</string>
     <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Na-on ang paglipat ng USB file"</string>
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Na-on ang PTP sa pamamagitan ng USB"</string>

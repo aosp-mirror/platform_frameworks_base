@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"აპს შეეძლება SMS შეტყობინებების მიღება და დამუშავება. ეს ნიშნავს, რომ აპს შეეძლება თქვენ მოწყობილობაზე გამოგზავნილი შეტყობინებების მონიტორინგი და მათი წაშლა თქვენთვის ჩვენების გარეშე."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ტექსტური შეტყობინებების (MMS) მიღება"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"აპს შეეძლება MMS შეტყობინებების მიღება და დამუშავება. ეს ნიშნავს, რომ აპს შეეძლება შეტყობინებების მონიტორინგი და მათი წაშლა თქვენთვის ჩვენების გარეშე."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Cell broadcast შეტყობინებების გადამისამართება"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"საშუალებას აძლევს აპს, დაუკავშირდეს cell broadcast მოდულს იმისთვის, რომ გადაამისამართოს cell broadcast შეტყობინებები მათი მიღებისთანავე. Cell broadcast გაფრთხილებები მიეწოდება ზოგიერთ მდებარეობაზე საგანგებო სიტუაციების შესახებ გაფრთხილების მიზნით. საგანგებო cell broadcast-ის მიღების დროს, მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"მასიური დაგზავნის შეტყობინებების წაკითხვა"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"აპს შეეძლება, წაიკითხოს თქვენს მოწყობილობაზე გამოგზავნილი ქსელის სამაუწყებლო შეტყობინებები. სამაუწყებლო გაფრთხილებები მოგეწოდებათ ზოგიერთ ადგილზე ექსტრემალური სიტუაციების შესახებ გასაფრთხილებლად. ქსელის გადაუდებელი შეტყონიბენის მიღების დროს მავნე აპებმა შეიძლება ხელი შეუშალონ თქვენი მოწყობილობის ფუნქციონირებას ან ოპერაციებს."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"გამოწერილი არხების წაკითხვა"</string>
@@ -517,9 +515,9 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ბიომეტრიული აპარატის გამოყენება"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"საშუალებას აძლევს აპს, ავტორიზაციისთვის გამოიყენოს ბიომეტრიული აპარატი"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"თითის ანაბეჭდის აპარატის მართვა"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"საშუალებას აძლევს აპლიკაციას დაამატოს ან ამოშალოს გამოსაყენებელი თითის ანაბეჭდის ნიმუშები,"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"საშუალებას აძლევს აპლიკაციას დაამატოს ან ამოშალოს გამოსაყენებელი თითის ანაბეჭდის ნიმუშები."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"თითის ანაბეჭდის აპარატის გამოყენება"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"საშუალებას აძლევს აპლიკაციას გამოიყენოს ავტენთიფიკაციისათვის თითის ანაბეჭდის აპარატი"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"საშუალებას აძლევს აპლიკაციას ავტორიზაციისთვის გამოიყენოს თითის ანაბეჭდის აპარატი"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"თქვენი მუსიკალური კოლექციის შეცვლა"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"აპი შეძლებს თქვენი მუსიკალური კოლექციის შეცვლას."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"თქვენი ვიდეოკოლექციის შეცვლა"</string>
@@ -535,7 +533,7 @@
     <string name="biometric_error_canceled" msgid="349665227864885880">"ავტორიზაცია გაუქმდა"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN-კოდი, ნიმუში ან პაროლი დაყენებული არ არის"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"აღმოჩენილია თითის ნაწილობრივი ანაბეჭდი. გთხოვთ, სცადოთ ხელახლა."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"თითის ანაბეჭდი ვერ მუშავდება. გთხოვთ, სცადოთ ხელახლა."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"თითის ანაბეჭდის დამუშავება ვერ მოხერხდა. გთხოვთ, ცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"თითის ანაბეჭდის სენსორი დაბინძურებულია. გთხოვთ, გაასუფთაოთ და სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"თითის აღება მეტისმეტად სწრაფად მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"თითის აღება მეტისმეტად ნელა მოხდა. გთხოვთ, სცადოთ ხელახლა."</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"საშუალებას აძლევს აპს, წაიკითხოს და დაწეროს კონფიგურაცია „არ შემაწუხოთ“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"ნახვის ნებართვის გამოყენების დაწყება"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ნებართვის გამოყენება. ჩვეულებრივი აპებისთვის არასოდეს უნდა იყოს საჭირო."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"მარტივი წვდომის მალსახმობის სამიზნე"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"აპს აძლევს მარტივი წვდომის მალსახმობის სამიზნის განსაზღვრის საშუალებას."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>

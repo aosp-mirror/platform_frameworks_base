@@ -230,7 +230,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Վրիպակի զեկույց"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ավարտել աշխատաշրջանը"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Սքրինշոթ"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Վրիպակների զեկույց"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Հաշվետվություն վրիպակի մասին"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Սա տեղեկություններ կհավաքագրի ձեր սարքի առկա կարգավիճակի մասին և կուղարկի այն էլեկտրոնային նամակով: Որոշակի ժամանակ կպահանջվի վրիպակի մասին զեկուցելու պահից սկսած մինչ ուղարկելը: Խնդրում ենք փոքր-ինչ համբերատար լինել:"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Ինտերակտիվ զեկույց"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Հիմնականում օգտագործեք այս տարբերակը: Այն ձեզ թույլ է տալիս հետևել զեկույցի ստեղծման գործընթացին, խնդրի մասին լրացուցիչ տեղեկություններ մուտքագրել և սքրինշոթներ ստեղծել: Կարող է բաց թողնել քիչ օգտագործվող որոշ բաժիններ, որոնց ստեղծումը երկար է տևում:"</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Թույլ է տալիս հավելվածին ստանալ և մշակել SMS հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ստանալ տեքստային հաղորդագրություններ (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Թույլ է տալիս հավելվածին ստանալ և մշակել MMS հաղորդագրությունները: Սա նշանակում է, որ հավելվածը կարող է ստուգել կամ ջնջել ձեր սարքին ուղարկված հաղորդագրությունները` առանց դրանք ձեզ ցուցադրելու:"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Բջջային հեռարձակման հաղորդագրությունների վերահասցեավորում"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Թույլ է տալիս հավելվածին կապ հաստատել բջջային հեռարձակման մոդուլի հետ՝ բնակչությանը ծանուցող հաղորդագրությունները վերահասցեավորելու համար։ Որոշ երկրներում այս հաղորդագրություններն օգտագործվում են բնակչությանը արտակարգ իրավիճակների մասին զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի աշխատանքին, որին ուղարկվում են այս հաղորդագրությունները:"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"կարդալ բջջային զեկուցվող հաղորդագրությունները"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Թույլ է տալիս հավելվածին կարդալ ձեր սարքի կողմից ստացված բջջային հեռարձակվող հաղորդագրությունները: Բջջային հեռարձակվող զգուշացումները ուղարկվում են որոշ վայրերում` արտակարգ իրավիճակների մասին ձեզ զգուշացնելու համար: Վնասարար հավելվածները կարող են խանգարել ձեր սարքի արդյունավետությանը կամ շահագործմանը, երբ ստացվում է արտակարգ իրավիճակի մասին բջջային հաղորդում:"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"կարդալ բաժանորդագրված հոսքերը"</string>
@@ -370,7 +368,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Թույլ է տալիս հավելվածին միացնել մեքենայի ռեժիմը:"</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"փակել այլ հավելվածները"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Թույլ է տալիս հավելվածին վերջ տալ այլ հավելվածների հետնաշերտի գործընթացները: Սա կարող է պատճառ դառնալ, որ այլ հավելվածները դադարեն աշխատել:"</string>
-    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վերևում"</string>
+    <string name="permlab_systemAlertWindow" msgid="7238805243128138690">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների վրայից"</string>
     <string name="permdesc_systemAlertWindow" msgid="2393776099672266188">"Այս հավելվածը կարող է ցուցադրվել այլ հավելվածների կամ էկրանի այլ հատվածների վերևում: Դա կարող է խոչընդոտել հավելվածի նորմալ օգտագործմանը և փոխել այլ հավելվածների տեսքը:"</string>
     <string name="permlab_runInBackground" msgid="7365290743781858803">"աշխատել ֆոնում"</string>
     <string name="permdesc_runInBackground" msgid="7370142232209999824">"Այս հավելվածը կարող է աշխատել ֆոնային ռեժիմում և ավելի արագ սպառել մարտկոցի լիցքը։"</string>
@@ -534,7 +532,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Չհաջողվեց ճանաչել"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Նույնականացումը չեղարկվեց"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Ավելացրեք PIN կոդ, նախշ կամ գաղտնաբառ։"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Մատնահետքը հայտնաբերվել է մասամբ: Փորձեք նորից:"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Մատնահետքն ամբողջությամբ չի սկանավորվել: Փորձեք նորից:"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Չհաջողվեց մշակել մատնահետքը: Նորից փորձեք:"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Մատնահետքերի սենսորն աղտոտված է: Մաքրեք այն և փորձեք նորից:"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Շատ արագ անցկացրիք մատը: Փորձեք նորից:"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Թույլ է տալիս հավելվածին փոփոխել «Չանհանգստացնել» գործառույթի կազմաձևումը:"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"թույլտվությունների մասին տվյալների հասանելիություն"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Հավելվածին հասանելի կդառնան թույլտվությունների մասին տվյալները։ Այս թույլտվությունն անհրաժեշտ չէ սովորական հավելվածներին։"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"հատուկ գործառույթների դյուրանցումն օգտագործելու նպատակը"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Հավելվածին թույլ է տալիս որոշել հատուկ գործառույթների դյուրանցումն օգտագործելու նպատակը։"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1387,8 +1383,8 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Ցուցադրում այլ հավելվածների վրայից"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վրայից"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վրայից"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Անջատել"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի ստուգում…"</string>
@@ -1555,7 +1551,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Ավելի շատ ընտրանքներ"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Համօգտագործվող ներքին հիշողություն"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Ներքին ընդհանուր կրիչ"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD քարտ"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"SD քարտ <xliff:g id="MANUFACTURER">%s</xliff:g>-ից"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB սարքավար"</string>
@@ -1588,7 +1584,7 @@
     <string name="serial_number" msgid="758814067660862493">"Հերթական համարը`"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Մատնահետքերը`"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 մատնահետք`"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1մատնահետք`"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 մատնահետք`"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Տեսնել բոլորը"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Ընտրել գործունեությունը"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Կիսվել"</string>
@@ -2011,7 +2007,7 @@
     <string name="standby_warning_message" product="default" msgid="5222741828239073484">"Սարքը շուտով կանջատվի: Սեղմեք՝ միացրած թողնելու համար:"</string>
     <string name="notification_appops_camera_active" msgid="5050283058419699771">"Տեսախցիկ"</string>
     <string name="notification_appops_microphone_active" msgid="4335305527588191730">"Խոսափող"</string>
-    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ցուցադրվում է մյուս հավելվածների վերևում"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"ցուցադրվում է մյուս հավելվածների վրայից"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2348803891571320452">"Ծանուցում լիցքավորման մասին"</string>
     <string name="dynamic_mode_notification_title" msgid="508815255807182035">"Մարտկոցի լիցքը կարող է սովորականից շուտ սպառվել"</string>
     <string name="dynamic_mode_notification_summary" msgid="2541166298550402690">"Մարտկոցի կյանքը երկարացնելու համար ակտիվացվել է մարտկոցի տնտեսման ռեժիմը"</string>

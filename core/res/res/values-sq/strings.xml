@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lejon aplikacionin të marrë dhe përpunojë mesazhe SMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prano mesazhe në tekst (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lejon aplikacionin të marrë dhe përpunojë mesazhe MMS. Kjo do të thotë se aplikacioni mund të monitorojë ose fshijë mesazhe të dërguara në pajisjen tënde, pa t\'i treguar ato."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Transmeto mesazhet e transmetimit celular"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Lejon që aplikacioni të lidhet me modulin e transmetimit celular për t\'i transferuar mesazhet e transmetimit celular menjëherë kur merren. Sinjalizimet e transmetimit celular dërgohen në disa vendndodhje për të të paralajmëruar për situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në cilësinë e funksionimit ose në veprimin e pajisjes sate kur merret një transmetim celular urgjent."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lexo mesazhet e transmetimit të qelizës"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lejon aplikacionin të lexojë mesazhet e transmetimit të qelizës, të marra nga pajisja jote. Alarmet e transmetimit të qelizës dërgohen në disa vendndodhje për të të paralajmëruar në situata urgjente. Aplikacionet keqdashëse mund të ndërhyjnë në veprimtarinë ose operacionin e pajisjes tënde kur merret një transmetim urgjent i qelizës."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lexo informacione të abonuara"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lejon aplikacionin të lexojë dhe shkruajë konfigurimin e \"Mos shqetëso\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"nis përdorimin e lejes për shikimin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Lejon që mbajtësi të nisë përdorimin e lejeve për një aplikacion. Nuk duhet të nevojitet asnjëherë për aplikacionet normale."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"objektivi i shkurtores së qasshmërisë"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Lejon që një aplikacion të përcaktojë objektivin e shkurtores së qasshmërisë."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitoro tentativat e shkyçjes së ekranit"</string>
@@ -1195,7 +1191,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Shfaq gjithmonë"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> është ndërtuar për një version të papërputhshëm të sistemit operativ Android dhe mund të shfaqë sjellje të papritura. Mund të ofrohet një version i përditësuar i aplikacionit."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Shfaq gjithnjë"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Kliko për përditësim"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Kontrollo për përditësim"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i ashpër\" (StrictMode)."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i rreptë\" (StrictMode)"</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Telefoni po përditësohet…"</string>
@@ -1915,7 +1911,7 @@
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikacionet e punës, njoftimet, të dhënat e tua dhe funksionet e tjera të profilit të punës do të aktivizohen"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivizo"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Ky aplikacion është ndërtuar për një version më të vjetër të Android dhe mund të mos funksionojë mirë. Provo të kontrollosh për përditësime ose kontakto me zhvilluesin."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Kliko për përditësim"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Kontrollo për përditësim"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Hap aplikacionin SMS për ta parë"</string>
     <string name="profile_encrypted_title" msgid="4260432497586829134">"Disa funksione mund të jenë të kufizuara"</string>

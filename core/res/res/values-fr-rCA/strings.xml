@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permet à l\'application de recevoir et de traiter les messages texte. Cette autorisation lui donne la possibilité de surveiller ou de supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recevoir des messages multimédias"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permet à l\'application de recevoir et de traiter les messages multimédias. Cette autorisation lui donne la possibilité de surveiller ou de supprimer les messages envoyés à votre appareil sans vous les montrer."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Transférer les messages de diffusion cellulaire"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Permet à l\'application d\'établir un lien avec le module de diffusion cellulaire afin de transférer les messages de diffusion cellulaire à mesure de leur réception. Dans certaines régions, des alertes de diffusion cellulaire sont envoyées afin de vous avertir de situations d\'urgence. Des applications malveillantes peuvent interférer avec les performances ou le fonctionnement de votre appareil lors de la réception d\'une alerte d\'urgence par diffusion cellulaire."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lire les messages de diffusion cellulaire"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permet à l\'application de lire les messages de diffusion cellulaire que votre appareil reçoit. Dans certaines zones géographiques, des alertes vous sont envoyées afin de vous prévenir en cas de situation d\'urgence. Des applications malveillantes peuvent venir perturber les performances ou le fonctionnement de votre appareil lors de la réception d\'un message de diffusion cellulaire."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lire les flux auxquels vous êtes abonné"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permet à l\'application de consulter et de modifier la configuration du mode Ne pas déranger."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"démarrer l\'affichage de l\'usage des autorisations"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Permet au détenteur de démarrer l\'usage des autorisations pour une application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cible du raccourci d\'accessibilité"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Permet à une application de définir la cible du raccourci d\'accessibilité."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1588,7 +1584,7 @@
     <string name="serial_number" msgid="758814067660862493">"Numéro de série :"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Empreintes :"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Empreinte digitale SHA-256 :"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte digitale SHA-1 :"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte SHA-1 :"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Tout afficher"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Sélectionnez une activité"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Partagez avec"</string>

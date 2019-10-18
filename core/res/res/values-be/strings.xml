@@ -330,7 +330,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Кіраваць маштабам дысплэя і пазіцыянаваннем."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Выконваць жэсты"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Можна кранаць, праводзіць пальцам, маштабаваць шчыпком, а таксама выконваць іншыя жэсты."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Жэсты адбіткаў пальцаў"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Жэсты на сканеры адбіткаў пальцаў"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Можа распазнаваць жэсты на сканеры адбіткаў пальцаў прылады."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"адключаць ці змяняць радок стану"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дазваляе прыкладанням адключаць радок стану або дадаваць і выдаляць сістэмныя значкі."</string>
@@ -350,10 +350,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Дазваляе прыкладанням атрымліваць і апрацоўваць SMS-паведамленні. Гэта значыць, што прыкладанне можа кантраляваць або выдаляць паведамленні, адпраўленыя на прыладу, не паказваючы іх вам."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"атрыманне тэкставых паведамленняў (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Дазваляе прыкладанням атрымліваць і апрацоўваць MMS-паведамленнi. Гэта значыць, што прыкладанне можа кантраляваць або выдаляць паведамленні, адпраўленыя на прыладу, не паказваючы іх вам."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Пераадрасоўваць паведамленні сотавай трансляцыі"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Дазваляе праграме звязвацца з модулем сотавай трансляцыі, каб пераадрасоўваць атрыманыя там паведамленні. Абвесткі сотавай трансляцыі дасылаюцца ў некаторыя месцы, каб папярэджваць вас пра надзвычайныя сітуацыі. Шкодныя праграмы могуць негатыўна ўплываць на прадукцыйнасць або працу прылады падчас атрымання паведамленняў сотавай трансляцыі пра надзвычайныя сітуацыі."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"чытаць паведамленні базавай станцыі"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Дазваляе прыкладанню чытаць паведамленні базавай станцыі, атрыманыя прыладай. Папярэджанні базавай станцыі дасылаюцца ў некаторыя месцы, каб папярэдзіць вас аб надзвычайных сітуацыях. Шкоднасныя прыкладанні могуць уплываць на прадукцыйнасць ці працу прылады пры атрыманні паведамлення базавай станцыі аб надзвычайнай сітуацыі."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"чытаць падпісаныя каналы"</string>
@@ -540,7 +538,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не распазнана"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Аўтэнтыфікацыя скасавана"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Не заданы PIN-код, узор разблакіроўкі або пароль"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Выяўлена частка адбіткаў пальцаў. Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Не ўвесь адбітак пальца адсканіраваны. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не атрымалася апрацаваць адбітак пальца. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчык адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Палец рухаўся занадта хутка. Паспрабуйце яшчэ раз."</string>
@@ -551,12 +549,12 @@
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Твар распазнаны"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Твар распазнаны. Націсніце, каб пацвердзіць"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратныя сродкі адбіткаў пальцаў недаступныя."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існы адбітак."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання адбіткаў пальцаў выйшаў. Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існуючы адбітак."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання выйшаў. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Аперацыя з адбіткамі пальцаў скасавана."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Занадта шмат спроб. Сканер адбіткаў пальцаў адключаны."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Занадта шмат спроб. Сканер адбіткаў пальцаў выключаны."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Адбіткі пальцаў не зарэгістраваны."</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"На гэтай прыладзе няма сканера адбіткаў пальцаў."</string>
@@ -665,8 +663,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Дазваляе праграме чытаць і выконваць запіс у канфігурацыю рэжыму «Не турбаваць»."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"запусціць выкарыстанне дазволаў на прагляд"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Дазваляе трымальніку запусціць выкарыстанне дазволаў праграмай. Не патрэбна для звычайных праграм."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"Аб\'екты хуткага доступу да спецыяльных магчымасцей"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Праграма зможа вызначаць аб\'екты хуткага доступу да спецыяльных магчымасцей."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устанавіць правілы паролю"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Кіраваць даўжынёй і сімваламі, дазволенымі пры ўводзе пароляў і PIN-кодаў блакіроўкі экрана."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Сачыць за спробамі разблакіроўкі экрана"</string>
@@ -1633,7 +1629,7 @@
     <string name="expires_on" msgid="3676242949915959821">"Заканчваецца:"</string>
     <string name="serial_number" msgid="758814067660862493">"Серыйны нумар:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Адбіткі пальцаў:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Адбітак пальцаў SHA-256:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Адбітак SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Адбіткі пальцаў SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Прагледзець усё"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Выберыце працэс"</string>

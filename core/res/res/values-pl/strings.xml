@@ -234,7 +234,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Zgłoszenie błędu"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Zakończ sesję"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Zrzut ekranu"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Zgłoszenie błędu"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Zgłoś błąd"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Informacje o bieżącym stanie urządzenia zostaną zebrane i wysłane e-mailem. Przygotowanie zgłoszenia błędu do wysłania chwilę potrwa, więc zachowaj cierpliwość."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktywny"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Używaj tej opcji w większości przypadków. Umożliwia śledzenie postępów raportu, podanie dodatkowych szczegółów problemu i wykonanie zrzutów ekranu. Raport może pomijać niektóre rzadko używane sekcje, których utworzenie zajmuje dużo czasu."</string>
@@ -350,10 +350,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Pozwala aplikacji na odbieranie i przetwarzanie SMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"odbieranie wiadomości tekstowych (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Pozwala aplikacji na odbieranie i przetwarzanie MMS-ów. To oznacza, że aplikacja będzie mogła bez Twojej wiedzy monitorować i usuwać wiadomości wysyłane do Twojego urządzenia."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Przekaż komunikaty z sieci komórkowej"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Zezwala aplikacji powiązać się z modułem komunikatów z sieci komórkowej, aby przekazywać je w momencie, w którym są otrzymywane. W niektórych lokalizacjach komunikaty alarmowe z sieci komórkowej są dostarczane, aby ostrzec Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na działanie urządzenia lub zakłócać je po nadejściu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"odczyt komunikatów z sieci komórkowej"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Zezwala aplikacji na odczyt komunikatów z sieci komórkowej odebranych na urządzeniu. Komunikaty alarmowe z sieci komórkowej są dostarczane w niektórych lokalizacjach w celu ostrzeżenia Cię o sytuacjach zagrożenia. Złośliwe aplikacje mogą wpływać na wydajność lub zakłócać działanie urządzenia po odebraniu komunikatu alarmowego z sieci komórkowej."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"czytanie subskrybowanych źródeł"</string>
@@ -552,7 +550,7 @@
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Twarz rozpoznana, kliknij Potwierdź"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Czytnik linii papilarnych nie jest dostępny."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Nie można zapisać odcisku palca. Usuń istniejący odcisk palca."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu odcisków palców. Spróbuj ponownie."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Odczyt odcisku palca został anulowany."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Odczyt odcisku palca został anulowany przez użytkownika."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Zbyt wiele prób. Spróbuj ponownie później."</string>
@@ -665,8 +663,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Pozwala aplikacji na odczyt i zmianę konfiguracji trybu Nie przeszkadzać."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"rozpocząć wyświetlanie użycia uprawnień"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Umożliwia rozpoczęcie korzystania z uprawnienia dotyczącego danej aplikacji jego posiadaczowi. Zwykłe aplikacje nie powinny potrzebować tego uprawnienia."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cel skrótu do ułatwień dostępu"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Pozwala aplikacji definiować cel skrótu do ułatwień dostępu."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolowanie długości haseł blokady ekranu i kodów PIN oraz dozwolonych w nich znaków."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorowanie prób odblokowania ekranu"</string>

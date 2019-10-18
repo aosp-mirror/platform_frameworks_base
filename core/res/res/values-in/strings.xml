@@ -161,7 +161,7 @@
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Autentikasi via proxy server gagal."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Tidak dapat tersambung ke server."</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"Tidak dapat berkomunikasi dengan server. Coba lagi nanti."</string>
-    <string name="httpErrorTimeout" msgid="4743403703762883954">"Sambungan ke server terputus."</string>
+    <string name="httpErrorTimeout" msgid="4743403703762883954">"Koneksi ke server terputus."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Halaman ini berisi terlalu banyak pengalihan server."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"Protokol tidak didukung."</string>
     <string name="httpErrorFailedSslHandshake" msgid="96549606000658641">"Tidak dapat membuat sambungan aman."</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Memungkinkan aplikasi menerima dan memproses pesan SMS. Ini artinya aplikasi dapat memantau atau menghapus pesan yang dikirim ke perangkat Anda tanpa menunjukkannya kepada Anda."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"terima pesan teks (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Memungkinkan aplikasi menerima dan memproses pesan MMS. Ini artinya aplikasi dapat memantau atau menghapus pesan yang dikirim ke perangkat Anda tanpa menunjukkannya kepada Anda."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Teruskan pesan cell broadcast"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Mengizinkan aplikasi mem-binding ke modul cell broadcast untuk meneruskan pesan cell broadcast saat pesan tersebut diterima. Notifikasi cell broadcast dikirim di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu performa atau operasi perangkat saat cell broadcast darurat diterima."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"membaca pesan siaran seluler"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Mengizinkan aplikasi membaca pesan siaran seluler yang diterima perangkat Anda. Notifikasi siaran seluler dikirimkan di beberapa lokasi untuk memperingatkan Anda tentang situasi darurat. Aplikasi berbahaya dapat mengganggu kinerja atau operasi perangkat Anda saat siaran seluler darurat diterima."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"baca feed langganan"</string>
@@ -519,7 +517,7 @@
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kelola hardware sidik jari"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Mengizinkan aplikasi memanggil metode untuk menambahkan dan menghapus template sidik jari untuk digunakan."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan hardware sidik jari"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Mengizinkan aplikasi untuk menggunakan hardware sidik jari untuk otentikasi"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Mengizinkan aplikasi untuk menggunakan hardware sidik jari untuk autentikasi"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"memodifikasi koleksi musik Anda"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Mengizinkan aplikasi untuk memodifikasi koleksi musik Anda."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"memodifikasi koleksi video Anda"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"mulai melihat penggunaan izin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Memungkinkan pemegang memulai penggunaan izin untuk aplikasi. Tidak diperlukan untuk aplikasi normal."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"target pintasan aksesibilitas"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Mengizinkan aplikasi menentukan target pintasan aksesibilitas."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Pantau upaya pembukaan kunci layar"</string>
