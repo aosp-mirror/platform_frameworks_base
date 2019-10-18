@@ -177,7 +177,7 @@ public class LocalActivityManager {
                 pendingActions = null;
             }
 
-            mActivityThread.handleStartActivity(clientRecord, pendingActions);
+            mActivityThread.handleStartActivity(r, pendingActions);
             r.curState = STARTED;
             
             if (desiredState == RESUMED) {

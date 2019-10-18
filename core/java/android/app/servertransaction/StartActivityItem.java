@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Android Open Source Project
+ * Copyright 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,41 +24,44 @@ import android.os.Parcel;
 import android.os.Trace;
 
 /**
- * Window visibility change message.
+ * Request to move an activity to started and visible state.
  * @hide
  */
-public class WindowVisibilityItem extends ClientTransactionItem {
+public class StartActivityItem extends ActivityLifecycleItem {
 
-    private boolean mShowWindow;
+    private static final String TAG = "StartActivityItem";
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
-                mShowWindow ? "activityShowWindow" : "activityHideWindow");
-        client.handleWindowVisibility(token, mShowWindow);
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "startActivityItem");
+        client.handleStartActivity(token, pendingActions);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    @Override
+    public int getTargetState() {
+        return ON_START;
     }
 
 
     // ObjectPoolItem implementation
 
-    private WindowVisibilityItem() {}
+    private StartActivityItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static WindowVisibilityItem obtain(boolean showWindow) {
-        WindowVisibilityItem instance = ObjectPool.obtain(WindowVisibilityItem.class);
+    public static StartActivityItem obtain() {
+        StartActivityItem instance = ObjectPool.obtain(StartActivityItem.class);
         if (instance == null) {
-            instance = new WindowVisibilityItem();
+            instance = new StartActivityItem();
         }
-        instance.mShowWindow = showWindow;
 
         return instance;
     }
 
     @Override
     public void recycle() {
-        mShowWindow = false;
+        super.recycle();
         ObjectPool.recycle(this);
     }
 
@@ -68,24 +71,24 @@ public class WindowVisibilityItem extends ClientTransactionItem {
     /** Write to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBoolean(mShowWindow);
+        // Empty
     }
 
     /** Read from Parcel. */
-    private WindowVisibilityItem(Parcel in) {
-        mShowWindow = in.readBoolean();
+    private StartActivityItem(Parcel in) {
+        // Empty
     }
 
-    public static final @android.annotation.NonNull Creator<WindowVisibilityItem> CREATOR =
-            new Creator<WindowVisibilityItem>() {
-        public WindowVisibilityItem createFromParcel(Parcel in) {
-            return new WindowVisibilityItem(in);
-        }
+    public static final @android.annotation.NonNull Creator<StartActivityItem> CREATOR =
+            new Creator<StartActivityItem>() {
+                public StartActivityItem createFromParcel(Parcel in) {
+                    return new StartActivityItem(in);
+                }
 
-        public WindowVisibilityItem[] newArray(int size) {
-            return new WindowVisibilityItem[size];
-        }
-    };
+                public StartActivityItem[] newArray(int size) {
+                    return new StartActivityItem[size];
+                }
+            };
 
     @Override
     public boolean equals(Object o) {
@@ -95,17 +98,17 @@ public class WindowVisibilityItem extends ClientTransactionItem {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final WindowVisibilityItem other = (WindowVisibilityItem) o;
-        return mShowWindow == other.mShowWindow;
+        return true;
     }
 
     @Override
     public int hashCode() {
-        return 17 + 31 * (mShowWindow ? 1 : 0);
+        return 17;
     }
 
     @Override
     public String toString() {
-        return "WindowVisibilityItem{showWindow=" + mShowWindow + "}";
+        return "StartActivityItem{}";
     }
 }
+

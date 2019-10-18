@@ -521,11 +521,12 @@ public class ActivityRecordTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testShouldPauseWhenMakeClientVisible() {
+    public void testShouldStartWhenMakeClientActive() {
         ActivityRecord topActivity = new ActivityBuilder(mService).setTask(mTask).build();
         topActivity.setOccludesParent(false);
         mActivity.setState(ActivityStack.ActivityState.STOPPED, "Testing");
-        mActivity.makeClientVisible();
+        mActivity.setVisibility(true);
+        mActivity.makeActiveIfNeeded(null /* activeActivity */);
         assertEquals(STARTED, mActivity.getState());
     }
 

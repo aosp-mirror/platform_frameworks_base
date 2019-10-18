@@ -183,8 +183,7 @@ public class TransactionExecutorHelper {
                 lifecycleItem = PauseActivityItem.obtain();
                 break;
             case ON_STOP:
-                lifecycleItem = StopActivityItem.obtain(r.isVisibleFromServer(),
-                        0 /* configChanges */);
+                lifecycleItem = StopActivityItem.obtain(0 /* configChanges */);
                 break;
             default:
                 lifecycleItem = ResumeActivityItem.obtain(false /* isForward */);

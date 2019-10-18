@@ -79,12 +79,13 @@ class EnsureActivitiesVisibleHelper {
 
         final PooledConsumer f = PooledLambda.obtainConsumer(
                 EnsureActivitiesVisibleHelper::setActivityVisibilityState, this,
-                PooledLambda.__(ActivityRecord.class), resumeTopActivity);
+                PooledLambda.__(ActivityRecord.class), starting, resumeTopActivity);
         mContiner.forAllActivities(f);
         f.recycle();
     }
 
-    private void setActivityVisibilityState(ActivityRecord r, final boolean resumeTopActivity) {
+    private void setActivityVisibilityState(ActivityRecord r, ActivityRecord starting,
+            final boolean resumeTopActivity) {
         final boolean isTop = r == mTop;
         if (mAboveTop && !isTop) {
             return;
@@ -129,7 +130,8 @@ class EnsureActivitiesVisibleHelper {
                         "Skipping: already visible at " + r);
 
                 if (r.mClientVisibilityDeferred && mNotifyClients) {
-                    r.makeClientVisible();
+                    r.makeActiveIfNeeded(r.mClientVisibilityDeferred ? null : starting);
+                    r.mClientVisibilityDeferred = false;
                 }
 
                 r.handleAlreadyVisible();
