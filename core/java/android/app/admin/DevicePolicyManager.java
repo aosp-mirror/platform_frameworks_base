@@ -6633,6 +6633,8 @@ public class DevicePolicyManager {
      * The calling device admin must be a profile owner or device owner. If it is not, a security
      * exception will be thrown.
      *
+     * <p>NOTE: Performs disk I/O and shouldn't be called on the main thread.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The IntentFilter for which a default handler is added.
      * @param activity The Activity that is added as default intent handler.
