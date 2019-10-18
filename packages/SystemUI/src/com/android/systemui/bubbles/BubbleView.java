@@ -39,7 +39,6 @@ import com.android.launcher3.icons.ShadowGenerator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
  * A floating object on the screen that can post message updates.
@@ -139,15 +138,6 @@ public class BubbleView extends FrameLayout {
 
     public void setAppIcon(Drawable appIcon) {
         mUserBadgedAppIcon = appIcon;
-    }
-
-    /**
-     * @return the {@link ExpandableNotificationRow} view to display notification content when the
-     * bubble is expanded.
-     */
-    @Nullable
-    public ExpandableNotificationRow getRowView() {
-        return (mBubble != null) ? mBubble.getEntry().getRow() : null;
     }
 
     /** Changes the dot's visibility to match the bubble view's state. */

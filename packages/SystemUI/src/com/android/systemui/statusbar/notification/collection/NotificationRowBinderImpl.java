@@ -248,7 +248,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
         // TODO: should updates to the entry be happening somewhere else?
         entry.setIconTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
-        entry.autoRedacted = entry.getSbn().getNotification().publicVersion == null;
 
         entry.setRow(row);
         row.setOnActivatedListener(mPresenter);

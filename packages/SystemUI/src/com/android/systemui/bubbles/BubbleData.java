@@ -184,7 +184,7 @@ public class BubbleData {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
         Bubble bubble = getBubbleWithKey(entry.getKey());
-        suppressFlyout = !entry.isVisuallyInterruptive || suppressFlyout;
+        suppressFlyout = !entry.getRanking().visuallyInterruptive() || suppressFlyout;
 
         if (bubble == null) {
             // Create a new bubble
