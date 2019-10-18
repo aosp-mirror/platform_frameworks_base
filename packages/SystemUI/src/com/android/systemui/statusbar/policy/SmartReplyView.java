@@ -350,7 +350,7 @@ public class SmartReplyView extends ViewGroup {
                         () -> {
                             smartReplyController.smartActionClicked(
                                     entry, actionIndex, action, smartActions.fromAssistant);
-                            headsUpManager.removeNotification(entry.key, true);
+                            headsUpManager.removeNotification(entry.getKey(), true);
                         }, entry.getRow());
         if (useDelayedOnClickListener) {
             onClickListener = new DelayedOnClickListener(onClickListener,

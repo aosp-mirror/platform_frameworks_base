@@ -284,12 +284,12 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
             ActivatableNotificationView first = s.getFirstVisibleChild();
             String fs = first == null ? "(null)"
                     :  (first instanceof ExpandableNotificationRow)
-                            ? ((ExpandableNotificationRow) first).getEntry().key
+                            ? ((ExpandableNotificationRow) first).getEntry().getKey()
                             : Integer.toHexString(System.identityHashCode(first));
             ActivatableNotificationView last = s.getLastVisibleChild();
             String ls = last == null ? "(null)"
                     :  (last instanceof ExpandableNotificationRow)
-                            ? ((ExpandableNotificationRow) last).getEntry().key
+                            ? ((ExpandableNotificationRow) last).getEntry().getKey()
                             : Integer.toHexString(System.identityHashCode(last));
             android.util.Log.d(TAG, "updateSections: f=" + fs + " s=" + i);
             android.util.Log.d(TAG, "updateSections: l=" + ls + " s=" + i);

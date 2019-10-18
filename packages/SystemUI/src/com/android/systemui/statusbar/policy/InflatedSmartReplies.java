@@ -144,13 +144,13 @@ public class InflatedSmartReplies {
             return false;
         }
         // If we are showing the spinner we don't want to add the buttons.
-        boolean showingSpinner = entry.notification.getNotification()
+        boolean showingSpinner = entry.getSbn().getNotification()
                 .extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
         if (showingSpinner) {
             return false;
         }
         // If we are keeping the notification around while sending we don't want to add the buttons.
-        boolean hideSmartReplies = entry.notification.getNotification()
+        boolean hideSmartReplies = entry.getSbn().getNotification()
                 .extras.getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false);
         if (hideSmartReplies) {
             return false;
@@ -168,7 +168,7 @@ public class InflatedSmartReplies {
     public static SmartRepliesAndActions chooseSmartRepliesAndActions(
             SmartReplyConstants smartReplyConstants,
             final NotificationEntry entry) {
-        Notification notification = entry.notification.getNotification();
+        Notification notification = entry.getSbn().getNotification();
         Pair<RemoteInput, Notification.Action> remoteInputActionPair =
                 notification.findRemoteInputActionPair(false /* freeform */);
         Pair<RemoteInput, Notification.Action> freeformRemoteInputActionPair =
@@ -177,7 +177,7 @@ public class InflatedSmartReplies {
         if (!smartReplyConstants.isEnabled()) {
             if (DEBUG) {
                 Log.d(TAG, "Smart suggestions not enabled, not adding suggestions for "
-                        + entry.notification.getKey());
+                        + entry.getSbn().getKey());
             }
             return new SmartRepliesAndActions(null, null);
         }
@@ -271,7 +271,7 @@ public class InflatedSmartReplies {
      * through the remote input.
      */
     public static boolean hasFreeformRemoteInput(NotificationEntry entry) {
-        Notification notification = entry.notification.getNotification();
+        Notification notification = entry.getSbn().getNotification();
         return null != notification.findRemoteInputActionPair(true /* freeform */);
     }
 

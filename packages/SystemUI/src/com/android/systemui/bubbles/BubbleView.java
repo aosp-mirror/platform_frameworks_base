@@ -230,7 +230,7 @@ public class BubbleView extends FrameLayout {
         }
         // Update icon.
         Notification.BubbleMetadata metadata = mBubble.getEntry().getBubbleMetadata();
-        Notification n = mBubble.getEntry().notification.getNotification();
+        Notification n = mBubble.getEntry().getSbn().getNotification();
         Icon ic = metadata.getIcon();
         boolean needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
 

@@ -22,7 +22,6 @@ import android.content.Context;
 import android.util.MathUtils;
 import android.view.View;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
@@ -410,7 +409,7 @@ public class AmbientState {
         if (!mPulsing || mHeadUpManager == null) {
             return false;
         }
-        return mHeadUpManager.isAlerting(entry.key);
+        return mHeadUpManager.isAlerting(entry.getKey());
     }
 
     public boolean isPanelTracking() {

@@ -501,7 +501,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
         if (id == R.id.settings_button) {
             Intent intent = mBubble.getSettingsIntent();
             mStackView.collapseStack(() -> {
-                mContext.startActivityAsUser(intent, mBubble.getEntry().notification.getUser());
+                mContext.startActivityAsUser(intent, mBubble.getEntry().getSbn().getUser());
                 logBubbleClickEvent(mBubble,
                         StatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
             });
@@ -609,7 +609,7 @@ public class BubbleExpandedView extends LinearLayout implements View.OnClickList
      * @param action the user interaction enum.
      */
     private void logBubbleClickEvent(Bubble bubble, int action) {
-        StatusBarNotification notification = bubble.getEntry().notification;
+        StatusBarNotification notification = bubble.getEntry().getSbn();
         StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
                 notification.getPackageName(),
                 notification.getNotification().getChannelId(),

@@ -63,7 +63,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
                 return new NotificationMessagingTemplateViewWrapper(ctx, v, row);
             }
             Class<? extends Notification.Style> style =
-                    row.getEntry().notification.getNotification().getNotificationStyle();
+                    row.getEntry().getSbn().getNotification().getNotificationStyle();
             if (Notification.DecoratedCustomViewStyle.class.equals(style)) {
                 return new NotificationDecoratedCustomViewWrapper(ctx, v, row);
             }

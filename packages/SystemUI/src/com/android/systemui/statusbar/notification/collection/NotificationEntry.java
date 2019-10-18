@@ -30,6 +30,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICAT
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING;
 
 import android.annotation.NonNull;
@@ -90,8 +91,8 @@ public final class NotificationEntry {
     private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
     private static final int COLOR_INVALID = 1;
 
-    public final String key;
-    public StatusBarNotification notification;
+    private final String mKey;
+    private StatusBarNotification mSbn;
     private Ranking mRanking;
 
 
@@ -175,14 +176,18 @@ public final class NotificationEntry {
     public NotificationEntry(
             @NonNull StatusBarNotification sbn,
             @NonNull Ranking ranking) {
-        this.key = sbn.getKey();
-        setNotification(sbn);
+        checkNotNull(sbn);
+        checkNotNull(sbn.getKey());
+        checkNotNull(ranking);
+
+        mKey = sbn.getKey();
+        setSbn(sbn);
         setRanking(ranking);
     }
 
     /** The key for this notification. Guaranteed to be immutable and unique */
     public String getKey() {
-        return key;
+        return mKey;
     }
 
     /**
@@ -190,19 +195,23 @@ public final class NotificationEntry {
      * being the Ranking). This object is swapped out whenever a notification is updated.
      */
     public StatusBarNotification getSbn() {
-        return notification;
+        return mSbn;
     }
 
     /**
      * Should only be called by NotificationEntryManager and friends.
      * TODO: Make this package-private
      */
-    public void setNotification(StatusBarNotification sbn) {
-        if (sbn.getKey() != null && key != null && !sbn.getKey().equals(key)) {
+    public void setSbn(@NonNull StatusBarNotification sbn) {
+        checkNotNull(sbn);
+        checkNotNull(sbn.getKey());
+
+        if (!sbn.getKey().equals(mKey)) {
             throw new IllegalArgumentException("New key " + sbn.getKey()
-                    + " doesn't match existing key " + key);
+                    + " doesn't match existing key " + mKey);
         }
-        notification = sbn;
+
+        mSbn = sbn;
         updatePeopleList();
     }
 
@@ -220,9 +229,12 @@ public final class NotificationEntry {
      * TODO: Make this package-private
      */
     public void setRanking(@NonNull Ranking ranking) {
-        if (!ranking.getKey().equals(key)) {
+        checkNotNull(ranking);
+        checkNotNull(ranking.getKey());
+
+        if (!ranking.getKey().equals(mKey)) {
             throw new IllegalArgumentException("New key " + ranking.getKey()
-                    + " doesn't match existing key " + key);
+                    + " doesn't match existing key " + mKey);
         }
         mRanking = ranking;
         isVisuallyInterruptive = ranking.visuallyInterruptive();
@@ -292,13 +304,13 @@ public final class NotificationEntry {
     }
 
     public boolean isBubble() {
-        return (notification.getNotification().flags & FLAG_BUBBLE) != 0;
+        return (mSbn.getNotification().flags & FLAG_BUBBLE) != 0;
     }
 
     private void updatePeopleList() {
         mAssociatedPeople.clear();
 
-        Bundle extras = notification.getNotification().extras;
+        Bundle extras = mSbn.getNotification().extras;
         if (extras == null) {
             return;
         }
@@ -310,7 +322,7 @@ public final class NotificationEntry {
         }
 
         if (Notification.MessagingStyle.class.equals(
-                notification.getNotification().getNotificationStyle())) {
+                mSbn.getNotification().getNotificationStyle())) {
             final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (Notification.MessagingStyle.Message message :
@@ -330,7 +342,7 @@ public final class NotificationEntry {
      * Returns the data needed for a bubble for this notification, if it exists.
      */
     public Notification.BubbleMetadata getBubbleMetadata() {
-        return notification.getNotification().getBubbleMetadata();
+        return mSbn.getNotification().getBubbleMetadata();
     }
 
     /**
@@ -452,7 +464,7 @@ public final class NotificationEntry {
                 });
 
         // Construct the centered icon
-        if (notification.getNotification().isMediaNotification()) {
+        if (mSbn.getNotification().isMediaNotification()) {
             centeredIcon = new StatusBarIconView(context,
                     sbn.getPackageName() + "/0x" + Integer.toHexString(sbn.getId()), sbn);
             centeredIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
@@ -492,8 +504,8 @@ public final class NotificationEntry {
             // Update the icon
             Notification n = sbn.getNotification();
             final StatusBarIcon ic = new StatusBarIcon(
-                    notification.getUser(),
-                    notification.getPackageName(),
+                    mSbn.getUser(),
+                    mSbn.getPackageName(),
                     n.getSmallIcon(),
                     n.iconLevel,
                     n.number,
@@ -517,7 +529,7 @@ public final class NotificationEntry {
     public int getContrastedColor(Context context, boolean isLowPriority,
             int backgroundColor) {
         int rawColor = isLowPriority ? Notification.COLOR_DEFAULT :
-                notification.getNotification().color;
+                mSbn.getNotification().color;
         if (mCachedContrastColorIsFor == rawColor && mCachedContrastColor != COLOR_INVALID) {
             return mCachedContrastColor;
         }
@@ -583,7 +595,7 @@ public final class NotificationEntry {
         if (!hasSentReply) {
             return false;
         }
-        Bundle extras = notification.getNotification().extras;
+        Bundle extras = mSbn.getNotification().extras;
         CharSequence[] replyTexts = extras.getCharSequenceArray(
                 Notification.EXTRA_REMOTE_INPUT_HISTORY);
         if (!ArrayUtils.isEmpty(replyTexts)) {
@@ -785,7 +797,7 @@ public final class NotificationEntry {
      * @see #canViewBeDismissed()
      */
     public boolean isClearable() {
-        if (notification == null || !notification.isClearable()) {
+        if (!mSbn.isClearable()) {
             return false;
         }
 
@@ -808,15 +820,15 @@ public final class NotificationEntry {
 
     @VisibleForTesting
     boolean isExemptFromDndVisualSuppression() {
-        if (isNotificationBlockedByPolicy(notification.getNotification())) {
+        if (isNotificationBlockedByPolicy(mSbn.getNotification())) {
             return false;
         }
 
-        if ((notification.getNotification().flags
+        if ((mSbn.getNotification().flags
                 & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             return true;
         }
-        if (notification.getNotification().isMediaNotification()) {
+        if (mSbn.getNotification().isMediaNotification()) {
             return true;
         }
         if (mIsSystemNotification != null && mIsSystemNotification) {

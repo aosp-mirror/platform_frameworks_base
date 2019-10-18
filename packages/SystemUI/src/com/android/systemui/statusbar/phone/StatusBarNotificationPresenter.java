@@ -201,7 +201,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
                         NotificationVisibility visibility,
                         boolean removedByUser) {
                     StatusBarNotificationPresenter.this.onNotificationRemoved(
-                            entry.key, entry.notification);
+                            entry.getKey(), entry.getSbn());
                     if (removedByUser) {
                         maybeEndAmbientPulse();
                     }

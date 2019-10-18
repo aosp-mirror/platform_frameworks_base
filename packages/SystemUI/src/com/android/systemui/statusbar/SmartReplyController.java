@@ -58,9 +58,9 @@ public class SmartReplyController {
     public void smartReplySent(NotificationEntry entry, int replyIndex, CharSequence reply,
             int notificationLocation, boolean modifiedBeforeSending) {
         mCallback.onSmartReplySent(entry, reply);
-        mSendingKeys.add(entry.key);
+        mSendingKeys.add(entry.getKey());
         try {
-            mBarService.onNotificationSmartReplySent(entry.notification.getKey(), replyIndex, reply,
+            mBarService.onNotificationSmartReplySent(entry.getSbn().getKey(), replyIndex, reply,
                     notificationLocation, modifiedBeforeSending);
         } catch (RemoteException e) {
             // Nothing to do, system going down
@@ -74,14 +74,14 @@ public class SmartReplyController {
             NotificationEntry entry, int actionIndex, Notification.Action action,
             boolean generatedByAssistant) {
         final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
-        final int rank = mEntryManager.getNotificationData().getRank(entry.key);
+        final int rank = mEntryManager.getNotificationData().getRank(entry.getKey());
         NotificationVisibility.NotificationLocation location =
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(
-                entry.key, rank, count, true, location);
+                entry.getKey(), rank, count, true, location);
         try {
             mBarService.onNotificationActionClick(
-                    entry.key, actionIndex, action, nv, generatedByAssistant);
+                    entry.getKey(), actionIndex, action, nv, generatedByAssistant);
         } catch (RemoteException e) {
             // Nothing to do, system going down
         }
@@ -101,7 +101,7 @@ public class SmartReplyController {
     public void smartSuggestionsAdded(final NotificationEntry entry, int replyCount,
             int actionCount, boolean generatedByAssistant, boolean editBeforeSending) {
         try {
-            mBarService.onNotificationSmartSuggestionsAdded(entry.notification.getKey(), replyCount,
+            mBarService.onNotificationSmartSuggestionsAdded(entry.getSbn().getKey(), replyCount,
                     actionCount, generatedByAssistant, editBeforeSending);
         } catch (RemoteException e) {
             // Nothing to do, system going down
@@ -110,7 +110,7 @@ public class SmartReplyController {
 
     public void stopSending(final NotificationEntry entry) {
         if (entry != null) {
-            mSendingKeys.remove(entry.notification.getKey());
+            mSendingKeys.remove(entry.getSbn().getKey());
         }
     }
 

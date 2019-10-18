@@ -93,10 +93,10 @@ public class NotificationData {
             new Comparator<NotificationEntry>() {
         @Override
         public int compare(NotificationEntry a, NotificationEntry b) {
-            final StatusBarNotification na = a.notification;
-            final StatusBarNotification nb = b.notification;
-            int aRank = getRank(a.key);
-            int bRank = getRank(b.key);
+            final StatusBarNotification na = a.getSbn();
+            final StatusBarNotification nb = b.getSbn();
+            int aRank = getRank(a.getKey());
+            int bRank = getRank(b.getKey());
 
             boolean aMedia = isImportantMedia(a);
             boolean bMedia = isImportantMedia(b);
@@ -164,7 +164,7 @@ public class NotificationData {
             final int len = mEntries.size();
             for (int i = 0; i < len; i++) {
                 NotificationEntry entry = mEntries.valueAt(i);
-                final StatusBarNotification sbn = entry.notification;
+                final StatusBarNotification sbn = entry.getSbn();
                 if (!getEnvironment().isNotificationForCurrentProfiles(sbn)) {
                     continue;
                 }
@@ -180,7 +180,7 @@ public class NotificationData {
 
     public void add(NotificationEntry entry) {
         synchronized (mEntries) {
-            mEntries.put(entry.notification.getKey(), entry);
+            mEntries.put(entry.getSbn().getKey(), entry);
         }
         mGroupManager.onEntryAdded(entry);
 
@@ -205,8 +205,8 @@ public class NotificationData {
             StatusBarNotification notification,
             String reason) {
         updateRanking(ranking, reason);
-        final StatusBarNotification oldNotification = entry.notification;
-        entry.setNotification(notification);
+        final StatusBarNotification oldNotification = entry.getSbn();
+        entry.setSbn(notification);
         mGroupManager.onEntryUpdated(entry, oldNotification);
     }
 
@@ -222,9 +222,9 @@ public class NotificationData {
             final int len = mEntries.size();
             for (int i = 0; i < len; i++) {
                 NotificationEntry entry = mEntries.valueAt(i);
-                if (uid == entry.notification.getUid()
-                        && pkg.equals(entry.notification.getPackageName())
-                        && key.equals(entry.key)) {
+                if (uid == entry.getSbn().getUid()
+                        && pkg.equals(entry.getSbn().getPackageName())
+                        && key.equals(entry.getKey())) {
                     if (showIcon) {
                         entry.mActiveAppOps.add(appOp);
                     } else {
@@ -251,7 +251,7 @@ public class NotificationData {
                 final ArrayList<NotificationEntry> logicalChildren =
                         mGroupManager.getLogicalChildren(statusBarNotification);
                 for (NotificationEntry child : logicalChildren) {
-                    if (isHighPriority(child.notification)) {
+                    if (isHighPriority(child.getSbn())) {
                         return true;
                     }
                 }
@@ -339,7 +339,7 @@ public class NotificationData {
 
     private boolean isImportantMedia(NotificationEntry e) {
         int importance = e.getRanking().getImportance();
-        boolean media = e.key.equals(getMediaManager().getMediaNotificationKey())
+        boolean media = e.getKey().equals(getMediaManager().getMediaNotificationKey())
                 && importance > NotificationManager.IMPORTANCE_MIN;
 
         return media;
@@ -348,7 +348,7 @@ public class NotificationData {
     private boolean isSystemMax(NotificationEntry e) {
         int importance = e.getRanking().getImportance();
         boolean sys = importance  >= NotificationManager.IMPORTANCE_HIGH
-                && isSystemNotification(e.notification);
+                && isSystemNotification(e.getSbn());
 
         return sys;
     }
@@ -369,18 +369,18 @@ public class NotificationData {
                 for (int i = 0; i < len; i++) {
                     NotificationEntry entry = mEntries.valueAt(i);
                     Ranking newRanking = new Ranking();
-                    if (!getRanking(entry.key, newRanking)) {
+                    if (!getRanking(entry.getKey(), newRanking)) {
                         continue;
                     }
                     entry.setRanking(newRanking);
 
-                    final StatusBarNotification oldSbn = entry.notification.cloneLight();
+                    final StatusBarNotification oldSbn = entry.getSbn().cloneLight();
                     final String overrideGroupKey = newRanking.getOverrideGroupKey();
                     if (!Objects.equals(oldSbn.getOverrideGroupKey(), overrideGroupKey)) {
-                        entry.notification.setOverrideGroupKey(overrideGroupKey);
+                        entry.getSbn().setOverrideGroupKey(overrideGroupKey);
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
-                    entry.setIsHighPriority(isHighPriority(entry.notification));
+                    entry.setIsHighPriority(isHighPriority(entry.getSbn()));
                 }
             }
         }
@@ -481,10 +481,10 @@ public class NotificationData {
     }
 
     private void dumpEntry(PrintWriter pw, String indent, int i, NotificationEntry e) {
-        getRanking(e.key, mTmpRanking);
+        getRanking(e.getKey(), mTmpRanking);
         pw.print(indent);
-        pw.println("  [" + i + "] key=" + e.key + " icon=" + e.icon);
-        StatusBarNotification n = e.notification;
+        pw.println("  [" + i + "] key=" + e.getKey() + " icon=" + e.icon);
+        StatusBarNotification n = e.getSbn();
         pw.print(indent);
         pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " importance="
                 + mTmpRanking.getImportance());

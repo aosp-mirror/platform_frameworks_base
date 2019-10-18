@@ -59,7 +59,7 @@ public class NotificationEntryHelper {
         @Override
         public StatusBarNotification build() {
             final StatusBarNotification sbn = super.build();
-            mTarget.setNotification(sbn);
+            mTarget.setSbn(sbn);
             return sbn;
         }
     }
