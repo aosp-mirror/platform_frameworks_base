@@ -509,10 +509,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Аппад дэлгэцийн түгжээний боломжтой уртын хэмжээ болон төрлийг заадаг дэлгэцийн түгжээний төвөгтэй байдлын түвшнийг (өндөр, дундаж, бага эсвэл байхгүй) мэдэж авахыг зөвшөөрдөг. Түүнчлэн, апп хэрэглэгчдэд дэлгэцийн түгжээг тодорхой түвшинд шинэчлэхийг санал болгох боломжтой хэдий ч хэрэглэгч үүнийг чөлөөтэй үл хэрэгсэж, орхих боломжтой. Дэлгэцийн түгжээг ил бичвэрээр хадгалдаггүй тул энэ апп тодорхой нууц үгийг мэддэггүй болохыг анхаарна уу."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"биометрийн техник хангамжийг ашиглах"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Aппад биометрийн техник хангамжийг баталгаажуулалтад ашиглахыг зөвшөөрдөг"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"хурууны хээний програм хангамжийг удирдах"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Хурууны хээний загварыг нэмэх эсвэл усгтах үйлдлийг хийх зөвшөөрлийг програмд олгодог."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"хурууны хээний програм хангамжийг ашиглах"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Баталгаажуулалт хийх зорилгоор хурууны хээний апп хамгамжийг ашиглах зөвшөөрлийг аппд олгодог"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"хурууны хээний төхөөрөмжийг удирдах"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Хурууны хээний загвар нэмэх эсвэл устгах үйлдэл хийх зөвшөөрлийг аппд олгодог."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"хурууны хээний төхөөрөмж ашиглах"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Баталгаажуулалт хийх зорилгоор хурууны хээний төхөөрөмжийг ашиглах зөвшөөрлийг аппд олгодог"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"хөгжмийн цуглуулгаа тохируулах"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Таны хөгжмийн цуглуулгыг тохируулах зөвшөөрлийг аппад олгодог."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"видео цуглуулгаа тохируулах"</string>
@@ -529,7 +529,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Тохируулсан пин, хээ эсвэл нууц үг алга"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Хурууны хээг дутуу уншуулсан байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Хурууны хээ боловсруулж чадахгүй байна. Дахин оролдоно уу."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Хурууны хээ мэдрэгч бохирдсон байна. Та цэвэрлэсний дараагаар дахин оролдоно уу."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Хурууны хээ мэдрэгч бохирдсон байна. Цэвэрлэсний дараа дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Хуруугаа хэт хурдан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Хуруу хэт удаан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -537,11 +537,11 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Хурууны хээг нотолсон"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Царайг баталгаажууллаа"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Царайг баталгаажууллаа. Баталгаажуулах товчлуурыг дарна уу"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хурууны хээний тоног төхөөрөмж бэлэн бус байна."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хурууны хээний төхөөрөмж бэлэн бус байна."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Хурууны хээг хадгалах боломжгүй байна. Одоо байгаа хурууны хээг арилгана уу."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Хурууны хээ оруулах хугацаа өнгөрсөн байна. Дахин оруулна уу."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Хурууны хээний бүртгэл амжилтгүй боллоо."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Хэрэглэгч хурууны хээн баталгаажуулалтыг цуцалсан байна."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Хэрэглэгч хурууны хээний баталгаажуулалтыг цуцалсан байна."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Хэтэрхий олон оролдлоо.  Түр хүлээгээд дахин оролдоно уу."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Хэт олон удаа оролдсон тул хурууны хээ мэдрэгчийг идэвхгүй болголоо."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Дахин оролдно уу."</string>
@@ -1508,7 +1508,7 @@
     <string name="sync_do_nothing" msgid="3743764740430821845">"Одоо юу ч хийхгүй"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"Бүртгэл сонгох"</string>
     <string name="add_account_label" msgid="2935267344849993553">"Бүртгэл нэмэх"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"Аккаунт нэмэх"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Бүртгэл нэмэх"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Өсөх"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Бууруулах"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> хүрээд, хүлээнэ үү."</string>
@@ -1545,7 +1545,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Нэмэлт сонголтууд"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Дотоод хуваалцсан санах ой"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Дундын дотоод хадгалах сан"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD карт"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD карт"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB диск"</string>

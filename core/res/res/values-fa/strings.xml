@@ -546,7 +546,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"تلاش‌های بسیاری زیادی انجام شده است. حسگر اثر انگشت غیرفعال شد."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوباره امتحان کنید."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"اثر انگشتی ثبت نشده است."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"این دستگاه حسگر اثرانگشت ندارد."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"این دستگاه حسگر اثر انگشت ندارد."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>

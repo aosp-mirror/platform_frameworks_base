@@ -523,7 +523,7 @@
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"للسماح للتطبيق باستخدام الأجهزة البيومترية للمصادقة"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"لإدارة أجهزة بصمة الإصبع"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"للسماح للتطبيق باستدعاء طرق لإضافة نماذج من بصمات الأصابع وحذفها."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"لاستخدام أجهزة بصمة الإصبع"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"استخدام أجهزة بصمة الإصبع"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"للسماح للتطبيق باستخدام أجهزة بصمة الإصبع للمصادقة"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"تعديل مجموعتك الموسيقية"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"للسماح للتطبيق بتعديل مجموعتك الموسيقية."</string>
@@ -1669,8 +1669,8 @@
     <string name="expires_on" msgid="3676242949915959821">"تنتهي الصلاحية في:"</string>
     <string name="serial_number" msgid="758814067660862493">"الرقم المسلسل:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"بصمات الأصابع:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"‏بصمة أصبع SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"‏بصمة أصبع SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"‏بصمة إصبع SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"‏بصمة إصبع SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"عرض الكل"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"اختيار نشاط"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"مشاركة مع"</string>

@@ -1186,7 +1186,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"常に表示"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> は、互換性のない Android OS バージョン用にビルドされているため、予期しない動作が発生するおそれがあります。アプリの更新バージョンを利用できる場合があります。"</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"常に表示"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"アップデートをチェック"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"アップデートを確認"</string>
     <string name="smv_application" msgid="3307209192155442829">"アプリ「<xliff:g id="APPLICATION">%1$s</xliff:g>」（プロセス「<xliff:g id="PROCESS">%2$s</xliff:g>」）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"スマートフォンの更新中…"</string>

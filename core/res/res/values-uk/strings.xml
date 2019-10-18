@@ -515,10 +515,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Дозволяє додатку визначати рівень складності способу блокування екрана (високий, середній, низький або нульовий). Враховуються кількість символів і тип блокування. Додаток також може пропонувати вибрати складніший тип блокування екрана, але це не обов’язково робити. Примітка: оскільки пароль зашифровано, додаток його не знає."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"використовувати біометричне апаратне забезпечення"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Додаток може використовувати біометричне апаратне забезпечення для автентифікації"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"керувати апаратним забезпеченням для цифрових відбитків"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Увімкнути в додатку функції для додавання й видалення шаблонів цифрових відбитків."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"використання сканера цифрових відбитків"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозволити додатку використовувати апаратне забезпечення для автентифікації"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"керувати сканером відбитків пальців"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Увімкнути в додатку функції для додавання й видалення шаблонів відбитків пальців."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"використання сканера відбитків пальців"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозволити додатку використовувати сканер відбитків пальців для автентифікації"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"змінювати колекцію музики"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Додаток зможе змінювати вашу колекцію музики."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"змінювати колекцію відео"</string>
@@ -533,20 +533,20 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не розпізнано"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Автентифікацію скасовано"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Не вказано PIN-код, ключ або пароль"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків забруднився. Очистьте його та повторіть спробу."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток пальця розпізнано частково. Повторіть спробу."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток пальця. Повторіть спробу."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Датчик відбитків пальців забруднився. Очистьте його та повторіть спробу."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Ви забрали палець надто швидко. Повторіть спробу."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Ви провели пальцем надто повільно. Повторіть спробу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Відбиток автентифіковано"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Відбиток пальця автентифіковано"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Обличчя автентифіковано"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Обличчя автентифіковано. Натисніть \"Підтвердити\""</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратне забезпечення для сканування відбитка недоступне."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Не вдалося зберегти відбиток. Видаліть наявний відбиток."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час очікування відбитка минув. Повторіть спробу."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Дію з відбитком скасовано."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Сканер відбитків пальців недоступний."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Не вдалося зберегти відбиток пальця. Видаліть наявний відбиток."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час очікування відбитка пальця минув. Повторіть спробу."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Дію з відбитком пальця скасовано."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Користувач скасував дію з відбитком пальця."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Забагато спроб. Спробуйте пізніше."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Забагато спроб. Сканер відбитків пальців вимкнено."</string>
