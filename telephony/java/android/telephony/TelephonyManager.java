@@ -10870,6 +10870,16 @@ public class TelephonyManager {
     }
 
     /**
+     * Broadcast intent action for Ota emergency number database installation complete.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final String ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED =
+            "android.telephony.action.OTA_EMERGENCY_NUMBER_DB_INSTALLED";
+
+    /**
      * Returns whether {@link TelephonyManager#ACTION_EMERGENCY_ASSISTANCE emergency assistance} is
      * available on the device.
      * <p>

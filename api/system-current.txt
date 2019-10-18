@@ -8320,6 +8320,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
     method public void updateServiceLocation();
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
+    field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_OTA_EMERGENCY_NUMBER_DB_INSTALLED = "android.telephony.action.OTA_EMERGENCY_NUMBER_DB_INSTALLED";
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
