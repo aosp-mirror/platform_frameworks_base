@@ -338,6 +338,15 @@ public final class DeviceConfig {
     public static final String NAMESPACE_PRIVACY = "privacy";
 
     /**
+     * Permission related properties definitions.
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String NAMESPACE_PERMISSIONS = "permissions";
+
+    /**
      * Interface for accessing keys belonging to {@link #NAMESPACE_WINDOW_MANAGER}.
      * @hide
      */
