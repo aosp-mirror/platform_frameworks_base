@@ -152,7 +152,7 @@ public final class PermissionPolicyService extends SystemService {
             for (int i = 0; i < numDangerousPerms; i++) {
                 PermissionInfo perm = dangerousPerms.get(i);
 
-                if (perm.isRuntime()) {
+                if (perm.isRestricted() || perm.backgroundPermission != null) {
                     appOpsService.startWatchingMode(getSwitchOp(perm.name), null, appOpsListener);
                 }
                 if (perm.isSoftRestricted()) {
@@ -499,7 +499,8 @@ public final class PermissionPolicyService extends SystemService {
 
         private void addPermissionAppOp(@NonNull PackageInfo packageInfo,
                 @NonNull PermissionInfo permissionInfo) {
-            if (!permissionInfo.isRuntime()) {
+            // TODO: Sync all permissions in the future.
+            if (!permissionInfo.isRestricted() && permissionInfo.backgroundPermission == null) {
                 return;
             }
 
