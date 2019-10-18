@@ -25,7 +25,7 @@ import com.android.internal.annotations.Immutable;
 import com.android.internal.util.DataClass;
 
 /**
- * When an {@link AppOpsManager#noteOp(String, int, String, String) app-op is noted} and the
+ * When an {@link AppOpsManager#noteOp(String, int, String, String, String) app-op is noted} and the
  * app the app-op is noted for has a {@link AppOpsManager.AppOpsCollector} registered the note-event
  * needs to be delivered to the collector. Usually this is done via an {@link SyncNotedAppOp}, but
  * in some cases this is not possible. In this case an {@link AsyncNotedAppOp} is send to the system
@@ -50,6 +50,9 @@ public final class AsyncNotedAppOp implements Parcelable {
      * be determined (e.g. when the op is noted from native code).
      */
     private final @Nullable String mNotingPackageName;
+
+    /** {@link android.content.Context#createFeatureContext Feature} in the app */
+    private final @Nullable String mFeatureId;
 
     /** Message associated with the noteOp. This message is set by the app noting the op */
     private final @NonNull String mMessage;
@@ -89,6 +92,8 @@ public final class AsyncNotedAppOp implements Parcelable {
      * @param notingPackageName
      *   Package that noted the op. {@code null} if the package name that noted the op could be not
      *   be determined (e.g. when the op is noted from native code).
+     * @param featureId
+     *   {@link android.content.Context#createFeatureContext Feature} in the app
      * @param message
      *   Message associated with the noteOp. This message is set by the app noting the op
      * @param time
@@ -100,6 +105,7 @@ public final class AsyncNotedAppOp implements Parcelable {
             @IntRange(from = 0, to = AppOpsManager._NUM_OP - 1) int opCode,
             @IntRange(from = 0) int notingUid,
             @Nullable String notingPackageName,
+            @Nullable String featureId,
             @NonNull String message,
             @IntRange(from = 0) long time) {
         this.mOpCode = opCode;
@@ -112,6 +118,7 @@ public final class AsyncNotedAppOp implements Parcelable {
                 IntRange.class, null, mNotingUid,
                 "from", 0);
         this.mNotingPackageName = notingPackageName;
+        this.mFeatureId = featureId;
         this.mMessage = message;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMessage);
@@ -138,6 +145,14 @@ public final class AsyncNotedAppOp implements Parcelable {
     @DataClass.Generated.Member
     public @Nullable String getNotingPackageName() {
         return mNotingPackageName;
+    }
+
+    /**
+     * {@link android.content.Context#createFeatureContext Feature} in the app
+     */
+    @DataClass.Generated.Member
+    public @Nullable String getFeatureId() {
+        return mFeatureId;
     }
 
     /**
@@ -172,6 +187,7 @@ public final class AsyncNotedAppOp implements Parcelable {
                 && mOpCode == that.mOpCode
                 && mNotingUid == that.mNotingUid
                 && java.util.Objects.equals(mNotingPackageName, that.mNotingPackageName)
+                && java.util.Objects.equals(mFeatureId, that.mFeatureId)
                 && java.util.Objects.equals(mMessage, that.mMessage)
                 && mTime == that.mTime;
     }
@@ -186,6 +202,7 @@ public final class AsyncNotedAppOp implements Parcelable {
         _hash = 31 * _hash + mOpCode;
         _hash = 31 * _hash + mNotingUid;
         _hash = 31 * _hash + java.util.Objects.hashCode(mNotingPackageName);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mFeatureId);
         _hash = 31 * _hash + java.util.Objects.hashCode(mMessage);
         _hash = 31 * _hash + Long.hashCode(mTime);
         return _hash;
@@ -199,10 +216,12 @@ public final class AsyncNotedAppOp implements Parcelable {
 
         byte flg = 0;
         if (mNotingPackageName != null) flg |= 0x4;
+        if (mFeatureId != null) flg |= 0x8;
         dest.writeByte(flg);
         dest.writeInt(mOpCode);
         dest.writeInt(mNotingUid);
         if (mNotingPackageName != null) dest.writeString(mNotingPackageName);
+        if (mFeatureId != null) dest.writeString(mFeatureId);
         dest.writeString(mMessage);
         dest.writeLong(mTime);
     }
@@ -222,6 +241,7 @@ public final class AsyncNotedAppOp implements Parcelable {
         int opCode = in.readInt();
         int notingUid = in.readInt();
         String notingPackageName = (flg & 0x4) == 0 ? null : in.readString();
+        String featureId = (flg & 0x8) == 0 ? null : in.readString();
         String message = in.readString();
         long time = in.readLong();
 
@@ -235,6 +255,7 @@ public final class AsyncNotedAppOp implements Parcelable {
                 IntRange.class, null, mNotingUid,
                 "from", 0);
         this.mNotingPackageName = notingPackageName;
+        this.mFeatureId = featureId;
         this.mMessage = message;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMessage);
@@ -261,10 +282,10 @@ public final class AsyncNotedAppOp implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1571246617363L,
+            time = 1571327470155L,
             codegenVersion = "1.0.9",
             sourceFile = "frameworks/base/core/java/android/app/AsyncNotedAppOp.java",
-            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=91L) int mOpCode\nprivate final @android.annotation.IntRange(from=0L) int mNotingUid\nprivate final @android.annotation.Nullable java.lang.String mNotingPackageName\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.annotation.IntRange(from=0L) long mTime\npublic @android.annotation.NonNull java.lang.String getOp()\nclass AsyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genHiddenConstructor=true)")
+            inputSignatures = "private final @android.annotation.IntRange(from=0L, to=91L) int mOpCode\nprivate final @android.annotation.IntRange(from=0L) int mNotingUid\nprivate final @android.annotation.Nullable java.lang.String mNotingPackageName\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.annotation.IntRange(from=0L) long mTime\npublic @android.annotation.NonNull java.lang.String getOp()\nclass AsyncNotedAppOp extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genAidl=true, genHiddenConstructor=true)")
     @Deprecated
     private void __metadata() {}
 

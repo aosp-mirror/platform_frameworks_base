@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
+import android.app.AppOpsManager.OpFeatureEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -17,6 +18,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.LongSparseLongArray;
+import android.util.Pair;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -162,7 +164,11 @@ public class RecentLocationAppsTest {
         final LongSparseLongArray durations = new LongSparseLongArray();
         durations.put(AppOpsManager.makeKey(AppOpsManager.UID_STATE_TOP,
                 AppOpsManager.OP_FLAG_SELF), duration);
-        return new OpEntry(op, false, AppOpsManager.MODE_ALLOWED, accessTimes,
-                null /*rejectTimes*/, durations, null /* proxyUids */, null /* proxyPackages */);
+
+        OpFeatureEntry.Builder featureEntry = new OpFeatureEntry.Builder(false, accessTimes,
+                null /*rejectTimes*/, durations, null /* proxyUids */,
+                null /* proxyPackages */, null /* proxyFeatureIds */);
+        return new OpEntry(op, AppOpsManager.MODE_ALLOWED,
+                new Pair[]{new Pair(null, featureEntry)});
     }
 }

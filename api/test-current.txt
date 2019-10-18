@@ -305,6 +305,7 @@ package android.app {
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
     method public int describeContents();
     method public long getDuration();
+    method @NonNull public java.util.Map<java.lang.String,android.app.AppOpsManager.OpFeatureEntry> getFeatures();
     method public long getLastAccessBackgroundTime(int);
     method public long getLastAccessForegroundTime(int);
     method public long getLastAccessTime(int);
@@ -318,13 +319,35 @@ package android.app {
     method public long getLastRejectTime(int, int, int);
     method public int getMode();
     method @NonNull public String getOpStr();
+    method @Deprecated @Nullable public String getProxyPackageName();
+    method @Nullable public String getProxyPackageName(int, int);
+    method @Deprecated public int getProxyUid();
+    method public int getProxyUid(int, int);
+    method public boolean isRunning();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEntry> CREATOR;
+  }
+
+  public static final class AppOpsManager.OpFeatureEntry {
+    method public long getDuration();
+    method public long getLastAccessBackgroundTime(int);
+    method public long getLastAccessForegroundTime(int);
+    method public long getLastAccessTime(int);
+    method public long getLastAccessTime(int, int, int);
+    method public long getLastBackgroundDuration(int);
+    method public long getLastDuration(int, int, int);
+    method public long getLastForegroundDuration(int);
+    method public long getLastRejectBackgroundTime(int);
+    method public long getLastRejectForegroundTime(int);
+    method public long getLastRejectTime(int);
+    method public long getLastRejectTime(int, int, int);
+    method @Nullable public String getProxyFeatureId();
+    method @Nullable public String getProxyFeatureId(int, int);
     method @Nullable public String getProxyPackageName();
     method @Nullable public String getProxyPackageName(int, int);
     method public int getProxyUid();
     method public int getProxyUid(int, int);
     method public boolean isRunning();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEntry> CREATOR;
   }
 
   public class DownloadManager {

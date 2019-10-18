@@ -684,10 +684,12 @@ public class AppStateTrackerTest {
         List<OpEntry> entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                new Pair[0]));
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                new Pair[0]));
 
         ops.add(new PackageOps(PACKAGE_1, UID_1, entries));
 
@@ -695,7 +697,8 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                new Pair[0]));
 
         ops.add(new PackageOps(PACKAGE_2, UID_2, entries));
 
@@ -703,7 +706,8 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_ALLOWED));
+                AppOpsManager.MODE_ALLOWED,
+                new Pair[0]));
 
         ops.add(new PackageOps(PACKAGE_1, UID_10_1, entries));
 
@@ -711,10 +715,12 @@ public class AppStateTrackerTest {
         entries = new ArrayList<>();
         entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                new Pair[0]));
         entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
-                AppOpsManager.MODE_IGNORED));
+                AppOpsManager.MODE_IGNORED,
+                new Pair[0]));
 
         ops.add(new PackageOps(PACKAGE_3, UID_10_3, entries));
 
