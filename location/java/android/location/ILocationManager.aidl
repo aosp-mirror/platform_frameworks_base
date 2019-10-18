@@ -31,6 +31,7 @@ import android.location.Location;
 import android.location.LocationRequest;
 import android.location.LocationTime;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 
 import com.android.internal.location.ProviderProperties;
 
@@ -41,6 +42,11 @@ import com.android.internal.location.ProviderProperties;
  */
 interface ILocationManager
 {
+    Location getLastLocation(in LocationRequest request, String packageName);
+    boolean getCurrentLocation(in LocationRequest request,
+            in ICancellationSignal cancellationSignal, in ILocationListener listener,
+            String packageName, String listenerIdentifier);
+
     void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
             in PendingIntent intent, String packageName, String listenerIdentifier);
     void removeUpdates(in ILocationListener listener, in PendingIntent intent, String packageName);
@@ -48,8 +54,6 @@ interface ILocationManager
     void requestGeofence(in LocationRequest request, in Geofence geofence,
             in PendingIntent intent, String packageName, String listenerIdentifier);
     void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
-
-    Location getLastLocation(in LocationRequest request, String packageName);
 
     boolean registerGnssStatusCallback(IGnssStatusListener callback, String packageName);
     void unregisterGnssStatusCallback(IGnssStatusListener callback);
