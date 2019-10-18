@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lehetővé teszi az alkalmazás számára, hogy SMS-eket fogadjon és dolgozzon fel. Ez azt jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"szöveges üzenetek (MMS) fogadása"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lehetővé teszi az alkalmazás számára, hogy MMS-eket fogadjon és dolgozzon fel. Ez azt jelenti, hogy az alkalmazás megfigyelheti vagy törölheti a beérkező üzeneteket anélkül, hogy Ön látná azokat."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Cellán belüli üzenetek továbbítása"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Az alkalmazás összekapcsolódhat a cellán belüli üzenetszórás moduljával, hogy az érkezésükkor továbbítani tudja a cellán belüli üzeneteket. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások vészhelyzeti cellaüzenet érkezésekor befolyásolhatják az eszköz teljesítményét és működését."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"cellán belüli üzenetek olvasása"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Lehetővé teszi az alkalmazás számára az eszközre érkező cellán belüli üzenetek olvasását. Bizonyos helyeken figyelmeztető üzeneteket kaphat a cellán belül a vészhelyzetekről. A rosszindulatú alkalmazások befolyásolhatják az eszköz  teljesítményét vagy működését vészhelyzeti cellaüzenet érkezésekor."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"feliratkozott hírcsatornák olvasása"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Az alkalmazás olvashatja és szerkesztheti a „Ne zavarjanak” funkció beállításait."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"engedélyhasználat megtekintésének elindítása"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Lehetővé teszi a felhasználó számára, hogy elindítsa az alkalmazás engedélyhasználatát. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"A kisegítő lehetőségek gyorsparancs célja"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Engedélyezi az alkalmazásoknak a kisegítő lehetőségek gyorsparancs céljának meghatározását."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Képernyőzár-feloldási kísérletek figyelése"</string>

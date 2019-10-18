@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ilovaga SMS xabarlarini qabul qilish va va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"MMS xabarlarni olish"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ilovaga MMS xabarlarini qabul qilish va ularni qayta ishlash uchun ruxsat beradi. Bu sizga yuborilgan xabarlarni ilova sizga ko‘rsatmasdan kuzatishi va o‘chirishi mumkinligini bildiradi."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Aholini ogohlantirish xabarlarini uzatish"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Qabul qilingan aholini ogohlantirish xabarlarini shu holicha uzatish uchun ilovani aholini ogohlantirish moduliga bogʻlash imkonini beradi. Ilovaga ayrim mamlakatlarda aholini favqulodda vaziyatlarda ogohlantirish uchun yuboriladigan tarqatma xabarlarni oʻqish uchun ruxsat beradi. Zararli dasturlar bunday xabarlar kelayotgan qurilmaning ishlashiga xalaqit qilishi mumkin."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"uyali tarmoq operatori xabarlarini o‘qish"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ilovaga qurilmangiz tomonidan qabul qilingan uyali tarmoq operatori xabarlarini o‘qish uchun ruxsat beradi. Uyali tarmoq operatorining ogohlantiruvchi xabarlari ba’zi manzillarga favqulodda holatlar haqida ogohlantirish uchun jo‘natiladi. Zararli ilovalar uyali tarmoq orqali favqulodda xabar qabul qilinganda qurilmangizning ish faoliyati yoki amallariga xalaqit qilishi mumkin"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"obunalarni o‘qish"</string>
@@ -536,7 +534,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"PIN kod, grafik kalit yoki parol sozlanmagan"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmoq izi qisman aniqlandi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmoq izi aniqlanmadi. Qaytadan urining."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Skanerni tozalab, keyin qaytadan urining."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmoq izi skanerini tozalab, keyin qaytadan urining."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Barmoq juda tez harakatlandi. Qaytadan urining."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"“Bezovta qilinmasin” rejimi sozlamalarini ko‘rish va o‘zgartirish."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"foydalaniladigan ruxsatlar axborotini ochish"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Ilova foydalanadigan ruxsatlar axborotini ishga tushirishga ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"tezkor yoqish maqsadi"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Ilova tezkor yoqish maqsadini aniqlay oladi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekranni qulfdan chiqarishga urinishlarni nazorat qilish"</string>

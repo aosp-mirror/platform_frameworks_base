@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"به برنامه اجازه می‌دهد پیامک‌ها را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"دریافت پیام‌های نوشتاری (فراپیام)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"به برنامه اجازه می‌دهد پیام‌های فراپیام را دریافت و پردازش کند. این یعنی برنامه می‌تواند پیام‌های ارسالی به دستگاه شما را بدون نمایش آن‌ها به شما حذف یا کنترل کند."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"بازارسال پیام‌های پخش سلولی"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"به برنامه امکان می‌دهد به مدول پخش سلولی متصل شود تا پیام‌های پخش سلولی را به محض دریافت بازارسال کند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی ارسال می‌شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‌شود، ممکن است برنامه‌های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"خواندن پیام‌های پخش سلولی"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"‏به برنامه اجازه می‎دهد پیام‌های پخش سلولی دستگاه شما را بخواند. هشدارهای پخش سلولی در برخی از موقعیت‌های مکانی تحویل داده می‎شوند تا موقعیت‌های اضطراری را به شما اعلام کنند. وقتی پخش سلولی دریافت می‎شود، ممکن است برنامه‎های مخرب در عملکرد یا کارکرد دستگاه شما اختلال ایجاد کنند."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"خواندن فیدهای مشترک"</string>
@@ -553,7 +551,7 @@
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"تلاش‌های بسیاری زیادی انجام شده است. حسگر اثر انگشت غیرفعال شد."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوباره امتحان کنید."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"اثر انگشتی ثبت نشده است."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"این دستگاه حسگر اثرانگشت ندارد."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"این دستگاه حسگر اثر انگشت ندارد."</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"به برنامه امکان می‌دهد پیکربندی «مزاحم نشوید» را بخواند و بنویسد."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"شروع مشاهده استفاده از مجوز"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"به دارنده اجازه شروع استفاده از مجوز را برای برنامه می‌دهد. هرگز برای برنامه‌های معمول نیاز نیست."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"مقصد میان‌بر دسترس‌پذیری"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"به برنامه اجازه می‌دهد مقصد میانبر دسترس‌پذیری را تعریف کند."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین گذرواژه"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"پایش تلاش‌های باز کردن قفل صفحه"</string>

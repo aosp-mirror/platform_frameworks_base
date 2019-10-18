@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"允许该应用接收和处理短信。这就意味着，该应用可能会监视发送到您设备的短信，或删除发送到您设备的短信而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"接收讯息（彩信）"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"允许该应用接收和处理彩信。这就意味着，该应用可能会监视发送到您设备的彩信，或删除发送到您设备的彩信而不向您显示。"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"转发小区广播消息"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"允许应用绑定到小区广播模块，以便及时转发收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您的设备收到紧急小区广播时干扰设备的性能或操作。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"读取小区广播消息"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"允许应用读取您的设备收到的小区广播消息。小区广播消息是在某些地区发送的、用于发布紧急情况警告的提醒信息。恶意应用可能会在您收到小区紧急广播时干扰您设备的性能或操作。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"读取订阅的供稿"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"允许此应用读取和写入“勿扰”模式配置。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"授权使用“查看权限”"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"允许该应用开始查看应用的权限使用情况（普通应用绝不需要此权限）。"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"无障碍功能快捷方式目标"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"允许应用定义无障碍功能快捷方式目标。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"监控屏幕解锁尝试次数"</string>

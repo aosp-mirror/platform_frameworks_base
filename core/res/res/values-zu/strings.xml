@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ivumela uhlelo lokusebenza ukuthola nokucubungula imilayezo ye-SMS. Loku kuchaza ukuthi uhlelo lokusebenza lungangamela noma lesuse imilayezo ethunyelwe kudivayisi yakho ngaphandle kokukubonisa yona."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"thola imiyalezo ebhaliwe (i-MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ivumela uhlelo lokusebenza ukuthola nokucubungula imilayezo ye-MMS. Loku kuchaza ukuthi uhlelo lokusebenza lungangamela noma lesuse imilayezo ethunyelwe kudivayisi yakho ngaphandle kokukubonisa yona."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Dlulisela imilayezo yokusakaza kweselula"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Ivumela uhlelo lokusebenza ukuthi luboshezelwe kumojuli yokusakaza kweselula ukuze kudluliselwe imilayezo yokusakaza yeselula njengoba itholwa. Izexwayiso zokusakaza kweselula zilethwa kwezinye izindawo ukuze zikuxwayise ngezimo zesimo esiphuthumayo. Izinhlelo zokusebenza ezinobungozi zingaphazamisa ngokusebenza noma ukusetshenziswa kwedivayisi yakho uma ukusakaza kweselula kwesimo esiphuthumayo kwamukelwa."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"funda imilayezo yokusakaza yeselula"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ivumela uhlelo lokusebenza ukufunda imilayezo yokusakaza yeselula etholwe idivayisi yakho. Izaziso zokusakaza zeselula zilethwa kwezinye izindawo ukukuxwayisa ngezimo ezisheshayo. Izinhlelo zokusebenza ezingalungile zingaphazamisana nokusebenza noma umsebenzi wedivayisi yakho uma ukusakaza kweselula kwesimo esisheshayo kutholwa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"funda izifunzo ezikhokhelwayo"</string>
@@ -541,14 +539,14 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Umnwe uhanjiswe kancane kakhulu. Sicela uzame futhi."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Isingxivizo somunwe sigunyaziwe"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Izigxivizo zeminwe zigunyaziwe"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Ubuso bufakazelwe ubuqiniso"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Ukuqinisekiswa kobuso, sicela ucindezele okuthi qinisekisa"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Izingxenyekazi zekhompuyutha zezingxivizo zeminwe azitholakali."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Izingxenyekazi zekhompuyutha zezigxivizo zeminwe azitholakali."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Izigxivizo zeminwe azikwazi ukugcinwa. Sicela ususe izigxivizo zeminwe ezikhona."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Kufinyelelwe isikhathi sokuvala sezigxivizo zeminwe. Zama futhi"</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Ukusebenza kwezingxivizo zeminwe kukhanseliwe."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Umsebenzi wesigxivizo somunwe sikhanselwe umsebenzisi."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Ukusebenza kwezigxivizo zeminwe kukhanseliwe."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Umsebenzi wezigxivizo zomunwe ukhanselwe umsebenzisi."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Imizamo eminingi kakhulu. Zama futhi emuva kwesikhathi."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Imizamo eminingi kakhulu. Inzwa yezigxivizo zeminwe ikhutshaziwe."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Zama futhi."</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ivumela izinhlelo zokusebenza ukufunda nokubhala ukulungiswa kokuthi Ungaphazamisi."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"qala ukusetshenziswa kokubuka imvume"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Ivumela umphathi ukuthi aqale ukusetshenziswa kwemvume kohlelo lokusebenza. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"impokophelo yesinqamuleli sokufinyeleleka"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Ivumela uhlelo lokusebenza ukuthi luchaze impokophelo yesinqamuleli sokufinyeleleka."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi wokukhiya isikrini nama-PIN."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Qapha imizamo yokuvula isikrini sakho"</string>

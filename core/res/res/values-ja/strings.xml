@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMSメッセージの受信と処理をアプリに許可します。これにより、アプリがデバイスに届いたメッセージを表示することなく監視または削除できるようになります。"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"テキストメッセージ（MMS）の受信"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMSメッセージの受信と処理をアプリに許可します。これにより、アプリがデバイスに届いたメッセージを表示することなく監視または削除できるようになります。"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"緊急速報メールの転送"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"受信した緊急速報メールを転送するために、緊急速報メール モジュールにバインドすることをこのアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによってデバイスの動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"緊急速報メール SMS の読み取り"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"デバイスで受信した緊急速報メール SMS の読み取りをアプリに許可します。緊急速報メールは、緊急事態を警告する目的で一部の地域に配信されます。緊急速報メールの受信時に、悪意のあるアプリによってデバイスの動作や処理が妨害される恐れがあります。"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"登録したフィードの読み取り"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"表示権限の使用の開始"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"アプリの権限使用の開始を所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ユーザー補助ショートカットのターゲット"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"ユーザー補助ショートカットのターゲットの定義付けをアプリに許可します。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"画面ロック解除試行の監視"</string>
@@ -1195,7 +1191,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"常に表示"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> は、互換性のない Android OS バージョン用にビルドされているため、予期しない動作が発生するおそれがあります。アプリの更新バージョンを利用できる場合があります。"</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"常に表示"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"アップデートをチェック"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"アップデートを確認"</string>
     <string name="smv_application" msgid="3307209192155442829">"アプリ「<xliff:g id="APPLICATION">%1$s</xliff:g>」（プロセス「<xliff:g id="PROCESS">%2$s</xliff:g>」）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"スマートフォンの更新中…"</string>

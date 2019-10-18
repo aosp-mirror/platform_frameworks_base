@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tətbiqə MMS mesajlarını almaq və emal etmək icazəsi verir. Bu o deməkdir ki, tətbiq sizin mesajlarınızı sizə göstərmədən monitorinq edə və ya silə bilər."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"mətn mesajlarını qəbul edir (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tətbiqə MMS mesajlarını qəbul və emal üçün imkan verir. Bu o deməkdir ki, bu tətbiq sizə göstərmədən cihazınıza göndərilən mesajları silə bilər."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Şəbəkə yayımı mesajlarını yönləndirin"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Tətbiqə şəbəkə yayım mesajlarını əldə edildiyi anda yönləndirmək üçün şəbəkə yayımı moduluna bağlanmaq icazəsi verir. Şəbəkə yayımı bəzi məkanlarda olan fövqəladə hadisələrlə bağlı Sizi xəbərdar etmək üçün qəbul edilir. Zərərli tətbiqlər fövqəladə şəbəkə yayımı əldə edildiyi zaman cihazın performansına və əməliyyatına müdaxilə edə bilər."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"mobil yayım mesajlarını oxuyur"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tətbiqə telefonunuz tərəfindən alınmış yayım mesajlarını oxuma icazəsi verir. Telefon yayımı bəzi məkanlarda olan fövqəladə hadisələrlə bağlı sizi xəbərdar etmək üçün qəbul edilir. Zərərli tətbiqlər təcili mobil yayım qəbul edildiyi zaman telefonunun performansına və əməliyyatına müdaxilə edə bilər."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abunə olunmuş xəbərləri oxuyur"</string>
@@ -534,7 +532,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Tanınmır"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"Doğrulama ləğv edildi"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Pin, nümunə və ya parol ayarlanmayıb"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmaq qismən müəyyən olundu. Lütfən, yenidən cəhd edin."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmaq izi yarımçıq müəyyən olundu. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmaq izi tanınmadı. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Barmaq izi sensoru çirklidir. Lütfən, təmizləyin və yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Barmağı çox tez tərpətdiniz. Yenidən edin."</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Tətbiqə \"Narahat Etməyin\" konfiqurasiyasını oxumağa və yazmağa icazə verin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"Baxış icazəsinin istifadəsinə başlayın"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Sahibinə tətbiqin icazədən istifadəsinə başlamağa imkan verir. Adi tətbiqlər üçün heç vaxt tələb edilmir."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"əlçatımlılıq qısayolunun hədəfi"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Tətbiqə əlçatımlılıq qısayolunun hədəfini müəyyən etməyə imkan verir."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qaydalarını təyin edin"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidinin parolu və PINlərində icazə verilən uzunluq və simvollara nəzarət edin."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekranı kiliddən çıxarmaq üçün edilən cəhdlərə nəzarət edin"</string>

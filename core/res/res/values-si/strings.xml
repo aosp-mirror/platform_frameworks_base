@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS පණිවිඩ ලැබීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. මෙහි තේරුම යෙදුමට ඔබගේ උපාංගයට ලැබෙන පණිවිඩ අධීක්ෂණය කිරීමට හැකිවීම වන අතර, ඒවා ඔබට නොපෙන්වා මකා දැමීමටද හැකි වීමයි."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"පෙළ පණිවුඩ ලබාගන්න (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"සෙල් විකාශන පණිවිඩ යොමු කිරීම"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"සෙල් විකාශන පණිවිඩ ලැබුණු විට ඒවා යොමු කිරීම සඳහා සෙල් විකාශන මොඩියුලයට බැඳීමට යෙදුමට ඉඩ දෙයි. හදිසි අවස්ථා පිළිබඳව ඔබට අනතුරු ඇඟවීම සඳහා සෙල් විකාශන ඇඟවීම් සමහර ස්ථානවල ලබා දෙනු ලැබේ. හදිසි සෙල් විකාශනයක් ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම්වලින් ඔබගේ උපාංග කාර්ය සාධනයට හෝ මෙහෙයුමට බාධා සිදු විය හැකිය."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"සෙල් ප්‍රචාරණ පණිවිඩ කියවීම"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ඔබගේ උපාංගයට ලැබුණු සෙල් විකාශන පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. ඔබට හදිසි අවස්ථාවන් පිළිබඳ අනතුරු ඇඟවීමට සෙල් විකාශන පණිවිඩ ඇතැම් ස්ථානවල සිට යවනු ලබයි. හදිසි සෙල් විකාශන ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම් මඟින් ඔබගේ උපාංගයට කාර්ය සාධනයට හෝ ක්‍රියකරණයට බාධා සිදුවිය හැක."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"දායක වූ සංග්‍රහ කියවීම"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"අවසර භාවිතය බැලීමට ආරම්භ කරන්න"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"තබා සිටින්නාට යෙදුමක් සඳහා අවසර භාවිතය ආරම්භ කිරීමට ඉඩ දෙයි. සාමාන්‍ය යෙදුම් සඳහා කිසි විටෙක අවශ්‍ය නොවිය යුතු ය."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ප්‍රවේශ්‍යතා කෙටිමං ඉලක්කය"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"ප්‍රවේශ්‍යතා කෙටිමං ඉලක්කය නිර්වචනය කිරීමට යෙදුමකට ඉඩ දෙන්න."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1589,7 +1585,7 @@
     <string name="expires_on" msgid="3676242949915959821">"කල් ඉකුත් වන්නේ:"</string>
     <string name="serial_number" msgid="758814067660862493">"අනුක්‍රමාංකය:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"ඇඟිලි සලකුණු:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ඇඟිලිසලකුණ:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 ඇඟිලි සලකුණ:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 ඇඟිලි සලකුණ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"සියල්ල බලන්න"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ක්‍රියාකාරකම තෝරන්න"</string>

@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS मेसेज प्राप्त करण्याची आणि त्यावर प्रक्रिया करण्याची अ‍ॅप ला अनुमती देते. म्हणजेच अ‍ॅप आपल्या डीव्हाइसवर पाठविलेले मेसेज तुम्हाला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"मजकूर मेसेज मिळवा (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS मेसेज प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यास अ‍ॅप ला अनुमती देते. म्हणजेच अ‍ॅप आपल्या डिव्हाइसवर पाठविलेले मेसेज तुम्हाला न दर्शवता त्यांचे परीक्षण करू किंवा ते हटवू शकतो."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"सेल प्रसारण मेसेज फॉरवर्ड करा"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"सेल प्रसारण मेसेज मिळाल्यानंतर ते फॉरवर्ड करण्यासाठी अॅपला सेल प्रसारण मॉड्यूलमध्ये प्रतिबद्ध करण्याची अनुमती देते. काही स्थानांमध्ये तुम्हाला आणीबाणीच्या परिस्थीतींची चेतावणी देण्यासाठी सेल प्रसारण सूचना वितरित केल्या जातात. दुर्भावनापूर्ण अॅप्स आणीबाणी सेल प्रसारण मिळवतात तेव्हा ती तुमच्या डिव्हाइसच्या परफॉर्मन्समध्ये किंवा कामामध्ये कदाचित व्यत्यय आणू शकतात."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"सेल प्रसारण मेसेज वाचा"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"आपल्या डिव्हाइसद्वारे प्राप्त केलेले सेल प्रसारण मेसेज वाचण्यासाठी अ‍ॅप ला अनुमती देते. काही स्थानांमध्ये तुम्हाला आणीबाणीच्या परिस्थितीची चेतावणी देण्यासाठी सेल प्रसारण सूचना वितरीत केल्या जातात. आणीबाणी सेल प्रसारण प्राप्त होते तेव्हा आपल्या डिव्हाइसच्या कार्यप्रदर्शनात किंवा कार्यात दुर्भावनापूर्ण अ‍ॅप्स व्यत्यय आणू शकतात."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"सदस्यता घेतलेली फीड वाचा"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"व्यत्यय आणू नका कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"व्ह्यू परवानगी वापर सुरू करा"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"धारकास अ‍ॅपसाठी परवानगी वापरणे सुरू करण्याची अनुमती देते. सामान्य अ‍ॅप्ससाठी कधीही आवश्यकता नसते."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"अॅक्सेसिबिलिटी शॉर्टकट लक्ष्य"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"अ‍ॅपला अॅक्सेसिबिलिटी शॉर्टकट लक्ष्याबद्दल सांगण्यासाठी अनुमती द्या."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>

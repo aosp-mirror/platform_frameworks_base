@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Разрешава на приложението да получава и обработва SMS съобщения. Това означава, че то може да наблюдава или изтрива изпратените до устройството ви, без да ви ги покаже."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"получаване на текстови съобщения (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Разрешава на приложението да получава и обработва MMS съобщения. Това означава, че то може да наблюдава или изтрива изпратените до устройството ви, без да ви ги покаже."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Препращане на съобщения с клетъчно излъчване"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Разрешава на приложението да се обвърже с модула за клетъчно излъчване, за да препраща получените съобщения с клетъчно излъчване. Сигналите с клетъчно излъчване се получават на някои местоположения, за да ви предупредят за спешни случаи. Злонамерените приложения могат да възпрепятстват изпълнението или работата на устройството ви при получаване на такова спешно излъчване."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"четене на съобщения с клетъчно излъчване"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Разрешава на приложението да чете съобщения с клетъчно излъчване, получени от устройството ви. Сигналите с клетъчно излъчване се получават на някои местоположения, за да ви предупредят за спешни ситуации. Злонамерените приложения могат да възпрепятстват изпълнението или работата на устройството ви при получаване на такова спешно излъчване."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"четене на емисиите с абонамент"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Предоставя на приложението достъп за четене и запис до конфигурацията на „Не безпокойте“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"стартиране на прегледа на използваните разрешения"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Разрешава на притежателя да стартира прегледа на използваните разрешения за дадено приложение. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"цел на прекия път към функцията за достъпност"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Разрешава на приложението да определя целта на прекия път към функцията за достъпност."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролира дължината и разрешените знаци за паролите и ПИН кодовете за заключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Наблюдаване на опитите за отключване на екрана"</string>
@@ -1587,8 +1583,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Изтича на:"</string>
     <string name="serial_number" msgid="758814067660862493">"Сериен номер:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Пръстови отпечатъци:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Пръстов отпечатък SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Пръстов отпечатък SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Отпечатък SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Отпечатък SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Вижте всички"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Избор на активност"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Споделяне със:"</string>

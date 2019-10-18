@@ -347,10 +347,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Ļauj lietotnei saņemt un apstrādāt īsziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"saņemt ziņojumus (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Ļauj lietotnei saņemt un apstrādāt multiziņas. Tas nozīmē, ka lietotne var pārraudzīt vai dzēst uz jūsu ierīci nosūtītos ziņojumus, neparādot tos jums."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Pārsūtīt šūnu apraides ziņojumus"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Ļauj piesaistīt lietotni šūnu apraides modulim, lai pārsūtītu šūnu apraides ziņojumus, tiklīdz tie tiek saņemti. Šūnu apraides brīdinājumi tiek piegādāti noteiktās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"šūnu apraides ziņojumu lasīšana"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Ļauj lietotnei lasīt ierīcē saņemtos šūnu apraides ziņojumus. Šūnu apraides brīdinājumi tiek piegādāti dažās atrašanās vietās, lai brīdinātu jūs par ārkārtas situācijām. Ļaunprātīgas lietotnes var traucēt ierīces veiktspēju vai darbības, kad ir saņemts ārkārtas šūnas apraides ziņojums."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lasīt abonētās plūsmas"</string>
@@ -662,8 +660,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ļauj lietotnei lasīt un rakstīt režīma “Netraucēt” konfigurāciju."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"Datu skatīšana par izmantojamajām atļaujām"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Ļauj atļaujas īpašniekam sākt lietotnes atļauju izmantošanu. Parastām lietotnēm tas nekad nav nepieciešams."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"pieejamības īsinājumtaustiņa mērķis"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Ļauj lietotnei definēt pieejamības īsinājumtaustiņa mērķi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolēt ekrāna bloķēšanas paroļu un PIN garumu un tajos atļautās rakstzīmes."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>

@@ -324,7 +324,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"မျက်နှာပြင် ဇူးမ်အရွယ်နှင့် နေရာချထားခြင်းကို ထိန်းချုပ်ပါသည်။"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"လက်ဟန်များ အသုံးပြုပါ"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"တို့ခြင်း၊ ပွတ်ဆွဲခြင်း၊ နှင့် အခြား လက်ဟန်များကို အသုံးပြုနိုင်ပါသည်။"</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"လက်ဗွေရာများ"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"လက်ဗွေဟန်များ"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"စက်ပစ္စည်း၏ လက်ဗွေအာရုံခံကိရိယာတွင် လုပ်ဆောင်ထားသည့် လက်ဟန်များကို မှတ်သားထားနိုင်သည်။"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"အခြေအနေပြဘားအား အလုပ်မလုပ်ခိုင်းရန်သို့မဟုတ် မွမ်းမံရန်"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"အက်ပ်အား အခြေအနေပြ ဘားကို ပိတ်ခွင့် သို့မဟတ် စနစ် အိုင်ကွန်များကို ထည့်ခြင်း ဖယ်ရှားခြင်း ပြုလုပ်ခွင့် ပြုသည်။"</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"အပလီကေးရှင်းအား စာတိုများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"စာပို့ခြင်းအား လက်ခံရယူခြင်း (ရုပ်သံစာ)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"အပလီကေးရှင်းအား ရုပ်သံစာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"စာတို ဖြန့်ဝေခြင်းစနစ်သုံး မက်ဆေ့ဂျ်များကို ထပ်ဆင့်ပို့ခြင်း"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"စာတို ဖြန့်ဝေခြင်းစနစ် မော်ဂျူးကိုပေါင်းရန် အက်ပ်များအား ခွင့်ပြုသည်။ ၎င်းမှာ စာတို ဖြန့်ဝေခြင်းစနစ်သုံး မက်ဆေ့ဂျ်များကို လက်ခံရရှိသည့်အတိုင်း ထပ်ဆင့်ပို့ရန် ဖြစ်သည်။ အချို့တည်နေရာများတွင် သင့်အား အရေးပေါ်အခြေအနေများကို သတိပေးရန် စာတို ဖြန့်ဝေခြင်းစနစ်သုံး သတိပေးချက်များကို ပေးပို့သည်။ အရေးပေါ် စာတို ဖြန့်ဝေခြင်းကို ရရှိသည့်အခါ သံသယဖြစ်နိုင်ဖွယ်ရှိသည့် အက်ပ်များက သင့်စက်၏ စွမ်းဆောင်ရည်နှင့် အော်ပရေးရှင်းတို့ကို အနှောင့်အယှက်ပေးနိုင်သည်။"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"စာတိုများ ဖြန့်ဝေခြင်းစနစ်အား ဖတ်ခြင်း"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"အပလီကေးရှင်းကို သင်၏ စက်ပစ္စည်းမှ လက်ခံရရှိသော အများလွှင့်ထုတ်ချက်များကို ဖတ်ရန် ခွင့်ပြုသည်။  အများလွှင့်ထုတ်ချက်များသည် အရေးပေါ်အခြေအနေများကို သင့်အား သတိပေးရန် အချို့ နေရာများတွင် ပို့ပေးသည်။ အရေးပေါ်သတိပေးချက် ထုတ်လွှင့်ချက်ကို လက်ခံရရှိချိန်တွင်အန္တရာယ် ဖြစ်စေနိုင်သော အပလီကေးရှင်းများသည် သင့်စက်ပစ္စည်း၏ လုပ်ငန်းလည်ပတ်မှုနှင့် စွမ်းဆောင်မှုကို ဝင်စွက်ဖက်နိုင်သည်။"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"အမည်သွင်းထားသောဖိဖ့်များကို ဖတ်ခြင်း"</string>
@@ -516,10 +514,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"ဖုန်းမျက်နှာပြင်လော့ခ်၏ ရှုပ်ထွေးမှုအဆင့် (မြင့်၊ အလယ်အလတ်၊ နိမ့် သို့မဟုတ် မရှိ) အား လေ့လာရန် အက်ပ်ကို ခွင့်ပြုသည်။ ၎င်းက သတ်မှတ်ထားနိုင်သော ဖုန်းမျက်နှာပြင်လော့ခ်၏ စာလုံးရေနှင့် အမျိုးအစားကို ညွှန်ပြပေးသည်။ အသုံးပြုသူများအနေနှင့် ဖုန်းမျက်နှာပြင်လော့ခ်ကို အတိုင်းအတာတစ်ခုအထိ အဆင့်မြှင့်ရန် အက်ပ်က အကြံပြုနိုင်သည်။ သို့သော်လည်း အသုံးပြုသူများက ၎င်းကို ဂရုပြုမနေဘဲ လွတ်လပ်စွာ ကြည့်ရှုနိုင်ပါသည်။ ဖုန်းမျက်နှာပြင်လော့ခ်ကို စာသားအတိုင်း သိမ်းမထားသဖြင့် အက်ပ်သည် စကားဝှက်အစစ်ကို မသိနိုင်ကြောင်း သတိပြုပါ။"</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"ဇီဝဗေဒဆိုင်ရာ အချက်အလက်သုံး ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန်"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"အထောက်အထားစိစစ်ခြင်းအတွက် ဇီဝဗေဒဆိုင်ရာ သတင်းအချက်အလက်များသုံးသည့် ကွန်ပျူတာဆိုင်ရာ စက်ပစ္စည်းကို အသုံးပြုရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"လက်ဗွေရာပစ္စည်းကို စီမံမည်"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"အသုံးပြုရန်အတွက် လက်ဗွေရာပုံစံများကို ပေါင်းထည့်ရန် သို့မဟုတ် ဖျက်ရန်နည်းလမ်းများကို အပ်ဖ်အား အသုံးပြုခွင့်ပြုသည်။"</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"လက်ဗွေရာပစ္စည်းကို အသုံးပြုမည်"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"စစ်မှန်ကြောင်းအထောက်အထားပြသခြင်းအတွက် လက်ဗွေရာပစ္စည်းကို အသုံးပြုရန် အပ်ဖ်အားခွင့်ပြုသည်။"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"လက်ဗွေစစ်ပစ္စည်းကို စီမံခြင်း"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"အသုံးပြုရန်အတွက် လက်ဗွေပုံစံများကို ပေါင်းထည့်ရန် သို့မဟုတ် ဖျက်ရန်နည်းလမ်းများကို အပ်က်အား သုံးခွင့်ပြုသည်။"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"လက်ဗွေ စက်ပစ္စည်းကို အသုံးပြုခြင်း"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"အထောက်အထားစိစစ်ရန်အတွက် အက်ပ်ကို လက်ဗွေစစ်ပစ္စည်း သုံးခွင့်ပြုသည်"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"သင့်တေးဂီတ စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"အက်ပ်အား သင့်တေးဂီတစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"သင့်ဗီဒီယို စုစည်းမှုကို ပြုပြင်ခြင်း"</string>
@@ -534,8 +532,8 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"မသိ"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"ပင်နံပါတ်၊ လော့ခ်ပုံစံ သို့မဟုတ် စကားဝှက် သတ်မှတ်မထားပါ"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေရဦ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေရာယူခြင်း မဆောင်ရွက်နိုင်ပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"လက်ဗွေ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"လက်ဗွေယူ၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"လက်ဗွေဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ သန့်ရှင်းလိုက်ပြီး ပြန်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"လက်ညှိုး အလွန်မြန်ဆန်စွာ ရွေ့ခဲ့သည်။ ထပ်မံ ကြိုးစားပါ။"</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"လက်ညှိုးအလွန်နှေးကွေးစွာ ရွေ့ခဲ့သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
@@ -544,20 +542,20 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"လက်ဗွေကို အထောက်အထား စိစစ်ပြီးပါပြီ"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"မျက်နှာ အထောက်အထားစိစစ်ပြီးပြီ၊ အတည်ပြုရန်ကို နှိပ်ပါ"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"လက်ဗွေရာ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"လက်ဗွေရာ သိုလှောင်၍မရပါ။ ကျေးဇူးပြု၍ ရှိပြီးလက်ဗွေရာအား ဖယ်ရှားပါ။"</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေရာအချိန်ကုန် သွားပါသည်။ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"လက်ဗွေရာ လုပ်ငန်း ဖျက်သိမ်းခဲ့၏။"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"လက်ဗွေ စက်ပစ္စည်းမရနိုင်ပါ။"</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"လက်ဗွေ သိုလှောင်၍မရပါ။ လက်ရှိ လက်ဗွေကို ဖယ်ရှားပါ။"</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"လက်ဗွေယူချိန်ကုန် သွားပါသည်။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"လက်ဗွေယူခြင်း ပယ်ဖျက်လိုက်သည်။"</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"လက်ဗွေဖြင့် အထောက်အထားစိစစ်ခြင်းကို အသုံးပြုသူက ပယ်ဖျက်ထားသည်။"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ကြိုးစာမှု အကြိမ်များနေ၏။ နောက်မှ ထပ်မံကြိုးစားပါ။"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"အကြိမ်အရေအတွက် အလွန်များနေပါပြီ။ လက်ဗွေဖတ်စနစ်ကို ပိတ်ထားပါသည်။"</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"အကြိမ်အရေအတွက် အလွန်များနေပါပြီ။ လက်ဗွေအာရုံခံကိရိယာ ပိတ်ထားပါသည်။"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ပြန်ကြိုးစားပါ"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"မည်သည့် လက်ဗွေကိုမျှ ထည့်သွင်းမထားပါ။"</string>
     <string name="fingerprint_error_hw_not_present" msgid="409523969613176352">"ဤစက်တွင် လက်ဗွေအာရုံခံကိရိယာ မရှိပါ။"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"လက်ချောင်း <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"လက်ဗွေ အိုင်ကွန်"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"လက်ဗွေ သင်္ကေတ"</string>
     <string name="permlab_manageFace" msgid="7262837876352591553">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို စီမံခြင်း"</string>
     <string name="permdesc_manageFace" msgid="8919637120670185330">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အား သုံးခွင့်ပြုသည်။"</string>
     <string name="permlab_useFaceAuthentication" msgid="2565716575739037572">"မျက်နှာမှတ် သော့ဖွင့်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ် ပစ်မှတ်"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ် ပစ်မှတ်ကို အက်ပ်အား သတ်မှတ်ခွင့်ပြုသည်။"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"မျက်နှာပြင်လော့ခ်ဖွင့်ရန် ကြိုးပမ်းမှုများကို စောင့်ကြည့်ပါ"</string>
@@ -1165,7 +1161,7 @@
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"စနစ် ဆက်တင် ထဲမှာ ပုံသေကို ရှင်းလိုက်ပါ &gt; အက်ပ်များ &gt; ဒေါင်းလုဒ် လုပ်ပြီး။"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"လုပ်စရာ တစ်ခု ရွေးချယ်ပါ"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB ကိရိယာ အတွက် အက်ပ်တစ်ခု ရွေးပါ"</string>
-    <string name="noApplications" msgid="2991814273936504689">"ဘယ် အက်ပ်ကမှ ဒီ လုပ်ဆောင်ချက်ကို မလုပ်ကိုင်နိုင်ပါ။"</string>
+    <string name="noApplications" msgid="2991814273936504689">"မည်သည့်အက်ပ်ကမျှ ဤလုပ်ဆောင်ချက်ကို မလုပ်ကိုင်နိုင်ပါ။"</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> ရပ်သွားပါပြီ"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ရပ်တန့်သွားပါပြီ"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> သည်ထပ်တလဲလဲ ရပ်တန့်နေပါသည်"</string>
@@ -1588,8 +1584,8 @@
     <string name="expires_on" msgid="3676242949915959821">"သက်တမ်းကုန်ဆုံးရက်-"</string>
     <string name="serial_number" msgid="758814067660862493">"အစဉ်လိုက်နံပါတ်"</string>
     <string name="fingerprints" msgid="4516019619850763049">"လက်ပွေများ"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 လက်ပွေ"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 လက်ပွေ"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 လက်ဗွေ-"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 လက်ဗွေ-"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"အားလုံးကို ကြည့်ရန်"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"လုပ်ဆောင်ချက်ကို ရွေးရန်"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"...နှင့် မျှဝေရန်"</string>

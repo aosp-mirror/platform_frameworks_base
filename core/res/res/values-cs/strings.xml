@@ -234,7 +234,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hlášení chyb"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Ukončit relaci"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Snímek obrazovky"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Zpráva o chybě"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Hlášení chyb"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Shromažďuje informace o aktuálním stavu zařízení. Tyto informace je následně možné poslat v e-mailové zprávě, chvíli však potrvá, než bude hlášení o chybě připraveno k odeslání. Buďte prosím trpěliví."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivní přehled"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Tato možnost se používá ve většině případů. Umožňuje sledovat průběh přehledu, zadat další podrobnosti o problému a pořizovat snímky obrazovky. Mohou být vynechány některé méně používané sekce, jejichž kontrola trvá dlouho."</string>
@@ -350,10 +350,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Umožňuje aplikaci přijmout a zpracovat zprávy SMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"příjem textových zpráv (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Umožňuje aplikaci přijmout a zpracovat zprávy MMS. Znamená to, že aplikace může sledovat zprávy odeslané do vašeho zařízení nebo je smazat, aniž by se vám zobrazily."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Přesměrování zpráv informačních služeb"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Umožňuje aplikaci vytvořit vazbu s modulem informačních služeb za účelem přesměrovávání přijatých zpráv informačních služeb. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čtení zpráv informačních služeb"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Umožňuje aplikaci číst zprávy informačních služeb přijaté ve vašem zařízení. Výstražná upozornění informačních služeb jsou v některých oblastech odesílána za účelem varování před výjimečnými událostmi. Škodlivé aplikace mohou narušit výkon či provoz vašeho zařízení během přijímání zpráv informačních služeb."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čtení zdrojů přihlášených k odběru"</string>
@@ -523,7 +521,7 @@
     <string name="permlab_useBiometric" msgid="8837753668509919318">"použití biometrického hardwaru"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Umožňuje aplikaci použít k ověření biometrický hardware"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"správa hardwaru na čtení otisků prstů"</string>
-    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Umožňuje aplikaci volat metody k přidání a smazání šablon otisků prstů, které budou použity."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Umožňuje aplikaci volit metody k přidávání a mazání šablon otisků prstů, které budou použity."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"použití hardwaru na čtení otisků prstů"</string>
     <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Umožňuje aplikaci použít k ověření hardware na čtení otisků prstů"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"úprava hudební sbírky"</string>
@@ -665,8 +663,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Umožňuje aplikaci číst a zapisovat konfiguraci režimu Nerušit."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"zahájení zobrazení využití oprávnění"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Umožňuje přístup zahájit využití oprávnění jiné aplikace. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cíl zkratky přístupnosti"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Umožňuje aplikaci definovat cíl zkratky přístupnosti."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Sledovat pokusy o odemknutí obrazovky"</string>

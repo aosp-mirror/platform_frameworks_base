@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Cho phép ứng dụng nhận và xử lý tin nhắn SMS. Điều này có nghĩa là ứng dụng có thể theo dõi hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"nhận tin nhắn văn bản (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Cho phép ứng dụng nhận và xử lý tin nhắn MMS. Điều này có nghĩa là ứng dụng có thể theo dõi hoặc xóa tin nhắn được gửi đến thiết bị của bạn mà không hiển thị chúng cho bạn."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Chuyển tiếp tin nhắn truyền phát trên di động"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Cho phép ứng dụng liên kết với mô-đun truyền phát trên di động để chuyển tiếp tin nhắn truyền phát trên di động ngay khi nhận được. Ở một số vị trí, thông báo truyền phát trên di động sẽ được gửi nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị khi nhận được tin nhắn truyền phát trên di động lúc khẩn cấp."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"đọc tin nhắn quảng bá"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Cho phép ứng dụng đọc tin nhắn quảng bá mà thiết bị của bạn nhận được. Tin nhắn quảng bá cảnh báo được gửi ở một số địa điểm nhằm cảnh báo cho bạn về các tình huống khẩn cấp. Các ứng dụng độc hại có thể gây ảnh hưởng đến hiệu suất hoặc hoạt động của thiết bị của bạn khi nhận được tin nhắn quảng bá khẩn cấp."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"đọc nguồn cấp dữ liệu đã đăng ký"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"đích đến của phím tắt hỗ trợ tiếp cận"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Cho phép ứng dụng xác định đích đến của phím tắt hỗ trợ tiếp cận."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kiểm soát độ dài và ký tự được phép trong mật khẩu khóa màn hình và mã PIN."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Giám sát những lần thử mở khóa màn hình"</string>
@@ -737,7 +733,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Tùy chỉnh"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Nhà riêng"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"Di Động"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Di động"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Cơ quan"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax cơ quan"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax nhà riêng"</string>

@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Hiermee kan de app sms-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar je apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"tekstberichten (MMS) ontvangen"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Hiermee kan de app MMS-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar je apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Cell broadcast-berichten doorsturen"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Hiermee kan de app de module voor cell broadcasts binden om cell broadcast-berichten door te sturen als die worden ontvangen. Cell broadcast-waarschuwingen worden op bepaalde locaties verzonden om je te waarschuwen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van je apparaat verstoren als een bericht met een noodmelding wordt ontvangen."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"infodienstberichten lezen"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Toestaan dat de app infodienstberichten leest die worden ontvangen op je apparaat. Infodienstberichten worden verzonden naar bepaalde locaties om u te waarschjeen voor noodsituaties. Schadelijke apps kunnen de prestaties of verwerking van je apparaat verstoren wanneer een infodienstbericht wordt ontvangen."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"Geabonneerde feeds lezen"</string>
@@ -495,9 +493,9 @@
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9115646511110555589">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je Android TV-apparaat. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar je telefoon. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-instellingen openen"</string>
-    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3174333400857321862">"Hiermee kan de app Bluetooth op je Android TV-apparaat configureren en externe apparaten zoeken en koppelen."</string>
-    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"WiMAX-status wijzigen"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"doel van snelkoppeling voor toegankelijkheid"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Hiermee kan een app het doel van de snelkoppeling voor toegankelijkheid definiëren."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Pogingen voor schermontgrendeling bijhouden"</string>
@@ -1229,10 +1225,10 @@
     <string name="sendText" msgid="5209874571959469142">"Een actie voor tekst selecteren"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Ringtonevolume"</string>
     <string name="volume_music" msgid="5421651157138628171">"Mediavolume"</string>
-    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspelen via Bluetooth"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Afspelen via bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille ringtone ingesteld"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume inkomend gesprek"</string>
-    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in Bluetooth-modus"</string>
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in bluetooth-modus"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"Wekkervolume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Meldingsvolume"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
