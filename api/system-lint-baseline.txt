@@ -51,6 +51,14 @@ MissingNullability: android.service.notification.NotificationAssistantService#at
     
 MissingNullability: android.telecom.CallScreeningService.CallResponse.Builder#setShouldScreenCallFurther(boolean):
     
+MissingNullability: android.telephony.CellBroadcastService#onBind(android.content.Intent):
+    Missing nullability on method `onBind` return
+MissingNullability: android.telephony.CellBroadcastService#onBind(android.content.Intent) parameter #0:
+    Missing nullability on parameter `intent` in method `onBind`
+MissingNullability: android.telephony.CellBroadcastService#onCdmaCellBroadcastSms(int, byte[]) parameter #1:
+    Missing nullability on parameter `message` in method `onCdmaCellBroadcastSms`
+MissingNullability: android.telephony.CellBroadcastService#onGsmCellBroadcastSms(int, byte[]) parameter #1:
+    Missing nullability on parameter `message` in method `onGsmCellBroadcastSms`
 MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
     
 MissingNullability: android.telephony.SmsCbCmasInfo#toString():
@@ -317,6 +325,8 @@ ServiceName: android.Manifest.permission#BIND_ATTENTION_SERVICE:
     
 ServiceName: android.Manifest.permission#BIND_AUGMENTED_AUTOFILL_SERVICE:
     
+ServiceName: android.Manifest.permission#BIND_CELL_BROADCAST_SERVICE:
+    Inconsistent service value; expected `BIND_CELL_BROADCAST`, was `android.permission.BIND_CELL_BROADCAST_SERVICE`
 ServiceName: android.Manifest.permission#BIND_CONTENT_CAPTURE_SERVICE:
     
 ServiceName: android.Manifest.permission#BIND_CONTENT_SUGGESTIONS_SERVICE:
