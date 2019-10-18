@@ -50,6 +50,7 @@
     <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"Allow <xliff:g id="APPLICATION">%1$s</xliff:g> to access <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device."</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Allow <xliff:g id="APPLICATION">%1$s</xliff:g> to access <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Open <xliff:g id="APPLICATION">%1$s</xliff:g> to handle <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="210658281376801521">"Open <xliff:g id="APPLICATION">%1$s</xliff:g> to handle <xliff:g id="USB_DEVICE">%2$s</xliff:g>?\nThis app has not been granted record permission but could capture audio through this USB device."</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Open <xliff:g id="APPLICATION">%1$s</xliff:g> to handle <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"No installed apps work with this USB accessory. Learn more about this accessory at <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB accessory"</string>
@@ -127,20 +128,13 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmed"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Tap Confirm to complete"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Authenticated"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"Use PIN"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"Use pattern"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"Use password"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"Wrong PIN"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"Wrong pattern"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"Wrong password"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"Too many incorrect attempts.\nTry again in <xliff:g id="NUMBER">%d</xliff:g> seconds."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Touch the fingerprint sensor"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerprint icon"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Looking for you…"</string>

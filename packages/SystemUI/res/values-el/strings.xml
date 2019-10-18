@@ -47,10 +47,10 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Ρύθμιση μεθόδων εισαγωγής"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Φυσικό πληκτρολόγιο"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
-    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
-    <skip />
+    <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"Να επιτρέπεται στην εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> να έχει πρόσβαση στη συσκευή <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Να επιτρέπεται η πρόσβαση της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> στο αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Να ανοίγει η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;"</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="210658281376801521">"Άνοιγμα της εφαρμογής <xliff:g id="APPLICATION">%1$s</xliff:g> για τον χειρισμό της συσκευής <xliff:g id="USB_DEVICE">%2$s</xliff:g>;\nΔεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Να ανοίγει η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> για τη διαχείριση του αξεσουάρ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>;"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Δεν έχετε εφαρμογή που να συνεργάζεται με το αξεσουάρ USB. Για περισσότερα: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Αξεσουάρ USB"</string>
@@ -111,7 +111,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Φωνητική υποβοήθηση"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Ξεκλείδωμα"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Αναμονή για δακτυλικό αποτύπωμα"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ξεκλείδωμα χωρίς τη χρήση του μοναδικού χαρακτηριστικού σας"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ξεκλείδωμα χωρίς τη χρήση του δακτυλικού αποτυπώματός σας"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Σάρωση προσώπου"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Αποστολή"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Διαχείριση ειδοποιήσεων"</string>
@@ -128,21 +128,14 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Επιβεβαιώθηκε"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Πατήστε Επιβεβαίωση για ολοκλήρωση"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"Ολοκληρώθηκε ο έλεγχος ταυτότητας"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Αγγίξτε τον αισθητήρα δακτυλικών αποτυπωμάτων"</string>
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"Χρήση PIN"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"Χρήση μοτίβου"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"Χρήση κωδικού πρόσβασης"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"Εσφαλμένο PIN"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"Εσφαλμένο μοτίβο"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"Εσφαλμένος κωδικός πρόσβασης"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"Πάρα πολλές αποτυχημένες προσπάθειες.\nΔοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Αγγίξτε τον αισθητήρα δακτυλικού αποτυπώματος"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Εικονίδιο δακτυλικών αποτυπωμάτων"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Αναζήτηση για εσάς…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Εικονίδιο προσώπου"</string>
@@ -380,8 +373,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Ειδοποιήσεις"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Φακός"</string>
-    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
-    <skip />
+    <string name="quick_settings_flashlight_camera_in_use" msgid="6120370795890963385">"Η κάμερα χρησιμοποιείται"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Δεδομένα κινητής τηλεφωνίας"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Χρήση δεδομένων"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Υπολειπόμενα δεδομένα"</string>

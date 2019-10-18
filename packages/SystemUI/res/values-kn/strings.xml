@@ -47,10 +47,10 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ಇನ್‌ಪುಟ್ ವಿಧಾನಗಳನ್ನು ಹೊಂದಿಸು"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ಭೌತಿಕ ಕೀಬೋರ್ಡ್"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
-    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
-    <skip />
+    <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಗೆ ಪ್ರವೇಶಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
+    <string name="usb_device_confirm_prompt_warn" msgid="210658281376801521">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಅನ್ನು ನಿಯಂತ್ರಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?\nಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಹುದು."</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಅನ್ನು ನಿರ್ವಹಿಸಲು <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯುವುದೇ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ಆಪ್‌ಗಳು USB ಪರಿಕರದಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುವುದಿಲ್ಲ. ಆ ಬಗ್ಗೆ <xliff:g id="URL">%1$s</xliff:g> ನಲ್ಲಿ ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ಪರಿಕರ"</string>
@@ -58,7 +58,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ಸಂಪರ್ಕಗೊಂಡಾಗ ಯಾವಾಗಲೂ <xliff:g id="APPLICATION">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"ಕಂಪ್ಯೂಟರ್‌ನ RSA ಕೀ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹೀಗಿದೆ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ಈ ಕಂಪ್ಯೂಟರ್‌ನಿಂದ ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"ಅನುಮತಿಸಿ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ಡೀಬಗ್ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
@@ -110,8 +110,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ಫೋನ್"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ಧ್ವನಿ ಸಹಾಯಕ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ಅನ್‌ಲಾಕ್"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ನಿಮ್ಮ ಬೆರಳಚ್ಚು ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‍‍ಗಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಬಳಸದೆಯೇ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"ಮುಖವನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ಕಳುಹಿಸಿ"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
@@ -128,20 +128,13 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ಪೂರ್ಣಗೊಳಿಸಲು ದೃಢೀಕರಿಸಿ ಅನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ದೃಢೀಕರಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"ಪಿನ್ ಬಳಸಿ"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"ಪ್ಯಾಟರ್ನ್ ಬಳಸಿ"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"ಪಾಸ್‌ವರ್ಡ್ ಬಳಸಿ"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"ತಪ್ಪಾದ ಪಿನ್‌"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"ಹಲವಾರು ತಪ್ಪು ಪ್ರಯತ್ನಗಳು.\nಮತ್ತೆ <xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಅನ್ನು ಸ್ಪರ್ಶಿಸಿ"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಐಕಾನ್"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ನಿಮಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ…"</string>
@@ -380,8 +373,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ಫ್ಲಾಶ್‌ಲೈಟ್‌"</string>
-    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
-    <skip />
+    <string name="quick_settings_flashlight_camera_in_use" msgid="6120370795890963385">"ಕ್ಯಾಮರಾ ಬಳಕೆಯಲ್ಲಿದೆ"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ಡೇಟಾ ಬಳಕೆ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ಉಳಿದಿರುವ ಡೇಟಾ"</string>

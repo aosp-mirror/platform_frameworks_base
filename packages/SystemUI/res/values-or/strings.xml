@@ -47,10 +47,11 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ଇନପୁଟ୍‍ ପଦ୍ଧତି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ଫିଜିକଲ୍ କୀ’ବୋର୍ଡ୍"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ଆକ୍ସେସ୍‍ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
-    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
-    <skip />
+    <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ଆକ୍ସେସ୍ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ କି?\nଏହି ଆପ୍‌କୁ ରେକର୍ଡ କରିବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ କିନ୍ତୁ ଏହି USB ଡିଭାଇସ୍ ଜରିଆରେ ଅଡିଓ କ୍ୟାପ୍ଟର୍ କରିପାରିବ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ଆକ୍ସେସ୍‍ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ନିୟନ୍ତ୍ରଣ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g> ଖୋଲିବେ?"</string>
+    <!-- no translation found for usb_device_confirm_prompt_warn (210658281376801521) -->
+    <skip />
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ନିୟନ୍ତ୍ରଣ କରିବାକୁ <xliff:g id="APPLICATION">%1$s</xliff:g> ଖୋଲିବେ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ଇନଷ୍ଟଲ୍‍ ହୋଇଥିବା କୌଣସି ଆପ୍‍ ଏହି USB ଆକ୍ସେସୋରୀରେ କାମ କରେନାହିଁ। ଏହି ଆକ୍ସେସୋରୀ ବିଷୟରେ <xliff:g id="URL">%1$s</xliff:g>ରେ ଅଧିକ ଜାଣନ୍ତୁ"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ଆକ୍ସେସରୀ"</string>
@@ -58,7 +59,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> କନେକ୍ଟ ଥିବାବେଳେ <xliff:g id="APPLICATION">%1$s</xliff:g> ସର୍ବଦା ଖୋଲନ୍ତୁ"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> କନେକ୍ଟ ଥିବାବେଳେ <xliff:g id="APPLICATION">%1$s</xliff:g> ସର୍ବଦା ଖୋଲନ୍ତୁ"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB ଡିବଗିଙ୍ଗ କରିବେ?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"କମ୍ପ୍ୟୁଟର୍‌ର RSA କୀ\' ଆଙ୍ଗୁଠି ଚିହ୍ନ ହେଉଛି:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"କମ୍ପ୍ୟୁଟର୍‌ର RSA କୀ ଫିଙ୍ଗରପ୍ରିଣ୍ଟ୍ ହେଉଛି:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"ସବୁବେଳେ ଏହି କମ୍ପ୍ୟୁଟର୍‌ରୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USBରେ ଡିବଗ୍‍ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -110,8 +111,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ଫୋନ୍‍"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"ଭଏସ୍‌ ସହାୟକ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ଅନଲକ୍‌ କରନ୍ତୁ"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ପାଇଁ ଅପେକ୍ଷା କରିଛି"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ଆଙ୍ଗୁଠିଚିହ୍ନ ବ୍ୟବହାର ନକରି ଅନଲକ୍‍ କରନ୍ତୁ"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ଟିପଚିହ୍ନ ପାଇଁ ଅପେକ୍ଷା କରୁଛି"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ଆପଣଙ୍କ ଟିପଚିହ୍ନ ବ୍ୟବହାର ନକରି ଅନଲକ୍‍ କରନ୍ତୁ"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"ଫେସ୍ ସ୍କାନିଙ୍ଗ କରାଯାଉଛି"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ପଠାନ୍ତୁ"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିଚାଳନା କରନ୍ତୁ"</string>
@@ -128,22 +129,15 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"ସୁନିଶ୍ଚିତ କରାଯାଇଛି"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"ସମ୍ପୂର୍ଣ୍ଣ କରିବାକୁ ସୁନିଶ୍ଚିତ କରନ୍ତୁରେ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"ପ୍ରାମାଣିକତା ହୋଇଛି"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"PIN ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"ପାଟର୍ନ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"ପାସ୍‌ୱାର୍ଡ୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"ଭୁଲ PIN"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"ଭୁଲ ପାଟର୍ନ"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"ଭୁଲ ପାସ୍‌ୱାର୍ଡ"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"ଅନେକ ଥର ଭୁଲ ଚେଷ୍ଟା। \n <xliff:g id="NUMBER">%d</xliff:g>ସେକେଣ୍ଡରେ ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ଟିପଚିହ୍ନ ସେନସର୍‌କୁ ଛୁଅଁନ୍ତୁ"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"ଆପଣଙ୍କୁ ଚିହ୍ନଟ କରୁଛି…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"ମୁହଁ ଆଇକନ୍"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"କମ୍ପାଟିବିଲିଟୀ ଜୁମ୍ ବଟନ୍।"</string>
@@ -380,8 +374,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ଫ୍ଲାସ୍‍ଲାଇଟ୍"</string>
-    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
-    <skip />
+    <string name="quick_settings_flashlight_camera_in_use" msgid="6120370795890963385">"କ୍ୟାମେରା ବ୍ୟବହାରରେ ଅଛି"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ମୋବାଇଲ୍‌ ଡାଟା"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ଡାଟାର ବ୍ୟବହାର"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ଅବଶିଷ୍ଟ ଡାଟା"</string>
