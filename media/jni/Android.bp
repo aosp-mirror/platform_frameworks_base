@@ -123,6 +123,30 @@ cc_library_shared {
     ],
 }
 
+cc_library_shared {
+    name: "libmedia_tv_tuner",
+    srcs: [
+        "android_media_tv_Tuner.cpp",
+    ],
+
+    shared_libs: [
+        "android.hardware.tv.tuner@1.0",
+        "libandroid_runtime",
+        "liblog",
+        "libutils",
+    ],
+
+    export_include_dirs: ["."],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-error=deprecated-declarations",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+}
+
 subdirs = [
     "audioeffect",
     "soundpool",
