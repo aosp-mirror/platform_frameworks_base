@@ -93,6 +93,8 @@ public class IpServer extends StateMachine {
     private static final int USB_PREFIX_LENGTH = 24;
     private static final String WIFI_HOST_IFACE_ADDR = "192.168.43.1";
     private static final int WIFI_HOST_IFACE_PREFIX_LENGTH = 24;
+    private static final String WIFI_P2P_IFACE_ADDR = "192.168.49.1";
+    private static final int WIFI_P2P_IFACE_PREFIX_LENGTH = 24;
 
     // TODO: have PanService use some visible version of this constant
     private static final String BLUETOOTH_IFACE_ADDR = "192.168.44.1";
@@ -403,6 +405,9 @@ public class IpServer extends StateMachine {
         } else if (mInterfaceType == ConnectivityManager.TETHERING_WIFI) {
             ipAsString = getRandomWifiIPv4Address();
             prefixLen = WIFI_HOST_IFACE_PREFIX_LENGTH;
+        } else if (mInterfaceType == ConnectivityManager.TETHERING_WIFI_P2P) {
+            ipAsString = WIFI_P2P_IFACE_ADDR;
+            prefixLen = WIFI_P2P_IFACE_PREFIX_LENGTH;
         } else {
             // BT configures the interface elsewhere: only start DHCP.
             final Inet4Address srvAddr = (Inet4Address) numericToInetAddress(BLUETOOTH_IFACE_ADDR);
