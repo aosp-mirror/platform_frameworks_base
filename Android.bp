@@ -1597,3 +1597,24 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
     ],
 }
+
+filegroup {
+    name: "framework-wifistack-shared-srcs",
+    srcs: [
+        ":framework-annotations",
+        "core/java/android/util/KeyValueListParser.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/android/util/Rational.java",
+        "core/java/android/util/proto/ProtoStream.java",
+        "core/java/android/util/proto/ProtoOutputStream.java",
+        "core/java/com/android/internal/util/FastXmlSerializer.java",
+        "core/java/com/android/internal/util/HexDump.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/com/android/internal/util/XmlUtils.java",
+    ],
+}
