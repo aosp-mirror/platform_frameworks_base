@@ -16,11 +16,15 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
+import android.os.TelephonyServiceManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
+
+import com.android.internal.util.Preconditions;
 
 
 /**
@@ -32,6 +36,23 @@ import android.telephony.euicc.EuiccManager;
 public class TelephonyFrameworkInitializer {
 
     private TelephonyFrameworkInitializer() {
+    }
+
+    private static volatile TelephonyServiceManager sTelephonyServiceManager;
+
+    /**
+     * Sets an instance of {@link TelephonyServiceManager} that allows
+     * the telephony mainline module to register/obtain telephony binder services. This is called
+     * by the platform during the system initialization.
+     *
+     * @param telephonyServiceManager instance of {@link TelephonyServiceManager} that allows
+     * the telephony mainline module to register/obtain telephony binder services.
+     */
+    public static void setTelephonyServiceManager(
+            @NonNull TelephonyServiceManager telephonyServiceManager) {
+        Preconditions.checkState(sTelephonyServiceManager == null,
+                "setTelephonyServiceManager called twice!");
+        sTelephonyServiceManager = Preconditions.checkNotNull(telephonyServiceManager);
     }
 
     /**
@@ -67,5 +88,10 @@ public class TelephonyFrameworkInitializer {
                 EuiccCardManager.class,
                 context -> new EuiccCardManager(context)
         );
+    }
+
+    /** @hide */
+    public static TelephonyServiceManager getTelephonyServiceManager() {
+        return sTelephonyServiceManager;
     }
 }

@@ -496,6 +496,9 @@ public final class SystemServer {
             // Initialize the system context.
             createSystemContext();
 
+            // Call per-process mainline module initialization.
+            ActivityThread.initializeMainlineModules();
+
             // Create the system service manager.
             mSystemServiceManager = new SystemServiceManager(mSystemContext);
             mSystemServiceManager.setStartInfo(mRuntimeRestart,
