@@ -86,6 +86,7 @@ import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
 
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
@@ -4819,7 +4820,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle, boolean parent) {
         if (!mHasFeature) {
-            new PasswordMetrics(LockPatternUtils.CREDENTIAL_TYPE_NONE);
+            new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         }
         enforceFullCrossUsersPermission(userHandle);
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
@@ -5176,11 +5177,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean resetPasswordInternal(String password, long tokenHandle, byte[] token,
             int flags, int callingUid, int userHandle) {
         synchronized (getLockObject()) {
-            // TODO(b/120484642): remove getBytes() below
             final PasswordMetrics minMetrics = getPasswordMinimumMetrics(userHandle);
-            final List<PasswordValidationError> validationErrors =
-                    PasswordMetrics.validatePassword(
-                            minMetrics, PASSWORD_COMPLEXITY_NONE, false, password.getBytes());
+            final List<PasswordValidationError> validationErrors;
+            // TODO: Consider changing validation API to take LockscreenCredential.
+            if (password.isEmpty()) {
+                validationErrors = PasswordMetrics.validatePasswordMetrics(
+                        minMetrics, PASSWORD_COMPLEXITY_NONE, false /* isPin */,
+                        new PasswordMetrics(CREDENTIAL_TYPE_NONE));
+            } else {
+                // TODO(b/120484642): remove getBytes() below
+                validationErrors = PasswordMetrics.validatePassword(
+                        minMetrics, PASSWORD_COMPLEXITY_NONE, false, password.getBytes());
+            }
+
             if (!validationErrors.isEmpty()) {
                 Log.w(LOG_TAG, "Failed to reset password due to constraint violation: "
                         + validationErrors.get(0));

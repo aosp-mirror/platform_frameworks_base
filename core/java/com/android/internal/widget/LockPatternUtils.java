@@ -1558,7 +1558,7 @@ public class LockPatternUtils {
         try {
             if (!localService.setLockCredentialWithToken(credential.getCredential(),
                     credential.getType(),
-                    tokenHandle, token, credential.getType(), userHandle)) {
+                    tokenHandle, token, credential.getQuality(), userHandle)) {
                 setKeyguardStoredPasswordQuality(currentQuality, userHandle);
                 return false;
             }
