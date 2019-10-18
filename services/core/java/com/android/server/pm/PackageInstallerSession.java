@@ -212,10 +212,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
 
-    /** Package of the owner of the installer session */
-    @GuardedBy("mLock")
-    private @Nullable String mInstallerPackageName;
-
     /** Uid of the owner of the installer session */
     @GuardedBy("mLock")
     private int mInstallerUid;
@@ -374,7 +370,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         DevicePolicyManagerInternal dpmi =
                 LocalServices.getService(DevicePolicyManagerInternal.class);
-        return dpmi != null && dpmi.canSilentlyInstallPackage(mInstallerPackageName, mInstallerUid);
+        return dpmi != null && dpmi.canSilentlyInstallPackage(
+                mInstallSource.installerPackageName, mInstallerUid);
     }
 
     /**
@@ -418,8 +415,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,
             Context context, PackageManagerService pm,
             PackageSessionProvider sessionProvider, Looper looper, StagingManager stagingManager,
-            int sessionId, int userId,
-            String installerPackageName, int installerUid, @NonNull InstallSource installSource,
+            int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
             SessionParams params, long createdMillis,
             File stageDir, String stageCid, boolean prepared, boolean committed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
@@ -435,7 +431,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.sessionId = sessionId;
         this.userId = userId;
         mOriginalInstallerUid = installerUid;
-        mInstallerPackageName = installerPackageName;
         mInstallerUid = installerUid;
         mInstallSource = Preconditions.checkNotNull(installSource);
         this.params = params;
@@ -475,7 +470,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         synchronized (mLock) {
             info.sessionId = sessionId;
             info.userId = userId;
-            info.installerPackageName = mInstallerPackageName;
+            info.installerPackageName = mInstallSource.installerPackageName;
             info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
                     mResolvedBaseFile.getAbsolutePath() : null;
             info.progress = mProgress;
@@ -1226,14 +1221,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException("Package is not valid", e);
             }
 
-            if (!mPackageName.equals(mInstallerPackageName)) {
+            if (!mPackageName.equals(mInstallSource.installerPackageName)) {
                 throw new SecurityException("Can only transfer sessions that update the original "
                         + "installer");
             }
 
-            mInstallerPackageName = packageName;
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName);
+            mInstallSource = InstallSource.create(packageName, packageName);
         }
 
         // Persist the fact that we've sealed ourselves to prevent
@@ -1246,7 +1240,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked()) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.INSTALL_PACKAGE)
-                    .setAdmin(mInstallerPackageName)
+                    .setAdmin(mInstallSource.installerPackageName)
                     .write();
         }
         if (params.isStaged) {
@@ -1452,8 +1446,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mRelinquished = true;
         return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
-                localObserver, params, mInstallerPackageName, mInstallerUid, mInstallSource, user,
-                mSigningDetails);
+                localObserver, params, mInstallerUid, mInstallSource, user, mSigningDetails);
     }
 
     private static void maybeRenameFile(File from, File to) throws PackageManagerException {
@@ -1902,7 +1895,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     String getInstallerPackageName() {
         synchronized (mLock) {
-            return mInstallerPackageName;
+            return mInstallSource.installerPackageName;
         }
     }
 
@@ -2343,9 +2336,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         pw.printPair("userId", userId);
         pw.printPair("mOriginalInstallerUid", mOriginalInstallerUid);
-        pw.printPair("mInstallerPackageName", mInstallerPackageName);
-        pw.printPair("mInstallerUid", mInstallerUid);
         mInstallSource.dump(pw);
+        pw.printPair("mInstallerUid", mInstallerUid);
         pw.printPair("createdMillis", createdMillis);
         pw.printPair("updatedMillis", updatedMillis);
         pw.printPair("stageDir", stageDir);
@@ -2424,7 +2416,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeIntAttribute(out, ATTR_SESSION_ID, sessionId);
             writeIntAttribute(out, ATTR_USER_ID, userId);
             writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
-                    mInstallerPackageName);
+                    mInstallSource.installerPackageName);
             writeIntAttribute(out, ATTR_INSTALLER_UID, mInstallerUid);
             writeStringAttribute(out, ATTR_INITIATING_PACKAGE_NAME,
                     mInstallSource.initiatingPackageName);
@@ -2626,10 +2618,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             childSessionIdsArray = EMPTY_CHILD_SESSION_ARRAY;
         }
 
-        InstallSource installSource = InstallSource.create(installInitiatingPackageName);
+        InstallSource installSource = InstallSource.create(installInitiatingPackageName,
+                installerPackageName);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
-                installerThread, stagingManager, sessionId, userId, installerPackageName,
-                installerUid, installSource, params, createdMillis, stageDir, stageCid,
+                installerThread, stagingManager, sessionId, userId, installerUid,
+                installSource, params, createdMillis, stageDir, stageCid,
                 prepared, committed, sealed, childSessionIdsArray, parentSessionId,
                 isReady, isFailed, isApplied, stagedSessionErrorCode, stagedSessionErrorMessage);
     }

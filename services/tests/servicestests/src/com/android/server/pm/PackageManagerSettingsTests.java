@@ -812,11 +812,9 @@ public class PackageManagerSettingsTests {
         assertSame(origPkgSetting.cpuAbiOverrideString, testPkgSetting.cpuAbiOverrideString);
         assertThat(origPkgSetting.cpuAbiOverrideString, is(testPkgSetting.cpuAbiOverrideString));
         assertThat(origPkgSetting.firstInstallTime, is(testPkgSetting.firstInstallTime));
-        assertSame(origPkgSetting.installerPackageName, testPkgSetting.installerPackageName);
-        assertThat(origPkgSetting.installerPackageName, is(testPkgSetting.installerPackageName));
+        assertSame(origPkgSetting.installSource, testPkgSetting.installSource);
         assertThat(origPkgSetting.installPermissionsFixed,
                 is(testPkgSetting.installPermissionsFixed));
-        assertThat(origPkgSetting.isOrphaned, is(testPkgSetting.isOrphaned));
         assertSame(origPkgSetting.keySetData, testPkgSetting.keySetData);
         assertThat(origPkgSetting.keySetData, is(testPkgSetting.keySetData));
         assertThat(origPkgSetting.lastUpdateTime, is(testPkgSetting.lastUpdateTime));
