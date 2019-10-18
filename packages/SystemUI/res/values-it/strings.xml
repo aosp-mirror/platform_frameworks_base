@@ -56,7 +56,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"Apri sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quando si collega <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Apri sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quando si collega <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Consentire debug USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Impronta della chiave RSA del computer: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Fingerprint della chiave RSA del computer: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Consenti sempre da questo computer"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Consenti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debug USB non consentito"</string>
