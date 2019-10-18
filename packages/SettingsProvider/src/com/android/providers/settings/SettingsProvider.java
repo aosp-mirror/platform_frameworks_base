@@ -56,6 +56,7 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IUserRestrictionsListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -65,7 +66,6 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -84,7 +84,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.providers.settings.SettingsState.Setting;
-import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
 import com.google.android.collect.Sets;
@@ -286,8 +285,6 @@ public class SettingsProvider extends ContentProvider {
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
-    private UserManagerInternal mUserManagerInternal;
-
     // We have to call in the package manager with no lock held,
     private volatile IPackageManager mPackageManager;
 
@@ -317,7 +314,6 @@ public class SettingsProvider extends ContentProvider {
 
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
-            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
             mPackageManager = AppGlobals.getPackageManager();
             mHandlerThread = new HandlerThread(LOG_TAG,
                     Process.THREAD_PRIORITY_BACKGROUND);
@@ -902,95 +898,100 @@ public class SettingsProvider extends ContentProvider {
         // TODO: The current design of settings looking different based on user restrictions
         // should be reworked to keep them separate and system code should check the setting
         // first followed by checking the user restriction before performing an operation.
-        UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
-        userManager.addUserRestrictionsListener((int userId, Bundle newRestrictions,
-                Bundle prevRestrictions) -> {
-            Set<String> changedRestrictions = getRestrictionDiff(prevRestrictions, newRestrictions);
-            // We are changing the settings affected by restrictions to their current
-            // value with a forced update to ensure that all cross profile dependencies
-            // are taken into account. Also make sure the settings update to.. the same
-            // value passes the security checks, so clear binder calling id.
-            if (changedRestrictions.contains(UserManager.DISALLOW_SHARE_LOCATION)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    synchronized (mLock) {
-                        Setting setting = getSecureSetting(
-                                Settings.Secure.LOCATION_MODE, userId);
-                        updateSecureSetting(Settings.Secure.LOCATION_MODE,
-                                setting != null ? setting.getValue() : null, null,
-                                true, userId, true);
-                        setting = getSecureSetting(
-                                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userId);
-                        updateSecureSetting(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                                setting != null ? setting.getValue() : null, null,
-                                true, userId, true);
+        IUserRestrictionsListener listener = new IUserRestrictionsListener.Stub() {
+            @Override
+            public void onUserRestrictionsChanged(int userId,
+                    Bundle newRestrictions, Bundle prevRestrictions) {
+                Set<String> changedRestrictions =
+                        getRestrictionDiff(prevRestrictions, newRestrictions);
+                // We are changing the settings affected by restrictions to their current
+                // value with a forced update to ensure that all cross profile dependencies
+                // are taken into account. Also make sure the settings update to.. the same
+                // value passes the security checks, so clear binder calling id.
+                if (changedRestrictions.contains(UserManager.DISALLOW_SHARE_LOCATION)) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mLock) {
+                            Setting setting = getSecureSetting(
+                                    Settings.Secure.LOCATION_MODE, userId);
+                            updateSecureSetting(Settings.Secure.LOCATION_MODE,
+                                    setting != null ? setting.getValue() : null, null,
+                                            true, userId, true);
+                            setting = getSecureSetting(
+                                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userId);
+                            updateSecureSetting(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                                    setting != null ? setting.getValue() : null, null,
+                                            true, userId, true);
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
                     }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+                }
+                if (changedRestrictions.contains(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
+                        || changedRestrictions.contains(
+                                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY)) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mLock) {
+                            Setting setting = getGlobalSetting(
+                                    Settings.Global.INSTALL_NON_MARKET_APPS);
+                            String value = setting != null ? setting.getValue() : null;
+                            updateGlobalSetting(Settings.Global.INSTALL_NON_MARKET_APPS,
+                                    value, null, true, userId, true);
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+                if (changedRestrictions.contains(UserManager.DISALLOW_DEBUGGING_FEATURES)) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mLock) {
+                            Setting setting = getGlobalSetting(Settings.Global.ADB_ENABLED);
+                            String value = setting != null ? setting.getValue() : null;
+                            updateGlobalSetting(Settings.Global.ADB_ENABLED,
+                                    value, null, true, userId, true);
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+                if (changedRestrictions.contains(UserManager.ENSURE_VERIFY_APPS)) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mLock) {
+                            Setting enable = getGlobalSetting(
+                                    Settings.Global.PACKAGE_VERIFIER_ENABLE);
+                            String enableValue = enable != null ? enable.getValue() : null;
+                            updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_ENABLE,
+                                    enableValue, null, true, userId, true);
+                            Setting include = getGlobalSetting(
+                                    Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB);
+                            String includeValue = include != null ? include.getValue() : null;
+                            updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
+                                    includeValue, null, true, userId, true);
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+                }
+                if (changedRestrictions.contains(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mLock) {
+                            Setting setting = getGlobalSetting(
+                                    Settings.Global.PREFERRED_NETWORK_MODE);
+                            String value = setting != null ? setting.getValue() : null;
+                            updateGlobalSetting(Settings.Global.PREFERRED_NETWORK_MODE,
+                                    value, null, true, userId, true);
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
                 }
             }
-            if (changedRestrictions.contains(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
-                    || changedRestrictions.contains(
-                            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    synchronized (mLock) {
-                        Setting setting = getGlobalSetting(Settings.Global.INSTALL_NON_MARKET_APPS);
-                        String value = setting != null ? setting.getValue() : null;
-                        updateGlobalSetting(Settings.Global.INSTALL_NON_MARKET_APPS,
-                                value, null, true, userId, true);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            if (changedRestrictions.contains(UserManager.DISALLOW_DEBUGGING_FEATURES)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    synchronized (mLock) {
-                        Setting setting = getGlobalSetting(Settings.Global.ADB_ENABLED);
-                        String value = setting != null ? setting.getValue() : null;
-                        updateGlobalSetting(Settings.Global.ADB_ENABLED,
-                                value, null, true, userId, true);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            if (changedRestrictions.contains(UserManager.ENSURE_VERIFY_APPS)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    synchronized (mLock) {
-                        Setting enable = getGlobalSetting(
-                                Settings.Global.PACKAGE_VERIFIER_ENABLE);
-                        String enableValue = enable != null ? enable.getValue() : null;
-                        updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                                enableValue, null, true, userId, true);
-                        Setting include = getGlobalSetting(
-                                Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB);
-                        String includeValue = include != null ? include.getValue() : null;
-                        updateGlobalSetting(Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
-                                includeValue, null, true, userId, true);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-            if (changedRestrictions.contains(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    synchronized (mLock) {
-                        Setting setting = getGlobalSetting(
-                                Settings.Global.PREFERRED_NETWORK_MODE);
-                        String value = setting != null ? setting.getValue() : null;
-                        updateGlobalSetting(Settings.Global.PREFERRED_NETWORK_MODE,
-                                value, null, true, userId, true);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        });
+        };
+        mUserManager.addUserRestrictionsListener(listener);
     }
 
     private static Set<String> getRestrictionDiff(Bundle prevRestrictions, Bundle newRestrictions) {
@@ -1185,6 +1186,17 @@ public class SettingsProvider extends ContentProvider {
                 MUTATION_OPERATION_RESET, false, mode);
     }
 
+    private boolean isSettingRestrictedForUser(String name, int userId,
+            String value, int callerUid) {
+        final long oldId = Binder.clearCallingIdentity();
+        try {
+            return (name != null
+                    && mUserManager.isSettingRestrictedForUser(name, userId, value, callerUid));
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
+    }
+
     private boolean mutateGlobalSetting(String name, String value, String tag,
             boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
             int mode) {
@@ -1196,8 +1208,7 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (name != null && mUserManagerInternal.isSettingRestrictedForUser(
-                name, callingUserId, value, Binder.getCallingUid())) {
+        if (isSettingRestrictedForUser(name, callingUserId, value, Binder.getCallingUid())) {
             return false;
         }
 
@@ -1505,8 +1516,7 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (name != null && mUserManagerInternal.isSettingRestrictedForUser(
-                name, callingUserId, value, Binder.getCallingUid())) {
+        if (isSettingRestrictedForUser(name, callingUserId, value, Binder.getCallingUid())) {
             return false;
         }
 
@@ -1646,8 +1656,7 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
 
-        if (name != null && mUserManagerInternal.isSettingRestrictedForUser(
-                name, callingUserId, value, Binder.getCallingUid())) {
+        if (isSettingRestrictedForUser(name, callingUserId, value, Binder.getCallingUid())) {
             return false;
         }
 
