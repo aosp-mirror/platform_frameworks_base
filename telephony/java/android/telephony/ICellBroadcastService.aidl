@@ -16,6 +16,9 @@
 
 package android.telephony;
 
+import android.os.RemoteCallback;
+import android.telephony.cdma.CdmaSmsCbProgramData;
+
 /**
  * Service bound to by the system to allow custom handling of cell broadcast messages.
  * <p>
@@ -29,4 +32,8 @@ interface ICellBroadcastService {
 
     /** @see android.telephony.CellBroadcastService#onCdmaCellBroadcastSms */
     oneway void handleCdmaCellBroadcastSms(int slotId, in byte[] bearerData, int serviceCategory);
+
+    /** @see android.telephony.CellBroadcastService#onCdmaScpMessage */
+    oneway void handleCdmaScpMessage(int slotId, in List<CdmaSmsCbProgramData> programData,
+            String originatingAddress, in RemoteCallback callback);
 }

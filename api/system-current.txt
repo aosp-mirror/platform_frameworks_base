@@ -7429,6 +7429,7 @@ package android.telephony {
     ctor public CellBroadcastService();
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
     method public abstract void onCdmaCellBroadcastSms(int, byte[], int);
+    method public abstract void onCdmaScpMessage(int, @NonNull java.util.List<android.telephony.cdma.CdmaSmsCbProgramData>, @NonNull String, @NonNull java.util.function.Consumer<android.os.Bundle>);
     method public abstract void onGsmCellBroadcastSms(int, byte[]);
     field public static final String CELL_BROADCAST_SERVICE_INTERFACE = "android.telephony.CellBroadcastService";
   }
