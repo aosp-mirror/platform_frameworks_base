@@ -17,6 +17,7 @@
 package android.service.textclassifier;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -51,6 +52,8 @@ import android.view.textclassifier.TextSelection;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -97,6 +100,18 @@ public abstract class TextClassifierService extends Service {
      */
     public static final String SERVICE_INTERFACE =
             "android.service.textclassifier.TextClassifierService";
+
+    /** @hide **/
+    public static final int CONNECTED = 0;
+    /** @hide **/
+    public static final int DISCONNECTED = 1;
+    /** @hide */
+    @IntDef(value = {
+            CONNECTED,
+            DISCONNECTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConnectionState{}
 
     /** @hide **/
     private static final String KEY_RESULT = "key_result";
@@ -195,6 +210,12 @@ public abstract class TextClassifierService extends Service {
             mMainThreadHandler.post(
                     () -> TextClassifierService.this.onDestroyTextClassificationSession(sessionId));
         }
+
+        @Override
+        public void onConnectedStateChanged(@ConnectionState int connected) {
+            mMainThreadHandler.post(connected == CONNECTED ? TextClassifierService.this::onConnected
+                    : TextClassifierService.this::onDisconnected);
+        }
     };
 
     @Nullable
@@ -204,6 +225,26 @@ public abstract class TextClassifierService extends Service {
             return mBinder;
         }
         return null;
+    }
+
+    @Override
+    public boolean onUnbind(@NonNull Intent intent) {
+        onDisconnected();
+        return super.onUnbind(intent);
+    }
+
+    /**
+     * Called when the Android system connects to service.
+     */
+    public void onConnected() {
+    }
+
+    /**
+     * Called when the Android system disconnects from the service.
+     *
+     * <p> At this point this service may no longer be an active {@link TextClassifierService}.
+     */
+    public void onDisconnected() {
     }
 
     /**
