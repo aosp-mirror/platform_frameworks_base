@@ -28,6 +28,7 @@ import android.net.wifi.IActionListener;
 import android.net.wifi.IDppCallback;
 import android.net.wifi.ILocalOnlyHotspotCallback;
 import android.net.wifi.INetworkRequestMatchCallback;
+import android.net.wifi.IScanResultsListener;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.ITxPacketCountListener;
@@ -227,4 +228,8 @@ interface IWifiManager
     oneway void forget(int netId, in IBinder binder, in IActionListener listener, int callbackIdentifier);
 
     oneway void getTxPacketCount(String packageName, in IBinder binder, in ITxPacketCountListener listener, int callbackIdentifier);
+
+    void registerScanResultsListener(in IBinder binder, in IScanResultsListener Listener, int listenerIdentifier);
+
+    void unregisterScanResultsListener(int listenerIdentifier);
 }

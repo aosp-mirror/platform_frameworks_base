@@ -59,6 +59,7 @@ import android.net.wifi.WifiManager.LocalOnlyHotspotSubscription;
 import android.net.wifi.WifiManager.NetworkRequestMatchCallback;
 import android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback;
 import android.net.wifi.WifiManager.OnWifiUsabilityStatsListener;
+import android.net.wifi.WifiManager.ScanResultsListener;
 import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.TrafficStateCallback;
 import android.os.Binder;
@@ -102,13 +103,14 @@ public class WifiManagerTest {
     android.net.wifi.IWifiManager mWifiService;
     @Mock ApplicationInfo mApplicationInfo;
     @Mock WifiConfiguration mApConfig;
-    @Mock IBinder mAppBinder;
     @Mock SoftApCallback mSoftApCallback;
     @Mock TrafficStateCallback mTrafficStateCallback;
     @Mock NetworkRequestMatchCallback mNetworkRequestMatchCallback;
     @Mock OnWifiUsabilityStatsListener mOnWifiUsabilityStatsListener;
+    @Mock ScanResultsListener mScanResultListener;
+    @Mock Executor mCallbackExecutor;
+    @Mock Executor mExecutor;
 
-    private Executor mExecutor;
     private Handler mHandler;
     private TestLooper mLooper;
     private WifiManager mWifiManager;
@@ -1710,5 +1712,67 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
         binderListenerCaptor.getValue().onFailure(WifiManager.BUSY);
         mLooper.dispatchAll();
         verify(externalListener).onFailure(WifiManager.BUSY);
+    }
+
+    /**
+     * Verify an IllegalArgumentException is thrown if listener is not provided.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddScanResultsListenerWithNullListener() throws Exception {
+        mWifiManager.addScanResultsListener(mCallbackExecutor, null);
+    }
+
+    /**
+     * Verify an IllegalArgumentException is thrown if executor is not provided.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testAddScanResultsListenerWithNullExecutor() throws Exception {
+        mWifiManager.addScanResultsListener(null, mScanResultListener);
+    }
+
+    /**
+     * Verify client provided listener is being called to the right listener.
+     */
+    @Test
+    public void testAddScanResultsListenerAndReceiveEvent() throws Exception {
+        ArgumentCaptor<IScanResultsListener.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(IScanResultsListener.Stub.class);
+        Executor executor = new SynchronousExecutor();
+        mWifiManager.addScanResultsListener(executor, mScanResultListener);
+        verify(mWifiService).registerScanResultsListener(any(IBinder.class),
+                callbackCaptor.capture(), anyInt());
+        callbackCaptor.getValue().onScanResultsAvailable();
+        verify(mScanResultListener).onScanResultsAvailable();
+    }
+
+    /**
+     * Verify client provided listener is being called on the right executor.
+     */
+    @Test
+    public void testAddScanResultsListenerWithTheTargetExecutor() throws Exception {
+        ArgumentCaptor<IScanResultsListener.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(IScanResultsListener.Stub.class);
+        mWifiManager.addScanResultsListener(mExecutor, mScanResultListener);
+        verify(mWifiService).registerScanResultsListener(any(IBinder.class),
+                callbackCaptor.capture(), anyInt());
+        callbackCaptor.getValue().onScanResultsAvailable();
+        verify(mExecutor).execute(any(Runnable.class));
+    }
+
+    /**
+     * Verify client removeScanResultsListener.
+     */
+    @Test
+    public void testRemoveScanResultsListener() throws Exception {
+        mWifiManager.removeScanResultsListener(mScanResultListener);
+        verify(mWifiService).unregisterScanResultsListener(anyInt());
+    }
+
+    /**
+     * Verify client removeScanResultsListener with null listener will cause an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testRemoveScanResultsListenerWithNullListener() throws Exception {
+        mWifiManager.removeScanResultsListener(null);
     }
 }
