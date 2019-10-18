@@ -21,6 +21,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.statusbar.NotificationVisibility;
@@ -40,6 +41,7 @@ public class ForegroundServiceNotificationListener {
 
     private final Context mContext;
     private final ForegroundServiceController mForegroundServiceController;
+    private final NotificationEntryManager mEntryManager;
 
     @Inject
     public ForegroundServiceNotificationListener(Context context,
@@ -47,15 +49,16 @@ public class ForegroundServiceNotificationListener {
             NotificationEntryManager notificationEntryManager) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
-        notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+        mEntryManager = notificationEntryManager;
+        mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
-                addNotification(entry.getSbn(), entry.getImportance());
+                addNotification(entry, entry.getImportance());
             }
 
             @Override
-            public void onPostEntryUpdated(NotificationEntry entry) {
-                updateNotification(entry.getSbn(), entry.getImportance());
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                updateNotification(entry, entry.getImportance());
             }
 
             @Override
@@ -67,15 +70,14 @@ public class ForegroundServiceNotificationListener {
             }
         });
 
-        notificationEntryManager.addNotificationLifetimeExtender(
-                new ForegroundServiceLifetimeExtender());
+        mEntryManager.addNotificationLifetimeExtender(new ForegroundServiceLifetimeExtender());
     }
 
     /**
-     * @param sbn notification that was just posted
+     * @param entry notification that was just posted
      */
-    private void addNotification(StatusBarNotification sbn, int importance) {
-        updateNotification(sbn, importance);
+    private void addNotification(NotificationEntry entry, int importance) {
+        updateNotification(entry, importance);
     }
 
     /**
@@ -113,9 +115,10 @@ public class ForegroundServiceNotificationListener {
     }
 
     /**
-     * @param sbn notification that was just changed in some way
+     * @param entry notification that was just changed in some way
      */
-    private void updateNotification(StatusBarNotification sbn, int newImportance) {
+    private void updateNotification(NotificationEntry entry, int newImportance) {
+        final StatusBarNotification sbn = entry.getSbn();
         mForegroundServiceController.updateUserState(
                 sbn.getUserId(),
                 userState -> {
@@ -143,8 +146,22 @@ public class ForegroundServiceNotificationListener {
                             }
                         }
                     }
+                    tagForeground(entry);
                     return true;
                 },
                 true /* create if not found */);
+    }
+
+    private void tagForeground(NotificationEntry entry) {
+        final StatusBarNotification sbn = entry.getSbn();
+        ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
+                sbn.getUserId(),
+                sbn.getPackageName());
+        if (activeOps != null) {
+            synchronized (entry.mActiveAppOps) {
+                entry.mActiveAppOps.clear();
+                entry.mActiveAppOps.addAll(activeOps);
+            }
+        }
     }
 }

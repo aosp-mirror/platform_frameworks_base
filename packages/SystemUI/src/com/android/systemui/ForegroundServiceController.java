@@ -21,9 +21,12 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 
 /**
  * Tracks state of foreground services and notifications related to foreground services per user.
@@ -33,9 +36,11 @@ public class ForegroundServiceController {
 
     private final SparseArray<ForegroundServicesUserState> mUserServices = new SparseArray<>();
     private final Object mMutex = new Object();
+    private final NotificationEntryManager mEntryManager;
 
     @Inject
-    public ForegroundServiceController() {
+    public ForegroundServiceController(NotificationEntryManager entryManager) {
+        mEntryManager = entryManager;
     }
 
     /**
@@ -90,11 +95,18 @@ public class ForegroundServiceController {
     }
 
     /**
-     * Records active app ops. App Ops are stored in FSC in addition to NotificationData in
-     * case they change before we have a notification to tag.
+     * Records active app ops and updates the app op for the pending or visible notifications
+     * with the given parameters.
+     * App Ops are stored in FSC in addition to NotificationEntry in case they change before we
+     * have a notification to tag.
+     * @param appOpCode code for appOp to add/remove
+     * @param uid of user the notification is sent to
+     * @param packageName package that created the notification
+     * @param active whether the appOpCode is active or not
      */
-    public void onAppOpChanged(int code, int uid, String packageName, boolean active) {
+    public void onAppOpChanged(int appOpCode, int uid, String packageName, boolean active) {
         int userId = UserHandle.getUserId(uid);
+        // Record active app ops
         synchronized (mMutex) {
             ForegroundServicesUserState userServices = mUserServices.get(userId);
             if (userServices == null) {
@@ -102,9 +114,30 @@ public class ForegroundServiceController {
                 mUserServices.put(userId, userServices);
             }
             if (active) {
-                userServices.addOp(packageName, code);
+                userServices.addOp(packageName, appOpCode);
             } else {
-                userServices.removeOp(packageName, code);
+                userServices.removeOp(packageName, appOpCode);
+            }
+        }
+
+        // Update appOp if there's an associated pending or visible notification:
+        final String foregroundKey = getStandardLayoutKey(userId, packageName);
+        if (foregroundKey != null) {
+            final NotificationEntry entry = mEntryManager.getPendingOrCurrentNotif(foregroundKey);
+            if (entry != null
+                    && uid == entry.getSbn().getUid()
+                    && packageName.equals(entry.getSbn().getPackageName())) {
+                boolean changed;
+                synchronized (entry.mActiveAppOps) {
+                    if (active) {
+                        changed = entry.mActiveAppOps.add(appOpCode);
+                    } else {
+                        changed = entry.mActiveAppOps.remove(appOpCode);
+                    }
+                }
+                if (changed) {
+                    mEntryManager.updateNotifications("appOpChanged pkg=" + packageName);
+                }
             }
         }
     }

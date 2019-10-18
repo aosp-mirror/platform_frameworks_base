@@ -130,7 +130,7 @@ public final class NotificationEntry {
     private Throwable mDebugThrowable;
     public CharSequence remoteInputTextWhenReset;
     public long lastRemoteInputSent = NOT_LAUNCHED_YET;
-    public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
+    public final ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
     public CharSequence headsUpStatusBarText;
     public CharSequence headsUpStatusBarTextPublic;
 

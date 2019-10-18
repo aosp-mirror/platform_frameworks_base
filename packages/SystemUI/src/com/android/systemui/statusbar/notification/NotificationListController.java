@@ -18,10 +18,6 @@ package com.android.systemui.statusbar.notification;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.os.UserHandle;
-import android.service.notification.StatusBarNotification;
-import android.util.ArraySet;
-
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -70,11 +66,6 @@ public class NotificationListController {
                 boolean removedByUser) {
             mListContainer.cleanUpViewStateForEntry(entry);
         }
-
-        @Override
-        public void onBeforeNotificationAdded(NotificationEntry entry) {
-            tagForeground(entry.getSbn());
-        }
     };
 
     private final DeviceProvisionedListener mDeviceProvisionedListener =
@@ -84,29 +75,4 @@ public class NotificationListController {
                     mEntryManager.updateNotifications("device provisioned changed");
                 }
             };
-
-    // TODO: This method is horrifically inefficient
-    private void tagForeground(StatusBarNotification notification) {
-        ArraySet<Integer> activeOps =
-                mForegroundServiceController.getAppOps(
-                        notification.getUserId(), notification.getPackageName());
-        if (activeOps != null) {
-            int len = activeOps.size();
-            for (int i = 0; i < len; i++) {
-                updateNotificationsForAppOp(activeOps.valueAt(i), notification.getUid(),
-                        notification.getPackageName(), true);
-            }
-        }
-    }
-
-    /** When an app op changes, propagate that change to notifications. */
-    public void updateNotificationsForAppOp(int appOp, int uid, String pkg, boolean showIcon) {
-        String foregroundKey =
-                mForegroundServiceController.getStandardLayoutKey(UserHandle.getUserId(uid), pkg);
-        if (foregroundKey != null) {
-            mEntryManager
-                    .getNotificationData().updateAppOp(appOp, uid, pkg, foregroundKey, showIcon);
-            mEntryManager.updateNotifications("app opp changed pkg=" + pkg);
-        }
-    }
 }
