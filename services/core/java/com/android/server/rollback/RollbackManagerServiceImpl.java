@@ -1248,13 +1248,22 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
     @GuardedBy("mLock")
     private NewRollback createNewRollbackLocked(PackageInstaller.SessionInfo parentSession) {
         int rollbackId = allocateRollbackIdLocked();
+        final int userId;
+        if (parentSession.getUser() == UserHandle.ALL) {
+            userId = UserHandle.USER_SYSTEM;
+        } else {
+            userId = parentSession.getUser().getIdentifier();
+        }
+        String installerPackageName = parentSession.getInstallerPackageName();
         final Rollback rollback;
         int parentSessionId = parentSession.getSessionId();
 
         if (parentSession.isStaged()) {
-            rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId);
+            rollback = mRollbackStore.createStagedRollback(rollbackId, parentSessionId, userId,
+                    installerPackageName);
         } else {
-            rollback = mRollbackStore.createNonStagedRollback(rollbackId);
+            rollback = mRollbackStore.createNonStagedRollback(rollbackId, userId,
+                    installerPackageName);
         }
 
         int[] packageSessionIds;

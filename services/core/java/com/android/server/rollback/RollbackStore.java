@@ -16,6 +16,8 @@
 
 package com.android.server.rollback;
 
+import static android.os.UserHandle.USER_SYSTEM;
+
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
@@ -196,18 +198,19 @@ class RollbackStore {
      * Creates a new Rollback instance for a non-staged rollback with
      * backupDir assigned.
      */
-    Rollback createNonStagedRollback(int rollbackId) {
+    Rollback createNonStagedRollback(int rollbackId, int userId, String installerPackageName) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
-        return new Rollback(rollbackId, backupDir, -1);
+        return new Rollback(rollbackId, backupDir, -1, userId, installerPackageName);
     }
 
     /**
      * Creates a new Rollback instance for a staged rollback with
      * backupDir assigned.
      */
-    Rollback createStagedRollback(int rollbackId, int stagedSessionId) {
+    Rollback createStagedRollback(int rollbackId, int stagedSessionId, int userId,
+            String installerPackageName) {
         File backupDir = new File(mRollbackDataDir, Integer.toString(rollbackId));
-        return new Rollback(rollbackId, backupDir, stagedSessionId);
+        return new Rollback(rollbackId, backupDir, stagedSessionId, userId, installerPackageName);
     }
 
     /**
@@ -263,6 +266,8 @@ class RollbackStore {
             dataJson.put("state", rollback.getStateAsString());
             dataJson.put("apkSessionId", rollback.getApkSessionId());
             dataJson.put("restoreUserDataInProgress", rollback.isRestoreUserDataInProgress());
+            dataJson.put("userId", rollback.getUserId());
+            dataJson.putOpt("installerPackageName", rollback.getInstallerPackageName());
 
             PrintWriter pw = new PrintWriter(new File(rollback.getBackupDir(), "rollback.json"));
             pw.println(dataJson.toString());
@@ -305,7 +310,9 @@ class RollbackStore {
                 dataJson.getInt("stagedSessionId"),
                 rollbackStateFromString(dataJson.getString("state")),
                 dataJson.getInt("apkSessionId"),
-                dataJson.getBoolean("restoreUserDataInProgress"));
+                dataJson.getBoolean("restoreUserDataInProgress"),
+                dataJson.optInt("userId", USER_SYSTEM),
+                dataJson.optString("installerPackageName", ""));
     }
 
     private static JSONObject toJson(VersionedPackage pkg) throws JSONException {
