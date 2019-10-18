@@ -59,6 +59,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Consumer;
@@ -138,7 +139,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
 
         assertScrimAlpha(OPAQUE /* front */,
-                SEMI_TRANSPARENT /* back */,
+                OPAQUE /* back */,
                 TRANSPARENT /* bubble */);
 
         assertScrimTint(true /* front */,
@@ -745,6 +746,22 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind.getDefaultFocusHighlightEnabled());
         Assert.assertFalse("Scrim shouldn't have focus highlight",
                 mScrimForBubble.getDefaultFocusHighlightEnabled());
+    }
+
+    @Test
+    public void testIsLowPowerMode() {
+        HashSet<ScrimState> lowPowerModeStates = new HashSet<>(Arrays.asList(
+                ScrimState.OFF, ScrimState.AOD, ScrimState.PULSING));
+        HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
+                ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, ScrimState.BOUNCER,
+                ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR, ScrimState.UNLOCKED,
+                ScrimState.BUBBLE_EXPANDED));
+
+        for (ScrimState state : ScrimState.values()) {
+            if (!lowPowerModeStates.contains(state) && !regularStates.contains(state)) {
+                Assert.fail("Scrim state not whitelisted nor blacklisted as low power mode");
+            }
+        }
     }
 
     private void assertScrimTint(boolean front, boolean behind, boolean bubble) {

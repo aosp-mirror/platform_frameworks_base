@@ -4280,11 +4280,19 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void prepareForGentleSleep(Runnable onDisplayOffCallback) {
-            if (onDisplayOffCallback != null) {
+            if (mPendingScreenOffCallback != null) {
                 Log.w(TAG, "Overlapping onDisplayOffCallback. Ignoring previous one.");
             }
             mPendingScreenOffCallback = onDisplayOffCallback;
             updateScrimController();
+        }
+
+        @Override
+        public void cancelGentleSleep() {
+            mPendingScreenOffCallback = null;
+            if (mScrimController.getState() == ScrimState.OFF) {
+                updateScrimController();
+            }
         }
 
         /**
