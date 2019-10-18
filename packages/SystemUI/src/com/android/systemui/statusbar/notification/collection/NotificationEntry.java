@@ -156,12 +156,6 @@ public final class NotificationEntry {
     private boolean hasSentReply;
 
     /**
-     * Whether this notification has changed in visual appearance since the previous post.
-     * New notifications are interruptive by default.
-     */
-    public boolean isVisuallyInterruptive;
-
-    /**
      * Whether this notification is shown to the user as a high priority notification: visible on
      * the lock screen/status bar and in the top section in the shade.
      */
@@ -236,9 +230,14 @@ public final class NotificationEntry {
             throw new IllegalArgumentException("New key " + ranking.getKey()
                     + " doesn't match existing key " + mKey);
         }
+
         mRanking = ranking;
-        isVisuallyInterruptive = ranking.visuallyInterruptive();
     }
+
+
+    /*
+     * Convenience getters for SBN and Ranking members
+     */
 
     public NotificationChannel getChannel() {
         return mRanking.getChannel();
@@ -286,6 +285,12 @@ public final class NotificationEntry {
         return mRanking.getSmartReplies();
     }
 
+
+    /*
+     * Old methods
+     *
+     * TODO: Remove as many of these as possible
+     */
 
     public void setInterruption() {
         interruption = true;
