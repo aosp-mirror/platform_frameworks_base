@@ -5440,4 +5440,6 @@
     <!-- ChooserActivity - Alphabetically sorted apps list label. [CHAR LIMIT=NONE] -->
     <string name="chooser_all_apps_button_label">Apps list</string>
 
+    <!-- Prompt for the USB device resolver dialog with warning text for USB device dialogs.  [CHAR LIMIT=200] -->
+    <string name="usb_device_resolve_prompt_warn">This app has not been granted record permission but could capture audio through this USB device.</string>
 </resources>

@@ -140,6 +140,9 @@ public class ResolverActivity extends Activity implements
 
     private final PackageMonitor mPackageMonitor = createPackageMonitor();
 
+    // Intent extra for connected audio devices
+    public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
+
     /**
      * Get the string resource to be used as a label for the link to the resolver activity for an
      * action.
@@ -1038,8 +1041,14 @@ public class ResolverActivity extends Activity implements
     public ResolverListAdapter createAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed, boolean useLayoutForBrowsables) {
+
+        Intent startIntent = getIntent();
+        boolean isAudioCaptureDevice =
+                startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
+
         return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, createListController(), useLayoutForBrowsables, this);
+                filterLastUsed, createListController(), useLayoutForBrowsables, this,
+                isAudioCaptureDevice);
     }
 
     @VisibleForTesting

@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LabeledIntent;
@@ -86,13 +87,15 @@ public class ResolverListAdapter extends BaseAdapter {
     private boolean mFilterLastUsed;
     private final ResolverListCommunicator mResolverListCommunicator;
     private Runnable mPostListReadyRunnable;
+    private final boolean mIsAudioCaptureDevice;
 
     public ResolverListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed,
             ResolverListController resolverListController,
             boolean useLayoutForBrowsables,
-            ResolverListCommunicator resolverListCommunicator) {
+            ResolverListCommunicator resolverListCommunicator,
+            boolean isAudioCaptureDevice) {
         mContext = context;
         mIntents = payloadIntents;
         mInitialIntents = initialIntents;
@@ -105,6 +108,7 @@ public class ResolverListAdapter extends BaseAdapter {
         mSuspendedMatrixColorFilter = createSuspendedColorMatrix();
         mUseLayoutForBrowsables = useLayoutForBrowsables;
         mResolverListCommunicator = resolverListCommunicator;
+        mIsAudioCaptureDevice = isAudioCaptureDevice;
         final ActivityManager am = (ActivityManager) mContext.getSystemService(ACTIVITY_SERVICE);
         mIconDpi = am.getLauncherLargeIconDensity();
     }
@@ -651,6 +655,29 @@ public class ResolverListAdapter extends BaseAdapter {
         protected CharSequence[] doInBackground(Void... voids) {
             ResolveInfoPresentationGetter pg =
                     makePresentationGetter(mDisplayResolveInfo.getResolveInfo());
+
+            if (mIsAudioCaptureDevice) {
+                // This is an audio capture device, so check record permissions
+                ActivityInfo activityInfo = mDisplayResolveInfo.getResolveInfo().activityInfo;
+                String packageName = activityInfo.packageName;
+
+                int uid = activityInfo.applicationInfo.uid;
+                boolean hasRecordPermission =
+                        PermissionChecker.checkPermissionForPreflight(
+                                mContext,
+                                android.Manifest.permission.RECORD_AUDIO, -1, uid,
+                                packageName)
+                                == android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+                if (!hasRecordPermission) {
+                    // Doesn't have record permission, so warn the user
+                    return new CharSequence[] {
+                            pg.getLabel(),
+                            mContext.getString(R.string.usb_device_resolve_prompt_warn)
+                    };
+                }
+            }
+
             return new CharSequence[] {
                     pg.getLabel(),
                     pg.getSubLabel()
