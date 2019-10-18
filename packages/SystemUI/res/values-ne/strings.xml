@@ -47,10 +47,11 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट विधिहरू सेटअप गर्नुहोस्"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"वास्तविक किबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
-    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
-    <skip />
+    <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_DEVICE">%2$s</xliff:g> माथि पहुँच राख्न अनुमति दिने हो?\nयो अनुप्रयोगलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> लाई <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> माथि पहुँच राख्ने अनुमति दिने हो?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
+    <!-- no translation found for usb_device_confirm_prompt_warn (210658281376801521) -->
+    <skip />
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> को व्यवस्थापन गर्न <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्ने हो?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"यस USB उपकरणसँग स्थापित अनुप्रयोग काम गर्दैन। यस उपकरणको बारेमा <xliff:g id="URL">%1$s</xliff:g> मा धेरै जान्नुहोस्"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB सहयोगी"</string>
@@ -58,7 +59,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> जडान भएको बेला सधैँ <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्नुहोस्"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> जडान भएको बेला सधैँ <xliff:g id="APPLICATION">%1$s</xliff:g> खोल्नुहोस्"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डिबग गर्नको लागि अनुमति दिने हो?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"कम्प्युटरको RSA कुञ्जी औंलाछाप:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"कम्प्युटरको RSA कुञ्जीको फिंगरप्रिन्ट:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"यो कम्प्युटरबाट सधैँ अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डिबग गर्न अनुमति छैन"</string>
@@ -111,7 +112,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"आवाज सहायता"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"खोल्नुहोस्"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"फिंगरप्रिन्ट कुर्दै"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"तपाईँको फिंगरप्रिन्ट बिना नै अनलक गर्नुहोस्"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"आफ्नो फिंगरप्रिन्ट बिना नै अनलक गर्नुहोस्"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"अनुहार स्क्यान गर्दै"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"पठाउनुहोस्"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"सूचनाहरू व्यवस्थित गर्नुहोस्"</string>
@@ -128,20 +129,13 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"पुष्टि भयो"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"पूरा गर्नका लागि पुष्टि गर्नुहोस् नामक विकल्पमा ट्याप गर्नुहोस्"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"प्रमाणीकरण गरियो"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"PIN प्रयोग गर्नुहोस्"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"ढाँचा प्रयोग गर्नुहोस्"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"पासवर्ड प्रयोग गर्नुहोस्"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"PIN मिलेन"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"ढाँचा मिलेन"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"पासवर्ड मिलेन"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"अत्यन्तै धेरै पटक गलत प्रयास गरिए। \n <xliff:g id="NUMBER">%d</xliff:g>सेकेन्ड पछि पुनः प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"फिंगरप्रिन्ट सेन्सरमा छुनुहोस्‌"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"फिंगरप्रिन्ट जनाउने आइकन"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"तपाईंलाई खोज्दै…"</string>
@@ -380,8 +374,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"अधिसूचनाहरू"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"फ्ल्यासलाइट"</string>
-    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
-    <skip />
+    <string name="quick_settings_flashlight_camera_in_use" msgid="6120370795890963385">"क्यामेरा प्रयोगमा छ"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"मोबाइल डेटा"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"डेटाको प्रयोग"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"बाँकी डेटा"</string>

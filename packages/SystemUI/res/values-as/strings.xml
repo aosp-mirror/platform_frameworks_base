@@ -47,10 +47,11 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ইনপুট পদ্ধতি ছেট আপ কৰক"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"বাস্তৱিক কীব\'ৰ্ড"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক অনুমতি দিবনে?"</string>
-    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
-    <skip />
+    <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_DEVICE">%2$s</xliff:g> এক্সেছ কৰিবলৈ অনুমতি দিবনে?\nএই এপ্‌টোক ৰেকর্ড কৰাৰ অনুমতি দিয়া হোৱা নাই কিন্তু ই এই ইউএছবি ডিভাইচটোৰ জৰিয়তে অডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g>ক <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ত প্ৰৱেশ কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g>ক ব্যৱহাৰ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক খোলেনে?"</string>
+    <!-- no translation found for usb_device_confirm_prompt_warn (210658281376801521) -->
+    <skip />
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g>ক ব্যৱহাৰ কৰিবলৈ <xliff:g id="APPLICATION">%1$s</xliff:g>ক খোলেনে?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ইনষ্টল হৈ থকা কোনো এপে ইউএছবি সহায়ক সামগ্ৰীটো চলাব নোৱাৰে। এই সহায়ক সামগ্ৰীৰ বিষয়ে <xliff:g id="URL">%1$s</xliff:g>ৰ জৰিয়তে অধিক জানক৷"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"ইউএছবিৰ সহায়ক সামগ্ৰী"</string>
@@ -128,20 +129,13 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"নিশ্চিত কৰিলে"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"সম্পূৰ্ণ কৰিবলৈ নিশ্চিত কৰক-ত টিপক"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"বিশ্বাসযোগ্যতা প্ৰমাণীকৰণ কৰা হ’ল"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"পিন ব্যৱহাৰ কৰক"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"আৰ্হি ব্যৱহাৰ কৰক"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"পাছৱৰ্ড ব্যৱহাৰ কৰক"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"ভুল পিন"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"ভুল আৰ্হি"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"ভুল পাছৱৰ্ড"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"বহুসংখ্যক ভুল প্ৰয়াস।\n<xliff:g id="NUMBER">%d</xliff:g>ছেকেণ্ডত পুনৰ চেষ্টা কৰক।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো স্পৰ্শ কৰক"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ফিংগাৰপ্ৰিণ্ট আইকন"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"আপোনাৰ মুখমণ্ডল বিচাৰি আছে…"</string>
@@ -380,8 +374,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"জাননীসমূহ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ফ্লাশ্বলাইট"</string>
-    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
-    <skip />
+    <string name="quick_settings_flashlight_camera_in_use" msgid="6120370795890963385">"কেমেৰা ব্যৱহাৰ হৈ আছে"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ম’বাইল ডেটা"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ডেটা ব্যৱহাৰ"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"বাকী থকা ডেটা"</string>
