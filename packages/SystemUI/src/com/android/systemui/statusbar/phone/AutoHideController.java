@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -25,10 +23,10 @@ import android.util.Log;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /** A controller to control all auto-hide things. */
 public class AutoHideController {
@@ -54,7 +52,7 @@ public class AutoHideController {
     };
 
     @Inject
-    public AutoHideController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler,
+    public AutoHideController(Context context, @MainHandler Handler handler,
             NotificationRemoteInputManager notificationRemoteInputManager,
             IWindowManager iWindowManager) {
         mHandler = handler;

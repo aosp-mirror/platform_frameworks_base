@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -26,12 +24,13 @@ import android.os.Handler;
 import android.os.UserManager;
 import android.util.Log;
 
+import com.android.systemui.dagger.qualifiers.MainHandler;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -56,7 +55,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     /**
      */
     @Inject
-    public HotspotControllerImpl(Context context, @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+    public HotspotControllerImpl(Context context, @MainHandler Handler mainHandler) {
         mContext = context;
         mConnectivityManager =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);

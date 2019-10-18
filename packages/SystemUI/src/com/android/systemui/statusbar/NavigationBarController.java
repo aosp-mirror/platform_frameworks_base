@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 import static com.android.systemui.SysUiServiceProvider.getComponent;
 
 import android.content.Context;
@@ -38,6 +37,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.Dependency;
 import com.android.systemui.assist.AssistHandleViewController;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.phone.AutoHideController;
@@ -48,7 +48,6 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.policy.BatteryController;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 
@@ -67,7 +66,7 @@ public class NavigationBarController implements Callbacks {
     SparseArray<NavigationBarFragment> mNavigationBars = new SparseArray<>();
 
     @Inject
-    public NavigationBarController(Context context, @Named(MAIN_HANDLER_NAME) Handler handler) {
+    public NavigationBarController(Context context, @MainHandler Handler handler) {
         mContext = context;
         mHandler = handler;
         mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);

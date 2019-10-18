@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger;
 
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 
 import android.content.ContentProvider;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.InjectionInflationController;
@@ -36,6 +39,7 @@ import dagger.Component;
 @Component(modules = {
         DependencyProvider.class,
         DependencyBinder.class,
+        SystemServicesModule.class,
         SystemUIFactory.ContextHolder.class,
         SystemUIModule.class,
         SystemUIDefaultModule.class})

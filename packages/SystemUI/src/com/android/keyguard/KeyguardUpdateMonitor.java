@@ -39,7 +39,6 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
 
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
@@ -101,6 +100,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.MainLooper;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -118,7 +118,6 @@ import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -1500,7 +1499,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     @VisibleForTesting
     @Inject
-    protected KeyguardUpdateMonitor(Context context, @Named(MAIN_LOOPER_NAME) Looper mainLooper) {
+    protected KeyguardUpdateMonitor(Context context, @MainLooper Looper mainLooper) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();

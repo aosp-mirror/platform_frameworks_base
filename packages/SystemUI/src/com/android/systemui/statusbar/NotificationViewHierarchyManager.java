@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -29,6 +27,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -47,7 +46,6 @@ import java.util.List;
 import java.util.Stack;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
@@ -99,8 +97,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private boolean mIsHandleDynamicPrivacyChangeScheduled;
 
     @Inject
-    public NotificationViewHierarchyManager(Context context,
-            @Named(MAIN_HANDLER_NAME) Handler mainHandler,
+    public NotificationViewHierarchyManager(Context context, @MainHandler Handler mainHandler,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,

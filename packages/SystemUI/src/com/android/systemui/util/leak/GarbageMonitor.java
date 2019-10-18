@@ -20,7 +20,6 @@ import static android.service.quicksettings.Tile.STATE_ACTIVE;
 import static android.telephony.ims.feature.ImsFeature.STATE_UNAVAILABLE;
 
 import static com.android.internal.logging.MetricsLogger.VIEW_UNKNOWN;
-import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -48,6 +47,7 @@ import android.util.LongSparseArray;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSHost;
@@ -59,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -110,7 +109,7 @@ public class GarbageMonitor implements Dumpable {
     @Inject
     public GarbageMonitor(
             Context context,
-            @Named(BG_LOOPER_NAME) Looper bgLooper,
+            @BgLooper Looper bgLooper,
             LeakDetector leakDetector,
             LeakReporter leakReporter) {
         mContext = context.getApplicationContext();

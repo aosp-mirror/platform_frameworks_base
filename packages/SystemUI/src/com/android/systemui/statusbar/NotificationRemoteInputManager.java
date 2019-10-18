@@ -17,8 +17,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -52,6 +50,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -69,7 +68,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
@@ -262,7 +260,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController,
             StatusBarStateController statusBarStateController,
-            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+            @MainHandler Handler mainHandler) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;

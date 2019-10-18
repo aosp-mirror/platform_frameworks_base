@@ -17,7 +17,6 @@
 package com.android.systemui.classifier;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.BRIGHTLINE_FALSING_MANAGER_ENABLED;
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 
 import android.content.Context;
 import android.hardware.SensorManager;
@@ -31,6 +30,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
 import com.android.systemui.classifier.brightline.FalsingDataProvider;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingPlugin;
 import com.android.systemui.plugins.PluginListener;
@@ -41,7 +41,6 @@ import com.android.systemui.util.sensors.ProximitySensor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -62,7 +61,7 @@ public class FalsingManagerProxy implements FalsingManager {
 
     @Inject
     FalsingManagerProxy(Context context, PluginManager pluginManager,
-            @Named(MAIN_HANDLER_NAME) Handler handler,
+            @MainHandler Handler handler,
             ProximitySensor proximitySensor,
             DeviceConfigProxy deviceConfig) {
         mProximitySensor = proximitySensor;

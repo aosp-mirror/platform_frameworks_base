@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import static com.android.settingslib.Utils.updateLocationEnabled;
-import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -36,13 +35,13 @@ import android.provider.Settings;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -66,7 +65,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final H mHandler = new H();
 
     @Inject
-    public LocationControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper) {
+    public LocationControllerImpl(Context context, @BgLooper Looper bgLooper) {
         mContext = context;
 
         // Register to listen for changes in location settings.

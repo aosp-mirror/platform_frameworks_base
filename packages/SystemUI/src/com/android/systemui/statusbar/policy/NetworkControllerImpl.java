@@ -24,7 +24,6 @@ import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OU
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 
 import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
-import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -65,6 +64,7 @@ import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.BgLooper;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGroup;
@@ -81,7 +81,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /** Platform implementation of the network controller. **/
@@ -170,7 +169,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * Construct this controller object and register for updates.
      */
     @Inject
-    public NetworkControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
+    public NetworkControllerImpl(Context context, @BgLooper Looper bgLooper,
             DeviceProvisionedController deviceProvisionedController) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
