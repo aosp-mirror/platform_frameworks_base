@@ -17,9 +17,8 @@ package com.android.settingslib.media;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.widget.Toast;
-
-import androidx.mediarouter.media.MediaRouter;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -31,22 +30,28 @@ public class InfoMediaDevice extends MediaDevice {
 
     private static final String TAG = "InfoMediaDevice";
 
-    private MediaRouter.RouteInfo mRouteInfo;
+    private final MediaRoute2Info mRouteInfo;
+    private final MediaRouter2Manager mRouterManager;
+    private final String mPackageName;
 
-    InfoMediaDevice(Context context, MediaRouter.RouteInfo info) {
+    InfoMediaDevice(Context context, MediaRouter2Manager routerManager, MediaRoute2Info info,
+            String packageName) {
         super(context, MediaDeviceType.TYPE_CAST_DEVICE);
+        mRouterManager = routerManager;
         mRouteInfo = info;
+        mPackageName = packageName;
         initDeviceRecord();
     }
 
     @Override
     public String getName() {
-        return mRouteInfo.getName();
+        return mRouteInfo.getName().toString();
     }
 
     @Override
     public String getSummary() {
-        return null;
+        return mRouteInfo.getClientPackageName() != null
+                ? mContext.getString(R.string.bluetooth_active_no_battery_level) : null;
     }
 
     @Override
@@ -63,15 +68,14 @@ public class InfoMediaDevice extends MediaDevice {
 
     @Override
     public boolean connect() {
-        //TODO(b/121083246): use SystemApi to transfer media
         setConnectedRecord();
-        Toast.makeText(mContext, "This is cast device !", Toast.LENGTH_SHORT).show();
-        return false;
+        mRouterManager.selectRoute(mPackageName, mRouteInfo);
+        return true;
     }
 
     @Override
     public void disconnect() {
-        //TODO(b/121083246): disconnected last select device
+        //TODO(b/144535188): disconnected last select device
     }
 
     @Override
