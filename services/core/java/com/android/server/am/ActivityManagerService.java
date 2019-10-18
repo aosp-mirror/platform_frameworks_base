@@ -503,10 +503,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
 
-    // Intent sent when remote bugreport collection has been completed
-    private static final String INTENT_REMOTE_BUGREPORT_FINISHED =
-            "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
-
     // If set, we will push process association information in to procstats.
     static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
 
@@ -14928,12 +14924,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             HashSet<ComponentName> singleUserReceivers = null;
             boolean scannedFirstReceivers = false;
             for (int user : users) {
-                // Skip users that have Shell restrictions, with exception of always permitted
-                // Shell broadcasts
+                // Skip users that have Shell restrictions
                 if (callingUid == SHELL_UID
                         && mUserController.hasUserRestriction(
-                                UserManager.DISALLOW_DEBUGGING_FEATURES, user)
-                        && !isPermittedShellBroadcast(intent)) {
+                                UserManager.DISALLOW_DEBUGGING_FEATURES, user)) {
                     continue;
                 }
                 List<ResolveInfo> newReceivers = AppGlobals.getPackageManager()
@@ -14998,11 +14992,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             // pm is in same process, this will never happen.
         }
         return receivers;
-    }
-
-    private boolean isPermittedShellBroadcast(Intent intent) {
-        // remote bugreport should always be allowed to be taken
-        return INTENT_REMOTE_BUGREPORT_FINISHED.equals(intent.getAction());
     }
 
     private void checkBroadcastFromSystem(Intent intent, ProcessRecord callerApp,
