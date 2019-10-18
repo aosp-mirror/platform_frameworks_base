@@ -50,7 +50,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
@@ -352,6 +351,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mBrightnessMirrorVisible;
     protected BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
+    private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
 
@@ -477,7 +477,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private @TransitionMode int mStatusBarMode;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
-    protected ScrimController mScrimController;
+    private final ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
     private final UiOffloadThread mUiOffloadThread;
 
@@ -679,7 +679,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
             NotifLog notifLog,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            ScrimController scrimController,
+            Lazy<LockscreenWallpaper> lockscreenWallpaperLazy) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -737,6 +739,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowViewControllerBuilder = statusBarWindowViewControllerBuilder;
         mNotifLog = notifLog;
         mDozeParameters = dozeParameters;
+        mScrimController = scrimController;
+        mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -995,7 +999,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         createNavigationBar(result);
 
         if (ENABLE_LOCKSCREEN_WALLPAPER) {
-            mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
+            mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
+            mLockscreenWallpaper.setHandler(mHandler);
         }
 
         mKeyguardIndicationController =
@@ -1029,19 +1034,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
         ScrimView scrimForBubble = mStatusBarWindow.findViewById(R.id.scrim_for_bubble);
 
-        mScrimController = SystemUIFactory.getInstance().createScrimController(
-                scrimBehind, scrimInFront, scrimForBubble, mLockscreenWallpaper,
-                (state, alpha, color) -> mLightBarController.setScrimState(state, alpha, color),
-                scrimsVisible -> {
-                    if (mStatusBarWindowController != null) {
-                        mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
-                    }
-                    if (mStatusBarWindow != null) {
-                        mStatusBarWindowViewController.onScrimVisibilityChanged(scrimsVisible);
-                    }
-                }, mDozeParameters,
-                mContext.getSystemService(AlarmManager.class),
-                mKeyguardStateController);
+        mScrimController.setScrimVisibleListener(scrimsVisible -> {
+            mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
+            if (mStatusBarWindow != null) {
+                mStatusBarWindowViewController.onScrimVisibilityChanged(scrimsVisible);
+            }
+        });
+        mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
+
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
         mDozeScrimController = new DozeScrimController(mDozeParameters, mDozeLog);

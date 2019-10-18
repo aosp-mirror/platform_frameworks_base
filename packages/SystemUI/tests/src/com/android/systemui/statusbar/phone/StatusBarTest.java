@@ -146,6 +146,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import dagger.Lazy;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -223,6 +225,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
     @Mock private NotifLog mNotifLog;
     @Mock private DozeParameters mDozeParameters;
+    @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    @Mock private LockscreenWallpaper mLockscreenWallpaper;
 
     @Before
     public void setup() throws Exception {
@@ -288,6 +292,8 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarWindowViewControllerBuilder.build())
                 .thenReturn(mStatusBarWindowViewController);
 
+        when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
+
         mStatusBar = new StatusBar(
                 mContext,
                 mFeatureFlags,
@@ -348,14 +354,15 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarWindowController,
                 mStatusBarWindowViewControllerBuilder,
                 mNotifLog,
-                mDozeParameters);
+                mDozeParameters,
+                mScrimController,
+                mLockscreenWallpaperLazy);
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.mStatusBarKeyguardViewManager = mStatusBarKeyguardViewManager;
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;
         mStatusBar.mBiometricUnlockController = mBiometricUnlockController;
-        mStatusBar.mScrimController = mScrimController;
         mStatusBar.mNotificationPanel = mNotificationPanelView;
         mStatusBar.mCommandQueue = mCommandQueue;
         mStatusBar.mDozeScrimController = mDozeScrimController;

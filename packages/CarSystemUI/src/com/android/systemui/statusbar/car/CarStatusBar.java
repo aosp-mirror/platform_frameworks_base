@@ -118,8 +118,10 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
+import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
@@ -154,6 +156,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private static final float FLING_ANIMATION_MAX_TIME = 0.5f;
     // acceleration rate for the fling animation
     private static final float FLING_SPEED_UP_FACTOR = 0.6f;
+    private final ScrimController mScrimController;
 
     private float mOpeningVelocity = DEFAULT_FLING_VELOCITY;
     private float mClosingVelocity = DEFAULT_FLING_VELOCITY;
@@ -310,7 +313,9 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuild,
             NotifLog notifLog,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            ScrimController scrimController,
+            Lazy<LockscreenWallpaper> lockscreenWallpaperLazy) {
         super(
                 context,
                 featureFlags,
@@ -368,8 +373,11 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 statusBarWindowController,
                 statusBarWindowViewControllerBuild,
                 notifLog,
-                dozeParameters);
+                dozeParameters,
+                scrimController,
+                lockscreenWallpaperLazy);
         mNavigationBarController = navigationBarController;
+        mScrimController = scrimController;
     }
 
     @Override
