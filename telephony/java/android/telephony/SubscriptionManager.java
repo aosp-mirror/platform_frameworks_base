@@ -571,6 +571,16 @@ public class SubscriptionManager {
     public static final String ACCESS_RULES = "access_rules";
 
     /**
+     * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
+     * {@link UiccAccessRule#encodeRules} but for the rules that come from CarrierConfigs.
+     * Only present if there are access rules in CarrierConfigs
+     * <p>TYPE: BLOB
+     * @hide
+     */
+    public static final String ACCESS_RULES_FROM_CARRIER_CONFIGS =
+            "access_rules_from_carrier_configs";
+
+    /**
      * TelephonyProvider column name identifying whether an embedded subscription is on a removable
      * card. Such subscriptions are marked inaccessible as soon as the current card is removed.
      * Otherwise, they will remain accessible unless explicitly deleted. Only present if
@@ -2085,13 +2095,13 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static boolean isValidSlotIndex(int slotIndex) {
-        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getSimCount();
+        return slotIndex >= 0 && slotIndex < TelephonyManager.getDefault().getMaxPhoneCount();
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public static boolean isValidPhoneId(int phoneId) {
-        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getPhoneCount();
+        return phoneId >= 0 && phoneId < TelephonyManager.getDefault().getMaxPhoneCount();
     }
 
     /** @hide */
@@ -2116,29 +2126,36 @@ public class SubscriptionManager {
     }
 
     /**
+     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     *
      * @return the list of subId's that are active,
      *         is never null but the length maybe 0.
      * @hide
      */
     @UnsupportedAppUsage
     public @NonNull int[] getActiveSubscriptionIdList() {
-        int[] subId = null;
+        return getActiveSubscriptionIdList(/* visibleOnly */ true);
+    }
 
+    /**
+     * TODO(b/137102918) Make this static, tests use this as an instance method currently.
+     *
+     * @return a non-null list of subId's that are active.
+     *
+     * @hide
+     */
+    public @NonNull int[] getActiveSubscriptionIdList(boolean visibleOnly) {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subId = iSub.getActiveSubIdList(/*visibleOnly*/true);
+                int[] subId = iSub.getActiveSubIdList(visibleOnly);
+                if (subId != null) return subId;
             }
         } catch (RemoteException ex) {
             // ignore it
         }
 
-        if (subId == null) {
-            subId = new int[0];
-        }
-
-        return subId;
-
+        return new int[0];
     }
 
     /**
@@ -2599,7 +2616,7 @@ public class SubscriptionManager {
         if (!info.isEmbedded()) {
             throw new IllegalArgumentException("Not an embedded subscription");
         }
-        if (info.getAccessRules() == null) {
+        if (info.getAllAccessRules() == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
@@ -2609,7 +2626,7 @@ public class SubscriptionManager {
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException("Unknown package: " + packageName, e);
         }
-        for (UiccAccessRule rule : info.getAccessRules()) {
+        for (UiccAccessRule rule : info.getAllAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 return true;

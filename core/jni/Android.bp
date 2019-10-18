@@ -294,8 +294,6 @@ cc_library_shared {
         "libnativeloader_lazy",
         "libmemunreachable",
         "libhidlbase",
-        "libhidltransport",
-        "libhwbinder",
         "libvintf",
         "libnativewindow",
         "libhwui",
