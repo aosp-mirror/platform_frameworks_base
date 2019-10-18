@@ -3649,6 +3649,10 @@ package android.media {
     method public void stop();
   }
 
+  public class RingtoneManager {
+    method @RequiresPermission(android.Manifest.permission.WRITE_SETTINGS) public static void ensureDefaultRingtones(@NonNull android.content.Context);
+  }
+
 }
 
 package android.media.audiopolicy {
