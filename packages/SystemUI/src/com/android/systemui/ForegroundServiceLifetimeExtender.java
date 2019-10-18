@@ -50,13 +50,13 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
 
     @Override
     public boolean shouldExtendLifetime(@NonNull NotificationEntry entry) {
-        if ((entry.notification.getNotification().flags
+        if ((entry.getSbn().getNotification().flags
                 & Notification.FLAG_FOREGROUND_SERVICE) == 0) {
             return false;
         }
 
         long currentTime = System.currentTimeMillis();
-        return currentTime - entry.notification.getPostTime() < MIN_FGS_TIME_MS;
+        return currentTime - entry.getSbn().getPostTime() < MIN_FGS_TIME_MS;
     }
 
     @Override
@@ -79,12 +79,12 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
             if (mManagedEntries.contains(entry)) {
                 mManagedEntries.remove(entry);
                 if (mNotificationSafeToRemoveCallback != null) {
-                    mNotificationSafeToRemoveCallback.onSafeToRemove(entry.key);
+                    mNotificationSafeToRemoveCallback.onSafeToRemove(entry.getKey());
                 }
             }
         };
         long delayAmt = MIN_FGS_TIME_MS
-                - (System.currentTimeMillis() - entry.notification.getPostTime());
+                - (System.currentTimeMillis() - entry.getSbn().getPostTime());
         mHandler.postDelayed(r, delayAmt);
     }
 }

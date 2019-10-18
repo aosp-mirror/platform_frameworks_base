@@ -1895,7 +1895,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void maybeEscalateHeadsUp() {
         mHeadsUpManager.getAllEntries().forEach(entry -> {
-            final StatusBarNotification sbn = entry.notification;
+            final StatusBarNotification sbn = entry.getSbn();
             final Notification notification = sbn.getNotification();
             if (notification.fullScreenIntent != null) {
                 if (DEBUG) {
@@ -3696,9 +3696,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Indicate that the group expansion is changing at this time -- this way the group
             // and children backgrounds / divider animations will look correct.
             entry.setGroupExpansionChanging(true);
-            if (entry.notification != null) {
-                userId = entry.notification.getUserId();
-            }
+            userId = entry.getSbn().getUserId();
         }
         boolean fullShadeNeedsBouncer = !mLockscreenUserManager.
                 userAllowsPrivateNotificationsInPublic(mLockscreenUserManager.getCurrentUserId())

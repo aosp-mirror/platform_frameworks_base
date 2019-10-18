@@ -143,11 +143,11 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 Lists.newArrayList(entry0, entry1, entry2));
 
         // Set up group manager to report that they should be bundled now.
-        when(mGroupManager.isChildInGroupWithSummary(entry0.notification)).thenReturn(false);
-        when(mGroupManager.isChildInGroupWithSummary(entry1.notification)).thenReturn(true);
-        when(mGroupManager.isChildInGroupWithSummary(entry2.notification)).thenReturn(true);
-        when(mGroupManager.getGroupSummary(entry1.notification)).thenReturn(entry0);
-        when(mGroupManager.getGroupSummary(entry2.notification)).thenReturn(entry0);
+        when(mGroupManager.isChildInGroupWithSummary(entry0.getSbn())).thenReturn(false);
+        when(mGroupManager.isChildInGroupWithSummary(entry1.getSbn())).thenReturn(true);
+        when(mGroupManager.isChildInGroupWithSummary(entry2.getSbn())).thenReturn(true);
+        when(mGroupManager.getGroupSummary(entry1.getSbn())).thenReturn(entry0);
+        when(mGroupManager.getGroupSummary(entry2.getSbn())).thenReturn(entry0);
 
         // Run updateNotifications - the view hierarchy should be reorganized.
         mViewHierarchyManager.updateNotificationViews();
@@ -172,9 +172,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 Lists.newArrayList(entry0, entry1, entry2));
 
         // Set up group manager to report that they should not be bundled now.
-        when(mGroupManager.isChildInGroupWithSummary(entry0.notification)).thenReturn(false);
-        when(mGroupManager.isChildInGroupWithSummary(entry1.notification)).thenReturn(false);
-        when(mGroupManager.isChildInGroupWithSummary(entry2.notification)).thenReturn(false);
+        when(mGroupManager.isChildInGroupWithSummary(entry0.getSbn())).thenReturn(false);
+        when(mGroupManager.isChildInGroupWithSummary(entry1.getSbn())).thenReturn(false);
+        when(mGroupManager.isChildInGroupWithSummary(entry2.getSbn())).thenReturn(false);
 
         // Run updateNotifications - the view hierarchy should be reorganized.
         mViewHierarchyManager.updateNotificationViews();
@@ -201,9 +201,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 Lists.newArrayList(entry0, entry1));
 
         // Set up group manager to report a suppressed summary now.
-        when(mGroupManager.isChildInGroupWithSummary(entry0.notification)).thenReturn(false);
-        when(mGroupManager.isChildInGroupWithSummary(entry1.notification)).thenReturn(false);
-        when(mGroupManager.isSummaryOfSuppressedGroup(entry0.notification)).thenReturn(true);
+        when(mGroupManager.isChildInGroupWithSummary(entry0.getSbn())).thenReturn(false);
+        when(mGroupManager.isChildInGroupWithSummary(entry1.getSbn())).thenReturn(false);
+        when(mGroupManager.isSummaryOfSuppressedGroup(entry0.getSbn())).thenReturn(true);
 
         // Run updateNotifications - the view hierarchy should be reorganized.
         mViewHierarchyManager.updateNotificationViews();

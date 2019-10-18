@@ -73,7 +73,7 @@ public class NotificationListController {
 
         @Override
         public void onBeforeNotificationAdded(NotificationEntry entry) {
-            tagForeground(entry.notification);
+            tagForeground(entry.getSbn());
         }
     };
 

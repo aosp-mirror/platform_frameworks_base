@@ -102,27 +102,27 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
         mHeadsUpManager.snooze();
 
-        assertTrue(mHeadsUpManager.isSnoozed(mEntry.notification.getPackageName()));
+        assertTrue(mHeadsUpManager.isSnoozed(mEntry.getSbn().getPackageName()));
     }
 
     @Test
     public void testSwipedOutNotification() {
         mHeadsUpManager.showNotification(mEntry);
-        mHeadsUpManager.addSwipedOutNotification(mEntry.key);
+        mHeadsUpManager.addSwipedOutNotification(mEntry.getKey());
 
         // Remove should succeed because the notification is swiped out
-        mHeadsUpManager.removeNotification(mEntry.key, false /* releaseImmediately */);
+        mHeadsUpManager.removeNotification(mEntry.getKey(), false /* releaseImmediately */);
 
-        assertFalse(mHeadsUpManager.isAlerting(mEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(mEntry.getKey()));
     }
 
     @Test
     public void testCanRemoveImmediately_swipedOut() {
         mHeadsUpManager.showNotification(mEntry);
-        mHeadsUpManager.addSwipedOutNotification(mEntry.key);
+        mHeadsUpManager.addSwipedOutNotification(mEntry.getKey());
 
         // Notification is swiped so it can be immediately removed.
-        assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.key));
+        assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.getKey()));
     }
 
     @Test
@@ -135,7 +135,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         mHeadsUpManager.showNotification(laterEntry);
 
         // Notification is "behind" a higher priority notification so we can remove it immediately.
-        assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.key));
+        assertTrue(mHeadsUpManager.canRemoveImmediately(mEntry.getKey()));
     }
 
 
@@ -143,7 +143,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     public void testExtendHeadsUp() {
         mHeadsUpManager.showNotification(mEntry);
         Runnable pastNormalTimeRunnable =
-                () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.key);
+                () -> mLivesPastNormalTime = mHeadsUpManager.isAlerting(mEntry.getKey());
         mTestHandler.postDelayed(pastNormalTimeRunnable,
                 TEST_AUTO_DISMISS_TIME + mHeadsUpManager.mExtensionTime / 2);
         mTestHandler.postDelayed(TEST_TIMEOUT_RUNNABLE, TEST_TIMEOUT_TIME);
@@ -155,6 +155,6 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
 
         assertFalse("Test timed out", mTimedOut);
         assertTrue("Pulse was not extended", mLivesPastNormalTime);
-        assertFalse(mHeadsUpManager.isAlerting(mEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(mEntry.getKey()));
     }
 }

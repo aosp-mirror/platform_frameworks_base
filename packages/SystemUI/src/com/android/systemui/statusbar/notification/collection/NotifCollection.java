@@ -199,7 +199,7 @@ public class NotifCollection {
             // need to keep its lifetime extended.
             cancelLifetimeExtension(entry);
 
-            entry.setNotification(sbn);
+            entry.setSbn(sbn);
             applyRanking(rankingMap);
 
             dispatchOnEntryUpdated(entry);

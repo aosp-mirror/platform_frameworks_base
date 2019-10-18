@@ -135,9 +135,9 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             throws InflationException {
         ViewGroup parent = mListContainer.getViewParentForNotification(entry);
         PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
-                entry.notification.getUser().getIdentifier());
+                entry.getSbn().getUser().getIdentifier());
 
-        final StatusBarNotification sbn = entry.notification;
+        final StatusBarNotification sbn = entry.getSbn();
         if (entry.rowExists()) {
             entry.updateIcons(mContext, sbn);
             entry.reset();
@@ -156,7 +156,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private void bindRow(NotificationEntry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row,
             Runnable onDismissRunnable) {
-        row.setExpansionLogger(mExpansionLogger, entry.notification.getKey());
+        row.setExpansionLogger(mExpansionLogger, entry.getSbn().getKey());
         row.setBypassController(mKeyguardBypassController);
         row.setStatusBarStateController(mStatusBarStateController);
         row.setGroupManager(mGroupManager);
@@ -213,8 +213,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
                 entry.reset();
                 PackageManager pmUser = StatusBar.getPackageManagerForUser(
                         mContext,
-                        entry.notification.getUser().getIdentifier());
-                updateNotification(entry, pmUser, entry.notification, entry.getRow());
+                        entry.getSbn().getUser().getIdentifier());
+                updateNotification(entry, pmUser, entry.getSbn(), entry.getRow());
             } else {
                 // Once the RowInflaterTask is done, it will pick up the updated entry, so
                 // no-op here.
@@ -248,7 +248,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
         // TODO: should updates to the entry be happening somewhere else?
         entry.setIconTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
-        entry.autoRedacted = entry.notification.getNotification().publicVersion == null;
+        entry.autoRedacted = entry.getSbn().getNotification().publicVersion == null;
 
         entry.setRow(row);
         row.setOnActivatedListener(mPresenter);

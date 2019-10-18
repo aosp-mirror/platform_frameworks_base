@@ -602,7 +602,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPostEntryUpdated(NotificationEntry entry) {
-                if (!entry.notification.isClearable()) {
+                if (!entry.getSbn().isClearable()) {
                     // The user may have performed a dismiss action on the notification, since it's
                     // not clearable we should snap it back.
                     snapViewIfNeeded(entry);
@@ -1627,7 +1627,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
                             && mHeadsUpManager.getTopEntry().getRow() != row
                             && mGroupManager.getGroupSummary(
-                                mHeadsUpManager.getTopEntry().notification)
+                            mHeadsUpManager.getTopEntry().getSbn())
                             != entry) {
                         continue;
                     }
@@ -5525,12 +5525,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         // TODO: This is a listener method; we shouldn't be calling it. Can we just
                         // call performRemoveNotification as below?
                         mEntryManager.removeNotification(
-                                rowToRemove.getEntry().key,
+                                rowToRemove.getEntry().getKey(),
                                 null /* ranking */,
                                 NotificationListenerService.REASON_CANCEL_ALL);
                     } else {
                         mEntryManager.performRemoveNotification(
-                                rowToRemove.getEntry().notification,
+                                rowToRemove.getEntry().getSbn(),
                                 NotificationListenerService.REASON_CANCEL_ALL);
                     }
                 } else {

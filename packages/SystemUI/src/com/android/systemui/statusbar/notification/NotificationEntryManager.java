@@ -110,7 +110,7 @@ public class NotificationEntryManager implements
             pw.println("null");
         } else {
             for (NotificationEntry entry : mPendingNotifications.values()) {
-                pw.println(entry.notification);
+                pw.println(entry.getSbn());
             }
         }
         pw.println("  Lifetime-extended notifications:");
@@ -119,7 +119,7 @@ public class NotificationEntryManager implements
         } else {
             for (Map.Entry<NotificationEntry, NotificationLifetimeExtender> entry
                     : mRetainedNotifications.entrySet()) {
-                pw.println("    " + entry.getKey().notification + " retained by "
+                pw.println("    " + entry.getKey().getSbn() + " retained by "
                         + entry.getValue().getClass().getName());
             }
         }
@@ -242,11 +242,11 @@ public class NotificationEntryManager implements
     @Override
     public void onAsyncInflationFinished(NotificationEntry entry,
             @InflationFlag int inflatedFlags) {
-        mPendingNotifications.remove(entry.key);
+        mPendingNotifications.remove(entry.getKey());
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
         if (!entry.isRowRemoved()) {
-            boolean isNew = mNotificationData.get(entry.key) == null;
+            boolean isNew = mNotificationData.get(entry.getKey()) == null;
             if (isNew) {
                 for (NotificationEntryListener listener : mNotificationEntryListeners) {
                     listener.onEntryInflated(entry, inflatedFlags);
@@ -372,7 +372,7 @@ public class NotificationEntryManager implements
     private void handleGroupSummaryRemoved(String key) {
         NotificationEntry entry = mNotificationData.get(key);
         if (entry != null && entry.rowExists() && entry.isSummaryWithChildren()) {
-            if (entry.notification.getOverrideGroupKey() != null && !entry.isRowDismissed()) {
+            if (entry.getSbn().getOverrideGroupKey() != null && !entry.isRowDismissed()) {
                 // We don't want to remove children for autobundled notifications as they are not
                 // always cancelled. We only remove them if they were dismissed by the user.
                 return;
@@ -383,7 +383,7 @@ public class NotificationEntryManager implements
             }
             for (int i = 0; i < childEntries.size(); i++) {
                 NotificationEntry childEntry = childEntries.get(i);
-                boolean isForeground = (entry.notification.getNotification().flags
+                boolean isForeground = (entry.getSbn().getNotification().flags
                         & Notification.FLAG_FOREGROUND_SERVICE) != 0;
                 boolean keepForReply =
                         getRemoteInputManager().shouldKeepForRemoteInputHistory(childEntry)
@@ -507,8 +507,8 @@ public class NotificationEntryManager implements
         for (NotificationEntry entry : entries) {
             NotificationUiAdjustment adjustment =
                     NotificationUiAdjustment.extractFromNotificationEntry(entry);
-            oldAdjustments.put(entry.key, adjustment);
-            oldImportances.put(entry.key, entry.getImportance());
+            oldAdjustments.put(entry.getKey(), adjustment);
+            oldImportances.put(entry.getKey(), entry.getImportance());
         }
 
         // Populate notification entries from the new rankings.
@@ -519,8 +519,8 @@ public class NotificationEntryManager implements
         for (NotificationEntry entry : entries) {
             requireBinder().onNotificationRankingUpdated(
                     entry,
-                    oldImportances.get(entry.key),
-                    oldAdjustments.get(entry.key),
+                    oldImportances.get(entry.getKey()),
+                    oldAdjustments.get(entry.getKey()),
                     NotificationUiAdjustment.extractFromNotificationEntry(entry));
         }
 

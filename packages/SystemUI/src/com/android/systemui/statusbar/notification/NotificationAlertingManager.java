@@ -80,7 +80,7 @@ public class NotificationAlertingManager {
                     NotificationEntry entry,
                     NotificationVisibility visibility,
                     boolean removedByUser) {
-                stopAlerting(entry.key);
+                stopAlerting(entry.getKey());
             }
         });
     }
@@ -104,7 +104,7 @@ public class NotificationAlertingManager {
                 mHeadsUpManager.showNotification(entry);
                 if (!mShadeController.get().isDozing()) {
                     // Mark as seen immediately
-                    setNotificationShown(entry.notification);
+                    setNotificationShown(entry.getSbn());
                 }
             } else {
                 entry.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
@@ -113,16 +113,16 @@ public class NotificationAlertingManager {
     }
 
     private void updateAlertState(NotificationEntry entry) {
-        boolean alertAgain = alertAgain(entry, entry.notification.getNotification());
+        boolean alertAgain = alertAgain(entry, entry.getSbn().getNotification());
         boolean shouldAlert;
         shouldAlert = mNotificationInterruptionStateProvider.shouldHeadsUp(entry);
-        final boolean wasAlerting = mHeadsUpManager.isAlerting(entry.key);
+        final boolean wasAlerting = mHeadsUpManager.isAlerting(entry.getKey());
         if (wasAlerting) {
             if (shouldAlert) {
-                mHeadsUpManager.updateNotification(entry.key, alertAgain);
-            } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.key)) {
+                mHeadsUpManager.updateNotification(entry.getKey(), alertAgain);
+            } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.getKey())) {
                 // We don't want this to be interrupting anymore, let's remove it
-                mHeadsUpManager.removeNotification(entry.key, false /* removeImmediately */);
+                mHeadsUpManager.removeNotification(entry.getKey(), false /* removeImmediately */);
             }
         } else if (shouldAlert && alertAgain) {
             // This notification was updated to be alerting, show it!

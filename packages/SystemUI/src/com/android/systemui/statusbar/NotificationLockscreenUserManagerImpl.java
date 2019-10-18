@@ -323,7 +323,7 @@ public class NotificationLockscreenUserManagerImpl implements
             exceedsPriorityThreshold = entry.getBucket() != BUCKET_SILENT;
         } else {
             exceedsPriorityThreshold =
-                    !getEntryManager().getNotificationData().isAmbient(entry.key);
+                    !getEntryManager().getNotificationData().isAmbient(entry.getKey());
         }
         return mShowLockscreenNotifications && exceedsPriorityThreshold;
     }
@@ -445,15 +445,15 @@ public class NotificationLockscreenUserManagerImpl implements
 
     /** @return true if the entry needs redaction when on the lockscreen. */
     public boolean needsRedaction(NotificationEntry ent) {
-        int userId = ent.notification.getUserId();
+        int userId = ent.getSbn().getUserId();
 
         boolean currentUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
         boolean notiUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(userId);
         boolean redactedLockscreen = currentUserWantsRedaction || notiUserWantsRedaction;
 
         boolean notificationRequestsRedaction =
-                ent.notification.getNotification().visibility == Notification.VISIBILITY_PRIVATE;
-        boolean userForcesRedaction = packageHasVisibilityOverride(ent.notification.getKey());
+                ent.getSbn().getNotification().visibility == Notification.VISIBILITY_PRIVATE;
+        boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
         return userForcesRedaction || notificationRequestsRedaction && redactedLockscreen;
     }

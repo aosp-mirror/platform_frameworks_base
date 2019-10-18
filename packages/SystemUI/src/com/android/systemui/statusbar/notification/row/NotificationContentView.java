@@ -1097,7 +1097,7 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void onNotificationUpdated(NotificationEntry entry) {
-        mStatusBarNotification = entry.notification;
+        mStatusBarNotification = entry.getSbn();
         mOnContentViewInactiveListeners.clear();
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateAllSingleLineViews();
@@ -1179,7 +1179,7 @@ public class NotificationContentView extends FrameLayout {
                 : mHeadsUpInflatedSmartReplies.getSmartRepliesAndActions();
         if (DEBUG) {
             Log.d(TAG, String.format("Adding suggestions for %s, %d actions, and %d replies.",
-                    entry.notification.getKey(),
+                    entry.getSbn().getKey(),
                     mCurrentSmartRepliesAndActions.smartActions == null ? 0 :
                             mCurrentSmartRepliesAndActions.smartActions.actions.size(),
                     mCurrentSmartRepliesAndActions.smartReplies == null ? 0 :
@@ -1253,7 +1253,7 @@ public class NotificationContentView extends FrameLayout {
                 }
             }
             if (hasRemoteInput) {
-                int color = entry.notification.getNotification().color;
+                int color = entry.getSbn().getNotification().color;
                 if (color == Notification.COLOR_DEFAULT) {
                     color = mContext.getColor(R.color.default_remote_input_background);
                 }
@@ -1267,7 +1267,7 @@ public class NotificationContentView extends FrameLayout {
                 if (existingPendingIntent != null || existing.isActive()) {
                     // The current action could be gone, or the pending intent no longer valid.
                     // If we find a matching action in the new notification, focus, otherwise close.
-                    Notification.Action[] actions = entry.notification.getNotification().actions;
+                    Notification.Action[] actions = entry.getSbn().getNotification().actions;
                     if (existingPendingIntent != null) {
                         existing.setPendingIntent(existingPendingIntent);
                     }

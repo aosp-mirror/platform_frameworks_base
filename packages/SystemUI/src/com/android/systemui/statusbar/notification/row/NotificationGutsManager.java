@@ -494,15 +494,17 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     @Override
     public void setShouldManageLifetime(NotificationEntry entry, boolean shouldExtend) {
         if (shouldExtend) {
-            mKeyToRemoveOnGutsClosed = entry.key;
+            mKeyToRemoveOnGutsClosed = entry.getKey();
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Keeping notification because it's showing guts. " + entry.key);
+                Log.d(TAG, "Keeping notification because it's showing guts. " + entry.getKey());
             }
         } else {
-            if (mKeyToRemoveOnGutsClosed != null && mKeyToRemoveOnGutsClosed.equals(entry.key)) {
+            if (mKeyToRemoveOnGutsClosed != null
+                    && mKeyToRemoveOnGutsClosed.equals(entry.getKey())) {
                 mKeyToRemoveOnGutsClosed = null;
                 if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Notification that was kept for guts was updated. " + entry.key);
+                    Log.d(TAG, "Notification that was kept for guts was updated. "
+                            + entry.getKey());
                 }
             }
         }

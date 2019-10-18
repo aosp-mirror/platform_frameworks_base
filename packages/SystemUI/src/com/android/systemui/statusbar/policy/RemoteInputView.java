@@ -175,7 +175,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         results.put(contentType, data);
         try {
             mStatusBarManagerService.grantInlineReplyUriPermission(
-                    mEntry.notification.getKey(), data);
+                    mEntry.getSbn().getKey(), data);
         } catch (Exception e) {
             Log.e(TAG, "Failed to grant URI permissions:" + e.getMessage(), e);
         }
@@ -191,7 +191,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mProgressBar.setVisibility(VISIBLE);
         mEntry.remoteInputText = mEditText.getText();
         mEntry.lastRemoteInputSent = SystemClock.elapsedRealtime();
-        mController.addSpinning(mEntry.key, mToken);
+        mController.addSpinning(mEntry.getKey(), mToken);
         mController.removeRemoteInput(mEntry, mToken);
         mEditText.mShowImeOnInputConnection = false;
         mController.remoteInputSent(mEntry);
@@ -203,17 +203,17 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         // but that's an edge case, and also because we can't always know which package will receive
         // an intent, so we just reset for the publisher.
         getContext().getSystemService(ShortcutManager.class).onApplicationActive(
-                mEntry.notification.getPackageName(),
-                mEntry.notification.getUser().getIdentifier());
+                mEntry.getSbn().getPackageName(),
+                mEntry.getSbn().getUser().getIdentifier());
 
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_SEND,
-                mEntry.notification.getPackageName());
+                mEntry.getSbn().getPackageName());
         try {
             mPendingIntent.send(mContext, 0, intent);
         } catch (PendingIntent.CanceledException e) {
             Log.i(TAG, "Unable to send remote input result", e);
             MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_FAIL,
-                    mEntry.notification.getPackageName());
+                    mEntry.getSbn().getPackageName());
         }
     }
 
@@ -228,7 +228,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 LayoutInflater.from(context).inflate(R.layout.remote_input, root, false);
         v.mController = controller;
         v.mEntry = entry;
-        UserHandle user = computeTextOperationUser(entry.notification.getUser());
+        UserHandle user = computeTextOperationUser(entry.getSbn().getUser());
         v.mEditText.mUser = user;
         v.mEditText.setTextOperationUser(user);
         v.setTag(VIEW_TAG);
@@ -284,7 +284,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mRemoteInputQuickSettingsDisabler.setRemoteInputActive(false);
 
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_CLOSE,
-                mEntry.notification.getPackageName());
+                mEntry.getSbn().getPackageName());
     }
 
     @Override
@@ -304,7 +304,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
             return;
         }
         mController.removeRemoteInput(mEntry, mToken);
-        mController.removeSpinning(mEntry.key, mToken);
+        mController.removeSpinning(mEntry.getKey(), mToken);
     }
 
     public void setPendingIntent(PendingIntent pendingIntent) {
@@ -349,7 +349,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
 
     public void focus() {
         MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_REMOTE_INPUT_OPEN,
-                mEntry.notification.getPackageName());
+                mEntry.getSbn().getPackageName());
 
         setVisibility(VISIBLE);
         if (mWrapper != null) {
@@ -388,7 +388,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.setEnabled(true);
         mSendButton.setVisibility(VISIBLE);
         mProgressBar.setVisibility(INVISIBLE);
-        mController.removeSpinning(mEntry.key, mToken);
+        mController.removeSpinning(mEntry.getKey(), mToken);
         updateSendButton();
         onDefocus(false /* animate */);
 
@@ -540,7 +540,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     }
 
     public boolean isSending() {
-        return getVisibility() == VISIBLE && mController.isSpinning(mEntry.key, mToken);
+        return getVisibility() == VISIBLE && mController.isSpinning(mEntry.getKey(), mToken);
     }
 
     /**

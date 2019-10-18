@@ -83,23 +83,23 @@ class Bubble {
     private boolean mSuppressFlyout;
 
     public static String groupId(NotificationEntry entry) {
-        UserHandle user = entry.notification.getUser();
-        return user.getIdentifier() + "|" + entry.notification.getPackageName();
+        UserHandle user = entry.getSbn().getUser();
+        return user.getIdentifier() + "|" + entry.getSbn().getPackageName();
     }
 
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(Context context, NotificationEntry e) {
         mEntry = e;
-        mKey = e.key;
-        mLastUpdated = e.notification.getPostTime();
+        mKey = e.getKey();
+        mLastUpdated = e.getSbn().getPostTime();
         mGroupId = groupId(e);
 
         PackageManager pm = context.getPackageManager();
         ApplicationInfo info;
         try {
             info = pm.getApplicationInfo(
-                mEntry.notification.getPackageName(),
+                mEntry.getSbn().getPackageName(),
                 PackageManager.MATCH_UNINSTALLED_PACKAGES
                     | PackageManager.MATCH_DISABLED_COMPONENTS
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
@@ -107,10 +107,10 @@ class Bubble {
             if (info != null) {
                 mAppName = String.valueOf(pm.getApplicationLabel(info));
             }
-            Drawable appIcon = pm.getApplicationIcon(mEntry.notification.getPackageName());
-            mUserBadgedAppIcon = pm.getUserBadgedIcon(appIcon, mEntry.notification.getUser());
+            Drawable appIcon = pm.getApplicationIcon(mEntry.getSbn().getPackageName());
+            mUserBadgedAppIcon = pm.getUserBadgedIcon(appIcon, mEntry.getSbn().getUser());
         } catch (PackageManager.NameNotFoundException unused) {
-            mAppName = mEntry.notification.getPackageName();
+            mAppName = mEntry.getSbn().getPackageName();
         }
     }
 
@@ -127,7 +127,7 @@ class Bubble {
     }
 
     public String getPackageName() {
-        return mEntry.notification.getPackageName();
+        return mEntry.getSbn().getPackageName();
     }
 
     public String getAppName() {
@@ -190,7 +190,7 @@ class Bubble {
 
     void updateEntry(NotificationEntry entry) {
         mEntry = entry;
-        mLastUpdated = entry.notification.getPostTime();
+        mLastUpdated = entry.getSbn().getPostTime();
         if (mInflated) {
             mIconView.update(this);
             mExpandedView.update(this);
@@ -287,7 +287,7 @@ class Bubble {
      * is an ongoing bubble.
      */
     boolean isOngoing() {
-        int flags = mEntry.notification.getNotification().flags;
+        int flags = mEntry.getSbn().getNotification().flags;
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 
@@ -296,8 +296,8 @@ class Bubble {
         boolean useRes = data.getDesiredHeightResId() != 0;
         if (useRes) {
             return getDimenForPackageUser(context, data.getDesiredHeightResId(),
-                    mEntry.notification.getPackageName(),
-                    mEntry.notification.getUser().getIdentifier());
+                    mEntry.getSbn().getPackageName(),
+                    mEntry.getSbn().getUser().getIdentifier());
         } else {
             return data.getDesiredHeight()
                     * context.getResources().getDisplayMetrics().density;
@@ -316,7 +316,7 @@ class Bubble {
 
     @Nullable
     PendingIntent getBubbleIntent(Context context) {
-        Notification notif = mEntry.notification.getNotification();
+        Notification notif = mEntry.getSbn().getNotification();
         Notification.BubbleMetadata data = notif.getBubbleMetadata();
         if (BubbleController.canLaunchInActivityView(context, mEntry) && data != null) {
             return data.getIntent();
@@ -327,7 +327,7 @@ class Bubble {
     Intent getSettingsIntent() {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_BUBBLE_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-        intent.putExtra(Settings.EXTRA_APP_UID, mEntry.notification.getUid());
+        intent.putExtra(Settings.EXTRA_APP_UID, mEntry.getSbn().getUid());
         intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -339,7 +339,7 @@ class Bubble {
      * notification, based on its type. Returns null if there should not be an update message.
      */
     CharSequence getUpdateMessage(Context context) {
-        final Notification underlyingNotif = mEntry.notification.getNotification();
+        final Notification underlyingNotif = mEntry.getSbn().getNotification();
         final Class<? extends Notification.Style> style = underlyingNotif.getNotificationStyle();
 
         try {
