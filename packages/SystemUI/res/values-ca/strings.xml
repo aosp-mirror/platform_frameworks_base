@@ -108,8 +108,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telèfon"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Assistència per veu"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloqueja"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"S\'està esperant l\'empremta digital"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloqueja sense utilitzar l\'empremta digital"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"S\'està esperant l\'empremta dactilar"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Desbloqueja sense utilitzar l\'empremta dactilar"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"S\'està escanejant la cara"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Envia"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Gestiona les notificacions"</string>
@@ -125,8 +125,8 @@
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="595380451325425259">"Cara autenticada"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"Confirmat"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"Toca Confirma per completar"</string>
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes digitals"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona d\'empremta digital"</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Toca el sensor d\'empremtes dactilars"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Icona d\'empremta dactilar"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"S\'està cercant la teva cara…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Icona facial"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botó de zoom de compatibilitat."</string>
@@ -457,7 +457,7 @@
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Es mostra informació sensible durant l\'emissió o la gravació"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
-    <string name="manage_notifications_text" msgid="2386728145475108753">"Gestió"</string>
+    <string name="manage_notifications_text" msgid="2386728145475108753">"Gestiona"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"Notificacions silencioses"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Esborra totes les notificacions silencioses"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notificacions pausades pel mode No molestis"</string>

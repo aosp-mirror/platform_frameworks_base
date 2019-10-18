@@ -460,7 +460,7 @@
     <string name="media_projection_dialog_title" msgid="8124184308671641248">"Izlaganje osjetljivih podataka za vrijeme emitiranja/snimanja"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne prikazuj opet"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Očisti sve"</string>
-    <string name="manage_notifications_text" msgid="2386728145475108753">"Upravljaj"</string>
+    <string name="manage_notifications_text" msgid="2386728145475108753">"Upravljajte"</string>
     <string name="notification_section_header_gentle" msgid="4372438504154095677">"Nečujna obavještenja"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="4286716295850400959">"Obriši sva nečujna obavještenja"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Obavještenja su pauzirana načinom rada Ne ometaj"</string>

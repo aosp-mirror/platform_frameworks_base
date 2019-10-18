@@ -835,7 +835,7 @@
     <string name="pip_phone_settings" msgid="8080777499521528521">"Реттеулер"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Жабу үшін төмен қарай сүйреңіз"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Mәзір"</string>
-    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> \"сурет ішіндегі сурет\" режимінде"</string>
+    <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> \"суреттегі сурет\" режимінде"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл мүмкіндікті пайдалануын қаламасаңыз, параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
     <string name="pip_play" msgid="1417176722760265888">"Ойнату"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Кідірту"</string>

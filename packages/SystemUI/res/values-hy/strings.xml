@@ -56,7 +56,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"Միշտ բացել <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը, երբ <xliff:g id="USB_DEVICE">%2$s</xliff:g> լրասարքը միացված է"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Միշտ բացել <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը, երբ <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> լրասարքը միացված է"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Թույլատրե՞լ USB-ով վրիպազերծումը"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Համակարգչի RSA-ի բանալի մատնահետքն է`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"RSA բանալու թվային մատնահետք`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Միշտ թույլատրել այս համակարգչից"</string>
     <string name="usb_debugging_allow" msgid="2272145052073254852">"Թույլատրել"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-ով վրիպազերծումը թույլատրված չէ"</string>
@@ -109,7 +109,7 @@
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Ձայնային հուշումներ"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Ապակողպել"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"Մատնահետքի սպասում"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ապակողպել չօգտագործելով մատնահետքը"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Ապակողպել առանց մատնահետքի"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"Դեմքի սկանավորում"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"Ուղարկել"</string>
     <string name="accessibility_manage_notification" msgid="2026361503393549753">"Կառավարել ծանուցումները"</string>
