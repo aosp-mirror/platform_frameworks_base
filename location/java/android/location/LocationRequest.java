@@ -30,6 +30,8 @@ import android.os.SystemClock;
 import android.os.WorkSource;
 import android.util.TimeUtils;
 
+import com.android.internal.util.Preconditions;
+
 
 /**
  * A data object that contains quality of service parameters for requests
@@ -159,6 +161,7 @@ public final class LocationRequest implements Parcelable {
     private boolean mExplicitFastestInterval = false;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private long mExpireAt = Long.MAX_VALUE;  // no expiry
+    private long mExpireIn = Long.MAX_VALUE;  // no expiry
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -262,6 +265,7 @@ public final class LocationRequest implements Parcelable {
         mFastestInterval = src.mFastestInterval;
         mExplicitFastestInterval = src.mExplicitFastestInterval;
         mExpireAt = src.mExpireAt;
+        mExpireIn = src.mExpireIn;
         mNumUpdates = src.mNumUpdates;
         mSmallestDisplacement = src.mSmallestDisplacement;
         mProvider = src.mProvider;
@@ -336,7 +340,7 @@ public final class LocationRequest implements Parcelable {
      * @throws IllegalArgumentException if the interval is less than zero
      */
     public @NonNull LocationRequest setInterval(long millis) {
-        checkInterval(millis);
+        Preconditions.checkArgument(millis >= 0, "invalid interval: + millis");
         mInterval = millis;
         if (!mExplicitFastestInterval) {
             mFastestInterval = (long) (mInterval / FASTEST_INTERVAL_FACTOR);
@@ -364,9 +368,7 @@ public final class LocationRequest implements Parcelable {
      *
      * @param enabled Enable or disable low power mode
      * @return the same object, so that setters can be chained
-     * @hide
      */
-    @SystemApi
     public @NonNull LocationRequest setLowPowerMode(boolean enabled) {
         mLowPowerMode = enabled;
         return this;
@@ -374,10 +376,7 @@ public final class LocationRequest implements Parcelable {
 
     /**
      * Returns true if low power mode is enabled.
-     *
-     * @hide
      */
-    @SystemApi
     public boolean isLowPowerMode() {
         return mLowPowerMode;
     }
@@ -425,93 +424,80 @@ public final class LocationRequest implements Parcelable {
      * <p>An interval of 0 is allowed, but not recommended, since
      * location updates may be extremely fast on future implementations.
      *
-     * <p>If {@link #setFastestInterval} is set slower than {@link #setInterval},
+     * <p>If the fastest interval set is slower than {@link #setInterval},
      * then your effective fastest interval is {@link #setInterval}.
      *
-     * @param millis fastest interval for updates in milliseconds, exact
+     * @param millis fastest interval for updates in milliseconds
      * @return the same object, so that setters can be chained
      * @throws IllegalArgumentException if the interval is less than zero
      */
     public @NonNull LocationRequest setFastestInterval(long millis) {
-        checkInterval(millis);
+        Preconditions.checkArgument(millis >= 0, "invalid interval: + millis");
         mExplicitFastestInterval = true;
         mFastestInterval = millis;
         return this;
     }
 
     /**
-     * Get the fastest interval of this request, in milliseconds.
+     * Get the fastest interval of this request in milliseconds. The system will never provide
+     * location updates faster than the minimum of the fastest interval and {@link #getInterval}.
      *
-     * <p>The system will never provide location updates faster
-     * than the minimum of {@link #getFastestInterval} and
-     * {@link #getInterval}.
-     *
-     * @return fastest interval in milliseconds, exact
+     * @return fastest interval in milliseconds
      */
     public long getFastestInterval() {
         return mFastestInterval;
     }
 
     /**
-     * Set the duration of this request, in milliseconds.
+     * Set the expiration time of this request in milliseconds of realtime since boot. Values in the
+     * past are allowed, but indicate that the request has already expired. The location manager
+     * will automatically stop updates after the request expires.
      *
-     * <p>The duration begins immediately (and not when the request
-     * is passed to the location manager), so call this method again
-     * if the request is re-used at a later time.
+     * @param millis expiration time of request in milliseconds since boot
+     * @return the same object, so that setters can be chained
+     * @see SystemClock#elapsedRealtime()
+     * @deprecated Prefer {@link #setExpireIn(long)}.
+     */
+    @Deprecated
+    public @NonNull LocationRequest setExpireAt(long millis) {
+        mExpireAt = Math.max(millis, 0);
+        return this;
+    }
+
+    /**
+     * Get the request expiration time in milliseconds of realtime since boot.
      *
-     * <p>The location manager will automatically stop updates after
-     * the request expires.
-     *
-     * <p>The duration includes suspend time. Values less than 0
-     * are allowed, but indicate that the request has already expired.
+     * @return request expiration time in milliseconds since boot
+     * @see SystemClock#elapsedRealtime()
+     * @deprecated Prefer {@link #getExpireIn()}.
+     */
+    @Deprecated
+    public long getExpireAt() {
+        return mExpireAt;
+    }
+
+    /**
+     * Set the duration of this request in milliseconds of realtime. Values less than 0 are allowed,
+     * but indicate that the request has already expired. The location manager will automatically
+     * stop updates after the request expires.
      *
      * @param millis duration of request in milliseconds
      * @return the same object, so that setters can be chained
+     * @see SystemClock#elapsedRealtime()
      */
     public @NonNull LocationRequest setExpireIn(long millis) {
-        long elapsedRealtime = SystemClock.elapsedRealtime();
-
-        // Check for > Long.MAX_VALUE overflow (elapsedRealtime > 0):
-        if (millis > Long.MAX_VALUE - elapsedRealtime) {
-            mExpireAt = Long.MAX_VALUE;
-        } else {
-            mExpireAt = millis + elapsedRealtime;
-        }
-
-        if (mExpireAt < 0) mExpireAt = 0;
+        mExpireIn = millis;
         return this;
     }
 
     /**
-     * Set the request expiration time, in millisecond since boot.
+     * Get the request expiration duration in milliseconds of realtime.
      *
-     * <p>This expiration time uses the same time base as {@link SystemClock#elapsedRealtime}.
-     *
-     * <p>The location manager will automatically stop updates after
-     * the request expires.
-     *
-     * <p>The duration includes suspend time. Values before {@link SystemClock#elapsedRealtime}
-     * are allowed,  but indicate that the request has already expired.
-     *
-     * @param millis expiration time of request, in milliseconds since boot including suspend
-     * @return the same object, so that setters can be chained
+     * @return request expiration duration in milliseconds
+     * @see SystemClock#elapsedRealtime()
      */
-    public @NonNull LocationRequest setExpireAt(long millis) {
-        mExpireAt = millis;
-        if (mExpireAt < 0) mExpireAt = 0;
-        return this;
-    }
-
-    /**
-     * Get the request expiration time, in milliseconds since boot.
-     *
-     * <p>This value can be compared to {@link SystemClock#elapsedRealtime} to determine
-     * the time until expiration.
-     *
-     * @return expiration time of request, in milliseconds since boot including suspend
-     */
-    public long getExpireAt() {
-        return mExpireAt;
+    public long getExpireIn() {
+        return mExpireIn;
     }
 
     /**
@@ -632,13 +618,6 @@ public final class LocationRequest implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    private static void checkInterval(long millis) {
-        if (millis < 0) {
-            throw new IllegalArgumentException("invalid interval: " + millis);
-        }
-    }
-
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static void checkQuality(int quality) {
         switch (quality) {
             case ACCURACY_FINE:
@@ -676,6 +655,7 @@ public final class LocationRequest implements Parcelable {
                     request.setFastestInterval(in.readLong());
                     request.setInterval(in.readLong());
                     request.setExpireAt(in.readLong());
+                    request.setExpireIn(in.readLong());
                     request.setNumUpdates(in.readInt());
                     request.setSmallestDisplacement(in.readFloat());
                     request.setHideFromAppOps(in.readInt() != 0);
@@ -705,6 +685,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeLong(mFastestInterval);
         parcel.writeLong(mInterval);
         parcel.writeLong(mExpireAt);
+        parcel.writeLong(mExpireIn);
         parcel.writeInt(mNumUpdates);
         parcel.writeFloat(mSmallestDisplacement);
         parcel.writeInt(mHideFromAppOps ? 1 : 0);
@@ -747,9 +728,11 @@ public final class LocationRequest implements Parcelable {
         s.append(" fastest=");
         TimeUtils.formatDuration(mFastestInterval, s);
         if (mExpireAt != Long.MAX_VALUE) {
-            long expireIn = mExpireAt - SystemClock.elapsedRealtime();
+            s.append(" expireAt=").append(TimeUtils.formatUptime(mExpireAt));
+        }
+        if (mExpireIn != Long.MAX_VALUE) {
             s.append(" expireIn=");
-            TimeUtils.formatDuration(expireIn, s);
+            TimeUtils.formatDuration(mExpireIn, s);
         }
         if (mNumUpdates != Integer.MAX_VALUE) {
             s.append(" num=").append(mNumUpdates);

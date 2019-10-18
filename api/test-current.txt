@@ -1136,17 +1136,20 @@ package android.location {
   public final class LocationRequest implements android.os.Parcelable {
     method @NonNull public static android.location.LocationRequest create();
     method public int describeContents();
-    method public long getExpireAt();
+    method @Deprecated public long getExpireAt();
+    method public long getExpireIn();
     method public long getFastestInterval();
     method public long getInterval();
     method public int getNumUpdates();
     method public int getQuality();
     method public boolean isLocationSettingsIgnored();
-    method @NonNull public android.location.LocationRequest setExpireAt(long);
+    method public boolean isLowPowerMode();
+    method @Deprecated @NonNull public android.location.LocationRequest setExpireAt(long);
     method @NonNull public android.location.LocationRequest setExpireIn(long);
     method @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @NonNull public android.location.LocationRequest setInterval(long);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) @NonNull public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @NonNull public android.location.LocationRequest setLowPowerMode(boolean);
     method @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @NonNull public android.location.LocationRequest setProvider(@NonNull String);
     method @NonNull public android.location.LocationRequest setQuality(int);

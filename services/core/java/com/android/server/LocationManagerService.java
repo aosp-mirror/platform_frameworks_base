@@ -2044,6 +2044,18 @@ public class LocationManagerService extends ILocationManager.Stub {
          * Note: must be constructed with lock held.
          */
         private UpdateRecord(String provider, LocationRequest request, Receiver receiver) {
+            // translate expireIn value into expireAt
+            long elapsedRealtime = SystemClock.elapsedRealtime();
+            long expireAt;
+            // Check for > Long.MAX_VALUE overflow (elapsedRealtime > 0):
+            if (request.getExpireIn() > Long.MAX_VALUE - elapsedRealtime) {
+                expireAt = Long.MAX_VALUE;
+            } else {
+                expireAt = Math.max(request.getExpireIn() + elapsedRealtime, 0);
+            }
+            request.setExpireAt(Math.min(request.getExpireAt(), expireAt));
+            request.setExpireIn(Long.MAX_VALUE);
+
             mProvider = provider;
             mRealRequest = request;
             mRequest = request;
