@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -104,6 +105,8 @@ public class BiometricServiceTest {
     IBiometricAuthenticator mFaceAuthenticator;
     @Mock
     ITrustManager mTrustManager;
+    @Mock
+    DevicePolicyManager mDevicePolicyManager;
 
     @Before
     public void setUp() {
@@ -111,6 +114,8 @@ public class BiometricServiceTest {
 
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE))
+                .thenReturn(mDevicePolicyManager);
 
         when(mInjector.getActivityManagerService()).thenReturn(mock(IActivityManager.class));
         when(mInjector.getStatusBarService()).thenReturn(mock(IStatusBarService.class));
@@ -1198,8 +1203,69 @@ public class BiometricServiceTest {
         for (String s : mInjector.getConfiguration(null)) {
             SensorConfig config = new SensorConfig(s);
             mBiometricService.mImpl.registerAuthenticator(config.mId, config.mModality,
-                    config.mStrength, mFingerprintAuthenticator);
+                config.mStrength, mFingerprintAuthenticator);
         }
+    }
+
+    @Test
+    public void testWorkAuthentication_fingerprintWorksIfNotDisabledByDevicePolicyManager()
+            throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        when(mDevicePolicyManager
+                .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
+                .thenReturn(~DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        waitForIdle();
+        assertEquals(mBiometricService.mPendingAuthSession.mState,
+                BiometricService.STATE_AUTH_CALLED);
+        startPendingAuthSession(mBiometricService);
+        waitForIdle();
+        assertEquals(mBiometricService.mCurrentAuthSession.mState,
+                BiometricService.STATE_AUTH_STARTED);
+    }
+
+    @Test
+    public void testWorkAuthentication_faceWorksIfNotDisabledByDevicePolicyManager()
+            throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        when(mDevicePolicyManager
+                .getKeyguardDisabledFeatures(any() /* admin*/, anyInt() /* userHandle */))
+                .thenReturn(~DevicePolicyManager.KEYGUARD_DISABLE_FACE);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        waitForIdle();
+        assertEquals(mBiometricService.mPendingAuthSession.mState,
+                BiometricService.STATE_AUTH_CALLED);
+        startPendingAuthSession(mBiometricService);
+        waitForIdle();
+        assertEquals(mBiometricService.mCurrentAuthSession.mState,
+                BiometricService.STATE_AUTH_STARTED);
+    }
+
+    @Test
+    public void testWorkAuthentication_fingerprintFailsIfDisabledByDevicePolicyManager()
+            throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        when(mDevicePolicyManager
+                .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        waitForIdle();
+        assertNotNull(mBiometricService.mCurrentAuthSession);
+        assertEquals(mBiometricService.mCurrentAuthSession.mState,
+                BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL);
+    }
+
+    @Test
+    public void testWorkAuthentication_faceFailsIfDisabledByDevicePolicyManager() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        when(mDevicePolicyManager
+                .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FACE);
+        invokeAuthenticateForWorkApp(mBiometricService.mImpl, mReceiver1);
+        waitForIdle();
+        assertNotNull(mBiometricService.mCurrentAuthSession);
+        assertEquals(mBiometricService.mCurrentAuthSession.mState,
+                BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL);
     }
 
     // Helper methods
@@ -1309,6 +1375,21 @@ public class BiometricServiceTest {
                 receiver,
                 TEST_PACKAGE_NAME /* packageName */,
                 createTestBiometricPromptBundle(requireConfirmation, authenticators));
+    }
+
+    private static void invokeAuthenticateForWorkApp(IBiometricService.Stub service,
+            IBiometricServiceReceiver receiver) throws Exception {
+        final Bundle bundle = new Bundle();
+        bundle.putBoolean(BiometricPrompt.EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS, true);
+        bundle.putBoolean(BiometricPrompt.KEY_REQUIRE_CONFIRMATION, true);
+        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
+        service.authenticate(
+                new Binder() /* token */,
+                0 /* sessionId */,
+                0 /* userId */,
+                receiver,
+                TEST_PACKAGE_NAME /* packageName */,
+                bundle);
     }
 
     private static Bundle createTestBiometricPromptBundle(

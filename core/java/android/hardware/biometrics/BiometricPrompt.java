@@ -87,6 +87,11 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final String KEY_AUTHENTICATORS_ALLOWED = "authenticators_allowed";
+    /**
+     * If this is set, check the Device Policy Manager for allowed biometrics.
+     * @hide
+     */
+    public static final String EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS = "check_dpm";
 
     /**
      * Error/help message will show for this amount of time.
@@ -322,6 +327,20 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         @NonNull
         public Builder setAllowedAuthenticators(@Authenticators.Types int authenticators) {
             mBundle.putInt(KEY_AUTHENTICATORS_ALLOWED, authenticators);
+            return this;
+        }
+
+        /**
+         * If set check the Device Policy Manager for disabled biometrics.
+         *
+         * @param checkDevicePolicyManager
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        public Builder setDisallowBiometricsIfPolicyExists(boolean checkDevicePolicyManager) {
+            mBundle.putBoolean(EXTRA_DISALLOW_BIOMETRICS_IF_POLICY_EXISTS,
+                    checkDevicePolicyManager);
             return this;
         }
 
