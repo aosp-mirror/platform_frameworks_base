@@ -85,11 +85,6 @@ import java.util.Objects;
  * clean this up in the future.
  */
 public final class NotificationEntry {
-    private static final long LAUNCH_COOLDOWN = 2000;
-    private static final long REMOTE_INPUT_COOLDOWN = 500;
-    private static final long INITIALIZATION_DELAY = 400;
-    private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
-    private static final int COLOR_INVALID = 1;
 
     private final String mKey;
     private StatusBarNotification mSbn;
@@ -109,7 +104,6 @@ public final class NotificationEntry {
     * TODO: Remove every member beneath this line if possible
     */
 
-    public boolean noisy;
     public StatusBarIconView icon;
     public StatusBarIconView expandedIcon;
     public StatusBarIconView centeredIcon;
@@ -965,4 +959,10 @@ public final class NotificationEntry {
             this.index = index;
         }
     }
+
+    private static final long LAUNCH_COOLDOWN = 2000;
+    private static final long REMOTE_INPUT_COOLDOWN = 500;
+    private static final long INITIALIZATION_DELAY = 400;
+    private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
+    private static final int COLOR_INVALID = 1;
 }
