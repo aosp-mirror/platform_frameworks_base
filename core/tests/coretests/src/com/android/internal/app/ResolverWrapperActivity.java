@@ -19,10 +19,14 @@ package com.android.internal.app;
 import static org.mockito.Mockito.mock;
 
 import android.app.usage.UsageStatsManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 
-import androidx.test.espresso.idling.CountingIdlingResource;
+import com.android.internal.app.chooser.TargetInfo;
 
+import java.util.List;
 import java.util.function.Function;
 
 /*
@@ -31,15 +35,17 @@ import java.util.function.Function;
 public class ResolverWrapperActivity extends ResolverActivity {
     static final OverrideData sOverrides = new OverrideData();
     private UsageStatsManager mUsm;
-    private CountingIdlingResource mLabelIdlingResource =
-            new CountingIdlingResource("LoadLabelTask");
 
-    public CountingIdlingResource getLabelIdlingResource() {
-        return mLabelIdlingResource;
+    @Override
+    public ResolverListAdapter createAdapter(Context context, List<Intent> payloadIntents,
+            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed,
+            boolean useLayoutForBrowsables) {
+        return new ResolverWrapperAdapter(context, payloadIntents, initialIntents, rList,
+                filterLastUsed, createListController(), useLayoutForBrowsables, this);
     }
 
-    ResolveListAdapter getAdapter() {
-        return mAdapter;
+    ResolverWrapperAdapter getAdapter() {
+        return (ResolverWrapperAdapter) mAdapter;
     }
 
     @Override
@@ -72,11 +78,6 @@ public class ResolverWrapperActivity extends ResolverActivity {
         return super.getPackageManager();
     }
 
-    @Override
-    protected LoadLabelTask getLoadLabelTask(DisplayResolveInfo info, ViewHolder holder) {
-        return new LoadLabelWrapperTask(info, holder);
-    }
-
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -94,24 +95,6 @@ public class ResolverWrapperActivity extends ResolverActivity {
             isVoiceInteraction = null;
             createPackageManager = null;
             resolverListController = mock(ResolverListController.class);
-        }
-    }
-
-    class LoadLabelWrapperTask extends LoadLabelTask {
-
-        protected LoadLabelWrapperTask(DisplayResolveInfo dri, ViewHolder holder) {
-            super(dri, holder);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            mLabelIdlingResource.increment();
-        }
-
-        @Override
-        protected void onPostExecute(CharSequence[] result) {
-            super.onPostExecute(result);
-            mLabelIdlingResource.decrement();
         }
     }
 }
