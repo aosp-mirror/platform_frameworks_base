@@ -25,8 +25,10 @@ import static android.net.ConnectivityManager.EXTRA_ACTIVE_TETHER;
 import static android.net.ConnectivityManager.EXTRA_AVAILABLE_TETHER;
 import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
+import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
@@ -90,6 +92,9 @@ import android.net.util.NetworkConstants;
 import android.net.util.SharedLog;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -140,6 +145,7 @@ public class TetheringTest {
     private static final String TEST_XLAT_MOBILE_IFNAME = "v4-test_rmnet_data0";
     private static final String TEST_USB_IFNAME = "test_rndis0";
     private static final String TEST_WLAN_IFNAME = "test_wlan0";
+    private static final String TEST_P2P_IFNAME = "test_p2p-p2p0-0";
 
     private static final int DHCPSERVER_START_TIMEOUT_MS = 1000;
 
@@ -216,9 +222,10 @@ public class TetheringTest {
             assertTrue("Non-mocked interface " + ifName,
                     ifName.equals(TEST_USB_IFNAME)
                             || ifName.equals(TEST_WLAN_IFNAME)
-                            || ifName.equals(TEST_MOBILE_IFNAME));
+                            || ifName.equals(TEST_MOBILE_IFNAME)
+                            || ifName.equals(TEST_P2P_IFNAME));
             final String[] ifaces = new String[] {
-                    TEST_USB_IFNAME, TEST_WLAN_IFNAME, TEST_MOBILE_IFNAME };
+                    TEST_USB_IFNAME, TEST_WLAN_IFNAME, TEST_MOBILE_IFNAME, TEST_P2P_IFNAME};
             return new InterfaceParams(ifName, ArrayUtils.indexOf(ifaces, ifName) + IFINDEX_OFFSET,
                     MacAddress.ALL_ZEROS_ADDRESS);
         }
@@ -361,6 +368,8 @@ public class TetheringTest {
                 .thenReturn(new String[] { "test_rndis\\d" });
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_wifi_regexs))
                 .thenReturn(new String[]{ "test_wlan\\d" });
+        when(mResources.getStringArray(com.android.internal.R.array.config_tether_wifi_p2p_regexs))
+                .thenReturn(new String[]{ "test_p2p-p2p\\d-.*" });
         when(mResources.getStringArray(com.android.internal.R.array.config_tether_bluetooth_regexs))
                 .thenReturn(new String[0]);
         when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
@@ -369,7 +378,7 @@ public class TetheringTest {
                 .thenReturn(false);
         when(mNMService.listInterfaces())
                 .thenReturn(new String[] {
-                        TEST_MOBILE_IFNAME, TEST_WLAN_IFNAME, TEST_USB_IFNAME});
+                        TEST_MOBILE_IFNAME, TEST_WLAN_IFNAME, TEST_USB_IFNAME, TEST_P2P_IFNAME});
         when(mNMService.getInterfaceConfig(anyString()))
                 .thenReturn(new InterfaceConfiguration());
         when(mRouterAdvertisementDaemon.start())
@@ -423,6 +432,31 @@ public class TetheringTest {
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
+    private static final String[] P2P_RECEIVER_PERMISSIONS_FOR_BROADCAST = {
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_WIFI_STATE
+    };
+
+    private void sendWifiP2pConnectionChanged(
+            boolean isGroupFormed, boolean isGroupOwner, String ifname) {
+        WifiP2pInfo p2pInfo = new WifiP2pInfo();
+        p2pInfo.groupFormed = isGroupFormed;
+        p2pInfo.isGroupOwner = isGroupOwner;
+
+        NetworkInfo networkInfo = new NetworkInfo(TYPE_WIFI_P2P, 0, null, null);
+
+        WifiP2pGroup group = new WifiP2pGroup();
+        group.setIsGroupOwner(isGroupOwner);
+        group.setInterface(ifname);
+
+        final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO, p2pInfo);
+        intent.putExtra(WifiP2pManager.EXTRA_NETWORK_INFO, networkInfo);
+        intent.putExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP, group);
+        mServiceContext.sendBroadcastAsUserMultiplePermissions(intent, UserHandle.ALL,
+                P2P_RECEIVER_PERMISSIONS_FOR_BROADCAST);
+    }
+
     private void sendUsbBroadcast(boolean connected, boolean configured, boolean rndisFunction) {
         final Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
         intent.putExtra(USB_CONNECTED, connected);
@@ -436,11 +470,11 @@ public class TetheringTest {
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private void verifyInterfaceServingModeStarted() throws Exception {
-        verify(mNMService, times(1)).getInterfaceConfig(TEST_WLAN_IFNAME);
+    private void verifyInterfaceServingModeStarted(String ifname) throws Exception {
+        verify(mNMService, times(1)).getInterfaceConfig(ifname);
         verify(mNMService, times(1))
-                .setInterfaceConfig(eq(TEST_WLAN_IFNAME), any(InterfaceConfiguration.class));
-        verify(mNMService, times(1)).tetherInterface(TEST_WLAN_IFNAME);
+                .setInterfaceConfig(eq(ifname), any(InterfaceConfiguration.class));
+        verify(mNMService, times(1)).tetherInterface(ifname);
     }
 
     private void verifyTetheringBroadcast(String ifname, String whichExtra) {
@@ -530,7 +564,7 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, TEST_WLAN_IFNAME, IFACE_IP_MODE_LOCAL_ONLY);
         mLooper.dispatchAll();
 
-        verifyInterfaceServingModeStarted();
+        verifyInterfaceServingModeStarted(TEST_WLAN_IFNAME);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
@@ -542,8 +576,9 @@ public class TetheringTest {
         verifyNoMoreInteractions(mWifiManager);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_ACTIVE_LOCAL_ONLY);
         verify(mUpstreamNetworkMonitor, times(1)).startObserveAllNetworks();
-        // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
-        assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
+        // This will be called twice, one is on entering IpServer.STATE_AVAILABLE,
+        // and another one is on IpServer.STATE_TETHERED/IpServer.STATE_LOCAL_ONLY.
+        assertEquals(2, mTetheringDependencies.isTetheringSupportedCalls);
 
         // Emulate externally-visible WifiManager effects, when hotspot mode
         // is being torn down.
@@ -552,9 +587,9 @@ public class TetheringTest {
         mLooper.dispatchAll();
 
         verify(mNMService, times(1)).untetherInterface(TEST_WLAN_IFNAME);
-        // TODO: Why is {g,s}etInterfaceConfig() called more than once?
-        verify(mNMService, atLeastOnce()).getInterfaceConfig(TEST_WLAN_IFNAME);
-        verify(mNMService, atLeastOnce())
+        // {g,s}etInterfaceConfig() called twice for enabling and disabling IPv4.
+        verify(mNMService, times(2)).getInterfaceConfig(TEST_WLAN_IFNAME);
+        verify(mNMService, times(2))
                 .setInterfaceConfig(eq(TEST_WLAN_IFNAME), any(InterfaceConfiguration.class));
         verify(mNMService, times(1)).stopTethering();
         verify(mNMService, times(1)).setIpForwardingEnabled(false);
@@ -770,7 +805,7 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED, TEST_WLAN_IFNAME, IFACE_IP_MODE_TETHERED);
         mLooper.dispatchAll();
 
-        verifyInterfaceServingModeStarted();
+        verifyInterfaceServingModeStarted(TEST_WLAN_IFNAME);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
@@ -785,8 +820,9 @@ public class TetheringTest {
         // In tethering mode, in the default configuration, an explicit request
         // for a mobile network is also made.
         verify(mUpstreamNetworkMonitor, times(1)).registerMobileNetworkRequest();
-        // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
-        assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
+        // This will be called twice, one is on entering IpServer.STATE_AVAILABLE,
+        // and another one is on IpServer.STATE_TETHERED/IpServer.STATE_LOCAL_ONLY.
+        assertEquals(2, mTetheringDependencies.isTetheringSupportedCalls);
 
         /////
         // We do not currently emulate any upstream being found.
@@ -809,7 +845,7 @@ public class TetheringTest {
         mLooper.dispatchAll();
 
         verify(mNMService, times(1)).untetherInterface(TEST_WLAN_IFNAME);
-        // TODO: Why is {g,s}etInterfaceConfig() called more than once?
+        // {g,s}etInterfaceConfig() called twice for enabling and disabling IPv4.
         verify(mNMService, atLeastOnce()).getInterfaceConfig(TEST_WLAN_IFNAME);
         verify(mNMService, atLeastOnce())
                 .setInterfaceConfig(eq(TEST_WLAN_IFNAME), any(InterfaceConfiguration.class));
@@ -857,8 +893,9 @@ public class TetheringTest {
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_UNSPECIFIED);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_TETHERED);
-        // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
-        assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
+        // There are 3 state change event:
+        // AVAILABLE -> STATE_TETHERED -> STATE_AVAILABLE.
+        assertEquals(3, mTetheringDependencies.isTetheringSupportedCalls);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         // This is called, but will throw.
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
@@ -1029,6 +1066,133 @@ public class TetheringTest {
         mPhoneStateListener.onActiveDataSubscriptionIdChanged(fakeSubId);
         final TetheringConfiguration newConfig = mTethering.getTetheringConfiguration();
         assertEquals(fakeSubId, newConfig.subId);
+    }
+
+    private void workingWifiP2pGroupOwner(
+            boolean emulateInterfaceStatusChanged) throws Exception {
+        if (emulateInterfaceStatusChanged) {
+            mTethering.interfaceStatusChanged(TEST_P2P_IFNAME, true);
+        }
+        sendWifiP2pConnectionChanged(true, true, TEST_P2P_IFNAME);
+        mLooper.dispatchAll();
+
+        verifyInterfaceServingModeStarted(TEST_P2P_IFNAME);
+        verifyTetheringBroadcast(TEST_P2P_IFNAME, EXTRA_AVAILABLE_TETHER);
+        verify(mNMService, times(1)).setIpForwardingEnabled(true);
+        verify(mNMService, times(1)).startTethering(any(String[].class));
+        verifyNoMoreInteractions(mNMService);
+        verifyTetheringBroadcast(TEST_P2P_IFNAME, EXTRA_ACTIVE_LOCAL_ONLY);
+        verify(mUpstreamNetworkMonitor, times(1)).startObserveAllNetworks();
+        // This will be called twice, one is on entering IpServer.STATE_AVAILABLE,
+        // and another one is on IpServer.STATE_TETHERED/IpServer.STATE_LOCAL_ONLY.
+        assertEquals(2, mTetheringDependencies.isTetheringSupportedCalls);
+
+        assertEquals(TETHER_ERROR_NO_ERROR, mTethering.getLastTetherError(TEST_P2P_IFNAME));
+
+        // Emulate externally-visible WifiP2pManager effects, when wifi p2p group
+        // is being removed.
+        sendWifiP2pConnectionChanged(false, true, TEST_P2P_IFNAME);
+        mTethering.interfaceRemoved(TEST_P2P_IFNAME);
+        mLooper.dispatchAll();
+
+        verify(mNMService, times(1)).untetherInterface(TEST_P2P_IFNAME);
+        // {g,s}etInterfaceConfig() called twice for enabling and disabling IPv4.
+        verify(mNMService, times(2)).getInterfaceConfig(TEST_P2P_IFNAME);
+        verify(mNMService, times(2))
+                .setInterfaceConfig(eq(TEST_P2P_IFNAME), any(InterfaceConfiguration.class));
+        verify(mNMService, times(1)).stopTethering();
+        verify(mNMService, times(1)).setIpForwardingEnabled(false);
+        verify(mUpstreamNetworkMonitor, never()).getCurrentPreferredUpstream();
+        verify(mUpstreamNetworkMonitor, never()).selectPreferredUpstreamType(any());
+        verifyNoMoreInteractions(mNMService);
+        // Asking for the last error after the per-interface state machine
+        // has been reaped yields an unknown interface error.
+        assertEquals(TETHER_ERROR_UNKNOWN_IFACE, mTethering.getLastTetherError(TEST_P2P_IFNAME));
+    }
+
+    private void workingWifiP2pGroupClient(
+            boolean emulateInterfaceStatusChanged) throws Exception {
+        if (emulateInterfaceStatusChanged) {
+            mTethering.interfaceStatusChanged(TEST_P2P_IFNAME, true);
+        }
+        sendWifiP2pConnectionChanged(true, false, TEST_P2P_IFNAME);
+        mLooper.dispatchAll();
+
+        verify(mNMService, never()).getInterfaceConfig(TEST_P2P_IFNAME);
+        verify(mNMService, never())
+                .setInterfaceConfig(eq(TEST_P2P_IFNAME), any(InterfaceConfiguration.class));
+        verify(mNMService, never()).tetherInterface(TEST_P2P_IFNAME);
+        verify(mNMService, never()).setIpForwardingEnabled(true);
+        verify(mNMService, never()).startTethering(any(String[].class));
+
+        // Emulate externally-visible WifiP2pManager effects, when wifi p2p group
+        // is being removed.
+        sendWifiP2pConnectionChanged(false, false, TEST_P2P_IFNAME);
+        mTethering.interfaceRemoved(TEST_P2P_IFNAME);
+        mLooper.dispatchAll();
+
+        verify(mNMService, never()).untetherInterface(TEST_P2P_IFNAME);
+        verify(mNMService, never()).getInterfaceConfig(TEST_P2P_IFNAME);
+        verify(mNMService, never())
+                .setInterfaceConfig(eq(TEST_P2P_IFNAME), any(InterfaceConfiguration.class));
+        verify(mNMService, never()).stopTethering();
+        verify(mNMService, never()).setIpForwardingEnabled(false);
+        verifyNoMoreInteractions(mNMService);
+        // Asking for the last error after the per-interface state machine
+        // has been reaped yields an unknown interface error.
+        assertEquals(TETHER_ERROR_UNKNOWN_IFACE, mTethering.getLastTetherError(TEST_P2P_IFNAME));
+    }
+
+    @Test
+    public void workingWifiP2pGroupOwnerWithIfaceChanged() throws Exception {
+        workingWifiP2pGroupOwner(true);
+    }
+
+    @Test
+    public void workingWifiP2pGroupOwnerSansIfaceChanged() throws Exception {
+        workingWifiP2pGroupOwner(false);
+    }
+
+    private void workingWifiP2pGroupOwnerLegacyMode(
+            boolean emulateInterfaceStatusChanged) throws Exception {
+        // change to legacy mode and update tethering information by chaning SIM
+        when(mResources.getStringArray(com.android.internal.R.array.config_tether_wifi_p2p_regexs))
+                .thenReturn(new String[]{});
+        final int fakeSubId = 1234;
+        mPhoneStateListener.onActiveDataSubscriptionIdChanged(fakeSubId);
+
+        if (emulateInterfaceStatusChanged) {
+            mTethering.interfaceStatusChanged(TEST_P2P_IFNAME, true);
+        }
+        sendWifiP2pConnectionChanged(true, true, TEST_P2P_IFNAME);
+        mLooper.dispatchAll();
+
+        verify(mNMService, never()).getInterfaceConfig(TEST_P2P_IFNAME);
+        verify(mNMService, never())
+                .setInterfaceConfig(eq(TEST_P2P_IFNAME), any(InterfaceConfiguration.class));
+        verify(mNMService, never()).tetherInterface(TEST_P2P_IFNAME);
+        verify(mNMService, never()).setIpForwardingEnabled(true);
+        verify(mNMService, never()).startTethering(any(String[].class));
+        assertEquals(TETHER_ERROR_UNKNOWN_IFACE, mTethering.getLastTetherError(TEST_P2P_IFNAME));
+    }
+    @Test
+    public void workingWifiP2pGroupOwnerLegacyModeWithIfaceChanged() throws Exception {
+        workingWifiP2pGroupOwnerLegacyMode(true);
+    }
+
+    @Test
+    public void workingWifiP2pGroupOwnerLegacyModeSansIfaceChanged() throws Exception {
+        workingWifiP2pGroupOwnerLegacyMode(false);
+    }
+
+    @Test
+    public void workingWifiP2pGroupClientWithIfaceChanged() throws Exception {
+        workingWifiP2pGroupClient(true);
+    }
+
+    @Test
+    public void workingWifiP2pGroupClientSansIfaceChanged() throws Exception {
+        workingWifiP2pGroupClient(false);
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an

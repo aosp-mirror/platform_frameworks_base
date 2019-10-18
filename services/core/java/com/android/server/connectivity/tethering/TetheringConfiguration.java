@@ -28,6 +28,7 @@ import static com.android.internal.R.array.config_tether_bluetooth_regexs;
 import static com.android.internal.R.array.config_tether_dhcp_range;
 import static com.android.internal.R.array.config_tether_upstream_types;
 import static com.android.internal.R.array.config_tether_usb_regexs;
+import static com.android.internal.R.array.config_tether_wifi_p2p_regexs;
 import static com.android.internal.R.array.config_tether_wifi_regexs;
 import static com.android.internal.R.bool.config_tether_upstream_automatic;
 import static com.android.internal.R.integer.config_mobile_hotspot_provision_check_period;
@@ -85,6 +86,7 @@ public class TetheringConfiguration {
 
     public final String[] tetherableUsbRegexs;
     public final String[] tetherableWifiRegexs;
+    public final String[] tetherableWifiP2pRegexs;
     public final String[] tetherableBluetoothRegexs;
     public final boolean isDunRequired;
     public final boolean chooseUpstreamAutomatically;
@@ -110,6 +112,7 @@ public class TetheringConfiguration {
         // us an interface name. Careful consideration needs to be given to
         // implications for Settings and for provisioning checks.
         tetherableWifiRegexs = getResourceStringArray(res, config_tether_wifi_regexs);
+        tetherableWifiP2pRegexs = getResourceStringArray(res, config_tether_wifi_p2p_regexs);
         tetherableBluetoothRegexs = getResourceStringArray(res, config_tether_bluetooth_regexs);
 
         isDunRequired = checkDunRequired(ctx, subId);
@@ -138,6 +141,15 @@ public class TetheringConfiguration {
         return matchesDownstreamRegexs(iface, tetherableWifiRegexs);
     }
 
+    /** Check whether this interface is Wifi P2P interface. */
+    public boolean isWifiP2p(String iface) {
+        return matchesDownstreamRegexs(iface, tetherableWifiP2pRegexs);
+    }
+
+    public boolean isWifiP2pLegacyTetheringMode() {
+        return (tetherableWifiP2pRegexs == null || tetherableWifiP2pRegexs.length == 0);
+    }
+
     public boolean isBluetooth(String iface) {
         return matchesDownstreamRegexs(iface, tetherableBluetoothRegexs);
     }
@@ -152,6 +164,7 @@ public class TetheringConfiguration {
 
         dumpStringArray(pw, "tetherableUsbRegexs", tetherableUsbRegexs);
         dumpStringArray(pw, "tetherableWifiRegexs", tetherableWifiRegexs);
+        dumpStringArray(pw, "tetherableWifiP2pRegexs", tetherableWifiP2pRegexs);
         dumpStringArray(pw, "tetherableBluetoothRegexs", tetherableBluetoothRegexs);
 
         pw.print("isDunRequired: ");
@@ -178,6 +191,7 @@ public class TetheringConfiguration {
         sj.add(String.format("subId:%d", subId));
         sj.add(String.format("tetherableUsbRegexs:%s", makeString(tetherableUsbRegexs)));
         sj.add(String.format("tetherableWifiRegexs:%s", makeString(tetherableWifiRegexs)));
+        sj.add(String.format("tetherableWifiP2pRegexs:%s", makeString(tetherableWifiP2pRegexs)));
         sj.add(String.format("tetherableBluetoothRegexs:%s",
                 makeString(tetherableBluetoothRegexs)));
         sj.add(String.format("isDunRequired:%s", isDunRequired));
