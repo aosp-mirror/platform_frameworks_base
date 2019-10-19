@@ -49,7 +49,6 @@ import androidx.slice.builders.SliceAction;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -59,6 +58,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
+import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -316,7 +316,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
             mContentResolver = getContext().getContentResolver();
             mNextAlarmController = new NextAlarmControllerImpl(getContext());
             mNextAlarmController.addCallback(this);
-            mZenModeController = Dependency.get(ZenModeController.class);
+            mZenModeController = new ZenModeControllerImpl(getContext(), mHandler);
             mZenModeController.addCallback(this);
             mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
             mPendingIntent = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
