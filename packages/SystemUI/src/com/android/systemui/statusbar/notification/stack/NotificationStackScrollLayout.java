@@ -116,6 +116,7 @@ import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorCom
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -518,7 +519,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             FalsingManager falsingManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
-            NotificationSectionsFeatureManager sectionsFeatureManager) {
+            NotificationSectionsFeatureManager sectionsFeatureManager,
+            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -541,6 +543,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         activityStarter,
                         statusBarStateController,
                         configurationController,
+                        peopleHubViewAdapter,
                         buckets.length);
         mSectionsManager.initialize(LayoutInflater.from(context));
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {

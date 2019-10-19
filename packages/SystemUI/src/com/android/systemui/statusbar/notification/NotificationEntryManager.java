@@ -126,7 +126,9 @@ public class NotificationEntryManager implements
     }
 
     @Inject
-    public NotificationEntryManager(NotificationData notificationData, NotifLog notifLog) {
+    public NotificationEntryManager(
+            NotificationData notificationData,
+            NotifLog notifLog) {
         mNotificationData = notificationData;
         mNotifLog = notifLog;
     }

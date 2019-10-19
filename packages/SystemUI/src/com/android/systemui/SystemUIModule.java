@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
@@ -35,7 +36,7 @@ import dagger.Provides;
  * A dagger module for injecting components of System UI that are not overridden by the System UI
  * implementation.
  */
-@Module(includes = {AssistModule.class, ComponentBinder.class})
+@Module(includes = {AssistModule.class, ComponentBinder.class, PeopleHubModule.class})
 public abstract class SystemUIModule {
 
     @Singleton
