@@ -19,6 +19,8 @@ package com.android.systemui.keyguard;
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +90,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.start();
         mViewMediator.onStartedGoingToSleep(OFF_BECAUSE_OF_USER);
         verify(mUpdateMonitor).setKeyguardGoingAway(false);
-        verify(mStatusBarWindowController).setKeyguardGoingAway(false);
+        verify(mStatusBarWindowController, never()).setKeyguardGoingAway(anyBoolean());
     }
 }

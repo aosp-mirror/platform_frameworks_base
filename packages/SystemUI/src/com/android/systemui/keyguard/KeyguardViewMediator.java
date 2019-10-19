@@ -833,8 +833,10 @@ public class KeyguardViewMediator extends SystemUI {
             mDeviceInteractive = false;
             mGoingToSleep = true;
 
-            // Reset keyguard going away state so we can start listening for biometric auth
-            setKeyguardGoingAway(false);
+            // Reset keyguard going away state so we can start listening for fingerprint. We
+            // explicitly DO NOT want to call mStatusBarWindowController.setKeyguardGoingAway(false)
+            // here, since that will mess with the device lock state.
+            mUpdateMonitor.setKeyguardGoingAway(false);
 
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
             // This also "locks" the device when not secure to provide easy access to the
@@ -1814,7 +1816,8 @@ public class KeyguardViewMediator extends SystemUI {
             mHideAnimationRun = false;
             adjustStatusBarLocked();
             userActivity();
-            setKeyguardGoingAway(false);
+            mUpdateMonitor.setKeyguardGoingAway(false);
+            mStatusBarWindowController.setKeyguardGoingAway(false);
             mShowKeyguardWakeLock.release();
         }
         mKeyguardDisplayManager.show();
@@ -1846,7 +1849,8 @@ public class KeyguardViewMediator extends SystemUI {
                         .KEYGUARD_GOING_AWAY_FLAG_SUBTLE_WINDOW_ANIMATIONS;
             }
 
-            setKeyguardGoingAway(true);
+            mUpdateMonitor.setKeyguardGoingAway(true);
+            mStatusBarWindowController.setKeyguardGoingAway(true);
 
             // Don't actually hide the Keyguard at the moment, wait for window
             // manager until it tells us it's safe to do so with
@@ -2079,11 +2083,6 @@ public class KeyguardViewMediator extends SystemUI {
     private void resetKeyguardDonePendingLocked() {
         mKeyguardDonePending = false;
         mHandler.removeMessages(KEYGUARD_DONE_PENDING_TIMEOUT);
-    }
-
-    private void setKeyguardGoingAway(boolean goingAway) {
-        mUpdateMonitor.setKeyguardGoingAway(goingAway);
-        mStatusBarWindowController.setKeyguardGoingAway(goingAway);
     }
 
     @Override
