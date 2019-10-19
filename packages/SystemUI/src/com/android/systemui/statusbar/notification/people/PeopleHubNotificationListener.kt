@@ -180,8 +180,7 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
     if (!isMessagingNotification()) {
         return null
     }
-    val clickIntent = sbn.notification.contentIntent
-            ?: return null
+    val clickIntent = sbn.notification.contentIntent ?: return null
     val extras = sbn.notification.extras
     val name = extras.getString(Notification.EXTRA_CONVERSATION_TITLE)
             ?: extras.getString(Notification.EXTRA_TITLE)
