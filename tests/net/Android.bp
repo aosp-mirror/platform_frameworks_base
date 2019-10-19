@@ -5,7 +5,6 @@ java_defaults {
     name: "FrameworksNetTests-jni-defaults",
     jni_libs: [
         "ld-android",
-        "libartbase",
         "libbacktrace",
         "libbase",
         "libbinder",
@@ -16,7 +15,6 @@ java_defaults {
         "libcgrouprc",
         "libcrypto",
         "libcutils",
-        "libdexfile",
         "libdl_android",
         "libhidl-gen-utils",
         "libhidlbase",
