@@ -431,18 +431,8 @@ public class TelephonyManager {
      * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
     public @ModemCount int getSupportedModemCount() {
-        // TODO: b/139642279 when turning on this feature, remove dependency of
-        // PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE and always return result based on
-        // PROPERTY_MAX_ACTIVE_MODEMS.
-        String rebootRequired = SystemProperties.get(
-                TelephonyProperties.PROPERTY_REBOOT_REQUIRED_ON_MODEM_CHANGE);
-        if (rebootRequired.equals("false")) {
-            // If no reboot is required, return max possible active modems.
-            return SystemProperties.getInt(
-                    TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS, getPhoneCount());
-        } else {
-            return getPhoneCount();
-        }
+        return SystemProperties.getInt(TelephonyProperties.PROPERTY_MAX_ACTIVE_MODEMS,
+                getActiveModemCount());
     }
 
     /** {@hide} */
