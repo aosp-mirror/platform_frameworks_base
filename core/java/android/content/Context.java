@@ -5353,7 +5353,7 @@ public abstract class Context {
      * @see #getFeatureId()
      */
     public @NonNull Context createFeatureContext(@Nullable String featureId) {
-        return this;
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
     /**
