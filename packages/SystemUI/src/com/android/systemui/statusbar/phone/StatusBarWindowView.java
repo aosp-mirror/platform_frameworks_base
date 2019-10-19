@@ -266,7 +266,7 @@ public class StatusBarWindowView extends FrameLayout {
      */
     public void setPulsing(boolean pulsing) {
         if (mLockIcon != null) {
-            mLockIcon.setPulsing(pulsing);
+            mLockIcon.setVisibility(pulsing ? View.GONE : View.VISIBLE);
         }
     }
 

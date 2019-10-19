@@ -259,9 +259,11 @@ public class KeyguardIndicationController implements StateListener,
                 hideTransientIndication();
             }
             updateIndication(false);
+            mLockIcon.setAlpha(255);
         } else if (!visible) {
             // If we unlock and return to keyguard quickly, previous error should not be shown
             hideTransientIndication();
+            mLockIcon.setAlpha(0);
         }
     }
 
