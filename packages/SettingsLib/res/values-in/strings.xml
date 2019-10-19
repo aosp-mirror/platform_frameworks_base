@@ -328,7 +328,7 @@
     <string name="app_process_limit_title" msgid="4280600650253107163">"Batas proses background"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Tampilkan ANR background"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Tampilkan peringatan channel notifikasi"</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Tampilkan peringatan saluran notifikasi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Menampilkan peringatan di layar saat aplikasi memposting notifikasi tanpa channel yang valid"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Paksa izinkan aplikasi di eksternal"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Membuat semua aplikasi dapat ditulis ke penyimpanan eksternal, terlepas dari nilai manifes"</string>
@@ -414,7 +414,7 @@
     <string name="disabled" msgid="9206776641295849915">"Dinonaktifkan"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Diizinkan"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"Tidak diizinkan"</string>
-    <string name="install_other_apps" msgid="6986686991775883017">"Menginstal aplikasi yang tidak dikenal"</string>
+    <string name="install_other_apps" msgid="6986686991775883017">"Instal aplikasi tidak dikenal"</string>
     <string name="home" msgid="3256884684164448244">"Layar Utama Setelan"</string>
   <string-array name="battery_labels">
     <item msgid="8494684293649631252">"0%"</item>
