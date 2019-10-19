@@ -1000,6 +1000,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public void onReportLocation(Location location) {
+            // likelihood of a 0,0 bug is far greater than this being a valid location
+            if (!isMock() && location.getLatitude() == 0 && location.getLongitude() == 0) {
+                Slog.w(TAG, "blocking 0,0 location from " + mName + " provider");
+                return;
+            }
+
             synchronized (mLock) {
                 handleLocationChangedLocked(location, this);
             }
