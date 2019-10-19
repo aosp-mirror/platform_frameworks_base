@@ -178,7 +178,7 @@ message MetricConditionLink {
 }
 
 message MetricStateLink {
-  optional int64 state = 1;
+  optional int32 state_atom_id = 1;
 
   optional FieldMatcher fields_in_what = 2;
 

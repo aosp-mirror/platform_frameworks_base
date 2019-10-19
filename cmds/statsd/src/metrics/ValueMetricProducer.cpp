@@ -59,10 +59,8 @@ const int FIELD_ID_SKIPPED_START_MILLIS = 3;
 const int FIELD_ID_SKIPPED_END_MILLIS = 4;
 // for ValueMetricData
 const int FIELD_ID_DIMENSION_IN_WHAT = 1;
-const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
 const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_DIMENSION_LEAF_IN_WHAT = 4;
-const int FIELD_ID_DIMENSION_LEAF_IN_CONDITION = 5;
 // for ValueBucketInfo
 const int FIELD_ID_VALUE_INDEX = 1;
 const int FIELD_ID_VALUE_LONG = 2;
@@ -266,21 +264,9 @@ void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
             writeDimensionToProto(dimensionKey.getDimensionKeyInWhat(), str_set, protoOutput);
             protoOutput->end(dimensionToken);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                uint64_t dimensionInConditionToken =
-                        protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
-                writeDimensionToProto(dimensionKey.getDimensionKeyInCondition(), str_set,
-                                      protoOutput);
-                protoOutput->end(dimensionInConditionToken);
-            }
         } else {
             writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInWhat(),
                                            FIELD_ID_DIMENSION_LEAF_IN_WHAT, str_set, protoOutput);
-            if (dimensionKey.hasDimensionKeyInCondition()) {
-                writeDimensionLeafNodesToProto(dimensionKey.getDimensionKeyInCondition(),
-                                               FIELD_ID_DIMENSION_LEAF_IN_CONDITION, str_set,
-                                               protoOutput);
-            }
         }
 
         // Then fill bucket_info (ValueBucketInfo).
@@ -586,10 +572,10 @@ void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     if (verbose) {
         for (const auto& it : mCurrentSlicedBucket) {
           for (const auto& interval : it.second) {
-            fprintf(out, "\t(what)%s\t(condition)%s  (value)%s\n",
-                    it.first.getDimensionKeyInWhat().toString().c_str(),
-                    it.first.getDimensionKeyInCondition().toString().c_str(),
-                    interval.value.toString().c_str());
+              fprintf(out, "\t(what)%s\t(states)%s  (value)%s\n",
+                      it.first.getDimensionKeyInWhat().toString().c_str(),
+                      it.first.getStateValuesKey().toString().c_str(),
+                      interval.value.toString().c_str());
           }
         }
     }

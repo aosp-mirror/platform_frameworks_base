@@ -42,26 +42,30 @@ public:
     // Returns true if atomId is being tracked and is associated with a state
     // atom. StateManager notifies the correct StateTracker to register listener.
     // If the correct StateTracker does not exist, a new StateTracker is created.
-    bool registerListener(int atomId, wp<StateListener> listener);
+    bool registerListener(int32_t atomId, wp<StateListener> listener);
 
     // Notifies the correct StateTracker to unregister a listener
     // and removes the tracker if it no longer has any listeners.
-    void unregisterListener(int atomId, wp<StateListener> listener);
+    void unregisterListener(int32_t atomId, wp<StateListener> listener);
 
-    // Queries the correct StateTracker for the original/un-mapped state value
-    // that is mapped to the given query key.
-    // If the StateTracker doesn't exist, returns StateTracker::kStateUnknown.
-    int getStateValue(int atomId, const HashableDimensionKey& queryKey);
+    // Returns true if the StateTracker exists and queries for the
+    // original state value mapped to the given query key. The state value is
+    // stored and output in a FieldValue class.
+    // Returns false if the StateTracker doesn't exist.
+    bool getStateValue(int32_t atomId, const HashableDimensionKey& queryKey,
+                       FieldValue* output) const;
 
-    inline int getStateTrackersCount() {
+    inline int getStateTrackersCount() const {
         std::lock_guard<std::mutex> lock(mMutex);
         return mStateTrackers.size();
     }
 
-    inline int getListenersCount(int atomId) {
+    inline int getListenersCount(int32_t atomId) const {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mStateTrackers.find(atomId) != mStateTrackers.end()) {
-            return mStateTrackers[atomId]->getListenersCount();
+
+        auto it = mStateTrackers.find(atomId);
+        if (it != mStateTrackers.end()) {
+            return it->second->getListenersCount();
         }
         return -1;
     }
@@ -70,7 +74,7 @@ private:
   mutable std::mutex mMutex;
 
   // Maps state atom ids to StateTrackers
-  std::unordered_map<int, sp<StateTracker>> mStateTrackers;
+  std::unordered_map<int32_t, sp<StateTracker>> mStateTrackers;
 };
 
 }  // namespace statsd

@@ -35,7 +35,7 @@ void StateManager::onLogEvent(const LogEvent& event) {
     }
 }
 
-bool StateManager::registerListener(int atomId, wp<StateListener> listener) {
+bool StateManager::registerListener(int32_t atomId, wp<StateListener> listener) {
     std::lock_guard<std::mutex> lock(mMutex);
 
     // Check if state tracker already exists
@@ -53,7 +53,7 @@ bool StateManager::registerListener(int atomId, wp<StateListener> listener) {
     return true;
 }
 
-void StateManager::unregisterListener(int atomId, wp<StateListener> listener) {
+void StateManager::unregisterListener(int32_t atomId, wp<StateListener> listener) {
     std::unique_lock<std::mutex> lock(mMutex);
 
     // Hold the sp<> until the lock is released so that ~StateTracker() is
@@ -77,13 +77,15 @@ void StateManager::unregisterListener(int atomId, wp<StateListener> listener) {
     lock.unlock();
 }
 
-int StateManager::getStateValue(int atomId, const HashableDimensionKey& key) {
+bool StateManager::getStateValue(int32_t atomId, const HashableDimensionKey& key,
+                                 FieldValue* output) const {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mStateTrackers.find(atomId) != mStateTrackers.end()) {
-        return mStateTrackers[atomId]->getStateValue(key);
-    }
 
-    return StateTracker::kStateUnknown;
+    auto it = mStateTrackers.find(atomId);
+    if (it != mStateTrackers.end()) {
+        return it->second->getStateValue(key, output);
+    }
+    return false;
 }
 
 }  // namespace statsd

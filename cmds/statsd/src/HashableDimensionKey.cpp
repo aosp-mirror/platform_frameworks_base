@@ -59,10 +59,11 @@ android::hash_t hashDimension(const HashableDimensionKey& value) {
     return JenkinsHashWhiten(hash);
 }
 
-bool filterValues(const Matcher& matcherField, const vector<FieldValue>& values, Value* output) {
+bool filterValues(const Matcher& matcherField, const vector<FieldValue>& values,
+                  FieldValue* output) {
     for (const auto& value : values) {
         if (value.mField.matches(matcherField)) {
-            (*output) = value.mValue;
+            (*output) = value;
             return true;
         }
     }
@@ -106,15 +107,34 @@ void getDimensionForCondition(const std::vector<FieldValue>& eventValues,
 
     size_t count = conditionDimension->getValues().size();
     if (count != links.conditionFields.size()) {
-        // ALOGE("WTF condition link is bad");
         return;
     }
 
     for (size_t i = 0; i < count; i++) {
         conditionDimension->mutableValue(i)->mField.setField(
-            links.conditionFields[i].mMatcher.getField());
+                links.conditionFields[i].mMatcher.getField());
         conditionDimension->mutableValue(i)->mField.setTag(
-            links.conditionFields[i].mMatcher.getTag());
+                links.conditionFields[i].mMatcher.getTag());
+    }
+}
+
+void getDimensionForState(const std::vector<FieldValue>& eventValues, const Metric2State& link,
+                          HashableDimensionKey* statePrimaryKey) {
+    // First, get the dimension from the event using the "what" fields from the
+    // MetricStateLinks.
+    filterValues(link.metricFields, eventValues, statePrimaryKey);
+
+    // Then check that the statePrimaryKey size equals the number of state fields
+    size_t count = statePrimaryKey->getValues().size();
+    if (count != link.stateFields.size()) {
+        return;
+    }
+
+    // For each dimension Value in the statePrimaryKey, set the field and tag
+    // using the state atom fields from MetricStateLinks.
+    for (size_t i = 0; i < count; i++) {
+        statePrimaryKey->mutableValue(i)->mField.setField(link.stateFields[i].mMatcher.getField());
+        statePrimaryKey->mutableValue(i)->mField.setTag(link.stateFields[i].mMatcher.getTag());
     }
 }
 
@@ -185,11 +205,11 @@ string HashableDimensionKey::toString() const {
 
 bool MetricDimensionKey::operator==(const MetricDimensionKey& that) const {
     return mDimensionKeyInWhat == that.getDimensionKeyInWhat() &&
-           mDimensionKeyInCondition == that.getDimensionKeyInCondition();
+           mStateValuesKey == that.getStateValuesKey();
 };
 
 string MetricDimensionKey::toString() const {
-    return mDimensionKeyInWhat.toString() + mDimensionKeyInCondition.toString();
+    return mDimensionKeyInWhat.toString() + mStateValuesKey.toString();
 }
 
 bool MetricDimensionKey::operator<(const MetricDimensionKey& that) const {
@@ -199,7 +219,7 @@ bool MetricDimensionKey::operator<(const MetricDimensionKey& that) const {
         return false;
     }
 
-    return mDimensionKeyInCondition < that.getDimensionKeyInCondition();
+    return mStateValuesKey < that.getStateValuesKey();
 }
 
 }  // namespace statsd

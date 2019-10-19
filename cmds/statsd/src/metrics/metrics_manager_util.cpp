@@ -472,10 +472,12 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                                         allStateGroupMaps, slicedStateAtoms, stateGroupMap)) {
                 return false;
             }
+        } else {
+            if (metric.state_link_size() > 0) {
+                ALOGW("CountMetric has a MetricStateLink but doesn't have a slice_by_state");
+                return false;
+            }
         }
-
-        // TODO(tsaichristine): add check for unequal number of MetricStateLinks
-        // and slice_by_states
 
         unordered_map<int, shared_ptr<Activation>> eventActivationMap;
         unordered_map<int, vector<shared_ptr<Activation>>> eventDeactivationMap;

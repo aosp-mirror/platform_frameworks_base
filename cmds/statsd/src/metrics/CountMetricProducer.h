@@ -52,7 +52,7 @@ public:
 
     virtual ~CountMetricProducer();
 
-    void onStateChanged(int atomId, const HashableDimensionKey& primaryKey, int oldState,
+    void onStateChanged(int32_t atomId, const HashableDimensionKey& primaryKey, int oldState,
                         int newState) override;
 
 protected:

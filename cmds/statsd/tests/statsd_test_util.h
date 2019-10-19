@@ -192,6 +192,9 @@ std::unique_ptr<LogEvent> CreateSyncEndEvent(
 std::unique_ptr<LogEvent> CreateAppCrashEvent(
     const int uid, uint64_t timestampNs);
 
+// Create log event for an app crash.
+std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(const int uid, uint64_t timestampNs);
+
 // Create log event for acquiring wakelock.
 std::unique_ptr<LogEvent> CreateAcquireWakelockEvent(
         const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
@@ -205,6 +208,10 @@ std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
 // Create log event for releasing wakelock.
 std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
     int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs);
+
+// Create log event for uid process state change.
+std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
+        int uid, const android::app::ProcessStateEnum state, uint64_t timestampNs);
 
 // Helper function to create an AttributionNodeInternal proto.
 AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);

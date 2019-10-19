@@ -254,28 +254,28 @@ Predicate CreateIsInBackgroundPredicate() {
 State CreateScreenState() {
     State state;
     state.set_id(StringToId("ScreenState"));
-    state.set_atom_id(29);
+    state.set_atom_id(android::util::SCREEN_STATE_CHANGED);
     return state;
 }
 
 State CreateUidProcessState() {
     State state;
     state.set_id(StringToId("UidProcessState"));
-    state.set_atom_id(27);
+    state.set_atom_id(android::util::UID_PROCESS_STATE_CHANGED);
     return state;
 }
 
 State CreateOverlayState() {
     State state;
     state.set_id(StringToId("OverlayState"));
-    state.set_atom_id(59);
+    state.set_atom_id(android::util::OVERLAY_STATE_CHANGED);
     return state;
 }
 
 State CreateScreenStateWithOnOffMap() {
     State state;
     state.set_id(StringToId("ScreenStateOnOff"));
-    state.set_atom_id(29);
+    state.set_atom_id(android::util::SCREEN_STATE_CHANGED);
 
     auto map = CreateScreenStateOnOffMap();
     *state.mutable_map() = map;
@@ -286,7 +286,7 @@ State CreateScreenStateWithOnOffMap() {
 State CreateScreenStateWithInDozeMap() {
     State state;
     state.set_id(StringToId("ScreenStateInDoze"));
-    state.set_atom_id(29);
+    state.set_atom_id(android::util::SCREEN_STATE_CHANGED);
 
     auto map = CreateScreenStateInDozeMap();
     *state.mutable_map() = map;
@@ -533,6 +533,15 @@ std::unique_ptr<LogEvent> CreateAppCrashEvent(const int uid, uint64_t timestampN
         uid, ProcessLifeCycleStateChanged::CRASHED, timestampNs);
 }
 
+std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(const int uid, uint64_t timestampNs) {
+    auto event = std::make_unique<LogEvent>(android::util::APP_CRASH_OCCURRED, timestampNs);
+    event->write(uid);
+    event->write("eventType");
+    event->write("processName");
+    event->init();
+    return event;
+}
+
 std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
     int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs) {
     auto logEvent = std::make_unique<LogEvent>(
@@ -542,6 +551,15 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
     logEvent->write(is_create);
     logEvent->init();
     return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
+        int uid, const android::app::ProcessStateEnum state, uint64_t timestampNs) {
+    auto event = std::make_unique<LogEvent>(android::util::UID_PROCESS_STATE_CHANGED, timestampNs);
+    event->write(uid);
+    event->write(state);
+    event->init();
+    return event;
 }
 
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
