@@ -30,6 +30,7 @@ import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.IWallpaperManager;
+import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
@@ -95,7 +96,7 @@ public class DependencyProvider {
     @Singleton
     @Provides
     @Named(TIME_TICK_HANDLER_NAME)
-    public Handler provideHandler() {
+    public Handler provideTimeTickHandler() {
         HandlerThread thread = new HandlerThread("TimeTick");
         thread.start();
         return new Handler(thread.getLooper());
@@ -131,6 +132,12 @@ public class DependencyProvider {
     @Named(MAIN_HANDLER_NAME)
     public Handler provideMainHandler(@Named(MAIN_LOOPER_NAME) Looper mainLooper) {
         return new Handler(mainLooper);
+    }
+
+    /** */
+    @Provides
+    public Handler provideHandler() {
+        return new Handler();
     }
 
     @Singleton
@@ -297,9 +304,16 @@ public class DependencyProvider {
 
     /** */
     @Provides
-    public IWallpaperManager provideWallPaperManager() {
+    @Nullable
+    public IWallpaperManager provideIWallpaperManager() {
         return IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));
+    }
+
+    /** */
+    @Provides
+    public WallpaperManager providesWallpaperManager(Context context) {
+        return (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
     }
 
     /** */

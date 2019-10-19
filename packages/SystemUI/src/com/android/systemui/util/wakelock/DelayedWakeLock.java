@@ -16,7 +16,10 @@
 
 package com.android.systemui.util.wakelock;
 
+import android.content.Context;
 import android.os.Handler;
+
+import javax.inject.Inject;
 
 /**
  * A wake lock that has a built in delay when releasing to give the framebuffer time to update.
@@ -52,5 +55,47 @@ public class DelayedWakeLock implements WakeLock {
     @Override
     public String toString() {
         return TO_STRING_PREFIX + mInner;
+    }
+
+    /**
+     * An injectable builder for {@see DelayedWakeLock} that has the context already filled in.
+     */
+    public static class Builder {
+        private final Context mContext;
+        private String mTag;
+        private Handler mHandler;
+
+        /**
+         * Constructor for DelayedWakeLock.Builder
+         */
+        @Inject
+        public Builder(Context context) {
+            mContext = context;
+        }
+
+        /**
+         * Set the tag for the WakeLock.
+         */
+        public Builder setTag(String tag) {
+            mTag = tag;
+
+            return this;
+        }
+
+        /**
+         * Set the handler for the DelayedWakeLock.
+         */
+        public Builder setHandler(Handler handler) {
+            mHandler = handler;
+
+            return this;
+        }
+
+        /**
+         * Build the DelayedWakeLock.
+         */
+        public DelayedWakeLock build() {
+            return new DelayedWakeLock(mHandler, WakeLock.createPartial(mContext, mTag));
+        }
     }
 }
