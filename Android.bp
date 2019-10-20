@@ -1531,3 +1531,15 @@ genrule {
         targets: ["droidcore"],
     },
 }
+
+// Avoid including Parcelable classes as we don't want to have two copies of
+// Parcelable cross the process.
+filegroup {
+    name: "framework-cellbroadcast-shared-srcs",
+    srcs: [
+        "core/java/android/util/LocalLog.java",
+        "core/java/android/util/Slog.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+    ],
+}
