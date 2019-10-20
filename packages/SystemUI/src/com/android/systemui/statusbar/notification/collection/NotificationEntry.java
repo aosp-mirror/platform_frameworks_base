@@ -113,6 +113,7 @@ public final class NotificationEntry {
     private long lastFullScreenIntentLaunchTime = NOT_LAUNCHED_YET;
     public CharSequence remoteInputText;
     private final List<Person> mAssociatedPeople = new ArrayList<>();
+    private Notification.BubbleMetadata mBubbleMetadata;
 
     /**
      * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
@@ -199,6 +200,7 @@ public final class NotificationEntry {
         }
 
         mSbn = sbn;
+        mBubbleMetadata = mSbn.getNotification().getBubbleMetadata();
         updatePeopleList();
     }
 
@@ -340,7 +342,33 @@ public final class NotificationEntry {
      * Returns the data needed for a bubble for this notification, if it exists.
      */
     public Notification.BubbleMetadata getBubbleMetadata() {
-        return mSbn.getNotification().getBubbleMetadata();
+        return mBubbleMetadata;
+    }
+
+    /**
+     * Sets bubble metadata for this notification.
+     */
+    public void setBubbleMetadata(Notification.BubbleMetadata metadata) {
+        mBubbleMetadata = metadata;
+    }
+
+    /**
+     * Updates the {@link Notification#FLAG_BUBBLE} flag on this notification to indicate
+     * whether it is a bubble or not. If this entry is set to not bubble, or does not have
+     * the required info to bubble, the flag cannot be set to true.
+     *
+     * @param shouldBubble whether this notification should be flagged as a bubble.
+     * @return true if the value changed.
+     */
+    public boolean setFlagBubble(boolean shouldBubble) {
+        boolean wasBubble = isBubble();
+        if (!shouldBubble) {
+            mSbn.getNotification().flags &= ~FLAG_BUBBLE;
+        } else if (mBubbleMetadata != null && canBubble()) {
+            // wants to be bubble & can bubble, set flag
+            mSbn.getNotification().flags |= FLAG_BUBBLE;
+        }
+        return wasBubble != isBubble();
     }
 
     /**

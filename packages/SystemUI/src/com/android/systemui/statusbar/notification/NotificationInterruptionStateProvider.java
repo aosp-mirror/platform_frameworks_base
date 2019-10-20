@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -189,8 +188,7 @@ public class NotificationInterruptionStateProvider {
             return false;
         }
 
-        final Notification n = sbn.getNotification();
-        if (n.getBubbleMetadata() == null || n.getBubbleMetadata().getIntent() == null) {
+        if (entry.getBubbleMetadata() == null || entry.getBubbleMetadata().getIntent() == null) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: notification: " + sbn.getKey()
                         + " doesn't have valid metadata");

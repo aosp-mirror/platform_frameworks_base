@@ -64,7 +64,8 @@ class Bubble {
 
     private long mLastUpdated;
     private long mLastAccessed;
-    private boolean mIsRemoved;
+
+    private boolean mIsUserCreated;
 
     /**
      * Whether this notification should be shown in the shade when it is also displayed as a bubble.
@@ -74,9 +75,7 @@ class Bubble {
      */
     private boolean mShowInShadeWhenBubble = true;
 
-    /**
-     * Whether the bubble should show a dot for the notification indicating updated content.
-     */
+    /** Whether the bubble should show a dot for the notification indicating updated content. */
     private boolean mShowBubbleUpdateDot = true;
 
     /** Whether flyout text should be suppressed, regardless of any other flags or state. */
@@ -294,6 +293,20 @@ class Bubble {
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 
+    /**
+     * Whether this bubble was explicitly created by the user via a SysUI affordance.
+     */
+    boolean isUserCreated() {
+        return mIsUserCreated;
+    }
+
+    /**
+     * Set whether this bubble was explicitly created by the user via a SysUI affordance.
+     */
+    void setUserCreated(boolean isUserCreated) {
+        mIsUserCreated = isUserCreated;
+    }
+
     float getDesiredHeight(Context context) {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         boolean useRes = data.getDesiredHeightResId() != 0;
@@ -319,9 +332,8 @@ class Bubble {
 
     @Nullable
     PendingIntent getBubbleIntent(Context context) {
-        Notification notif = mEntry.getSbn().getNotification();
-        Notification.BubbleMetadata data = notif.getBubbleMetadata();
-        if (BubbleController.canLaunchInActivityView(context, mEntry) && data != null) {
+        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
+        if (data != null) {
             return data.getIntent();
         }
         return null;
