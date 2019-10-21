@@ -19,6 +19,7 @@ package com.android.server.compat;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Process;
 import android.util.Slog;
 import android.util.StatsLog;
 
@@ -128,7 +129,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     private ApplicationInfo getApplicationInfo(String packageName) {
         try {
-            return mContext.getPackageManager().getApplicationInfo(packageName, 0);
+            return mContext.getPackageManager().getApplicationInfoAsUser(packageName, 0,
+                    Process.myUid());
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "No installed package " + packageName);
         }
