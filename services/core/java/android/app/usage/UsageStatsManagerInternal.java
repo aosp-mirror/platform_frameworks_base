@@ -23,6 +23,8 @@ import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
+
 import java.util.List;
 import java.util.Set;
 
@@ -152,35 +154,6 @@ public abstract class UsageStatsManagerInternal {
      * all of the returned uids can be safely considered app idle.
      */
     public abstract int[] getIdleUidsForUser(@UserIdInt int userId);
-
-    /**
-     * Sets up a listener for changes to packages being accessed.
-     * @param listener A listener within the system process.
-     */
-    public abstract void addAppIdleStateChangeListener(
-            AppIdleStateChangeListener listener);
-
-    /**
-     * Removes a listener that was previously added for package usage state changes.
-     * @param listener The listener within the system process to remove.
-     */
-    public abstract void removeAppIdleStateChangeListener(
-            AppIdleStateChangeListener listener);
-
-    public static abstract class AppIdleStateChangeListener {
-
-        /** Callback to inform listeners that the idle state has changed to a new bucket. */
-        public abstract void onAppIdleStateChanged(String packageName, @UserIdInt int userId,
-                boolean idle, int bucket, int reason);
-
-        /**
-         * Optional callback to inform the listener that the app has transitioned into
-         * an active state due to user interaction.
-         */
-        public void onUserInteractionStarted(String packageName, @UserIdInt int userId) {
-            // No-op by default
-        }
-    }
 
     /**  Backup/Restore API */
     public abstract byte[] getBackupPayload(@UserIdInt int userId, String key);

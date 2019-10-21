@@ -45,7 +45,6 @@ import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -70,6 +69,8 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.AppStateTracker.Listener;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -128,8 +129,8 @@ public class AppStateTrackerTest {
         }
 
         @Override
-        UsageStatsManagerInternal injectUsageStatsManagerInternal() {
-            return mMockUsageStatsManagerInternal;
+        AppStandbyInternal injectAppStandbyInternal() {
+            return mMockAppStandbyInternal;
         }
 
         @Override
@@ -175,7 +176,7 @@ public class AppStateTrackerTest {
     private PowerManagerInternal mMockPowerManagerInternal;
 
     @Mock
-    private UsageStatsManagerInternal mMockUsageStatsManagerInternal;
+    private AppStandbyInternal mMockAppStandbyInternal;
 
     private MockContentResolver mMockContentResolver;
 
@@ -271,7 +272,7 @@ public class AppStateTrackerTest {
 
         verify(mMockContext).registerReceiver(
                 receiverCaptor.capture(), any(IntentFilter.class));
-        verify(mMockUsageStatsManagerInternal).addAppIdleStateChangeListener(
+        verify(mMockAppStandbyInternal).addListener(
                 appIdleStateChangeListenerCaptor.capture());
 
         mIUidObserver = uidObserverArgumentCaptor.getValue();

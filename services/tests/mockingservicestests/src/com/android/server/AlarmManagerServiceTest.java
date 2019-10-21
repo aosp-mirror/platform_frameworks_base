@@ -85,6 +85,7 @@ import androidx.test.filters.FlakyTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.usage.AppStandbyInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -108,7 +109,7 @@ public class AlarmManagerServiceTest {
 
     private long mAppStandbyWindow;
     private AlarmManagerService mService;
-    private UsageStatsManagerInternal.AppIdleStateChangeListener mAppStandbyListener;
+    private AppStandbyInternal.AppIdleStateChangeListener mAppStandbyListener;
     private AlarmManagerService.ChargingReceiver mChargingReceiver;
     @Mock
     private ContentResolver mMockResolver;
@@ -118,6 +119,8 @@ public class AlarmManagerServiceTest {
     private IActivityManager mIActivityManager;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    @Mock
+    private AppStandbyInternal mAppStandbyInternal;
     @Mock
     private AppStateTracker mAppStateTracker;
     @Mock
@@ -257,6 +260,8 @@ public class AlarmManagerServiceTest {
         doReturn(mAppStateTracker).when(() -> LocalServices.getService(AppStateTracker.class));
         doReturn(null)
                 .when(() -> LocalServices.getService(DeviceIdleInternal.class));
+        doReturn(mAppStandbyInternal).when(
+                () -> LocalServices.getService(AppStandbyInternal.class));
         doReturn(mUsageStatsManagerInternal).when(
                 () -> LocalServices.getService(UsageStatsManagerInternal.class));
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
@@ -289,9 +294,9 @@ public class AlarmManagerServiceTest {
         assertEquals(0, mService.mConstants.MIN_FUTURITY);
         assertEquals(0, mService.mConstants.MIN_INTERVAL);
         mAppStandbyWindow = mService.mConstants.APP_STANDBY_WINDOW;
-        ArgumentCaptor<UsageStatsManagerInternal.AppIdleStateChangeListener> captor =
-                ArgumentCaptor.forClass(UsageStatsManagerInternal.AppIdleStateChangeListener.class);
-        verify(mUsageStatsManagerInternal).addAppIdleStateChangeListener(captor.capture());
+        ArgumentCaptor<AppStandbyInternal.AppIdleStateChangeListener> captor =
+                ArgumentCaptor.forClass(AppStandbyInternal.AppIdleStateChangeListener.class);
+        verify(mAppStandbyInternal).addListener(captor.capture());
         mAppStandbyListener = captor.getValue();
 
         ArgumentCaptor<AlarmManagerService.ChargingReceiver> chargingReceiverCaptor =

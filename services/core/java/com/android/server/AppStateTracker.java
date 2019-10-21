@@ -24,7 +24,6 @@ import android.app.IActivityManager;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -58,6 +57,8 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
 import com.android.server.AppStateTrackerProto.ExemptedPackage;
 import com.android.server.AppStateTrackerProto.RunAnyInBackgroundRestrictedPackages;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -89,7 +90,7 @@ public class AppStateTracker {
     IAppOpsService mAppOpsService;
     PowerManagerInternal mPowerManagerInternal;
     StandbyTracker mStandbyTracker;
-    UsageStatsManagerInternal mUsageStatsManagerInternal;
+    AppStandbyInternal mAppStandbyInternal;
 
     private final MyHandler mHandler;
 
@@ -420,8 +421,7 @@ public class AppStateTracker {
             mAppOpsManager = Preconditions.checkNotNull(injectAppOpsManager());
             mAppOpsService = Preconditions.checkNotNull(injectIAppOpsService());
             mPowerManagerInternal = Preconditions.checkNotNull(injectPowerManagerInternal());
-            mUsageStatsManagerInternal = Preconditions.checkNotNull(
-                    injectUsageStatsManagerInternal());
+            mAppStandbyInternal = Preconditions.checkNotNull(injectAppStandbyInternal());
 
             mFlagsObserver = new FeatureFlagsObserver();
             mFlagsObserver.register();
@@ -429,7 +429,7 @@ public class AppStateTracker {
             mForceAllAppStandbyForSmallBattery =
                     mFlagsObserver.isForcedAppStandbyForSmallBatteryEnabled();
             mStandbyTracker = new StandbyTracker();
-            mUsageStatsManagerInternal.addAppIdleStateChangeListener(mStandbyTracker);
+            mAppStandbyInternal.addListener(mStandbyTracker);
 
             try {
                 mIActivityManager.registerUidObserver(new UidObserver(),
@@ -494,8 +494,8 @@ public class AppStateTracker {
     }
 
     @VisibleForTesting
-    UsageStatsManagerInternal injectUsageStatsManagerInternal() {
-        return LocalServices.getService(UsageStatsManagerInternal.class);
+    AppStandbyInternal injectAppStandbyInternal() {
+        return LocalServices.getService(AppStandbyInternal.class);
     }
 
     @VisibleForTesting
