@@ -1562,8 +1562,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     // Send broadcasts
                     for (int i = 0; i < size; i++) {
-                        sendPackageChangedBroadcast(packages[i], true, components[i], uids[i],
-                                null);
+                        sendPackageChangedBroadcast(packages[i], true /* dontKillApp */,
+                                components[i], uids[i], null /* reason */);
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                     break;
@@ -2049,7 +2049,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int i = 0; i < res.libraryConsumers.size(); i++) {
                     PackageParser.Package pkg = res.libraryConsumers.get(i);
                     // send broadcast that all consumers of the static shared library have changed
-                    sendPackageChangedBroadcast(pkg.packageName, false /*killFlag*/,
+                    sendPackageChangedBroadcast(pkg.packageName, false /* dontKillApp */,
                             new ArrayList<>(Collections.singletonList(pkg.packageName)),
                             pkg.applicationInfo.uid, null);
                 }
@@ -20007,7 +20007,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private void sendPackageChangedBroadcast(String packageName,
-            boolean killFlag, ArrayList<String> componentNames, int packageUid,
+            boolean dontKillApp, ArrayList<String> componentNames, int packageUid,
             String reason) {
         if (DEBUG_INSTALL)
             Log.v(TAG, "Sending package changed: package=" + packageName + " components="
@@ -20017,7 +20017,7 @@ public class PackageManagerService extends IPackageManager.Stub
         String nameList[] = new String[componentNames.size()];
         componentNames.toArray(nameList);
         extras.putStringArray(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST, nameList);
-        extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, killFlag);
+        extras.putBoolean(Intent.EXTRA_DONT_KILL_APP, dontKillApp);
         extras.putInt(Intent.EXTRA_UID, packageUid);
         if (reason != null) {
             extras.putString(Intent.EXTRA_REASON, reason);
@@ -20290,7 +20290,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return;
                 }
                 sendPackageChangedBroadcast(pkg.packageName,
-                        false /* killFlag */,
+                        true /* dontKillApp */,
                         new ArrayList<>(Collections.singletonList(pkg.packageName)),
                         pkg.applicationInfo.uid,
                         Intent.ACTION_OVERLAY_CHANGED);
