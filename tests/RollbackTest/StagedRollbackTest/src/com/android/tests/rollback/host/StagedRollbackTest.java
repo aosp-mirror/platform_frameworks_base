@@ -204,11 +204,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testPreviouslyAbandonedRollbacks() throws Exception {
-        runPhase("testPreviouslyAbandonedRollbacksEnableRollback");
+        runPhase("testPreviouslyAbandonedRollbacks_Phase1");
         getDevice().reboot();
-        runPhase("testPreviouslyAbandonedRollbacksCommitRollback");
+        runPhase("testPreviouslyAbandonedRollbacks_Phase2");
         getDevice().reboot();
-        runPhase("testPreviouslyAbandonedRollbacksCheckUserdataRollback");
+        runPhase("testPreviouslyAbandonedRollbacks_Phase3");
     }
 
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {
