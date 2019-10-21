@@ -30,7 +30,7 @@ import android.util.Log;
  * @hide
  */
 public abstract class MediaRoute2ProviderService extends Service {
-    private static final String TAG = "MediaRouteProviderSrv";
+    private static final String TAG = "MR2ProviderService";
 
     public static final String SERVICE_INTERFACE = "android.media.MediaRoute2ProviderService";
 

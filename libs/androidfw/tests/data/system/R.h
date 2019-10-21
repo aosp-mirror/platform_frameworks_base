@@ -43,7 +43,8 @@ struct R {
 
   struct string {
     enum : uint32_t {
-      cancel = 0x01040000,
+      no = 0x01040009,
+      yes = 0x01040013,
     };
   };
 };

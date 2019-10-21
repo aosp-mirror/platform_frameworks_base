@@ -102,8 +102,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // A suppressed summary should transfer its alert state to the child.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertTrue(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -120,14 +120,14 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // Add second child notification so that summary is no longer suppressed.
-        mPendingEntries.put(childEntry2.key, childEntry2);
+        mPendingEntries.put(childEntry2.getKey(), childEntry2);
         mNotificationEntryListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // The alert state should transfer back to the summary as there is now more than one
         // child and the summary should no longer be suppressed.
-        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -147,12 +147,12 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupAlertTransferHelper.onDozingChanged(true);
 
         // Add second child notification so that summary is no longer suppressed.
-        mPendingEntries.put(childEntry2.key, childEntry2);
+        mPendingEntries.put(childEntry2.getKey(), childEntry2);
         mNotificationEntryListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
         // Dozing changed so no reason to re-alert summary.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
     }
 
     @Test
@@ -168,8 +168,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         // Alert is immediately removed from summary, but we do not show child yet either as its
         // content is not inflated.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
         assertTrue(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
     }
 
@@ -189,8 +189,8 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mNotificationEntryListener.onEntryReinflated(childEntry);
 
         // Alert is immediately removed from summary, and we show child as its content is inflated.
-        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
-        assertTrue(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.getKey()));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -209,7 +209,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // Add second child notification so that summary is no longer suppressed.
-        mPendingEntries.put(childEntry2.key, childEntry2);
+        mPendingEntries.put(childEntry2.getKey(), childEntry2);
         mNotificationEntryListener.onPendingEntryAdded(childEntry2);
         mGroupManager.onEntryAdded(childEntry2);
 
@@ -220,7 +220,7 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
 
         verify(childEntry.getRow(), times(1)).freeContentViewWhenSafe(mHeadsUpManager
             .getContentFlag());
-        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.getKey()));
     }
 
     @Test
@@ -255,10 +255,10 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // Notify that entry changed groups.
-        StatusBarNotification oldNotification = childEntry.notification;
-        StatusBarNotification newSbn = spy(childEntry.notification.clone());
+        StatusBarNotification oldNotification = childEntry.getSbn();
+        StatusBarNotification newSbn = spy(childEntry.getSbn().clone());
         doReturn("other_group").when(newSbn).getGroupKey();
-        childEntry.setNotification(newSbn);
+        childEntry.setSbn(newSbn);
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));
@@ -278,10 +278,10 @@ public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
 
         // Update that child to a summary.
-        StatusBarNotification oldNotification = childEntry.notification;
-        childEntry.setNotification(
+        StatusBarNotification oldNotification = childEntry.getSbn();
+        childEntry.setSbn(
                 mGroupTestHelper.createSummaryNotification(
-                        Notification.GROUP_ALERT_SUMMARY, 47).notification);
+                        Notification.GROUP_ALERT_SUMMARY, 47).getSbn());
         mGroupManager.onEntryUpdated(childEntry, oldNotification);
 
         assertFalse(mGroupAlertTransferHelper.isAlertTransferPending(childEntry));

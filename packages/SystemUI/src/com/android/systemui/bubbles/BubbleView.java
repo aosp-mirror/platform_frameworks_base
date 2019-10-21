@@ -39,7 +39,6 @@ import com.android.launcher3.icons.ShadowGenerator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
  * A floating object on the screen that can post message updates.
@@ -141,15 +140,6 @@ public class BubbleView extends FrameLayout {
         mUserBadgedAppIcon = appIcon;
     }
 
-    /**
-     * @return the {@link ExpandableNotificationRow} view to display notification content when the
-     * bubble is expanded.
-     */
-    @Nullable
-    public ExpandableNotificationRow getRowView() {
-        return (mBubble != null) ? mBubble.getEntry().getRow() : null;
-    }
-
     /** Changes the dot's visibility to match the bubble view's state. */
     void updateDotVisibility(boolean animate) {
         updateDotVisibility(animate, null /* after */);
@@ -230,7 +220,7 @@ public class BubbleView extends FrameLayout {
         }
         // Update icon.
         Notification.BubbleMetadata metadata = mBubble.getEntry().getBubbleMetadata();
-        Notification n = mBubble.getEntry().notification.getNotification();
+        Notification n = mBubble.getEntry().getSbn().getNotification();
         Icon ic = metadata.getIcon();
         boolean needsTint = ic.getType() != Icon.TYPE_ADAPTIVE_BITMAP;
 

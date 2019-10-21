@@ -1169,7 +1169,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage)
+        // TODO moltmann b/136595429: Set featureId from caller
+        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage, /* featureId */ null)
                 != AppOpsManager.MODE_ALLOWED) {
             if (!ignoreTargetSecurity) {
                 return ACTIVITY_RESTRICTION_APPOP;
@@ -1212,7 +1213,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage)
+        // TODO moltmann b/136595429: Set componentId from caller
+        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage, /* featureId */ null)
                 != AppOpsManager.MODE_ALLOWED) {
             return ACTIVITY_RESTRICTION_APPOP;
         }
@@ -2254,7 +2256,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             pw.print(" #"); pw.print(i); pw.print(": ");
             pw.println(r);
             if (full) {
-                r.dump(pw, innerPrefix);
+                r.dump(pw, innerPrefix, true /* dumpAll */);
             } else if (complete) {
                 // Complete + brief == give a summary.  Isn't that obvious?!?
                 pw.print(innerPrefix); pw.println(r.intent.toInsecureString());

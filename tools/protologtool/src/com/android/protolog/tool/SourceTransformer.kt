@@ -42,7 +42,6 @@ import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.printer.PrettyPrinter
 import com.github.javaparser.printer.PrettyPrinterConfiguration
-import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter
 
 class SourceTransformer(
     protoLogImplClassName: String,
@@ -135,7 +134,8 @@ class SourceTransformer(
         // Inline the new statement.
         val printedIfStmt = inlinePrinter.print(ifStmt)
         // Append blank lines to preserve line numbering in file (to allow debugging)
-        val newLines = LexicalPreservingPrinter.print(parentStmt).count { c -> c == '\n' }
+        val parentRange = parentStmt.range.get()
+        val newLines = parentRange.end.line - parentRange.begin.line
         val newStmt = printedIfStmt.substringBeforeLast('}') + ("\n".repeat(newLines)) + '}'
         // pre-workaround code, see explanation below
         /*
@@ -224,9 +224,7 @@ class SourceTransformer(
         fileName = path
         processedCode = code.split('\n').toMutableList()
         offsets = IntArray(processedCode.size)
-        LexicalPreservingPrinter.setup(compilationUnit)
         protoLogCallProcessor.process(compilationUnit, this, fileName)
-        // return LexicalPreservingPrinter.print(compilationUnit)
         return processedCode.joinToString("\n")
     }
 }

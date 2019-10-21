@@ -50,6 +50,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -77,10 +78,12 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.function.ToLongFunction;
 
 /**
  * API for interacting with "application operation" tracking.
@@ -2052,7 +2055,7 @@ public class AppOpsManager {
      *
      * @see #markAppOpNoted
      */
-    private static final ThreadLocal<long[]> sAppOpsNotedInThisBinderTransaction =
+    private static final ThreadLocal<ArrayMap<String, long[]>> sAppOpsNotedInThisBinderTransaction =
             new ThreadLocal<>();
 
     /** Whether noting for an appop should be collected */
@@ -2329,51 +2332,42 @@ public class AppOpsManager {
     }
 
     /**
-     * Class holding the information about one unique operation of an application.
+     * Class holding the information about one unique operation of a
+     * {@link Context#createFeatureContext(String) feature}.
+     *
      * @hide
      */
     @TestApi
     @Immutable
     @SystemApi
-    public static final class OpEntry implements Parcelable {
-        private final int mOp;
+    public static final class OpFeatureEntry {
+        private final @NonNull OpEntry mParent;
         private final boolean mRunning;
-        private final @Mode int mMode;
+
         private final @Nullable LongSparseLongArray mAccessTimes;
         private final @Nullable LongSparseLongArray mRejectTimes;
         private final @Nullable LongSparseLongArray mDurations;
         private final @Nullable LongSparseLongArray mProxyUids;
         private final @Nullable LongSparseArray<String> mProxyPackageNames;
+        private final @Nullable LongSparseArray<String> mProxyFeatureIds;
 
         /**
          * @hide
          */
-        public OpEntry(int op, boolean running, @Mode int mode,
-                @Nullable LongSparseLongArray accessTimes, @Nullable LongSparseLongArray rejectTimes,
+        public OpFeatureEntry(@NonNull OpEntry parent, boolean running,
+                @Nullable LongSparseLongArray accessTimes,
+                @Nullable LongSparseLongArray rejectTimes,
                 @Nullable LongSparseLongArray durations, @Nullable LongSparseLongArray proxyUids,
-                @Nullable LongSparseArray<String> proxyPackageNames) {
-            mOp = op;
+                @Nullable LongSparseArray<String> proxyPackageNames,
+                @Nullable LongSparseArray<String> proxyFeatureIds) {
+            mParent = Preconditions.checkNotNull(parent);
             mRunning = running;
-            mMode = mode;
             mAccessTimes = accessTimes;
             mRejectTimes = rejectTimes;
             mDurations = durations;
             mProxyUids = proxyUids;
             mProxyPackageNames = proxyPackageNames;
-        }
-
-        /**
-         * @hide
-         */
-        public OpEntry(int op, @Mode int mode) {
-            mOp = op;
-            mMode = mode;
-            mRunning = false;
-            mAccessTimes = null;
-            mRejectTimes = null;
-            mDurations = null;
-            mProxyUids = null;
-            mProxyPackageNames = null;
+            mProxyFeatureIds = proxyFeatureIds;
         }
 
         /**
@@ -2390,29 +2384,6 @@ public class AppOpsManager {
         /**
          * @hide
          */
-        @UnsupportedAppUsage
-        public int getOp() {
-            return mOp;
-        }
-
-        /**
-         * @return This entry's op string name, such as {@link #OPSTR_COARSE_LOCATION}.
-         */
-        public @NonNull String getOpStr() {
-            return sOpToString[mOp];
-        }
-
-        /**
-         * @return this entry's current mode, such as {@link #MODE_ALLOWED}.
-         */
-        public @Mode int getMode() {
-            return mMode;
-        }
-
-        /**
-         * @hide
-         */
-        @UnsupportedAppUsage
         public long getTime() {
             return getLastAccessTime(OP_FLAGS_ALL);
         }
@@ -2455,7 +2426,7 @@ public class AppOpsManager {
          */
         public long getLastAccessForegroundTime(@OpFlags int flags) {
             return maxForFlagsInStates(mAccessTimes, MAX_PRIORITY_UID_STATE,
-                    resolveFirstUnrestrictedUidState(mOp), flags);
+                    resolveFirstUnrestrictedUidState(mParent.mOp), flags);
         }
 
         /**
@@ -2475,7 +2446,7 @@ public class AppOpsManager {
          * @see #getLastAccessTime(int, int, int)
          */
         public long getLastAccessBackgroundTime(@OpFlags int flags) {
-            return maxForFlagsInStates(mAccessTimes, resolveLastRestrictedUidState(mOp),
+            return maxForFlagsInStates(mAccessTimes, resolveLastRestrictedUidState(mParent.mOp),
                     MIN_PRIORITY_UID_STATE, flags);
         }
 
@@ -2509,7 +2480,6 @@ public class AppOpsManager {
         /**
          * @hide
          */
-        @UnsupportedAppUsage
         public long getRejectTime() {
             return getLastRejectTime(OP_FLAGS_ALL);
         }
@@ -2553,7 +2523,7 @@ public class AppOpsManager {
          */
         public long getLastRejectForegroundTime(@OpFlags int flags) {
             return maxForFlagsInStates(mRejectTimes, MAX_PRIORITY_UID_STATE,
-                    resolveFirstUnrestrictedUidState(mOp), flags);
+                    resolveFirstUnrestrictedUidState(mParent.mOp), flags);
         }
 
         /**
@@ -2573,7 +2543,7 @@ public class AppOpsManager {
          * @see #getLastRejectTime(int)
          */
         public long getLastRejectBackgroundTime(@OpFlags int flags) {
-            return maxForFlagsInStates(mRejectTimes, resolveLastRestrictedUidState(mOp),
+            return maxForFlagsInStates(mRejectTimes, resolveLastRestrictedUidState(mParent.mOp),
                     MIN_PRIORITY_UID_STATE, flags);
         }
 
@@ -2633,7 +2603,7 @@ public class AppOpsManager {
          */
         public long getLastForegroundDuration(@OpFlags int flags) {
             return sumForFlagsInStates(mDurations, MAX_PRIORITY_UID_STATE,
-                    resolveFirstUnrestrictedUidState(mOp), flags);
+                    resolveFirstUnrestrictedUidState(mParent.mOp), flags);
         }
 
         /**
@@ -2651,7 +2621,7 @@ public class AppOpsManager {
          * @see #getLastDuration(int, int, int)
          */
         public long getLastBackgroundDuration(@OpFlags int flags) {
-            return sumForFlagsInStates(mDurations, resolveLastRestrictedUidState(mOp),
+            return sumForFlagsInStates(mDurations, resolveLastRestrictedUidState(mParent.mOp),
                     MIN_PRIORITY_UID_STATE, flags);
         }
 
@@ -2736,10 +2706,661 @@ public class AppOpsManager {
          * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
          * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
          * for any flag.
-         * @return The proxy package name.
+         * @return The feature id.
          */
         public @Nullable String getProxyPackageName(@UidState int uidState, @OpFlags int flags) {
             return findFirstNonNullForFlagsInStates(mProxyPackageNames, uidState, uidState, flags);
+        }
+
+        /**
+         * Gets the feature of the app that performed the op on behalf of this
+         * app and as a result blamed the op on this app or {@code null}
+         * if there is no proxy.
+         *
+         * @return The proxy package name.
+         */
+        public @Nullable String getProxyFeatureId() {
+            return findFirstNonNullForFlagsInStates(mProxyFeatureIds, MAX_PRIORITY_UID_STATE,
+                    MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
+        }
+
+        /**
+         * Gets the feature of the app that performed the op on behalf of this
+         * app and as a result blamed the op on this app for a UID state or
+         * {@code null} if there is no proxy.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return The feature id.
+         */
+        public @Nullable String getProxyFeatureId(@UidState int uidState, @OpFlags int flags) {
+            return findFirstNonNullForFlagsInStates(mProxyFeatureIds, uidState, uidState, flags);
+        }
+
+        /**
+         * @hide
+         */
+        public static class Builder {
+            private final boolean mRunning;
+
+            private final @Nullable LongSparseLongArray mAccessTimes;
+            private final @Nullable LongSparseLongArray mRejectTimes;
+            private final @Nullable LongSparseLongArray mDurations;
+            private final @Nullable LongSparseLongArray mProxyUids;
+            private final @Nullable LongSparseArray<String> mProxyPackageNames;
+            private final @Nullable LongSparseArray<String> mProxyFeatureIds;
+            private @NonNull OpEntry mParent;
+
+            public Builder(boolean running, @Nullable LongSparseLongArray accessTimes,
+                    @Nullable LongSparseLongArray rejectTimes,
+                    @Nullable LongSparseLongArray durations,
+                    @Nullable LongSparseLongArray proxyUids,
+                    @Nullable LongSparseArray<String> proxyPackageNames,
+                    @Nullable LongSparseArray<String> proxyFeatureIds) {
+                mRunning = running;
+                mAccessTimes = accessTimes;
+                mRejectTimes = rejectTimes;
+                mDurations = durations;
+                mProxyUids = proxyUids;
+                mProxyPackageNames = proxyPackageNames;
+                mProxyFeatureIds = proxyFeatureIds;
+            }
+
+            public Builder setParent(@NonNull OpEntry parent) {
+                mParent = parent;
+
+                return this;
+            }
+
+            /**
+             * Create OpFeatureEntry from builder
+             */
+            public OpFeatureEntry build() {
+                Preconditions.checkNotNull(mParent);
+
+                return new OpFeatureEntry(mParent, mRunning, mAccessTimes, mRejectTimes,
+                        mDurations, mProxyUids, mProxyPackageNames, mProxyFeatureIds);
+            }
+        }
+
+        /**
+         * @hide
+         */
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            LongSparseLongArray.Parcelling longSparseLongArrayParcelling =
+                    LongSparseLongArray.Parcelling.Cache.getOrCreate(
+                            LongSparseLongArray.Parcelling.class);
+            LongSparseArray.StringParcelling longSparseStringArrayParcelling =
+                    LongSparseArray.StringParcelling.Cache.getOrCreate(
+                            LongSparseArray.StringParcelling.class);
+
+            dest.writeBoolean(mRunning);
+            longSparseLongArrayParcelling.parcel(mAccessTimes, dest, flags);
+            longSparseLongArrayParcelling.parcel(mRejectTimes, dest, flags);
+            longSparseLongArrayParcelling.parcel(mDurations, dest, flags);
+            longSparseLongArrayParcelling.parcel(mProxyUids, dest, flags);
+            longSparseStringArrayParcelling.parcel(mProxyPackageNames, dest, flags);
+            longSparseStringArrayParcelling.parcel(mProxyFeatureIds, dest, flags);
+        }
+
+        /**
+         * @hide
+         */
+        public static OpFeatureEntry.Builder createFromParcel(@NonNull Parcel source) {
+            LongSparseLongArray.Parcelling longSparseLongArrayParcelling =
+                    LongSparseLongArray.Parcelling.Cache.getOrCreate(
+                            LongSparseLongArray.Parcelling.class);
+            LongSparseArray.StringParcelling longSparseStringArrayParcelling =
+                    LongSparseArray.StringParcelling.Cache.getOrCreate(
+                            LongSparseArray.StringParcelling.class);
+
+            return new OpFeatureEntry.Builder(source.readBoolean(),
+                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
+                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
+                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
+                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
+                    (LongSparseArray<String>) longSparseStringArrayParcelling.unparcel(source),
+                    (LongSparseArray<String>) longSparseStringArrayParcelling.unparcel(source));
+        }
+    }
+
+    /**
+     * Class holding the information about one unique operation of an application.
+     * @hide
+     */
+    @TestApi
+    @Immutable
+    @SystemApi
+    public static final class OpEntry implements Parcelable {
+        private final @IntRange(from = 0, to = _NUM_OP - 1) int mOp;
+        private final @Mode int mMode;
+        private final @NonNull ArrayMap<String, OpFeatureEntry> mFeatures;
+
+        /**
+         * @hide
+         */
+        public OpEntry(@IntRange(from = 0, to = _NUM_OP - 1) int op, @Mode int mode,
+                @NonNull Pair<String, OpFeatureEntry.Builder>[] featureBuilders) {
+            mOp = Preconditions.checkArgumentInRange(op, 0, _NUM_OP - 1, "op");
+            mMode = Preconditions.checkArgumentInRange(mode, 0, MODE_FOREGROUND, "mode");
+
+            mFeatures = new ArrayMap<>(featureBuilders.length);
+            for (Pair<String, OpFeatureEntry.Builder> feature : featureBuilders) {
+                mFeatures.put(feature.first, feature.second.setParent(this).build());
+            }
+        }
+
+        /**
+         * @return The mapping from the feature ids to the feature state
+         */
+        public @NonNull Map<String, OpFeatureEntry> getFeatures() {
+            return mFeatures;
+        }
+
+        /**
+         * @hide
+         */
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "{@code "
+                + "#getOpStr()}")
+        public int getOp() {
+            return mOp;
+        }
+
+        /**
+         * @return This entry's op string name, such as {@link #OPSTR_COARSE_LOCATION}.
+         */
+        public @NonNull String getOpStr() {
+            return sOpToString[mOp];
+        }
+
+        /**
+         * @return this entry's current mode, such as {@link #MODE_ALLOWED}.
+         */
+        public @Mode int getMode() {
+            return mMode;
+        }
+
+        /**
+         * @deprecated Use {@link OpEntry#getLastAccessTime(int)} instead
+         *
+         * @hide
+         */
+        @Deprecated
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "{@code "
+                + "#getLastAccessTime(int)}")
+        public long getTime() {
+            return getLastAccessTime(OP_FLAGS_ALL);
+        }
+
+        private long getMaxOfFeatures(@NonNull ToLongFunction<OpFeatureEntry> timeGetter) {
+            long max = 0;
+
+            int numFeatures = mFeatures.size();
+            for (int i = 0; i < numFeatures; i++) {
+                max = Math.max(max, timeGetter.applyAsLong(mFeatures.valueAt(i)));
+            }
+
+            return max;
+        }
+
+        private long getSumOfFeatures(@NonNull ToLongFunction<OpFeatureEntry> getter) {
+            long sum = 0;
+
+            int numFeatures = mFeatures.size();
+            for (int i = 0; i < numFeatures; i++) {
+                sum += getter.applyAsLong(mFeatures.valueAt(i));
+            }
+
+            return sum;
+        }
+
+        /**
+         * Return the last wall clock time  in milliseconds this op was accessed
+         * by the app for a given range of UID states.
+         *
+         * @param fromUidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state for which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         *
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessForegroundTime(int)
+         * @see #getLastAccessBackgroundTime(int)
+         * @see #getLastAccessTime(int)
+         */
+        public long getLastAccessTime(@OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastAccessTime(flags)));
+        }
+
+        /**
+         * Return the last wall clock time in milliseconds this op was accessed
+         * by the app while in the foreground.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessBackgroundTime(int)
+         * @see #getLastAccessTime(int)
+         * @see #getLastAccessTime(int, int, int)
+         */
+        public long getLastAccessForegroundTime(@OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastAccessForegroundTime(flags)));
+        }
+
+        /**
+         * Return the last wall clock time in milliseconds this op was accessed
+         * by the app while in the background.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessForegroundTime(int)
+         * @see #getLastAccessTime(int)
+         * @see #getLastAccessTime(int, int, int)
+         */
+        public long getLastAccessBackgroundTime(@OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastAccessBackgroundTime(flags)));
+        }
+
+        /**
+         * Return the last wall clock time  in milliseconds this op was accessed
+         * by the app for a given range of UID states.
+         *
+         * @param fromUidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state for which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         *
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastAccessForegroundTime(int)
+         * @see #getLastAccessBackgroundTime(int)
+         * @see #getLastAccessTime(int)
+         */
+        public long getLastAccessTime(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastAccessTime(fromUidState,
+                            toUidState, flags)));
+        }
+
+        /**
+         * @deprecated Use {@link OpEntry#getLastRejectTime(int)} instead
+         *
+         * @hide
+         */
+        @Deprecated
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "{@code "
+                + "#getLastRejectTime(int)}")
+        public long getRejectTime() {
+            return getLastRejectTime(OP_FLAGS_ALL);
+        }
+
+        /**
+         * Return the last wall clock time in milliseconds the app made an attempt
+         * to access this op but was rejected.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last reject time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectBackgroundTime(int)
+         * @see #getLastRejectForegroundTime(int)
+         * @see #getLastRejectTime(int, int, int)
+         */
+        public long getLastRejectTime(@OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastRejectTime(flags)));
+        }
+
+        /**
+         * Return the last wall clock time in milliseconds the app made an attempt
+         * to access this op while in the foreground but was rejected.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground reject time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectBackgroundTime(int)
+         * @see #getLastRejectTime(int, int, int)
+         * @see #getLastRejectTime(int)
+         */
+        public long getLastRejectForegroundTime(@OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastRejectForegroundTime(flags)));
+        }
+
+        /**
+         * Return the last wall clock time in milliseconds the app made an attempt
+         * to access this op while in the background but was rejected.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last background reject time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectForegroundTime(int)
+         * @see #getLastRejectTime(int, int, int)
+         * @see #getLastRejectTime(int)
+         */
+        public long getLastRejectBackgroundTime(@OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastRejectBackgroundTime(flags)));
+        }
+
+        /**
+         * Return the last wall clock time state in milliseconds the app made an
+         * attempt to access this op for a given range of UID states.
+         *
+         * @param fromUidState The UID state from which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state to which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the last foreground access time in milliseconds since
+         * epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian).
+         *
+         * @see #getLastRejectForegroundTime(int)
+         * @see #getLastRejectBackgroundTime(int)
+         * @see #getLastRejectTime(int)
+         */
+        public long getLastRejectTime(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return getMaxOfFeatures(
+                    (featureEntry -> featureEntry.getLastRejectTime(fromUidState,
+                            toUidState, flags)));
+        }
+
+        /**
+         * @return Whether the operation is running.
+         */
+        public boolean isRunning() {
+            int numFeatures = mFeatures.size();
+            if (mFeatures.isEmpty()) {
+                return false;
+            }
+
+            for (int i = 0; i < numFeatures; i++) {
+                if (mFeatures.valueAt(i).mRunning) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * @return The duration of the operation in milliseconds. The duration is in wall time.
+         */
+        public long getDuration() {
+            return getLastDuration(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
+        }
+
+        /**
+         * Return the duration in milliseconds the app accessed this op while
+         * in the foreground. The duration is in wall time.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the foreground access duration in milliseconds.
+         *
+         * @see #getLastBackgroundDuration(int)
+         * @see #getLastDuration(int, int, int)
+         */
+        public long getLastForegroundDuration(@OpFlags int flags) {
+            return getSumOfFeatures((featureEntry) ->
+                    featureEntry.getLastForegroundDuration(flags));
+        }
+
+        /**
+         * Return the duration in milliseconds the app accessed this op while
+         * in the background. The duration is in wall time.
+         *
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the background access duration in milliseconds.
+         *
+         * @see #getLastForegroundDuration(int)
+         * @see #getLastDuration(int, int, int)
+         */
+        public long getLastBackgroundDuration(@OpFlags int flags) {
+            return getSumOfFeatures((featureEntry) ->
+                    featureEntry.getLastBackgroundDuration(flags));
+        }
+
+        /**
+         * Return the duration in milliseconds the app accessed this op for
+         * a given range of UID states. The duration is in wall time.
+         *
+         * @param fromUidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param toUidState The UID state for which to query.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return the access duration in milliseconds.
+         */
+        public long getLastDuration(@UidState int fromUidState, @UidState int toUidState,
+                @OpFlags int flags) {
+            return getSumOfFeatures((featureEntry) ->
+                    featureEntry.getLastDuration(fromUidState, toUidState, flags));
+        }
+
+        /**
+         * Like {@link #findFirstNonNegativeForFlagsInStates(LongSparseLongArray, int, int, int)}
+         * but for all proxy uid in all features.
+         */
+        private long findFirstNonNegativeProxyUidInFeatureStates(@UidState int beginUidState,
+                @UidState int endUidState, @OpFlags int flags) {
+            int numFeatures = mFeatures.size();
+
+            if (numFeatures == 0) {
+                return -1;
+            }
+
+            while (flags != 0) {
+                final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+                flags &= ~flag;
+                for (int uidState : UID_STATES) {
+                    if (uidState < beginUidState || uidState > endUidState) {
+                        continue;
+                    }
+
+                    final long key = makeKey(uidState, flag);
+
+                    for (int i = 0; i < numFeatures; i++) {
+                        OpFeatureEntry featureEntry = mFeatures.valueAt(i);
+
+                        if (featureEntry.mProxyUids == null) {
+                            continue;
+                        }
+
+                        final long proxyUid = featureEntry.mProxyUids.get(key);
+                        if (proxyUid >= 0) {
+                            return proxyUid;
+                        }
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        /**
+         * Like {@link #findFirstNonNullForFlagsInStates(LongSparseArray, int, int, int)} but
+         * for all proxyPackageNames in all features.
+         */
+        private @Nullable String findFirstNonNullProxyPackageNameInFeatureStates(
+                @OpFlags int flags, @UidState int beginUidState, @UidState int endUidState) {
+            int numFeatures = mFeatures.size();
+
+            if (numFeatures == 0) {
+                return null;
+            }
+
+            while (flags != 0) {
+                final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+                flags &= ~flag;
+                for (int uidState : UID_STATES) {
+                    if (uidState < beginUidState || uidState > endUidState) {
+                        continue;
+                    }
+                    final long key = makeKey(uidState, flag);
+
+                    for (int i = 0; i < numFeatures; i++) {
+                        OpFeatureEntry featureEntry = mFeatures.valueAt(i);
+
+                        if (featureEntry.mProxyPackageNames == null) {
+                            continue;
+                        }
+
+                        final String proxyName = featureEntry.mProxyPackageNames.get(key);
+                        if (proxyName != null) {
+                            return proxyName;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * @deprecated Use {@link #getProxyUid(int, int)} instead
+         */
+        @Deprecated
+        public int getProxyUid() {
+            return (int) findFirstNonNegativeProxyUidInFeatureStates(MAX_PRIORITY_UID_STATE,
+                    MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
+        }
+
+        /**
+         * Gets the UID of the app that performed the op on behalf of this app and
+         * as a result blamed the op on this app or {@link Process#INVALID_UID} if
+         * there is no proxy.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         *
+         * @return The proxy UID.
+         */
+        public int getProxyUid(@UidState int uidState, @OpFlags int flags) {
+            return (int) findFirstNonNegativeProxyUidInFeatureStates(uidState, uidState, flags);
+        }
+
+        /**
+         * @deprecated Use {@link #getProxyPackageName(int, int)} instead
+         */
+        @Deprecated
+        public @Nullable String getProxyPackageName() {
+            return findFirstNonNullProxyPackageNameInFeatureStates(MAX_PRIORITY_UID_STATE,
+                    MIN_PRIORITY_UID_STATE, OP_FLAGS_ALL);
+        }
+
+        /**
+         * Gets the package name of the app that performed the op on behalf of this
+         * app and as a result blamed the op on this app for a UID state or
+         * {@code null} if there is no proxy.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         * @param flags The flags which are any combination of
+         * {@link #OP_FLAG_SELF}, {@link #OP_FLAG_TRUSTED_PROXY},
+         * {@link #OP_FLAG_UNTRUSTED_PROXY}, {@link #OP_FLAG_TRUSTED_PROXIED},
+         * {@link #OP_FLAG_UNTRUSTED_PROXIED}. You can use {@link #OP_FLAGS_ALL}
+         * for any flag.
+         * @return The proxy package name.
+         */
+        public @Nullable String getProxyPackageName(@UidState int uidState, @OpFlags int flags) {
+            return findFirstNonNullProxyPackageNameInFeatureStates(uidState, uidState, flags);
+        }
+
+        /**
+         * Create OpEntry from parcel.
+         *
+         * @hide
+         */
+        public static OpEntry createFromParcel(@NonNull Parcel source) {
+            int op = source.readInt();
+            int mode = source.readInt();
+
+            int numFeatures = source.readInt();
+            Pair<String, OpFeatureEntry.Builder>[] features = new Pair[numFeatures];
+            for (int i = 0; i < numFeatures; i++) {
+                features[i] = new Pair<>(source.readString(),
+                        OpFeatureEntry.createFromParcel(source));
+            }
+
+            return new OpEntry(op, mode, features);
         }
 
         @Override
@@ -2751,31 +3372,23 @@ public class AppOpsManager {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mOp);
             dest.writeInt(mMode);
-            dest.writeBoolean(mRunning);
-            writeLongSparseLongArrayToParcel(mAccessTimes, dest);
-            writeLongSparseLongArrayToParcel(mRejectTimes, dest);
-            writeLongSparseLongArrayToParcel(mDurations, dest);
-            writeLongSparseLongArrayToParcel(mProxyUids, dest);
-            writeLongSparseStringArrayToParcel(mProxyPackageNames, dest);
+
+            int numFeatures = mFeatures.size();
+            dest.writeInt(numFeatures);
+            for (int i = 0; i < numFeatures; i++) {
+                dest.writeString(mFeatures.keyAt(i));
+                mFeatures.valueAt(i).writeToParcel(dest, flags);
+            }
         }
 
-        OpEntry(Parcel source) {
-            mOp = source.readInt();
-            mMode = source.readInt();
-            mRunning = source.readBoolean();
-            mAccessTimes = readLongSparseLongArrayFromParcel(source);
-            mRejectTimes = readLongSparseLongArrayFromParcel(source);
-            mDurations = readLongSparseLongArrayFromParcel(source);
-            mProxyUids = readLongSparseLongArrayFromParcel(source);
-            mProxyPackageNames = readLongSparseStringArrayFromParcel(source);
-        }
-
-        public static final @android.annotation.NonNull Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
-            @Override public OpEntry createFromParcel(Parcel source) {
-                return new OpEntry(source);
+        public static final @NonNull Creator<OpEntry> CREATOR = new Creator<OpEntry>() {
+            @Override
+            public @NonNull OpEntry createFromParcel(@NonNull Parcel parcel) {
+                return OpEntry.createFromParcel(parcel);
             }
 
-            @Override public OpEntry[] newArray(int size) {
+            @Override
+            public @NonNull OpEntry[] newArray(int size) {
                 return new OpEntry[size];
             }
         };
@@ -4428,7 +5041,7 @@ public class AppOpsManager {
      * state due to UID policy or because it's controlled by a different master op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
-     * {@link #noteOp(String, int, String, String)} if the effective mode is needed.
+     * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
      *
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
@@ -4452,7 +5065,7 @@ public class AppOpsManager {
      * state due to UID policy or because it's controlled by a different master op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
-     * {@link #noteOp(String, int, String, String)} if the effective mode is needed.
+     * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
      *
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
@@ -4474,7 +5087,7 @@ public class AppOpsManager {
      * state due to UID policy or because it's controlled by a different master op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
-     * {@link #noteOp(String, int, String, String)} if the effective mode is needed.
+     * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
      *
      * @param uid The uid of the application of interest.
      * @param packageName The name of the application of interest.
@@ -4507,7 +5120,7 @@ public class AppOpsManager {
      * state due to UID policy or because it's controlled by a different master op.
      *
      * Use {@link #unsafeCheckOp(String, int, String)}} or
-     * {@link #noteOp(String, int, String, String)} if the effective mode is needed.
+     * {@link #noteOp(String, int, String, String, String)} if the effective mode is needed.
      *
      * @param uid The uid of the application of interest.
      * @param packageName The name of the application of interest.
@@ -4897,8 +5510,8 @@ public class AppOpsManager {
      *
      * @see #isOperationActive
      * @see #stopWatchingActive
-     * @see #startOp(int, int, String, boolean, String)
-     * @see #finishOp(int, int, String)
+     * @see #startOp(int, int, String, boolean, String, String)
+     * @see #finishOp(int, int, String, String)
      */
     // TODO: Uncomment below annotation once b/73559440 is fixed
     // @RequiresPermission(value=Manifest.permission.WATCH_APPOPS, conditional=true)
@@ -4948,8 +5561,8 @@ public class AppOpsManager {
      *
      * @see #isOperationActive
      * @see #startWatchingActive
-     * @see #startOp(int, int, String, boolean, String)
-     * @see #finishOp(int, int, String)
+     * @see #startOp(int, int, String, boolean, String, String)
+     * @see #finishOp(int, int, String, String)
      */
     public void stopWatchingActive(@NonNull OnOpActiveChangedListener callback) {
         synchronized (mActiveWatchers) {
@@ -4979,7 +5592,7 @@ public class AppOpsManager {
      *
      * @see #startWatchingActive(int[], OnOpActiveChangedListener)
      * @see #stopWatchingNoted(OnOpNotedListener)
-     * @see #noteOp(String, int, String, String)
+     * @see #noteOp(String, int, String, String, String)
      *
      * @hide
      */
@@ -5011,7 +5624,7 @@ public class AppOpsManager {
      * Unregistering a non-registered callback has no effect.
      *
      * @see #startWatchingNoted(int[], OnOpNotedListener)
-     * @see #noteOp(String, int, String, String)
+     * @see #noteOp(String, int, String, String, String)
      *
      * @hide
      */
@@ -5047,15 +5660,15 @@ public class AppOpsManager {
     /**
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
-     * String)} or {@link #startOp(String, int, String, String)} for your actual security checks,
-     * which also ensure that the given uid and package name are consistent. This function can just
-     * be used for a quick check to see if an operation has been disabled for the application,
-     * as an early reject of some work.  This does not modify the time stamp or other data
-     * about the operation.
+     * String, String)} or {@link #startOp(String, int, String, String, String)} for your actual
+     * security checks, which also ensure that the given uid and package name are consistent. This
+     * function can just be used for a quick check to see if an operation has been disabled for the
+     * application, as an early reject of some work.  This does not modify the time stamp or other
+     * data about the operation.
      *
      * <p>Important things this will not do (which you need to ultimate use
-     * {@link #noteOp(String, int, String, String)} or
-     * {@link #startOp(String, int, String, String)} to cover):</p>
+     * {@link #noteOp(String, int, String, String, String)} or
+     * {@link #startOp(String, int, String, String, String)} to cover):</p>
      * <ul>
      *     <li>Verifying the uid and package are consistent, so callers can't spoof
      *     their identity.</li>
@@ -5126,35 +5739,37 @@ public class AppOpsManager {
     }
 
     /**
-     * @deprecated Use {@link #noteOp(String, int, String, String)} instead
+     * @deprecated Use {@link #noteOp(String, int, String, String, String)} instead
      */
     @Deprecated
     public int noteOp(@NonNull String op, int uid, @NonNull String packageName) {
-        return noteOp(op, uid, packageName, null);
+        return noteOp(op, uid, packageName, null, null);
     }
 
     /**
-     * @deprecated Use {@link #noteOp(String, int, String, String)} instead
+     * @deprecated Use {@link #noteOp(String, int, String, String, String)} instead
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
-            + "#noteOp(java.lang.String, int, java.lang.String, java.lang.String)} instead")
+            + "#noteOp(java.lang.String, int, java.lang.String, java.lang.String, "
+            + "java.lang.String)} instead")
     @Deprecated
     public int noteOp(int op) {
-        return noteOp(op, Process.myUid(), mContext.getOpPackageName(), null);
+        return noteOp(op, Process.myUid(), mContext.getOpPackageName(), null, null);
     }
 
     /**
-     * @deprecated Use {@link #noteOp(String, int, String, String)} instead
+     * @deprecated Use {@link #noteOp(String, int, String, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
-            + "#noteOp(java.lang.String, int, java.lang.String, java.lang.String)} instead")
+            + "#noteOp(java.lang.String, int, java.lang.String, java.lang.String, "
+            + "java.lang.String)} instead")
     public int noteOp(int op, int uid, @Nullable String packageName) {
-        return noteOp(op, uid, packageName, null);
+        return noteOp(op, uid, packageName, null, null);
     }
 
     /**
@@ -5167,6 +5782,7 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -5176,8 +5792,8 @@ public class AppOpsManager {
      * @throws SecurityException If the app has been configured to crash on this op.
      */
     public int noteOp(@NonNull String op, int uid, @Nullable String packageName,
-            @Nullable String message) {
-        return noteOp(strOpToOp(op), uid, packageName, message);
+            @Nullable String featureId, @Nullable String message) {
+        return noteOp(strOpToOp(op), uid, packageName, featureId, message);
     }
 
     /**
@@ -5190,6 +5806,7 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -5200,8 +5817,9 @@ public class AppOpsManager {
      *
      * @hide
      */
-    public int noteOp(int op, int uid, @Nullable String packageName, @Nullable String message) {
-        final int mode = noteOpNoThrow(op, uid, packageName, message);
+    public int noteOp(int op, int uid, @Nullable String packageName, @Nullable String featureId,
+            @Nullable String message) {
+        final int mode = noteOpNoThrow(op, uid, packageName, featureId, message);
         if (mode == MODE_ERRORED) {
             throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
@@ -5209,27 +5827,28 @@ public class AppOpsManager {
     }
 
     /**
-     * @deprecated Use {@link #noteOpNoThrow(String, int, String, String)} instead
+     * @deprecated Use {@link #noteOpNoThrow(String, int, String, String, String)} instead
      */
     @Deprecated
     public int noteOpNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
-        return noteOpNoThrow(op, uid, packageName, null);
+        return noteOpNoThrow(op, uid, packageName, null, null);
     }
 
     /**
-     * @deprecated Use {@link #noteOpNoThrow(int, int, String, String)} instead
+     * @deprecated Use {@link #noteOpNoThrow(int, int, String, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
-            + "#noteOpNoThrow(java.lang.String, int, java.lang.String, java.lang.String)} instead")
+            + "#noteOpNoThrow(java.lang.String, int, java.lang.String, java.lang.String, "
+            + "java.lang.String)} instead")
     public int noteOpNoThrow(int op, int uid, String packageName) {
-        return noteOpNoThrow(op, uid, packageName, null);
+        return noteOpNoThrow(op, uid, packageName, null, null);
     }
 
     /**
-     * Like {@link #noteOp(String, int, String, String)} but instead of throwing a
+     * Like {@link #noteOp(String, int, String, String, String)} but instead of throwing a
      * {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
      * @param op The operation to note.  One of the OPSTR_* constants.
@@ -5242,17 +5861,18 @@ public class AppOpsManager {
      * causing the app to crash).
      */
     public int noteOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @Nullable String message) {
-        return noteOpNoThrow(strOpToOp(op), uid, packageName, message);
+            @Nullable String feature, @Nullable String message) {
+        return noteOpNoThrow(strOpToOp(op), uid, packageName, feature, message);
     }
 
     /**
-     * Like {@link #noteOp(String, int, String, String)} but instead of throwing a
+     * Like {@link #noteOp(String, int, String, String, String)} but instead of throwing a
      * {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
      * @param op The operation to note.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -5262,11 +5882,11 @@ public class AppOpsManager {
      * @hide
      */
     public int noteOpNoThrow(int op, int uid, @Nullable String packageName,
-            @Nullable String message) {
+            @Nullable String featureId, @Nullable String message) {
         try {
-            int mode = mService.noteOperation(op, uid, packageName);
+            int mode = mService.noteOperation(op, uid, packageName, featureId);
             if (mode == MODE_ALLOWED) {
-                markAppOpNoted(uid, packageName, op, message);
+                markAppOpNoted(uid, packageName, op, featureId, message);
             }
 
             return mode;
@@ -5276,23 +5896,24 @@ public class AppOpsManager {
     }
 
     /**
-     * @deprecated Use {@link #noteProxyOp(String, String, int, String)} instead
+     * @deprecated Use {@link #noteProxyOp(String, String, int, String, String)} instead
      */
     @Deprecated
     public int noteProxyOp(@NonNull String op, @NonNull String proxiedPackageName) {
-        return noteProxyOp(op, proxiedPackageName, Binder.getCallingUid(), null);
+        return noteProxyOp(op, proxiedPackageName, Binder.getCallingUid(), null, null);
     }
 
     /**
-     * @deprecated Use {@link #noteProxyOp(String, String, int, String)} instead
+     * @deprecated Use {@link #noteProxyOp(String, String, int, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
-            + "#noteProxyOp(java.lang.String, java.lang.String, int, java.lang.String)} instead")
+            + "#noteProxyOp(java.lang.String, java.lang.String, int, java.lang.String, "
+            + "java.lang.String)} instead")
     public int noteProxyOp(int op, @Nullable String proxiedPackageName) {
-        return noteProxyOp(op, proxiedPackageName, Binder.getCallingUid(), null);
+        return noteProxyOp(op, proxiedPackageName, Binder.getCallingUid(), null, null);
     }
 
     /**
@@ -5304,6 +5925,8 @@ public class AppOpsManager {
      * @param op The operation to note. One of the OP_* constants.
      * @param proxiedPackageName The name of the application calling into the proxy application.
      * @param proxiedUid The uid of the proxied application
+     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
+     *                           feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
@@ -5315,8 +5938,9 @@ public class AppOpsManager {
      * @hide
      */
     public int noteProxyOp(int op, @Nullable String proxiedPackageName, int proxiedUid,
-            @Nullable String message) {
-        int mode = noteProxyOpNoThrow(op, proxiedPackageName, proxiedUid, message);
+            @Nullable String proxiedFeatureId, @Nullable String message) {
+        int mode = noteProxyOpNoThrow(op, proxiedPackageName, proxiedUid, proxiedFeatureId,
+                message);
         if (mode == MODE_ERRORED) {
             throw new SecurityException("Proxy package " + mContext.getOpPackageName()
                     + " from uid " + Process.myUid() + " or calling package " + proxiedPackageName
@@ -5334,6 +5958,8 @@ public class AppOpsManager {
      * @param op The operation to note. One of the OPSTR_* constants.
      * @param proxiedPackageName The name of the application calling into the proxy application.
      * @param proxiedUid The uid of the proxied application
+     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
+     *                           feature
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
@@ -5343,29 +5969,30 @@ public class AppOpsManager {
      * op.
      */
     public int noteProxyOp(@NonNull String op, @Nullable String proxiedPackageName, int proxiedUid,
-            @Nullable String message) {
-        return noteProxyOp(strOpToOp(op), proxiedPackageName, proxiedUid, message);
+            @Nullable String proxiedFeatureId, @Nullable String message) {
+        return noteProxyOp(strOpToOp(op), proxiedPackageName, proxiedUid, proxiedFeatureId,
+                message);
     }
 
     /**
-     * @deprecated Use {@link #noteProxyOpNoThrow(String, String, int, String)} instead
+     * @deprecated Use {@link #noteProxyOpNoThrow(String, String, int, String, String)} instead
      */
     @Deprecated
     public int noteProxyOpNoThrow(@NonNull String op, @NonNull String proxiedPackageName) {
-        return noteProxyOpNoThrow(op, proxiedPackageName, Binder.getCallingUid(), null);
+        return noteProxyOpNoThrow(op, proxiedPackageName, Binder.getCallingUid(), null, null);
     }
 
     /**
-     * @deprecated Use {@link #noteProxyOpNoThrow(String, String, int, String)} instead
+     * @deprecated Use {@link #noteProxyOpNoThrow(String, String, int, String, String)} instead
      */
     @Deprecated
     public int noteProxyOpNoThrow(@NonNull String op, @Nullable String proxiedPackageName,
             int proxiedUid) {
-        return noteProxyOpNoThrow(op, proxiedPackageName, proxiedUid, null);
+        return noteProxyOpNoThrow(op, proxiedPackageName, proxiedUid, null, null);
     }
 
     /**
-     * Like {@link #noteProxyOp(String, String, int, String)} but instead
+     * Like {@link #noteProxyOp(String, String, int, String, String)} but instead
      * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
      * <p>This API requires package with the {@code proxiedPackageName} to belong to
@@ -5374,37 +6001,43 @@ public class AppOpsManager {
      * @param op The op to note
      * @param proxiedPackageName The package to note the op for
      * @param proxiedUid The uid the package belongs to
+     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
+     *                           feature
      * @param message A message describing the reason the op was noted
      */
     public int noteProxyOpNoThrow(@NonNull String op, @Nullable String proxiedPackageName,
-            int proxiedUid, @Nullable String message) {
-        return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName, proxiedUid, message);
+            int proxiedUid, @Nullable String proxiedFeatureId, @Nullable String message) {
+        return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName, proxiedUid,
+                proxiedFeatureId, message);
     }
 
     /**
-     * Like {@link #noteProxyOp(int, String, int, String)} but instead
+     * Like {@link #noteProxyOp(int, String, int, String, String)} but instead
      * of throwing a {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
      * @param op The op to note
      * @param proxiedPackageName The package to note the op for or {@code null} if the op should be
      *                           noted for the "android" package
      * @param proxiedUid The uid the package belongs to
+     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
+     *                           feature
      * @param message A message describing the reason the op was noted
      *
      * @hide
      */
     public int noteProxyOpNoThrow(int op, @Nullable String proxiedPackageName, int proxiedUid,
-            @Nullable String message) {
+            @Nullable String proxiedFeatureId, @Nullable String message) {
         int myUid = Process.myUid();
 
         try {
-            int mode = mService.noteProxyOperation(op, myUid, mContext.getOpPackageName(),
-                    proxiedUid, proxiedPackageName);
+            int mode = mService.noteProxyOperation(op, proxiedUid, proxiedPackageName,
+                    proxiedFeatureId, myUid, mContext.getOpPackageName(),
+                    mContext.getFeatureId());
             if (mode == MODE_ALLOWED
                     // Only collect app-ops when the proxy is trusted
                     && mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1, myUid)
                     == PackageManager.PERMISSION_GRANTED) {
-                markAppOpNoted(proxiedUid, proxiedPackageName, op, message);
+                markAppOpNoted(proxiedUid, proxiedPackageName, op, proxiedFeatureId, message);
             }
 
             return mode;
@@ -5416,15 +6049,15 @@ public class AppOpsManager {
     /**
      * Do a quick check for whether an application might be able to perform an operation.
      * This is <em>not</em> a security check; you must use {@link #noteOp(String, int, String,
-     * String)} or {@link #startOp(int, int, String, boolean, String)} for your actual security
-     * checks, which also ensure that the given uid and package name are consistent. This function
-     * can just be used for a quick check to see if an operation has been disabled for the
-     * application, as an early reject of some work.  This does not modify the time stamp or other
-     * data about the operation.
+     * String, String)} or {@link #startOp(int, int, String, boolean, String, String)} for your
+     * actual security checks, which also ensure that the given uid and package name are consistent.
+     * This function can just be used for a quick check to see if an operation has been disabled for
+     * the application, as an early reject of some work.  This does not modify the time stamp or
+     * other data about the operation.
      *
      * <p>Important things this will not do (which you need to ultimate use
-     * {@link #noteOp(String, int, String, String)} or
-     * {@link #startOp(int, int, String, boolean, String)} to cover):</p>
+     * {@link #noteOp(String, int, String, String, String)} or
+     * {@link #startOp(int, int, String, boolean, String, String)} to cover):</p>
      * <ul>
      *     <li>Verifying the uid and package are consistent, so callers can't spoof
      *     their identity.</li>
@@ -5534,41 +6167,41 @@ public class AppOpsManager {
 
 
     /**
-     * @deprecated use {@link #startOp(String, int, String, String)} instead
+     * @deprecated use {@link #startOp(String, int, String, String, String)} instead
      */
     @Deprecated
     public int startOp(@NonNull String op, int uid, @NonNull String packageName) {
-        return startOp(op, uid, packageName, null);
+        return startOp(op, uid, packageName, null, null);
     }
 
     /**
-     * @deprecated Use {@link #startOp(int, int, String, boolean, String)} instead
+     * @deprecated Use {@link #startOp(int, int, String, boolean, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     public int startOp(int op) {
-        return startOp(op, Process.myUid(), mContext.getOpPackageName(), false, null);
+        return startOp(op, Process.myUid(), mContext.getOpPackageName(), false, null, null);
     }
 
     /**
-     * @deprecated Use {@link #startOp(int, int, String, boolean, String)} instead
+     * @deprecated Use {@link #startOp(int, int, String, boolean, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     public int startOp(int op, int uid, String packageName) {
-        return startOp(op, uid, packageName, false, null);
+        return startOp(op, uid, packageName, false, null, null);
     }
 
     /**
-     * @deprecated Use {@link #startOp(int, int, String, boolean, String)} instead
+     * @deprecated Use {@link #startOp(int, int, String, boolean, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     public int startOp(int op, int uid, String packageName, boolean startIfModeDefault) {
-        return startOp(op, uid, packageName, startIfModeDefault, null);
+        return startOp(op, uid, packageName, startIfModeDefault, null, null);
     }
 
     /**
@@ -5577,6 +6210,7 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param message Description why op was started
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -5587,8 +6221,8 @@ public class AppOpsManager {
      * the package is not in the passed in UID.
      */
     public int startOp(@NonNull String op, int uid, @Nullable String packageName,
-            @Nullable String message) {
-        return startOp(strOpToOp(op), uid, packageName, false, message);
+            @NonNull String featureId, @Nullable String message) {
+        return startOp(strOpToOp(op), uid, packageName, false, featureId, message);
     }
 
     /**
@@ -5597,6 +6231,7 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param startIfModeDefault Whether to start if mode is {@link #MODE_DEFAULT}.
      * @param message Description why op was started
      *
@@ -5610,8 +6245,9 @@ public class AppOpsManager {
      * @hide
      */
     public int startOp(int op, int uid, @Nullable String packageName, boolean startIfModeDefault,
-            @Nullable String message) {
-        final int mode = startOpNoThrow(op, uid, packageName, startIfModeDefault, message);
+            @NonNull String featureId, @Nullable String message) {
+        final int mode = startOpNoThrow(op, uid, packageName, startIfModeDefault, featureId,
+                message);
         if (mode == MODE_ERRORED) {
             throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
@@ -5619,40 +6255,41 @@ public class AppOpsManager {
     }
 
     /**
-     * @deprecated use {@link #startOpNoThrow(String, int, String, String)} instead
+     * @deprecated use {@link #startOpNoThrow(String, int, String, String, String)} instead
      */
     @Deprecated
     public int startOpNoThrow(@NonNull String op, int uid, @NonNull String packageName) {
-        return startOpNoThrow(op, uid, packageName, null);
+        return startOpNoThrow(op, uid, packageName, null, null);
     }
 
     /**
-     * @deprecated Use {@link #startOpNoThrow(int, int, String, boolean, String} instead
+     * @deprecated Use {@link #startOpNoThrow(int, int, String, boolean, String, String} instead
      *
      * @hide
      */
     @Deprecated
     public int startOpNoThrow(int op, int uid, String packageName) {
-        return startOpNoThrow(op, uid, packageName, false, null);
+        return startOpNoThrow(op, uid, packageName, false, null, null);
     }
 
     /**
-     * @deprecated Use {@link #startOpNoThrow(int, int, String, boolean, String} instead
+     * @deprecated Use {@link #startOpNoThrow(int, int, String, boolean, String, String} instead
      *
      * @hide
      */
     @Deprecated
     public int startOpNoThrow(int op, int uid, String packageName, boolean startIfModeDefault) {
-        return startOpNoThrow(op, uid, packageName, startIfModeDefault, null);
+        return startOpNoThrow(op, uid, packageName, startIfModeDefault, null, null);
     }
 
     /**
-     * Like {@link #startOp(String, int, String, String)} but instead of throwing a
+     * Like {@link #startOp(String, int, String, String, String)} but instead of throwing a
      * {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param message Description why op was started
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -5660,17 +6297,18 @@ public class AppOpsManager {
      * causing the app to crash).
      */
     public int startOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @Nullable String message) {
-        return startOpNoThrow(strOpToOp(op), uid, packageName, false, message);
+            @NonNull String featureId, @Nullable String message) {
+        return startOpNoThrow(strOpToOp(op), uid, packageName, false, featureId, message);
     }
 
     /**
-     * Like {@link #startOp(int, int, String, boolean, String)} but instead of throwing a
+     * Like {@link #startOp(int, int, String, boolean, String, String)} but instead of throwing a
      * {@link SecurityException} it returns {@link #MODE_ERRORED}.
      *
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
+     * @param featureId The feature in the app or {@code null} for default feature
      * @param startIfModeDefault Whether to start if mode is {@link #MODE_DEFAULT}.
      * @param message Description why op was started
      *
@@ -5681,12 +6319,12 @@ public class AppOpsManager {
      * @hide
      */
     public int startOpNoThrow(int op, int uid, @NonNull String packageName,
-            boolean startIfModeDefault, @Nullable String message) {
+            boolean startIfModeDefault, @Nullable String featureId, @Nullable String message) {
         try {
             int mode = mService.startOperation(getToken(mService), op, uid, packageName,
-                    startIfModeDefault);
+                    featureId, startIfModeDefault);
             if (mode == MODE_ALLOWED) {
-                markAppOpNoted(uid, packageName, op, message);
+                markAppOpNoted(uid, packageName, op, featureId, message);
             }
 
             return mode;
@@ -5696,36 +6334,54 @@ public class AppOpsManager {
     }
 
     /**
-     * @deprecated Use {@link #finishOp(String, int, String)} instead
+     * @deprecated Use {@link #finishOp(String, int, String, String)} instead
      *
      * @hide
      */
     @Deprecated
     public void finishOp(int op) {
-        finishOp(op, Process.myUid(), mContext.getOpPackageName());
+        finishOp(op, Process.myUid(), mContext.getOpPackageName(), null);
     }
 
     /**
-     * Report that an application is no longer performing an operation that had previously
-     * been started with {@link #startOp(String, int, String, String)}.  There is no validation of
-     * input or result; the parameters supplied here must be the exact same ones previously passed
-     * in when starting the operation.
+     * @deprecated Use {@link #finishOp(String, int, String, String)} instead
      */
     public void finishOp(@NonNull String op, int uid, @NonNull String packageName) {
-        finishOp(strOpToOp(op), uid, packageName);
+        finishOp(strOpToOp(op), uid, packageName, null);
     }
 
     /**
      * Report that an application is no longer performing an operation that had previously
-     * been started with {@link #startOp(int, int, String, boolean, String)}. There is no
+     * been started with {@link #startOp(String, int, String, String, String)}.  There is no
+     * validation of input or result; the parameters supplied here must be the exact same ones
+     * previously passed in when starting the operation.
+     */
+    public void finishOp(@NonNull String op, int uid, @NonNull String packageName,
+            @Nullable String featureId) {
+        finishOp(strOpToOp(op), uid, packageName, featureId);
+    }
+
+    /**
+     * @deprecated Use {@link #finishOp(int, int, String, String)} instead
+     *
+     * @hide
+     */
+    public void finishOp(int op, int uid, @NonNull String packageName) {
+        finishOp(op, uid, packageName, null);
+    }
+
+    /**
+     * Report that an application is no longer performing an operation that had previously
+     * been started with {@link #startOp(int, int, String, boolean, String, String)}. There is no
      * validation of input or result; the parameters supplied here must be the exact same ones
      * previously passed in when starting the operation.
      *
      * @hide
      */
-    public void finishOp(int op, int uid, @NonNull String packageName) {
+    public void finishOp(int op, int uid, @NonNull String packageName,
+            @Nullable String featureId) {
         try {
-            mService.finishOperation(getToken(mService), op, uid, packageName);
+            mService.finishOperation(getToken(mService), op, uid, packageName, featureId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -5737,8 +6393,8 @@ public class AppOpsManager {
      * If you don't hold the {@code android.Manifest.permission#WATCH_APPOPS}
      * permission you can query only for your UID.
      *
-     * @see #finishOp(String, int, String)
-     * @see #startOp(String, int, String, String)
+     * @see #finishOp(String, int, String, String)
+     * @see #startOp(String, int, String, String, String)
      */
     public boolean isOpActive(@NonNull String op, int uid, @NonNull String packageName) {
         return isOperationActive(strOpToOp(op), uid, packageName);
@@ -5766,9 +6422,10 @@ public class AppOpsManager {
      */
     public static class PausedNotedAppOpsCollection {
         final int mUid;
-        final @Nullable long[] mCollectedNotedAppOps;
+        final @Nullable ArrayMap<String, long[]> mCollectedNotedAppOps;
 
-        PausedNotedAppOpsCollection(int uid, @Nullable long[] collectedNotedAppOps) {
+        PausedNotedAppOpsCollection(int uid, @Nullable ArrayMap<String,
+                long[]> collectedNotedAppOps) {
             mUid = uid;
             mCollectedNotedAppOps = collectedNotedAppOps;
         }
@@ -5786,7 +6443,8 @@ public class AppOpsManager {
     public static @Nullable PausedNotedAppOpsCollection pauseNotedAppOpsCollection() {
         Integer previousUid = sBinderThreadCallingUid.get();
         if (previousUid != null) {
-            long[] previousCollectedNotedAppOps = sAppOpsNotedInThisBinderTransaction.get();
+            ArrayMap<String, long[]> previousCollectedNotedAppOps =
+                    sAppOpsNotedInThisBinderTransaction.get();
 
             sBinderThreadCallingUid.remove();
             sAppOpsNotedInThisBinderTransaction.remove();
@@ -5832,8 +6490,12 @@ public class AppOpsManager {
     /**
      * Mark an app-op as noted
      */
-    private void markAppOpNoted(int uid, @NonNull String packageName, int code,
-            @Nullable String message) {
+    private void markAppOpNoted(int uid, @Nullable String packageName, int code,
+            @Nullable String featureId, @Nullable String message) {
+        if (packageName == null) {
+            packageName = "android";
+        }
+
         // check it the appops needs to be collected and cache result
         if (sAppOpsToNote[code] == SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED) {
             boolean shouldCollectNotes;
@@ -5860,7 +6522,7 @@ public class AppOpsManager {
             if (sNotedAppOpsCollector != null && uid == Process.myUid() && packageName.equals(
                     ActivityThread.currentOpPackageName())) {
                 // This app is noting an app-op for itself. Deliver immediately.
-                sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(code));
+                sNotedAppOpsCollector.onSelfNoted(new SyncNotedAppOp(code, featureId));
 
                 return;
             }
@@ -5869,18 +6531,24 @@ public class AppOpsManager {
         if (binderUid != null && binderUid == uid) {
             // If this is inside of a two-way binder call: Delivered to caller via
             // {@link #prefixParcelWithAppOpsIfNeeded}
-            long[] appOpsNotedInThisBinderTransaction;
+            // We are inside of a two-way binder call. Delivered to caller via
+            // {@link #prefixParcelWithAppOpsIfNeeded}
+            ArrayMap<String, long[]> appOpsNoted = sAppOpsNotedInThisBinderTransaction.get();
+            if (appOpsNoted == null) {
+                appOpsNoted = new ArrayMap<>(1);
+                sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
+            }
 
-            appOpsNotedInThisBinderTransaction = sAppOpsNotedInThisBinderTransaction.get();
-            if (appOpsNotedInThisBinderTransaction == null) {
-                appOpsNotedInThisBinderTransaction = new long[2];
-                sAppOpsNotedInThisBinderTransaction.set(appOpsNotedInThisBinderTransaction);
+            long[] appOpsNotedForFeature = appOpsNoted.get(featureId);
+            if (appOpsNotedForFeature == null) {
+                appOpsNotedForFeature = new long[2];
+                appOpsNoted.put(featureId, appOpsNotedForFeature);
             }
 
             if (code < 64) {
-                appOpsNotedInThisBinderTransaction[0] |= 1L << code;
+                appOpsNotedForFeature[0] |= 1L << code;
             } else {
-                appOpsNotedInThisBinderTransaction[1] |= 1L << (code - 64);
+                appOpsNotedForFeature[1] |= 1L << (code - 64);
             }
         } else {
             // Cannot deliver the note synchronous: Hence send it to the system server to
@@ -5892,7 +6560,8 @@ public class AppOpsManager {
 
             long token = Binder.clearCallingIdentity();
             try {
-                mService.noteAsyncOp(mContext.getOpPackageName(), uid, packageName, code, message);
+                mService.noteAsyncOp(mContext.getOpPackageName(), uid, packageName, code,
+                        featureId, message);
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             } finally {
@@ -5912,14 +6581,21 @@ public class AppOpsManager {
      * @hide
      */
     public static void prefixParcelWithAppOpsIfNeeded(@NonNull Parcel p) {
-        long[] notedAppOps = sAppOpsNotedInThisBinderTransaction.get();
-        if (notedAppOps == null || (notedAppOps[0] == 0 && notedAppOps[1] == 0)) {
+        ArrayMap<String, long[]> notedAppOps = sAppOpsNotedInThisBinderTransaction.get();
+        if (notedAppOps == null) {
             return;
         }
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
-        p.writeLong(notedAppOps[0]);
-        p.writeLong(notedAppOps[1]);
+
+        int numFeatureWithNotesAppOps = notedAppOps.size();
+        p.writeInt(numFeatureWithNotesAppOps);
+
+        for (int i = 0; i < numFeatureWithNotesAppOps; i++) {
+            p.writeString(notedAppOps.keyAt(i));
+            p.writeLong(notedAppOps.valueAt(i)[0]);
+            p.writeLong(notedAppOps.valueAt(i)[1]);
+        }
     }
 
     /**
@@ -5928,26 +6604,28 @@ public class AppOpsManager {
      * <p>This is called on the calling side of a two way binder transaction just after the
      * transaction returns.
      *
-     * <p>Note: Make sure to keep frameworks/native/libs/binder/Status.cpp::readAndLogNotedAppops
-     * in sync.
-     *
      * @param p The parcel to read from
      *
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
-        long[] rawNotedAppOps = new long[2];
-        rawNotedAppOps[0] = p.readLong();
-        rawNotedAppOps[1] = p.readLong();
+        int numFeaturesWithNotedAppOps = p.readInt();
 
-        if (rawNotedAppOps[0] != 0 || rawNotedAppOps[1] != 0) {
-            BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
+        for (int i = 0; i < numFeaturesWithNotedAppOps; i++) {
+            String featureId = p.readString();
+            long[] rawNotedAppOps = new long[2];
+            rawNotedAppOps[0] = p.readLong();
+            rawNotedAppOps[1] = p.readLong();
 
-            synchronized (sLock) {
-                for (int code = notedAppOps.nextSetBit(0); code != -1;
-                        code = notedAppOps.nextSetBit(code + 1)) {
-                    if (sNotedAppOpsCollector != null) {
-                        sNotedAppOpsCollector.onNoted(new SyncNotedAppOp(code));
+            if (rawNotedAppOps[0] != 0 || rawNotedAppOps[1] != 0) {
+                BitSet notedAppOps = BitSet.valueOf(rawNotedAppOps);
+
+                synchronized (sLock) {
+                    for (int code = notedAppOps.nextSetBit(0); code != -1;
+                            code = notedAppOps.nextSetBit(code + 1)) {
+                        if (sNotedAppOpsCollector != null) {
+                            sNotedAppOpsCollector.onNoted(new SyncNotedAppOp(code, featureId));
+                        }
                     }
                 }
             }
@@ -6134,8 +6812,8 @@ public class AppOpsManager {
      *
      * @see #startWatchingActive(int[], OnOpActiveChangedListener)
      * @see #stopWatchingMode(OnOpChangedListener)
-     * @see #finishOp(int)
-     * @see #startOp(int, int, String, boolean, String)
+     * @see #finishOp(int, int, String, String)
+     * @see #startOp(int, int, String, boolean, String, String)
      *
      * @hide */
     @TestApi

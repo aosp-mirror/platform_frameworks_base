@@ -97,7 +97,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testPerformOnRemoveNotification() {
         when(mController.isRemoteInputActive(mEntry)).thenReturn(true);
-        mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.key());
+        mRemoteInputManager.onPerformRemoveNotification(mEntry, mEntry.getKey());
 
         verify(mController).removeRemoteInput(mEntry, null);
     }
@@ -112,7 +112,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testShouldExtendLifetime_isSpinning() {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
-        when(mController.isSpinning(mEntry.key)).thenReturn(true);
+        when(mController.isSpinning(mEntry.getKey())).thenReturn(true);
 
         assertTrue(mRemoteInputHistoryExtender.shouldExtendLifetime(mEntry));
     }
@@ -128,7 +128,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Test
     public void testShouldExtendLifetime_smartReplySending() {
         NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY = true;
-        when(mSmartReplyController.isSendingSmartReply(mEntry.key)).thenReturn(true);
+        when(mSmartReplyController.isSendingSmartReply(mEntry.getKey())).thenReturn(true);
 
         assertTrue(mSmartReplyHistoryExtender.shouldExtendLifetime(mEntry));
     }

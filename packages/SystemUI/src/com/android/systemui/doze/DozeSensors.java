@@ -153,7 +153,7 @@ public class DozeSensors {
                         dozeLog),
         };
 
-        mProximitySensor = new ProximitySensor(context, sensorManager);
+        mProximitySensor = new ProximitySensor(context.getResources(), sensorManager);
 
         mProximitySensor.register(
                 proximityEvent -> {

@@ -429,7 +429,7 @@ public class ScanTests {
 
         final PackageManagerService.ScanResult scanResult = executeScan(scanRequest);
 
-        assertThat(scanResult.pkgSetting.isOrphaned, is(true));
+        assertThat(scanResult.pkgSetting.installSource.isOrphaned, is(true));
     }
 
     private static Matcher<Integer> hasFlag(final int flag) {

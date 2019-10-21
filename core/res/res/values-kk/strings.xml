@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Қолданбаға SMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"мәтін хабарларын алу (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Қолданбаға MMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Ұялы таратылым хабарларының бағытын өзгерту"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Ұялы таратылым хабарлары алынғаннан кейін, олардың бағытын өзгерту үшін қолданбаға ұялы таратылым модулімен байланыстыруға мүмкіндік береді. Ұялы таратылым ескертулері кей аймақтарда төтенше жағдайлар туралы хабарлау үшін беріледі. Төтенше жағдай туралы ұялы таратылым хабары алынғаннан кейін, зиянды қолданбалар құрылғы жұмысына кедергі келтіруі мүмкін."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ұялы хабар тарату хабарларын оқу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Қолданбаға ұялы таратылым хабарларын оқу мүмкіндігін береді. Ұялы таратылым дабылдары кейбір аймақтарда төтенше жағдай туралы ескерту үшін қолданылады. Төтенше ұялы хабарлар келгенде залалды қолданбалар құрылғының жұмысына кедергі жасауы мүмкін."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылған ағындарды оқу"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"рұқсаттарды пайдалану туралы деректерді көру"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Пайдаланушы қолданбаға берілетін рұқсаттарды басқара алады. Ондай рұқсаттар әдеттегі қолданбаларға керек емес."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"арнайы мүмкіндіктер таңбашасының мақсаты"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Қолданбаға арнайы мүмкіндіктер таңбашасының мақсатын анықтауға мүмкіндік береді."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Құпия сөз ережелерін тағайындау"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Экран құлпын ашу әркеттерін бақылау"</string>
@@ -1556,7 +1552,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Басқа опциялар"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Ішкі ортақ қойма"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Ішкі ортақ жад"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD картасы"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD картасы"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"USB дискі"</string>

@@ -144,7 +144,7 @@ TEST(LoadedArscTest, LoadAppAsSharedLibrary) {
                                       "resources.arsc", &contents));
 
   std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(StringPiece(contents), nullptr /*loaded_idmap*/, false /*system*/,
+      LoadedArsc::Load(StringPiece(contents), nullptr /* loaded_idmap */, false /*system*/,
                        true /*load_as_shared_library*/);
   ASSERT_THAT(loaded_arsc, NotNull());
 
@@ -222,67 +222,13 @@ TEST(LoadedArscTest, LoadOutOfOrderTypeSpecs) {
   ASSERT_THAT(type_spec->types[0], NotNull());
 }
 
-class MockLoadedIdmap : public LoadedIdmap {
- public:
-  MockLoadedIdmap() : LoadedIdmap() {
-    local_header_.magic = kIdmapMagic;
-    local_header_.version = kIdmapCurrentVersion;
-    local_header_.target_package_id = 0x08;
-    local_header_.type_count = 1;
-    header_ = &local_header_;
-
-    entry_header = util::unique_cptr<IdmapEntry_header>(
-        (IdmapEntry_header*)::malloc(sizeof(IdmapEntry_header) + sizeof(uint32_t)));
-    entry_header->target_type_id = 0x03;
-    entry_header->overlay_type_id = 0x02;
-    entry_header->entry_id_offset = 1;
-    entry_header->entry_count = 1;
-    entry_header->entries[0] = 0x00000000u;
-    type_map_[entry_header->overlay_type_id] = entry_header.get();
-  }
-
- private:
-  Idmap_header local_header_;
-  util::unique_cptr<IdmapEntry_header> entry_header;
-};
-
-TEST(LoadedArscTest, LoadOverlay) {
-  std::string contents;
-  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlay/overlay.apk", "resources.arsc",
-                                      &contents));
-
-  MockLoadedIdmap loaded_idmap;
-
-  std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(StringPiece(contents), &loaded_idmap);
-  ASSERT_THAT(loaded_arsc, NotNull());
-
-  const LoadedPackage* package = loaded_arsc->GetPackageById(0x08u);
-  ASSERT_THAT(package, NotNull());
-
-  const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(0x03u - 1);
-  ASSERT_THAT(type_spec, NotNull());
-  ASSERT_THAT(type_spec->type_count, Ge(1u));
-  ASSERT_THAT(type_spec->types[0], NotNull());
-
-  // The entry being overlaid doesn't exist at the original entry index.
-  ASSERT_THAT(LoadedPackage::GetEntry(type_spec->types[0], 0x0001u), IsNull());
-
-  // Since this is an overlay, the actual entry ID must be mapped.
-  ASSERT_THAT(type_spec->idmap_entries, NotNull());
-  uint16_t target_entry_id = 0u;
-  ASSERT_TRUE(LoadedIdmap::Lookup(type_spec->idmap_entries, 0x0001u, &target_entry_id));
-  ASSERT_THAT(target_entry_id, Eq(0x0u));
-  ASSERT_THAT(LoadedPackage::GetEntry(type_spec->types[0], 0x0000), NotNull());
-}
-
 TEST(LoadedArscTest, LoadOverlayable) {
   std::string contents;
   ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/overlayable/overlayable.apk",
                                       "resources.arsc", &contents));
 
   std::unique_ptr<const LoadedArsc> loaded_arsc =
-      LoadedArsc::Load(StringPiece(contents), nullptr /*loaded_idmap*/, false /*system*/,
+      LoadedArsc::Load(StringPiece(contents), nullptr /* loaded_idmap */, false /*system*/,
                        false /*load_as_shared_library*/);
 
   ASSERT_THAT(loaded_arsc, NotNull());
@@ -383,9 +329,10 @@ TEST(LoadedArscTest, GetOverlayableMap) {
   ASSERT_EQ(std::string("com.android.overlayable"), packages[0]->GetPackageName());
 
   const auto map = packages[0]->GetOverlayableMap();
-  ASSERT_EQ(2, map.size());
+  ASSERT_EQ(3, map.size());
   ASSERT_EQ(map.at("OverlayableResources1"), "overlay://theme");
   ASSERT_EQ(map.at("OverlayableResources2"), "overlay://com.android.overlayable");
+  ASSERT_EQ(map.at("OverlayableResources3"), "");
 }
 
 TEST(LoadedArscTest, LoadCustomLoader) {
@@ -394,7 +341,6 @@ TEST(LoadedArscTest, LoadCustomLoader) {
   std::unique_ptr<Asset>
       asset = ApkAssets::CreateAssetFromFile(GetTestDataPath() + "/loader/resources.arsc");
 
-  MockLoadedIdmap loaded_idmap;
   const StringPiece data(
       reinterpret_cast<const char*>(asset->getBuffer(true /*wordAligned*/)),
       asset->getLength());
@@ -404,13 +350,13 @@ TEST(LoadedArscTest, LoadCustomLoader) {
   ASSERT_THAT(loaded_arsc, NotNull());
 
   const LoadedPackage* package =
-      loaded_arsc->GetPackageById(get_package_id(android::R::string::cancel));
+      loaded_arsc->GetPackageById(get_package_id(overlayable::R::string::overlayable11));
   ASSERT_THAT(package, NotNull());
-  EXPECT_THAT(package->GetPackageName(), StrEq("android"));
-  EXPECT_THAT(package->GetPackageId(), Eq(0x01));
+  EXPECT_THAT(package->GetPackageName(), StrEq("com.android.loader"));
+  EXPECT_THAT(package->GetPackageId(), Eq(0x7f));
 
-  const uint8_t type_index = get_type_id(android::R::string::cancel) - 1;
-  const uint16_t entry_index = get_entry_id(android::R::string::cancel);
+  const uint8_t type_index = get_type_id(overlayable::R::string::overlayable11) - 1;
+  const uint16_t entry_index = get_entry_id(overlayable::R::string::overlayable11);
 
   const TypeSpec* type_spec = package->GetTypeSpecByTypeIndex(type_index);
   ASSERT_THAT(type_spec, NotNull());

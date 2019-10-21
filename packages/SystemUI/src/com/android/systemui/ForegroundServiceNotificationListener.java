@@ -50,12 +50,12 @@ public class ForegroundServiceNotificationListener {
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
-                addNotification(entry.notification, entry.getImportance());
+                addNotification(entry.getSbn(), entry.getImportance());
             }
 
             @Override
             public void onPostEntryUpdated(NotificationEntry entry) {
-                updateNotification(entry.notification, entry.getImportance());
+                updateNotification(entry.getSbn(), entry.getImportance());
             }
 
             @Override
@@ -63,7 +63,7 @@ public class ForegroundServiceNotificationListener {
                     NotificationEntry entry,
                     NotificationVisibility visibility,
                     boolean removedByUser) {
-                removeNotification(entry.notification);
+                removeNotification(entry.getSbn());
             }
         });
 

@@ -164,7 +164,7 @@ public class NotificationInterruptionStateProvider {
      * @return true if the entry should bubble up, false otherwise
      */
     public boolean shouldBubbleUp(NotificationEntry entry) {
-        final StatusBarNotification sbn = entry.notification;
+        final StatusBarNotification sbn = entry.getSbn();
 
         if (!canAlertCommon(entry)) {
             return false;
@@ -216,7 +216,7 @@ public class NotificationInterruptionStateProvider {
     }
 
     private boolean shouldHeadsUpWhenAwake(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.notification;
+        StatusBarNotification sbn = entry.getSbn();
 
         if (!mUseHeadsUp) {
             if (DEBUG_HEADS_UP) {
@@ -289,7 +289,7 @@ public class NotificationInterruptionStateProvider {
      * @return true if the entry should ambient pulse, false otherwise
      */
     private boolean shouldHeadsUpWhenDozing(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.notification;
+        StatusBarNotification sbn = entry.getSbn();
 
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
             if (DEBUG_HEADS_UP) {
@@ -336,7 +336,7 @@ public class NotificationInterruptionStateProvider {
      */
     @VisibleForTesting
     public boolean canAlertCommon(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.notification;
+        StatusBarNotification sbn = entry.getSbn();
 
         if (mNotificationFilter.shouldFilterOut(entry)) {
             if (DEBUG || DEBUG_HEADS_UP) {
@@ -363,7 +363,7 @@ public class NotificationInterruptionStateProvider {
      */
     @VisibleForTesting
     public boolean canAlertAwakeCommon(NotificationEntry entry) {
-        StatusBarNotification sbn = entry.notification;
+        StatusBarNotification sbn = entry.getSbn();
 
         if (mPresenter.isDeviceInVrMode()) {
             if (DEBUG_HEADS_UP) {
@@ -423,7 +423,7 @@ public class NotificationInterruptionStateProvider {
      * @return {@code true} if we should launch the full screen intent
      */
     public boolean shouldLaunchFullScreenIntentWhenAdded(NotificationEntry entry) {
-        return entry.notification.getNotification().fullScreenIntent != null
+        return entry.getSbn().getNotification().fullScreenIntent != null
             && (!shouldHeadsUp(entry)
                 || mStatusBarStateController.getState() == StatusBarState.KEYGUARD);
     }

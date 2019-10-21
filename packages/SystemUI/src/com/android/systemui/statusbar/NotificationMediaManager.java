@@ -204,7 +204,7 @@ public class NotificationMediaManager implements Dumpable {
                     NotificationEntry entry,
                     NotificationVisibility visibility,
                     boolean removedByUser) {
-                onNotificationRemoved(entry.key);
+                onNotificationRemoved(entry.getKey());
             }
         });
 
@@ -284,7 +284,7 @@ public class NotificationMediaManager implements Dumpable {
 
                 if (entry.isMediaNotification()) {
                     final MediaSession.Token token =
-                            entry.notification.getNotification().extras.getParcelable(
+                            entry.getSbn().getNotification().extras.getParcelable(
                                     Notification.EXTRA_MEDIA_SESSION);
                     if (token != null) {
                         MediaController aController = new MediaController(mContext, token);
@@ -292,7 +292,7 @@ public class NotificationMediaManager implements Dumpable {
                                 getMediaControllerPlaybackState(aController)) {
                             if (DEBUG_MEDIA) {
                                 Log.v(TAG, "DEBUG_MEDIA: found mediastyle controller matching "
-                                        + entry.notification.getKey());
+                                        + entry.getSbn().getKey());
                             }
                             mediaNotification = entry;
                             controller = aController;
@@ -321,10 +321,10 @@ public class NotificationMediaManager implements Dumpable {
 
                             for (int i = 0; i < N; i++) {
                                 final NotificationEntry entry = activeNotifications.get(i);
-                                if (entry.notification.getPackageName().equals(pkg)) {
+                                if (entry.getSbn().getPackageName().equals(pkg)) {
                                     if (DEBUG_MEDIA) {
                                         Log.v(TAG, "DEBUG_MEDIA: found controller matching "
-                                                + entry.notification.getKey());
+                                                + entry.getSbn().getKey());
                                     }
                                     controller = aController;
                                     mediaNotification = entry;
@@ -351,8 +351,8 @@ public class NotificationMediaManager implements Dumpable {
             }
 
             if (mediaNotification != null
-                    && !mediaNotification.notification.getKey().equals(mMediaNotificationKey)) {
-                mMediaNotificationKey = mediaNotification.notification.getKey();
+                    && !mediaNotification.getSbn().getKey().equals(mMediaNotificationKey)) {
+                mMediaNotificationKey = mediaNotification.getSbn().getKey();
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Found new media notification: key="
                             + mMediaNotificationKey);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.car;
+package com.android.systemui.navigationbar.car;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -76,6 +76,7 @@ public class CarFacetButtonController {
         }
     }
 
+    /** Removes all buttons from the button maps. */
     public void removeAll() {
         mButtonsByCategory.clear();
         mButtonsByPackage.clear();
@@ -129,7 +130,7 @@ public class CarFacetButtonController {
 
         if (mSelectedFacetButtons != null) {
             Iterator<CarFacetButton> iterator = mSelectedFacetButtons.iterator();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 CarFacetButton carFacetButton = iterator.next();
                 if (carFacetButton.getDisplayId() == validStackInfo.displayId) {
                     carFacetButton.setSelected(false);

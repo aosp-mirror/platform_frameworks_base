@@ -117,7 +117,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     }
 
     protected boolean hasFullScreenIntent(@NonNull NotificationEntry entry) {
-        return entry.notification.getNotification().fullScreenIntent != null;
+        return entry.getSbn().getNotification().fullScreenIntent != null;
     }
 
     protected void setEntryPinned(
@@ -206,7 +206,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     public void snooze() {
         for (String key : mAlertEntries.keySet()) {
             AlertEntry entry = getHeadsUpEntry(key);
-            String packageName = entry.mEntry.notification.getPackageName();
+            String packageName = entry.mEntry.getSbn().getPackageName();
             mSnoozedPackages.put(snoozeKey(packageName, mUser),
                     mClock.currentTimeMillis() + mSnoozeLengthMs);
         }
@@ -328,8 +328,8 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * one should be ranked higher and 0 if they are equal.
      */
     public int compare(@NonNull NotificationEntry a, @NonNull NotificationEntry b) {
-        AlertEntry aEntry = getHeadsUpEntry(a.key);
-        AlertEntry bEntry = getHeadsUpEntry(b.key);
+        AlertEntry aEntry = getHeadsUpEntry(a.getKey());
+        AlertEntry bEntry = getHeadsUpEntry(b.getKey());
         if (aEntry == null || bEntry == null) {
             return aEntry == null ? 1 : -1;
         }
@@ -341,7 +341,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
      * until it's collapsed again.
      */
     public void setExpanded(@NonNull NotificationEntry entry, boolean expanded) {
-        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.key);
+        HeadsUpEntry headsUpEntry = getHeadsUpEntry(entry.getKey());
         if (headsUpEntry != null && entry.isRowPinned()) {
             headsUpEntry.setExpanded(expanded);
         }

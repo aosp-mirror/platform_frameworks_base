@@ -99,14 +99,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRemovedBeforeStarted_expectCanceled() throws Exception {
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        AnimationAdapter adapter = mController.addAnimation(appWindow.getTask(),
+        AnimationAdapter adapter = mController.addAnimation(activity.getTask(),
                 false /* isRecentTaskInvisible */);
         adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
 
         // Remove the app window so that the animation target can not be created
-        appWindow.removeImmediately();
+        activity.removeImmediately();
         mController.startAnimation();
 
         // Verify that the finish callback to reparent the leash is called
@@ -118,14 +118,14 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testCancelAfterRemove_expectIgnored() {
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        AnimationAdapter adapter = mController.addAnimation(appWindow.getTask(),
+        AnimationAdapter adapter = mController.addAnimation(activity.getTask(),
                 false /* isRecentTaskInvisible */);
         adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
 
         // Remove the app window so that the animation target can not be created
-        appWindow.removeImmediately();
+        activity.removeImmediately();
         mController.startAnimation();
         mController.cleanupAnimation(REORDER_KEEP_IN_PLACE);
         try {
@@ -140,24 +140,24 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         final ActivityStack homeStack = mDisplayContent.mActivityDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final AppWindowToken homeAppWindow =
+        final ActivityRecord homeActivity =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
                         .build();
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final AppWindowToken hiddenAppWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord hiddenActivity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        hiddenAppWindow.setHidden(true);
+        hiddenActivity.setHidden(true);
         mDisplayContent.getConfiguration().windowConfiguration.setRotation(
                 mDisplayContent.getRotation());
         mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
 
         // Ensure that we are animating the target activity as well
-        assertTrue(mController.isAnimatingTask(homeAppWindow.getTask()));
-        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
-        assertFalse(mController.isAnimatingTask(hiddenAppWindow.getTask()));
+        assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
+        assertFalse(mController.isAnimatingTask(hiddenActivity.getTask()));
     }
 
     @Test
@@ -165,12 +165,12 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         final ActivityStack homeStack = mDisplayContent.mActivityDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final AppWindowToken homeAppWindow =
+        final ActivityRecord homeAppWindow =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
                         .build();
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord appWindow = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
         appWindow.addWindow(win1);
@@ -194,15 +194,15 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         final ActivityStack homeStack = mDisplayContent.mActivityDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final AppWindowToken homeAppWindow =
+        final ActivityRecord homeActivity =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
                         .build();
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win1);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
                 mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
         spyOn(mDisplayContent.mWallpaperController);
@@ -215,7 +215,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         // Cancel the animation and ensure the controller is still running
         wallpaperWindowToken.cancelAnimation();
-        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
         assertFalse(mController.isAnimatingWallpaper(wallpaperWindowToken));
         verify(mMockRunner, never()).onAnimationCanceled(null /* taskSnapshot */);
     }
@@ -225,17 +225,17 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mWm.setRecentsAnimationController(mController);
         final ActivityStack homeStack = mDisplayContent.mActivityDisplay.getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
-        final AppWindowToken homeAppWindow =
+        final ActivityRecord homeActivity =
                 new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
                         .setStack(homeStack)
                         .setCreateTask(true)
                         .build();
-        final WindowState hwin1 = createWindow(null, TYPE_BASE_APPLICATION, homeAppWindow, "hwin1");
-        homeAppWindow.addWindow(hwin1);
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final WindowState hwin1 = createWindow(null, TYPE_BASE_APPLICATION, homeActivity, "hwin1");
+        homeActivity.addWindow(hwin1);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win1);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
         final WallpaperWindowToken wallpaperWindowToken = new WallpaperWindowToken(mWm,
                 mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
         spyOn(mDisplayContent.mWallpaperController);
@@ -256,15 +256,15 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testDeferCancelAnimation() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win1);
-        assertEquals(appWindow.getTask().getTopVisibleAppToken(), appWindow);
-        assertEquals(appWindow.findMainWindow(), win1);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
+        assertEquals(activity.getTask().getTopVisibleActivity(), activity);
+        assertEquals(activity.findMainWindow(), win1);
 
-        mController.addAnimation(appWindow.getTask(), false /* isRecentTaskInvisible */);
-        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        mController.addAnimation(activity.getTask(), false /* isRecentTaskInvisible */);
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
 
         mController.setDeferredCancel(true /* deferred */, false /* screenshot */);
         mController.cancelAnimationWithScreenshot(false /* screenshot */);
@@ -279,15 +279,15 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testDeferCancelAnimationWithScreenShot() throws Exception {
         mWm.setRecentsAnimationController(mController);
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win1);
-        assertEquals(appWindow.getTask().getTopVisibleAppToken(), appWindow);
-        assertEquals(appWindow.findMainWindow(), win1);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
+        assertEquals(activity.getTask().getTopVisibleActivity(), activity);
+        assertEquals(activity.findMainWindow(), win1);
 
-        mController.addAnimation(appWindow.getTask(), false /* isRecentTaskInvisible */);
-        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        mController.addAnimation(activity.getTask(), false /* isRecentTaskInvisible */);
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
 
         spyOn(mWm.mTaskSnapshotController);
         doNothing().when(mWm.mTaskSnapshotController).notifyAppVisibilityChanged(any(),
@@ -311,20 +311,20 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testShouldAnimateWhenNoCancelWithDeferredScreenshot() {
         mWm.setRecentsAnimationController(mController);
-        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+        final ActivityRecord activity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, appWindow, "win1");
-        appWindow.addWindow(win1);
-        assertEquals(appWindow.getTask().getTopVisibleAppToken(), appWindow);
-        assertEquals(appWindow.findMainWindow(), win1);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
+        assertEquals(activity.getTask().getTopVisibleActivity(), activity);
+        assertEquals(activity.findMainWindow(), win1);
 
-        mController.addAnimation(appWindow.getTask(), false /* isRecentTaskInvisible */);
-        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        mController.addAnimation(activity.getTask(), false /* isRecentTaskInvisible */);
+        assertTrue(mController.isAnimatingTask(activity.getTask()));
 
-        // Assume appWindow transition should animate when no
+        // Assume activity transition should animate when no
         // IRecentsAnimationController#setCancelWithDeferredScreenshot called.
         assertFalse(mController.shouldDeferCancelWithScreenshot());
-        assertTrue(appWindow.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
+        assertTrue(activity.shouldAnimate(TRANSIT_ACTIVITY_CLOSE));
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

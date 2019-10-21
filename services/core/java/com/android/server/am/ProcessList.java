@@ -20,6 +20,8 @@ import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.getFreeMemory;
@@ -28,6 +30,7 @@ import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
@@ -41,6 +44,7 @@ import static com.android.server.am.ActivityManagerService.PROC_START_TIMEOUT_MS
 import static com.android.server.am.ActivityManagerService.PROC_START_TIMEOUT_WITH_WRAPPER;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerService.TAG_LRU;
+import static com.android.server.am.ActivityManagerService.TAG_NETWORK;
 import static com.android.server.am.ActivityManagerService.TAG_PROCESSES;
 import static com.android.server.am.ActivityManagerService.TAG_PSS;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
@@ -239,6 +243,24 @@ public final class ProcessList {
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_LOW_THRESHOLD = 5;
+
+    /**
+     * State indicating that there is no need for any blocking for network.
+     */
+    @VisibleForTesting
+    static final int NETWORK_STATE_NO_CHANGE = 0;
+
+    /**
+     * State indicating that the main thread needs to be informed about the network wait.
+     */
+    @VisibleForTesting
+    static final int NETWORK_STATE_BLOCK = 1;
+
+    /**
+     * State indicating that any threads waiting for network state to get updated can be unblocked.
+     */
+    @VisibleForTesting
+    static final int NETWORK_STATE_UNBLOCK = 2;
 
     // If true, then we pass the flag to ART to load the app image startup cache.
     private static final String PROPERTY_USE_APP_IMAGE_STARTUP_CACHE =
@@ -3187,6 +3209,115 @@ public final class ProcessList {
                 continue;
             }
             mService.doStopUidLocked(uidRec.uid, uidRec);
+        }
+    }
+
+    /**
+     * Checks if the uid is coming from background to foreground or vice versa and returns
+     * appropriate block state based on this.
+     *
+     * @return blockState based on whether the uid is coming from background to foreground or
+     *         vice versa. If bg->fg or fg->bg, then {@link #NETWORK_STATE_BLOCK} or
+     *         {@link #NETWORK_STATE_UNBLOCK} respectively, otherwise
+     *         {@link #NETWORK_STATE_NO_CHANGE}.
+     */
+    @VisibleForTesting
+    int getBlockStateForUid(UidRecord uidRec) {
+        // Denotes whether uid's process state is currently allowed network access.
+        final boolean isAllowed =
+                isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.getCurProcState())
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.getCurProcState());
+        // Denotes whether uid's process state was previously allowed network access.
+        final boolean wasAllowed = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState)
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.setProcState);
+
+        // When the uid is coming to foreground, AMS should inform the app thread that it should
+        // block for the network rules to get updated before launching an activity.
+        if (!wasAllowed && isAllowed) {
+            return NETWORK_STATE_BLOCK;
+        }
+        // When the uid is going to background, AMS should inform the app thread that if an
+        // activity launch is blocked for the network rules to get updated, it should be unblocked.
+        if (wasAllowed && !isAllowed) {
+            return NETWORK_STATE_UNBLOCK;
+        }
+        return NETWORK_STATE_NO_CHANGE;
+    }
+
+    /**
+     * Checks if any uid is coming from background to foreground or vice versa and if so, increments
+     * the {@link UidRecord#curProcStateSeq} corresponding to that uid using global seq counter
+     * {@link ProcessList#mProcStateSeqCounter} and notifies the app if it needs to block.
+     */
+    @VisibleForTesting
+    @GuardedBy("mService")
+    void incrementProcStateSeqAndNotifyAppsLocked(ActiveUids activeUids) {
+        if (mService.mWaitForNetworkTimeoutMs <= 0) {
+            return;
+        }
+        // Used for identifying which uids need to block for network.
+        ArrayList<Integer> blockingUids = null;
+        for (int i = activeUids.size() - 1; i >= 0; --i) {
+            final UidRecord uidRec = activeUids.valueAt(i);
+            // If the network is not restricted for uid, then nothing to do here.
+            if (!mService.mInjector.isNetworkRestrictedForUid(uidRec.uid)) {
+                continue;
+            }
+            if (!UserHandle.isApp(uidRec.uid) || !uidRec.hasInternetPermission) {
+                continue;
+            }
+            // If process state is not changed, then there's nothing to do.
+            if (uidRec.setProcState == uidRec.getCurProcState()) {
+                continue;
+            }
+            final int blockState = getBlockStateForUid(uidRec);
+            // No need to inform the app when the blockState is NETWORK_STATE_NO_CHANGE as
+            // there's nothing the app needs to do in this scenario.
+            if (blockState == NETWORK_STATE_NO_CHANGE) {
+                continue;
+            }
+            synchronized (uidRec.networkStateLock) {
+                uidRec.curProcStateSeq = ++mProcStateSeqCounter; // TODO: use method
+                if (blockState == NETWORK_STATE_BLOCK) {
+                    if (blockingUids == null) {
+                        blockingUids = new ArrayList<>();
+                    }
+                    blockingUids.add(uidRec.uid);
+                } else {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "uid going to background, notifying all blocking"
+                                + " threads for uid: " + uidRec);
+                    }
+                    if (uidRec.waitingForNetwork) {
+                        uidRec.networkStateLock.notifyAll();
+                    }
+                }
+            }
+        }
+
+        // There are no uids that need to block, so nothing more to do.
+        if (blockingUids == null) {
+            return;
+        }
+
+        for (int i = mLruProcesses.size() - 1; i >= 0; --i) {
+            final ProcessRecord app = mLruProcesses.get(i);
+            if (!blockingUids.contains(app.uid)) {
+                continue;
+            }
+            if (!app.killedByAm && app.thread != null) {
+                final UidRecord uidRec = getUidRecordLocked(app.uid);
+                try {
+                    if (DEBUG_NETWORK) {
+                        Slog.d(TAG_NETWORK, "Informing app thread that it needs to block: "
+                                + uidRec);
+                    }
+                    if (uidRec != null) {
+                        app.thread.setNetworkBlockSeq(uidRec.curProcStateSeq);
+                    }
+                } catch (RemoteException ignored) {
+                }
+            }
         }
     }
 }

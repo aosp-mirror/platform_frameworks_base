@@ -347,10 +347,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogućuje primanje i obradu SMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj, a da vam ih ne prikaže."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primanje tekstnih poruka (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogućuje primanje i obradu MMS poruka. To znači da aplikacija može nadzirati ili izbrisati poruke poslane na vaš uređaj, a da vam ih ne prikaže."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Prosljeđivanje poruka emitiranja na mobitele"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Omogućuje aplikaciji da se poveže s modulom za emitiranje na mobitele kako bi prosljeđivala poruke koje se emitiraju na mobitele po njihovom primitku. Upozorenja značajke emitiranja na mobitele dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno emitiranje na mobitele."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitaj poruke koje se emitiraju unutar mobilne mreže"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućuje aplikaciji čitanje poruka emitiranih unutar mobilne mreže koje prima vaš uređaj. Upozorenja koja se emitiraju na području mobilne mreže dostavljaju se na nekim lokacijama kako bi upozorila korisnike na hitne situacije. Zlonamjerne aplikacije mogu ometati izvršavanje ili rad vašeg uređaja kada stigne hitno upozorenje koje se emitira unutar mobilne mreže."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čitanje pretplaćenih feedova"</string>
@@ -662,8 +660,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Omogućuje aplikaciji čitanje i pisanje konfiguracije opcije Ne ometaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"pokrenuti upotrebu dopuštenja za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Dopušta nositelju pokretanje upotrebe dopuštenja za aplikaciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cilj prečaca pristupačnosti"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Aplikaciji omogućuje da definira cilj prečaca pristupačnosti."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Nadziri pokušaje otključavanja zaslona"</string>

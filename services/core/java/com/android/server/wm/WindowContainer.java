@@ -947,9 +947,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         wrapper.release();
     }
 
-    void forAllAppWindows(Consumer<AppWindowToken> callback) {
+    void forAllActivities(Consumer<ActivityRecord> callback) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).forAllAppWindows(callback);
+            mChildren.get(i).forAllActivities(callback);
         }
     }
 
@@ -1446,7 +1446,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final WindowManagerPolicy policy = mWmService.mPolicy;
         forAllWindows(w -> {
             final boolean keyguard = policy.isKeyguardHostWindow(w.mAttrs);
-            if (w.isVisibleLw() && (w.mAppToken != null || keyguard)) {
+            if (w.isVisibleLw() && (w.mActivityRecord != null || keyguard)) {
                 w.mWinAnimator.mDrawState = DRAW_PENDING;
                 // Force add to mResizingWindows.
                 w.resetLastContentInsets();

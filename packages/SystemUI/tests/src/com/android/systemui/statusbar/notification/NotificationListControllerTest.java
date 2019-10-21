@@ -109,7 +109,7 @@ public class NotificationListControllerTest extends SysuiTestCase {
         final NotificationEntry entry = buildEntry();
         mEntryListener.onEntryRemoved(
                 entry,
-                NotificationVisibility.obtain(entry.key, 0, 0, true),
+                NotificationVisibility.obtain(entry.getKey(), 0, 0, true),
                 false);
         verify(mListContainer).cleanUpViewStateForEntry(entry);
     }
@@ -126,13 +126,13 @@ public class NotificationListControllerTest extends SysuiTestCase {
         final NotificationEntry entry = buildEntry();
         mNotificationData.add(entry);
         when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
-                .thenReturn(entry.key);
+                .thenReturn(entry.getKey());
 
         // WHEN we are notified of a new app op
         mController.updateNotificationsForAppOp(
                 AppOpsManager.OP_CAMERA,
-                entry.notification.getUid(),
-                entry.notification.getPackageName(),
+                entry.getSbn().getUid(),
+                entry.getSbn().getPackageName(),
                 true);
 
         // THEN the app op is added to the entry
@@ -165,10 +165,10 @@ public class NotificationListControllerTest extends SysuiTestCase {
         expected.add(235);
         expected.add(1);
         when(mForegroundServiceController.getStandardLayoutKey(
-                entry.notification.getUserId(),
-                entry.notification.getPackageName())).thenReturn(entry.key);
-        when(mForegroundServiceController.getAppOps(entry.notification.getUserId(),
-                entry.notification.getPackageName())).thenReturn(expected);
+                entry.getSbn().getUserId(),
+                entry.getSbn().getPackageName())).thenReturn(entry.getKey());
+        when(mForegroundServiceController.getAppOps(entry.getSbn().getUserId(),
+                entry.getSbn().getPackageName())).thenReturn(expected);
 
         // WHEN the notification is added
         mEntryListener.onBeforeNotificationAdded(entry);
@@ -187,10 +187,10 @@ public class NotificationListControllerTest extends SysuiTestCase {
 
         mNotificationData.add(entry);
         when(mForegroundServiceController.getStandardLayoutKey(
-                entry.notification.getUserId(),
-                entry.notification.getPackageName())).thenReturn(entry.key);
-        when(mForegroundServiceController.getAppOps(entry.notification.getUserId(),
-                entry.notification.getPackageName())).thenReturn(null);
+                entry.getSbn().getUserId(),
+                entry.getSbn().getPackageName())).thenReturn(entry.getKey());
+        when(mForegroundServiceController.getAppOps(entry.getSbn().getUserId(),
+                entry.getSbn().getPackageName())).thenReturn(null);
 
         // WHEN the notification is added
         mEntryListener.onBeforeNotificationAdded(entry);
@@ -208,11 +208,11 @@ public class NotificationListControllerTest extends SysuiTestCase {
         ops.add(3);
         ops.add(235);
         ops.add(1);
-        when(mForegroundServiceController.getAppOps(entry.notification.getUserId(),
-                entry.notification.getPackageName())).thenReturn(ops);
+        when(mForegroundServiceController.getAppOps(entry.getSbn().getUserId(),
+                entry.getSbn().getPackageName())).thenReturn(ops);
         when(mForegroundServiceController.getStandardLayoutKey(
-                entry.notification.getUserId(),
-                entry.notification.getPackageName())).thenReturn("something else");
+                entry.getSbn().getUserId(),
+                entry.getSbn().getPackageName())).thenReturn("something else");
 
         // WHEN the notification is added
         mEntryListener.onBeforeNotificationAdded(entry);

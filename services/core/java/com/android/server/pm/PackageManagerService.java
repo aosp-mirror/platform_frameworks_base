@@ -1598,7 +1598,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         handlePackagePostInstall(parentRes, grantPermissions,
                                 killApp, virtualPreload, grantedPermissions,
                                 whitelistedRestrictedPermissions, didRestore,
-                                args.installerPackageName, args.observer);
+                                args.installSource.installerPackageName, args.observer);
 
                         // Handle the child packages
                         final int childCount = (parentRes.addedChildPackages != null)
@@ -1608,7 +1608,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             handlePackagePostInstall(childRes, grantPermissions,
                                     killApp, virtualPreload, grantedPermissions,
                                     whitelistedRestrictedPermissions, false /*didRestore*/,
-                                    args.installerPackageName, args.observer);
+                                    args.installSource.installerPackageName, args.observer);
                         }
 
                         // Log tracing if needed
@@ -4037,7 +4037,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private PackageInfo getPackageInfoInternal(String packageName, long versionCode,
             int flags, int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForPackage(flags, userId, packageName);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 false /* requireFullPermission */, false /* checkShell */, "get package info");
 
@@ -4339,7 +4339,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public int getPackageUid(String packageName, int flags, int userId) {
         if (!mUserManager.exists(userId)) return -1;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForPackage(flags, userId, packageName);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getPackageUid");
 
@@ -4369,7 +4369,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public int[] getPackageGids(String packageName, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForPackage(flags, userId, packageName);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/, "getPackageGids");
 
@@ -4451,7 +4451,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ApplicationInfo getApplicationInfoInternal(String packageName, int flags,
             int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForApplication(flags, userId, packageName);
+        flags = updateFlagsForApplication(flags, userId);
 
         if (!isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId)) {
             mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -4738,7 +4738,7 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Update given flags when being used to request {@link PackageInfo}.
      */
-    private int updateFlagsForPackage(int flags, int userId, Object cookie) {
+    private int updateFlagsForPackage(int flags, int userId) {
         final boolean isCallerSystemUser = UserHandle.getCallingUserId() == UserHandle.USER_SYSTEM;
         if ((flags & PackageManager.MATCH_ANY_USER) != 0) {
             // require the permission to be held; the calling uid and given user id referring
@@ -4762,14 +4762,14 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * Update given flags when being used to request {@link ApplicationInfo}.
      */
-    private int updateFlagsForApplication(int flags, int userId, Object cookie) {
-        return updateFlagsForPackage(flags, userId, cookie);
+    private int updateFlagsForApplication(int flags, int userId) {
+        return updateFlagsForPackage(flags, userId);
     }
 
     /**
      * Update given flags when being used to request {@link ComponentInfo}.
      */
-    private int updateFlagsForComponent(int flags, int userId, Object cookie) {
+    private int updateFlagsForComponent(int flags, int userId) {
         return updateFlags(flags, userId);
     }
 
@@ -4798,16 +4798,12 @@ public class PackageManagerService extends IPackageManager.Stub
      * action and a {@code android.intent.category.BROWSABLE} category</li>
      * </ul>
      */
-    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid) {
-        return updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*wantInstantApps*/, false /*onlyExposedExplicitly*/);
-    }
-    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid,
-            boolean wantInstantApps) {
-        return updateFlagsForResolve(flags, userId, intent, callingUid,
+    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps) {
+        return updateFlagsForResolve(flags, userId, callingUid,
                 wantInstantApps, false /*onlyExposedExplicitly*/);
     }
-    int updateFlagsForResolve(int flags, int userId, Intent intent, int callingUid,
+
+    int updateFlagsForResolve(int flags, int userId, int callingUid,
             boolean wantInstantApps, boolean onlyExposedExplicitly) {
         // Safe mode means we shouldn't match any third-party components
         if (mSafeMode) {
@@ -4830,7 +4826,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 flags &= ~PackageManager.MATCH_INSTANT;
             }
         }
-        return updateFlagsForComponent(flags, userId, intent /*cookie*/);
+        return updateFlagsForComponent(flags, userId);
     }
 
     @Override
@@ -4847,7 +4843,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ActivityInfo getActivityInfoInternal(ComponentName component, int flags,
             int filterCallingUid, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
 
         if (!isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId)) {
             mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
@@ -4928,7 +4924,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */, "get receiver info");
         synchronized (mLock) {
@@ -4958,7 +4954,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
 
-        flags = updateFlagsForPackage(flags, userId, null);
+        flags = updateFlagsForPackage(flags, userId);
 
         final boolean canSeeStaticLibraries =
                 mContext.checkCallingOrSelfPermission(INSTALL_PACKAGES)
@@ -5143,7 +5139,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */, "get service info");
         synchronized (mLock) {
@@ -5168,7 +5164,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ProviderInfo getProviderInfo(ComponentName component, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForComponent(flags, userId, component);
+        flags = updateFlagsForComponent(flags, userId);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /* requireFullPermission */, false /* checkShell */, "get provider info");
         synchronized (mLock) {
@@ -5868,7 +5864,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
-            flags = updateFlagsForResolve(flags, userId, intent, filterCallingUid, resolveForStart);
+            flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart);
             mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
@@ -5898,7 +5894,7 @@ public class PackageManagerService extends IPackageManager.Stub
         intent = updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
         final int flags = updateFlagsForResolve(
-                0, userId, intent, callingUid, false /*includeInstantApps*/);
+                0, userId, callingUid, false /*includeInstantApps*/);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mLock) {
@@ -6212,7 +6208,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                         android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
         flags = updateFlagsForResolve(
-                flags, userId, intent, callingUid, false /*includeInstantApps*/);
+                flags, userId, callingUid, false /*includeInstantApps*/);
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mLock) {
@@ -6420,7 +6416,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final int callingUid = Binder.getCallingUid();
             final UserInfo parent = getProfileParent(sourceUserId);
             synchronized (mLock) {
-                int flags = updateFlagsForResolve(0, parent.id, intent, callingUid,
+                int flags = updateFlagsForResolve(0, parent.id, callingUid,
                         false /*includeInstantApps*/);
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
@@ -6506,7 +6502,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        flags = updateFlagsForResolve(flags, userId, intent, filterCallingUid, resolveForStart,
+        flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
                 comp != null || pkgName != null /*onlyExposedExplicitly*/);
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<>(1);
@@ -7273,8 +7269,7 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent activity options");
@@ -7460,8 +7455,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7551,8 +7545,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private ResolveInfo resolveServiceInternal(Intent intent, String resolvedType, int flags,
             int userId, int callingUid) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(
-                flags, userId, intent, callingUid, false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         List<ResolveInfo> query = queryIntentServicesInternal(
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
         if (query != null) {
@@ -7581,7 +7574,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid, includeInstantApps);
+        flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7708,8 +7701,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, intent, callingUid,
-                false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7831,7 +7823,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return ParceledListSlice.emptyList();
         }
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
-        flags = updateFlagsForPackage(flags, userId, null);
+        flags = updateFlagsForPackage(flags, userId);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
         final boolean listApex = (flags & MATCH_APEX) != 0;
         final boolean listFactory = (flags & MATCH_FACTORY_ONLY) != 0;
@@ -7931,7 +7923,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public ParceledListSlice<PackageInfo> getPackagesHoldingPermissions(
             String[] permissions, int flags, int userId) {
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
-        flags = updateFlagsForPackage(flags, userId, permissions);
+        flags = updateFlagsForPackage(flags, userId);
         mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "get packages holding permissions");
@@ -7973,7 +7965,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return Collections.emptyList();
         }
         if (!mUserManager.exists(userId)) return Collections.emptyList();
-        flags = updateFlagsForApplication(flags, userId, null);
+        flags = updateFlagsForApplication(flags, userId);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
 
         mPermissionManager.enforceCrossUserPermission(
@@ -8208,7 +8200,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForComponent(flags, userId, name);
+        flags = updateFlagsForComponent(flags, userId);
         final int callingUid = Binder.getCallingUid();
         final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
         if (providerInfo == null) {
@@ -8247,7 +8239,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int userId = processName != null ? UserHandle.getUserId(uid)
                 : UserHandle.getCallingUserId();
         if (!mUserManager.exists(userId)) return ParceledListSlice.emptyList();
-        flags = updateFlagsForComponent(flags, userId, processName);
+        flags = updateFlagsForComponent(flags, userId);
         ArrayList<ProviderInfo> finalList = null;
         final List<ProviderInfo> matchList =
                 mComponentResolver.queryProviders(processName, metaDataKey, uid, flags, userId);
@@ -10907,7 +10899,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (isSystemApp(pkg)) {
-            pkgSetting.isOrphaned = true;
+            pkgSetting.setIsOrphaned(true);
         }
 
         // Take care of first install / last update times.
@@ -12390,7 +12382,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
         info.removedPackage = packageName;
-        info.installerPackageName = pkgSetting.installerPackageName;
+        info.installerPackageName = pkgSetting.installSource.installerPackageName;
         info.removedUsers = new int[] {userId};
         info.broadcastUsers = new int[] {userId};
         info.uid = UserHandle.getUid(userId, pkgSetting.appId);
@@ -13412,9 +13404,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
             // Verify: if target already has an installer package, it must
             // be signed with the same cert as the caller.
-            if (targetPackageSetting.installerPackageName != null) {
+            String targetInstallerPackageName =
+                    targetPackageSetting.installSource.installerPackageName;
+            if (targetInstallerPackageName != null) {
                 PackageSetting setting = mSettings.mPackages.get(
-                        targetPackageSetting.installerPackageName);
+                        targetInstallerPackageName);
                 // If the currently set package isn't valid, then it's always
                 // okay to change it.
                 if (setting != null) {
@@ -13423,13 +13417,13 @@ public class PackageManagerService extends IPackageManager.Stub
                             != PackageManager.SIGNATURE_MATCH) {
                         throw new SecurityException(
                                 "Caller does not have same cert as old installer package "
-                                + targetPackageSetting.installerPackageName);
+                                + targetInstallerPackageName);
                     }
                 }
             }
 
             // Okay!
-            targetPackageSetting.installerPackageName = installerPackageName;
+            targetPackageSetting.setInstallerPackageName(installerPackageName);
             if (installerPackageName != null) {
                 mSettings.mInstallerPackages.add(installerPackageName);
             }
@@ -13454,7 +13448,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     ps, Binder.getCallingUid(), UserHandle.getCallingUserId())) {
                 throw new IllegalArgumentException("Unknown target package " + packageName);
             }
-            if (!Objects.equals(callerPackageName, ps.installerPackageName)) {
+            if (!Objects.equals(callerPackageName, ps.installSource.installerPackageName)) {
                 throw new IllegalArgumentException("Calling package " + callerPackageName
                         + " is not installer for " + packageName);
             }
@@ -13914,8 +13908,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final MoveInfo move;
         final IPackageInstallObserver2 observer;
         int installFlags;
-        final String installerPackageName;
-        final InstallSource installSource;
+        @NonNull final InstallSource installSource;
         final String volumeUuid;
         private boolean mVerificationCompleted;
         private boolean mEnableRollbackCompleted;
@@ -13932,8 +13925,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final long requiredInstalledVersionCode;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
-                int installFlags, String installerPackageName,
-                InstallSource installSource, String volumeUuid,
+                int installFlags, InstallSource installSource, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
                 SigningDetails signingDetails, int installReason,
@@ -13943,8 +13935,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.move = move;
             this.observer = observer;
             this.installFlags = installFlags;
-            this.installerPackageName = installerPackageName;
-            this.installSource = installSource;
+            this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
             this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
@@ -13970,12 +13961,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     activeInstallSession.getInstallerUid());
             origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
             move = null;
-            installReason = fixUpInstallReason(activeInstallSession.getInstallerPackageName(),
+            installReason = fixUpInstallReason(
+                    activeInstallSession.getInstallSource().installerPackageName,
                     activeInstallSession.getInstallerUid(),
                     activeInstallSession.getSessionParams().installReason);
             observer = activeInstallSession.getObserver();
             installFlags = activeInstallSession.getSessionParams().installFlags;
-            installerPackageName = activeInstallSession.getInstallerPackageName();
             installSource = activeInstallSession.getInstallSource();
             volumeUuid = activeInstallSession.getSessionParams().volumeUuid;
             packageAbiOverride = activeInstallSession.getSessionParams().abiOverride;
@@ -14227,7 +14218,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE,
-                            installerPackageName);
+                            installSource.installerPackageName);
 
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS,
                             installFlags);
@@ -14458,8 +14449,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final IPackageInstallObserver2 observer;
         // Always refers to PackageManager flags only
         final int installFlags;
-        final String installerPackageName;
-        final InstallSource installSource;
+        @NonNull final InstallSource installSource;
         final String volumeUuid;
         final UserHandle user;
         final String abiOverride;
@@ -14478,8 +14468,7 @@ public class PackageManagerService extends IPackageManager.Stub
         /* nullable */ String[] instructionSets;
 
         InstallArgs(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
-                int installFlags, String installerPackageName,
-                InstallSource installSource, String volumeUuid,
+                int installFlags, InstallSource installSource, String volumeUuid,
                 UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
                 List<String> whitelistedRestrictedPermissions,
@@ -14490,8 +14479,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.move = move;
             this.installFlags = installFlags;
             this.observer = observer;
-            this.installerPackageName = installerPackageName;
-            this.installSource = installSource;
+            this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
             this.user = user;
             this.instructionSets = instructionSets;
@@ -14508,7 +14496,7 @@ public class PackageManagerService extends IPackageManager.Stub
         /** New install */
         InstallArgs(InstallParams params) {
             this(params.origin, params.move, params.observer, params.installFlags,
-                    params.installerPackageName, params.installSource, params.volumeUuid,
+                    params.installSource, params.volumeUuid,
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
                     params.traceMethod, params.traceCookie, params.signingDetails,
@@ -14600,8 +14588,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
-            super(OriginInfo.fromNothing(), null, null, 0, null, null, null, null, instructionSets,
-                    null, null, null, null, 0, PackageParser.SigningDetails.UNKNOWN,
+            super(OriginInfo.fromNothing(), null, null, 0, InstallSource.EMPTY,
+                    null, null, instructionSets, null, null, null, null, 0,
+                    PackageParser.SigningDetails.UNKNOWN,
                     PackageManager.INSTALL_REASON_UNKNOWN, null /* parent */);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
@@ -15057,7 +15046,7 @@ public class PackageManagerService extends IPackageManager.Stub
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "updateSettings");
 
         final String pkgName = pkg.packageName;
-        final String installerPackageName = installArgs.installerPackageName;
+        final String installerPackageName = installArgs.installSource.installerPackageName;
         final int[] installedForUsers = res.origUsers;
         final int installReason = installArgs.installReason;
 
@@ -15825,7 +15814,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }
                 request.installResult.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
-                request.installResult.installerPackageName = request.args.installerPackageName;
+                request.installResult.installerPackageName =
+                        request.args.installSource.installerPackageName;
 
                 final String packageName = prepareResult.packageToScan.packageName;
                 prepareResults.put(packageName, prepareResult);
@@ -16171,7 +16161,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if ((mPackages.containsKey(childPkg.packageName))) {
                         childRes.removedInfo = new PackageRemovedInfo(this);
                         childRes.removedInfo.removedPackage = childPkg.packageName;
-                        childRes.removedInfo.installerPackageName = childPs.installerPackageName;
+                        childRes.removedInfo.installerPackageName =
+                                childPs.installSource.installerPackageName;
                     }
                     if (res.addedChildPackages == null) {
                         res.addedChildPackages = new ArrayMap<>();
@@ -16619,7 +16610,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 res.removedInfo = new PackageRemovedInfo(this);
                 res.removedInfo.uid = oldPackage.applicationInfo.uid;
                 res.removedInfo.removedPackage = oldPackage.packageName;
-                res.removedInfo.installerPackageName = ps.installerPackageName;
+                res.removedInfo.installerPackageName = ps.installSource.installerPackageName;
                 res.removedInfo.isStaticSharedLib = pkg.staticSharedLibName != null;
                 res.removedInfo.isUpdate = true;
                 res.removedInfo.origUsers = installedUsers;
@@ -16642,7 +16633,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 childRes.removedInfo.removedPackage = childPkg.packageName;
                                 if (childPs != null) {
                                     childRes.removedInfo.installerPackageName =
-                                            childPs.installerPackageName;
+                                            childPs.installSource.installerPackageName;
                                 }
                                 childRes.removedInfo.isUpdate = true;
                                 childRes.removedInfo.installReasons =
@@ -16654,7 +16645,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             PackageRemovedInfo childRemovedRes = new PackageRemovedInfo(this);
                             childRemovedRes.removedPackage = childPkg.packageName;
                             if (childPs != null) {
-                                childRemovedRes.installerPackageName = childPs.installerPackageName;
+                                childRemovedRes.installerPackageName =
+                                        childPs.installSource.installerPackageName;
                             }
                             childRemovedRes.isUpdate = false;
                             childRemovedRes.dataRemoved = true;
@@ -17676,7 +17668,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageParser.Package deletedPkg = deletedPs.pkg;
         if (outInfo != null) {
             outInfo.removedPackage = packageName;
-            outInfo.installerPackageName = deletedPs.installerPackageName;
+            outInfo.installerPackageName = deletedPs.installSource.installerPackageName;
             outInfo.isStaticSharedLib = deletedPkg != null
                     && deletedPkg.staticSharedLibName != null;
             outInfo.populateUsers(deletedPs == null ? null
@@ -18271,7 +18263,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     String childPackageName = ps.childPackageNames.get(i);
                     PackageRemovedInfo childInfo = new PackageRemovedInfo(this);
                     childInfo.removedPackage = childPackageName;
-                    childInfo.installerPackageName = ps.installerPackageName;
+                    childInfo.installerPackageName = ps.installSource.installerPackageName;
                     outInfo.removedChildPackages.put(childPackageName, childInfo);
                     PackageSetting childPs = mSettings.getPackageLPr(childPackageName);
                     if (childPs != null) {
@@ -18411,7 +18403,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (outInfo != null) {
             outInfo.removedPackage = ps.name;
-            outInfo.installerPackageName = ps.installerPackageName;
+            outInfo.installerPackageName = ps.installSource.installerPackageName;
             outInfo.isStaticSharedLib = pkg != null && pkg.staticSharedLibName != null;
             outInfo.removedAppId = ps.appId;
             outInfo.removedUsers = userIds;
@@ -21876,7 +21868,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         final String currentVolumeUuid;
         final File codeFile;
-        final String installerPackageName;
         final InstallSource installSource;
         final String packageAbiOverride;
         final int appId;
@@ -21934,7 +21925,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
             isCurrentLocationExternal = isExternal(pkg);
             codeFile = new File(pkg.codePath);
-            installerPackageName = ps.installerPackageName;
             installSource = ps.installSource;
             packageAbiOverride = ps.cpuAbiOverrideString;
             appId = UserHandle.getAppId(pkg.applicationInfo.uid);
@@ -22081,7 +22071,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installerPackageName, installSource, volumeUuid, null /*verificationInfo*/, user,
+                installSource, volumeUuid, null /*verificationInfo*/, user,
                 packageAbiOverride, null /*grantedPermissions*/,
                 null /*whitelistedRestrictedPermissions*/, PackageParser.SigningDetails.UNKNOWN,
                 PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.VERSION_CODE_HIGHEST);
@@ -23543,7 +23533,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     return false;
                 }
                 final PackageSetting installerPackageSetting =
-                        mSettings.mPackages.get(packageSetting.installerPackageName);
+                        mSettings.mPackages.get(packageSetting.installSource.installerPackageName);
                 return installerPackageSetting != null
                         && UserHandle.isSameApp(installerPackageSetting.appId, callingUid);
             }
@@ -23966,23 +23956,20 @@ public class PackageManagerService extends IPackageManager.Stub
         private final File mStagedDir;
         private final IPackageInstallObserver2 mObserver;
         private final PackageInstaller.SessionParams mSessionParams;
-        private final String mInstallerPackageName;
         private final int mInstallerUid;
-        private final InstallSource mInstallSource;
+        @NonNull private final InstallSource mInstallSource;
         private final UserHandle mUser;
         private final SigningDetails mSigningDetails;
 
         ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
-                PackageInstaller.SessionParams sessionParams, String installerPackageName,
-                int installerUid, InstallSource installSource,
-                UserHandle user, SigningDetails signingDetails) {
+                PackageInstaller.SessionParams sessionParams, int installerUid,
+                InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
             mObserver = observer;
             mSessionParams = sessionParams;
-            mInstallerPackageName = installerPackageName;
             mInstallerUid = installerUid;
-            mInstallSource = installSource;
+            mInstallSource = Preconditions.checkNotNull(installSource);
             mUser = user;
             mSigningDetails = signingDetails;
         }
@@ -24003,14 +23990,11 @@ public class PackageManagerService extends IPackageManager.Stub
             return mSessionParams;
         }
 
-        public String getInstallerPackageName() {
-            return mInstallerPackageName;
-        }
-
         public int getInstallerUid() {
             return mInstallerUid;
         }
 
+        @NonNull
         public InstallSource getInstallSource() {
             return mInstallSource;
         }

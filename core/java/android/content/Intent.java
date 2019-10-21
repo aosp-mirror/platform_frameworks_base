@@ -1134,6 +1134,18 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     /**
+     * Activity Action: Dial a emergency number specified by the data.  This shows a
+     * UI with the number being dialed, allowing the user to explicitly
+     * initiate the call.
+     * <p>Input: If nothing, an empty emergency dialer is started; else {@link #getData}
+     * is a tel: URI of an explicit emergency phone number.
+     * <p>Output: nothing.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DIAL_EMERGENCY = "android.intent.action.DIAL_EMERGENCY";
+    /**
      * Activity action: Perform a call to any number (emergency or not)
      * specified by the data.
      * <p>Input: {@link #getData} is URI of a phone number to be dialed or a

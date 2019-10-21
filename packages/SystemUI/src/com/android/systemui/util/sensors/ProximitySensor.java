@@ -16,7 +16,7 @@
 
 package com.android.systemui.util.sensors;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.DependencyProvider;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -64,9 +65,10 @@ public class ProximitySensor {
     };
 
     @Inject
-    public ProximitySensor(Context context, AsyncSensorManager sensorManager) {
+    public ProximitySensor(@DependencyProvider.MainResources Resources resources,
+            AsyncSensorManager sensorManager) {
         mSensorManager = sensorManager;
-        Sensor sensor = findBrightnessSensor(context);
+        Sensor sensor = findBrightnessSensor(resources);
 
         if (sensor == null) {
             mUsingBrightnessSensor = false;
@@ -106,8 +108,8 @@ public class ProximitySensor {
         registerInternal();
     }
 
-    private Sensor findBrightnessSensor(Context context) {
-        String sensorType = context.getString(R.string.doze_brightness_sensor_type);
+    private Sensor findBrightnessSensor(Resources resources) {
+        String sensorType = resources.getString(R.string.doze_brightness_sensor_type);
         List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         Sensor sensor = null;
         for (Sensor s : sensorList) {

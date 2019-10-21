@@ -347,10 +347,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Dozvoljava aplikaciji da prima i obrađuje SMS poruke. To znači da aplikacija može da nadgleda ili briše poruke koje se šalju uređaju, a da vam ih ne prikaže."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prijem tekstualnih poruka (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Dozvoljava aplikaciji da prima i obrađuje MMS poruke. To znači da aplikacija može da nadgleda ili briše poruke koje se šalju uređaju, a da vam ih ne prikaže."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Prosleđivanje poruka za mobilne uređaje na lokalitetu"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Dozvoljava aplikaciji da se vezuje za modul poruka za mobilne uređaje na lokalitetu da bi prosleđivala poruke za mobilne uređaje na lokalitetu onako kako su primljene. Obaveštenja poruka za mobilne uređaje na lokalitetu se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na učinak ili ometaju rad uređaja kada se primi poruka o hitnom slučaju za mobilne uređaje na lokalitetu."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitanje poruka info servisa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućava aplikaciji da čita poruke info servisa koje uređaj prima. Upozorenja info servisa se na nekim lokacijama primaju kao upozorenja na hitne slučajeve. Zlonamerne aplikacije mogu da utiču na učinak ili ometaju funkcionisanje uređaja kada se primi poruka info servisa o hitnom slučaju."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čitanje prijavljenih fidova"</string>
@@ -662,8 +660,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Dozvoljava aplikaciji da čita i upisuje konfiguraciju podešavanja Ne uznemiravaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"početak korišćenja dozvole za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Dozvoljava vlasniku da započne korišćenje dozvole za aplikaciju. Nikada ne bi trebalo da bude potrebna za uobičajene aplikacije."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cilj prečice za pristupačnost"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Dozvoljava aplikaciji da definiše cilj prečice za pristupačnost."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Podešavanje pravila za lozinku"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontroliše dužinu i znakove dozvoljene u lozinkama i PIN-ovima za zaključavanje ekrana."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Nadgledajte pokušaje otključavanja ekrana"</string>
@@ -1610,8 +1606,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Ističe:"</string>
     <string name="serial_number" msgid="758814067660862493">"Serijski broj:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Digitalni otisci:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 digitalni otisak:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 digitalni otisak:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 otisak prsta:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 otisak prsta:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Prikaži sve"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Izbor aktivnosti"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Deli sa"</string>

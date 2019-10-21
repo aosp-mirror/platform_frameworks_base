@@ -266,7 +266,7 @@ class WindowStateAnimator {
         if (DEBUG_ANIM) Slog.v(
                 TAG, "Animation done in " + this + ": exiting=" + mWin.mAnimatingExit
                         + ", reportedVisible="
-                        + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
+                        + (mWin.mActivityRecord != null ? mWin.mActivityRecord.reportedVisible : false));
 
         mWin.checkPolicyVisibilityChange();
         final DisplayContent displayContent = mWin.getDisplayContent();
@@ -285,8 +285,8 @@ class WindowStateAnimator {
                     "WindowStateAnimator", displayContent.pendingLayoutChanges);
         }
 
-        if (mWin.mAppToken != null) {
-            mWin.mAppToken.updateReportedVisibilityLocked();
+        if (mWin.mActivityRecord != null) {
+            mWin.mActivityRecord.updateReportedVisibilityLocked();
         }
     }
 
@@ -358,8 +358,8 @@ class WindowStateAnimator {
         }
         mDrawState = READY_TO_SHOW;
         boolean result = false;
-        final AppWindowToken atoken = mWin.mAppToken;
-        if (atoken == null || atoken.canShowWindows()
+        final ActivityRecord activity = mWin.mActivityRecord;
+        if (activity == null || activity.canShowWindows()
                 || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = mWin.performShowLocked();
         }
@@ -409,7 +409,7 @@ class WindowStateAnimator {
                 // we are just doing an in-place switch. In that case any SurfaceFlinger side
                 // child layers need to be reparented to the new surface to make this
                 // transparent to the app.
-                if (mWin.mAppToken == null || mWin.mAppToken.isRelaunching() == false) {
+                if (mWin.mActivityRecord == null || mWin.mActivityRecord.isRelaunching() == false) {
                     mPostDrawTransaction.reparentChildren(mPendingDestroySurface.mSurfaceControl,
                             mSurfaceController.mSurfaceControl)
                             .apply();
@@ -431,16 +431,16 @@ class WindowStateAnimator {
     void resetDrawState() {
         mDrawState = DRAW_PENDING;
 
-        if (mWin.mAppToken == null) {
+        if (mWin.mActivityRecord == null) {
             return;
         }
 
-        if (!mWin.mAppToken.isSelfAnimating()) {
-            mWin.mAppToken.clearAllDrawn();
+        if (!mWin.mActivityRecord.isSelfAnimating()) {
+            mWin.mActivityRecord.clearAllDrawn();
         } else {
             // Currently animating, persist current state of allDrawn until animation
             // is complete.
-            mWin.mAppToken.deferClearAllDrawn = true;
+            mWin.mActivityRecord.deferClearAllDrawn = true;
         }
     }
 
@@ -588,10 +588,10 @@ class WindowStateAnimator {
     }
 
     void destroySurfaceLocked() {
-        final AppWindowToken wtoken = mWin.mAppToken;
-        if (wtoken != null) {
-            if (mWin == wtoken.startingWindow) {
-                wtoken.startingDisplayed = false;
+        final ActivityRecord activity = mWin.mActivityRecord;
+        if (activity != null) {
+            if (mWin == activity.startingWindow) {
+                activity.startingDisplayed = false;
             }
         }
 

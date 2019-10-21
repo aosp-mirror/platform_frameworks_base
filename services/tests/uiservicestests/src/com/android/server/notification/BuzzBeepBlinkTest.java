@@ -22,6 +22,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
 import static junit.framework.Assert.assertFalse;
@@ -1541,10 +1542,12 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCanInterruptNonRingtoneInsistentBuzz() throws Exception {
+    public void testCanInterruptNonRingtoneInsistentBuzz() {
         NotificationChannel fakeRingtoneChannel =
                 new NotificationChannel("ringtone", "", IMPORTANCE_HIGH);
         fakeRingtoneChannel.enableVibration(true);
+        fakeRingtoneChannel.setSound(null,
+                new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION).build());
         NotificationRecord ringtoneNotification = getCallRecord(1, fakeRingtoneChannel, true);
 
         mService.buzzBeepBlinkLocked(ringtoneNotification);

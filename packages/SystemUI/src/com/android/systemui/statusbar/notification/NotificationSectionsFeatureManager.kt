@@ -66,7 +66,7 @@ class NotificationSectionsFeatureManager @Inject constructor(
 private fun usePeopleFiltering(proxy: DeviceConfigProxy): Boolean {
     if (sUsePeopleFiltering == null) {
         sUsePeopleFiltering = proxy.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_USE_PEOPLE_FILTERING, false)
+                DeviceConfig.NAMESPACE_SYSTEMUI, NOTIFICATIONS_USE_PEOPLE_FILTERING, true)
     }
 
     return sUsePeopleFiltering!!

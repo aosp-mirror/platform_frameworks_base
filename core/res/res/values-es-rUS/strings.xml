@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que la aplicación reciba y procese mensajes SMS, lo que significa que podría controlar o eliminar mensajes enviados al dispositivo sin mostrártelos."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"recibir mensajes de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que la aplicación reciba y procese mensajes MMS, lo que significa que podría controlar o eliminar mensajes enviados al dispositivo sin mostrártelos."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Reenviar mensajes de emisión móvil"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Permite que la app se vincule al módulo de emisión móvil para reenviar los mensajes de este tipo a medida que se reciben. En algunas ubicaciones, se envían alertas de emisión móvil para advertirte en situaciones de emergencia. Es posible que las apps maliciosas interfieran con el rendimiento o el funcionamiento de tu dispositivo cuando recibes una emisión móvil de emergencia."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"Leer mensajes de difusión móvil"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite a la aplicación leer los mensajes de difusión móvil que recibe tu dispositivo. En algunas ubicaciones, las alertas de difusión móvil se envían para informar situaciones de emergencia. Las aplicaciones maliciosas pueden afectar el rendimiento o funcionamiento de tu dispositivo cuando se recibe un un mensaje de difusión móvil de emergencia."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"leer canales suscritos"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite que la aplicación lea y modifique la configuración de la función No interrumpir."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"iniciar uso de permiso de vista"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Permite que el propietario inicie el uso de permisos para una app. No debería requerirse para apps normales."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"orientación del acceso directo de accesibilidad"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Permite que una app defina la orientación del acceso directo de accesibilidad."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Supervisa los intentos para desbloquear la pantalla"</string>

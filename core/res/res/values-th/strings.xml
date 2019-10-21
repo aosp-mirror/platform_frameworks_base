@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ SMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"รับข้อความ (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ MMS ซึ่งหมายความว่าแอปพลิเคชันจะสามารถตรวจสอบหรือลบข้อความที่ส่งมายังอุปกรณ์ของคุณได้โดยไม่ต้องแสดงให้คุณเห็น"</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"ส่งต่อข้อความจากการส่งข้อมูลเตือนภัยทางมือถือ (CB)"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"อนุญาตให้แอปเชื่อมโยงกับโมดูลการส่งข้อมูลเตือนภัยทางมือถือ (CB) เพื่อส่งต่อข้อความจากการส่งข้อมูลเตือนภัยทางมือถือ (CB) ทันทีที่ได้รับ ระบบจะส่งการแจ้งเตือนจากการส่งข้อมูลเตือนภัยทางมือถือ (CB) ในบางตำแหน่งเพื่อแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจรบกวนประสิทธิภาพหรือการทำงานของอุปกรณ์เมื่อได้รับการส่งข้อมูลเตือนภัยทางมือถือ (CB) ในกรณีฉุกเฉิน"</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"อ่านข้อความที่ได้รับจากสถานีมือถือ"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"อนุญาตให้แอปอ่านข้อความจากสถานีมือถือที่อุปกรณ์ได้รับ การแจ้งเตือนทางมือถือมีให้บริการในบางพื้นที่ โดยจะแจ้งเตือนคุณเกี่ยวกับสถานการณ์ฉุกเฉิน แอปที่เป็นอันตรายอาจเข้าแทรกแซงการทำงานของอุปกรณ์เมื่อได้รับข้อความแจ้งเตือนฉุกเฉิน"</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"อ่านฟีดข้อมูลที่สมัครไว้"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"อนุญาตให้แอปอ่านและเขียนการกำหนดค่าโหมดห้ามรบกวน"</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"เริ่มการใช้สิทธิ์การดู"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"อนุญาตให้เจ้าของเริ่มการใช้สิทธิ์ของแอป ไม่จำเป็นสำหรับแอปทั่วไป"</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"เป้าหมายทางลัดการช่วยเหลือพิเศษ"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"อนุญาตให้แอปกำหนดเป้าหมายทางลัดการช่วยเหลือพิเศษ"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
@@ -1555,7 +1551,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ตัวเลือกเพิ่มเติม"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"ที่จัดเก็บข้อมูลที่ใช้ร่วมกันภายใน"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"พื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกันภายใน"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"การ์ด SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"การ์ด SD ของ <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"ไดรฟ์ USB"</string>

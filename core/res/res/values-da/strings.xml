@@ -75,7 +75,7 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Standarder for opkalds-id til begrænset. Næste opkald: Ikke begrænset"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Begrænset"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
-    <string name="serviceNotProvisioned" msgid="8614830180508686666">"Tjenesten leveres ikke!"</string>
+    <string name="serviceNotProvisioned" msgid="8614830180508686666">"Tjenesten provisioneres ikke."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Du kan ikke ændre indstillingen for opkalds-id\'et."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Ingen mobildatatjeneste"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Det er ikke muligt at foretage nødopkald"</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillader, at appen kan modtage og behandle sms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Videresend Cell Broadcast-meddelelser"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Tillader, at appen bindes til Cell Broadcast-modulet, så Cell Broadcast-meddelelser kan videresendes, når de modtages. I nogle områder sendes der Cell Broadcast-underretninger for at advare dig om nødsituationer. Ondsindede apps kan forstyrre effektiviteten eller driften af din enhed, når den modtager en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"læse Cell Broadcast-meddelelser"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillader, at appen læser Cell Broadcast-underretninger, der modtages af din enhed. I nogle områder sendes der Cell Broadcast-underretninger for at advare om nødsituationer. Ondsindede apps kan forstyrre ydelsen eller driften af ​din ​enhed, når der modtages en Cell Broadcast-meddelelse om en nødsituation."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læse feeds, jeg abonnerer på"</string>
@@ -516,10 +514,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Giver appen tilladelse til at kende skærmlåsens kompleksitet (høj, medium, lav eller ingen), hvilket kan afsløre oplysninger om skærmlåsens længde og type. Appen kan også foreslå brugerne at opdatere deres skærmlås til et bestemt niveau, men brugerne kan frit ignorere det og gå videre. Bemærk! Skærmlåsen gemmes ikke som almindelig tekst, så appen kender ikke den nøjagtige adgangskode."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"brug biometrisk hardware"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Tillader, at appen kan bruge biometrisk hardware til godkendelse"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrer fingeraftrykhardware"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrer hardware til fingeraftryk"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Tillader, at appen kan køre metoder til at tilføje og slette fingeraftryksskabeloner"</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"bruge fingeraftrykhardware"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Tillader, at appen kan bruge fingeraftrykhardware til godkendelse"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"bruge hardware til fingeraftryk"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Tillader, at appen kan bruge hardware til fingeraftryk til godkendelse"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"ændre din musiksamling"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Tillader, at appen kan ændre din musiksamling."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"ændre din videosamling"</string>
@@ -536,7 +534,7 @@
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"Der er ikke angivet pinkode, mønster eller adgangskode"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Der blev registreret et delvist fingeraftryk. Prøv igen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Fingeraftrykket kunne ikke behandles. Prøv igen."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Sensoren til registrering af fingeraftryk er beskidt. Tør den af, og prøv igen."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Fingeraftrykslæseren er beskidt. Tør den af, og prøv igen."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Du bevægede fingeren for hurtigt. Prøv igen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Du bevægede fingeren for langsomt. Prøv igen."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Giver appen tilladelse til at læse og redigere konfigurationen af Forstyr ikke."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"start brugen at tilladelsesvisning"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Tillader, at brugeren kan bruge en tilladelse for en app. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"mål for hjælpefunktionsgenvej"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Tillader, at en app definerer målet for en hjælpefunktionsgenvej."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angiv regler for adgangskoder"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Tjek længden samt tilladte tegn i adgangskoder og pinkoder til skærmlåsen."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1977,7 +1973,7 @@
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svar"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM-kort er ikke tilladt for tale"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kort er ikke aktiveret for tale"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kort er ikke provisioneret til tale"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kort er ikke tilladt for tale"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon er ikke tilladt for tale"</string>
     <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM-kortet <xliff:g id="SIMNUMBER">%d</xliff:g> er ikke tilladt"</string>

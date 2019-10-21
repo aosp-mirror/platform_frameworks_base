@@ -46,7 +46,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public class MediaRouter2Manager {
-    private static final String TAG = "MediaRouter2Manager";
+    private static final String TAG = "MR2Manager";
     private static final Object sLock = new Object();
 
     @GuardedBy("sLock")

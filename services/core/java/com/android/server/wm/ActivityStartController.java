@@ -506,7 +506,7 @@ public class ActivityStartController {
         if (mLastHomeActivityStartRecord != null) {
             pw.print(prefix);
             pw.println("mLastHomeActivityStartRecord:");
-            mLastHomeActivityStartRecord.dump(pw, prefix + "  ");
+            mLastHomeActivityStartRecord.dump(pw, prefix + "  ", true /* dumpAll */);
         }
 
         final boolean dumpPackagePresent = dumpPackage != null;

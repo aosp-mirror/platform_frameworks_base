@@ -22,7 +22,6 @@ import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -35,7 +34,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -47,9 +45,13 @@ import libcore.io.IoUtils;
 
 import java.util.Objects;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Manages the lockscreen wallpaper.
  */
+@Singleton
 public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implements Runnable {
 
     private static final String TAG = "LockscreenWallpaper";
@@ -57,9 +59,8 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
 
-    private final StatusBar mBar;
     private final WallpaperManager mWallpaperManager;
-    private final Handler mH;
+    private Handler mH;
     private final KeyguardUpdateMonitor mUpdateMonitor;
 
     private boolean mCached;
@@ -70,23 +71,30 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     private UserHandle mSelectedUser;
     private AsyncTask<Void, Void, LoaderResult> mLoader;
 
-    public LockscreenWallpaper(Context ctx, StatusBar bar, Handler h) {
-        mBar = bar;
-        mH = h;
-        mWallpaperManager = (WallpaperManager) ctx.getSystemService(Context.WALLPAPER_SERVICE);
+    @Inject
+    public LockscreenWallpaper(WallpaperManager wallpaperManager,
+            @Nullable IWallpaperManager iWallpaperManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
+        mWallpaperManager = wallpaperManager;
         mCurrentUserId = ActivityManager.getCurrentUser();
-        mUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
+        mUpdateMonitor = keyguardUpdateMonitor;
 
-        IWallpaperManager service = IWallpaperManager.Stub.asInterface(
-                ServiceManager.getService(Context.WALLPAPER_SERVICE));
-        if (service != null) {
+        if (iWallpaperManager != null) {
             // Service is disabled on some devices like Automotive
             try {
-                service.setLockWallpaperCallback(this);
+                iWallpaperManager.setLockWallpaperCallback(this);
             } catch (RemoteException e) {
                 Log.e(TAG, "System dead?" + e);
             }
         }
+    }
+
+    void setHandler(Handler handler) {
+        if (mH != null) {
+            Log.wtfStack(TAG, "Handler has already been set. Trying to double initialize?");
+            return;
+        }
+        mH = handler;
     }
 
     public Bitmap getBitmap() {
@@ -176,6 +184,10 @@ public class LockscreenWallpaper extends IWallpaperManagerCallback.Stub implemen
     }
 
     private void postUpdateWallpaper() {
+        if (mH == null) {
+            Log.wtfStack(TAG, "Trying to use LockscreenWallpaper before initialization.");
+            return;
+        }
         mH.removeCallbacks(this);
         mH.post(this);
     }

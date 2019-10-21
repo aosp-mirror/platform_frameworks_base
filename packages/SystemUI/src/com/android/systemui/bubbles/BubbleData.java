@@ -183,8 +183,8 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + entry);
         }
-        Bubble bubble = getBubbleWithKey(entry.key);
-        suppressFlyout = !entry.isVisuallyInterruptive || suppressFlyout;
+        Bubble bubble = getBubbleWithKey(entry.getKey());
+        suppressFlyout = !entry.getRanking().visuallyInterruptive() || suppressFlyout;
 
         if (bubble == null) {
             // Create a new bubble
@@ -217,7 +217,7 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryRemoved: entry=" + entry + " reason=" + reason);
         }
-        doRemove(entry.key, reason);
+        doRemove(entry.getKey(), reason);
         dispatchPendingChanges();
     }
 
@@ -290,7 +290,7 @@ public class BubbleData {
             return bubbleChildren;
         }
         for (Bubble b : mBubbles) {
-            if (groupKey.equals(b.getEntry().notification.getGroupKey())) {
+            if (groupKey.equals(b.getEntry().getSbn().getGroupKey())) {
                 bubbleChildren.add(b);
             }
         }
@@ -633,7 +633,8 @@ public class BubbleData {
                 try {
                     deleteIntent.send();
                 } catch (PendingIntent.CanceledException e) {
-                    Log.w(TAG, "Failed to send delete intent for bubble with key: " + entry.key);
+                    Log.w(TAG, "Failed to send delete intent for bubble with key: "
+                            + entry.getKey());
                 }
             }
         }

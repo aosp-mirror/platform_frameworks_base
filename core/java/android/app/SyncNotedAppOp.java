@@ -18,6 +18,7 @@ package android.app;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import com.android.internal.annotations.Immutable;
 
@@ -33,6 +34,7 @@ import com.android.internal.annotations.Immutable;
 @Immutable
 public final class SyncNotedAppOp {
     private final int mOpCode;
+    private final @Nullable String mFeatureId;
 
     /**
      * @return The op that was noted.
@@ -42,14 +44,23 @@ public final class SyncNotedAppOp {
     }
 
     /**
+     * @return The {@link android.content.Context#createFeatureContext Feature} in the app
+     */
+    public @Nullable String getFeatureId() {
+        return mFeatureId;
+    }
+
+    /**
      * Create a new sync op description
      *
      * @param opCode The op that was noted
      *
      * @hide
      */
-    public SyncNotedAppOp(@IntRange(from = 0, to = AppOpsManager._NUM_OP - 1) int opCode) {
+    public SyncNotedAppOp(@IntRange(from = 0, to = AppOpsManager._NUM_OP - 1) int opCode,
+            @Nullable String featureId) {
         mOpCode = opCode;
+        mFeatureId = featureId;
     }
 
     @Override

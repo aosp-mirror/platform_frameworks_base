@@ -17,9 +17,11 @@
 package android.util;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Parcel;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.util.Preconditions;
 
 import libcore.util.EmptyArray;
 
@@ -282,5 +284,50 @@ public class LongSparseLongArray implements Cloneable {
         }
         buffer.append('}');
         return buffer.toString();
+    }
+
+    /**
+     * @hide
+     */
+    public static class Parcelling implements com.android.internal.util.Parcelling {
+        @Override
+        public void parcel(Object item, Parcel dest, int parcelFlags) {
+            if (item == null) {
+                dest.writeInt(-1);
+                return;
+            }
+
+            LongSparseLongArray array = (LongSparseLongArray) item;
+            dest.writeInt(array.mSize);
+            dest.writeLongArray(array.mKeys);
+            dest.writeLongArray(array.mValues);
+        }
+
+        @Override
+        public Object unparcel(Parcel source) {
+            int size = source.readInt();
+            if (size == -1) {
+                return null;
+            }
+
+            LongSparseLongArray array = new LongSparseLongArray(0);
+
+            array.mSize = size;
+            array.mKeys = source.createLongArray();
+            array.mValues = source.createLongArray();
+
+            // Make sure array is sane
+            Preconditions.checkArgument(array.mKeys.length >= size);
+            Preconditions.checkArgument(array.mValues.length >= size);
+
+            if (size > 0) {
+                long last = array.mKeys[0];
+                for (int i = 1; i < size; i++) {
+                    Preconditions.checkArgument(last < array.mKeys[i]);
+                }
+            }
+
+            return array;
+        }
     }
 }

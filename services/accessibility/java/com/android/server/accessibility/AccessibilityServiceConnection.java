@@ -62,9 +62,6 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     private final Handler mMainHandler;
 
-    private boolean mWasConnectedAndDied;
-
-
     AccessibilityServiceConnection(AccessibilityUserState userState, Context context,
             ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
@@ -168,8 +165,6 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public AccessibilityServiceInfo getServiceInfo() {
-        // Update crashed data
-        mAccessibilityServiceInfo.crashed = mWasConnectedAndDied;
         return mAccessibilityServiceInfo;
     }
 
@@ -178,10 +173,13 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         synchronized (mLock) {
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
-            Set<ComponentName> bindingServices = userState.getBindingServicesLocked();
-            if (bindingServices.contains(mComponentName) || mWasConnectedAndDied) {
+            final Set<ComponentName> bindingServices = userState.getBindingServicesLocked();
+            final Set<ComponentName> crashedServices = userState.getCrashedServicesLocked();
+            if (bindingServices.contains(mComponentName)
+                    || crashedServices.contains(mComponentName)) {
                 bindingServices.remove(mComponentName);
-                mWasConnectedAndDied = false;
+                crashedServices.remove(mComponentName);
+                mAccessibilityServiceInfo.crashed = false;
                 serviceInterface = mServiceInterface;
             }
             // There's a chance that service is removed from enabled_accessibility_services setting
@@ -271,7 +269,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!isConnectedLocked()) {
                 return;
             }
-            mWasConnectedAndDied = true;
+            mAccessibilityServiceInfo.crashed = true;
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState != null) {
                 userState.serviceDisconnectedLocked(this);

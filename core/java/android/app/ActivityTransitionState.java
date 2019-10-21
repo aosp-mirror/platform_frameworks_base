@@ -204,14 +204,7 @@ class ActivityTransitionState {
         }
         mEnterTransitionCoordinator = new EnterTransitionCoordinator(activity,
                 resultReceiver, sharedElementNames, mEnterActivityOptions.isReturning(),
-                mEnterActivityOptions.isCrossTask(),
-                () -> {
-                    if (isReturning) {
-                        // once it is done transitioning, we don't need the coordinator --
-                        // if we kept it around, it could leak Views
-                        mEnterTransitionCoordinator = null;
-                    }
-                });
+                mEnterActivityOptions.isCrossTask());
         if (mEnterActivityOptions.isCrossTask()) {
             mExitingFrom = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
             mExitingTo = new ArrayList<>(mEnterActivityOptions.getSharedElementNames());
@@ -280,6 +273,10 @@ class ActivityTransitionState {
                             mEnterTransitionCoordinator.isWaitingForRemoteExit()) {
                         restoreExitedViews();
                         restoreReenteringViews();
+                    } else if (mEnterTransitionCoordinator.isReturning()) {
+                        mEnterTransitionCoordinator.runAfterTransitionsComplete(() -> {
+                            mEnterTransitionCoordinator = null;
+                        });
                     }
                 }
             }, 1000);

@@ -638,7 +638,7 @@ public class DisplayRotationTests {
         mBuilder.build();
 
         final WindowState win = mock(WindowState.class);
-        win.mAppToken = mock(AppWindowToken.class);
+        win.mActivityRecord = mock(ActivityRecord.class);
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
         attrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
@@ -648,13 +648,13 @@ public class DisplayRotationTests {
         mMockDisplayContent.mCurrentFocus = win;
         mTarget.mUpsideDownRotation = Surface.ROTATION_180;
 
-        doReturn(true).when(win.mAppToken).matchParentBounds();
+        doReturn(true).when(win.mActivityRecord).matchParentBounds();
         // The focused fullscreen opaque window without override bounds should be able to be
         // rotated seamlessly.
         assertTrue(mTarget.shouldRotateSeamlessly(
                 Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));
 
-        doReturn(false).when(win.mAppToken).matchParentBounds();
+        doReturn(false).when(win.mActivityRecord).matchParentBounds();
         // No seamless rotation if the window may be positioned with offset after rotation.
         assertFalse(mTarget.shouldRotateSeamlessly(
                 Surface.ROTATION_0, Surface.ROTATION_90, false /* forceUpdate */));

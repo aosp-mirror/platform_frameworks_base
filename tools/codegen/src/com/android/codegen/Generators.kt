@@ -417,7 +417,7 @@ fun ClassPrinter.generateParcelable() {
     if (!isMethodGenerationSuppressed("writeToParcel", Parcel, "int")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
-        "public void writeToParcel($Parcel dest, int flags)" {
+        "public void writeToParcel(@$NonNull $Parcel dest, int flags)" {
             +"// You can override field parcelling by defining methods like:"
             +"// void parcelFieldName(Parcel dest, int flags) { ... }"
             +""
@@ -473,7 +473,7 @@ fun ClassPrinter.generateParcelable() {
         +"/** @hide */"
         +"@SuppressWarnings({\"unchecked\", \"RedundantCast\"})"
         +GENERATED_MEMBER_HEADER
-        "$visibility $ClassName($Parcel in) {" {
+        "$visibility $ClassName(@$NonNull $Parcel in) {" {
             +"// You can override field unparcelling by defining methods like:"
             +"// static FieldType unparcelFieldName(Parcel in) { ... }"
             +""
@@ -598,7 +598,7 @@ fun ClassPrinter.generateParcelable() {
             }
 
             +"@Override"
-            "public $ClassName createFromParcel($Parcel in)" {
+            "public $ClassName createFromParcel(@$NonNull $Parcel in)" {
                 +"return new $ClassName(in);"
             }
             rmEmptyLine()
@@ -611,7 +611,7 @@ fun ClassPrinter.generateEqualsHashcode() {
     if (!isMethodGenerationSuppressed("equals", "Object")) {
         +"@Override"
         +GENERATED_MEMBER_HEADER
-        "public boolean equals(Object o)" {
+        "public boolean equals(@$Nullable Object o)" {
             +"// You can override field equality logic by defining either of the methods like:"
             +"// boolean fieldNameEquals($ClassName other) { ... }"
             +"// boolean fieldNameEquals(FieldType otherValue) { ... }"
@@ -904,7 +904,7 @@ fun ClassPrinter.generateForEachField() {
         usedSpecializationsSet.toList().forEachLastAware { specType, isLast ->
             val SpecType = specType.capitalize()
             val ActionClass = classRef("com.android.internal.util.DataClass.Per${SpecType}FieldAction")
-            +"$ActionClass<$ClassType> action$SpecType${if_(!isLast, ",")}"
+            +"@$NonNull $ActionClass<$ClassType> action$SpecType${if_(!isLast, ",")}"
         }
     }; " {" {
         usedSpecializations.forEachIndexed { i, specType ->
@@ -919,7 +919,7 @@ fun ClassPrinter.generateForEachField() {
         +"/** @deprecated May cause boxing allocations - use with caution! */"
         +"@Deprecated"
         +GENERATED_MEMBER_HEADER
-        "void forEachField($PerObjectFieldAction<$ClassType> action)" {
+        "void forEachField(@$NonNull $PerObjectFieldAction<$ClassType> action)" {
             fields.forEachApply {
                 +"action.acceptObject(this, \"$nameLowerCamel\", $name);"
             }

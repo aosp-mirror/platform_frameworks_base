@@ -47,10 +47,11 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ടൈപ്പുചെയ്യൽ രീതികൾ സജ്ജീകരിക്കുക"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ഫിസിക്കൽ കീബോഡ്"</string>
     <string name="usb_device_permission_prompt" msgid="1825685909587559679">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g>-നെ അനുവദിക്കണോ?"</string>
-    <!-- no translation found for usb_device_permission_prompt_warn (1842558472039505091) -->
-    <skip />
+    <string name="usb_device_permission_prompt_warn" msgid="1842558472039505091">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?\nഈ ആപ്പിന് റെക്കോർഡ് അനുമതി നൽകിയിട്ടില്ല, എന്നാൽ ഈ USB ഉപകരണത്തിലൂടെ ഓഡിയോ ക്യാപ്‌ചർ ചെയ്യാനാവും."</string>
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> ആക്‌സസ് ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g>-നെ അനുവദിക്കണോ?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> കൈകാര്യം ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കണോ?"</string>
+    <!-- no translation found for usb_device_confirm_prompt_warn (210658281376801521) -->
+    <skip />
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> കൈകാര്യം ചെയ്യാൻ <xliff:g id="APPLICATION">%1$s</xliff:g> തുറക്കണോ?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"ഈ USB ആക്‌സസ്സറിയിൽ ഇൻസ്‌റ്റാളുചെയ്‌തവയൊന്നും പ്രവർത്തിക്കുന്നില്ല. <xliff:g id="URL">%1$s</xliff:g>-ൽ ഇതേക്കുറിച്ച് കൂടുതലറിയുക"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB ആക്‌സസ്സറി"</string>
@@ -110,7 +111,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ഫോണ്‍"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"വോയ്‌സ് സഹായം"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"അണ്‍ലോക്ക് ചെയ്യുക"</string>
-    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ഫിംഗർപ്രിന്റിനായി കാക്കുന്നു"</string>
+    <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ഫിംഗർപ്രിന്റിനായി കാത്തിരിക്കുന്നു"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"നിങ്ങളുടെ ഫിംഗർപ്രിന്റ് ഉപയോഗിക്കാതെ അൺലോക്കുചെയ്യുക"</string>
     <string name="accessibility_scanning_face" msgid="769545173211758586">"മുഖം സ്കാൻ ചെയ്യുന്നു"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"അയയ്ക്കുക"</string>
@@ -128,22 +129,15 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="2003141400387093967">"സ്ഥിരീകരിച്ചു"</string>
     <string name="biometric_dialog_tap_confirm" msgid="4540715260292022404">"പൂർത്തിയാക്കാൻ സ്ഥിരീകരിക്കുക ടാപ്പ് ചെയ്യൂ"</string>
     <string name="biometric_dialog_authenticated" msgid="5918352844999713693">"പരിശോധിച്ചുറപ്പിച്ചു"</string>
-    <!-- no translation found for biometric_dialog_use_pin (2506187927478996039) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_pattern (4721877831431699442) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_use_password (3426428493718969343) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pin (4600590473629948574) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_pattern (4808369401645512099) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_wrong_password (2343518162282889518) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_credential_too_many_attempts (1556206869468265728) -->
-    <skip />
-    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"വിരലടയാള സെൻസർ സ്‌പർശിക്കുക"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"വിരലടയാള ഐക്കൺ"</string>
+    <string name="biometric_dialog_use_pin" msgid="2506187927478996039">"പിൻ ഉപയോഗിക്കുക"</string>
+    <string name="biometric_dialog_use_pattern" msgid="4721877831431699442">"പാറ്റേൺ ഉപയോഗിക്കുക"</string>
+    <string name="biometric_dialog_use_password" msgid="3426428493718969343">"പാസ്‌വേഡ് ഉപയോഗിക്കുക"</string>
+    <string name="biometric_dialog_wrong_pin" msgid="4600590473629948574">"പിൻ തെറ്റാണ്"</string>
+    <string name="biometric_dialog_wrong_pattern" msgid="4808369401645512099">"പാറ്റേൺ തെറ്റാണ്"</string>
+    <string name="biometric_dialog_wrong_password" msgid="2343518162282889518">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="1556206869468265728">"നിരവധി തെറ്റായ ശ്രമങ്ങൾ. \n<xliff:g id="NUMBER">%d</xliff:g> സെക്കൻഡിൽ വീണ്ടും ശ്രമിക്കുക."</string>
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ഫിംഗർപ്രിന്റ് സെൻസർ സ്‌പർശിക്കുക"</string>
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ഫിംഗർപ്രിന്റ് ഐക്കൺ"</string>
     <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"നിങ്ങൾക്കായി തിരയുന്നു…"</string>
     <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"മുഖത്തിന്റെ ഐക്കൺ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"അനുയോജ്യതാ സൂം ബട്ടൺ."</string>
@@ -380,8 +374,7 @@
     </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"അറിയിപ്പുകൾ"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ടോർച്ച്"</string>
-    <!-- no translation found for quick_settings_flashlight_camera_in_use (6120370795890963385) -->
-    <skip />
+    <string name="quick_settings_flashlight_camera_in_use" msgid="6120370795890963385">"ക്യാമറ ഉപയോഗത്തിലാണ്"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"മൊബൈൽ ഡാറ്റ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ഡാറ്റാ ഉപയോഗം"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ശേഷിക്കുന്ന ഡാറ്റ"</string>

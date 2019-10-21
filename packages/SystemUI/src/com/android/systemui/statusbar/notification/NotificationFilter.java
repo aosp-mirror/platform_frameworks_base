@@ -85,7 +85,7 @@ public class NotificationFilter {
      * @return true if the provided notification should NOT be shown right now.
      */
     public boolean shouldFilterOut(NotificationEntry entry) {
-        final StatusBarNotification sbn = entry.notification;
+        final StatusBarNotification sbn = entry.getSbn();
         if (!(getEnvironment().isDeviceProvisioned()
                 || showNotificationEvenIfUnprovisioned(sbn))) {
             return true;

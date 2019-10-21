@@ -230,7 +230,7 @@ public class NotificationContentInflater {
         }
         // Only inflate the ones that are set.
         reInflateFlags &= mInflationFlags;
-        StatusBarNotification sbn = mRow.getEntry().notification;
+        StatusBarNotification sbn = mRow.getEntry().getSbn();
 
         // To check if the notification has inline image and preload inline image if necessary.
         mRow.getImageResolver().preloadImages(sbn.getNotification());

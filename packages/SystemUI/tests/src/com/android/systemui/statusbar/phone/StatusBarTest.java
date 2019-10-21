@@ -91,6 +91,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.NotificationEntryBuilder;
@@ -107,7 +108,7 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
+import com.android.systemui.statusbar.notification.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -145,6 +146,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import dagger.Lazy;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
@@ -156,6 +159,7 @@ public class StatusBarTest extends SysuiTestCase {
     private TestableNotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
     private CommandQueue mCommandQueue;
 
+    @Mock private FeatureFlags mFeatureFlags;
     @Mock private LightBarController mLightBarController;
     @Mock private StatusBarIconController mStatusBarIconController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -205,7 +209,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private KeyguardBypassController mKeyguardBypassController;
     @Mock private InjectionInflationController mInjectionInflationController;
     @Mock private DynamicPrivacyController mDynamicPrivacyController;
-    @Mock private NotifPipelineInitializer mNotifPipelineInitializer;
+    @Mock private NewNotifPipeline mNewNotifPipeline;
     @Mock private ZenModeController mZenModeController;
     @Mock private AutoHideController mAutoHideController;
     @Mock private NotificationViewHierarchyManager mNotificationViewHierarchyManager;
@@ -221,6 +225,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private StatusBarWindowViewController mStatusBarWindowViewController;
     @Mock private NotifLog mNotifLog;
     @Mock private DozeParameters mDozeParameters;
+    @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
+    @Mock private LockscreenWallpaper mLockscreenWallpaper;
 
     @Before
     public void setup() throws Exception {
@@ -286,8 +292,11 @@ public class StatusBarTest extends SysuiTestCase {
         when(mStatusBarWindowViewControllerBuilder.build())
                 .thenReturn(mStatusBarWindowViewController);
 
+        when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
+
         mStatusBar = new StatusBar(
                 mContext,
+                mFeatureFlags,
                 mLightBarController,
                 mAutoHideController,
                 mKeyguardUpdateMonitor,
@@ -302,7 +311,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mDynamicPrivacyController,
                 mBypassHeadsUpNotifier,
                 true,
-                mNotifPipelineInitializer,
+                () -> mNewNotifPipeline,
                 new FalsingManagerFake(),
                 mBroadcastDispatcher,
                 new RemoteInputQuickSettingsDisabler(
@@ -345,14 +354,15 @@ public class StatusBarTest extends SysuiTestCase {
                 mStatusBarWindowController,
                 mStatusBarWindowViewControllerBuilder,
                 mNotifLog,
-                mDozeParameters);
+                mDozeParameters,
+                mScrimController,
+                mLockscreenWallpaperLazy);
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.mStatusBarKeyguardViewManager = mStatusBarKeyguardViewManager;
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;
         mStatusBar.mBiometricUnlockController = mBiometricUnlockController;
-        mStatusBar.mScrimController = mScrimController;
         mStatusBar.mNotificationPanel = mNotificationPanelView;
         mStatusBar.mCommandQueue = mCommandQueue;
         mStatusBar.mDozeScrimController = mDozeScrimController;

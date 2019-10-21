@@ -73,6 +73,8 @@ class AccessibilityUserState {
 
     final Set<ComponentName> mBindingServices = new HashSet<>();
 
+    final Set<ComponentName> mCrashedServices = new HashSet<>();
+
     final Set<ComponentName> mEnabledServices = new HashSet<>();
 
     final Set<ComponentName> mTouchExplorationGrantedServices = new HashSet<>();
@@ -127,6 +129,7 @@ class AccessibilityUserState {
         // Clear service management state.
         mBoundServices.clear();
         mBindingServices.clear();
+        mCrashedServices.clear();
 
         // Clear event management state.
         mLastSentClientState = -1;
@@ -184,15 +187,16 @@ class AccessibilityUserState {
 
     /**
      * Make sure a services disconnected but still 'on' state is reflected in AccessibilityUserState
-     * There are three states to a service here: off, bound, and binding.
-     * This drops a service from a bound state, to the binding state.
-     * The binding state describes the situation where a service is on, but not bound.
+     * There are four states to a service here: off, bound, and binding, and crashed.
+     * This drops a service from a bound state, to the crashed state.
+     * The crashed state describes the situation where a service used to be bound, but no longer is
+     * despite still being enabled.
      *
      * @param serviceConnection The service.
      */
     void serviceDisconnectedLocked(AccessibilityServiceConnection serviceConnection) {
         removeServiceLocked(serviceConnection);
-        mBindingServices.add(serviceConnection.getComponentName());
+        mCrashedServices.add(serviceConnection.getComponentName());
     }
 
     /**
@@ -289,8 +293,18 @@ class AccessibilityUserState {
         mBindInstantServiceAllowed = allowed;
     }
 
+    /**
+     * Returns binding service list.
+     */
     Set<ComponentName> getBindingServicesLocked() {
         return mBindingServices;
+    }
+
+    /**
+     * Returns crashed service list.
+     */
+    Set<ComponentName> getCrashedServicesLocked() {
+        return mCrashedServices;
     }
 
     /**
@@ -298,6 +312,23 @@ class AccessibilityUserState {
      */
     Set<ComponentName> getEnabledServicesLocked() {
         return mEnabledServices;
+    }
+
+    /**
+     * Remove service from crashed service list if users disable it.
+     */
+    void updateCrashedServicesIfNeededLocked() {
+        for (int i = 0, count = mInstalledServices.size(); i < count; i++) {
+            final AccessibilityServiceInfo installedService = mInstalledServices.get(i);
+            final ComponentName componentName = ComponentName.unflattenFromString(
+                    installedService.getId());
+
+            if (mCrashedServices.contains(componentName)
+                    && !mEnabledServices.contains(componentName)) {
+                // Remove it from mCrashedServices since users toggle the switch bar to retry.
+                mCrashedServices.remove(componentName);
+            }
+        }
     }
 
     List<AccessibilityServiceConnection> getBoundServicesLocked() {
@@ -430,6 +461,18 @@ class AccessibilityUserState {
         pw.println("}");
         pw.append("     Binding services:{");
         it = mBindingServices.iterator();
+        if (it.hasNext()) {
+            ComponentName componentName = it.next();
+            pw.append(componentName.toShortString());
+            while (it.hasNext()) {
+                componentName = it.next();
+                pw.append(", ");
+                pw.append(componentName.toShortString());
+            }
+        }
+        pw.println("}");
+        pw.append("     Crashed services:{");
+        it = mCrashedServices.iterator();
         if (it.hasNext()) {
             ComponentName componentName = it.next();
             pw.append(componentName.toShortString());

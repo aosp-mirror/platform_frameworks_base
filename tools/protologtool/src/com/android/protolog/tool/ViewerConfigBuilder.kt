@@ -23,39 +23,52 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import java.io.StringWriter
 
 class ViewerConfigBuilder(
-    private val protoLogCallVisitor: ProtoLogCallProcessor
-) : ProtoLogCallVisitor {
-    override fun processCall(
-        call: MethodCallExpr,
-        messageString: String,
-        level: LogLevel,
-        group: LogGroup
-    ) {
+    private val processor: ProtoLogCallProcessor
+) {
+    private fun addLogCall(logCall: LogCall, context: ParsingContext) {
+        val group = logCall.logGroup
+        val messageString = logCall.messageString
         if (group.enabled) {
-            val position = fileName
-            val key = CodeUtils.hash(position, messageString, level, group)
+            val key = logCall.key()
             if (statements.containsKey(key)) {
-                if (statements[key] != LogCall(messageString, level, group, position)) {
+                if (statements[key] != logCall) {
                     throw HashCollisionException(
                             "Please modify the log message \"$messageString\" " +
-                                    "or \"${statements[key]}\" - their hashes are equal.",
-                            ParsingContext(fileName, call))
+                                    "or \"${statements[key]}\" - their hashes are equal.", context)
                 }
             } else {
                 groups.add(group)
-                statements[key] = LogCall(messageString, level, group, position)
-                call.range.isPresent
+                statements[key] = logCall
             }
         }
     }
 
     private val statements: MutableMap<Int, LogCall> = mutableMapOf()
     private val groups: MutableSet<LogGroup> = mutableSetOf()
-    private var fileName: String = ""
 
-    fun processClass(unit: CompilationUnit, fileName: String) {
-        this.fileName = fileName
-        protoLogCallVisitor.process(unit, this, fileName)
+    fun findLogCalls(unit: CompilationUnit, fileName: String): List<Pair<LogCall, ParsingContext>> {
+        val calls = mutableListOf<Pair<LogCall, ParsingContext>>()
+        val visitor = object : ProtoLogCallVisitor {
+            override fun processCall(
+                call: MethodCallExpr,
+                messageString: String,
+                level: LogLevel,
+                group: LogGroup
+            ) {
+                val logCall = LogCall(messageString, level, group, fileName)
+                val context = ParsingContext(fileName, call)
+                calls.add(logCall to context)
+            }
+        }
+        processor.process(unit, visitor, fileName)
+
+        return calls
+    }
+
+    fun addLogCalls(calls: List<Pair<LogCall, ParsingContext>>) {
+        calls.forEach { (logCall, context) ->
+            addLogCall(logCall, context)
+        }
     }
 
     fun build(): String {
@@ -101,5 +114,7 @@ class ViewerConfigBuilder(
         val logLevel: LogLevel,
         val logGroup: LogGroup,
         val position: String
-    )
+    ) {
+        fun key() = CodeUtils.hash(position, messageString, logLevel, logGroup)
+    }
 }

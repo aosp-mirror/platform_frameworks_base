@@ -36,7 +36,7 @@ public class NotificationEntryHelper {
         private final NotificationEntry mTarget;
 
         private ModifiedRankingBuilder(NotificationEntry target) {
-            super(target.ranking());
+            super(target.getRanking());
             mTarget = target;
         }
 
@@ -52,14 +52,14 @@ public class NotificationEntryHelper {
         private final NotificationEntry mTarget;
 
         private ModifiedSbnBuilder(NotificationEntry target) {
-            super(target.sbn());
+            super(target.getSbn());
             mTarget = target;
         }
 
         @Override
         public StatusBarNotification build() {
             final StatusBarNotification sbn = super.build();
-            mTarget.setNotification(sbn);
+            mTarget.setSbn(sbn);
             return sbn;
         }
     }

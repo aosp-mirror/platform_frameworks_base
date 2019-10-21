@@ -531,7 +531,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * List of app window tokens that are waiting for replacing windows. If the
      * replacement doesn't come in time the stale windows needs to be disposed of.
      */
-    final ArrayList<AppWindowToken> mWindowReplacementTimeouts = new ArrayList<>();
+    final ArrayList<ActivityRecord> mWindowReplacementTimeouts = new ArrayList<>();
 
     /**
      * Windows that are being resized.  Used so we can tell the client about
@@ -880,7 +880,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** The display that the rotation animation is applying to. */
     private int mFrozenDisplayId;
 
-    /** Skip repeated AppWindowTokens initialization. Note that AppWindowsToken's version of this
+    /** Skip repeated ActivityRecords initialization. Note that AppWindowsToken's version of this
      * is a long initialized to Long.MIN_VALUE so that it doesn't match this value on startup. */
     int mTransactionSequence;
 
@@ -990,7 +990,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void onAppTransitionFinishedLocked(IBinder token) {
             mAtmInternal.notifyAppTransitionFinished();
-            final AppWindowToken atoken = mRoot.getAppWindowToken(token);
+            final ActivityRecord atoken = mRoot.getActivityRecord(token);
             if (atoken == null) {
                 return;
             }
@@ -1368,7 +1368,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return WindowManagerGlobal.ADD_PERMISSION_DENIED;
             }
 
-            AppWindowToken atoken = null;
+            ActivityRecord activity = null;
             final boolean hasParent = parentWindow != null;
             // Use existing parent window token for child windows since they go in the same token
             // as there parent window so we can apply the same policy on them.
@@ -1434,16 +1434,16 @@ public class WindowManagerService extends IWindowManager.Stub
                         session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
             } else if (rootType >= FIRST_APPLICATION_WINDOW
                     && rootType <= LAST_APPLICATION_WINDOW) {
-                atoken = token.asAppWindowToken();
-                if (atoken == null) {
+                activity = token.asActivityRecord();
+                if (activity == null) {
                     ProtoLog.w(WM_ERROR, "Attempted to add window with non-application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_NOT_APP_TOKEN;
-                } else if (atoken.removed) {
+                } else if (activity.removed) {
                     ProtoLog.w(WM_ERROR, "Attempted to add window with exiting application token "
                             + ".%s Aborting.", token);
                     return WindowManagerGlobal.ADD_APP_EXITING;
-                } else if (type == TYPE_APPLICATION_STARTING && atoken.startingWindow != null) {
+                } else if (type == TYPE_APPLICATION_STARTING && activity.startingWindow != null) {
                     ProtoLog.w(WM_ERROR,
                             "Attempted to add starting window to token with already existing"
                                     + " starting window");
@@ -1495,8 +1495,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "%s.  Aborting.", attrs.token);
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (token.asAppWindowToken() != null) {
-                ProtoLog.w(WM_ERROR, "Non-null appWindowToken for system window of rootType=%d",
+            } else if (token.asActivityRecord() != null) {
+                ProtoLog.w(WM_ERROR, "Non-null activity for system window of rootType=%d",
                         rootType);
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
@@ -1591,11 +1591,11 @@ public class WindowManagerService extends IWindowManager.Stub
             final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
             win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
 
-            final AppWindowToken aToken = token.asAppWindowToken();
-            if (type == TYPE_APPLICATION_STARTING && aToken != null) {
-                aToken.startingWindow = win;
+            final ActivityRecord tokenActivity = token.asActivityRecord();
+            if (type == TYPE_APPLICATION_STARTING && tokenActivity != null) {
+                tokenActivity.startingWindow = win;
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "addWindow: %s startingWindow=%s",
-                        aToken, win);
+                        activity, win);
             }
 
             boolean imMayMove = true;
@@ -1636,12 +1636,12 @@ public class WindowManagerService extends IWindowManager.Stub
             winAnimator.mEnterAnimationPending = true;
             winAnimator.mEnteringAnimation = true;
             // Check if we need to prepare a transition for replacing window first.
-            if (atoken != null && atoken.isVisible()
-                    && !prepareWindowReplacementTransition(atoken)) {
+            if (activity != null && activity.isVisible()
+                    && !prepareWindowReplacementTransition(activity)) {
                 // If not, check if need to set up a dummy transition during display freeze
                 // so that the unfreeze wait for the apps to draw. This might be needed if
                 // the app is relaunching.
-                prepareNoneTransitionForRelaunching(atoken);
+                prepareNoneTransitionForRelaunching(activity);
             }
 
             final DisplayFrames displayFrames = displayContent.mDisplayFrames;
@@ -1651,10 +1651,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.calculateDisplayCutoutForRotation(displayInfo.rotation));
             final Rect taskBounds;
             final boolean floatingStack;
-            if (atoken != null && atoken.getTask() != null) {
+            if (activity != null && activity.getTask() != null) {
                 taskBounds = mTmpRect;
-                atoken.getTask().getBounds(mTmpRect);
-                floatingStack = atoken.getTask().isFloating();
+                tokenActivity.getTask().getBounds(mTmpRect);
+                floatingStack = activity.getTask().isFloating();
             } else {
                 taskBounds = null;
                 floatingStack = false;
@@ -1668,7 +1668,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
             }
-            if (win.mAppToken == null || !win.mAppToken.isClientHidden()) {
+            if (win.mActivityRecord == null || !win.mActivityRecord.isClientHidden()) {
                 res |= WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
             }
 
@@ -1753,8 +1753,8 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState attachedWindow) {
         // Try using the target SDK of the root window
         if (attachedWindow != null) {
-            return attachedWindow.mAppToken != null
-                    && attachedWindow.mAppToken.mTargetSdk >= Build.VERSION_CODES.O;
+            return attachedWindow.mActivityRecord != null
+                    && attachedWindow.mActivityRecord.mTargetSdk >= Build.VERSION_CODES.O;
         } else {
             // Otherwise, look at the package
             try {
@@ -1778,9 +1778,9 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Returns true if we're done setting up any transitions.
      */
-    private boolean prepareWindowReplacementTransition(AppWindowToken atoken) {
-        atoken.clearAllDrawn();
-        final WindowState replacedWindow = atoken.getReplacingWindow();
+    private boolean prepareWindowReplacementTransition(ActivityRecord activity) {
+        activity.clearAllDrawn();
+        final WindowState replacedWindow = activity.getReplacingWindow();
         if (replacedWindow == null) {
             // We expect to already receive a request to remove the old window. If it did not
             // happen, let's just simply add a window.
@@ -1791,8 +1791,8 @@ public class WindowManagerService extends IWindowManager.Stub
         Rect frame = replacedWindow.getVisibleFrameLw();
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
-        final DisplayContent dc = atoken.getDisplayContent();
-        dc.mOpeningApps.add(atoken);
+        final DisplayContent dc = activity.getDisplayContent();
+        dc.mOpeningApps.add(activity);
         dc.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT,
                 0 /* flags */, false /* forceOverride */);
         dc.mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
@@ -1801,14 +1801,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return true;
     }
 
-    private void prepareNoneTransitionForRelaunching(AppWindowToken atoken) {
+    private void prepareNoneTransitionForRelaunching(ActivityRecord activity) {
         // Set up a none-transition and add the app to opening apps, so that the display
         // unfreeze wait for the apps to be drawn.
         // Note that if the display unfroze already because app unfreeze timed out,
         // we don't set up the transition anymore and just let it go.
-        final DisplayContent dc = atoken.getDisplayContent();
-        if (mDisplayFrozen && !dc.mOpeningApps.contains(atoken) && atoken.isRelaunching()) {
-            dc.mOpeningApps.add(atoken);
+        final DisplayContent dc = activity.getDisplayContent();
+        if (mDisplayFrozen && !dc.mOpeningApps.contains(activity) && activity.isRelaunching()) {
+            dc.mOpeningApps.add(activity);
             dc.prepareAppTransition(WindowManager.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT, 0 /* flags */,
                     false /* forceOverride */);
             dc.executeAppTransition();
@@ -1885,26 +1885,26 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         final WindowToken token = win.mToken;
-        final AppWindowToken atoken = win.mAppToken;
+        final ActivityRecord activity = win.mActivityRecord;
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Removing %s from %s", win, token);
         // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty()) {
             if (!token.mPersistOnEmpty) {
                 token.removeImmediately();
-            } else if (atoken != null) {
-                // TODO: Should this be moved into AppWindowToken.removeWindow? Might go away after
+            } else if (activity != null) {
+                // TODO: Should this be moved into ActivityRecord.removeWindow? Might go away after
                 // re-factor.
-                atoken.firstWindowDrawn = false;
-                atoken.clearAllDrawn();
-                final TaskStack stack = atoken.getStack();
+                activity.firstWindowDrawn = false;
+                activity.clearAllDrawn();
+                final TaskStack stack = activity.getStack();
                 if (stack != null) {
-                    stack.mExitingAppTokens.remove(atoken);
+                    stack.mExitingActivities.remove(activity);
                 }
             }
         }
 
-        if (atoken != null) {
-            atoken.postWindowRemoveStartingWindowCleanup(win);
+        if (activity != null) {
+            activity.postWindowRemoveStartingWindowCleanup(win);
         }
 
         if (win.mAttrs.type == TYPE_WALLPAPER) {
@@ -1917,8 +1917,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (dc != null && !mWindowPlacerLocked.isInLayout()) {
             dc.assignWindowLayers(true /* setLayoutNeeded */);
             mWindowPlacerLocked.performSurfacePlacement();
-            if (win.mAppToken != null) {
-                win.mAppToken.updateReportedVisibilityLocked();
+            if (win.mActivityRecord != null) {
+                win.mActivityRecord.updateReportedVisibilityLocked();
             }
         }
 
@@ -2125,9 +2125,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         | WindowManager.LayoutParams.SYSTEM_UI_VISIBILITY_CHANGED)) != 0) {
                     win.mLayoutNeeded = true;
                 }
-                if (win.mAppToken != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
+                if (win.mActivityRecord != null && ((flagChanges & FLAG_SHOW_WHEN_LOCKED) != 0
                         || (flagChanges & FLAG_DISMISS_KEYGUARD) != 0)) {
-                    win.mAppToken.checkKeyguardFlagsChanged();
+                    win.mActivityRecord.checkKeyguardFlagsChanged();
                 }
                 if (((attrChanges & LayoutParams.ACCESSIBILITY_TITLE_CHANGED) != 0)
                         && (mAccessibilityController != null)) {
@@ -2196,8 +2196,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // We should only relayout if the view is visible, it is a starting window, or the
             // associated appToken is not hidden.
             final boolean shouldRelayout = viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                            || !win.mAppToken.isClientHidden());
+                    (win.mActivityRecord == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                            || !win.mActivityRecord.isClientHidden());
 
             // If we are not currently running the exit animation, we need to see about starting
             // one.
@@ -2302,8 +2302,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
             }
 
-            if (win.mAppToken != null) {
-                displayContent.mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
+            if (win.mActivityRecord != null) {
+                displayContent.mUnknownAppVisibilityController.notifyRelayouted(win.mActivityRecord);
             }
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: updateOrientation");
@@ -2315,8 +2315,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.mWallpaperController.updateWallpaperOffset(
                         win, displayInfo.logicalWidth, displayInfo.logicalHeight, false);
             }
-            if (win.mAppToken != null) {
-                win.mAppToken.updateReportedVisibilityLocked();
+            if (win.mActivityRecord != null) {
+                win.mActivityRecord.updateReportedVisibilityLocked();
             }
             if (winAnimator.mReportSurfaceResized) {
                 winAnimator.mReportSurfaceResized = false;
@@ -2414,8 +2414,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent.mInputMethodWindow == win) {
                 displayContent.setInputMethodWindowLocked(null);
             }
-            boolean stopped = win.mAppToken != null ? win.mAppToken.mAppStopped : true;
-            // We set mDestroying=true so AppWindowToken#notifyAppStopped in-to destroy surfaces
+            boolean stopped = win.mActivityRecord != null ? win.mActivityRecord.mAppStopped : true;
+            // We set mDestroying=true so ActivityRecord#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave
             // this to the exit animation.
             win.mDestroying = true;
@@ -2700,7 +2700,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void setWindowOpaqueLocked(IBinder token, boolean isOpaque) {
-        final AppWindowToken wtoken = mRoot.getAppWindowToken(token);
+        final ActivityRecord wtoken = mRoot.getActivityRecord(token);
         if (wtoken != null) {
             wtoken.setMainWindowOpaque(isOpaque);
         }
@@ -4338,7 +4338,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // to make room for IME, but the window is not the focused window that's taking input.
         // TODO (b/111080190): Consider the case of multiple IMEs on multi-display.
         final DisplayContent topFocusedDisplay = mRoot.getTopFocusedDisplayContent();
-        final AppWindowToken focusedApp = topFocusedDisplay.mFocusedApp;
+        final ActivityRecord focusedApp = topFocusedDisplay.mFocusedApp;
         return (focusedApp != null && focusedApp.getTask() != null)
                 ? focusedApp.getTask().mStack : null;
     }
@@ -4823,8 +4823,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 case WINDOW_REPLACEMENT_TIMEOUT: {
                     synchronized (mGlobalLock) {
                         for (int i = mWindowReplacementTimeouts.size() - 1; i >= 0; i--) {
-                            final AppWindowToken token = mWindowReplacementTimeouts.get(i);
-                            token.onWindowReplacementTimeout();
+                            final ActivityRecord activity = mWindowReplacementTimeouts.get(i);
+                            activity.onWindowReplacementTimeout();
                         }
                         mWindowReplacementTimeouts.clear();
                     }
@@ -5997,7 +5997,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 mRoot.forAllWindows((w) -> {
                     if ((!visibleOnly || w.mWinAnimator.getShown())
-                            && (!appsOnly || w.mAppToken != null)) {
+                            && (!appsOnly || w.mActivityRecord != null)) {
                         windows.add(w);
                     }
                 }, true /* traverseTopToBottom */);
@@ -6032,16 +6032,16 @@ public class WindowManagerService extends IWindowManager.Stub
      * the time an ANR occurred before anything else in the system changes
      * in response.
      *
-     * @param appWindowToken The application that ANR'd, may be null.
+     * @param activity The application that ANR'd, may be null.
      * @param windowState The window that ANR'd, may be null.
      * @param reason The reason for the ANR, may be null.
      */
-    void saveANRStateLocked(AppWindowToken appWindowToken, WindowState windowState, String reason) {
+    void saveANRStateLocked(ActivityRecord activity, WindowState windowState, String reason) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new FastPrintWriter(sw, false, 1024);
         pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
-        if (appWindowToken != null) {
-            pw.println("  Application at fault: " + appWindowToken.stringName);
+        if (activity != null) {
+            pw.println("  Application at fault: " + activity.stringName);
         }
         if (windowState != null) {
             pw.println("  Window at fault: " + windowState.mAttrs.getTitle());
@@ -6287,19 +6287,19 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param token Application token for which the activity will be relaunched.
      */
     void setWillReplaceWindow(IBinder token, boolean animate) {
-        final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-        if (appWindowToken == null) {
+        final ActivityRecord activity = mRoot.getActivityRecord(token);
+        if (activity == null) {
             ProtoLog.w(WM_ERROR, "Attempted to set replacing window on non-existing app token %s",
                     token);
             return;
         }
-        if (!appWindowToken.hasContentToDisplay()) {
+        if (!activity.hasContentToDisplay()) {
             ProtoLog.w(WM_ERROR,
                     "Attempted to set replacing window on app token with no content %s",
                     token);
             return;
         }
-        appWindowToken.setWillReplaceWindows(animate);
+        activity.setWillReplaceWindows(animate);
     }
 
     /**
@@ -6316,14 +6316,14 @@ public class WindowManagerService extends IWindowManager.Stub
     // above. We should combine them or find better names.
     void setWillReplaceWindows(IBinder token, boolean childrenOnly) {
         synchronized (mGlobalLock) {
-            final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-            if (appWindowToken == null) {
+            final ActivityRecord activity = mRoot.getActivityRecord(token);
+            if (activity == null) {
                 ProtoLog.w(WM_ERROR,
                         "Attempted to set replacing window on non-existing app token %s",
                         token);
                 return;
             }
-            if (!appWindowToken.hasContentToDisplay()) {
+            if (!activity.hasContentToDisplay()) {
                 ProtoLog.w(WM_ERROR,
                         "Attempted to set replacing window on app token with no content %s",
                         token);
@@ -6331,9 +6331,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (childrenOnly) {
-                appWindowToken.setWillReplaceChildWindows();
+                activity.setWillReplaceChildWindows();
             } else {
-                appWindowToken.setWillReplaceWindows(false /* animate */);
+                activity.setWillReplaceWindows(false /* animate */);
             }
 
             scheduleClearWillReplaceWindows(token, true /* replacing */);
@@ -6350,22 +6350,22 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param replacing Whether the window is being replaced or not.
      */
     void scheduleClearWillReplaceWindows(IBinder token, boolean replacing) {
-        final AppWindowToken appWindowToken = mRoot.getAppWindowToken(token);
-        if (appWindowToken == null) {
+        final ActivityRecord activity = mRoot.getActivityRecord(token);
+        if (activity == null) {
             ProtoLog.w(WM_ERROR, "Attempted to reset replacing window on non-existing app token %s",
                     token);
             return;
         }
         if (replacing) {
-            scheduleWindowReplacementTimeouts(appWindowToken);
+            scheduleWindowReplacementTimeouts(activity);
         } else {
-            appWindowToken.clearWillReplaceWindows();
+            activity.clearWillReplaceWindows();
         }
     }
 
-    void scheduleWindowReplacementTimeouts(AppWindowToken appWindowToken) {
-        if (!mWindowReplacementTimeouts.contains(appWindowToken)) {
-            mWindowReplacementTimeouts.add(appWindowToken);
+    void scheduleWindowReplacementTimeouts(ActivityRecord activity) {
+        if (!mWindowReplacementTimeouts.contains(activity)) {
+            mWindowReplacementTimeouts.add(activity);
         }
         mH.removeMessages(H.WINDOW_REPLACEMENT_TIMEOUT);
         mH.sendEmptyMessageDelayed(

@@ -520,7 +520,7 @@ public class DisplayRotation {
 
         // If the bounds of activity window is different from its parent, then reject to be seamless
         // because the window position may change after rotation that will look like a sudden jump.
-        if (w.mAppToken != null && !w.mAppToken.matchParentBounds()) {
+        if (w.mActivityRecord != null && !w.mActivityRecord.matchParentBounds()) {
             return false;
         }
 

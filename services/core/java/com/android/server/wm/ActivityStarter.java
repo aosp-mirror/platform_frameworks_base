@@ -1834,7 +1834,9 @@ class ActivityStarter {
      */
     private void complyActivityFlags(TaskRecord targetTask, ActivityRecord reusedActivity) {
         ActivityRecord targetTaskTop = targetTask.getTopActivity();
-        if (reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
+        final boolean resetTask =
+                reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0;
+        if (resetTask) {
             targetTaskTop = mTargetStack.resetTaskIfNeededLocked(targetTaskTop, mStartActivity);
         }
 
@@ -1907,14 +1909,17 @@ class ActivityStarter {
                 mAddingToTask = true;
             }
         } else if (mStartActivity.mActivityComponent.equals(targetTask.realActivity)) {
-            // In this case the top activity on the task is the same as the one being launched,
-            // so we take that as a request to bring the task to the foreground. If the top
-            // activity in the task is the root activity, deliver this new intent to it if it
-            // desires.
-            if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                    || LAUNCH_SINGLE_TOP == mLaunchMode)
-                    && targetTaskTop.mActivityComponent.equals(
-                    mStartActivity.mActivityComponent) && mStartActivity.resultTo == null) {
+            if (targetTask == mInTask) {
+                // In this case we are bringing up an existing activity from a recent task. We
+                // don't need to add a new activity instance on top.
+            } else if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
+                            || LAUNCH_SINGLE_TOP == mLaunchMode)
+                    && targetTaskTop.mActivityComponent.equals(mStartActivity.mActivityComponent)
+                    && mStartActivity.resultTo == null) {
+                // In this case the top activity on the task is the same as the one being launched,
+                // so we take that as a request to bring the task to the foreground. If the top
+                // activity in the task is the root activity, deliver this new intent to it if it
+                // desires.
                 if (targetTaskTop.isRootOfTask()) {
                     targetTaskTop.getTaskRecord().setIntent(mStartActivity);
                 }
@@ -1926,7 +1931,7 @@ class ActivityStarter {
             } else if (reusedActivity == null) {
                 mAddingToTask = true;
             }
-        } else if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) == 0) {
+        } else if (!resetTask) {
             // In this case an activity is being launched in to an existing task, without
             // resetting that task. This is typically the situation of launching an activity
             // from a notification or shortcut. We want to place the new activity on top of the
@@ -2841,12 +2846,12 @@ class ActivityStarter {
         if (r != null) {
             pw.print(prefix);
             pw.println("mLastStartActivityRecord:");
-            r.dump(pw, prefix + "  ");
+            r.dump(pw, prefix + "  ", true /* dumpAll */);
         }
         if (mStartActivity != null) {
             pw.print(prefix);
             pw.println("mStartActivity:");
-            mStartActivity.dump(pw, prefix + "  ");
+            mStartActivity.dump(pw, prefix + "  ", true /* dumpAll */);
         }
         if (mIntent != null) {
             pw.print(prefix);

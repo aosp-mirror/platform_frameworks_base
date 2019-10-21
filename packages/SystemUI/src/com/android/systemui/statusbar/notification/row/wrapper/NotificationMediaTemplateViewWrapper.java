@@ -175,7 +175,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
         mActions = mView.findViewById(com.android.internal.R.id.media_actions);
         mIsViewVisible = mView.isShown();
 
-        final MediaSession.Token token = mRow.getEntry().notification.getNotification().extras
+        final MediaSession.Token token = mRow.getEntry().getSbn().getNotification().extras
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();
@@ -404,7 +404,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
      * @return new LogMaker
      */
     private LogMaker newLog(int event) {
-        String packageName = mRow.getEntry().notification.getPackageName();
+        String packageName = mRow.getEntry().getSbn().getPackageName();
 
         return new LogMaker(MetricsEvent.MEDIA_NOTIFICATION_SEEKBAR)
                 .setType(event)
@@ -416,7 +416,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
      * @return new LogMaker
      */
     private LogMaker newLog(int event, int subtype) {
-        String packageName = mRow.getEntry().notification.getPackageName();
+        String packageName = mRow.getEntry().getSbn().getPackageName();
         return new LogMaker(MetricsEvent.MEDIA_NOTIFICATION_SEEKBAR)
                 .setType(event)
                 .setSubtype(subtype)

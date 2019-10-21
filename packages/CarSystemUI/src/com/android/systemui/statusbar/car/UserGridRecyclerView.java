@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.car;
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -80,7 +81,7 @@ public class UserGridRecyclerView extends RecyclerView {
         mCarUserManagerHelper = new CarUserManagerHelper(mContext);
         mUserManager = UserManager.get(mContext);
 
-        addItemDecoration(new ItemSpacingDecoration(context.getResources().getDimensionPixelSize(
+        addItemDecoration(new ItemSpacingDecoration(mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_user_switcher_vertical_spacing_between_users)));
     }
 
@@ -140,8 +141,7 @@ public class UserGridRecyclerView extends RecyclerView {
                 continue;
             }
 
-            boolean isForeground =
-                    mCarUserManagerHelper.getCurrentForegroundUserId() == userInfo.id;
+            boolean isForeground = ActivityManager.getCurrentUser() == userInfo.id;
             UserRecord record = new UserRecord(userInfo, false /* isStartGuestSession */,
                     false /* isAddUser */, isForeground);
             userRecords.add(record);
@@ -159,7 +159,7 @@ public class UserGridRecyclerView extends RecyclerView {
     }
 
     private UserRecord createForegroundUserRecord() {
-        return new UserRecord(mCarUserManagerHelper.getCurrentForegroundUserInfo(),
+        return new UserRecord(mUserManager.getUserInfo(ActivityManager.getCurrentUser()),
                 false /* isStartGuestSession */, false /* isAddUser */, true /* isForeground */);
     }
 

@@ -45,7 +45,7 @@ public class OomAdjProfiler {
     private boolean mLastScheduledScreenOff;
 
     @GuardedBy("this")
-    private long mOomAdjStartTimeMs;
+    private long mOomAdjStartTimeUs;
     @GuardedBy("this")
     private boolean mOomAdjStarted;
 
@@ -65,6 +65,11 @@ public class OomAdjProfiler {
     @GuardedBy("this")
     final RingBuffer<CpuTimes> mSystemServerCpuTimesHist = new RingBuffer<>(CpuTimes.class, 10);
 
+    @GuardedBy("this")
+    private long mTotalOomAdjRunTimeUs;
+    @GuardedBy("this")
+    private int mTotalOomAdjCalls;
+
     void batteryPowerChanged(boolean onBattery) {
         synchronized (this) {
             scheduleSystemServerCpuTimeUpdate();
@@ -81,7 +86,7 @@ public class OomAdjProfiler {
 
     void oomAdjStarted() {
         synchronized (this) {
-            mOomAdjStartTimeMs = SystemClock.currentThreadTimeMillis();
+            mOomAdjStartTimeUs = SystemClock.currentThreadTimeMicro();
             mOomAdjStarted = true;
         }
     }
@@ -91,7 +96,10 @@ public class OomAdjProfiler {
             if (!mOomAdjStarted) {
                 return;
             }
-            mOomAdjRunTime.addCpuTimeMs(SystemClock.currentThreadTimeMillis() - mOomAdjStartTimeMs);
+            long elapsedUs = SystemClock.currentThreadTimeMicro() - mOomAdjStartTimeUs;
+            mOomAdjRunTime.addCpuTimeUs(elapsedUs);
+            mTotalOomAdjRunTimeUs += elapsedUs;
+            mTotalOomAdjCalls++;
         }
     }
 
@@ -169,32 +177,50 @@ public class OomAdjProfiler {
                 pw.print("oom_adj=");
                 pw.println(oomAdjRunTimes[i]);
             }
+            if (mTotalOomAdjCalls != 0) {
+                pw.println("System server total oomAdj runtimes (us) since boot:");
+                pw.print("  cpu time spent=");
+                pw.print(mTotalOomAdjRunTimeUs);
+                pw.print("  number of calls=");
+                pw.print(mTotalOomAdjCalls);
+                pw.print("  average=");
+                pw.println(mTotalOomAdjRunTimeUs / mTotalOomAdjCalls);
+            }
         }
     }
 
     private class CpuTimes {
-        private long mOnBatteryTimeMs;
-        private long mOnBatteryScreenOffTimeMs;
+        private long mOnBatteryTimeUs;
+        private long mOnBatteryScreenOffTimeUs;
 
         public void addCpuTimeMs(long cpuTimeMs) {
-            addCpuTimeMs(cpuTimeMs, mOnBattery, mScreenOff);
+            addCpuTimeUs(cpuTimeMs * 1000, mOnBattery, mScreenOff);
         }
 
         public void addCpuTimeMs(long cpuTimeMs, boolean onBattery, boolean screenOff) {
+            addCpuTimeUs(cpuTimeMs * 1000, onBattery, screenOff);
+        }
+
+        public void addCpuTimeUs(long cpuTimeUs) {
+            addCpuTimeUs(cpuTimeUs, mOnBattery, mScreenOff);
+        }
+
+        public void addCpuTimeUs(long cpuTimeUs, boolean onBattery, boolean screenOff) {
             if (onBattery) {
-                mOnBatteryTimeMs += cpuTimeMs;
+                mOnBatteryTimeUs += cpuTimeUs;
                 if (screenOff) {
-                    mOnBatteryScreenOffTimeMs += cpuTimeMs;
+                    mOnBatteryScreenOffTimeUs += cpuTimeUs;
                 }
             }
         }
 
         public boolean isEmpty() {
-            return mOnBatteryTimeMs == 0 && mOnBatteryScreenOffTimeMs == 0;
+            return mOnBatteryTimeUs == 0 && mOnBatteryScreenOffTimeUs == 0;
         }
 
         public String toString() {
-            return "[" + mOnBatteryTimeMs + "," + mOnBatteryScreenOffTimeMs + "]";
+            return "[" + (mOnBatteryTimeUs / 1000) + ","
+                    + (mOnBatteryScreenOffTimeUs / 1000) + "]";
         }
     }
 }

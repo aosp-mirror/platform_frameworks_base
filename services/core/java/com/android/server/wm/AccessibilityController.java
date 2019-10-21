@@ -725,7 +725,7 @@ final class AccessibilityController {
             }
 
             private Region getLetterboxBounds(WindowState windowState) {
-                final AppWindowToken appToken = windowState.mAppToken;
+                final ActivityRecord appToken = windowState.mActivityRecord;
                 if (appToken == null) {
                     return new Region();
                 }

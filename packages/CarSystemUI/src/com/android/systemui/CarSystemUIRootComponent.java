@@ -27,7 +27,8 @@ import dagger.Component;
                 DependencyBinder.class,
                 SystemUIFactory.ContextHolder.class,
                 SystemUIModule.class,
-                CarSystemUIModule.class
+                CarSystemUIModule.class,
+                CarSystemUIBinder.class
         })
 interface CarSystemUIRootComponent extends SystemUIRootComponent {
 

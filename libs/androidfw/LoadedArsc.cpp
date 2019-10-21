@@ -51,9 +51,8 @@ namespace {
 // the Type structs.
 class TypeSpecPtrBuilder {
  public:
-  explicit TypeSpecPtrBuilder(const ResTable_typeSpec* header,
-                              const IdmapEntry_header* idmap_header)
-      : header_(header), idmap_header_(idmap_header) {
+  explicit TypeSpecPtrBuilder(const ResTable_typeSpec* header)
+      : header_(header) {
   }
 
   void AddType(const ResTable_type* type) {
@@ -70,7 +69,6 @@ class TypeSpecPtrBuilder {
     TypeSpec* type_spec =
         (TypeSpec*)::malloc(sizeof(TypeSpec) + (types_.size() * sizeof(ElementType)));
     type_spec->type_spec = header_;
-    type_spec->idmap_entries = idmap_header_;
     type_spec->type_count = types_.size();
     memcpy(type_spec + 1, types_.data(), types_.size() * sizeof(ElementType));
     return TypeSpecPtr(type_spec);
@@ -80,7 +78,6 @@ class TypeSpecPtrBuilder {
   DISALLOW_COPY_AND_ASSIGN(TypeSpecPtrBuilder);
 
   const ResTable_typeSpec* header_;
-  const IdmapEntry_header* idmap_header_;
   std::vector<const ResTable_type*> types_;
 };
 
@@ -400,7 +397,6 @@ const LoadedPackage* LoadedArsc::GetPackageById(uint8_t package_id) const {
 }
 
 std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
-                                                         const LoadedIdmap* loaded_idmap,
                                                          bool system,
                                                          bool load_as_shared_library,
                                                          bool for_loader) {
@@ -424,12 +420,6 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       (loaded_package->package_id_ == kAppPackageId && load_as_shared_library)) {
     // Package ID of 0 means this is a shared library.
     loaded_package->dynamic_ = true;
-  }
-
-  if (loaded_idmap != nullptr) {
-    // This is an overlay and so it needs to pretend to be the target package.
-    loaded_package->package_id_ = loaded_idmap->TargetPackageId();
-    loaded_package->overlay_ = true;
   }
 
   if (for_loader) {
@@ -517,16 +507,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           return {};
         }
 
-        // If this is an overlay, associate the mapping of this type to the target type
-        // from the IDMAP.
-        const IdmapEntry_header* idmap_entry_header = nullptr;
-        if (loaded_idmap != nullptr) {
-          idmap_entry_header = loaded_idmap->GetEntryMapForType(type_spec->id);
-        }
-
         std::unique_ptr<TypeSpecPtrBuilder>& builder_ptr = type_builder_map[type_spec->id - 1];
         if (builder_ptr == nullptr) {
-          builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec, idmap_entry_header);
+          builder_ptr = util::make_unique<TypeSpecPtrBuilder>(type_spec);
           loaded_package->resource_ids_.set(type_spec->id, entry_count);
         } else {
           LOG(WARNING) << StringPrintf("RES_TABLE_TYPE_SPEC_TYPE already defined for ID %02x",
@@ -687,15 +670,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       return {};
     }
 
-    // We only add the type to the package if there is no IDMAP, or if the type is
-    // overlaying something.
-    if (loaded_idmap == nullptr || type_spec_ptr->idmap_entries != nullptr) {
-      // If this is an overlay, insert it at the target type ID.
-      if (type_spec_ptr->idmap_entries != nullptr) {
-        type_idx = dtohs(type_spec_ptr->idmap_entries->target_type_id) - 1;
-      }
-      loaded_package->type_specs_.editItemAt(type_idx) = std::move(type_spec_ptr);
-    }
+    loaded_package->type_specs_.editItemAt(type_idx) = std::move(type_spec_ptr);
   }
 
   return std::move(loaded_package);
@@ -709,6 +684,10 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
     return false;
   }
 
+  if (loaded_idmap != nullptr) {
+    global_string_pool_ = util::make_unique<OverlayStringPool>(loaded_idmap);
+  }
+
   const size_t package_count = dtohl(header->packageCount);
   size_t packages_seen = 0;
 
@@ -720,9 +699,9 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
     switch (child_chunk.type()) {
       case RES_STRING_POOL_TYPE:
         // Only use the first string pool. Ignore others.
-        if (global_string_pool_.getError() == NO_INIT) {
-          status_t err = global_string_pool_.setTo(child_chunk.header<ResStringPool_header>(),
-                                                   child_chunk.size());
+        if (global_string_pool_->getError() == NO_INIT) {
+          status_t err = global_string_pool_->setTo(child_chunk.header<ResStringPool_header>(),
+                                                    child_chunk.size());
           if (err != NO_ERROR) {
             LOG(ERROR) << "RES_STRING_POOL_TYPE corrupt.";
             return false;
@@ -741,11 +720,7 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
         packages_seen++;
 
         std::unique_ptr<const LoadedPackage> loaded_package =
-            LoadedPackage::Load(child_chunk,
-                                loaded_idmap,
-                                system_,
-                                load_as_shared_library,
-                                for_loader);
+            LoadedPackage::Load(child_chunk, system_, load_as_shared_library, for_loader);
         if (!loaded_package) {
           return false;
         }

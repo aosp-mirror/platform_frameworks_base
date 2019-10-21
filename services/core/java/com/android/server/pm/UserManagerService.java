@@ -54,6 +54,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.IUserManager;
+import android.os.IUserRestrictionsListener;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -1606,6 +1607,36 @@ public class UserManagerService extends IUserManager.Stub {
         return false;
     }
 
+    @Override
+    public boolean isSettingRestrictedForUser(String setting, @UserIdInt int userId,
+            String value, int callingUid) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Non-system caller");
+        }
+        return UserRestrictionsUtils.isSettingRestrictedForUser(mContext, setting, userId,
+                value, callingUid);
+    }
+
+    @Override
+    public void addUserRestrictionsListener(final IUserRestrictionsListener listener) {
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Non-system caller");
+        }
+
+        // NOTE: unregistering not supported; only client is the settings provider,
+        // which installs a single static permanent listener.  If that listener goes
+        // bad it implies the whole system process is going to crash.
+        mLocalService.addUserRestrictionsListener(
+                (int userId, Bundle newRestrict, Bundle prevRestrict) -> {
+                    try {
+                        listener.onUserRestrictionsChanged(userId, newRestrict, prevRestrict);
+                    } catch (RemoteException re) {
+                        Slog.e("IUserRestrictionsListener",
+                                "Unable to invoke listener: " + re.getMessage());
+                    }
+                });
+    }
+
     /**
      * @hide
      *
@@ -2846,7 +2877,7 @@ public class UserManagerService extends IUserManager.Stub {
                     return null;
                 }
                 // If we're adding a guest and there already exists one, bail.
-                if (isGuest && findCurrentGuestUser() != null) {
+                if (isGuest && !preCreate && findCurrentGuestUser() != null) {
                     Log.e(LOG_TAG, "Cannot add guest user. Guest user already exists.");
                     return null;
                 }
@@ -3100,7 +3131,8 @@ public class UserManagerService extends IUserManager.Stub {
             final int size = mUsers.size();
             for (int i = 0; i < size; i++) {
                 final UserInfo user = mUsers.valueAt(i).info;
-                if (user.isGuest() && !user.guestToRemove && !mRemovingUserIds.get(user.id)) {
+                if (user.isGuest() && !user.guestToRemove && !user.preCreated
+                        && !mRemovingUserIds.get(user.id)) {
                     return user;
                 }
             }
@@ -4410,7 +4442,7 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public boolean isSettingRestrictedForUser(String setting, @UserIdInt int userId,
                 String value, int callingUid) {
-            return UserRestrictionsUtils.isSettingRestrictedForUser(mContext, setting, userId,
+            return UserManagerService.this.isSettingRestrictedForUser(setting, userId,
                     value, callingUid);
         }
 

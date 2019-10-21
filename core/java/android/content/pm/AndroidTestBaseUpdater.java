@@ -55,15 +55,20 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
     private static final long REMOVE_ANDROID_TEST_BASE = 133396946L;
 
     private static boolean isChangeEnabled(Package pkg) {
-        IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        try {
-            return platformCompat.isChangeEnabled(REMOVE_ANDROID_TEST_BASE, pkg.applicationInfo);
-        } catch (RemoteException | NullPointerException e) {
-            Log.e(TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
+        // Do not ask platform compat for system apps to prevent a boot time regression in tests.
+        // b/142558883.
+        if (!pkg.applicationInfo.isSystemApp()) {
+            IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
+                    ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+            try {
+                return platformCompat.isChangeEnabled(REMOVE_ANDROID_TEST_BASE,
+                        pkg.applicationInfo);
+            } catch (RemoteException | NullPointerException e) {
+                Log.e(TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
+            }
         }
         // Fall back to previous behaviour.
-        return pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.Q;
+        return pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.Q;
     }
 
     @Override

@@ -1765,7 +1765,7 @@ public abstract class ContentResolver implements ContentInterface {
             stableProvider = null;
 
             return new AssetFileDescriptor(pfd, fd.getStartOffset(),
-                    fd.getDeclaredLength());
+                    fd.getDeclaredLength(), fd.getExtras());
 
         } catch (RemoteException e) {
             // Whatever, whatever, we'll go away.

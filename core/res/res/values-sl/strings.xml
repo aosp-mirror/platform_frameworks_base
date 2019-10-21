@@ -350,10 +350,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Aplikaciji omogoča prejemanje in obdelavo SMS-ov. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"prejemanje sporočil (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Aplikaciji omogoča prejemanje in obdelavo MMS-ov. S tem lahko aplikacija nadzoruje ali izbriše sporočila, poslana v napravo, ne da bi vam jih pokazala."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Posredovanje sporočil oddaj v celici"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Aplikaciji omogoča povezovanje z modulom za oddaje v celici, da posreduje sporočila oddaj v celici, takoj ko jih prejme. Na nekaterih lokacijah so opozorila oddaj v celici dostavljena, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko prejme sporočilo oddaje v celici."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"branje sporočil oddaje v celici"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogoča aplikaciji branje sporočil oddaje v celici, ki jih prejme naprava. Opozorila oddaje v celici so dostavljena na nekaterih lokacijah, da vas opozorijo na izredne razmere. Zlonamerne aplikacije lahko vplivajo na delovanje naprave, ko dobi sporočilo oddaje v celici."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"branje naročenih virov"</string>
@@ -665,8 +663,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Aplikaciji omogoča branje in pisanje konfiguracije načina »ne moti«."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"začetek uporabe dovoljenja za ogledovanje"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Imetniku omogoča začetek uporabe dovoljenj za aplikacijo. Nikoli ni potrebno za navadne aplikacije."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cilj bližnjice funkcije za ljudi s posebnimi potrebami"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Aplikaciji dovoljuje, da določi cilj bližnjice funkcije za ljudi s posebnimi potrebami."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih in kodah PIN za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Nadzor nad poskusi odklepanja zaslona"</string>

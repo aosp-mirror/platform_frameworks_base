@@ -15,27 +15,41 @@
 -->
 
 <resources>
-<overlayable name="OverlayableResources1" actor="overlay://theme">
-    <!-- Any overlay can overlay the value of @string/overlayable1 -->
-    <item type="string" name="overlayable1" />
+    <overlayable name="OverlayableResources1" actor="overlay://theme">
+        <!-- Any overlay on the product or system partition can overlay the value of
+            @string/overlayable2 -->
+        <policy type="product|system">
+            <item type="string" name="overlayable2" />
+        </policy>
 
-    <!-- Any overlay on the product or system partition can overlay the value of
-        @string/overlayable2 -->
-    <policy type="product|system">
-        <item type="string" name="overlayable2" />
-    </policy>
+        <!-- Any overlay can overlay the value of @string/overlayable4 -->
+        <policy type="public">
+            <item type="string" name="overlayable1" />
+            <item type="string" name="overlayable4" />
+        </policy>
+    </overlayable>
 
-    <!-- Any overlay can overlay the value of @string/overlayable4 -->
-    <policy type="public">
-        <item type="string" name="overlayable4" />
-    </policy>
-</overlayable>
+    <overlayable name="OverlayableResources2" actor="overlay://com.android.overlayable">
+        <!-- Any overlay on the vendor or product partition can overlay the value of
+            @string/overlayable3 -->
+        <policy type="vendor|product">
+            <item type="string" name="overlayable3" />
+        </policy>
+    </overlayable>
 
-<overlayable name="OverlayableResources2" actor="overlay://com.android.overlayable">
-    <!-- Any overlay on the vendor or product partition can overlay the value of
-        @string/overlayable3 -->
-    <policy type="vendor|product">
-        <item type="string" name="overlayable3" />
-    </policy>
-</overlayable>
+    <overlayable name="OverlayableResources3">
+        <policy type="public">
+            <item type="string" name="overlayable5" />
+            <item type="string" name="overlayable6" />
+            <item type="string" name="overlayable7" />
+            <item type="string" name="overlayable8" />
+            <item type="string" name="overlayable9" />
+            <item type="string" name="overlayable10" />
+            <item type="string" name="overlayable11" />
+            <item type="integer" name="config_int" />
+            <item type="id" name="hello_view" />
+            <item type="attr" name="max_lines" />
+            <item type="layout" name="hello_view" />
+        </policy>
+    </overlayable>
 </resources>

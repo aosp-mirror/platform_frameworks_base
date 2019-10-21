@@ -18,11 +18,14 @@ package com.android.protolog.tool
 
 import com.android.protolog.tool.CommandOptions.Companion.USAGE
 import com.github.javaparser.ParseProblemException
+import com.github.javaparser.ParserConfiguration
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.jar.JarOutputStream
 import java.util.zip.ZipEntry
 import kotlin.system.exitProcess
@@ -45,29 +48,37 @@ object ProtoLogTool {
         val outJar = JarOutputStream(out)
         val processor = ProtoLogCallProcessor(command.protoLogClassNameArg,
                 command.protoLogGroupsClassNameArg, groups)
-        val transformer = SourceTransformer(command.protoLogImplClassNameArg, processor)
 
-        command.javaSourceArgs.forEach { path ->
-            val file = File(path)
-            val text = file.readText()
-            val newPath = path
-            val outSrc = try {
-                val code = tryParse(text, path)
-                if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                    transformer.processClass(text, newPath, code)
-                } else {
+        val executor = newThreadPool()
+
+        command.javaSourceArgs.map { path ->
+            executor.submitCallable {
+                val transformer = SourceTransformer(command.protoLogImplClassNameArg, processor)
+                val file = File(path)
+                val text = file.readText()
+                val outSrc = try {
+                    val code = tryParse(text, path)
+                    if (containsProtoLogText(text, command.protoLogClassNameArg)) {
+                        transformer.processClass(text, path, code)
+                    } else {
+                        text
+                    }
+                } catch (ex: ParsingException) {
+                    // If we cannot parse this file, skip it (and log why). Compilation will fail
+                    // in a subsequent build step.
+                    println("\n${ex.message}\n")
                     text
                 }
-            } catch (ex: ParsingException) {
-                // If we cannot parse this file, skip it (and log why). Compilation will fail
-                // in a subsequent build step.
-                println("\n${ex.message}\n")
-                text
+                path to outSrc
             }
-            outJar.putNextEntry(ZipEntry(newPath))
+        }.map { future ->
+            val (path, outSrc) = future.get()
+            outJar.putNextEntry(ZipEntry(path))
             outJar.write(outSrc.toByteArray())
             outJar.closeEntry()
         }
+
+        executor.shutdown()
 
         outJar.close()
         out.close()
@@ -92,23 +103,36 @@ object ProtoLogTool {
         val processor = ProtoLogCallProcessor(command.protoLogClassNameArg,
                 command.protoLogGroupsClassNameArg, groups)
         val builder = ViewerConfigBuilder(processor)
-        command.javaSourceArgs.forEach { path ->
-            val file = File(path)
-            val text = file.readText()
-            if (containsProtoLogText(text, command.protoLogClassNameArg)) {
-                try {
-                    val code = tryParse(text, path)
-                    val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
-                            .get().nameAsString else ""
-                    val newPath = pack.replace('.', '/') + '/' + file.name
-                    builder.processClass(code, newPath)
-                } catch (ex: ParsingException) {
-                    // If we cannot parse this file, skip it (and log why). Compilation will fail
-                    // in a subsequent build step.
-                    println("\n${ex.message}\n")
+
+        val executor = newThreadPool()
+
+        command.javaSourceArgs.map { path ->
+            executor.submitCallable {
+                val file = File(path)
+                val text = file.readText()
+                if (containsProtoLogText(text, command.protoLogClassNameArg)) {
+                    try {
+                        val code = tryParse(text, path)
+                        val pack = if (code.packageDeclaration.isPresent) code.packageDeclaration
+                                .get().nameAsString else ""
+                        val newPath = pack.replace('.', '/') + '/' + file.name
+                        builder.findLogCalls(code, newPath)
+                    } catch (ex: ParsingException) {
+                        // If we cannot parse this file, skip it (and log why). Compilation will fail
+                        // in a subsequent build step.
+                        println("\n${ex.message}\n")
+                        null
+                    }
+                } else {
+                    null
                 }
             }
+        }.forEach { future ->
+            builder.addLogCalls(future.get() ?: return@forEach)
         }
+
+        executor.shutdown()
+
         val out = FileOutputStream(command.viewerConfigJsonArg)
         out.write(builder.build().toByteArray())
         out.close()
@@ -122,6 +146,11 @@ object ProtoLogTool {
 
     @JvmStatic
     fun main(args: Array<String>) {
+        StaticJavaParser.setConfiguration(ParserConfiguration().apply {
+            setLanguageLevel(ParserConfiguration.LanguageLevel.RAW)
+            setAttributeComments(false)
+        })
+
         try {
             val command = CommandOptions(args)
             when (command.command) {
@@ -138,3 +167,8 @@ object ProtoLogTool {
         }
     }
 }
+
+private fun <T> ExecutorService.submitCallable(f: () -> T) = submit(f)
+
+private fun newThreadPool() = Executors.newFixedThreadPool(
+        Runtime.getRuntime().availableProcessors())

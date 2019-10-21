@@ -106,7 +106,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
                 "overrideWindow");
         overrideWindow.mAttrs.packageName = "com.android.test";
         overrideWindow.mAttrs.preferredDisplayModeId = LOW_MODE_ID;
-        overrideWindow.mAppToken.mSurfaceAnimator.startAnimation(
+        overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */);
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
@@ -122,7 +122,7 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         mPolicy.addNonHighRefreshRatePackage("com.android.test");
         assertEquals(LOW_MODE_ID, mPolicy.getPreferredModeId(cameraUsingWindow));
 
-        cameraUsingWindow.mAppToken.mSurfaceAnimator.startAnimation(
+        cameraUsingWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 cameraUsingWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */);
         assertEquals(0, mPolicy.getPreferredModeId(cameraUsingWindow));

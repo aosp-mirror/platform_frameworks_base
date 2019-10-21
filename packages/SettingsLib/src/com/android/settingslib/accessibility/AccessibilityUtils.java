@@ -48,11 +48,21 @@ public class AccessibilityUtils {
         return getEnabledServicesFromSettings(context, UserHandle.myUserId());
     }
 
+    /**
+     * Check if the accessibility service is crashed
+     *
+     * @param packageName The package name to check
+     * @param serviceName The service name to check
+     * @param installedServiceInfos The list of installed accessibility service
+     * @return {@code true} if the accessibility service is crashed for the user.
+     * {@code false} otherwise.
+     */
     public static boolean hasServiceCrashed(String packageName, String serviceName,
-            List<AccessibilityServiceInfo> enabledServiceInfos) {
-        for (int i = 0; i < enabledServiceInfos.size(); i++) {
-            AccessibilityServiceInfo accessibilityServiceInfo = enabledServiceInfos.get(i);
-            final ServiceInfo serviceInfo = enabledServiceInfos.get(i).getResolveInfo().serviceInfo;
+            List<AccessibilityServiceInfo> installedServiceInfos) {
+        for (int i = 0; i < installedServiceInfos.size(); i++) {
+            final AccessibilityServiceInfo accessibilityServiceInfo = installedServiceInfos.get(i);
+            final ServiceInfo serviceInfo =
+                    installedServiceInfos.get(i).getResolveInfo().serviceInfo;
             if (TextUtils.equals(serviceInfo.packageName, packageName)
                     && TextUtils.equals(serviceInfo.name, serviceName)) {
                 return accessibilityServiceInfo.crashed;

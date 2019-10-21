@@ -237,8 +237,8 @@
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Relatório completo"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Use esta opção para ter o mínimo de interferência do sistema quando seu dispositivo não estiver respondendo ou estiver muito lento, ou quando você precisar de todas as seções de relatórios. Ela não permite que você informe mais detalhes ou faça capturas de tela adicionais."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
-      <item quantity="one">Capturas de tela para o relatório do bug serão feitas em <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
-      <item quantity="other">Capturas de tela para o relatório do bug serão feitas em <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
+      <item quantity="one">Capturas de tela para o relatório de bug serão feitas em <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
+      <item quantity="other">Capturas de tela para o relatório de bug serão feitas em <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som DESATIVADO"</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite que o app receba e processe mensagens SMS. Isso significa que o app pode monitorar ou excluir mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"receber mensagens de texto (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite que o app receba e processe mensagens MMS. Isso significa que o app pode monitorar ou excluir as mensagens enviadas para o dispositivo sem mostrá-las para você."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Encaminhar mensagens de transmissão celular"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Permite que o app se vincule ao módulo de transmissão celular para encaminhar mensagens de transmissão celular assim que elas forem recebidas. Alertas de transmissão celular são recebidos em alguns locais para avisar sobre situações de emergência. Apps maliciosos podem interferir no desempenho ou funcionamento do dispositivo quando uma transmissão celular de emergência é recebida."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensagens de difusão celular"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite que o app leia mensagens de difusão celular recebidas por seu dispositivo. Alertas de difusão celular são recebidos em alguns locais para avisar você de situações de emergência. Apps maliciosos podem interferir no desempenho ou funcionamento de seu dispositivo quando uma difusão celular de emergência é recebida."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"ler feeds inscritos"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permitir que o app leia e grave a configuração \"Não perturbe\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"iniciar uso da permissão para visualização"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Permite que o sistema inicie o uso de permissão para um app. Não deve ser necessário para apps comuns."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"objetivo do atalho de acessibilidade"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Permite que um app defina o objetivo do atalho de acessibilidade."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras para senha"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controla o tamanho e os caracteres permitidos nos PINs e nas senhas do bloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorar tentativas de desbloqueio de tela"</string>
@@ -1373,10 +1369,10 @@
     <string name="usb_contaminant_detected_message" msgid="832337061059487250">"A porta USB é desativada automaticamente. Toque para saber mais."</string>
     <string name="usb_contaminant_not_detected_title" msgid="7708281124088684821">"É seguro usar a porta USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="2415791798244545292">"Não há mais líquidos ou detritos detectados no smartphone."</string>
-    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Gerando relatório do bug..."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>
-    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartilhando relatório do bug…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Seu administrador solicitou um relatório do bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados."</string>
+    <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Gerando relatório de bug..."</string>
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório de bug?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartilhando relatório de bug…"</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="6029609949340992866">"Seu administrador solicitou um relatório de bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"COMPARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECUSAR"</string>
     <string name="select_input_method" msgid="4653387336791222978">"Selecione o método de entrada"</string>
@@ -1555,7 +1551,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Mais opções"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"Armazenamento interno compartilhado"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"Divisão interna de armazenamento"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Cartão SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"Cartão SD <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"Drive USB"</string>

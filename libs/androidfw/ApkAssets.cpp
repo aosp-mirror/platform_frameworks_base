@@ -45,7 +45,7 @@ ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle,
                      time_t last_mod_time,
                      bool for_loader)
     : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path), last_mod_time_(last_mod_time),
-      for_loader(for_loader) {
+      for_loader_(for_loader) {
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system,
@@ -75,7 +75,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     return {};
   }
   return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(), std::move(idmap_asset),
-                  std::move(loaded_idmap), system, false /*load_as_shared_library*/);
+                  std::move(loaded_idmap), system, true /*load_as_shared_library*/);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
@@ -165,12 +165,14 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 
   // Must retain ownership of the IDMAP Asset so that all pointers to its mmapped data remain valid.
   loaded_apk->idmap_asset_ = std::move(idmap_asset);
+  loaded_apk->loaded_idmap_ = std::move(loaded_idmap);
 
   const StringPiece data(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
       loaded_apk->resources_asset_->getLength());
   loaded_apk->loaded_arsc_ =
-      LoadedArsc::Load(data, loaded_idmap.get(), system, load_as_shared_library, for_loader);
+      LoadedArsc::Load(data, loaded_apk->loaded_idmap_.get(), system, load_as_shared_library,
+                       for_loader);
   if (loaded_apk->loaded_arsc_ == nullptr) {
     LOG(ERROR) << "Failed to load '" << kResourcesArsc << "' in APK '" << path << "'.";
     return {};
@@ -319,7 +321,7 @@ bool ApkAssets::ForEachFile(const std::string& root_path,
 
 bool ApkAssets::IsUpToDate() const {
   // Loaders are invalidated by the app, not the system, so assume up to date
-  if (for_loader) {
+  if (for_loader_) {
     return true;
   }
 

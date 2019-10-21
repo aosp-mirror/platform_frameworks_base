@@ -245,7 +245,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         StatusBarNotification parentToCancel = null;
         if (shouldAutoCancel(sbn) && mGroupManager.isOnlyChildInGroup(sbn)) {
             StatusBarNotification summarySbn =
-                    mGroupManager.getLogicalGroupSummary(sbn).notification;
+                    mGroupManager.getLogicalGroupSummary(sbn).getSbn();
             if (shouldAutoCancel(summarySbn)) {
                 parentToCancel = summarySbn;
             }
@@ -310,7 +310,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
         }
-        if (!TextUtils.isEmpty(remoteInputText) && !controller.isSpinning(entry.key)) {
+        if (!TextUtils.isEmpty(remoteInputText) && !controller.isSpinning(entry.getKey())) {
             fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                     remoteInputText.toString());
         }
@@ -409,11 +409,11 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         if (mNotificationInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
             if (shouldSuppressFullScreenIntent(entry)) {
                 if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + entry.key);
+                    Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + entry.getKey());
                 }
             } else if (entry.getImportance() < NotificationManager.IMPORTANCE_HIGH) {
                 if (DEBUG) {
-                    Log.d(TAG, "No Fullscreen intent: not important enough: " + entry.key);
+                    Log.d(TAG, "No Fullscreen intent: not important enough: " + entry.getKey());
                 }
             } else {
                 // Stop screensaver if the notification has a fullscreen intent.
@@ -432,8 +432,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 }
                 try {
                     EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
-                            entry.key);
-                    entry.notification.getNotification().fullScreenIntent.send();
+                            entry.getKey());
+                    entry.getSbn().getNotification().fullScreenIntent.send();
                     entry.notifyFullScreenIntentLaunched();
                     mMetricsLogger.count("note_fullscreen", 1);
                 } catch (PendingIntent.CanceledException e) {

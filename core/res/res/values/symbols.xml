@@ -1920,6 +1920,7 @@
   <java-symbol type="bool" name="config_tether_upstream_automatic" />
   <java-symbol type="array" name="config_tether_usb_regexs" />
   <java-symbol type="array" name="config_tether_wifi_regexs" />
+  <java-symbol type="array" name="config_tether_wifi_p2p_regexs" />
   <java-symbol type="array" name="config_usbHostBlacklist" />
   <java-symbol type="array" name="config_serialPorts" />
   <java-symbol type="array" name="radioAttributes" />
@@ -1970,6 +1971,7 @@
   <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
   <java-symbol type="bool" name="config_wifi_connected_mac_randomization_supported" />
   <java-symbol type="bool" name="config_wifi_p2p_mac_randomization_supported" />
+  <java-symbol type="bool" name="config_wifi_ap_mac_randomization_supported" />
   <java-symbol type="bool" name="config_wifi_aggressive_randomization_ssid_whitelist_enabled" />
   <java-symbol type="bool" name="config_wifi_link_probing_supported" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
@@ -3163,6 +3165,7 @@
 
   <java-symbol type="string" name="global_action_emergency" />
   <java-symbol type="string" name="config_emergency_call_number" />
+  <java-symbol type="string" name="config_emergency_dialer_package" />
   <java-symbol type="array" name="config_emergency_mcc_codes" />
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />

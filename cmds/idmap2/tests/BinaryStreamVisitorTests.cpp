@@ -18,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "TestHelpers.h"
 #include "androidfw/ApkAssets.h"
@@ -52,112 +53,39 @@ TEST(BinaryStreamVisitorTests, CreateBinaryStreamViaBinaryStreamVisitor) {
   ASSERT_EQ(idmap1->GetData().size(), 1U);
   ASSERT_EQ(idmap1->GetData().size(), idmap2->GetData().size());
 
-  const auto& data1 = idmap1->GetData()[0];
-  const auto& data2 = idmap2->GetData()[0];
+  const std::vector<std::unique_ptr<const IdmapData>>& data_blocks1 = idmap1->GetData();
+  ASSERT_EQ(data_blocks1.size(), 1U);
+  const std::unique_ptr<const IdmapData>& data1 = data_blocks1[0];
+  ASSERT_THAT(data1, NotNull());
 
-  ASSERT_EQ(data1->GetHeader()->GetTargetPackageId(), data2->GetHeader()->GetTargetPackageId());
-  ASSERT_EQ(data1->GetTypeEntries().size(), 2U);
-  ASSERT_EQ(data1->GetTypeEntries().size(), data2->GetTypeEntries().size());
-  ASSERT_EQ(data1->GetTypeEntries()[0]->GetEntry(0), data2->GetTypeEntries()[0]->GetEntry(0));
-  ASSERT_EQ(data1->GetTypeEntries()[0]->GetEntry(1), data2->GetTypeEntries()[0]->GetEntry(1));
-  ASSERT_EQ(data1->GetTypeEntries()[0]->GetEntry(2), data2->GetTypeEntries()[0]->GetEntry(2));
-  ASSERT_EQ(data1->GetTypeEntries()[1]->GetEntry(0), data2->GetTypeEntries()[1]->GetEntry(0));
-  ASSERT_EQ(data1->GetTypeEntries()[1]->GetEntry(1), data2->GetTypeEntries()[1]->GetEntry(1));
-  ASSERT_EQ(data1->GetTypeEntries()[1]->GetEntry(2), data2->GetTypeEntries()[1]->GetEntry(2));
-}
+  const std::vector<std::unique_ptr<const IdmapData>>& data_blocks2 = idmap2->GetData();
+  ASSERT_EQ(data_blocks2.size(), 1U);
+  const std::unique_ptr<const IdmapData>& data2 = data_blocks2[0];
+  ASSERT_THAT(data2, NotNull());
 
-TEST(BinaryStreamVisitorTests, CreateIdmapFromApkAssetsInteropWithLoadedIdmap) {
-  const std::string target_apk_path(GetTestDataPath() + "/target/target.apk");
-  std::unique_ptr<const ApkAssets> target_apk = ApkAssets::Load(target_apk_path);
-  ASSERT_THAT(target_apk, NotNull());
+  const auto& target_entries1 = data1->GetTargetEntries();
+  const auto& target_entries2 = data2->GetTargetEntries();
+  ASSERT_EQ(target_entries1.size(), target_entries2.size());
+  ASSERT_EQ(target_entries1[0].target_id, target_entries2[0].target_id);
+  ASSERT_EQ(target_entries1[0].data_value, target_entries2[0].data_value);
 
-  const std::string overlay_apk_path(GetTestDataPath() + "/overlay/overlay.apk");
-  std::unique_ptr<const ApkAssets> overlay_apk = ApkAssets::Load(overlay_apk_path);
-  ASSERT_THAT(overlay_apk, NotNull());
+  ASSERT_EQ(target_entries1[1].target_id, target_entries2[1].target_id);
+  ASSERT_EQ(target_entries1[1].data_value, target_entries2[1].data_value);
 
-  const auto idmap = Idmap::FromApkAssets(*target_apk, *overlay_apk, PolicyFlags::POLICY_PUBLIC,
-                                          /* enforce_overlayable */ true);
-  ASSERT_TRUE(idmap);
+  ASSERT_EQ(target_entries1[2].target_id, target_entries2[2].target_id);
+  ASSERT_EQ(target_entries1[2].data_value, target_entries2[2].data_value);
 
-  std::stringstream stream;
-  BinaryStreamVisitor visitor(stream);
-  (*idmap)->accept(&visitor);
-  const std::string str = stream.str();
-  const StringPiece data(str);
-  std::unique_ptr<const LoadedIdmap> loaded_idmap = LoadedIdmap::Load(data);
-  ASSERT_THAT(loaded_idmap, NotNull());
-  ASSERT_EQ(loaded_idmap->TargetPackageId(), 0x7f);
+  const auto& overlay_entries1 = data1->GetOverlayEntries();
+  const auto& overlay_entries2 = data2->GetOverlayEntries();
+  ASSERT_EQ(overlay_entries1.size(), overlay_entries2.size());
+  ASSERT_EQ(overlay_entries1[0].overlay_id, overlay_entries2[0].overlay_id);
+  ASSERT_EQ(overlay_entries1[0].target_id, overlay_entries2[0].target_id);
 
-  const IdmapEntry_header* header = loaded_idmap->GetEntryMapForType(0x01);
-  ASSERT_THAT(header, NotNull());
+  ASSERT_EQ(overlay_entries1[1].overlay_id, overlay_entries2[1].overlay_id);
+  ASSERT_EQ(overlay_entries1[1].target_id, overlay_entries2[1].target_id);
 
-  EntryId entry;
-  bool success = LoadedIdmap::Lookup(header, 0x0000, &entry);
-  ASSERT_TRUE(success);
-  ASSERT_EQ(entry, 0x0000);
-
-  header = loaded_idmap->GetEntryMapForType(0x02);
-  ASSERT_THAT(header, NotNull());
-
-  success = LoadedIdmap::Lookup(header, 0x0000, &entry);  // string/a
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0001, &entry);  // string/b
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0002, &entry);  // string/c
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0003, &entry);  // string/policy_odm
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0004, &entry);  // string/policy_oem
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0005, &entry);  // string/other
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0006, &entry);  // string/not_overlayable
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0007, &entry);  // string/policy_product
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0008, &entry);  // string/policy_public
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0009, &entry);  // string/policy_system
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x000a, &entry);  // string/policy_system_vendor
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x000b, &entry);  // string/policy_signature
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x000c, &entry);  // string/str1
-  ASSERT_TRUE(success);
-  ASSERT_EQ(entry, 0x0000);
-
-  success = LoadedIdmap::Lookup(header, 0x000d, &entry);  // string/str2
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x000e, &entry);  // string/str3
-  ASSERT_TRUE(success);
-  ASSERT_EQ(entry, 0x0001);
-
-  success = LoadedIdmap::Lookup(header, 0x000f, &entry);  // string/str4
-  ASSERT_TRUE(success);
-  ASSERT_EQ(entry, 0x0002);
-
-  success = LoadedIdmap::Lookup(header, 0x0010, &entry);  // string/x
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0011, &entry);  // string/y
-  ASSERT_FALSE(success);
-
-  success = LoadedIdmap::Lookup(header, 0x0012, &entry);  // string/z
-  ASSERT_FALSE(success);
+  ASSERT_EQ(overlay_entries1[2].overlay_id, overlay_entries2[2].overlay_id);
+  ASSERT_EQ(overlay_entries1[2].target_id, overlay_entries2[2].target_id);
 }
 
 }  // namespace android::idmap2

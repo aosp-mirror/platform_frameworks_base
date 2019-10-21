@@ -2838,13 +2838,13 @@ public final class Settings {
         if (pkg.uidError) {
             serializer.attribute(null, "uidError", "true");
         }
-        if (pkg.installerPackageName != null) {
-            serializer.attribute(null, "installer", pkg.installerPackageName);
+        InstallSource installSource = pkg.installSource;
+        if (installSource.installerPackageName != null) {
+            serializer.attribute(null, "installer", installSource.installerPackageName);
         }
-        if (pkg.isOrphaned) {
+        if (installSource.isOrphaned) {
             serializer.attribute(null, "isOrphaned", "true");
         }
-        InstallSource installSource = pkg.installSource;
         if (installSource.initiatingPackageName != null) {
             serializer.attribute(null, "installInitiator", installSource.initiatingPackageName);
         }
@@ -3807,9 +3807,8 @@ public final class Settings {
         }
         if (packageSetting != null) {
             packageSetting.uidError = "true".equals(uidError);
-            packageSetting.installerPackageName = installerPackageName;
-            packageSetting.isOrphaned = "true".equals(isOrphaned);
-            packageSetting.installSource = InstallSource.create(installInitiatingPackageName);
+            packageSetting.installSource = InstallSource.create(
+                    installInitiatingPackageName, installerPackageName, "true".equals(isOrphaned));
             packageSetting.volumeUuid = volumeUuid;
             packageSetting.categoryHint = categoryHint;
             packageSetting.legacyNativeLibraryPathString = legacyNativeLibraryPathStr;
@@ -4252,7 +4251,7 @@ public final class Settings {
         if (pkg == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        return pkg.installerPackageName;
+        return pkg.installSource.installerPackageName;
     }
 
     boolean isOrphaned(String packageName) {
@@ -4260,7 +4259,7 @@ public final class Settings {
         if (pkg == null) {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        return pkg.isOrphaned;
+        return pkg.installSource.isOrphaned;
     }
 
     int getApplicationEnabledSettingLPr(String packageName, int userId) {
@@ -4313,8 +4312,9 @@ public final class Settings {
             pkgSetting.setStopped(stopped, userId);
             // pkgSetting.pkg.mSetStopped = stopped;
             if (pkgSetting.getNotLaunched(userId)) {
-                if (pkgSetting.installerPackageName != null) {
-                    pm.notifyFirstLaunch(pkgSetting.name, pkgSetting.installerPackageName, userId);
+                if (pkgSetting.installSource.installerPackageName != null) {
+                    pm.notifyFirstLaunch(pkgSetting.name,
+                            pkgSetting.installSource.installerPackageName, userId);
                 }
                 pkgSetting.setNotLaunched(false, userId);
             }
@@ -4477,7 +4477,8 @@ public final class Settings {
             pw.print(",");
             pw.print(ps.lastUpdateTime);
             pw.print(",");
-            pw.print(ps.installerPackageName != null ? ps.installerPackageName : "?");
+            pw.print(ps.installSource.installerPackageName != null
+                    ? ps.installSource.installerPackageName : "?");
             pw.println();
             if (ps.pkg != null) {
                 pw.print(checkinTag); pw.print("-"); pw.print("splt,");
@@ -4690,9 +4691,9 @@ public final class Settings {
         pw.print(prefix); pw.print("  lastUpdateTime=");
             date.setTime(ps.lastUpdateTime);
             pw.println(sdf.format(date));
-        if (ps.installerPackageName != null) {
+        if (ps.installSource.installerPackageName != null) {
             pw.print(prefix); pw.print("  installerPackageName=");
-                    pw.println(ps.installerPackageName);
+            pw.println(ps.installSource.installerPackageName);
         }
         if (ps.volumeUuid != null) {
             pw.print(prefix); pw.print("  volumeUuid=");

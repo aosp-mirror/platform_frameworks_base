@@ -347,10 +347,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Permite aplicației să primească și să proceseze mesaje SMS. Acest lucru înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primește mesaje text (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite aplicației să primească și să proceseze mesaje MMS. Acest lucru înseamnă că aplicația ar putea monitoriza sau șterge mesajele trimise pe dispozitivul dvs. fără a vi le arăta."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Redirecționează mesajele cu transmisie celulară"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Permite aplicației să se conecteze la modulul de transmisie celulară pentru a redirecționa mesajele cu transmisie celulară pe măsură ce le primește. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgență."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"citește mesajele cu transmisie celulară"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite aplicației să citească mesajele primite prin transmisie celulară de dispozitivul dvs. Alertele cu transmisie celulară sunt difuzate în unele locații pentru a vă avertiza cu privire la situațiile de urgență. Aplicațiile rău intenționate pot afecta performanța sau funcționarea dispozitivului dvs. când este primită o transmisie celulară de urgență."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"citire feeduri abonat"</string>
@@ -662,8 +660,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"porniți folosirea permisiunii de vizualizare"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Permite proprietarului să pornească folosirea permisiunii pentru o aplicație. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ținta comenzii rapide de accesibilitate"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Permite unei aplicații să definească ținta comenzii rapide de accesibilitate."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Să monitorizeze încercările de deblocare a ecranului"</string>

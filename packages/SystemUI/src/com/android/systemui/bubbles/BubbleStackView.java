@@ -629,7 +629,7 @@ public class BubbleStackView extends FrameLayout {
         }
         Bubble topBubble = mBubbleData.getBubbles().get(0);
         String appName = topBubble.getAppName();
-        Notification notification = topBubble.getEntry().notification.getNotification();
+        Notification notification = topBubble.getEntry().getSbn().getNotification();
         CharSequence titleCharSeq = notification.extras.getCharSequence(Notification.EXTRA_TITLE);
         String titleStr = getResources().getString(R.string.stream_notification);
         if (titleCharSeq != null) {
@@ -1681,7 +1681,7 @@ public class BubbleStackView extends FrameLayout {
      */
     private void logBubbleEvent(@Nullable Bubble bubble, int action) {
         if (bubble == null || bubble.getEntry() == null
-                || bubble.getEntry().notification == null) {
+                || bubble.getEntry().getSbn() == null) {
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
                     null /* package name */,
                     null /* notification channel */,
@@ -1695,7 +1695,7 @@ public class BubbleStackView extends FrameLayout {
                     false /* on-going bubble */,
                     false /* isAppForeground (unused) */);
         } else {
-            StatusBarNotification notification = bubble.getEntry().notification;
+            StatusBarNotification notification = bubble.getEntry().getSbn();
             StatsLog.write(StatsLog.BUBBLE_UI_CHANGED,
                     notification.getPackageName(),
                     notification.getNotification().getChannelId(),

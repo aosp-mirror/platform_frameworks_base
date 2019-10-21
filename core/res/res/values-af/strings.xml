@@ -295,7 +295,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Laat &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om SMS\'e te stuur en te bekyk?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Berging"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"toegang te verkry tot foto\'s, media en lêers op jou toestel"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot jou foto\'s, media en lêers op jou toestel?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Gee vir &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot jou foto\'s, media en lêers op jou toestel?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"oudio op te neem"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Laat &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toe om oudio op te neem?"</string>
@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Laat die program toe om SMS-boodskappe te ontvang en te verwerk. Dit beteken dat die program boodskappe wat na jou toestel gestuur is, kan monitor of uitvee, sonder dat jy dit gesien het."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ontvang teksboodskappe (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Laat die program toe om MMS-boodskappe te ontvang en te verwerk. Dit beteken dat die program boodskappe wat na jou toestel gestuur is kan monitor of uitvee, sonder dat jy dit gesien het."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Stuur seluitsendingboodskappe aan"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Laat die program toe om die seluitsendingmodule te bind om seluitsendingboodskappe aan te stuur wanneer hulle ontvang word. Seluitsendingwaarskuwings word in sommige liggings gelewer om jou oor noodsituasies te waarsku. Kwaadwillige programme kan met die werkverrigting of werking van jou toestel inmeng wanneer \'n noodseluitsending ontvang word."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lees seluitsending-boodskappe"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Laat die program toe om seluitsending-boodskappe te lees wat deur jou toestel ontvang word. Seluitsending-waarskuwings word in sommige plekke afgelewer om jou van noodsituasies te waarsku. Kwaadwillige programme mag inmeng met die prestasie of die werking van jou toestel wanneer \'n noodgeval se seluitsending ontvang word."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lees ingetekende nuus"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Laat die program toe om Moenie Steur Nie-opstelling te lees en skryf."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"begin kyk van toestemminggebruik"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Laat die houer toe om die toestemminggebruik vir \'n program te begin. Behoort nooit vir normale programme nodig te wees nie."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"toeganklikheidkortpadteiken"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Laat \'n program toe om die toeganklikheidkortpadteiken te definieer."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitor pogings om skerm te ontsluit"</string>

@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
@@ -52,7 +53,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Test system Rollback APIs.
@@ -96,7 +99,10 @@ public class RollbackTest {
                     Manifest.permission.INSTALL_PACKAGES,
                     Manifest.permission.DELETE_PACKAGES,
                     Manifest.permission.TEST_MANAGE_ROLLBACKS,
-                    Manifest.permission.MANAGE_ROLLBACKS);
+                    Manifest.permission.MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_USERS,
+                    Manifest.permission.CREATE_USERS,
+                    Manifest.permission.INTERACT_ACROSS_USERS);
 
             // Register a broadcast receiver for notification when the
             // rollback has been committed.
@@ -106,7 +112,6 @@ public class RollbackTest {
             // Uninstall TestApp.A
             Uninstall.packages(TestApp.A);
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
-
             // TODO: There is currently a race condition between when the app is
             // uninstalled and when rollback manager deletes the rollback. Fix it
             // so that's not the case!
@@ -148,6 +153,12 @@ public class RollbackTest {
             // Roll back the app.
             RollbackUtils.rollback(available.getRollbackId());
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+
+            UserManager um = (UserManager) context.getSystemService(context.USER_SERVICE);
+            List<Integer> userIds = um.getUsers(true)
+                    .stream().map(user -> user.id).collect(Collectors.toList());
+            assertThat(InstallUtils.isOnlyInstalledForUser(TestApp.A,
+                    context.getUserId(), userIds)).isTrue();
 
             // Verify we received a broadcast for the rollback.
             // TODO: Race condition between the timeout and when the broadcast is

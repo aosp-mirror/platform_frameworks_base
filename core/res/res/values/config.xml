@@ -387,6 +387,12 @@
     </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         Wifi P2P interfaces.  If the device doesn't want to support tethering over Wifi P2p this
+         should be empty.  An example would be "p2p-p2p.*" -->
+    <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
          WiMAX interfaces.  If the device doesn't want to support tethering over Wifi this
          should be empty.  An example would be "softap.*" -->
     <string-array translatable="false" name="config_tether_wimax_regexs">
@@ -442,7 +448,7 @@
     </string-array>
 
     <!-- Package name for the default CellBroadcastService module [DO NOT TRANSLATE] -->
-    <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastreceiver
+    <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastservice
     </string>
 
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
@@ -757,6 +763,9 @@
 
     <!-- Indicates that p2p MAC randomization is supported on this device -->
     <bool translatable="false" name="config_wifi_p2p_mac_randomization_supported">false</bool>
+
+    <!-- Indicates that AP mode MAC randomization is supported on this device -->
+    <bool translatable="false" name="config_wifi_ap_mac_randomization_supported">true</bool>
 
     <!-- flag for activating paranoid MAC randomization on a limited set of SSIDs -->
     <bool translatable="false" name="config_wifi_aggressive_randomization_ssid_whitelist_enabled">false</bool>
@@ -3542,6 +3551,9 @@
 
     <!-- emergency call number for the emergency affordance -->
     <string name="config_emergency_call_number" translatable="false">112</string>
+
+    <!-- Package name that provides Emergency Dialer -->
+    <string name="config_emergency_dialer_package">com.android.phone</string>
 
     <!-- Do not translate. Mcc codes whose existence trigger the presence of emergency
          affordances-->

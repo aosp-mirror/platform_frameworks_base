@@ -6633,6 +6633,8 @@ public class DevicePolicyManager {
      * The calling device admin must be a profile owner or device owner. If it is not, a security
      * exception will be thrown.
      *
+     * <p>NOTE: Performs disk I/O and shouldn't be called on the main thread.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The IntentFilter for which a default handler is added.
      * @param activity The Activity that is added as default intent handler.
@@ -7203,7 +7205,8 @@ public class DevicePolicyManager {
      * used, calling with an empty list only allows the built-in system services. Any non-system
      * accessibility service that's currently enabled must be included in the list.
      * <p>
-     * System accessibility services are always available to the user the list can't modify this.
+     * System accessibility services are always available to the user and this method can't
+     * disable them.
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of accessibility service package names.
      * @return {@code true} if the operation succeeded, or {@code false} if the list didn't

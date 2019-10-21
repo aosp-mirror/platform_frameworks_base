@@ -117,16 +117,16 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes, int icon,
             int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         final com.android.server.wm.WindowState window;
-        final AppWindowToken atoken;
+        final ActivityRecord activity;
         final WindowManagerService wm = mWmSupplier.get();
         synchronized (wm.mGlobalLock) {
-            atoken = wm.mRoot.getAppWindowToken(appToken);
+            activity = wm.mRoot.getActivityRecord(appToken);
             IWindow iWindow = mock(IWindow.class);
             doReturn(mock(IBinder.class)).when(iWindow).asBinder();
-            window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
+            window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, activity,
                     "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
                     mock(Session.class), iWindow, mPowerManagerWrapper);
-            atoken.startingWindow = window;
+            activity.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
             mRunnableWhenAddingSplashScreen.run();
@@ -134,8 +134,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         }
         return () -> {
             synchronized (wm.mGlobalLock) {
-                atoken.removeChild(window);
-                atoken.startingWindow = null;
+                activity.removeChild(window);
+                activity.startingWindow = null;
             }
         };
     }

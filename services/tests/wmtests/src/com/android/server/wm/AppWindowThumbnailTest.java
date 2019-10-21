@@ -47,10 +47,10 @@ public class AppWindowThumbnailTest extends WindowTestsBase {
     private AppWindowThumbnail buildThumbnail() {
         final GraphicBuffer buffer = GraphicBuffer.create(1, 1, PixelFormat.RGBA_8888,
                 GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
-        final AppWindowToken mockAwt = mock(AppWindowToken.class);
-        when(mockAwt.getPendingTransaction()).thenReturn(new StubTransaction());
-        when(mockAwt.makeSurface()).thenReturn(new MockSurfaceControlBuilder());
-        return new AppWindowThumbnail(new StubTransaction(), mockAwt,
+        final ActivityRecord mockAr = mock(ActivityRecord.class);
+        when(mockAr.getPendingTransaction()).thenReturn(new StubTransaction());
+        when(mockAr.makeSurface()).thenReturn(new MockSurfaceControlBuilder());
+        return new AppWindowThumbnail(new StubTransaction(), mockAr,
                 buffer, false, mock(Surface.class), mock(SurfaceAnimator.class));
     }
 

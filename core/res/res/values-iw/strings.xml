@@ -330,7 +330,7 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"קבע את המרחק מהתצוגה ואת מיקום התצוגה."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"ביצוע תנועות"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"יכול להקיש, להחליק, לעשות תנועת צביטה ולבצע תנועות אחרות."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"תנועות"</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"תנועות של טביעות אצבעות"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"אפשרות לזהות תנועות בזמן נגיעה בחיישן טביעות האצבע של המכשיר."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"השבת או שנה את שורת המצב"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"מאפשר לאפליקציה להשבית את שורת המצב או להוסיף ולהסיר סמלי מערכת."</string>
@@ -350,10 +350,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"‏מאפשר לאפליקציה לקבל ולעבד הודעות SMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"‏קבלת הודעות טקסט (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"‏מאפשר לאפליקציה לקבל ולעבד הודעות MMS. משמעות הדבר היא שהאפליקציה יכולה לעקוב אחר הודעות שנשלחו למכשיר או למחוק אותן מבלי להציג לך אותן."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"העברת הודעות של שידור סלולרי"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"מאפשרת לאפליקציה להתחייב למודול של השידור הסלולרי כדי להעביר הודעות של שידור סלולרי כשהן מתקבלות. התראות שידור סלולרי נשלחות במקומות מסוימים כדי להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"קריאת הודעות שידור סלולרי"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"מאפשר לאפליקציה לקרוא הודעות שידור סלולרי שהתקבלו במכשיר שלך. התראות שידור סלולרי נשלחות במקומות מסוימים על מנת להזהיר אותך מפני מצבי חירום. אפליקציות זדוניות עשויות להפריע לביצועים או לפעולה של המכשיר שלך כאשר מתקבל שידור חירום סלולרי."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"קרא עדכוני מנויים"</string>
@@ -540,9 +538,9 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"לא זוהתה"</string>
     <string name="biometric_error_canceled" msgid="349665227864885880">"האימות בוטל"</string>
     <string name="biometric_error_device_not_secured" msgid="6583143098363528349">"עוד לא הוגדרו קוד גישה, קו ביטול נעילה או סיסמה"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. נסה שוב."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"זוהתה טביעת אצבע חלקית. אפשר לנסות שוב."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"לא ניתן היה לעבד את טביעת האצבע. נסה שוב."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. נקה אותו ונסה שוב."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"החיישן של טביעות האצבעות מלוכלך. צריך לנקות אותו ולנסות שוב."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"הזזת את האצבע מהר מדי. נסה שוב."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"הזזת את האצבע לאט מדי. נסה שוב."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -550,9 +548,9 @@
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"טביעת האצבע אומתה"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"זיהוי הפנים בוצע"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"זיהוי הפנים בוצע. יש ללחוץ על אישור"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"החומרה בשביל טביעת אצבע אינה זמינה."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"לא ניתן לאחסן טביעת אצבע. הסר טביעת אצבע קיימת."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"חלף הזמן הקצוב לטביעת אצבע. נסה שוב."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"החומרה בשביל טביעות אצבעות אינה זמינה."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"לא ניתן לאחסן טביעת אצבע. יש להסיר טביעת אצבע קיימת."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"חלף הזמן הקצוב לטביעת אצבע. אפשר לנסות שוב."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"פעולת טביעת האצבע בוטלה."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"פעולת טביעת האצבע בוטלה בידי המשתמש."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"יותר מדי ניסיונות. נסה שוב מאוחר יותר."</string>
@@ -665,8 +663,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"מאפשר לאפליקציה לקרוא ולכתוב את התצורה של \'נא לא להפריע\'."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"התחלת צפייה בהרשאות השימוש"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"מאפשרת לבעלים להפעיל את השימוש בהרשאות עבור אפליקציה מסוימת. הרשאה זו אף פעם לא נדרשת עבור אפליקציות רגילות."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"קיצור דרך ליעד של פעולת נגישות"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"מאפשרת לאפליקציה להגדיר את קיצור הדרך ליעד של פעולת נגישות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"קביעת האורך הנדרש והתווים המותרים בסיסמאות ובקודי הגישה של מסך הנעילה."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"מעקב אחר ניסיונות לביטול של נעילת המסך"</string>

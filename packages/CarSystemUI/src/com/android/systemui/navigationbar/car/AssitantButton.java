@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.car;
+package com.android.systemui.navigationbar.car;
 
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE;
 
@@ -33,6 +33,7 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 public class AssitantButton extends CarFacetButton {
 
     private static final String TAG = "CarFacetButton";
+    private final AssistUtils mAssistUtils;
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
                 @Override
@@ -45,8 +46,6 @@ public class AssitantButton extends CarFacetButton {
                     Log.d(TAG, "IVoiceInteractionSessionShowCallback onShown()");
                 }
             };
-    
-    private final AssistUtils mAssistUtils;
 
     public AssitantButton(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -63,7 +62,7 @@ public class AssitantButton extends CarFacetButton {
     }
 
     @Override
-    protected void setupIntents(TypedArray typedArray){
+    protected void setupIntents(TypedArray typedArray) {
         // left blank because for the assistant button Intent will not be passed from the layout.
     }
 }

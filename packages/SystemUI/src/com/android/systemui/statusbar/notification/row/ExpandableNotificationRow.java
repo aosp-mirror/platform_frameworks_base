@@ -442,7 +442,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void setEntry(@NonNull NotificationEntry entry) {
         mEntry = entry;
-        mStatusBarNotification = entry.notification;
+        mStatusBarNotification = entry.getSbn();
         cacheIsSystemNotification();
     }
 
@@ -1203,7 +1203,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
-            mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.notification);
+            mChildrenContainer.reInflateViews(mExpandClickListener, mEntry.getSbn());
         }
         if (mGuts != null) {
             NotificationGuts oldGuts = mGuts;
@@ -2303,7 +2303,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private void updateRippleAllowed() {
         boolean allowed = isOnKeyguard()
-                || mEntry.notification.getNotification().contentIntent == null;
+                || mEntry.getSbn().getNotification().contentIntent == null;
         setRippleAllowed(allowed);
     }
 

@@ -27,6 +27,8 @@ import android.os.IBinder;
 import android.view.IWindow;
 import android.view.WindowManager;
 
+import com.android.server.wm.ActivityTestsBase.ActivityBuilder;
+
 /**
  * A collection of static functions that provide access to WindowManager related test functionality.
  */
@@ -44,23 +46,21 @@ class WindowTestUtils {
         }
     }
 
-    /** Creates an {@link AppWindowToken} and adds it to the specified {@link Task}. */
-    static ActivityRecord createAppWindowTokenInTask(DisplayContent dc, Task task) {
-        final ActivityRecord newToken = createTestAppWindowToken(dc);
-        task.addChild(newToken, POSITION_TOP);
-        return newToken;
+    /** Creates an {@link ActivityRecord} and adds it to the specified {@link Task}. */
+    static ActivityRecord createActivityRecordInTask(DisplayContent dc, Task task) {
+        final ActivityRecord activity = createTestActivityRecord(dc);
+        task.addChild(activity, POSITION_TOP);
+        return activity;
     }
 
-    static ActivityRecord createTestAppWindowToken(DisplayContent dc) {
+    static ActivityRecord createTestActivityRecord(DisplayContent dc) {
         synchronized (dc.mWmService.mGlobalLock) {
-            final ActivityRecord r =
-                    new ActivityTestsBase.ActivityBuilder(dc.mWmService.mAtmService)
-                            .build();
-            r.onDisplayChanged(dc);
-            r.setOccludesParent(true);
-            r.setHidden(false);
-            r.hiddenRequested = false;
-            return r;
+            final ActivityRecord activity = new ActivityBuilder(dc.mWmService.mAtmService).build();
+            activity.onDisplayChanged(dc);
+            activity.setOccludesParent(true);
+            activity.setHidden(false);
+            activity.hiddenRequested = false;
+            return activity;
         }
     }
 

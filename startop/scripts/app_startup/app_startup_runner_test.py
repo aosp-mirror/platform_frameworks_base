@@ -92,7 +92,7 @@ def default_dict_for_parsed_args(**kwargs):
   """
   d = {'compiler_filters': None, 'simulate': False, 'debug': False,
        'output': None, 'timeout': 10, 'loop_count': 1, 'inodes': None,
-       'trace_duration': None, 'compiler_type': asr.CompilerType.HOST}
+       'trace_duration': None, 'compiler_type': asr.CompilerType.DEVICE}
   d.update(kwargs)
   return d
 

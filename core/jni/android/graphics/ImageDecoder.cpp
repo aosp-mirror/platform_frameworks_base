@@ -374,16 +374,17 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (scale || jsubset) {
         int translateX = 0;
         int translateY = 0;
+        SkImageInfo scaledInfo;
         if (jsubset) {
             SkIRect subset;
             GraphicsJNI::jrect_to_irect(env, jsubset, &subset);
 
-            translateX    = -subset.fLeft;
-            translateY    = -subset.fTop;
-            desiredWidth  =  subset.width();
-            desiredHeight =  subset.height();
+            translateX = -subset.fLeft;
+            translateY = -subset.fTop;
+            scaledInfo = bitmapInfo.makeWH(subset.width(), subset.height());
+        } else {
+            scaledInfo = bitmapInfo.makeWH(desiredWidth, desiredHeight);
         }
-        SkImageInfo scaledInfo = bitmapInfo.makeWH(desiredWidth, desiredHeight);
         SkBitmap scaledBm;
         if (!scaledBm.setInfo(scaledInfo)) {
             doThrowIOE(env, "Failed scaled setInfo");

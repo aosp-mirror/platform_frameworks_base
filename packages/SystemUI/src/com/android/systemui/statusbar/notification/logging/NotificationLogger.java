@@ -126,7 +126,7 @@ public class NotificationLogger implements StateListener {
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
                 NotificationEntry entry = activeNotifications.get(i);
-                String key = entry.notification.getKey();
+                String key = entry.getSbn().getKey();
                 boolean isVisible = mListContainer.isInVisibleLocation(entry);
                 NotificationVisibility visObj = NotificationVisibility.obtain(key, i, N, isVisible,
                         getNotificationLocation(entry));
@@ -214,14 +214,14 @@ public class NotificationLogger implements StateListener {
                     NotificationVisibility visibility,
                     boolean removedByUser) {
                 if (removedByUser && visibility != null) {
-                    logNotificationClear(entry.key, entry.notification, visibility);
+                    logNotificationClear(entry.getKey(), entry.getSbn(), visibility);
                 }
-                mExpansionStateLogger.onEntryRemoved(entry.key);
+                mExpansionStateLogger.onEntryRemoved(entry.getKey());
             }
 
             @Override
             public void onEntryReinflated(NotificationEntry entry) {
-                mExpansionStateLogger.onEntryReinflated(entry.key);
+                mExpansionStateLogger.onEntryReinflated(entry.getKey());
             }
 
             @Override

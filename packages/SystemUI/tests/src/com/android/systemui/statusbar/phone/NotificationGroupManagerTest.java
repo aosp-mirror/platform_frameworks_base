@@ -75,7 +75,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
 
-        assertTrue(mGroupManager.isOnlyChildInGroup(childEntry.notification));
+        assertTrue(mGroupManager.isOnlyChildInGroup(childEntry.getSbn()));
     }
 
     @Test
@@ -87,7 +87,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
 
-        assertTrue(mGroupManager.isChildInGroupWithSummary(childEntry.notification));
+        assertTrue(mGroupManager.isChildInGroupWithSummary(childEntry.getSbn()));
     }
 
     @Test
@@ -99,8 +99,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
 
-        assertTrue(mGroupManager.isSummaryOfGroup(summaryEntry.notification));
-        assertEquals(summaryEntry, mGroupManager.getGroupSummary(childEntry.notification));
+        assertTrue(mGroupManager.isSummaryOfGroup(summaryEntry.getSbn()));
+        assertEquals(summaryEntry, mGroupManager.getGroupSummary(childEntry.getSbn()));
     }
 
     @Test
@@ -113,7 +113,7 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         mGroupManager.onEntryRemoved(childEntry);
 
-        assertFalse(mGroupManager.isChildInGroupWithSummary(childEntry.notification));
+        assertFalse(mGroupManager.isChildInGroupWithSummary(childEntry.getSbn()));
     }
 
     @Test
@@ -126,8 +126,8 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
 
         mGroupManager.onEntryRemoved(summaryEntry);
 
-        assertNull(mGroupManager.getGroupSummary(childEntry.notification));
-        assertFalse(mGroupManager.isSummaryOfGroup(summaryEntry.notification));
+        assertNull(mGroupManager.getGroupSummary(childEntry.getSbn()));
+        assertFalse(mGroupManager.isSummaryOfGroup(summaryEntry.getSbn()));
     }
 
     @Test
@@ -137,13 +137,13 @@ public class NotificationGroupManagerTest extends SysuiTestCase {
         mGroupManager.onEntryAdded(summaryEntry);
         mGroupManager.onEntryAdded(childEntry);
         mGroupManager.onEntryAdded(mGroupTestHelper.createChildNotification());
-        when(mHeadsUpManager.isAlerting(childEntry.key)).thenReturn(true);
+        when(mHeadsUpManager.isAlerting(childEntry.getKey())).thenReturn(true);
 
         mGroupManager.onHeadsUpStateChanged(childEntry, true);
 
         // Child entries that are heads upped should be considered separate groups visually even if
         // they are the same group logically
-        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry.notification));
-        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry.notification));
+        assertEquals(childEntry, mGroupManager.getGroupSummary(childEntry.getSbn()));
+        assertEquals(summaryEntry, mGroupManager.getLogicalGroupSummary(childEntry.getSbn()));
     }
 }

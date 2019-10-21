@@ -19,23 +19,15 @@ package android.net.wifi.hotspot2;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.net.wifi.EAPConstants;
-import android.net.wifi.hotspot2.pps.Credential;
-import android.net.wifi.hotspot2.pps.HomeSp;
-import android.net.wifi.hotspot2.pps.Policy;
-import android.net.wifi.hotspot2.pps.UpdateParameter;
 import android.os.Parcel;
-import android.util.Base64;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,136 +37,6 @@ import java.util.Map;
 public class PasspointConfigurationTest {
     private static final int MAX_URL_BYTES = 1023;
     private static final int CERTIFICATE_FINGERPRINT_BYTES = 32;
-
-    /**
-     * Utility function for creating a {@link android.net.wifi.hotspot2.pps.HomeSP}.
-     *
-     * @return {@link android.net.wifi.hotspot2.pps.HomeSP}
-     */
-    private static HomeSp createHomeSp() {
-        HomeSp homeSp = new HomeSp();
-        homeSp.setFqdn("fqdn");
-        homeSp.setFriendlyName("friendly name");
-        homeSp.setRoamingConsortiumOis(new long[] {0x55, 0x66});
-        return homeSp;
-    }
-
-    /**
-     * Utility function for creating a {@link android.net.wifi.hotspot2.pps.Credential}.
-     *
-     * @return {@link android.net.wifi.hotspot2.pps.Credential}
-     */
-    private static Credential createCredential() {
-        Credential cred = new Credential();
-        cred.setRealm("realm");
-        cred.setUserCredential(null);
-        cred.setCertCredential(null);
-        cred.setSimCredential(new Credential.SimCredential());
-        cred.getSimCredential().setImsi("1234*");
-        cred.getSimCredential().setEapType(EAPConstants.EAP_SIM);
-        cred.setCaCertificate(null);
-        cred.setClientCertificateChain(null);
-        cred.setClientPrivateKey(null);
-        return cred;
-    }
-
-    /**
-     * Helper function for creating a {@link Policy} for testing.
-     *
-     * @return {@link Policy}
-     */
-    private static Policy createPolicy() {
-        Policy policy = new Policy();
-        policy.setMinHomeDownlinkBandwidth(123);
-        policy.setMinHomeUplinkBandwidth(345);
-        policy.setMinRoamingDownlinkBandwidth(567);
-        policy.setMinRoamingUplinkBandwidth(789);
-        policy.setMaximumBssLoadValue(12);
-        policy.setExcludedSsidList(new String[] {"ssid1", "ssid2"});
-        HashMap<Integer, String> requiredProtoPortMap = new HashMap<>();
-        requiredProtoPortMap.put(12, "23,342,123");
-        requiredProtoPortMap.put(23, "789,372,1235");
-        policy.setRequiredProtoPortMap(requiredProtoPortMap);
-
-        List<Policy.RoamingPartner> preferredRoamingPartnerList = new ArrayList<>();
-        Policy.RoamingPartner partner1 = new Policy.RoamingPartner();
-        partner1.setFqdn("partner1.com");
-        partner1.setFqdnExactMatch(true);
-        partner1.setPriority(12);
-        partner1.setCountries("us,jp");
-        Policy.RoamingPartner partner2 = new Policy.RoamingPartner();
-        partner2.setFqdn("partner2.com");
-        partner2.setFqdnExactMatch(false);
-        partner2.setPriority(42);
-        partner2.setCountries("ca,fr");
-        preferredRoamingPartnerList.add(partner1);
-        preferredRoamingPartnerList.add(partner2);
-        policy.setPreferredRoamingPartnerList(preferredRoamingPartnerList);
-
-        UpdateParameter policyUpdate = new UpdateParameter();
-        policyUpdate.setUpdateIntervalInMinutes(1712);
-        policyUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_OMADM);
-        policyUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_HOMESP);
-        policyUpdate.setServerUri("policy.update.com");
-        policyUpdate.setUsername("username");
-        policyUpdate.setBase64EncodedPassword(
-                Base64.encodeToString("password".getBytes(), Base64.DEFAULT));
-        policyUpdate.setTrustRootCertUrl("trust.cert.com");
-        policyUpdate.setTrustRootCertSha256Fingerprint(
-                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
-        policy.setPolicyUpdate(policyUpdate);
-
-        return policy;
-    }
-
-    private static UpdateParameter createSubscriptionUpdate() {
-        UpdateParameter subUpdate = new UpdateParameter();
-        subUpdate.setUpdateIntervalInMinutes(9021);
-        subUpdate.setUpdateMethod(UpdateParameter.UPDATE_METHOD_SSP);
-        subUpdate.setRestriction(UpdateParameter.UPDATE_RESTRICTION_ROAMING_PARTNER);
-        subUpdate.setServerUri("subscription.update.com");
-        subUpdate.setUsername("subUsername");
-        subUpdate.setBase64EncodedPassword(
-                Base64.encodeToString("subPassword".getBytes(), Base64.DEFAULT));
-        subUpdate.setTrustRootCertUrl("subscription.trust.cert.com");
-        subUpdate.setTrustRootCertSha256Fingerprint(new byte[CERTIFICATE_FINGERPRINT_BYTES]);
-        return subUpdate;
-    }
-    /**
-     * Helper function for creating a {@link PasspointConfiguration} for testing.
-     *
-     * @return {@link PasspointConfiguration}
-     */
-    private static PasspointConfiguration createConfig() {
-        PasspointConfiguration config = new PasspointConfiguration();
-        config.setUpdateIdentifier(1234);
-        config.setHomeSp(createHomeSp());
-        config.setAaaServerTrustedNames(
-                new String[] {"trusted.fqdn.com", "another-trusted.fqdn.com"});
-        config.setCredential(createCredential());
-        config.setPolicy(createPolicy());
-        config.setSubscriptionUpdate(createSubscriptionUpdate());
-        Map<String, byte[]> trustRootCertList = new HashMap<>();
-        trustRootCertList.put("trustRoot.cert1.com",
-                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
-        trustRootCertList.put("trustRoot.cert2.com",
-                new byte[CERTIFICATE_FINGERPRINT_BYTES]);
-        config.setTrustRootCertList(trustRootCertList);
-        config.setUpdateIdentifier(1);
-        config.setCredentialPriority(120);
-        config.setSubscriptionCreationTimeInMillis(231200);
-        config.setSubscriptionExpirationTimeInMillis(2134232);
-        config.setSubscriptionType("Gold");
-        config.setUsageLimitUsageTimePeriodInMinutes(3600);
-        config.setUsageLimitStartTimeInMillis(124214213);
-        config.setUsageLimitDataLimit(14121);
-        config.setUsageLimitTimeLimitInMinutes(78912);
-        Map<String, String> friendlyNames = new HashMap<>();
-        friendlyNames.put("en", "ServiceName1");
-        friendlyNames.put("kr", "ServiceName2");
-        config.setServiceFriendlyNames(friendlyNames);
-        return config;
-    }
 
     /**
      * Verify parcel write and read consistency for the given configuration.
@@ -209,7 +71,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithFullConfiguration() throws Exception {
-        verifyParcel(createConfig());
+        verifyParcel(PasspointTestUtils.createConfig());
     }
 
     /**
@@ -219,7 +81,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutServiceNames() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setServiceFriendlyNames(null);
         verifyParcel(config);
     }
@@ -231,7 +93,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutHomeSP() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setHomeSp(null);
         verifyParcel(config);
     }
@@ -243,7 +105,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutCredential() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setCredential(null);
         verifyParcel(config);
     }
@@ -255,7 +117,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutPolicy() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setPolicy(null);
         verifyParcel(config);
     }
@@ -267,7 +129,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutSubscriptionUpdate() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setSubscriptionUpdate(null);
         verifyParcel(config);
     }
@@ -280,7 +142,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutTrustRootCertList() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setTrustRootCertList(null);
         verifyParcel(config);
     }
@@ -293,7 +155,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void verifyParcelWithoutAaaServerTrustedNames() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setAaaServerTrustedNames(null);
         verifyParcel(config);
     }
@@ -318,7 +180,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateFullConfig() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
 
         assertTrue(config.validate());
         assertTrue(config.validateForR2());
@@ -332,7 +194,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateFullConfigWithoutUpdateIdentifier() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setUpdateIdentifier(Integer.MIN_VALUE);
 
         assertTrue(config.validate());
@@ -346,7 +208,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithoutCredential() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setCredential(null);
 
         assertFalse(config.validate());
@@ -360,7 +222,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithoutHomeSp() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setHomeSp(null);
 
         assertFalse(config.validate());
@@ -375,7 +237,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithoutPolicy() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setPolicy(null);
 
         assertTrue(config.validate());
@@ -390,7 +252,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithoutSubscriptionUpdate() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setSubscriptionUpdate(null);
 
         assertTrue(config.validate());
@@ -405,7 +267,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithoutAaaServerTrustedNames() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         config.setAaaServerTrustedNames(null);
 
         assertTrue(config.validate());
@@ -420,7 +282,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithInvalidTrustRootCertUrl() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         byte[] rawUrlBytes = new byte[MAX_URL_BYTES + 1];
         Map<String, byte[]> trustRootCertList = new HashMap<>();
         Arrays.fill(rawUrlBytes, (byte) 'a');
@@ -445,7 +307,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateConfigWithInvalidTrustRootCertFingerprint() throws Exception {
-        PasspointConfiguration config = createConfig();
+        PasspointConfiguration config = PasspointTestUtils.createConfig();
         Map<String, byte[]> trustRootCertList = new HashMap<>();
         trustRootCertList.put("test.cert.com", new byte[CERTIFICATE_FINGERPRINT_BYTES + 1]);
         config.setTrustRootCertList(trustRootCertList);
@@ -482,7 +344,7 @@ public class PasspointConfigurationTest {
      */
     @Test
     public void validateCopyConstructorWithValidSource() throws Exception {
-        PasspointConfiguration sourceConfig = createConfig();
+        PasspointConfiguration sourceConfig = PasspointTestUtils.createConfig();
         PasspointConfiguration copyConfig = new PasspointConfiguration(sourceConfig);
         assertTrue(copyConfig.equals(sourceConfig));
     }

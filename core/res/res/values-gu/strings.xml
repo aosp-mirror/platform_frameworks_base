@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"ઍપ્લિકેશનને SMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ટેક્સ્ટ સંદેશા (MMS) પ્રાપ્ત કરો"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"ઍપ્લિકેશનને MMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"સેલ બ્રોડકાસ્ટ સંદેશા ફૉરવર્ડ કરો"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"સેલ બ્રોડકાસ્ટ સંદેશા પ્રાપ્ત થાય કે તરત ફૉરવર્ડ કરવા માટે સેલ બ્રોડકાસ્ટ મૉડ્યૂલ સાથે પ્રતિબદ્ધ થવા બાબતે ઍપને મંજૂરી આપે છે. તમને કટોકટીની પરિસ્થિતિની ચેતવણી આપવા માટે સેલ બ્રોડકાસ્ટ અલર્ટ અમુક સ્થાનોમાં ડિલિવર કરવામાં આવે છે. કટોકટી અંગેનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય, ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઑપરેશનમાં વિક્ષેપ પાડે તેમ બની શકે છે."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"સેલ બ્રોડકાસ્ટ સંદેશા વાંચો"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"એપ્લિકેશનને તમારા ઉપકરણ દ્વારા પ્રાપ્ત થયેલ સેલ બ્રોડકાસ્ટ સંદેશાને વાંચવાની મંજૂરી આપે છે. સેલ બ્રોડકાસ્ટ ચેતવણીઓ તમને કટોકટીની સ્થિતિઓ અંગે ચેતવવા માટે કેટલાક સ્થાનોમાં વિતરિત થાય છે. જ્યારે કટોકટીનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય ત્યારે દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારા ઉપકરણના પ્રદર્શન અથવા ઓપરેશનમાં હસ્તક્ષેપ કરી શકે છે."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"સબ્સ્ક્રાઇબ કરેલ ફીડ્સ વાંચો"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"એપ્લિકેશનને ખલેલ પાડશો નહીં ગોઠવણી વાંચવા અને લખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"પરવાનગી વપરાશ જુઓને શરૂ કરો"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"કોઈ ઍપ માટે પરવાનગી વપરાશ શરૂ કરવાની ધારકને મંજૂરી આપે છે. સામાન્ય ઍપ માટે ક્યારેય જરૂર પડી ન શકે."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"ઍક્સેસિબિલિટી શૉર્ટકટ ટાર્ગેટ"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"ઍપને ઍક્સેસિબિલિટી શૉર્ટકટ ટાર્ગેટ વ્યાખ્યાતિત કરવાની મંજૂરી આપે છે."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોનું નિયમન કરો"</string>
@@ -1938,7 +1934,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"સમાચાર અને સામાયિકો"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"નકશા અને નેવિગેશન"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"ઉત્પાદકતા"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ઉપકરણ સ્ટૉરેજ"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ડિવાઇસ સ્ટૉરેજ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ડિબગિંગ"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"કલાક"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"મિનિટ"</string>

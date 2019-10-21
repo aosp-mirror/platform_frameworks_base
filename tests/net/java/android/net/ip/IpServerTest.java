@@ -19,11 +19,13 @@ package android.net.ip;
 import static android.net.ConnectivityManager.TETHERING_BLUETOOTH;
 import static android.net.ConnectivityManager.TETHERING_USB;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
+import static android.net.ConnectivityManager.TETHERING_WIFI_P2P;
 import static android.net.ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_NO_ERROR;
 import static android.net.ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.ip.IpServer.STATE_AVAILABLE;
+import static android.net.ip.IpServer.STATE_LOCAL_ONLY;
 import static android.net.ip.IpServer.STATE_TETHERED;
 import static android.net.ip.IpServer.STATE_UNAVAILABLE;
 import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
@@ -256,6 +258,23 @@ public class IpServerTest {
     }
 
     @Test
+    public void canBeTetheredAsWifiP2p() throws Exception {
+        initStateMachine(TETHERING_WIFI_P2P);
+
+        dispatchCommand(IpServer.CMD_TETHER_REQUESTED, STATE_LOCAL_ONLY);
+        InOrder inOrder = inOrder(mCallback, mNMService);
+        inOrder.verify(mNMService).getInterfaceConfig(IFACE_NAME);
+        inOrder.verify(mNMService).setInterfaceConfig(IFACE_NAME, mInterfaceConfiguration);
+        inOrder.verify(mNMService).tetherInterface(IFACE_NAME);
+        inOrder.verify(mCallback).updateInterfaceState(
+                mIpServer, STATE_LOCAL_ONLY, TETHER_ERROR_NO_ERROR);
+        inOrder.verify(mCallback).updateLinkProperties(
+                eq(mIpServer), mLinkPropertiesCaptor.capture());
+        assertIPv4AddressAndDirectlyConnectedRoute(mLinkPropertiesCaptor.getValue());
+        verifyNoMoreInteractions(mNMService, mStatsService, mCallback);
+    }
+
+    @Test
     public void handlesFirstUpstreamChange() throws Exception {
         initTetheredStateMachine(TETHERING_BLUETOOTH, null);
 
@@ -416,6 +435,14 @@ public class IpServerTest {
         dispatchTetherConnectionChanged(UPSTREAM_IFACE);
 
         assertDhcpStarted(new IpPrefix("192.168.44.0/24"));
+    }
+
+    @Test
+    public void startsDhcpServerOnWifiP2p() throws Exception {
+        initTetheredStateMachine(TETHERING_WIFI_P2P, UPSTREAM_IFACE);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE);
+
+        assertDhcpStarted(new IpPrefix("192.168.49.0/24"));
     }
 
     @Test

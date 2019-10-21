@@ -308,6 +308,22 @@ class ProcessRecord implements WindowProcessListener {
     // This will be same as {@link #uid} usually except for some apps used during factory testing.
     int startUid;
 
+    // Cached task info for OomAdjuster
+    private static final int VALUE_INVALID = -1;
+    private static final int VALUE_FALSE = 0;
+    private static final int VALUE_TRUE = 1;
+    private int mCachedHasActivities = VALUE_INVALID;
+    private int mCachedIsHeavyWeight = VALUE_INVALID;
+    private int mCachedHasVisibleActivities = VALUE_INVALID;
+    private int mCachedIsHomeProcess = VALUE_INVALID;
+    private int mCachedIsPreviousProcess = VALUE_INVALID;
+    private int mCachedHasRecentTasks = VALUE_INVALID;
+    private int mCachedIsReceivingBroadcast = VALUE_INVALID;
+    int mCachedAdj = ProcessList.INVALID_ADJ;
+    boolean mCachedForegroundActivities = false;
+    int mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+    int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startTime) {
         this.startUid = startUid;
@@ -1302,7 +1318,7 @@ class ProcessRecord implements WindowProcessListener {
             }
             mService.mProcessList.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+                mService.updateOomAdjLocked(this, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
             }
         }
     }
@@ -1649,5 +1665,101 @@ class ProcessRecord implements WindowProcessListener {
     private boolean getShowBackground() {
         return Settings.Secure.getInt(mService.mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+    }
+
+    void resetCachedInfo() {
+        mCachedHasActivities = VALUE_INVALID;
+        mCachedIsHeavyWeight = VALUE_INVALID;
+        mCachedHasVisibleActivities = VALUE_INVALID;
+        mCachedIsHomeProcess = VALUE_INVALID;
+        mCachedIsPreviousProcess = VALUE_INVALID;
+        mCachedHasRecentTasks = VALUE_INVALID;
+        mCachedIsReceivingBroadcast = VALUE_INVALID;
+        mCachedAdj = ProcessList.INVALID_ADJ;
+        mCachedForegroundActivities = false;
+        mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+        mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+    }
+
+    boolean getCachedHasActivities() {
+        if (mCachedHasActivities == VALUE_INVALID) {
+            mCachedHasActivities = getWindowProcessController().hasActivities() ? VALUE_TRUE
+                    : VALUE_FALSE;
+        }
+        return mCachedHasActivities == VALUE_TRUE;
+    }
+
+    boolean getCachedIsHeavyWeight() {
+        if (mCachedIsHeavyWeight == VALUE_INVALID) {
+            mCachedIsHeavyWeight = mService.mAtmInternal.isHeavyWeightProcess(
+                    getWindowProcessController()) ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedIsHeavyWeight == VALUE_TRUE;
+    }
+
+    boolean getCachedHasVisibleActivities() {
+        if (mCachedHasVisibleActivities == VALUE_INVALID) {
+            mCachedHasVisibleActivities = getWindowProcessController().hasVisibleActivities()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedHasVisibleActivities == VALUE_TRUE;
+    }
+
+    boolean getCachedIsHomeProcess() {
+        if (mCachedIsHomeProcess == VALUE_INVALID) {
+            mCachedIsHomeProcess = getWindowProcessController().isHomeProcess()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedIsHomeProcess == VALUE_TRUE;
+    }
+
+    boolean getCachedIsPreviousProcess() {
+        if (mCachedIsPreviousProcess == VALUE_INVALID) {
+            mCachedIsPreviousProcess = getWindowProcessController().isPreviousProcess()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedIsPreviousProcess == VALUE_TRUE;
+    }
+
+    boolean getCachedHasRecentTasks() {
+        if (mCachedHasRecentTasks == VALUE_INVALID) {
+            mCachedHasRecentTasks = getWindowProcessController().hasRecentTasks()
+                    ? VALUE_TRUE : VALUE_FALSE;
+        }
+        return mCachedHasRecentTasks == VALUE_TRUE;
+    }
+
+    boolean getCachedIsReceivingBroadcast(ArraySet<BroadcastQueue> tmpQueue) {
+        if (mCachedIsReceivingBroadcast == VALUE_INVALID) {
+            tmpQueue.clear();
+            mCachedIsReceivingBroadcast = mService.isReceivingBroadcastLocked(this, tmpQueue)
+                    ? VALUE_TRUE : VALUE_FALSE;
+            if (mCachedIsReceivingBroadcast == VALUE_TRUE) {
+                mCachedSchedGroup = tmpQueue.contains(mService.mFgBroadcastQueue)
+                        ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
+            }
+        }
+        return mCachedIsReceivingBroadcast == VALUE_TRUE;
+    }
+
+    void computeOomAdjFromActivitiesIfNecessary(OomAdjuster.ComputeOomAdjWindowCallback callback,
+            int adj, boolean foregroundActivities, int procState, int schedGroup, int appUid,
+            int logUid, int processCurTop) {
+        if (mCachedAdj != ProcessList.INVALID_ADJ) {
+            return;
+        }
+        callback.initialize(this, adj, foregroundActivities, procState, schedGroup, appUid, logUid,
+                processCurTop);
+        final int minLayer = getWindowProcessController().computeOomAdjFromActivities(
+                ProcessList.VISIBLE_APP_LAYER_MAX, callback);
+
+        mCachedAdj = callback.adj;
+        mCachedForegroundActivities = callback.foregroundActivities;
+        mCachedProcState = callback.procState;
+        mCachedSchedGroup = callback.schedGroup;
+
+        if (mCachedAdj == ProcessList.VISIBLE_APP_ADJ) {
+            mCachedAdj += minLayer;
+        }
     }
 }

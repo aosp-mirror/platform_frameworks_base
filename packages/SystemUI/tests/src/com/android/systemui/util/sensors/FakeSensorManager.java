@@ -92,6 +92,18 @@ public class FakeSensorManager extends SensorManager {
         if (s != null) {
             return s;
         }
+        switch(type) {
+            case Sensor.TYPE_PROXIMITY:
+                try {
+                    return createSensor(Sensor.TYPE_PROXIMITY, null);
+                } catch (Exception e) {
+                    // fall through
+                }
+                break;
+            default:
+                break;
+
+        }
         // Our mock sensors aren't wakeup, and it's a pain to create them that way. Instead, just
         // return non-wakeup sensors if we can't find a wakeup sensor.
         return getDefaultSensor(type, false /* wakeup */);

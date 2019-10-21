@@ -422,10 +422,10 @@ public class WindowFrameTests extends WindowTestsBase {
         // Now simulate switch to fullscreen for letterboxed app.
         final int xInset = logicalWidth / 10;
         final Rect cf = new Rect(xInset, 0, logicalWidth - xInset, logicalHeight);
-        Configuration config = new Configuration(w.mAppToken.getRequestedOverrideConfiguration());
+        Configuration config = new Configuration(w.mActivityRecord.getRequestedOverrideConfiguration());
         config.windowConfiguration.setBounds(cf);
         config.windowConfiguration.setAppBounds(cf);
-        w.mAppToken.onRequestedOverrideConfigurationChanged(config);
+        w.mActivityRecord.onRequestedOverrideConfigurationChanged(config);
         pf.set(0, 0, logicalWidth, logicalHeight);
         task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         task.setBounds(null);
@@ -549,11 +549,11 @@ public class WindowFrameTests extends WindowTestsBase {
         attrs.width = width;
         attrs.height = height;
 
-        AppWindowToken token = createAppWindowToken(mTestDisplayContent,
+        ActivityRecord activity = createActivityRecord(mTestDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
 
-        FrameTestWindowState ws = new FrameTestWindowState(mWm, mIWindow, token, attrs);
-        token.addWindow(ws);
+        FrameTestWindowState ws = new FrameTestWindowState(mWm, mIWindow, activity, attrs);
+        activity.addWindow(ws);
         return ws;
     }
 }

@@ -347,10 +347,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Omogućava aplikaciji primanje i obradu SMS poruka. Ovo znači da aplikacija može pratiti ili brisati poruke poslane na vaš uređaj, a da vam ih pritom ne prikazuje."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"primanje tekstualnih poruka (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Omogućava aplikaciji prijem i obradu MMS poruka. Ovo znači da aplikacija može pratiti ili brisati poruke poslane na vaš uređaj, a da vam ih pritom ne prikazuje."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Prosljeđivanje poruka info servisa"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Dopušta aplikaciji da se veže za modul info servisa kako bi prosljeđivala poruke info servisa. Upozorenja koja emitira info servis se isporučuju na nekim lokacijama kako bi vas upozorila na vanredne situacije. Zlonamjerne aplikacije mogu ometati performanse ili rad vašeg uređaja kada primite informacije o vanrednoj situaciji od info servisa."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"čitanje poruka info servisa"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Omogućava aplikaciji čitanje poruka info servisa koje je primio vaš uređaj. Upozorenja koja emitira info servis se isporučuju na nekim lokacijama kako bi vas upozorila na vanredne situacije. Zlonamjerne aplikacije mogu ometati performanse ili rad vašeg uređaja kada primite informaciju o vanrednoj situaciji od info servisa."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"čitanje sadržaja na koje ste pretplaćeni"</string>
@@ -519,10 +517,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="4730994229754212347">"Omogućava aplikaciji da sazna nivo kompleksnosti zaključavanja ekrana (visoki, srednji, niski ili bez zaključavanja), što naznačava mogući raspon trajanja i vrste zaključavanja ekrana. Aplikacija također može korisnicima predložiti da ažuriraju zaključavanje ekrana do određenog nivoa, ali korisnici slobodno mogu ignorirati prijedlog i napustiti stranicu. Važno je napomenuti da se zaključavanje ekrana ne pohranjuje kao obični tekst tako da aplikacija ne zna tačnu lozinku."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"koristi biometrijski hardver za otiske prstij"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Omogućava aplikaciji da za autentifikaciju koristi biometrijski hardver"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za otiske prstiju"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za otisak prsta"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Omogućava aplikaciji da koristi metode za dodavanje i brisanje šablona otisaka prstiju za upotrebu."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"korištenje hardvera za otiske prstiju"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otiske prstiju"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"korištenje hardvera za otisak prsta"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otisak prsta"</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"izmjena muzičke kolekcije"</string>
     <string name="permdesc_audioWrite" msgid="8888544708166230494">"Omogućava aplikaciji da mijenja vašu muzičku kolekciju."</string>
     <string name="permlab_videoWrite" msgid="128769316366746446">"izmjena kolekcije videozapisa"</string>
@@ -550,7 +548,7 @@
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardver za otisak prsta nije dostupan."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Otisak prsta se ne može pohraniti. Uklonite postojeći otisak prsta."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Vrijeme za prepoznavanje otiska prsta je isteklo. Pokušajte ponovo."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Radnja sa otiskom prsta je otkazana."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Radnja s otiskom prsta je otkazana."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Korisnik je otkazao radnju s otiskom prsta."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Previše pokušaja. Senzor za otisak prsta je onemogućen."</string>
@@ -662,8 +660,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Omogućava aplikaciji da čita i upisuje konfiguraciju načina rada Ne ometaj."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"pokrenuti korištenje odobrenja za pregled"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Dozvoljava vlasniku da pokrene korištenje odobrenja za aplikaciju. Ne bi trebalo biti potrebno za obične aplikacije."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"cilj prečice pristupačnosti"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Omogućava aplikaciji da definira cilj prečice pristupačnosti."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavljanje pravila za lozinke"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN-ovima."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Prati pokušaje otključavanja ekrana"</string>

@@ -263,7 +263,7 @@ final class InputMonitor {
         inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
         inputWindowHandle.hasFocus = hasFocus;
         inputWindowHandle.hasWallpaper = hasWallpaper;
-        inputWindowHandle.paused = child.mAppToken != null ? child.mAppToken.paused : false;
+        inputWindowHandle.paused = child.mActivityRecord != null ? child.mActivityRecord.paused : false;
         inputWindowHandle.layer = child.mLayer;
         inputWindowHandle.ownerPid = child.mSession.mPid;
         inputWindowHandle.ownerUid = child.mSession.mUid;
@@ -353,7 +353,7 @@ final class InputMonitor {
         }
     }
 
-    public void setFocusedAppLw(AppWindowToken newApp) {
+    public void setFocusedAppLw(ActivityRecord newApp) {
         // Focused app has changed.
         if (newApp == null) {
             mService.mInputManager.setFocusedApplication(mDisplayId, null);
@@ -476,7 +476,7 @@ final class InputMonitor {
                 final RecentsAnimationController recentsAnimationController =
                         mService.getRecentsAnimationController();
                 if (recentsAnimationController != null
-                        && recentsAnimationController.shouldApplyInputConsumer(w.mAppToken)) {
+                        && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord)) {
                     if (recentsAnimationController.updateInputConsumerForApp(
                             recentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
                         recentsAnimationInputConsumer.show(mInputTransaction, w);

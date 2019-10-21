@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Lar appen motta og behandle tekstmeldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din uten at du har sett dem."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"motta tekstmeldinger (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Lar appen motta og behandle multimediemeldinger. Dette betyr at appen kan overvåke eller slette meldinger som er sendt til enheten din uten at du har sett dem."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Videresend kringkastede meldinger"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Tillat at denne appen binder seg til modulen for kringkastede meldinger for å videresende kringkastede meldinger når de mottas. Kringkastede varsler leveres noen steder for å advare deg om nødssituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"lese kringkastede meldinger"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Tillater at appen kan lese kringkastede meldinger enheten din mottar. Kringkastede varsler leveres noen steder for å advare deg om nødssituasjoner. Skadelige apper kan forstyrre ytelsen eller funksjonen til enheten din når en kringkastet nødmelding mottas."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"lese abonnement på nyhetskilder"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Lar appen lese og skrive konfigurasjon av Ikke forstyrr."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"start visning av bruk av tillatelser"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Lar innehaveren starte bruk av tillatelser for en app. Dette skal aldri være nødvendig for vanlige apper."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"mål for tilgjengelighetssnarvei"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Tillat at en app definerer målet for tilgjengelighetssnarveien."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollerer tillatt lengde og tillatte tegn i passord og PIN-koder for opplåsing av skjermen."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Overvåk forsøk på å låse opp skjermen"</string>

@@ -129,7 +129,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private int mTopFocusedDisplayId = INVALID_DISPLAY;
 
     // Map from the PID to the top most app which has a focused window of the process.
-    final HashMap<Integer, AppWindowToken> mTopFocusedAppByProcess = new HashMap<>();
+    final HashMap<Integer, ActivityRecord> mTopFocusedAppByProcess = new HashMap<>();
 
     // Only a separate transaction until we separate the apply surface changes
     // transaction from the global transaction.
@@ -145,9 +145,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     };
 
     private static final Consumer<WindowState> sRemoveReplacedWindowsConsumer = w -> {
-        final AppWindowToken aToken = w.mAppToken;
-        if (aToken != null) {
-            aToken.removeReplacedWindowIfNeeded(w);
+        final ActivityRecord activity = w.mActivityRecord;
+        if (activity != null) {
+            activity.removeReplacedWindowIfNeeded(w);
         }
     };
 
@@ -175,7 +175,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (newFocus != null) {
                 final int pidOfNewFocus = newFocus.mSession.mPid;
                 if (mTopFocusedAppByProcess.get(pidOfNewFocus) == null) {
-                    mTopFocusedAppByProcess.put(pidOfNewFocus, newFocus.mAppToken);
+                    mTopFocusedAppByProcess.put(pidOfNewFocus, newFocus.mActivityRecord);
                 }
                 if (topFocusedDisplayId == INVALID_DISPLAY) {
                     topFocusedDisplayId = dc.getDisplayId();
@@ -330,12 +330,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * NOTE: Only one AppWindowToken is allowed to exist in the system for a binder token, since
      * AppWindowToken represents an activity which can only exist on one display.
      */
-    AppWindowToken getAppWindowToken(IBinder binder) {
+    ActivityRecord getActivityRecord(IBinder binder) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final DisplayContent dc = mChildren.get(i);
-            final AppWindowToken atoken = dc.getAppWindowToken(binder);
-            if (atoken != null) {
-                return atoken;
+            final ActivityRecord activity = dc.getActivityRecord(binder);
+            if (activity != null) {
+                return activity;
             }
         }
         return null;
@@ -541,8 +541,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     ProtoLog.i(WM_SHOW_SURFACE_ALLOC,
                             "SURFACE RECOVER DESTROY: %s",  winAnimator.mWin);
                     winAnimator.destroySurface();
-                    if (winAnimator.mWin.mAppToken != null) {
-                        winAnimator.mWin.mAppToken.removeStartingWindow();
+                    if (winAnimator.mWin.mActivityRecord != null) {
+                        winAnimator.mWin.mActivityRecord.removeStartingWindow();
                     }
                 }
 

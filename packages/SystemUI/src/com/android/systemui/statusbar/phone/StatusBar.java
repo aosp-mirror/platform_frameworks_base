@@ -50,7 +50,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
-import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
@@ -179,6 +178,7 @@ import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -198,7 +198,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineInitializer;
+import com.android.systemui.statusbar.notification.NewNotifPipeline;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationClicker;
@@ -246,6 +246,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
 import dagger.Subcomponent;
 
 @Singleton
@@ -350,6 +351,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mBrightnessMirrorVisible;
     protected BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
+    private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     protected LockscreenWallpaper mLockscreenWallpaper;
     private final AutoHideController mAutoHideController;
 
@@ -370,6 +372,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private final Object mQueueLock = new Object();
 
+    private final FeatureFlags mFeatureFlags;
     private final StatusBarIconController mIconController;
     private final DozeLog mDozeLog;
     private final InjectionInflationController mInjectionInflater;
@@ -381,7 +384,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     private final boolean mAllowNotificationLongPress;
-    private final NotifPipelineInitializer mNotifPipelineInitializer;
+    private final Lazy<NewNotifPipeline> mNewNotifPipeline;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final ConfigurationController mConfigurationController;
@@ -474,7 +477,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private @TransitionMode int mStatusBarMode;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
-    protected ScrimController mScrimController;
+    private final ScrimController mScrimController;
     protected DozeScrimController mDozeScrimController;
     private final UiOffloadThread mUiOffloadThread;
 
@@ -621,6 +624,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Inject
     public StatusBar(
             Context context,
+            FeatureFlags featureFlags,
             LightBarController lightBarController,
             AutoHideController autoHideController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -635,7 +639,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             DynamicPrivacyController dynamicPrivacyController,
             BypassHeadsUpNotifier bypassHeadsUpNotifier,
             @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowNotificationLongPress,
-            NotifPipelineInitializer notifPipelineInitializer,
+            Lazy<NewNotifPipeline> newNotifPipeline,
             FalsingManager falsingManager,
             BroadcastDispatcher broadcastDispatcher,
             RemoteInputQuickSettingsDisabler remoteInputQuickSettingsDisabler,
@@ -675,8 +679,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowViewController.Builder statusBarWindowViewControllerBuilder,
             NotifLog notifLog,
-            DozeParameters dozeParameters) {
+            DozeParameters dozeParameters,
+            ScrimController scrimController,
+            Lazy<LockscreenWallpaper> lockscreenWallpaperLazy) {
         super(context);
+        mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
         mAutoHideController = autoHideController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -691,7 +698,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDynamicPrivacyController = dynamicPrivacyController;
         mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
         mAllowNotificationLongPress = allowNotificationLongPress;
-        mNotifPipelineInitializer = notifPipelineInitializer;
+        mNewNotifPipeline = newNotifPipeline;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mRemoteInputQuickSettingsDisabler = remoteInputQuickSettingsDisabler;
@@ -732,6 +739,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowViewControllerBuilder = statusBarWindowViewControllerBuilder;
         mNotifLog = notifLog;
         mDozeParameters = dozeParameters;
+        mScrimController = scrimController;
+        mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -990,7 +999,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         createNavigationBar(result);
 
         if (ENABLE_LOCKSCREEN_WALLPAPER) {
-            mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
+            mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
+            mLockscreenWallpaper.setHandler(mHandler);
         }
 
         mKeyguardIndicationController =
@@ -1024,19 +1034,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
         ScrimView scrimForBubble = mStatusBarWindow.findViewById(R.id.scrim_for_bubble);
 
-        mScrimController = SystemUIFactory.getInstance().createScrimController(
-                scrimBehind, scrimInFront, scrimForBubble, mLockscreenWallpaper,
-                (state, alpha, color) -> mLightBarController.setScrimState(state, alpha, color),
-                scrimsVisible -> {
-                    if (mStatusBarWindowController != null) {
-                        mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
-                    }
-                    if (mStatusBarWindow != null) {
-                        mStatusBarWindowViewController.onScrimVisibilityChanged(scrimsVisible);
-                    }
-                }, mDozeParameters,
-                mContext.getSystemService(AlarmManager.class),
-                mKeyguardStateController);
+        mScrimController.setScrimVisibleListener(scrimsVisible -> {
+            mStatusBarWindowController.setScrimsVisibility(scrimsVisible);
+            if (mStatusBarWindow != null) {
+                mStatusBarWindowViewController.onScrimVisibilityChanged(scrimsVisible);
+            }
+        });
+        mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
+
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
         mDozeScrimController = new DozeScrimController(mDozeParameters, mDozeLog);
@@ -1211,7 +1216,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mGroupAlertTransferHelper.bind(mEntryManager, mGroupManager);
         mNotificationListController.bind();
 
-        mNotifPipelineInitializer.initialize(mNotificationListener);
+        if (mFeatureFlags.isNewNotifPipelineEnabled()) {
+            mNewNotifPipeline.get().initialize(mNotificationListener);
+        }
     }
 
     /**
@@ -1888,7 +1895,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void maybeEscalateHeadsUp() {
         mHeadsUpManager.getAllEntries().forEach(entry -> {
-            final StatusBarNotification sbn = entry.notification;
+            final StatusBarNotification sbn = entry.getSbn();
             final Notification notification = sbn.getNotification();
             if (notification.fullScreenIntent != null) {
                 if (DEBUG) {
@@ -3689,9 +3696,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Indicate that the group expansion is changing at this time -- this way the group
             // and children backgrounds / divider animations will look correct.
             entry.setGroupExpansionChanging(true);
-            if (entry.notification != null) {
-                userId = entry.notification.getUserId();
-            }
+            userId = entry.getSbn().getUserId();
         }
         boolean fullShadeNeedsBouncer = !mLockscreenUserManager.
                 userAllowsPrivateNotificationsInPublic(mLockscreenUserManager.getCurrentUserId())

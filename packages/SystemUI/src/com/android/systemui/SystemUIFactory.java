@@ -17,7 +17,6 @@
 package com.android.systemui;
 
 import android.annotation.NonNull;
-import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,8 +24,6 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.colorextraction.ColorExtractor.GradientColors;
-import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -35,21 +32,15 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockIcon;
-import com.android.systemui.statusbar.phone.LockscreenWallpaper;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.ScrimState;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-
-import java.util.function.Consumer;
 
 import dagger.Module;
 import dagger.Provides;
@@ -141,16 +132,6 @@ public class SystemUIFactory {
                 expansionCallback, keyguardStateController,
                 Dependency.get(KeyguardUpdateMonitor.class), bypassController,
                 new Handler(Looper.getMainLooper()));
-    }
-
-    public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
-            ScrimView scrimForBubble,
-            LockscreenWallpaper lockscreenWallpaper,
-            TriConsumer<ScrimState, Float, GradientColors> scrimStateListener,
-            Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
-            AlarmManager alarmManager, KeyguardStateController keyguardStateController) {
-        return new ScrimController(scrimBehind, scrimInFront, scrimForBubble, scrimStateListener,
-                scrimVisibleListener, dozeParameters, alarmManager, keyguardStateController);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,

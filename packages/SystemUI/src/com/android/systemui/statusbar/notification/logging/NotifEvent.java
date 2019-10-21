@@ -27,12 +27,11 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * An event related to notifications. {@link NotifLog} stores and prints these events for debugging
- * and triaging purposes.
+ * and triaging purposes. We do not store a copy of the status bar notification nor ranking
+ * here to mitigate memory usage.
  */
 public class NotifEvent extends RichEvent {
     public static final int TOTAL_EVENT_TYPES = 11;
-    private final StatusBarNotification mSbn;
-    private final Ranking mRanking;
 
     /**
      * Creates a NotifEvent with an event type that matches with an index in the array
@@ -44,34 +43,20 @@ public class NotifEvent extends RichEvent {
     public NotifEvent(int logLevel, int type, String reason, StatusBarNotification sbn,
             Ranking ranking) {
         super(logLevel, type, reason);
+        mMessage += getExtraInfo(sbn, ranking);
+    }
+
+    private String getExtraInfo(StatusBarNotification sbn, Ranking ranking) {
+        StringBuilder extraInfo = new StringBuilder();
 
         if (sbn != null) {
-            mSbn = sbn.cloneLight();
-        } else {
-            mSbn = null;
+            extraInfo.append(" Sbn=");
+            extraInfo.append(sbn);
         }
 
         if (ranking != null) {
-            mRanking = new Ranking();
-            mRanking.populate(ranking);
-        } else {
-            mRanking = null;
-        }
-
-        mMessage += getExtraInfo();
-    }
-
-    private String getExtraInfo() {
-        StringBuilder extraInfo = new StringBuilder();
-
-        if (mSbn != null) {
-            extraInfo.append(" Sbn=");
-            extraInfo.append(mSbn);
-        }
-
-        if (mRanking != null) {
             extraInfo.append(" Ranking=");
-            extraInfo.append(mRanking);
+            extraInfo.append(ranking);
         }
 
         return extraInfo.toString();
@@ -104,13 +89,6 @@ public class NotifEvent extends RichEvent {
                     + " TOTAL_EVENT_LENGTH=" + TOTAL_EVENT_TYPES);
         }
         return events;
-    }
-
-    /**
-     * @return a copy of the status bar notification that changed with this event
-     */
-    public StatusBarNotification getSbn() {
-        return mSbn;
     }
 
     /**

@@ -344,10 +344,8 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillåter att appen tar emot och hanterar SMS. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"ta emot textmeddelanden (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillåter att appen tar emot och hanterar MMS-meddelanden. Detta innebär att appen kan övervaka eller ta bort meddelanden som skickats till enheten utan att visa dem för dig."</string>
-    <!-- no translation found for permlab_bindCellBroadcastService (4468585041824555604) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCellBroadcastService (9073440260695196089) -->
-    <skip />
+    <string name="permlab_bindCellBroadcastService" msgid="4468585041824555604">"Vidarebefordra massutskick via sms"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="9073440260695196089">"Tillåter att appen binds till cellsändningsmodulen så att massutskick via sms kan vidarebefordras vid mottagandet. I vissa områden används massutskick via sms för att varna om nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktioner när ett massutskick via sms tas emot."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"läsa SMS-meddelanden"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Appen tillåts läsa SMS som skickas till din enhet. På vissa platser skickas SMS för att varna för nödsituationer. Skadliga appar kan påverka enhetens prestanda eller funktionalitet när du får ett meddelande om en nödsituation via SMS."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"läsa flöden som du prenumererar på"</string>
@@ -659,8 +657,6 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ger appen läs- och skrivbehörighet till konfigurationen för Stör ej."</string>
     <string name="permlab_startViewPermissionUsage" msgid="5484728591597709944">"börja visa behörighetsanvändningen"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="4808345878203594428">"Gör att innehavaren kan öppna behörighetsanvändning för en app. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_accessibilityShortcutTarget" msgid="1385930065395622809">"mål för Aktivera tillgänglighet snabbt"</string>
-    <string name="permdesc_accessibilityShortcutTarget" msgid="562750894417800432">"Tillåter att en app kan definiera målet för Aktivera tillgänglighet snabbt."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Styr tillåten längd och tillåtna tecken i lösenord och pinkoder för skärmlåset."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Övervaka försök att låsa upp skärmen"</string>

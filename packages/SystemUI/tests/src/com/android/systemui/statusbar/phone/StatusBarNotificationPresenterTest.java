@@ -132,7 +132,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertFalse("The panel shouldn't allow heads up while disabled",
-                mStatusBar.canHeadsUp(entry, entry.sbn()));
+                mStatusBar.canHeadsUp(entry, entry.getSbn()));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         TestableLooper.get(this).processAllMessages();
 
         assertFalse("The panel shouldn't allow heads up while notitifcation shade disabled",
-                mStatusBar.canHeadsUp(entry, entry.sbn()));
+                mStatusBar.canHeadsUp(entry, entry.getSbn()));
     }
 
     @Test

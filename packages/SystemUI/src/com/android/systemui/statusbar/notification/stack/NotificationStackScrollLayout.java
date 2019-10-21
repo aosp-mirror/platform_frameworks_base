@@ -116,6 +116,7 @@ import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorCom
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.people.PeopleHubSectionFooterViewAdapter;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -518,7 +519,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             FalsingManager falsingManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
-            NotificationSectionsFeatureManager sectionsFeatureManager) {
+            NotificationSectionsFeatureManager sectionsFeatureManager,
+            PeopleHubSectionFooterViewAdapter peopleHubViewAdapter) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
 
@@ -541,6 +543,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         activityStarter,
                         statusBarStateController,
                         configurationController,
+                        peopleHubViewAdapter,
                         buckets.length);
         mSectionsManager.initialize(LayoutInflater.from(context));
         mSectionsManager.setOnClearGentleNotifsClickListener(v -> {
@@ -602,7 +605,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
             public void onPostEntryUpdated(NotificationEntry entry) {
-                if (!entry.notification.isClearable()) {
+                if (!entry.getSbn().isClearable()) {
                     // The user may have performed a dismiss action on the notification, since it's
                     // not clearable we should snap it back.
                     snapViewIfNeeded(entry);
@@ -1627,7 +1630,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
                             && mHeadsUpManager.getTopEntry().getRow() != row
                             && mGroupManager.getGroupSummary(
-                                mHeadsUpManager.getTopEntry().notification)
+                            mHeadsUpManager.getTopEntry().getSbn())
                             != entry) {
                         continue;
                     }
@@ -5525,12 +5528,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         // TODO: This is a listener method; we shouldn't be calling it. Can we just
                         // call performRemoveNotification as below?
                         mEntryManager.removeNotification(
-                                rowToRemove.getEntry().key,
+                                rowToRemove.getEntry().getKey(),
                                 null /* ranking */,
                                 NotificationListenerService.REASON_CANCEL_ALL);
                     } else {
                         mEntryManager.performRemoveNotification(
-                                rowToRemove.getEntry().notification,
+                                rowToRemove.getEntry().getSbn(),
                                 NotificationListenerService.REASON_CANCEL_ALL);
                     }
                 } else {

@@ -113,7 +113,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Test
     public void testOnChildLocationsChangedReportsVisibilityChanged() throws Exception {
         NotificationVisibility[] newlyVisibleKeys = {
-                NotificationVisibility.obtain(mEntry.key, 0, 1, true)
+                NotificationVisibility.obtain(mEntry.getKey(), 0, 1, true)
         };
         NotificationVisibility[] noLongerVisibleKeys = {};
         doAnswer(invocation -> {

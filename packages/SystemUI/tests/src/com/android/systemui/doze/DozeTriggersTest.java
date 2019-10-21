@@ -83,7 +83,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         mDockManagerFake = mock(DockManager.class);
         AsyncSensorManager asyncSensorManager =
                 new AsyncSensorManager(mSensors, null, new Handler());
-        mProximitySensor = new FakeProximitySensor(getContext(), asyncSensorManager);
+        mProximitySensor = new FakeProximitySensor(getContext().getResources(), asyncSensorManager);
 
         mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
                 asyncSensorManager, Handler.createAsync(Looper.myLooper()), wakeLock, true,
