@@ -4233,8 +4233,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
-                @PermissionInfo.Protection int protectionLevel) {
+        public @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtection(
+                @PermissionInfo.Protection int protection) {
             ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
 
             synchronized (PermissionManagerService.this.mLock) {
@@ -4244,7 +4244,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
                     if (bp.perm != null && bp.perm.info != null
-                            && bp.protectionLevel == protectionLevel) {
+                            && bp.perm.info.getProtection() == protection) {
                         matchingPermissions.add(bp.perm.info);
                     }
                 }

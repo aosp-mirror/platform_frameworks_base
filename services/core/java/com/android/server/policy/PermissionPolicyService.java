@@ -144,7 +144,7 @@ public final class PermissionPolicyService extends SystemService {
         };
 
         final ArrayList<PermissionInfo> dangerousPerms =
-                permManagerInternal.getAllPermissionWithProtectionLevel(
+                permManagerInternal.getAllPermissionWithProtection(
                         PermissionInfo.PROTECTION_DANGEROUS);
 
         try {
