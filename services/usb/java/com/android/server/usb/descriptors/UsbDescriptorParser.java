@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 public final class UsbDescriptorParser {
     private static final String TAG = "UsbDescriptorParser";
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private final String mDeviceAddr;
 
@@ -42,6 +42,11 @@ public final class UsbDescriptorParser {
     // This may well be different than the overall USB Spec.
     // Obtained from the first AudioClass Header descriptor.
     private int mACInterfacesSpec = UsbDeviceDescriptor.USBSPEC_1_0;
+
+    // The VideoClass spec implemented by the VideoClass Interfaces
+    // This may well be different than the overall USB Spec.
+    // Obtained from the first VidieoClass Header descriptor.
+    private int mVCInterfacesSpec = UsbDeviceDescriptor.USBSPEC_1_0;
 
     /**
      * Connect this parser to an existing set of already parsed descriptors.
@@ -88,6 +93,14 @@ public final class UsbDescriptorParser {
 
     public int getACInterfaceSpec() {
         return mACInterfacesSpec;
+    }
+
+    public void setVCInterfaceSpec(int spec) {
+        mVCInterfacesSpec = spec;
+    }
+
+    public int getVCInterfaceSpec() {
+        return mVCInterfacesSpec;
     }
 
     private class UsbDescriptorsStreamFormatException extends Exception {
@@ -186,19 +199,20 @@ public final class UsbDescriptorParser {
                             break;
 
                         case UsbDescriptor.CLASSID_VIDEO:
-                            Log.d(TAG, "  UsbDescriptor.CLASSID_VIDEO subType:0x"
-                                    + Integer.toHexString(stream.getByte()));
+                            if (DEBUG) {
+                                Log.d(TAG, "  UsbDescriptor.CLASSID_VIDEO");
+                            }
                             descriptor = UsbVCInterface.allocDescriptor(this, stream, length, type);
                             break;
 
                         case UsbDescriptor.CLASSID_AUDIOVIDEO:
-                            Log.d(TAG, "  UsbDescriptor.CLASSID_AUDIOVIDEO subType:0x"
-                                    + Integer.toHexString(stream.getByte()));
+                            if (DEBUG) {
+                                Log.d(TAG, "  UsbDescriptor.CLASSID_AUDIOVIDEO");
+                            }
                             break;
 
                         default:
-                            Log.d(TAG, "  Unparsed Class-specific Interface:0x"
-                                    + Integer.toHexString(mCurInterfaceDescriptor.getUsbClass()));
+                            Log.w(TAG, "  Unparsed Class-specific");
                             break;
                     }
                 }
@@ -206,23 +220,32 @@ public final class UsbDescriptorParser {
 
             case UsbDescriptor.DESCRIPTORTYPE_CLASSSPECIFIC_ENDPOINT:
                 if (mCurInterfaceDescriptor != null) {
-                    switch (mCurInterfaceDescriptor.getUsbClass()) {
+                    int subClass = mCurInterfaceDescriptor.getUsbClass();
+                    switch (subClass) {
                         case UsbDescriptor.CLASSID_AUDIO:
                             descriptor = UsbACEndpoint.allocDescriptor(this, length, type);
                             break;
-                        case UsbDescriptor.CLASSID_VIDEO:
-                            Log.d(TAG, "UsbDescriptor.CLASSID_VIDEO subType:0x"
-                                    + Integer.toHexString(stream.getByte()));
-                            descriptor = UsbVCEndpoint.allocDescriptor(this, length, type);
+
+                        case UsbDescriptor.CLASSID_VIDEO: {
+                            Byte subtype = stream.getByte();
+                            if (DEBUG) {
+                                Log.d(TAG, "UsbDescriptor.CLASSID_VIDEO type:0x"
+                                        + Integer.toHexString(type));
+                            }
+                            descriptor = UsbVCEndpoint.allocDescriptor(this, length, type, subtype);
+                        }
                             break;
 
                         case UsbDescriptor.CLASSID_AUDIOVIDEO:
-                            Log.d(TAG, "UsbDescriptor.CLASSID_AUDIOVIDEO subType:0x"
-                                    + Integer.toHexString(stream.getByte()));
+                            if (DEBUG) {
+                                Log.d(TAG, "UsbDescriptor.CLASSID_AUDIOVIDEO type:0x"
+                                        + Integer.toHexString(type));
+                            }
                             break;
+
                         default:
-                            Log.d(TAG, "  Unparsed Class-specific Endpoint:0x"
-                                    + Integer.toHexString(mCurInterfaceDescriptor.getUsbClass()));
+                            Log.w(TAG, "  Unparsed Class-specific Endpoint:0x"
+                                    + Integer.toHexString(subClass));
                             break;
                     }
                 }
@@ -550,6 +573,30 @@ public final class UsbDescriptorParser {
      */
     public boolean hasAudioCapture() {
         return hasAudioTerminal(UsbACInterface.ACI_INPUT_TERMINAL);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasVideoCapture() {
+        for (UsbDescriptor descriptor : mDescriptors) {
+            if (descriptor instanceof UsbVCInputTerminal) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasVideoPlayback() {
+        for (UsbDescriptor descriptor : mDescriptors) {
+            if (descriptor instanceof UsbVCOutputTerminal) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
