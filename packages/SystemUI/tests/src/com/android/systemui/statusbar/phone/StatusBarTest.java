@@ -61,7 +61,9 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.LinearLayout;
 
 import androidx.test.filters.SmallTest;
 
@@ -70,6 +72,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
@@ -173,6 +176,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private ArrayList<NotificationEntry> mNotificationList;
+    @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private NotificationData mNotificationData;
     @Mock private NotificationInterruptionStateProvider.HeadsUpSuppressor mHeadsUpSuppressor;
@@ -227,11 +231,14 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DozeParameters mDozeParameters;
     @Mock private Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     @Mock private LockscreenWallpaper mLockscreenWallpaper;
+    @Mock private LinearLayout mLockIconContainer;
+    @Mock private ViewMediatorCallback mKeyguardVieMediatorCallback;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDependency.injectTestDependency(NotificationFilter.class, mNotificationFilter);
+        mDependency.injectMockDependency(KeyguardDismissUtil.class);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         mPowerManager = new PowerManager(mContext, powerManagerService,
@@ -293,6 +300,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .thenReturn(mStatusBarWindowViewController);
 
         when(mLockscreenWallpaperLazy.get()).thenReturn(mLockscreenWallpaper);
+        when(mBiometricUnlockControllerLazy.get()).thenReturn(mBiometricUnlockController);
 
         mStatusBar = new StatusBar(
                 mContext,
@@ -356,13 +364,24 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotifLog,
                 mDozeParameters,
                 mScrimController,
-                mLockscreenWallpaperLazy);
+                mLockscreenWallpaperLazy,
+                mBiometricUnlockControllerLazy);
+
+        when(mStatusBarWindowView.findViewById(R.id.lock_icon_container)).thenReturn(
+                mLockIconContainer);
+
+        when(mKeyguardViewMediator.registerStatusBar(any(StatusBar.class), any(ViewGroup.class),
+                any(NotificationPanelView.class), any(BiometricUnlockController.class),
+                any(ViewGroup.class), any(ViewGroup.class), any(KeyguardBypassController.class)))
+                .thenReturn(mStatusBarKeyguardViewManager);
+
+        when(mKeyguardViewMediator.getViewMediatorCallback()).thenReturn(
+                mKeyguardVieMediatorCallback);
+
         // TODO: we should be able to call mStatusBar.start() and have all the below values
         // initialized automatically.
         mStatusBar.mComponents = mContext.getComponents();
-        mStatusBar.mStatusBarKeyguardViewManager = mStatusBarKeyguardViewManager;
         mStatusBar.mStatusBarWindow = mStatusBarWindowView;
-        mStatusBar.mBiometricUnlockController = mBiometricUnlockController;
         mStatusBar.mNotificationPanel = mNotificationPanelView;
         mStatusBar.mCommandQueue = mCommandQueue;
         mStatusBar.mDozeScrimController = mDozeScrimController;
@@ -373,6 +392,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mBarService = mBarService;
         mStatusBar.mStackScroller = mStackScroller;
         mStatusBar.mStatusBarWindowViewController = mStatusBarWindowViewController;
+        mStatusBar.startKeyguard();
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
         Dependency.get(InitController.class).executePostInitTasks();
         entryManager.setUpForTest(mock(NotificationPresenter.class), mStackScroller,

@@ -34,6 +34,7 @@ import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.dagger.qualifiers.MainResources;
@@ -73,6 +74,12 @@ public class SystemServicesModule {
     @Provides
     static IWindowManager provideIWindowManager() {
         return WindowManagerGlobal.getWindowManagerService();
+    }
+
+    @Singleton
+    @Provides
+    static LatencyTracker provideLatencyTracker(Context context) {
+        return LatencyTracker.getInstance(context);
     }
 
     @SuppressLint("MissingPermission")
