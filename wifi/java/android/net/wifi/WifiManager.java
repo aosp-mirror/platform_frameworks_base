@@ -208,6 +208,33 @@ public class WifiManager {
     public @interface NetworkSuggestionsStatusCode {}
 
     /**
+     * Reason code if suggested network connection attempt failed with an unknown failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_UNKNOWN = 0;
+    /**
+     * Reason code if suggested network connection attempt failed with association failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_ASSOCIATION = 1;
+    /**
+     * Reason code if suggested network connection attempt failed with an authentication failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION = 2;
+    /**
+     * Reason code if suggested network connection attempt failed with an IP provision failure.
+     */
+    public static final int STATUS_SUGGESTION_CONNECTION_FAILURE_IP_PROVISIONING = 3;
+
+    /** @hide */
+    @IntDef(prefix = {"STATUS_SUGGESTION_CONNECTION_FAILURE_"},
+            value = {STATUS_SUGGESTION_CONNECTION_FAILURE_UNKNOWN,
+                    STATUS_SUGGESTION_CONNECTION_FAILURE_ASSOCIATION,
+                    STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION,
+                    STATUS_SUGGESTION_CONNECTION_FAILURE_IP_PROVISIONING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SuggestionConnectionStatusCode {}
+
+    /**
      * Broadcast intent action indicating whether Wi-Fi scanning is allowed currently
      * @hide
      */
@@ -5229,7 +5256,7 @@ public class WifiManager {
     }
 
     /**
-     * Base class for scan results listener. Should be implemented by applications and set when
+     * Interface for scan results listener. Should be implemented by applications and set when
      * calling {@link WifiManager#addScanResultsListener(Executor, ScanResultsListener)}.
      */
     public interface ScanResultsListener {
@@ -5311,6 +5338,110 @@ public class WifiManager {
                 throw new RemoteException("Wifi service is not running");
             }
             iWifiManager.unregisterScanResultsListener(listener.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Interface for suggestion connection status listener.
+     * Should be implemented by applications and set when calling
+     * {@link WifiManager#addSuggestionConnectionStatusListener(
+     * Executor, SuggestionConnectionStatusListener)}.
+     */
+    public interface SuggestionConnectionStatusListener {
+
+        /**
+         * Called when the framework attempted to connect to a suggestion provided by the
+         * registering app, but the connection to the suggestion failed.
+         * @param wifiNetworkSuggestion The suggestion which failed to connect.
+         * @param failureReason the connection failure reason code. One of
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_ASSOCIATION},
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION},
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_IP_PROVISIONING}
+         * {@link #STATUS_SUGGESTION_CONNECTION_FAILURE_UNKNOWN}
+         */
+        void onConnectionStatus(
+                @NonNull WifiNetworkSuggestion wifiNetworkSuggestion,
+                @SuggestionConnectionStatusCode int failureReason);
+    }
+
+    private class SuggestionConnectionStatusListenerProxy extends
+            ISuggestionConnectionStatusListener.Stub {
+        private final Executor mExecutor;
+        private final SuggestionConnectionStatusListener mListener;
+
+        SuggestionConnectionStatusListenerProxy(@NonNull Executor executor,
+                @NonNull SuggestionConnectionStatusListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onConnectionStatus(@NonNull WifiNetworkSuggestion wifiNetworkSuggestion,
+                int failureReason) {
+            mExecutor.execute(() ->
+                    mListener.onConnectionStatus(wifiNetworkSuggestion, failureReason));
+        }
+
+    }
+
+    /**
+     * Add a listener for suggestion networks. See {@link SuggestionConnectionStatusListener}.
+     * Caller will receive the event when suggested network have connection failure.
+     * Caller can remove a previously registered listener using
+     * {@link WifiManager#removeSuggestionConnectionStatusListener(
+     * SuggestionConnectionStatusListener)}
+     * Same caller can add multiple listeners to monitor the event.
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
+     * {@link android.Manifest.permission#ACCESS_WIFI_STATE} permissions.
+     * Callers without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param executor The executor to execute the listener of the {@code listener} object.
+     * @param listener listener for suggestion network connection failure.
+     */
+    @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
+    public void addSuggestionConnectionStatusListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull SuggestionConnectionStatusListener listener) {
+        if (listener == null) throw new IllegalArgumentException("Listener cannot be null");
+        if (executor == null) throw new IllegalArgumentException("Executor cannot be null");
+        Log.v(TAG, "addSuggestionConnectionStatusListener listener=" + listener
+                + ", executor=" + executor);
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.registerSuggestionConnectionStatusListener(new Binder(),
+                    new SuggestionConnectionStatusListenerProxy(executor, listener),
+                    listener.hashCode(), mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+    }
+
+    /**
+     * Allow callers to remove a previously registered listener. After calling this method,
+     * applications will no longer receive suggestion connection events through that listener.
+     *
+     * @param listener listener to remove.
+     */
+    @RequiresPermission(ACCESS_WIFI_STATE)
+    public void removeSuggestionConnectionStatusListener(
+            @NonNull SuggestionConnectionStatusListener listener) {
+        if (listener == null) throw new IllegalArgumentException("Listener cannot be null");
+        Log.v(TAG, "removeSuggestionConnectionStatusListener: listener=" + listener);
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.unregisterSuggestionConnectionStatusListener(listener.hashCode(),
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

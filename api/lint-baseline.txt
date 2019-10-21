@@ -534,7 +534,7 @@ MissingNullability: android.icu.util.VersionInfo#UNICODE_12_1:
 MissingNullability: android.media.MediaMetadataRetriever#getFrameAtTime(long, int, android.media.MediaMetadataRetriever.BitmapParams):
     
 MissingNullability: android.media.MediaMetadataRetriever#getScaledFrameAtTime(long, int, int, int, android.media.MediaMetadataRetriever.BitmapParams):
-    
+
 
 
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
@@ -1160,7 +1160,7 @@ SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(jav
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
     
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
-    
+
 
 
 StreamFiles: android.content.res.loader.DirectoryResourceLoader#DirectoryResourceLoader(java.io.File):
