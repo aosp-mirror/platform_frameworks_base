@@ -143,6 +143,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     private boolean mHovering;
     private int mCurrentlyDisplayingGroupId;
     private boolean mShowing;
+    private boolean mDismissing;
     private boolean mExpanded;
     private View mExpandIcon;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -244,6 +245,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
         mHovering = false;
         mShowing = false;
+        mDismissing = false;
         mExpanded = false;
         mWindow = mDialog.getWindow();
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
@@ -335,14 +337,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
         mHandler.removeMessages(H.DISMISS);
         mHandler.removeMessages(H.SHOW);
-        if (!mShowing) {
+        if (!mShowing || mDismissing) {
             return;
         }
 
-        mListView.animate().cancel();
-
-        mListView.setTranslationY(0);
-        mListView.setAlpha(1);
+        mDismissing = true;
         mListView.animate()
                 .alpha(0)
                 .translationY(-mListView.getHeight())
@@ -354,7 +353,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
                     }
                     mDialog.dismiss();
                     mShowing = false;
-                    mShowing = false;
+                    mDismissing = false;
                     // if mExpandIcon is null that means user never clicked on the expanded arrow
                     // which implies that the dialog is still not expanded. In that case we do
                     // not want to reset the state
