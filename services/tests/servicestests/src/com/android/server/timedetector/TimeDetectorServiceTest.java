@@ -28,7 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.timedetector.TimeSignal;
+import android.app.timedetector.PhoneTimeSuggestion;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.TimestampedValue;
@@ -67,10 +67,10 @@ public class TimeDetectorServiceTest {
     public void testStubbedCall_withoutPermission() {
         doThrow(new SecurityException("Mock"))
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
-        TimeSignal timeSignal = createNitzTimeSignal();
+        PhoneTimeSuggestion phoneTimeSuggestion = createPhoneTimeSuggestion();
 
         try {
-            mTimeDetectorService.suggestTime(timeSignal);
+            mTimeDetectorService.suggestPhoneTime(phoneTimeSuggestion);
         } finally {
             verify(mMockContext).enforceCallingPermission(
                     eq(android.Manifest.permission.SET_TIME), anyString());
@@ -78,15 +78,15 @@ public class TimeDetectorServiceTest {
     }
 
     @Test
-    public void testSuggestTime() {
+    public void testSuggestPhoneTime() {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        TimeSignal timeSignal = createNitzTimeSignal();
-        mTimeDetectorService.suggestTime(timeSignal);
+        PhoneTimeSuggestion phoneTimeSuggestion = createPhoneTimeSuggestion();
+        mTimeDetectorService.suggestPhoneTime(phoneTimeSuggestion);
 
         verify(mMockContext)
                 .enforceCallingPermission(eq(android.Manifest.permission.SET_TIME), anyString());
-        mStubbedTimeDetectorStrategy.verifySuggestTimeCalled(timeSignal);
+        mStubbedTimeDetectorStrategy.verifySuggestPhoneTimeCalled(phoneTimeSuggestion);
     }
 
     @Test
@@ -115,15 +115,16 @@ public class TimeDetectorServiceTest {
         mStubbedTimeDetectorStrategy.verifyHandleAutoTimeDetectionToggleCalled(false);
     }
 
-    private static TimeSignal createNitzTimeSignal() {
+    private static PhoneTimeSuggestion createPhoneTimeSuggestion() {
+        int phoneId = 1234;
         TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
-        return new TimeSignal(TimeSignal.SOURCE_ID_NITZ, timeValue);
+        return new PhoneTimeSuggestion(phoneId, timeValue);
     }
 
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {
 
         // Call tracking.
-        private TimeSignal mLastSuggestedTime;
+        private PhoneTimeSuggestion mLastPhoneSuggestion;
         private Boolean mLastAutoTimeDetectionToggle;
         private boolean mDumpCalled;
 
@@ -132,9 +133,9 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
-        public void suggestTime(TimeSignal timeSignal) {
+        public void suggestPhoneTime(PhoneTimeSuggestion timeSuggestion) {
             resetCallTracking();
-            mLastSuggestedTime = timeSignal;
+            mLastPhoneSuggestion = timeSuggestion;
         }
 
         @Override
@@ -150,13 +151,13 @@ public class TimeDetectorServiceTest {
         }
 
         void resetCallTracking() {
-            mLastSuggestedTime = null;
+            mLastPhoneSuggestion = null;
             mLastAutoTimeDetectionToggle = null;
             mDumpCalled = false;
         }
 
-        void verifySuggestTimeCalled(TimeSignal expectedSignal) {
-            assertEquals(expectedSignal, mLastSuggestedTime);
+        void verifySuggestPhoneTimeCalled(PhoneTimeSuggestion expectedSignal) {
+            assertEquals(expectedSignal, mLastPhoneSuggestion);
         }
 
         void verifyHandleAutoTimeDetectionToggleCalled(boolean expectedEnable) {
