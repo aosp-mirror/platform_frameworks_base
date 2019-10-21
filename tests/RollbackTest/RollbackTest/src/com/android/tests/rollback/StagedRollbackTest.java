@@ -32,6 +32,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
+import android.provider.DeviceConfig;
 import android.text.TextUtils;
 
 import androidx.test.InstrumentationRegistry;
@@ -64,6 +65,8 @@ public class StagedRollbackTest {
 
     private static final String NETWORK_STACK_CONNECTOR_CLASS =
             "android.net.INetworkStackConnector";
+    private static final String PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT =
+            "watchdog_trigger_failure_count";
 
     private static final String MODULE_META_DATA_PACKAGE = getModuleMetadataPackageName();
 
@@ -76,7 +79,8 @@ public class StagedRollbackTest {
                 Manifest.permission.INSTALL_PACKAGES,
                 Manifest.permission.DELETE_PACKAGES,
                 Manifest.permission.TEST_MANAGE_ROLLBACKS,
-                Manifest.permission.FORCE_STOP_PACKAGES);
+                Manifest.permission.FORCE_STOP_PACKAGES,
+                Manifest.permission.WRITE_DEVICE_CONFIG);
     }
 
     /**
@@ -128,7 +132,10 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnly_Phase3() throws Exception {
-        // Crash TestApp.A PackageWatchdog#TRIGGER_FAILURE_COUNT times to trigger rollback
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(5), false);
+
         RollbackUtils.sendCrashBroadcast(TestApp.A, 5);
 
         // We expect the device to be rebooted automatically. Wait for that to happen.
