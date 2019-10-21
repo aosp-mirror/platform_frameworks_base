@@ -230,7 +230,7 @@
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de error"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Finalizar sesión"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
-    <string name="bugreport_title" msgid="5981047024855257269">"Informe de errores"</string>
+    <string name="bugreport_title" msgid="5981047024855257269">"Informar de un error"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, introducir más información sobre el problema y hacer capturas de pantalla. Es posible que se omitan algunas secciones menos utilizadas y que requieran más tiempo."</string>
@@ -1186,7 +1186,7 @@
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostrar siempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible de Android OS y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Mostrar siempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Comprobar actualizaciones"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Buscar actualizaciones"</string>
     <string name="smv_application" msgid="3307209192155442829">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha infringido su política StrictMode autoaplicable."</string>
     <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"El teléfono se está actualizando…"</string>
@@ -1904,7 +1904,7 @@
     <string name="work_mode_off_message" msgid="5130856710614337649">"Tus aplicaciones, notificaciones, datos y otras funciones del perfil de trabajo se activarán"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activar"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Esta aplicación se ha diseñado para una versión anterior de Android y es posible que no funcione correctamente. Busca actualizaciones o ponte en contacto con el desarrollador."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Comprobar actualizaciones"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Buscar actualizaciones"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Abre la aplicación de SMS para ver el mensaje"</string>
     <string name="profile_encrypted_title" msgid="4260432497586829134">"Algunas funciones limitadas"</string>

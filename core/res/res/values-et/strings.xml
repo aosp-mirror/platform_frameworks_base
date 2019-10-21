@@ -1136,7 +1136,7 @@
     <string name="whichOpenLinksWithApp" msgid="8225991685366651614">"Linkide avamine rakendusega <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="whichOpenHostLinksWithApp" msgid="3464470639011045589">"Ava teenuse <xliff:g id="HOST">%1$s</xliff:g> lingid rakendusega <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="6142688895536868827">"Juudep. andmine"</string>
-    <string name="whichEditApplication" msgid="144727838241402655">"Muutmine:"</string>
+    <string name="whichEditApplication" msgid="144727838241402655">"Redigeeri rakendusega:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Muutmine rakendusega %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Muuda"</string>
     <string name="whichSendApplication" msgid="5803792421724377602">"Jagamine"</string>

@@ -1577,8 +1577,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Изтича на:"</string>
     <string name="serial_number" msgid="758814067660862493">"Сериен номер:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Пръстови отпечатъци:"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"Пръстов отпечатък SHA-256:"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"Пръстов отпечатък SHA-1:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Отпечатък SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Отпечатък SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Вижте всички"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Избор на активност"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Споделяне със:"</string>
