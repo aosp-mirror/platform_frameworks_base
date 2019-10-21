@@ -161,9 +161,18 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private Drawable mNotificationPanelBackground;
 
     private ViewGroup mTopNavigationBarContainer;
+    private ViewGroup mNavigationBarWindow;
+    private ViewGroup mLeftNavigationBarWindow;
+    private ViewGroup mRightNavigationBarWindow;
     private CarNavigationBarView mTopNavigationBarView;
+    private CarNavigationBarView mNavigationBarView;
+    private CarNavigationBarView mLeftNavigationBarView;
+    private CarNavigationBarView mRightNavigationBarView;
 
     private final Object mQueueLock = new Object();
+    private boolean mShowLeft;
+    private boolean mShowRight;
+    private boolean mShowBottom;
     private final NavigationBarViewFactory mNavigationBarViewFactory;
     private CarFacetButtonController mCarFacetButtonController;
     private DeviceProvisionedController mDeviceProvisionedController;
@@ -429,6 +438,16 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mHvacController.removeAllComponents();
         mCarFacetButtonController.removeAll();
 
+        if (mNavigationBarWindow != null) {
+            mNavigationBarView = null;
+        }
+        if (mLeftNavigationBarWindow != null) {
+            mLeftNavigationBarView = null;
+        }
+        if (mRightNavigationBarWindow != null) {
+            mRightNavigationBarView = null;
+        }
+
         buildNavBarContent();
         // CarFacetButtonController was reset therefore we need to re-add the status bar elements
         // to the controller.
@@ -451,28 +470,28 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * the full screen user selector is shown.
      */
     void setNavBarVisibility(@View.Visibility int visibility) {
-        if (mNavigationBarViewFactory.getBottomWindow() != null) {
-            mNavigationBarViewFactory.getBottomWindow().setVisibility(visibility);
+        if (mNavigationBarWindow != null) {
+            mNavigationBarWindow.setVisibility(visibility);
         }
-        if (mNavigationBarViewFactory.getLeftWindow() != null) {
-            mNavigationBarViewFactory.getLeftWindow().setVisibility(visibility);
+        if (mLeftNavigationBarWindow != null) {
+            mLeftNavigationBarWindow.setVisibility(visibility);
         }
-        if (mNavigationBarViewFactory.getRightWindow() != null) {
-            mNavigationBarViewFactory.getRightWindow().setVisibility(visibility);
+        if (mRightNavigationBarWindow != null) {
+            mRightNavigationBarWindow.setVisibility(visibility);
         }
     }
 
     @Override
     public boolean hideKeyguard() {
         boolean result = super.hideKeyguard();
-        if (mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser) != null) {
-            mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser).hideKeyguardButtons();
+        if (mNavigationBarView != null) {
+            mNavigationBarView.hideKeyguardButtons();
         }
-        if (mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser) != null) {
-            mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser).hideKeyguardButtons();
+        if (mLeftNavigationBarView != null) {
+            mLeftNavigationBarView.hideKeyguardButtons();
         }
-        if (mNavigationBarViewFactory.getRightBar(mDeviceIsSetUpForUser) != null) {
-            mNavigationBarViewFactory.getRightBar(mDeviceIsSetUpForUser).hideKeyguardButtons();
+        if (mRightNavigationBarView != null) {
+            mRightNavigationBarView.hideKeyguardButtons();
         }
         return result;
     }
@@ -487,14 +506,14 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * Switch to the keyguard applicable content contained in the nav bars
      */
     private void updateNavBarForKeyguardContent() {
-        if (mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser) != null) {
-            mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser).showKeyguardButtons();
+        if (mNavigationBarView != null) {
+            mNavigationBarView.showKeyguardButtons();
         }
-        if (mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser) != null) {
-            mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser).showKeyguardButtons();
+        if (mLeftNavigationBarView != null) {
+            mLeftNavigationBarView.showKeyguardButtons();
         }
-        if (mNavigationBarViewFactory.getRightBar(mDeviceIsSetUpForUser) != null) {
-            mNavigationBarViewFactory.getRightBar(mDeviceIsSetUpForUser).showKeyguardButtons();
+        if (mRightNavigationBarView != null) {
+            mRightNavigationBarView.showKeyguardButtons();
         }
     }
 
@@ -599,26 +618,19 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mNotificationDataManager = new NotificationDataManager();
         mNotificationDataManager.setOnUnseenCountUpdateListener(
                 () -> {
-                    if (mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser) != null
-                            && mNotificationDataManager != null) {
+                    if (mNavigationBarView != null && mNotificationDataManager != null) {
                         Boolean hasUnseen =
                                 mNotificationDataManager.getUnseenNotificationCount() > 0;
-                        if (mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser) != null) {
-                            mNavigationBarViewFactory.getBottomBar(
-                                    mDeviceIsSetUpForUser).toggleNotificationUnseenIndicator(
-                                    hasUnseen);
+                        if (mNavigationBarView != null) {
+                            mNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
                         }
 
-                        if (mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser) != null) {
-                            mNavigationBarViewFactory.getLeftBar(
-                                    mDeviceIsSetUpForUser).toggleNotificationUnseenIndicator(
-                                    hasUnseen);
+                        if (mLeftNavigationBarView != null) {
+                            mLeftNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
                         }
 
-                        if (mNavigationBarViewFactory.getRightBar(mDeviceIsSetUpForUser) != null) {
-                            mNavigationBarViewFactory.getRightBar(
-                                    mDeviceIsSetUpForUser).toggleNotificationUnseenIndicator(
-                                    hasUnseen);
+                        if (mRightNavigationBarView != null) {
+                            mRightNavigationBarView.toggleNotificationUnseenIndicator(hasUnseen);
                         }
                     }
                 });
@@ -873,6 +885,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
+        mShowBottom = mContext.getResources().getBoolean(R.bool.config_enableBottomNavigationBar);
+        mShowLeft = mContext.getResources().getBoolean(R.bool.config_enableLeftNavigationBar);
+        mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
+
         buildNavBarWindows();
         buildNavBarContent();
     }
@@ -880,22 +896,40 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private void buildNavBarContent() {
         buildTopBar();
 
-        CarNavigationBarView bottom = mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser);
-        bottom.setStatusBar(this);
-        bottom.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
+        if (mShowBottom) {
+            mNavigationBarView = mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser);
+            mNavigationBarView.setStatusBar(this);
+            mNavigationBarView.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
+        }
 
-        CarNavigationBarView left = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
-        left.setStatusBar(this);
-        left.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
+        if (mShowLeft) {
+            mLeftNavigationBarView = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
+            mLeftNavigationBarView.setStatusBar(this);
+            mLeftNavigationBarView.setStatusBarWindowTouchListener(
+                    mNavBarNotificationTouchListener);
+        }
 
-        CarNavigationBarView right = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
-        right.setStatusBar(this);
-        right.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
+        if (mShowRight) {
+            mRightNavigationBarView = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
+            mRightNavigationBarView.setStatusBar(this);
+            mRightNavigationBarView.setStatusBarWindowTouchListener(
+                    mNavBarNotificationTouchListener);
+        }
     }
 
     private void buildNavBarWindows() {
         mTopNavigationBarContainer = mStatusBarWindow
                 .findViewById(R.id.car_top_navigation_bar_container);
+
+        if (mShowBottom) {
+            mNavigationBarWindow = mNavigationBarViewFactory.getBottomWindow();
+        }
+        if (mShowLeft) {
+            mLeftNavigationBarWindow = mNavigationBarViewFactory.getLeftWindow();
+        }
+        if (mShowRight) {
+            mRightNavigationBarWindow = mNavigationBarViewFactory.getRightWindow();
+        }
     }
 
     private void buildTopBar() {

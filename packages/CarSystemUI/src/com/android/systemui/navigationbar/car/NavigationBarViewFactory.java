@@ -108,7 +108,7 @@ public class NavigationBarViewFactory {
 
     private ViewGroup getWindowCached(Type type) {
         if (mCachedContainerMap.containsKey(type)) {
-            return mCachedViewMap.get(type);
+            return mCachedContainerMap.get(type);
         }
 
         ViewGroup window = (ViewGroup) View.inflate(mContext,
