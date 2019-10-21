@@ -16,4 +16,4 @@
 
 package android.app.timedetector;
 
-parcelable TimeSignal;
+parcelable PhoneTimeSuggestion;
