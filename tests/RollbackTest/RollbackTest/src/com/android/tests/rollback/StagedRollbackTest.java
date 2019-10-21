@@ -292,6 +292,21 @@ public class StagedRollbackTest {
         Uninstall.packages(TestApp.A);
     }
 
+    @Test
+    public void testNetworkPassedDoesNotRollback_Phase1() throws Exception {
+        resetNetworkStack();
+    }
+
+    @Test
+    public void testNetworkPassedDoesNotRollback_Phase2() throws Exception {
+        assertNetworkStackRollbackAvailable();
+    }
+
+    @Test
+    public void testNetworkPassedDoesNotRollback_Phase3() throws Exception {
+        assertNoNetworkStackRollbackCommitted();
+    }
+
     @Nullable
     private static String getModuleMetadataPackageName() {
         String packageName = InstrumentationRegistry.getContext().getResources().getString(

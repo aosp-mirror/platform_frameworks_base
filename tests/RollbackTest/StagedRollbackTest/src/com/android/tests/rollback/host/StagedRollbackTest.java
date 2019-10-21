@@ -166,7 +166,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
     @Test
     public void testNetworkPassedDoesNotRollback() throws Exception {
         // Remove available rollbacks and uninstall NetworkStack on /data/
-        runPhase("resetNetworkStack");
+        runPhase("testNetworkPassedDoesNotRollback_Phase1");
         // Reduce health check deadline, here unlike the network failed case, we use
         // a longer deadline because joining a network can take a much longer time for
         // reasons external to the device than 'not joining'
@@ -183,7 +183,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().waitForDeviceAvailable();
 
         // Verify rollback was enabled
-        runPhase("assertNetworkStackRollbackAvailable");
+        runPhase("testNetworkPassedDoesNotRollback_Phase2");
 
         // Connect to internet so network health check passes
         getDevice().executeShellCommand("svc wifi enable");
@@ -196,7 +196,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Sleep for > health check deadline
         Thread.sleep(310000);
         // Verify rollback was not executed after health check deadline
-        runPhase("assertNoNetworkStackRollbackCommitted");
+        runPhase("testNetworkPassedDoesNotRollback_Phase3");
     }
 
     /**
