@@ -1663,7 +1663,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outFrame, outContentInsets, outStableInsets, outOutsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
-            outInsetsState.set(displayContent.getInsetsStateController().getInsetsForDispatch(win));
+            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win));
 
             if (mInTouchMode) {
                 res |= WindowManagerGlobal.ADD_FLAG_IN_TOUCH_MODE;
@@ -2356,7 +2356,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     outStableInsets, outOutsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
-            outInsetsState.set(displayContent.getInsetsStateController().getInsetsForDispatch(win));
+            outInsetsState.set(displayContent.getInsetsPolicy().getInsetsForDispatch(win));
             if (DEBUG) {
                 Slog.v(TAG_WM, "Relayout given client " + client.asBinder()
                         + ", requestedWidth=" + requestedWidth
@@ -5569,6 +5569,20 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.statusBarVisibilityChanged(visibility);
             } else {
                 Slog.w(TAG, "statusBarVisibilityChanged with invalid displayId=" + displayId);
+            }
+        }
+    }
+
+    @Override
+    public void hideTransientBars(int displayId) {
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
+                "hideTransientBars()");
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.hideTransientBars();
+            } else {
+                Slog.w(TAG, "hideTransientBars with invalid displayId=" + displayId);
             }
         }
     }

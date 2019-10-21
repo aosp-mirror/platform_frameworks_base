@@ -35,33 +35,39 @@ import java.lang.annotation.RetentionPolicy;
 public interface WindowInsetsController {
 
     /**
-     * Makes system bars become opaque with solid dark background and light foreground.
+     * Makes the top bars become opaque with solid dark background and light foreground.
      * @hide
      */
-    int APPEARANCE_OPAQUE_BARS = 1;
+    int APPEARANCE_OPAQUE_TOP_BAR = 1;
+
+    /**
+     * Makes the side bars become opaque with solid dark background and light foreground.
+     * @hide
+     */
+    int APPEARANCE_OPAQUE_SIDE_BARS = 1 << 1;
 
     /**
      * Makes items on system bars become less noticeable without changing the layout of the bars.
      * @hide
      */
-    int APPEARANCE_LOW_PROFILE_BARS = 1 << 1;
+    int APPEARANCE_LOW_PROFILE_BARS = 1 << 2;
 
     /**
      * Changes the foreground color for the light top bar so that the items on the bar can be read
      * clearly.
      */
-    int APPEARANCE_LIGHT_TOP_BAR = 1 << 2;
+    int APPEARANCE_LIGHT_TOP_BAR = 1 << 3;
 
     /**
      * Changes the foreground color for the light side bars so that the items on the bar can be read
      * clearly.
      */
-    int APPEARANCE_LIGHT_SIDE_BARS = 1 << 3;
+    int APPEARANCE_LIGHT_SIDE_BARS = 1 << 4;
 
     /** Determines the appearance of system bars. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {APPEARANCE_OPAQUE_BARS, APPEARANCE_LOW_PROFILE_BARS,
-            APPEARANCE_LIGHT_TOP_BAR, APPEARANCE_LIGHT_SIDE_BARS})
+    @IntDef(flag = true, value = {APPEARANCE_OPAQUE_TOP_BAR, APPEARANCE_OPAQUE_SIDE_BARS,
+            APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_TOP_BAR, APPEARANCE_LIGHT_SIDE_BARS})
     @interface Appearance {
     }
 

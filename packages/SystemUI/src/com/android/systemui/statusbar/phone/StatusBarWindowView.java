@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -42,6 +43,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.FrameLayout;
 
@@ -74,7 +76,8 @@ public class StatusBarWindowView extends FrameLayout {
     }
 
     @Override
-    protected boolean fitSystemWindows(Rect insets) {
+    public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
+        final Insets insets = windowInsets.getMaxInsets(WindowInsets.Type.systemBars());
         if (getFitsSystemWindows()) {
             boolean paddingChanged = insets.top != getPaddingTop()
                     || insets.bottom != getPaddingBottom();
@@ -100,9 +103,6 @@ public class StatusBarWindowView extends FrameLayout {
             if (paddingChanged) {
                 setPadding(0, 0, 0, 0);
             }
-            insets.left = 0;
-            insets.top = 0;
-            insets.right = 0;
         } else {
             if (mRightInset != 0 || mLeftInset != 0) {
                 mRightInset = 0;
@@ -116,9 +116,8 @@ public class StatusBarWindowView extends FrameLayout {
             if (changed) {
                 setPadding(0, 0, 0, 0);
             }
-            insets.top = 0;
         }
-        return false;
+        return windowInsets;
     }
 
     private void applyMargins() {
