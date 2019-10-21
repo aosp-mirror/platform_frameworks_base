@@ -101,7 +101,7 @@
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Файл өткөрүү серверине туташкан жок"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Киргизүү түзмөгүнө туташты"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Интернетке мүмкүнчүлүк алуу үчүн түзмөккө туташты"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Жергиликтүү Интернет туташуусу түзмөк менен бөлүшүлүүдө"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Түзмөк модем катары иштөөдө"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Интернетке туташуу үчүн колдонулсун"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"MAP үчүн колдонуу"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"SIM картаны пайдалануу үчүн колдонуу"</string>
