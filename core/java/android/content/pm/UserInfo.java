@@ -312,7 +312,7 @@ public class UserInfo implements Parcelable {
      */
     public boolean supportsSwitchToByUser() {
         // Hide the system user when it does not represent a human user.
-        boolean hideSystemUser = UserManager.isSplitSystemUser();
+        boolean hideSystemUser = UserManager.isHeadlessSystemUserMode();
         return (!hideSystemUser || id != UserHandle.USER_SYSTEM) && supportsSwitchTo();
     }
 
