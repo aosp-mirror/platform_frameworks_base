@@ -532,6 +532,7 @@ public class SystemConfig {
             Slog.w(TAG, "Couldn't find or open permissions file " + permFile);
             return;
         }
+        Slog.i(TAG, "Reading permissions from " + permFile);
 
         final boolean lowRam = ActivityManager.isLowRamDeviceStatic();
 
