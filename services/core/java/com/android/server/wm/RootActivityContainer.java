@@ -1780,8 +1780,12 @@ class RootActivityContainer extends ConfigurationContainer
         // If {@code r} is already in target display and its task is the same as the candidate task,
         // the intention should be getting a launch stack for the reusable activity, so we can use
         // the existing stack.
-        if (r.getDisplayId() == displayId && r.getTaskRecord() == candidateTask) {
-            return candidateTask.getStack();
+        if (candidateTask != null
+                && (r.getTaskRecord() == null || r.getTaskRecord() == candidateTask)) {
+            final int attachedDisplayId = r.getDisplayId();
+            if (attachedDisplayId == INVALID_DISPLAY || attachedDisplayId == displayId) {
+                return candidateTask.getStack();
+            }
         }
 
         int windowingMode;
