@@ -2047,6 +2047,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.SKIP_TOUCH_COUNT,
                 SecureSettingsProto.Gesture.SKIP_TOUCH_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.AWARE_TAP_PAUSE_GESTURE_COUNT,
+                SecureSettingsProto.Gesture.AWARE_TAP_PAUSE_GESTURE_COUNT);
+        dumpSetting(s, p,
+                Settings.Secure.AWARE_TAP_PAUSE_TOUCH_COUNT,
+                SecureSettingsProto.Gesture.AWARE_TAP_PAUSE_TOUCH_COUNT);
         p.end(gestureToken);
 
         dumpSetting(s, p,
