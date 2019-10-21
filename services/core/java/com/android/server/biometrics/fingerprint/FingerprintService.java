@@ -22,6 +22,7 @@ import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -350,7 +351,7 @@ public class FingerprintService extends BiometricServiceBase {
 
         // TODO: refactor out common code here
         @Override // Binder call
-        public boolean isHardwareDetected(long deviceId, String opPackageName) {
+        public boolean isHardwareDetected(String opPackageName) {
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
                     Binder.getCallingUid(), Binder.getCallingPid(),
                     UserHandle.getCallingUserId())) {
@@ -480,8 +481,7 @@ public class FingerprintService extends BiometricServiceBase {
         public void onError(long deviceId, int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onError(cookie, error,
-                        FingerprintManager.getErrorString(getContext(), error, vendorCode));
+                getWrapperReceiver().onError(cookie, TYPE_FINGERPRINT, error, vendorCode);
             }
         }
     }

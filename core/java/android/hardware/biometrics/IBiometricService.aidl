@@ -19,6 +19,7 @@ package android.hardware.biometrics;
 import android.os.Bundle;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricServiceReceiver;
+import android.hardware.biometrics.IBiometricAuthenticator;
 
 /**
  * Communication channel from BiometricPrompt and BiometricManager to BiometricService. The
@@ -40,7 +41,12 @@ interface IBiometricService {
     int canAuthenticate(String opPackageName, int userId);
 
     // Checks if any biometrics are enrolled.
-    boolean hasEnrolledBiometrics(int userId);
+    boolean hasEnrolledBiometrics(int userId, String opPackageName);
+
+    // Registers an authenticator (e.g. face, fingerprint, iris).
+    // Id must be unique, whereas strength and modality don't need to be.
+    // TODO(b/123321528): Turn strength and modality into enums.
+    void registerAuthenticator(int id, int strength, int modality, IBiometricAuthenticator authenticator);
 
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);

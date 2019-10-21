@@ -26,6 +26,8 @@ import android.annotation.RequiresPermission;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -339,9 +341,23 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         @Override
-        public void onError(int error, String message) throws RemoteException {
+        public void onError(int modality, int error, int vendorCode) throws RemoteException {
             mExecutor.execute(() -> {
-                mAuthenticationCallback.onAuthenticationError(error, message);
+                String errorMessage;
+                switch (modality) {
+                    case TYPE_FACE:
+                        errorMessage = FaceManager.getErrorString(mContext, error, vendorCode);
+                        break;
+
+                    case TYPE_FINGERPRINT:
+                        errorMessage = FingerprintManager.getErrorString(mContext, error,
+                                vendorCode);
+                        break;
+
+                    default:
+                        errorMessage = "";
+                }
+                mAuthenticationCallback.onAuthenticationError(error, errorMessage);
             });
         }
 

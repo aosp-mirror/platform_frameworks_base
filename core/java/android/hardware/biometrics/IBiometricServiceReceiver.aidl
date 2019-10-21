@@ -25,7 +25,7 @@ oneway interface IBiometricServiceReceiver {
     // Noties that authentication failed.
     void onAuthenticationFailed();
     // Notify BiometricPrompt that an error has occurred.
-    void onError(int error, String message);
+    void onError(int modality, int error, int vendorCode);
     // Notifies that a biometric has been acquired.
     void onAcquired(int acquiredInfo, String message);
     // Notifies that the SystemUI dialog has been dismissed.

@@ -134,6 +134,13 @@ public interface BiometricConstants {
     int BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL = 14;
 
     /**
+     * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
+     * because the authentication attempt was unsuccessful.
+     * @hide
+     */
+    int BIOMETRIC_PAUSED_REJECTED = 100;
+
+    /**
      * @hide
      */
     @UnsupportedAppUsage
