@@ -21,6 +21,7 @@ genrule {
     cmd: "$(location protologtool) transform-protolog-calls " +
       "--protolog-class com.android.server.protolog.common.ProtoLog " +
       "--protolog-impl-class com.android.server.protolog.ProtoLogImpl " +
+      "--protolog-cache-class 'com.android.server.protolog.ProtoLog$$Cache' " +
       "--loggroups-class com.android.server.wm.ProtoLogGroup " +
       "--loggroups-jar $(location :services.core.wm.protologgroups) " +
       "--output-srcjar $(out) " +

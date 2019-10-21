@@ -44,14 +44,32 @@ public class ProtoLogIntegrationTest {
     @Test
     public void testProtoLogToolIntegration() {
         ProtoLogImpl mockedProtoLog = mock(ProtoLogImpl.class);
-        ProtoLogImpl.setSingleInstance(mockedProtoLog);
-        ProtoLogGroup.testProtoLog();
-        verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.ERROR), eq(
-                ProtoLogGroup.TEST_GROUP),
+        runWith(mockedProtoLog, () -> {
+            ProtoLogGroup.testProtoLog();
+        });
+        verify(mockedProtoLog).log(eq(ProtoLogImpl.LogLevel.ERROR), eq(ProtoLogGroup.TEST_GROUP),
                 anyInt(), eq(0b0010101001010111),
                 eq(ProtoLogGroup.TEST_GROUP.isLogToLogcat()
                         ? "Test completed successfully: %b %d %o %x %e %g %f %% %s"
                         : null),
                 eq(new Object[]{true, 1L, 2L, 3L, 0.4, 0.5, 0.6, "ok"}));
+    }
+
+    /**
+     * Starts protolog for the duration of {@code runnable}, with a ProtoLogImpl instance installed.
+     */
+    private void runWith(ProtoLogImpl mockInstance, Runnable runnable) {
+        ProtoLogImpl original = ProtoLogImpl.getSingleInstance();
+        original.startProtoLog(null);
+        try {
+            ProtoLogImpl.setSingleInstance(mockInstance);
+            try {
+                runnable.run();
+            } finally {
+                ProtoLogImpl.setSingleInstance(original);
+            }
+        } finally {
+            original.stopProtoLog(null, false);
+        }
     }
 }
