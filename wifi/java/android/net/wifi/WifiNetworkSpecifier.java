@@ -157,7 +157,8 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
          */
         public @NonNull Builder setBssidPattern(
                 @NonNull MacAddress baseAddress, @NonNull MacAddress mask) {
-            checkNotNull(baseAddress, mask);
+            checkNotNull(baseAddress);
+            checkNotNull(mask);
             mBssidPatternMatcher = Pair.create(baseAddress, mask);
             return this;
         }
