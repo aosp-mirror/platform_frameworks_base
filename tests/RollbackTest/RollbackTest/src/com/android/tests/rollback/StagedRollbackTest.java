@@ -158,18 +158,6 @@ public class StagedRollbackTest {
         assertThat(rollback.getCommittedSessionId()).isNotEqualTo(-1);
     }
 
-    @Test
-    public void resetNetworkStack() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        String networkStack = getNetworkStackPackageName();
-
-        rm.expireRollbackForPackage(networkStack);
-        Uninstall.packages(networkStack);
-
-        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
-                        networkStack)).isNull();
-    }
-
     /**
      * Stage install ModuleMetadata package to simulate a Mainline module update.
      */
@@ -210,43 +198,35 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkFailedRollback_Phase1() throws Exception {
-        resetNetworkStack();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        String networkStack = getNetworkStackPackageName();
+
+        rm.expireRollbackForPackage(networkStack);
+        Uninstall.packages(networkStack);
+
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        networkStack)).isNull();
     }
 
     @Test
     public void testNetworkFailedRollback_Phase2() throws Exception {
-        assertNetworkStackRollbackAvailable();
-    }
-
-    @Test
-    public void testNetworkFailedRollback_Phase3() throws Exception {
-        assertNoNetworkStackRollbackCommitted();
-    }
-
-    @Test
-    public void testNetworkFailedRollback_Phase4() throws Exception {
-        assertNetworkStackRollbackCommitted();
-    }
-
-    @Test
-    public void assertNetworkStackRollbackAvailable() throws Exception {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         getNetworkStackPackageName())).isNotNull();
     }
 
     @Test
-    public void assertNetworkStackRollbackCommitted() throws Exception {
-        RollbackManager rm = RollbackUtils.getRollbackManager();
-        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
-                        getNetworkStackPackageName())).isNotNull();
-    }
-
-    @Test
-    public void assertNoNetworkStackRollbackCommitted() throws Exception {
+    public void testNetworkFailedRollback_Phase3() throws Exception {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
                         getNetworkStackPackageName())).isNull();
+    }
+
+    @Test
+    public void testNetworkFailedRollback_Phase4() throws Exception {
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName())).isNotNull();
     }
 
     private String getNetworkStackPackageName() {
@@ -294,17 +274,28 @@ public class StagedRollbackTest {
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase1() throws Exception {
-        resetNetworkStack();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        String networkStack = getNetworkStackPackageName();
+
+        rm.expireRollbackForPackage(networkStack);
+        Uninstall.packages(networkStack);
+
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        networkStack)).isNull();
     }
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase2() throws Exception {
-        assertNetworkStackRollbackAvailable();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
+                        getNetworkStackPackageName())).isNotNull();
     }
 
     @Test
     public void testNetworkPassedDoesNotRollback_Phase3() throws Exception {
-        assertNoNetworkStackRollbackCommitted();
+        RollbackManager rm = RollbackUtils.getRollbackManager();
+        assertThat(getUniqueRollbackInfoForPackage(rm.getRecentlyCommittedRollbacks(),
+                        getNetworkStackPackageName())).isNull();
     }
 
     @Nullable
