@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -61,7 +62,7 @@ public abstract class CellIdentity implements Parcelable {
         mType = type;
 
         // Only allow INT_MAX if unknown string mcc/mnc
-        if (mcc == null || mcc.matches("^[0-9]{3}$")) {
+        if (mcc == null || isMcc(mcc)) {
             mMccStr = mcc;
         } else if (mcc.isEmpty() || mcc.equals(String.valueOf(Integer.MAX_VALUE))) {
             // If the mccStr is empty or unknown, set it as null.
@@ -73,7 +74,7 @@ public abstract class CellIdentity implements Parcelable {
             log("invalid MCC format: " + mcc);
         }
 
-        if (mnc == null || mnc.matches("^[0-9]{2,3}$")) {
+        if (mnc == null || isMnc(mnc)) {
             mMncStr = mnc;
         } else if (mnc.isEmpty() || mnc.equals(String.valueOf(Integer.MAX_VALUE))) {
             // If the mncStr is empty or unknown, set it as null.
@@ -261,5 +262,31 @@ public abstract class CellIdentity implements Parcelable {
             int value, int rangeMin, int rangeMax, int special) {
         if ((value < rangeMin || value > rangeMax) && value != special) return CellInfo.UNAVAILABLE;
         return value;
+    }
+
+    /** @hide */
+    private static boolean isMcc(@NonNull String mcc) {
+        // ensure no out of bounds indexing
+        if (mcc.length() != 3) return false;
+
+        // Character.isDigit allows all unicode digits, not just [0-9]
+        for (int i = 0; i < 3; i++) {
+            if (mcc.charAt(i) < '0' || mcc.charAt(i) > '9') return false;
+        }
+
+        return true;
+    }
+
+    /** @hide */
+    private static boolean isMnc(@NonNull String mnc) {
+        // ensure no out of bounds indexing
+        if (mnc.length() < 2 || mnc.length() > 3) return false;
+
+        // Character.isDigit allows all unicode digits, not just [0-9]
+        for (int i = 0; i < mnc.length(); i++) {
+            if (mnc.charAt(i) < '0' || mnc.charAt(i) > '9') return false;
+        }
+
+        return true;
     }
 }
