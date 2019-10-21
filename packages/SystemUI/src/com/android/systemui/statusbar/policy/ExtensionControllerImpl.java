@@ -135,7 +135,7 @@ public class ExtensionControllerImpl implements ExtensionController {
         }
 
         @Override
-        public ExtensionController.Extension build() {
+        public ExtensionController.Extension<T> build() {
             // Sort items in ascending order
             Collections.sort(mExtension.mProducers, Comparator.comparingInt(Item::sortOrder));
             mExtension.notifyChanged();

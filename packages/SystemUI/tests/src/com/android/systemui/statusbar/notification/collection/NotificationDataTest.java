@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -639,7 +640,10 @@ public class NotificationDataTest extends SysuiTestCase {
 
     public static class TestableNotificationData extends NotificationData {
         public TestableNotificationData(NotificationSectionsFeatureManager sectionsFeatureManager) {
-            super(sectionsFeatureManager, mock(NotifLog.class));
+            super(
+                    sectionsFeatureManager,
+                    mock(NotifLog.class),
+                    mock(PeopleNotificationIdentifier.class));
         }
 
         public static final String OVERRIDE_RANK = "r";
