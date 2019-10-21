@@ -213,6 +213,9 @@ filegroup {
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
 
+        // AIDL from frameworks/base/native/
+        ":platform-compat-native-aidl",
+
         // AIDL sources from external directories
         ":dumpstate_aidl",
         ":framework_native_aidl",
