@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.internal.telephony;
+package android.telephony;
 
 import android.annotation.NonNull;
-import android.telephony.Rlog;
+import android.annotation.SystemApi;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -30,8 +30,17 @@ import java.util.stream.Collectors;
  * The coordinates used by this utils class are latitude and longitude, but some algorithms in this
  * class only use them as coordinates on plane, so the calculation will be inaccurate. So don't use
  * this class for anything other then geo-targeting of cellbroadcast messages.
+ * @hide
  */
+@SystemApi
 public class CbGeoUtils {
+
+    /**
+     * This class is never instantiated
+     * @hide
+     */
+    private CbGeoUtils() {}
+
     /** Geometric interface. */
     public interface Geometry {
         /**
@@ -39,27 +48,36 @@ public class CbGeoUtils {
          * @param p point in latitude, longitude format.
          * @return {@code True} if the given point is inside the geometry.
          */
-        boolean contains(LatLng p);
+        boolean contains(@NonNull LatLng p);
     }
 
     /**
      * Tolerance for determining if the value is 0. If the absolute value of a value is less than
      * this tolerance, it will be treated as 0.
+     * @hide
      */
     public static final double EPS = 1e-7;
 
-    /** The radius of earth. */
+    /**
+     * The radius of earth.
+     * @hide
+     */
     public static final int EARTH_RADIUS_METER = 6371 * 1000;
 
     private static final String TAG = "CbGeoUtils";
 
-    /** The TLV tags of WAC, defined in ATIS-0700041 5.2.3 WAC tag coding. */
+    // The TLV tags of WAC, defined in ATIS-0700041 5.2.3 WAC tag coding.
+    /** @hide */
     public static final int GEO_FENCING_MAXIMUM_WAIT_TIME = 0x01;
+    /** @hide */
     public static final int GEOMETRY_TYPE_POLYGON = 0x02;
+    /** @hide */
     public static final int GEOMETRY_TYPE_CIRCLE = 0x03;
 
-    /** The identifier of geometry in the encoded string. */
+    // The identifier of geometry in the encoded string.
+    /** @hide */
     private static final String CIRCLE_SYMBOL = "circle";
+    /** @hide */
     private static final String POLYGON_SYMBOL = "polygon";
 
     /** Point represent by (latitude, longitude). */
@@ -81,7 +99,8 @@ public class CbGeoUtils {
          * @param p the point use to calculate the subtraction result.
          * @return the result of this point subtract the given point {@code p}.
          */
-        public LatLng subtract(LatLng p) {
+        @NonNull
+        public LatLng subtract(@NonNull LatLng p) {
             return new LatLng(lat - p.lat, lng - p.lng);
         }
 
@@ -90,7 +109,7 @@ public class CbGeoUtils {
          * @param p the point use to calculate the distance.
          * @return the distance in meter.
          */
-        public double distance(LatLng p) {
+        public double distance(@NonNull LatLng p) {
             double dlat = Math.sin(0.5 * Math.toRadians(lat - p.lat));
             double dlng = Math.sin(0.5 * Math.toRadians(lng - p.lng));
             double x = dlat * dlat
@@ -106,6 +125,7 @@ public class CbGeoUtils {
 
     /**
      * The class represents a simple polygon with at least 3 points.
+     * @hide
      */
     public static class Polygon implements Geometry {
         /**
@@ -239,7 +259,10 @@ public class CbGeoUtils {
         }
     }
 
-    /** The class represents a circle. */
+    /**
+     * The class represents a circle.
+     * @hide
+     */
     public static class Circle implements Geometry {
         private final LatLng mCenter;
         private final double mRadiusMeter;
@@ -266,6 +289,7 @@ public class CbGeoUtils {
     /**
      * Parse the geometries from the encoded string {@code str}. The string must follow the
      * geometry encoding specified by {@link android.provider.Telephony.CellBroadcasts#GEOMETRIES}.
+     * @hide
      */
     @NonNull
     public static List<Geometry> parseGeometriesFromString(@NonNull String str) {
@@ -297,6 +321,7 @@ public class CbGeoUtils {
      *
      * @param geometries the list of geometry objects need to be encoded.
      * @return the encoded string.
+     * @hide
      */
     @NonNull
     public static String encodeGeometriesToString(List<Geometry> geometries) {
@@ -313,6 +338,7 @@ public class CbGeoUtils {
      * {@link android.provider.Telephony.CellBroadcasts#GEOMETRIES}.
      * @param geometry the geometry object need to be encoded.
      * @return the encoded string.
+     * @hide
      */
     @NonNull
     private static String encodeGeometryToString(@NonNull Geometry geometry) {
@@ -351,6 +377,7 @@ public class CbGeoUtils {
      *
      * @param str encoded lat/lng string.
      * @Return {@link LatLng} object.
+     * @hide
      */
     @NonNull
     public static LatLng parseLatLngFromString(@NonNull String str) {
@@ -361,6 +388,7 @@ public class CbGeoUtils {
     /**
      * @Return the sign of the given value {@code value} with the specified tolerance. Return 1
      * means the sign is positive, -1 means negative, 0 means the value will be treated as 0.
+     * @hide
      */
     public static int sign(double value) {
         if (value > EPS) return 1;

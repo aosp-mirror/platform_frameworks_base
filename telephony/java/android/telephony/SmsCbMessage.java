@@ -25,9 +25,7 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony.CellBroadcasts;
-
-import com.android.internal.telephony.CbGeoUtils;
-import com.android.internal.telephony.CbGeoUtils.Geometry;
+import android.telephony.CbGeoUtils.Geometry;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -414,9 +412,8 @@ public final class SmsCbMessage implements Parcelable {
     /**
      * Get the Geo-Fencing Maximum Wait Time.
      * @return the time in second.
-     * @hide
      */
-    public int getMaximumWaitingTime() {
+    public int getMaximumWaitingDuration() {
         return mMaximumWaitTimeSec;
     }
 
