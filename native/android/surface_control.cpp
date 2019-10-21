@@ -294,7 +294,7 @@ void ASurfaceTransaction_setOnComplete(ASurfaceTransaction* aSurfaceTransaction,
 
         auto& aSurfaceControlStats = aSurfaceTransactionStats.aSurfaceControlStats;
 
-        for (const auto& [surfaceControl, acquireTime, previousReleaseFence] : surfaceControlStats) {
+        for (const auto& [surfaceControl, acquireTime, previousReleaseFence, transformHint] : surfaceControlStats) {
             ASurfaceControl* aSurfaceControl = reinterpret_cast<ASurfaceControl*>(surfaceControl.get());
             aSurfaceControlStats[aSurfaceControl].acquireTime = acquireTime;
             aSurfaceControlStats[aSurfaceControl].previousReleaseFence = previousReleaseFence;
