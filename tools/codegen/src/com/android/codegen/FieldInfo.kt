@@ -93,6 +93,8 @@ data class FieldInfo(
     // Generic args
     val isArray = Type.endsWith("[]")
     val isList = FieldClass == "List" || FieldClass == "ArrayList"
+    val isMap = FieldClass == "Map" || FieldClass == "ArrayMap"
+            || FieldClass == "HashMap" || FieldClass == "LinkedHashMap"
     val fieldBit = bitAtExpr(index)
     var isLast = false
     val isFinal = fieldAst.isFinal
@@ -197,7 +199,7 @@ data class FieldInfo(
                 listOf("String", "CharSequence", "Exception", "Size", "SizeF", "Bundle",
                         "FileDescriptor", "SparseBooleanArray", "SparseIntArray", "SparseArray") ->
             FieldClass
-        FieldClass == "Map" && fieldTypeGenegicArgs[0] == "String" -> "Map"
+        isMap && fieldTypeGenegicArgs[0] == "String" -> "Map"
         isArray -> when {
             FieldInnerType!! in (PRIMITIVE_TYPES + "String") -> FieldInnerType + "Array"
             isBinder(FieldInnerType) -> "BinderArray"
