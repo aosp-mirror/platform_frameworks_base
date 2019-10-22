@@ -211,11 +211,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     ActivityRecord createTestActivityRecord(DisplayContent dc, int
             windowingMode, int activityType) {
         final TaskStack stack = createTaskStackOnDisplay(windowingMode, activityType, dc);
-        final Task task = createTaskInStack(stack, 0 /* userId */);
-        final ActivityRecord activity =
-                WindowTestUtils.createTestActivityRecord(dc);
-        task.addChild(activity, 0);
-        return activity;
+        return WindowTestUtils.createTestActivityRecord(stack.mActivityStack);
     }
 
     WindowState createWindow(WindowState parent, int type, String name) {
@@ -327,14 +323,14 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     TaskStack createTaskStackOnDisplay(int windowingMode, int activityType, DisplayContent dc) {
         synchronized (mWm.mGlobalLock) {
-            final Configuration overrideConfig = new Configuration();
-            overrideConfig.windowConfiguration.setWindowingMode(windowingMode);
-            overrideConfig.windowConfiguration.setActivityType(activityType);
-            final int stackId = ++sNextStackId;
-            final TaskStack stack = new TaskStack(mWm, stackId, mock(ActivityStack.class));
-            dc.setStackOnDisplay(stackId, true, stack);
-            stack.onRequestedOverrideConfigurationChanged(overrideConfig);
-            return stack;
+            final ActivityStack stack = new ActivityTestsBase.StackBuilder(
+                    dc.mWmService.mAtmService.mRootActivityContainer)
+                    .setDisplay(dc.mActivityDisplay)
+                    .setWindowingMode(windowingMode)
+                    .setActivityType(activityType)
+                    .setCreateActivity(false)
+                    .build();
+            return stack.mTaskStack;
         }
     }
 
@@ -385,5 +381,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayInfo.type = Display.TYPE_VIRTUAL;
         displayInfo.ownerUid = SYSTEM_UID;
         return createNewDisplay(displayInfo);
+    }
+
+    /** Sets the default minimum task size to 1 so that tests can use small task sizes */
+    public void removeGlobalMinSizeRestriction() {
+        mWm.mAtmService.mRootActivityContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
     }
 }

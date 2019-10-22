@@ -16,11 +16,16 @@
 
 package com.android.server.wm;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -45,7 +50,7 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
         final ActivityRecord activity =
                 WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
 
@@ -59,11 +64,11 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer_deferRemoval() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
         final ActivityRecord activity =
                 WindowTestUtils.createActivityRecordInTask(mDisplayContent, task);
 
-        task.mShouldDeferRemoval = true;
+        doReturn(true).when(task).shouldDeferRemoval();
 
         task.removeIfPossible();
         // For the case of deferred removal the task will still be connected to the its app token
@@ -81,9 +86,9 @@ public class TaskTests extends WindowTestsBase {
     @Test
     public void testReparent() {
         final TaskStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stackController1);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
         final TaskStack stackController2 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task2 = WindowTestUtils.createTestTask(stackController2);
+        final Task task2 = createTaskInStack(stackController2, 0 /* userId */);
 
         boolean gotException = false;
         try {
@@ -104,34 +109,33 @@ public class TaskTests extends WindowTestsBase {
 
         task.reparent(stackController2, 0, false/* moveParents */);
         assertEquals(stackController2, task.getParent());
-        assertEquals(0, task.positionInParent());
-        assertEquals(1, task2.positionInParent());
+        assertEquals(0, task.getParent().mChildren.indexOf(task));
+        assertEquals(1, task2.getParent().mChildren.indexOf(task2));
     }
 
     @Test
     public void testReparent_BetweenDisplays() {
         // Create first stack on primary display.
         final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack1);
-        task.mOnDisplayChangedCalled = false;
+        final Task task = createTaskInStack(stack1, 0 /* userId */);
         assertEquals(mDisplayContent, stack1.getDisplayContent());
 
         // Create second display and put second stack on it.
         final DisplayContent dc = createNewDisplay();
         final TaskStack stack2 = createTaskStackOnDisplay(dc);
-        final WindowTestUtils.TestTask task2 = WindowTestUtils.createTestTask(stack2);
+        final Task task2 = createTaskInStack(stack2, 0 /* userId */);
         // Reparent and check state
         task.reparent(stack2, 0, false /* moveParents */);
         assertEquals(stack2, task.getParent());
-        assertEquals(0, task.positionInParent());
-        assertEquals(1, task2.positionInParent());
-        assertTrue(task.mOnDisplayChangedCalled);
+        assertEquals(0, task.getParent().mChildren.indexOf(task));
+        assertEquals(1, task2.getParent().mChildren.indexOf(task2));
+        verify(task, times(1)).onDisplayChanged(any());
     }
 
     @Test
     public void testBounds() {
         final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack1);
+        final Task task = createTaskInStack(stack1, 0 /* userId */);
 
         // Check that setting bounds also updates surface position
         Rect bounds = new Rect(10, 10, 100, 200);
