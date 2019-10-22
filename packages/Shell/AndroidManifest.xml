@@ -247,23 +247,6 @@
             android:exported="false" />
 
         <receiver
-            android:name=".BugreportReceiver"
-            android:permission="android.permission.DUMP">
-            <intent-filter>
-                <action android:name="com.android.internal.intent.action.BUGREPORT_STARTED" />
-                <action android:name="com.android.internal.intent.action.BUGREPORT_FINISHED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".RemoteBugreportReceiver"
-            android:permission="android.permission.DUMP">
-            <intent-filter>
-                <action android:name="com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
             android:name=".BugreportRequestedReceiver"
             android:permission="android.permission.TRIGGER_SHELL_BUGREPORT">
             <intent-filter>
