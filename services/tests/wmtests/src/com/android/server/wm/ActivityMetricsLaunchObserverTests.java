@@ -18,8 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -63,10 +61,8 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     private ActivityMetricsLaunchObserver mLaunchObserver;
     private ActivityMetricsLaunchObserverRegistry mLaunchObserverRegistry;
 
-    private ActivityStack mStack;
-    private TaskRecord mTask;
-    private ActivityRecord mActivityRecord;
-    private ActivityRecord mActivityRecordTrampoline;
+    private ActivityRecord mTrampolineActivity;
+    private ActivityRecord mTopActivity;
 
     @Before
     public void setUpAMLO() {
@@ -80,15 +76,10 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         // Sometimes we need an ActivityRecord for ActivityMetricsLogger to do anything useful.
         // This seems to be the easiest way to create an ActivityRecord.
-        mStack = new StackBuilder(mRootActivityContainer)
-                .setActivityType(ACTIVITY_TYPE_STANDARD)
-                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
-                .setOnTop(true)
-                .setCreateActivity(true)
+        mTrampolineActivity = new ActivityBuilder(mService).setCreateTask(true).build();
+        mTopActivity = new ActivityBuilder(mService)
+                .setTask(mTrampolineActivity.getTaskRecord())
                 .build();
-        mTask = mStack.topTask();
-        mActivityRecord = mTask.getTopActivity();
-        mActivityRecordTrampoline = new ActivityBuilder(mService).setTask(mTask).build();
     }
 
     @After
@@ -123,8 +114,7 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
         return verify(mock, timeout(TimeUnit.SECONDS.toMillis(5)));
     }
 
-    @Test
-    public void testOnIntentStarted() throws Exception {
+    private void onIntentStarted() {
         Intent intent = new Intent("action 1");
 
         mActivityMetricsLogger.notifyActivityLaunching(intent);
@@ -134,123 +124,123 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testOnIntentFailed() throws Exception {
-        testOnIntentStarted();
-
-        ActivityRecord activityRecord = null;
+    public void testOnIntentFailed() {
+        onIntentStarted();
 
         // Bringing an intent that's already running 'to front' is not considered
         // as an ACTIVITY_LAUNCHED state transition.
         mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
-                activityRecord);
+                null /* launchedActivity */);
 
         verifyAsync(mLaunchObserver).onIntentFailed();
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
-    @Test
-    public void testOnActivityLaunched() throws Exception {
-        testOnIntentStarted();
+    private void onActivityLaunched() {
+        onIntentStarted();
 
-        mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS,
-                mActivityRecord);
+        mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS, mTopActivity);
 
-        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mActivityRecord), anyInt());
+        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTopActivity), anyInt());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
     @Test
-    public void testOnActivityLaunchFinished() throws Exception {
-       testOnActivityLaunched();
+    public void testOnActivityLaunchFinished() {
+        onActivityLaunched();
 
-       mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
-               SystemClock.elapsedRealtimeNanos());
+        mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
+                SystemClock.elapsedRealtimeNanos());
 
-       mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecord.getWindowingMode(),
-               SystemClock.elapsedRealtimeNanos());
+        notifyWindowsDrawn(mTopActivity);
 
-       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecord), anyLong());
-       verifyNoMoreInteractions(mLaunchObserver);
-    }
-
-    @Test
-    public void testOnActivityLaunchCancelled() throws Exception {
-       testOnActivityLaunched();
-
-       mActivityRecord.mDrawn = true;
-
-       // Cannot time already-visible activities.
-       mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT, mActivityRecord);
-
-       verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mActivityRecord));
-       verifyNoMoreInteractions(mLaunchObserver);
-    }
-
-    @Test
-    public void testOnReportFullyDrawn() throws Exception {
-        testOnActivityLaunched();
-
-        mActivityMetricsLogger.logAppTransitionReportedDrawn(mActivityRecord, false);
-
-        verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mActivityRecord), anyLong());
+        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTopActivity), anyLong());
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
     @Test
-    public void testOnActivityLaunchedTrampoline() throws Exception {
-        testOnIntentStarted();
+    public void testOnActivityLaunchCancelled() {
+        onActivityLaunched();
 
-        mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS,
-                mActivityRecord);
+        mTopActivity.mDrawn = true;
 
-        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mActivityRecord), anyInt());
+        // Cannot time already-visible activities.
+        mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT, mTopActivity);
+
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTopActivity));
+        verifyNoMoreInteractions(mLaunchObserver);
+    }
+
+    @Test
+    public void testOnReportFullyDrawn() {
+        onActivityLaunched();
+
+        mActivityMetricsLogger.logAppTransitionReportedDrawn(mTopActivity, false);
+
+        verifyAsync(mLaunchObserver).onReportFullyDrawn(eqProto(mTopActivity), anyLong());
+        verifyNoMoreInteractions(mLaunchObserver);
+    }
+
+    private void onActivityLaunchedTrampoline() {
+        onIntentStarted();
+
+        mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS, mTopActivity);
+
+        verifyAsync(mLaunchObserver).onActivityLaunched(eqProto(mTopActivity), anyInt());
 
         // A second, distinct, activity launch is coalesced into the the current app launch sequence
-        mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS,
-                mActivityRecordTrampoline);
+        mActivityMetricsLogger.notifyActivityLaunched(START_SUCCESS, mTrampolineActivity);
 
         verifyNoMoreInteractions(mLaunchObserver);
     }
 
-    @Test
-    public void testOnActivityLaunchFinishedTrampoline() throws Exception {
-       testOnActivityLaunchedTrampoline();
-
-       mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
-               SystemClock.elapsedRealtimeNanos());
-
-       mActivityMetricsLogger.notifyWindowsDrawn(mActivityRecordTrampoline.getWindowingMode(),
-               SystemClock.elapsedRealtimeNanos());
-
-       verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mActivityRecordTrampoline),
-                                                             anyLong());
-       verifyNoMoreInteractions(mLaunchObserver);
+    private void notifyWindowsDrawn(ActivityRecord r) {
+        mActivityMetricsLogger.notifyWindowsDrawn(r.getWindowingMode(),
+                SystemClock.elapsedRealtimeNanos());
     }
 
     @Test
-    public void testOnActivityLaunchCancelledTrampoline() throws Exception {
-       testOnActivityLaunchedTrampoline();
+    public void testOnActivityLaunchFinishedTrampoline() {
+        onActivityLaunchedTrampoline();
 
-       mActivityRecordTrampoline.mDrawn = true;
+        mActivityMetricsLogger.notifyTransitionStarting(new SparseIntArray(),
+                SystemClock.elapsedRealtimeNanos());
 
-       // Cannot time already-visible activities.
-       mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
-               mActivityRecordTrampoline);
+        notifyWindowsDrawn(mTrampolineActivity);
 
-       verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mActivityRecordTrampoline));
-       verifyNoMoreInteractions(mLaunchObserver);
+        assertWithMessage("Trampoline activity is drawn but the top activity is not yet")
+                .that(mActivityMetricsLogger.allWindowsDrawn()).isFalse();
+
+        notifyWindowsDrawn(mTopActivity);
+
+        verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTrampolineActivity),
+                anyLong());
+        verifyNoMoreInteractions(mLaunchObserver);
     }
 
     @Test
-    public void testActivityRecordProtoIsNotTooBig() throws Exception {
+    public void testOnActivityLaunchCancelledTrampoline() {
+        onActivityLaunchedTrampoline();
+
+        mTrampolineActivity.mDrawn = true;
+
+        // Cannot time already-visible activities.
+        mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT, mTrampolineActivity);
+
+        verifyAsync(mLaunchObserver).onActivityLaunchCancelled(eqProto(mTrampolineActivity));
+        verifyNoMoreInteractions(mLaunchObserver);
+    }
+
+    @Test
+    public void testActivityRecordProtoIsNotTooBig() {
         // The ActivityRecordProto must not be too big, otherwise converting it at runtime
         // will become prohibitively expensive.
-        assertWithMessage("mActivityRecord: %s", mActivityRecord).
-                that(activityRecordToProto(mActivityRecord).length).
-                isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
+        assertWithMessage("mTopActivity: %s", mTopActivity)
+                .that(activityRecordToProto(mTopActivity).length)
+                .isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
 
-        assertWithMessage("mActivityRecordTrampoline: %s", mActivityRecordTrampoline).
-                that(activityRecordToProto(mActivityRecordTrampoline).length).
-                isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
+        assertWithMessage("mTrampolineActivity: %s", mTrampolineActivity)
+                .that(activityRecordToProto(mTrampolineActivity).length)
+                .isAtMost(ActivityMetricsLogger.LAUNCH_OBSERVER_ACTIVITY_RECORD_PROTO_CHUNK_SIZE);
     }
 }
