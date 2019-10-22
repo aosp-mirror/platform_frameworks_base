@@ -60,22 +60,6 @@ class SystemServerBenchmarks {
         benchmarks.addBenchmark("Empty", () -> {
         });
 
-        benchmarks.addBenchmark("CPU Intensive (1 thread)", () -> {
-            CPUIntensive.doSomeWork(1);
-        });
-
-        benchmarks.addBenchmark("CPU Intensive (2 thread)", () -> {
-            CPUIntensive.doSomeWork(2);
-        });
-
-        benchmarks.addBenchmark("CPU Intensive (4 thread)", () -> {
-            CPUIntensive.doSomeWork(4);
-        });
-
-        benchmarks.addBenchmark("CPU Intensive (8 thread)", () -> {
-            CPUIntensive.doSomeWork(8);
-        });
-
         PackageManager pm = parent.getPackageManager();
         benchmarks.addBenchmark("getInstalledApplications", () -> {
             pm.getInstalledApplications(PackageManager.MATCH_SYSTEM_ONLY);

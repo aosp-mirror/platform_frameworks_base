@@ -20,10 +20,11 @@
 
 package com.android.startop.test;
 
-final class CPUIntensive {
-    public static final int THREAD_COUNT = 8;
+import android.app.Activity;
+
+public class CPUIntensiveBenchmarks {
     public static final int ARRAY_SIZE = 30000;
-    public static int[][] array = new int[THREAD_COUNT][ARRAY_SIZE];
+    public static int[][] mArray;
 
     static class WorkerThread extends Thread {
         int mThreadNumber;
@@ -31,21 +32,22 @@ final class CPUIntensive {
             mThreadNumber = number;
         }
         public void run() {
-            final int arrayLength = array[mThreadNumber].length;
+            final int arrayLength = mArray[mThreadNumber].length;
             for (int i = 0; i < arrayLength; ++i) {
-                array[mThreadNumber][i] = i * i;
+                mArray[mThreadNumber][i] = i * i;
             }
             for (int i = 0; i < arrayLength; ++i) {
                 for (int j = 0; j < arrayLength; ++j) {
-                    int swap = array[mThreadNumber][j];
-                    array[mThreadNumber][j] = array[mThreadNumber][(j + i) % arrayLength];
-                    array[mThreadNumber][(j + i) % arrayLength] = swap;
+                    int swap = mArray[mThreadNumber][j];
+                    mArray[mThreadNumber][j] = mArray[mThreadNumber][(j + i) % arrayLength];
+                    mArray[mThreadNumber][(j + i) % arrayLength] = swap;
                 }
             }
         }
     };
 
-    public static void doSomeWork(int threadCount) {
+    static void doSomeWork(int threadCount) {
+        mArray = new int[threadCount][ARRAY_SIZE];
         WorkerThread[] threads = new WorkerThread[threadCount];
         // Create the threads.
         for (int i = 0; i < threadCount; ++i) {
@@ -63,5 +65,25 @@ final class CPUIntensive {
             }
         }
     }
-}
 
+    // Time limit to run benchmarks in seconds
+    public static final int TIME_LIMIT = 5;
+
+    static void initializeBenchmarks(Activity parent, BenchmarkRunner benchmarks) {
+        benchmarks.addBenchmark("Use 1 thread", () -> {
+            doSomeWork(1);
+        });
+        benchmarks.addBenchmark("Use 2 threads", () -> {
+            doSomeWork(2);
+        });
+        benchmarks.addBenchmark("Use 4 threads", () -> {
+            doSomeWork(4);
+        });
+        benchmarks.addBenchmark("Use 8 threads", () -> {
+            doSomeWork(8);
+        });
+        benchmarks.addBenchmark("Use 16 threads", () -> {
+            doSomeWork(16);
+        });
+    }
+}
