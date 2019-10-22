@@ -32,7 +32,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.UserHandle;
@@ -67,6 +66,7 @@ public class UserGridRecyclerView extends RecyclerView {
     private CarUserManagerHelper mCarUserManagerHelper;
     private UserManager mUserManager;
     private Context mContext;
+    private UserIconProvider mUserIconProvider;
 
     private final BroadcastReceiver mUserUpdateReceiver = new BroadcastReceiver() {
         @Override
@@ -80,6 +80,7 @@ public class UserGridRecyclerView extends RecyclerView {
         mContext = context;
         mCarUserManagerHelper = new CarUserManagerHelper(mContext);
         mUserManager = UserManager.get(mContext);
+        mUserIconProvider = new UserIconProvider();
 
         addItemDecoration(new ItemSpacingDecoration(mContext.getResources().getDimensionPixelSize(
                 R.dimen.car_user_switcher_vertical_spacing_between_users)));
@@ -252,9 +253,7 @@ public class UserGridRecyclerView extends RecyclerView {
         @Override
         public void onBindViewHolder(UserAdapterViewHolder holder, int position) {
             UserRecord userRecord = mUsers.get(position);
-            RoundedBitmapDrawable circleIcon = RoundedBitmapDrawableFactory.create(mRes,
-                    getUserRecordIcon(userRecord));
-            circleIcon.setCircular(true);
+            RoundedBitmapDrawable circleIcon = getCircularUserRecordIcon(userRecord);
             holder.mUserAvatarImageView.setImageDrawable(circleIcon);
             holder.mUserNameTextView.setText(userRecord.mInfo.name);
 
@@ -336,17 +335,20 @@ public class UserGridRecyclerView extends RecyclerView {
             }
         }
 
-        private Bitmap getUserRecordIcon(UserRecord userRecord) {
+        private RoundedBitmapDrawable getCircularUserRecordIcon(UserRecord userRecord) {
+            Resources resources = mContext.getResources();
+            RoundedBitmapDrawable circleIcon;
             if (userRecord.mIsStartGuestSession) {
-                return mCarUserManagerHelper.getGuestDefaultIcon();
+                circleIcon = mUserIconProvider.getRoundedGuestDefaultIcon(resources);
+            } else if (userRecord.mIsAddUser) {
+                circleIcon = RoundedBitmapDrawableFactory.create(mRes, UserIcons.convertToBitmap(
+                        mContext.getDrawable(R.drawable.car_add_circle_round)));
+                circleIcon.setCircular(true);
+            } else {
+                circleIcon = mUserIconProvider.getRoundedUserIcon(userRecord.mInfo, mContext);
             }
 
-            if (userRecord.mIsAddUser) {
-                return UserIcons.convertToBitmap(mContext
-                        .getDrawable(R.drawable.car_add_circle_round));
-            }
-
-            return mCarUserManagerHelper.getUserIcon(userRecord.mInfo);
+            return circleIcon;
         }
 
         @Override
