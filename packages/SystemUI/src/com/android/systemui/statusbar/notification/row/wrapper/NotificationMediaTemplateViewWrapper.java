@@ -28,6 +28,7 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.metrics.LogMaker;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,9 +42,12 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.MediaNotificationView;
 import com.android.systemui.Dependency;
+import com.android.systemui.qs.QSPanel;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -177,6 +181,26 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
 
         final MediaSession.Token token = mRow.getEntry().getSbn().getNotification().extras
                 .getParcelable(Notification.EXTRA_MEDIA_SESSION);
+
+        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
+        if (flag == 1) {
+            StatusBarWindowController ctrl = Dependency.get(StatusBarWindowController.class);
+            QuickQSPanel panel = ctrl.getStatusBarView().findViewById(
+                    com.android.systemui.R.id.quick_qs_panel);
+            panel.getMediaPlayer().setMediaSession(token,
+                    mRow.getStatusBarNotification().getNotification().getSmallIcon(),
+                    getNotificationHeader().getOriginalIconColor(),
+                    mRow.getCurrentBackgroundTint(),
+                    mActions);
+            QSPanel bigPanel = ctrl.getStatusBarView().findViewById(
+                    com.android.systemui.R.id.quick_settings_panel);
+            bigPanel.addMediaSession(token,
+                    mRow.getStatusBarNotification().getNotification().getSmallIcon(),
+                    getNotificationHeader().getOriginalIconColor(),
+                    mRow.getCurrentBackgroundTint(),
+                    mActions,
+                    mRow.getStatusBarNotification());
+        }
 
         boolean showCompactSeekbar = mMediaManager.getShowCompactMediaSeekbar();
         if (token == null || (COMPACT_MEDIA_TAG.equals(mView.getTag()) && !showCompactSeekbar)) {

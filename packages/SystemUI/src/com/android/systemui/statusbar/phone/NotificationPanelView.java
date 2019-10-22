@@ -770,6 +770,11 @@ public class NotificationPanelView extends PanelView implements
         int sideMargin = res.getDimensionPixelOffset(R.dimen.notification_side_paddings);
         int topMargin =
                 res.getDimensionPixelOffset(com.android.internal.R.dimen.quick_qs_total_height);
+        int flag = Settings.System.getInt(mContext.getContentResolver(), "qs_media_player", 0);
+        if (flag == 1) {
+            topMargin = res.getDimensionPixelOffset(
+                    com.android.internal.R.dimen.quick_qs_total_height_with_media);
+        }
         lp = (FrameLayout.LayoutParams) mPluginFrame.getLayoutParams();
         if (lp.width != qsWidth || lp.gravity != panelGravity || lp.leftMargin != sideMargin
                 || lp.rightMargin != sideMargin || lp.topMargin != topMargin) {

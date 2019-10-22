@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,6 +87,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final BubbleController mBubbleController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
+    private final Context mContext;
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
@@ -107,6 +109,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             KeyguardBypassController bypassController,
             BubbleController bubbleController,
             DynamicPrivacyController privacyController) {
+        mContext = context;
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mBypassController = bypassController;
@@ -143,7 +146,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
+            int flag = Settings.System.getInt(mContext.getContentResolver(),
+                    "qs_media_player", 0);
+            boolean hideMedia = (flag == 1);
             if (ent.isRowDismissed() || ent.isRowRemoved()
+                    || (ent.isMediaNotification() && hideMedia)
                     || mBubbleController.isBubbleNotificationSuppressedFromShade(ent.getKey())) {
                 // we don't want to update removed notifications because they could
                 // temporarily become children if they were isolated before.

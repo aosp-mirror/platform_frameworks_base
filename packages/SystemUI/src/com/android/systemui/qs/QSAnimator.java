@@ -14,6 +14,7 @@
 
 package com.android.systemui.qs;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
@@ -267,6 +268,17 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mAllViews.add(tileView);
             count++;
         }
+
+
+        int flag = Settings.System.getInt(mQsPanel.getContext().getContentResolver(),
+                "qs_media_player", 0);
+        if (flag == 1) {
+            View qsMediaView = mQsPanel.getMediaPanel();
+            View qqsMediaView = mQuickQsPanel.getMediaPlayer().getView();
+            translationXBuilder.addFloat(qsMediaView, "alpha", 0, 1);
+            translationXBuilder.addFloat(qqsMediaView, "alpha", 1, 0);
+        }
+
         if (mAllowFancy) {
             // Make brightness appear static position and alpha in through second half.
             View brightness = mQsPanel.getBrightnessView();
