@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.Authenticators;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
@@ -37,7 +39,6 @@ import android.app.IActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
@@ -322,7 +323,7 @@ public class BiometricServiceTest {
 
         assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mState);
-        assertEquals(Authenticator.TYPE_CREDENTIAL,
+        assertEquals(Authenticators.DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mBundle
                         .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
@@ -576,7 +577,7 @@ public class BiometricServiceTest {
         assertNotNull(mBiometricService.mCurrentAuthSession);
         assertEquals(BiometricService.STATE_SHOWING_DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mState);
-        assertEquals(Authenticator.TYPE_CREDENTIAL,
+        assertEquals(Authenticators.DEVICE_CREDENTIAL,
                 mBiometricService.mCurrentAuthSession.mBundle.getInt(
                         BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
         verify(mBiometricService.mStatusBarService).showAuthenticationDialog(
@@ -609,50 +610,55 @@ public class BiometricServiceTest {
     }
 
     @Test
-    public void testCombineAuthenticatorBundle_keyAllowDeviceCredentialAlwaysRemoved() {
-        Bundle bundle;
-        int authenticators;
+    public void testCombineAuthenticatorBundles_withKeyDeviceCredential_andKeyAuthenticators() {
+        final boolean allowDeviceCredential = false;
+        final @Authenticators.Types int authenticators =
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK;
+        final Bundle bundle = new Bundle();
 
-        // In:
-        // KEY_ALLOW_DEVICE_CREDENTIAL = true
-        // KEY_AUTHENTICATORS_ALLOWED = TYPE_BIOMETRIC | TYPE_CREDENTIAL
-        // Out:
-        // KEY_ALLOW_DEVICE_CREDENTIAL = null
-        // KEY_AUTHENTICATORS_ALLOWED = TYPE_BIOMETRIC | TYPE_CREDENTIAL
-        bundle = new Bundle();
-        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
-        authenticators = Authenticator.TYPE_CREDENTIAL | Authenticator.TYPE_BIOMETRIC;
+        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, allowDeviceCredential);
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
         Utils.combineAuthenticatorBundles(bundle);
-        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(authenticators, bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
 
-        // In:
-        // KEY_ALLOW_DEVICE_CREDENTIAL = true
-        // KEY_AUTHENTICATORS_ALLOWED = TYPE_BIOMETRIC
-        // Out:
-        // KEY_ALLOW_DEVICE_CREDENTIAL = null
-        // KEY_AUTHENTICATORS_ALLOWED = TYPE_BIOMETRIC | TYPE_CREDENTIAL
-        bundle = new Bundle();
-        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, true);
-        authenticators = Authenticator.TYPE_BIOMETRIC;
+        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
+        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED), authenticators);
+    }
+
+    @Test
+    public void testCombineAuthenticatorBundles_withNoKeyDeviceCredential_andKeyAuthenticators() {
+        final @Authenticators.Types int authenticators =
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK;
+        final Bundle bundle = new Bundle();
+
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
         Utils.combineAuthenticatorBundles(bundle);
-        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(authenticators, bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
 
-        // In:
-        // KEY_ALLOW_DEVICE_CREDENTIAL = null
-        // KEY_AUTHENTICATORS_ALLOWED = TYPE_BIOMETRIC | TYPE_CREDENTIAL
-        // Out:
-        // KEY_ALLOW_DEVICE_CREDENTIAL = null
-        // KEY_AUTHENTICATORS_ALLOWED = TYPE_BIOMETRIC | TYPE_CREDENTIAL
-        bundle = new Bundle();
-        authenticators = Authenticator.TYPE_BIOMETRIC | Authenticator.TYPE_CREDENTIAL;
-        bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
-        Utils.combineAuthenticatorBundles(bundle);
         assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
-        assertEquals(authenticators, bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED));
+        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED), authenticators);
+    }
+
+    @Test
+    public void testCombineAuthenticatorBundles_withKeyDeviceCredential_andNoKeyAuthenticators() {
+        final boolean allowDeviceCredential = true;
+        final Bundle bundle = new Bundle();
+
+        bundle.putBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, allowDeviceCredential);
+        Utils.combineAuthenticatorBundles(bundle);
+
+        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
+        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED),
+                Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
+    }
+
+    @Test
+    public void testCombineAuthenticatorBundles_withNoKeyDeviceCredential_andNoKeyAuthenticators() {
+        final Bundle bundle = new Bundle();
+
+        Utils.combineAuthenticatorBundles(bundle);
+
+        assertNull(bundle.get(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL));
+        assertEquals(bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED),
+                Authenticators.BIOMETRIC_WEAK);
     }
 
     @Test

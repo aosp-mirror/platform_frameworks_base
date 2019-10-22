@@ -104,8 +104,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testCanAuthenticate_callsBiometricServiceCanAuthenticate() throws
-            Exception {
+    public void testCanAuthenticate_callsBiometricServiceCanAuthenticate() throws Exception {
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
 

@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -29,7 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -416,7 +416,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                     // TODO: Clean this up
                     Bundle bundle = (Bundle) mCurrentDialogArgs.arg1;
                     bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                            Authenticator.TYPE_CREDENTIAL);
+                            Authenticators.DEVICE_CREDENTIAL);
                 }
 
                 showDialog(mCurrentDialogArgs, true /* skipAnimation */, savedState);

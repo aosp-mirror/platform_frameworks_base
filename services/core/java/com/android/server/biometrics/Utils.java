@@ -16,15 +16,14 @@
 
 package com.android.server.biometrics;
 
+import static android.hardware.biometrics.BiometricManager.Authenticators;
+
 import android.content.Context;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 public class Utils {
     public static boolean isDebugEnabled(Context context, int targetUserId) {
@@ -45,32 +44,26 @@ public class Utils {
     }
 
     /**
-     * Combine {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
-     * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible
-     * enough.
+     * Combines {@link BiometricPrompt#KEY_ALLOW_DEVICE_CREDENTIAL} with
+     * {@link BiometricPrompt#KEY_AUTHENTICATORS_ALLOWED}, as the former is not flexible enough.
      */
     public static void combineAuthenticatorBundles(Bundle bundle) {
-        boolean biometricEnabled = true; // enabled by default
-        boolean credentialEnabled = bundle.getBoolean(
-                BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
-        if (bundle.get(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED) != null) {
-            final int authenticatorFlags =
-                    bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
-            biometricEnabled = (authenticatorFlags & Authenticator.TYPE_BIOMETRIC) != 0;
-            // Using both KEY_ALLOW_DEVICE_CREDENTIAL and KEY_AUTHENTICATORS_ALLOWED together
-            // is not supported. Default to overwriting.
-            credentialEnabled = (authenticatorFlags & Authenticator.TYPE_CREDENTIAL) != 0;
-        }
-
+        // Cache and remove explicit ALLOW_DEVICE_CREDENTIAL boolean flag from the bundle.
+        final boolean deviceCredentialAllowed =
+                bundle.getBoolean(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL, false);
         bundle.remove(BiometricPrompt.KEY_ALLOW_DEVICE_CREDENTIAL);
 
-        int authenticators = 0;
-        if (biometricEnabled) {
-            authenticators |= Authenticator.TYPE_BIOMETRIC;
+        final @Authenticators.Types int authenticators;
+        if (bundle.containsKey(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED)) {
+            // Ignore ALLOW_DEVICE_CREDENTIAL flag if AUTH_TYPES_ALLOWED is defined.
+            authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+        } else {
+            // Otherwise, use ALLOW_DEVICE_CREDENTIAL flag along with Weak+ biometrics by default.
+            authenticators = deviceCredentialAllowed
+                    ? Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK
+                    : Authenticators.BIOMETRIC_WEAK;
         }
-        if (credentialEnabled) {
-            authenticators |= Authenticator.TYPE_CREDENTIAL;
-        }
+
         bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, authenticators);
     }
 
@@ -80,6 +73,6 @@ public class Utils {
      */
     public static boolean isDeviceCredentialAllowed(Bundle bundle) {
         final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
-        return (authenticators & Authenticator.TYPE_CREDENTIAL) != 0;
+        return (authenticators & Authenticators.DEVICE_CREDENTIAL) != 0;
     }
 }

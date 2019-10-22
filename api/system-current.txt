@@ -2172,6 +2172,15 @@ package android.hardware {
 
 }
 
+package android.hardware.biometrics {
+
+  public static interface BiometricManager.Authenticators {
+    field public static final int BIOMETRIC_CONVENIENCE = 4095; // 0xfff
+    field public static final int EMPTY_SET = 0; // 0x0
+  }
+
+}
+
 package android.hardware.camera2 {
 
   public abstract class CameraDevice implements java.lang.AutoCloseable {

@@ -23,6 +23,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_IRIS;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
+import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -31,7 +32,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
@@ -606,14 +606,10 @@ public class BiometricService extends SystemService {
                 return;
             }
 
-            if (bundle.get(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED) != null) {
-                checkInternalPermission();
-            }
-
             Utils.combineAuthenticatorBundles(bundle);
 
-            // Check the usage of this in system server. Need to remove this check if it becomes
-            // a public API.
+            // Check the usage of this in system server. Need to remove this check if it becomes a
+            // public API.
             final boolean useDefaultTitle =
                     bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false);
             if (useDefaultTitle) {
@@ -1135,10 +1131,11 @@ public class BiometricService extends SystemService {
                     // If any error is received while preparing the auth session (lockout, etc),
                     // and if device credential is allowed, just show the credential UI.
                     if (mPendingAuthSession.isAllowDeviceCredential()) {
-                        int authenticators = mPendingAuthSession.mBundle
-                                .getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
+                        @Authenticators.Types int authenticators =
+                                mPendingAuthSession.mBundle.getInt(
+                                        BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
                         // Disallow biometric and notify SystemUI to show the authentication prompt.
-                        authenticators &= ~Authenticator.TYPE_BIOMETRIC;
+                        authenticators &= ~Authenticators.BIOMETRIC_WEAK;
                         mPendingAuthSession.mBundle.putInt(
                                 BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
                                 authenticators);
@@ -1365,7 +1362,7 @@ public class BiometricService extends SystemService {
             if (error != BiometricConstants.BIOMETRIC_SUCCESS && credentialAllowed) {
                 // If there's a problem but device credential is allowed, only show credential UI.
                 bundle.putInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED,
-                        Authenticator.TYPE_CREDENTIAL);
+                        Authenticators.DEVICE_CREDENTIAL);
             } else if (error != BiometricConstants.BIOMETRIC_SUCCESS) {
                 // Check for errors, notify callback, and return
                 try {
@@ -1407,7 +1404,8 @@ public class BiometricService extends SystemService {
         // with the cookie. Once all cookies are received, we can show the prompt
         // and let the services start authenticating. The cookie should be non-zero.
         final int cookie = mRandom.nextInt(Integer.MAX_VALUE - 1) + 1;
-        final int authenticators = bundle.getInt(BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED);
+        final @Authenticators.Types int authenticators = bundle.getInt(
+                BiometricPrompt.KEY_AUTHENTICATORS_ALLOWED, 0);
         Slog.d(TAG, "Creating auth session. Modality: " + modality
                 + ", cookie: " + cookie
                 + ", authenticators: " + authenticators);
@@ -1415,7 +1413,7 @@ public class BiometricService extends SystemService {
 
         // If it's only device credential, we don't need to wait - LockSettingsService is
         // always ready to check credential (SystemUI invokes that path).
-        if ((authenticators & ~Authenticator.TYPE_CREDENTIAL) != 0) {
+        if ((authenticators & ~Authenticators.DEVICE_CREDENTIAL) != 0) {
             modalities.put(modality, cookie);
         }
         mPendingAuthSession = new AuthSession(modalities, token, sessionId, userId,
@@ -1423,7 +1421,7 @@ public class BiometricService extends SystemService {
                 modality, requireConfirmation);
 
         try {
-            if (authenticators == Authenticator.TYPE_CREDENTIAL) {
+            if (authenticators == Authenticators.DEVICE_CREDENTIAL) {
                 mPendingAuthSession.mState = STATE_SHOWING_DEVICE_CREDENTIAL;
                 mCurrentAuthSession = mPendingAuthSession;
                 mPendingAuthSession = null;
