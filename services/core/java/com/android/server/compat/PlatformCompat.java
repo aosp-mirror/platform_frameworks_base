@@ -19,7 +19,7 @@ package com.android.server.compat;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Process;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.StatsLog;
 
@@ -54,8 +54,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
-    public void reportChangeByPackageName(long changeId, String packageName) {
-        ApplicationInfo appInfo = getApplicationInfo(packageName);
+    public void reportChangeByPackageName(long changeId, String packageName, int userId) {
+        ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo == null) {
             return;
         }
@@ -80,8 +80,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
-    public boolean isChangeEnabledByPackageName(long changeId, String packageName) {
-        ApplicationInfo appInfo = getApplicationInfo(packageName);
+    public boolean isChangeEnabledByPackageName(long changeId, String packageName, int userId) {
+        ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
         if (appInfo == null) {
             return true;
         }
@@ -96,7 +96,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         }
         boolean enabled = true;
         for (String packageName : packages) {
-            enabled = enabled && isChangeEnabledByPackageName(changeId, packageName);
+            enabled = enabled && isChangeEnabledByPackageName(changeId, packageName,
+                    UserHandle.getUserId(uid));
         }
         return enabled;
     }
@@ -127,10 +128,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         mChangeReporter.resetReportedChanges(appInfo.uid);
     }
 
-    private ApplicationInfo getApplicationInfo(String packageName) {
+    private ApplicationInfo getApplicationInfo(String packageName, int userId) {
         try {
-            return mContext.getPackageManager().getApplicationInfoAsUser(packageName, 0,
-                    Process.myUid());
+            return mContext.getPackageManager().getApplicationInfoAsUser(packageName, 0, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "No installed package " + packageName);
         }
