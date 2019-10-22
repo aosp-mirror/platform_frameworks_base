@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.BG_LOOPER_NAME;
-import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
-
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
@@ -36,6 +33,8 @@ import com.android.settingslib.bluetooth.BluetoothCallback;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
+import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.MainLooper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -46,7 +45,6 @@ import java.util.List;
 import java.util.WeakHashMap;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -74,9 +72,8 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     /**
      */
     @Inject
-    public BluetoothControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper,
-            @Named(MAIN_LOOPER_NAME) Looper mainLooper,
-            @Nullable LocalBluetoothManager localBluetoothManager) {
+    public BluetoothControllerImpl(Context context, @BgLooper Looper bgLooper,
+            @MainLooper Looper mainLooper, @Nullable LocalBluetoothManager localBluetoothManager) {
         mLocalBluetoothManager = localBluetoothManager;
         mBgHandler = new Handler(bgLooper);
         mHandler = new H(mainLooper);

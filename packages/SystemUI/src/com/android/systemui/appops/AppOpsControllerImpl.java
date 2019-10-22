@@ -16,8 +16,6 @@
 
 package com.android.systemui.appops;
 
-import static com.android.systemui.Dependency.BG_LOOPER_NAME;
-
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -31,6 +29,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dagger.qualifiers.BgLooper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -39,7 +38,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -79,7 +77,7 @@ public class AppOpsControllerImpl implements AppOpsController,
     };
 
     @Inject
-    public AppOpsControllerImpl(Context context, @Named(BG_LOOPER_NAME) Looper bgLooper) {
+    public AppOpsControllerImpl(Context context, @BgLooper Looper bgLooper) {
         this(context, bgLooper, new PermissionFlagsCache(context));
     }
 

@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -58,6 +57,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.R;
 import com.android.systemui.SystemUISecondaryUserService;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.tiles.UserDetailView;
@@ -70,7 +70,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -110,7 +109,7 @@ public class UserSwitcherController implements Dumpable {
 
     @Inject
     public UserSwitcherController(Context context, KeyguardStateController keyguardStateController,
-            @Named(MAIN_HANDLER_NAME) Handler handler, ActivityStarter activityStarter) {
+            @MainHandler Handler handler, ActivityStarter activityStarter) {
         mContext = context;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(context);

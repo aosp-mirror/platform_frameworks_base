@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger;
 
 import android.app.Activity;
 import android.app.Service;
+
+import com.android.systemui.SystemUI;
 
 import java.util.Map;
 

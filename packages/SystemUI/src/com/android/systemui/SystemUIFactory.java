@@ -27,6 +27,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.dagger.DaggerSystemUIRootComponent;
+import com.android.systemui.dagger.DependencyProvider;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -107,7 +110,7 @@ public class SystemUIFactory {
 
     protected SystemUIRootComponent buildSystemUIRootComponent(Context context) {
         return DaggerSystemUIRootComponent.builder()
-                .dependencyProvider(new com.android.systemui.DependencyProvider())
+                .dependencyProvider(new DependencyProvider())
                 .contextHolder(new ContextHolder(context))
                 .build();
     }

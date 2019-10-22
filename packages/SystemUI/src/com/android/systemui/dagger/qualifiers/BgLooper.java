@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger.qualifiers;
 
-import android.app.Activity;
-import android.app.Service;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-/**
- * Interface necessary to make Dagger happy. See {@link ContextComponentResolver}.
- */
-public interface ContextComponentHelper {
-    /** Turns a classname into an instance of the class or returns null. */
-    Activity resolveActivity(String className);
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 
-    /** Turns a classname into an instance of the class or returns null. */
-    Service resolveService(String className);
+import javax.inject.Qualifier;
 
-    /** Turns a classname into an instance of the class or returns null. */
-    SystemUI resolveSystemUI(String className);
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface BgLooper {
 }

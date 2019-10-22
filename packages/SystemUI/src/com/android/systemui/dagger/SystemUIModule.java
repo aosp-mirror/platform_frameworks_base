@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger;
 
 import android.annotation.Nullable;
 import android.content.Context;
