@@ -1909,7 +1909,14 @@ public class UserManager {
      * Returns the user-wide restrictions imposed on the user specified by <code>userHandle</code>.
      * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
      * @return a Bundle containing all the restrictions.
+     *
+     * <p>Requires {@code android.permission.MANAGE_USERS} or
+     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
+     * must be the calling user or a managed profile associated with it.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public Bundle getUserRestrictions(UserHandle userHandle) {
         try {
             return mService.getUserRestrictions(userHandle.getIdentifier());
@@ -2000,7 +2007,7 @@ public class UserManager {
      * @return {@code true} if the current user has the given restriction, {@code false} otherwise.
      */
     public boolean hasUserRestriction(String restrictionKey) {
-        return hasUserRestriction(restrictionKey, Process.myUserHandle());
+        return hasUserRestrictionForUser(restrictionKey, Process.myUserHandle());
     }
 
     /**
@@ -2012,9 +2019,29 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public boolean hasUserRestriction(String restrictionKey, UserHandle userHandle) {
+        return hasUserRestrictionForUser(restrictionKey, userHandle);
+    }
+
+    /**
+     * Returns whether the given user has been disallowed from performing certain actions
+     * or setting certain settings.
+     * @param restrictionKey the string key representing the restriction
+     * @param userHandle the UserHandle of the user for whom to retrieve the restrictions.
+     *
+     * <p>Requires {@code android.permission.MANAGE_USERS} or
+     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
+     * must be the calling user or a managed profile associated with it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    public boolean hasUserRestrictionForUser(@NonNull String restrictionKey,
+            @NonNull UserHandle userHandle) {
         try {
-            return mService.hasUserRestriction(restrictionKey,
-                    userHandle.getIdentifier());
+            return mService.hasUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
