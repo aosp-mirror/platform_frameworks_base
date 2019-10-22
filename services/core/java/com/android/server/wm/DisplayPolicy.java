@@ -3241,7 +3241,8 @@ public class DisplayPolicy {
                 statusBar.topAppWindowChanged(displayId, isFullscreen, isImmersive);
 
                 // TODO(b/118118435): Remove this after removing system UI visibilities.
-                mDisplayContent.statusBarVisibilityChanged(visibility);
+                mDisplayContent.statusBarVisibilityChanged(
+                        visibility & ~(View.STATUS_BAR_UNHIDE | View.NAVIGATION_BAR_UNHIDE));
             }
         });
         return diff;
