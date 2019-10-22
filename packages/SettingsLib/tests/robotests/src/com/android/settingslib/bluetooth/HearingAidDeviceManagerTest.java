@@ -75,8 +75,8 @@ public class HearingAidDeviceManagerTest {
         when(mDevice2.getAddress()).thenReturn(DEVICE_ADDRESS_2);
         when(mDevice1.getName()).thenReturn(DEVICE_NAME_1);
         when(mDevice2.getName()).thenReturn(DEVICE_NAME_2);
-        when(mDevice1.getAliasName()).thenReturn(DEVICE_ALIAS_1);
-        when(mDevice2.getAliasName()).thenReturn(DEVICE_ALIAS_2);
+        when(mDevice1.getAlias()).thenReturn(DEVICE_ALIAS_1);
+        when(mDevice2.getAlias()).thenReturn(DEVICE_ALIAS_2);
         when(mDevice1.getBluetoothClass()).thenReturn(DEVICE_CLASS);
         when(mDevice2.getBluetoothClass()).thenReturn(DEVICE_CLASS);
         when(mLocalBluetoothManager.getEventManager()).thenReturn(mBluetoothEventManager);

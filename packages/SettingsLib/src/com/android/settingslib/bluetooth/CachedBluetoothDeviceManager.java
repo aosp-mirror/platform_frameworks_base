@@ -166,7 +166,7 @@ public class CachedBluetoothDeviceManager {
             return cachedDevice.getName();
         }
 
-        String name = device.getAliasName();
+        String name = device.getAlias();
         if (name != null) {
             return name;
         }
