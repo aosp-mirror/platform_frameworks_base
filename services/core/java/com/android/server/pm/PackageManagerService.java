@@ -751,17 +751,17 @@ public class PackageManagerService extends IPackageManager.Stub
     static final List<SystemPartition> SYSTEM_PARTITIONS = Collections.unmodifiableList(
             Arrays.asList(
                     new SystemPartition(Environment.getRootDirectory(), 0 /* scanFlag */,
-                            true /* hasPriv */, false /* hasOverlays */),
+                            false /* hasOverlays */),
                     new SystemPartition(Environment.getVendorDirectory(), SCAN_AS_VENDOR,
-                            true /* hasPriv */, true /* hasOverlays */),
+                            true /* hasOverlays */),
                     new SystemPartition(Environment.getOdmDirectory(), SCAN_AS_ODM,
-                            true /* hasPriv */, true /* hasOverlays */),
+                            true /* hasOverlays */),
                     new SystemPartition(Environment.getOemDirectory(), SCAN_AS_OEM,
-                            false /* hasPriv */, true /* hasOverlays */),
+                            true /* hasOverlays */),
                     new SystemPartition(Environment.getProductDirectory(), SCAN_AS_PRODUCT,
-                            true /* hasPriv */, true /* hasOverlays */),
+                            true /* hasOverlays */),
                     new SystemPartition(Environment.getSystemExtDirectory(), SCAN_AS_SYSTEM_EXT,
-                            true /* hasPriv */, true /* hasOverlays */)));
+                            true /* hasOverlays */)));
 
     private final List<SystemPartition> mDirsToScanAsSystem;
 
@@ -2427,12 +2427,28 @@ public class PackageManagerService extends IPackageManager.Stub
         @Nullable
         public final File overlayFolder;
 
-        private SystemPartition(File folder, int scanFlag, boolean hasPrivApps,
-                boolean hasOverlays) {
+
+        private static boolean shouldScanPrivApps(@ScanFlags int scanFlags) {
+            if ((scanFlags & SCAN_AS_OEM) != 0) {
+                return false;
+            }
+            if (scanFlags == 0) {  // /system partition
+                return true;
+            }
+            if ((scanFlags
+                    & (SCAN_AS_VENDOR | SCAN_AS_ODM | SCAN_AS_PRODUCT | SCAN_AS_SYSTEM_EXT)) != 0) {
+                return true;
+            }
+            return false;
+        }
+
+        private SystemPartition(File folder, int scanFlag, boolean hasOverlays) {
             this.folder = folder;
             this.scanFlag = scanFlag;
             this.appFolder = toCanonical(new File(folder, "app"));
-            this.privAppFolder = hasPrivApps ? toCanonical(new File(folder, "priv-app")) : null;
+            this.privAppFolder = shouldScanPrivApps(scanFlag)
+                    ? toCanonical(new File(folder, "priv-app"))
+                    : null;
             this.overlayFolder = hasOverlays ? toCanonical(new File(folder, "overlay")) : null;
         }
 
@@ -17790,17 +17806,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    static boolean locationIsPrivileged(String path) {
-        // TODO(dariofreni): include APEX partitions when they will support priv apps.
-        for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
-            SystemPartition partition = SYSTEM_PARTITIONS.get(i);
-            if (partition.containsPrivPath(path)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static @Nullable SystemPartition resolveApexToSystemPartition(
             ApexManager.ActiveApexInfo apexInfo) {
         for (int i = 0, size = SYSTEM_PARTITIONS.size(); i < size; i++) {
@@ -17808,7 +17813,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (apexInfo.preinstalledApexPath.getAbsolutePath().startsWith(
                     sp.folder.getAbsolutePath())) {
                 return new SystemPartition(apexInfo.apexDirectory, sp.scanFlag,
-                        false /* hasPriv */, false /* hasOverlays */);
+                        false /* hasOverlays */);
             }
         }
         return null;
