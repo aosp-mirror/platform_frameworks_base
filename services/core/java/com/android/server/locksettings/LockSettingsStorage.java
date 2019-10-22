@@ -30,7 +30,6 @@ import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -699,7 +698,7 @@ class LockSettingsStorage {
             }
 
             if (upgradeVersion != DATABASE_VERSION) {
-                Log.w(TAG, "Failed to upgrade database!");
+                Slog.w(TAG, "Failed to upgrade database!");
             }
         }
     }

@@ -104,7 +104,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -1304,17 +1303,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         final IProgressListener listener = new IProgressListener.Stub() {
             @Override
             public void onStarted(int id, Bundle extras) throws RemoteException {
-                Log.d(TAG, "unlockUser started");
+                Slog.d(TAG, "unlockUser started");
             }
 
             @Override
             public void onProgress(int id, int progress, Bundle extras) throws RemoteException {
-                Log.d(TAG, "unlockUser progress " + progress);
+                Slog.d(TAG, "unlockUser progress " + progress);
             }
 
             @Override
             public void onFinished(int id, Bundle extras) throws RemoteException {
-                Log.d(TAG, "unlockUser finished");
+                Slog.d(TAG, "unlockUser finished");
                 latch.countDown();
             }
         };
@@ -1798,7 +1797,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         try {
             return mStorageManager.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to check user key locked state", e);
+            Slog.e(TAG, "failed to check user key locked state", e);
             return false;
         }
     }
@@ -2033,7 +2032,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 try {
                     progressCallback.onCredentialVerified();
                 } catch (RemoteException e) {
-                    Log.w(TAG, "progressCallback throws exception", e);
+                    Slog.w(TAG, "progressCallback throws exception", e);
                 }
             }
             setUserPasswordMetrics(credential, userId);
