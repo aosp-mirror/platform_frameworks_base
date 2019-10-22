@@ -75,8 +75,8 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.navigationbar.car.CarFacetButtonController;
+import com.android.systemui.navigationbar.car.CarNavigationBarController;
 import com.android.systemui.navigationbar.car.CarNavigationBarView;
-import com.android.systemui.navigationbar.car.NavigationBarViewFactory;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.car.CarQSFragment;
@@ -92,8 +92,6 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.car.hvac.HvacController;
-import com.android.systemui.statusbar.car.hvac.TemperatureView;
 import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NewNotifPipeline;
@@ -170,14 +168,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private CarNavigationBarView mRightNavigationBarView;
 
     private final Object mQueueLock = new Object();
-    private boolean mShowLeft;
-    private boolean mShowRight;
-    private boolean mShowBottom;
-    private final NavigationBarViewFactory mNavigationBarViewFactory;
+    private final CarNavigationBarController mCarNavigationBarController;
     private CarFacetButtonController mCarFacetButtonController;
     private DeviceProvisionedController mDeviceProvisionedController;
     private boolean mDeviceIsSetUpForUser = true;
-    private HvacController mHvacController;
     private DrivingStateHelper mDrivingStateHelper;
     private PowerManagerHelper mPowerManagerHelper;
     private FlingAnimationUtils mFlingAnimationUtils;
@@ -301,7 +295,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
 
             /* Car Settings injected components. */
-            NavigationBarViewFactory navigationBarViewFactory) {
+            CarNavigationBarController carNavigationBarController) {
         super(
                 context,
                 featureFlags,
@@ -363,7 +357,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 scrimController,
                 lockscreenWallpaperLazy);
         mScrimController = scrimController;
-        mNavigationBarViewFactory = navigationBarViewFactory;
+        mCarNavigationBarController = carNavigationBarController;
     }
 
     @Override
@@ -378,10 +372,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
         mScreenLifecycle.addObserver(mScreenObserver);
 
-        // Need to initialize HVAC controller before calling super.start - before system bars are
-        // created.
-        mHvacController = new HvacController(mContext);
-
         super.start();
 
         mNotificationPanel.setScrollingEnabled(true);
@@ -394,8 +384,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
         createBatteryController();
         mCarBatteryController.startListening();
-
-        mHvacController.connectToCarService();
 
         mDeviceProvisionedController.addCallback(
                 new DeviceProvisionedController.DeviceProvisionedListener() {
@@ -433,9 +421,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
      * before and after the device is provisioned. . Also for change of density and font size.
      */
     private void restartNavBars() {
-        // remove and reattach all hvac components such that we don't keep a reference to unused
-        // ui elements
-        mHvacController.removeAllComponents();
         mCarFacetButtonController.removeAll();
 
         if (mNavigationBarWindow != null) {
@@ -452,17 +437,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         // CarFacetButtonController was reset therefore we need to re-add the status bar elements
         // to the controller.
         mCarFacetButtonController.addAllFacetButtons(mStatusBarWindow);
-    }
-
-    private void addTemperatureViewToController(View v) {
-        if (v instanceof TemperatureView) {
-            mHvacController.addHvacTextView((TemperatureView) v);
-        } else if (v instanceof ViewGroup) {
-            ViewGroup viewGroup = (ViewGroup) v;
-            for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                addTemperatureViewToController(viewGroup.getChildAt(i));
-            }
-        }
     }
 
     /**
@@ -885,10 +859,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
 
     @Override
     protected void createNavigationBar(@Nullable RegisterStatusBarResult result) {
-        mShowBottom = mContext.getResources().getBoolean(R.bool.config_enableBottomNavigationBar);
-        mShowLeft = mContext.getResources().getBoolean(R.bool.config_enableLeftNavigationBar);
-        mShowRight = mContext.getResources().getBoolean(R.bool.config_enableRightNavigationBar);
-
         buildNavBarWindows();
         buildNavBarContent();
     }
@@ -896,50 +866,36 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private void buildNavBarContent() {
         buildTopBar();
 
-        if (mShowBottom) {
-            mNavigationBarView = mNavigationBarViewFactory.getBottomBar(mDeviceIsSetUpForUser);
-            mNavigationBarView.setStatusBar(this);
-            mNavigationBarView.setStatusBarWindowTouchListener(mNavBarNotificationTouchListener);
-        }
+        mNavigationBarView = mCarNavigationBarController.getBottomBar(mDeviceIsSetUpForUser);
+        mCarNavigationBarController.registerBottomBarTouchListener(
+                mNavBarNotificationTouchListener);
 
-        if (mShowLeft) {
-            mLeftNavigationBarView = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
-            mLeftNavigationBarView.setStatusBar(this);
-            mLeftNavigationBarView.setStatusBarWindowTouchListener(
-                    mNavBarNotificationTouchListener);
-        }
+        mLeftNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
+        mCarNavigationBarController.registerLeftBarTouchListener(
+                mNavBarNotificationTouchListener);
 
-        if (mShowRight) {
-            mRightNavigationBarView = mNavigationBarViewFactory.getLeftBar(mDeviceIsSetUpForUser);
-            mRightNavigationBarView.setStatusBar(this);
-            mRightNavigationBarView.setStatusBarWindowTouchListener(
-                    mNavBarNotificationTouchListener);
-        }
+        mRightNavigationBarView = mCarNavigationBarController.getLeftBar(mDeviceIsSetUpForUser);
+        mCarNavigationBarController.registerRightBarTouchListener(
+                mNavBarNotificationTouchListener);
+
+        mCarNavigationBarController.registerNotificationController(() -> togglePanel());
     }
 
     private void buildNavBarWindows() {
         mTopNavigationBarContainer = mStatusBarWindow
                 .findViewById(R.id.car_top_navigation_bar_container);
 
-        if (mShowBottom) {
-            mNavigationBarWindow = mNavigationBarViewFactory.getBottomWindow();
-        }
-        if (mShowLeft) {
-            mLeftNavigationBarWindow = mNavigationBarViewFactory.getLeftWindow();
-        }
-        if (mShowRight) {
-            mRightNavigationBarWindow = mNavigationBarViewFactory.getRightWindow();
-        }
+        mNavigationBarWindow = mCarNavigationBarController.getBottomWindow();
+        mLeftNavigationBarWindow = mCarNavigationBarController.getLeftWindow();
+        mRightNavigationBarWindow = mCarNavigationBarController.getRightWindow();
     }
 
     private void buildTopBar() {
         mTopNavigationBarContainer.removeAllViews();
-        mTopNavigationBarView = mNavigationBarViewFactory.getTopBar(mDeviceIsSetUpForUser);
+        mTopNavigationBarView = mCarNavigationBarController.getTopBar(mDeviceIsSetUpForUser);
+        mCarNavigationBarController.registerTopBarTouchListener(
+                mTopNavBarNotificationTouchListener);
         mTopNavigationBarContainer.addView(mTopNavigationBarView);
-
-        mTopNavigationBarView.setStatusBar(this);
-        addTemperatureViewToController(mTopNavigationBarView);
-        mTopNavigationBarView.setStatusBarWindowTouchListener(mTopNavBarNotificationTouchListener);
     }
 
     @Override
