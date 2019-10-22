@@ -1127,11 +1127,7 @@ public class SubscriptionManager {
         SubscriptionInfo subInfo = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subInfo = iSub.getActiveSubscriptionInfo(subId, mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1165,11 +1161,7 @@ public class SubscriptionManager {
         SubscriptionInfo result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForIccId(iccId, mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1203,11 +1195,7 @@ public class SubscriptionManager {
         SubscriptionInfo result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIndex,
                         mContext.getOpPackageName(), mContext.getFeatureId());
@@ -1231,11 +1219,7 @@ public class SubscriptionManager {
         List<SubscriptionInfo> result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAllSubInfoList(mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1316,11 +1300,7 @@ public class SubscriptionManager {
         List<SubscriptionInfo> activeList = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1371,11 +1351,7 @@ public class SubscriptionManager {
         List<SubscriptionInfo> result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAvailableSubscriptionInfoList(mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1414,11 +1390,7 @@ public class SubscriptionManager {
         List<SubscriptionInfo> result = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAccessibleSubscriptionInfoList(mContext.getOpPackageName());
             }
@@ -1447,11 +1419,7 @@ public class SubscriptionManager {
     public void requestEmbeddedSubscriptionInfoListRefresh() {
         int cardId = TelephonyManager.from(mContext).getCardIdForDefaultEuicc();
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.requestEmbeddedSubscriptionInfoListRefresh(cardId);
             }
@@ -1480,11 +1448,7 @@ public class SubscriptionManager {
     @SystemApi
     public void requestEmbeddedSubscriptionInfoListRefresh(int cardId) {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.requestEmbeddedSubscriptionInfoListRefresh(cardId);
             }
@@ -1505,11 +1469,7 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1538,11 +1498,7 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubInfoCount(mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -1563,11 +1519,7 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubInfoCountMax();
             }
@@ -1624,11 +1576,7 @@ public class SubscriptionManager {
         }
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub == null) {
                 Log.e(LOG_TAG, "[addSubscriptionInfoRecord]- ISub service is null");
                 return;
@@ -1662,11 +1610,7 @@ public class SubscriptionManager {
         }
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub == null) {
                 Log.e(LOG_TAG, "[removeSubscriptionInfoRecord]- ISub service is null");
                 return;
@@ -1769,11 +1713,7 @@ public class SubscriptionManager {
         int result = INVALID_SIM_SLOT_INDEX;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getSlotIndex(subscriptionId);
             }
@@ -1807,11 +1747,7 @@ public class SubscriptionManager {
         int[] subId = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getSubId(slotIndex);
             }
@@ -1835,11 +1771,7 @@ public class SubscriptionManager {
         int result = INVALID_PHONE_INDEX;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getPhoneId(subId);
             }
@@ -1873,11 +1805,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getDefaultSubId();
             }
@@ -1900,11 +1828,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getDefaultVoiceSubId();
             }
@@ -1934,11 +1858,7 @@ public class SubscriptionManager {
     public void setDefaultVoiceSubscriptionId(int subscriptionId) {
         if (VDBG) logd("setDefaultVoiceSubId sub id = " + subscriptionId);
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setDefaultVoiceSubId(subscriptionId);
             }
@@ -1986,11 +1906,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getDefaultSmsSubId();
             }
@@ -2016,11 +1932,7 @@ public class SubscriptionManager {
     public void setDefaultSmsSubId(int subscriptionId) {
         if (VDBG) logd("setDefaultSmsSubId sub id = " + subscriptionId);
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setDefaultSmsSubId(subscriptionId);
             }
@@ -2058,11 +1970,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getDefaultDataSubId();
             }
@@ -2088,11 +1996,7 @@ public class SubscriptionManager {
     public void setDefaultDataSubId(int subscriptionId) {
         if (VDBG) logd("setDataSubscription sub id = " + subscriptionId);
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setDefaultDataSubId(subscriptionId);
             }
@@ -2123,11 +2027,7 @@ public class SubscriptionManager {
     /** @hide */
     public void clearSubscriptionInfo() {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.clearSubInfo();
             }
@@ -2263,11 +2163,7 @@ public class SubscriptionManager {
      */
     public @NonNull int[] getActiveSubscriptionIdList(boolean visibleOnly) {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 int[] subId = iSub.getActiveSubIdList(visibleOnly);
                 if (subId != null) return subId;
@@ -2318,11 +2214,7 @@ public class SubscriptionManager {
         int simState = TelephonyManager.SIM_STATE_UNKNOWN;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 simState = iSub.getSimStateForSlotIndex(slotIndex);
             }
@@ -2341,11 +2233,7 @@ public class SubscriptionManager {
      */
     public static void setSubscriptionProperty(int subId, String propKey, String propValue) {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.setSubscriptionProperty(subId, propKey, propValue);
             }
@@ -2365,11 +2253,7 @@ public class SubscriptionManager {
             Context context) {
         String resultValue = null;
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 resultValue = iSub.getSubscriptionProperty(subId, propKey,
                         context.getOpPackageName(), context.getFeatureId());
@@ -2511,11 +2395,7 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public boolean isActiveSubId(int subId) {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.isActiveSubId(subId, mContext.getOpPackageName(),
                         mContext.getFeatureId());
@@ -2818,11 +2698,7 @@ public class SubscriptionManager {
             @TelephonyManager.SetOpportunisticSubscriptionResult Consumer<Integer> callback) {
         if (VDBG) logd("[setPreferredDataSubscriptionId]+ subId:" + subId);
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub == null) return;
 
             ISetOpportunisticDataCallback callbackStub = new ISetOpportunisticDataCallback.Stub() {
@@ -2865,11 +2741,7 @@ public class SubscriptionManager {
     public int getPreferredDataSubscriptionId() {
         int preferredSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 preferredSubId = iSub.getPreferredDataSubscriptionId();
             }
@@ -2900,11 +2772,7 @@ public class SubscriptionManager {
         List<SubscriptionInfo> subInfoList = null;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subInfoList = iSub.getOpportunisticSubscriptions(contextPkg, contextFeature);
             }
@@ -3005,11 +2873,7 @@ public class SubscriptionManager {
         ParcelUuid groupUuid = null;
         int[] subIdArray = subIdList.stream().mapToInt(i->i).toArray();
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 groupUuid = iSub.createSubscriptionGroup(subIdArray, pkgForDebug);
             } else {
@@ -3059,11 +2923,7 @@ public class SubscriptionManager {
         int[] subIdArray = subIdList.stream().mapToInt(i->i).toArray();
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.addSubscriptionsIntoGroup(subIdArray, groupUuid, pkgForDebug);
             } else {
@@ -3115,11 +2975,7 @@ public class SubscriptionManager {
         int[] subIdArray = subIdList.stream().mapToInt(i->i).toArray();
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 iSub.removeSubscriptionsFromGroup(subIdArray, groupUuid, pkgForDebug);
             } else {
@@ -3164,11 +3020,7 @@ public class SubscriptionManager {
 
         List<SubscriptionInfo> result = null;
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getSubscriptionsInGroup(groupUuid, contextPkg, contextFeature);
             } else {
@@ -3281,11 +3133,7 @@ public class SubscriptionManager {
             logd("setSubscriptionActivated subId= " + subscriptionId + " enable " + enable);
         }
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.setSubscriptionEnabled(enable, subscriptionId);
             }
@@ -3374,11 +3222,7 @@ public class SubscriptionManager {
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isSubscriptionEnabled(int subscriptionId) {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.isSubscriptionEnabled(subscriptionId);
             }
@@ -3401,11 +3245,7 @@ public class SubscriptionManager {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subId = iSub.getEnabledSubscriptionId(slotIndex);
             }
@@ -3431,11 +3271,7 @@ public class SubscriptionManager {
         int result = 0;
 
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = helper.callMethod(iSub);
             }
@@ -3458,11 +3294,7 @@ public class SubscriptionManager {
      */
     public static int getActiveDataSubscriptionId() {
         try {
-            ISub iSub = ISub.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getSubscriptionServiceRegisterer()
-                            .get());
+            ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.getActiveDataSubscriptionId();
             }
