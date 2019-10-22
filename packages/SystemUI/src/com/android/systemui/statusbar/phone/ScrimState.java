@@ -39,14 +39,19 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             mFrontTint = Color.BLACK;
-            mBehindTint = previousState.mBehindTint;
+            mBehindTint = Color.BLACK;
             mBubbleTint = previousState.mBubbleTint;
 
             mFrontAlpha = 1f;
-            mBehindAlpha = previousState.mBehindAlpha;
+            mBehindAlpha = 1f;
             mBubbleAlpha = previousState.mBubbleAlpha;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION_LONG;
+        }
+
+        @Override
+        public boolean isLowPowerState() {
+            return true;
         }
     },
 

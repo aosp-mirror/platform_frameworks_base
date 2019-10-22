@@ -71,7 +71,7 @@ public class DozeScreenState implements DozeMachine.Part {
     @Override
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         int screenState = newState.screenState(mParameters);
-        mDozeHost.prepareForGentleSleep(null);
+        mDozeHost.cancelGentleSleep();
 
         if (newState == DozeMachine.State.FINISH) {
             // Make sure not to apply the screen state after DozeService was destroyed.
