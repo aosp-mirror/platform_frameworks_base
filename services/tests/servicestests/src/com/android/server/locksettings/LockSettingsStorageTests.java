@@ -240,12 +240,12 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         writePasswordBytes(PASSWORD_0, 10);
         writePatternBytes(PATTERN_0, 20);
 
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN,
                 mStorage.readCredentialHash(10).type);
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 mStorage.readCredentialHash(20).type);
         mStorage.clearCache();
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN,
                 mStorage.readCredentialHash(10).type);
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 mStorage.readCredentialHash(20).type);
@@ -352,20 +352,20 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     }
 
     public void testPersistentDataBlock_unavailable() {
-        mStorage.mPersistentDataBlock = null;
+        mStorage.mPersistentDataBlockManager = null;
 
         assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
     }
 
     public void testPersistentDataBlock_empty() {
-        mStorage.mPersistentDataBlock = mock(PersistentDataBlockManagerInternal.class);
+        mStorage.mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
 
         assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
     }
 
     public void testPersistentDataBlock_withData() {
-        mStorage.mPersistentDataBlock = mock(PersistentDataBlockManagerInternal.class);
-        when(mStorage.mPersistentDataBlock.getFrpCredentialHandle())
+        mStorage.mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
+        when(mStorage.mPersistentDataBlockManager.getFrpCredentialHandle())
                 .thenReturn(PersistentData.toBytes(PersistentData.TYPE_SP_WEAVER, SOME_USER_ID,
                         DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD));
 
@@ -378,8 +378,8 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     }
 
     public void testPersistentDataBlock_exception() {
-        mStorage.mPersistentDataBlock = mock(PersistentDataBlockManagerInternal.class);
-        when(mStorage.mPersistentDataBlock.getFrpCredentialHandle())
+        mStorage.mPersistentDataBlockManager = mock(PersistentDataBlockManagerInternal.class);
+        when(mStorage.mPersistentDataBlockManager.getFrpCredentialHandle())
                 .thenThrow(new IllegalStateException("oops"));
         assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
     }
@@ -453,7 +453,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
     private void assertPasswordBytes(byte[] password, int userId) {
         CredentialHash cred = mStorage.readCredentialHash(userId);
-        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, cred.type);
+        assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN, cred.type);
         assertArrayEquals(password, cred.hash);
     }
 

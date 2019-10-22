@@ -23,6 +23,7 @@ import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FOR
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -31,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -162,21 +162,6 @@ public class KeySyncTaskTest {
     }
 
     @Test
-    public void isPin_isTrueForNumericString() {
-        assertTrue(KeySyncTask.isPin("3298432574398654376547".getBytes()));
-    }
-
-    @Test
-    public void isPin_isFalseForStringContainingLetters() {
-        assertFalse(KeySyncTask.isPin("398i54369548654".getBytes()));
-    }
-
-    @Test
-    public void isPin_isFalseForStringContainingSymbols() {
-        assertFalse(KeySyncTask.isPin("-3987543643".getBytes()));
-    }
-
-    @Test
     public void hashCredentialsBySaltedSha256_returnsSameHashForSameCredentialsAndSalt() {
         String credentials = "password1234";
         byte[] salt = randomBytes(16);
@@ -221,19 +206,19 @@ public class KeySyncTaskTest {
     @Test
     public void getUiFormat_returnsPinIfPin() {
         assertEquals(UI_FORMAT_PIN,
-                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD, "1234".getBytes()));
+                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PIN));
     }
 
     @Test
     public void getUiFormat_returnsPasswordIfPassword() {
         assertEquals(UI_FORMAT_PASSWORD,
-                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD, "1234a".getBytes()));
+                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PASSWORD));
     }
 
     @Test
     public void getUiFormat_returnsPatternIfPattern() {
         assertEquals(UI_FORMAT_PATTERN,
-                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PATTERN, "1234".getBytes()));
+                KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PATTERN));
 
     }
 
@@ -683,7 +668,7 @@ public class KeySyncTaskTest {
                 mRecoverySnapshotStorage,
                 mSnapshotListenersStorage,
                 TEST_USER_ID,
-                CREDENTIAL_TYPE_PASSWORD,
+                CREDENTIAL_TYPE_PIN,
                 /*credential=*/ pin.getBytes(),
                 /*credentialUpdated=*/ false,
                 mPlatformKeyManager,
@@ -799,7 +784,7 @@ public class KeySyncTaskTest {
           mRecoverySnapshotStorage,
           mSnapshotListenersStorage,
           TEST_USER_ID,
-          /*credentialType=*/ 3,
+          /*credentialType=*/ 5, // Some invalid credential type value
           "12345".getBytes(),
           /*credentialUpdated=*/ false,
           mPlatformKeyManager,

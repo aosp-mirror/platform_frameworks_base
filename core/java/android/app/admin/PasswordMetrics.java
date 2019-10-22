@@ -73,6 +73,11 @@ public final class PasswordMetrics implements Parcelable {
     // consider it a complex PIN/password.
     public static final int MAX_ALLOWED_SEQUENCE = 3;
 
+    // One of CREDENTIAL_TYPE_NONE, CREDENTIAL_TYPE_PATTERN or CREDENTIAL_TYPE_PASSWORD.
+    // Note that this class still uses CREDENTIAL_TYPE_PASSWORD to represent both numeric PIN
+    // and alphabetic password. This is OK as long as this definition is only used internally,
+    // and the value never gets mixed up with credential types from other parts of the framework.
+    // TODO: fix this (ideally after we move logic to PasswordPolicy)
     public @CredentialType int credType;
     // Fields below only make sense when credType is PASSWORD.
     public int length = 0;
@@ -161,24 +166,26 @@ public final class PasswordMetrics implements Parcelable {
 
     public static final @NonNull Parcelable.Creator<PasswordMetrics> CREATOR
             = new Parcelable.Creator<PasswordMetrics>() {
-        public PasswordMetrics createFromParcel(Parcel in) {
-            int credType = in.readInt();
-            int length = in.readInt();
-            int letters = in.readInt();
-            int upperCase = in.readInt();
-            int lowerCase = in.readInt();
-            int numeric = in.readInt();
-            int symbols = in.readInt();
-            int nonLetter = in.readInt();
-            int nonNumeric = in.readInt();
-            int seqLength = in.readInt();
-            return new PasswordMetrics(credType, length, letters, upperCase, lowerCase, numeric,
-                    symbols, nonLetter, nonNumeric, seqLength);
-        }
+                @Override
+                public PasswordMetrics createFromParcel(Parcel in) {
+                    int credType = in.readInt();
+                    int length = in.readInt();
+                    int letters = in.readInt();
+                    int upperCase = in.readInt();
+                    int lowerCase = in.readInt();
+                    int numeric = in.readInt();
+                    int symbols = in.readInt();
+                    int nonLetter = in.readInt();
+                    int nonNumeric = in.readInt();
+                    int seqLength = in.readInt();
+                    return new PasswordMetrics(credType, length, letters, upperCase, lowerCase,
+                            numeric, symbols, nonLetter, nonNumeric, seqLength);
+                }
 
-        public PasswordMetrics[] newArray(int size) {
-            return new PasswordMetrics[size];
-        }
+                @Override
+                public PasswordMetrics[] newArray(int size) {
+                    return new PasswordMetrics[size];
+                }
     };
 
     /**
@@ -189,7 +196,7 @@ public final class PasswordMetrics implements Parcelable {
      * {@link com.android.internal.widget.LockPatternUtils#CREDENTIAL_TYPE_PASSWORD}.
      */
     public static PasswordMetrics computeForCredential(LockscreenCredential credential) {
-        if (credential.isPassword()) {
+        if (credential.isPassword() || credential.isPin()) {
             return PasswordMetrics.computeForPassword(credential.getCredential());
         } else if (credential.isPattern())  {
             return new PasswordMetrics(CREDENTIAL_TYPE_PATTERN);

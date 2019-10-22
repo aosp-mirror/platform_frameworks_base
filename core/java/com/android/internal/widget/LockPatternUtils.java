@@ -17,9 +17,6 @@
 package com.android.internal.widget;
 
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
@@ -59,9 +56,9 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 
-import libcore.util.HexEncoding;
-
 import com.google.android.collect.Lists;
+
+import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -117,13 +114,19 @@ public class LockPatternUtils {
     // NOTE: When modifying this, make sure credential sufficiency validation logic is intact.
     public static final int CREDENTIAL_TYPE_NONE = -1;
     public static final int CREDENTIAL_TYPE_PATTERN = 1;
-    public static final int CREDENTIAL_TYPE_PASSWORD = 2;
+    // This is the legacy value persisted on disk. Never return it to clients, but internally
+    // we still need it to handle upgrade cases.
+    public static final int CREDENTIAL_TYPE_PASSWORD_OR_PIN = 2;
+    public static final int CREDENTIAL_TYPE_PIN = 3;
+    public static final int CREDENTIAL_TYPE_PASSWORD = 4;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"CREDENTIAL_TYPE_"}, value = {
             CREDENTIAL_TYPE_NONE,
             CREDENTIAL_TYPE_PATTERN,
-            CREDENTIAL_TYPE_PASSWORD, // Either pin or password.
+            CREDENTIAL_TYPE_PASSWORD,
+            CREDENTIAL_TYPE_PIN,
+            // CREDENTIAL_TYPE_PASSWORD_OR_PIN is missing on purpose.
     })
     public @interface CredentialType {}
 
@@ -169,6 +172,7 @@ public class LockPatternUtils {
 
     public static final String SYNTHETIC_PASSWORD_HANDLE_KEY = "sp-handle";
     public static final String SYNTHETIC_PASSWORD_ENABLED_KEY = "enable-sp";
+    public static final int SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT = 1;
     private static final String HISTORY_DELIMITER = ",";
 
     @UnsupportedAppUsage
@@ -372,8 +376,8 @@ public class LockPatternUtils {
      *
      * @param credential The credential to check.
      * @param challenge The challenge to verify against the credential
-     * @return the attestation that the challenge was verified, or null
      * @param userId The user whose credential is being verified
+     * @return the attestation that the challenge was verified, or null
      * @throws RequestThrottledException if credential verification is being throttled due to
      *         to many incorrect attempts.
      * @throws IllegalStateException if called on the main thread.
@@ -383,7 +387,7 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response = getLockSettings().verifyCredential(
-                    credential.getCredential(), credential.getType(), challenge, userId);
+                    credential, challenge, userId);
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return response.getPayload();
             } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
@@ -392,6 +396,7 @@ public class LockPatternUtils {
                 return null;
             }
         } catch (RemoteException re) {
+            Log.e(TAG, "failed to verify credential", re);
             return null;
         }
     }
@@ -413,8 +418,7 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response = getLockSettings().checkCredential(
-                    credential.getCredential(), credential.getType(),
-                    userId, wrapCallback(progressCallback));
+                    credential, userId, wrapCallback(progressCallback));
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return true;
@@ -424,6 +428,7 @@ public class LockPatternUtils {
                 return false;
             }
         } catch (RemoteException re) {
+            Log.e(TAG, "failed to check credential", re);
             return false;
         }
     }
@@ -447,8 +452,7 @@ public class LockPatternUtils {
         throwIfCalledOnMainThread();
         try {
             VerifyCredentialResponse response =
-                    getLockSettings().verifyTiedProfileChallenge(
-                            credential.getCredential(), credential.getType(), challenge, userId);
+                    getLockSettings().verifyTiedProfileChallenge(credential, challenge, userId);
 
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
                 return response.getPayload();
@@ -458,6 +462,7 @@ public class LockPatternUtils {
                 return null;
             }
         } catch (RemoteException re) {
+            Log.e(TAG, "failed to verify tied profile credential", re);
             return null;
         }
     }
@@ -471,6 +476,7 @@ public class LockPatternUtils {
         try {
             return getLockSettings().checkVoldPassword(userId);
         } catch (RemoteException re) {
+            Log.e(TAG, "failed to check vold password", re);
             return false;
         }
     }
@@ -482,7 +488,7 @@ public class LockPatternUtils {
     public byte[] getPasswordHistoryHashFactor(@NonNull LockscreenCredential currentPassword,
             int userId) {
         try {
-            return getLockSettings().getHashFactor(currentPassword.getCredential(), userId);
+            return getLockSettings().getHashFactor(currentPassword, userId);
         } catch (RemoteException e) {
             Log.e(TAG, "failed to get hash factor", e);
             return null;
@@ -524,30 +530,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Check to see if the user has stored a lock pattern.
-     * @return Whether a saved pattern exists.
-     */
-    private boolean savedPatternExists(int userId) {
-        try {
-            return getLockSettings().havePattern(userId);
-        } catch (RemoteException re) {
-            return false;
-        }
-    }
-
-    /**
-     * Check to see if the user has stored a lock pattern.
-     * @return Whether a saved pattern exists.
-     */
-    private boolean savedPasswordExists(int userId) {
-        try {
-            return getLockSettings().havePassword(userId);
-        } catch (RemoteException re) {
-            return false;
-        }
-    }
-
-    /**
      * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
      * currently cleared.
      *
@@ -568,22 +550,11 @@ public class LockPatternUtils {
     /**
      * Used by device policy manager to validate the current password
      * information it has.
+     * @Deprecated use {@link #getKeyguardStoredPasswordQuality}
      */
     @UnsupportedAppUsage
     public int getActivePasswordQuality(int userId) {
-        int quality = getKeyguardStoredPasswordQuality(userId);
-
-        if (isLockPasswordEnabled(quality, userId)) {
-            // Quality is a password and a password exists. Return the quality.
-            return quality;
-        }
-
-        if (isLockPatternEnabled(quality, userId)) {
-            // Quality is a pattern and a pattern exists. Return the quality.
-            return quality;
-        }
-
-        return PASSWORD_QUALITY_UNSPECIFIED;
+        return getKeyguardStoredPasswordQuality(userId);
     }
 
     /**
@@ -641,6 +612,22 @@ public class LockPatternUtils {
         return quality == PASSWORD_QUALITY_NUMERIC || quality == PASSWORD_QUALITY_NUMERIC_COMPLEX;
     }
 
+    /** Returns the canonical password quality corresponding to the given credential type. */
+    public static int credentialTypeToPasswordQuality(int credentialType) {
+        switch (credentialType) {
+            case CREDENTIAL_TYPE_NONE:
+                return PASSWORD_QUALITY_UNSPECIFIED;
+            case CREDENTIAL_TYPE_PATTERN:
+                return PASSWORD_QUALITY_SOMETHING;
+            case CREDENTIAL_TYPE_PIN:
+                return PASSWORD_QUALITY_NUMERIC;
+            case CREDENTIAL_TYPE_PASSWORD:
+                return PASSWORD_QUALITY_ALPHABETIC;
+            default:
+                throw new IllegalStateException("Unknown type: " + credentialType);
+        }
+    }
+
     /**
      * Save a new lockscreen credential.
      *
@@ -684,19 +671,12 @@ public class LockPatternUtils {
         }
         newCredential.checkLength();
 
-        final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
-        setKeyguardStoredPasswordQuality(newCredential.getQuality(), userHandle);
-
         try {
             if (!getLockSettings().setLockCredential(
-                    newCredential.getCredential(), newCredential.getType(),
-                    savedCredential.getCredential(),
-                    newCredential.getQuality(), userHandle, allowUntrustedChange)) {
-                setKeyguardStoredPasswordQuality(currentQuality, userHandle);
+                    newCredential, savedCredential, userHandle, allowUntrustedChange)) {
                 return false;
             }
-        } catch (RemoteException | RuntimeException e) {
-            setKeyguardStoredPasswordQuality(currentQuality, userHandle);
+        } catch (RemoteException e) {
             throw new RuntimeException("Unable to save lock password", e);
         }
 
@@ -904,14 +884,12 @@ public class LockPatternUtils {
      * @see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)
      *
      * @return stored password quality
+     * @deprecated use {@link #getCredentialTypeForUser(int)} instead
      */
     @UnsupportedAppUsage
+    @Deprecated
     public int getKeyguardStoredPasswordQuality(int userHandle) {
-        return (int) getLong(PASSWORD_TYPE_KEY, PASSWORD_QUALITY_UNSPECIFIED, userHandle);
-    }
-
-    private void setKeyguardStoredPasswordQuality(int quality, int userHandle) {
-        setLong(PASSWORD_TYPE_KEY, quality, userHandle);
+        return credentialTypeToPasswordQuality(getCredentialTypeForUser(userHandle));
     }
 
     /**
@@ -920,17 +898,17 @@ public class LockPatternUtils {
      *
      * @param userHandle Managed profile user id
      * @param enabled True if separate challenge is enabled
-     * @param managedUserPassword Managed profile previous password. Null when {@code enabled} is
+     * @param profilePassword Managed profile previous password. Null when {@code enabled} is
      *            true
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
-            LockscreenCredential managedUserPassword) {
+            LockscreenCredential profilePassword) {
         if (!isManagedProfile(userHandle)) {
             return;
         }
         try {
             getLockSettings().setSeparateProfileChallengeEnabled(userHandle, enabled,
-                    managedUserPassword.getCredential());
+                    profilePassword);
             reportEnabledTrustAgentsChanged(userHandle);
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't update work profile challenge enabled");
@@ -1098,28 +1076,33 @@ public class LockPatternUtils {
     }
 
     /**
+     * Returns the credential type of the user, can be one of {@link #CREDENTIAL_TYPE_NONE},
+     * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
+     * {@link #CREDENTIAL_TYPE_PASSWORD}
+     */
+    public @CredentialType int getCredentialTypeForUser(int userHandle) {
+        try {
+            return getLockSettings().getCredentialType(userHandle);
+        } catch (RemoteException re) {
+            Log.e(TAG, "failed to get credential type", re);
+            return CREDENTIAL_TYPE_NONE;
+        }
+    }
+
+    /**
      * @param userId the user for which to report the value
      * @return Whether the lock screen is secured.
      */
     @UnsupportedAppUsage
     public boolean isSecure(int userId) {
-        int mode = getKeyguardStoredPasswordQuality(userId);
-        return isLockPatternEnabled(mode, userId) || isLockPasswordEnabled(mode, userId);
+        int type = getCredentialTypeForUser(userId);
+        return type != CREDENTIAL_TYPE_NONE;
     }
 
     @UnsupportedAppUsage
     public boolean isLockPasswordEnabled(int userId) {
-        return isLockPasswordEnabled(getKeyguardStoredPasswordQuality(userId), userId);
-    }
-
-    private boolean isLockPasswordEnabled(int mode, int userId) {
-        final boolean passwordEnabled = mode == PASSWORD_QUALITY_ALPHABETIC
-                || mode == PASSWORD_QUALITY_NUMERIC
-                || mode == PASSWORD_QUALITY_NUMERIC_COMPLEX
-                || mode == PASSWORD_QUALITY_ALPHANUMERIC
-                || mode == PASSWORD_QUALITY_COMPLEX
-                || mode == PASSWORD_QUALITY_MANAGED;
-        return passwordEnabled && savedPasswordExists(userId);
+        int type = getCredentialTypeForUser(userId);
+        return type == CREDENTIAL_TYPE_PASSWORD || type == CREDENTIAL_TYPE_PIN;
     }
 
     /**
@@ -1127,7 +1110,8 @@ public class LockPatternUtils {
      */
     @UnsupportedAppUsage
     public boolean isLockPatternEnabled(int userId) {
-        return isLockPatternEnabled(getKeyguardStoredPasswordQuality(userId), userId);
+        int type = getCredentialTypeForUser(userId);
+        return type == CREDENTIAL_TYPE_PATTERN;
     }
 
     @Deprecated
@@ -1141,10 +1125,6 @@ public class LockPatternUtils {
     @Deprecated
     public void setLegacyLockPatternEnabled(int userId) {
         setBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, true, userId);
-    }
-
-    private boolean isLockPatternEnabled(int mode, int userId) {
-        return mode == PASSWORD_QUALITY_SOMETHING && savedPatternExists(userId);
     }
 
     /**
@@ -1543,8 +1523,8 @@ public class LockPatternUtils {
      * @param userHandle The user who's lock credential to be changed
      * @return {@code true} if the operation is successful.
      */
-    public boolean setLockCredentialWithToken(LockscreenCredential credential, long tokenHandle,
-            byte[] token, int userHandle) {
+    public boolean setLockCredentialWithToken(@NonNull LockscreenCredential credential,
+            long tokenHandle, byte[] token, int userHandle) {
         if (!hasSecureLockScreen()) {
             throw new UnsupportedOperationException(
                     "This operation requires the lock screen feature.");
@@ -1552,19 +1532,8 @@ public class LockPatternUtils {
         credential.checkLength();
         LockSettingsInternal localService = getLockSettingsInternal();
 
-        final int currentQuality = getKeyguardStoredPasswordQuality(userHandle);
-        setKeyguardStoredPasswordQuality(credential.getQuality(), userHandle);
-
-        try {
-            if (!localService.setLockCredentialWithToken(credential.getCredential(),
-                    credential.getType(),
-                    tokenHandle, token, credential.getQuality(), userHandle)) {
-                setKeyguardStoredPasswordQuality(currentQuality, userHandle);
-                return false;
-            }
-        } catch (RuntimeException e) {
-            setKeyguardStoredPasswordQuality(currentQuality, userHandle);
-            throw new RuntimeException("Unable to save lock credential", e);
+        if (!localService.setLockCredentialWithToken(credential, tokenHandle, token, userHandle)) {
+            return false;
         }
 
         onPostPasswordChanged(credential, userHandle);
@@ -1765,7 +1734,8 @@ public class LockPatternUtils {
     }
 
     public boolean isSyntheticPasswordEnabled() {
-        return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, 0, UserHandle.USER_SYSTEM) != 0;
+        return getLong(SYNTHETIC_PASSWORD_ENABLED_KEY, SYNTHETIC_PASSWORD_ENABLED_BY_DEFAULT,
+                UserHandle.USER_SYSTEM) != 0;
     }
 
     /**

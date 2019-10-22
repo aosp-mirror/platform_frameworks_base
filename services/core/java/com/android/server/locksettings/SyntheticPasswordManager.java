@@ -20,7 +20,6 @@ import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChang
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.weaver.V1_0.IWeaver;
@@ -42,6 +41,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
@@ -138,7 +138,6 @@ public class SyntheticPasswordManager {
     static class AuthenticationResult {
         public AuthenticationToken authToken;
         public VerifyCredentialResponse gkResponse;
-        public int credentialType;
     }
 
     static class AuthenticationToken {
@@ -220,7 +219,7 @@ public class SyntheticPasswordManager {
         byte scryptN;
         byte scryptR;
         byte scryptP;
-        public int passwordType;
+        public int credentialType;
         byte[] salt;
         // For GateKeeper-based credential, this is the password handle returned by GK,
         // for weaver-based credential, this is empty.
@@ -231,7 +230,7 @@ public class SyntheticPasswordManager {
             result.scryptN = PASSWORD_SCRYPT_N;
             result.scryptR = PASSWORD_SCRYPT_R;
             result.scryptP = PASSWORD_SCRYPT_P;
-            result.passwordType = passwordType;
+            result.credentialType = passwordType;
             result.salt = secureRandom(PASSWORD_SALT_LENGTH);
             return result;
         }
@@ -241,7 +240,7 @@ public class SyntheticPasswordManager {
             ByteBuffer buffer = ByteBuffer.allocate(data.length);
             buffer.put(data, 0, data.length);
             buffer.flip();
-            result.passwordType = buffer.getInt();
+            result.credentialType = buffer.getInt();
             result.scryptN = buffer.get();
             result.scryptR = buffer.get();
             result.scryptP = buffer.get();
@@ -263,7 +262,7 @@ public class SyntheticPasswordManager {
             ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES + 3 * Byte.BYTES
                     + Integer.BYTES + salt.length + Integer.BYTES +
                     (passwordHandle != null ? passwordHandle.length : 0));
-            buffer.putInt(passwordType);
+            buffer.putInt(credentialType);
             buffer.put(scryptN);
             buffer.put(scryptR);
             buffer.put(scryptP);
@@ -437,13 +436,20 @@ public class SyntheticPasswordManager {
         }
     }
 
-    public int getCredentialType(long handle, int userId) {
+    int getCredentialType(long handle, int userId) {
         byte[] passwordData = loadState(PASSWORD_DATA_NAME, handle, userId);
         if (passwordData == null) {
             Log.w(TAG, "getCredentialType: encountered empty password data for user " + userId);
             return LockPatternUtils.CREDENTIAL_TYPE_NONE;
         }
-        return PasswordData.fromBytes(passwordData).passwordType;
+        return PasswordData.fromBytes(passwordData).credentialType;
+    }
+
+    static int getFrpCredentialType(byte[] payload) {
+        if (payload == null) {
+            return LockPatternUtils.CREDENTIAL_TYPE_NONE;
+        }
+        return PasswordData.fromBytes(payload).credentialType;
     }
 
     /**
@@ -469,12 +475,13 @@ public class SyntheticPasswordManager {
      *
      */
     public AuthenticationToken newSyntheticPasswordAndSid(IGateKeeperService gatekeeper,
-            byte[] hash, byte[] credential, int userId) {
+            byte[] hash, LockscreenCredential credential, int userId) {
         AuthenticationToken result = AuthenticationToken.create();
         GateKeeperResponse response;
         if (hash != null) {
             try {
-                response = gatekeeper.enroll(userId, hash, credential, result.deriveGkPassword());
+                response = gatekeeper.enroll(userId, hash, credential.getCredential(),
+                        result.deriveGkPassword());
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed to enroll credential duing SP init", e);
             }
@@ -638,15 +645,9 @@ public class SyntheticPasswordManager {
      * @throw IllegalStateException if creation fails.
      */
     public long createPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            byte[] credential, int credentialType, AuthenticationToken authToken,
-            int requestedQuality, int userId) {
-        if (credential == null || credentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
-            credentialType = LockPatternUtils.CREDENTIAL_TYPE_NONE;
-            credential = DEFAULT_PASSWORD;
-        }
-
+            LockscreenCredential credential, AuthenticationToken authToken, int userId) {
         long handle = generateHandle();
-        PasswordData pwd = PasswordData.create(credentialType);
+        PasswordData pwd = PasswordData.create(credential.getType());
         byte[] pwdToken = computePasswordToken(credential, pwd);
         final long sid;
         final byte[] applicationId;
@@ -663,7 +664,8 @@ public class SyntheticPasswordManager {
             }
             saveWeaverSlot(weaverSlot, handle, userId);
             mPasswordSlotManager.markSlotInUse(weaverSlot);
-            synchronizeWeaverFrpPassword(pwd, requestedQuality, userId, weaverSlot);
+            // No need to pass in quality since the credential type already encodes sufficient info
+            synchronizeWeaverFrpPassword(pwd, 0, userId, weaverSlot);
 
             pwd.passwordHandle = null;
             sid = GateKeeper.INVALID_SECURE_USER_ID;
@@ -692,7 +694,8 @@ public class SyntheticPasswordManager {
             sid = sidFromPasswordHandle(pwd.passwordHandle);
             applicationId = transformUnderSecdiscardable(pwdToken,
                     createSecdiscardable(handle, userId));
-            synchronizeFrpPassword(pwd, requestedQuality, userId);
+            // No need to pass in quality since the credential type already encodes sufficient info
+            synchronizeFrpPassword(pwd, 0, userId);
         }
         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
 
@@ -702,7 +705,7 @@ public class SyntheticPasswordManager {
     }
 
     public VerifyCredentialResponse verifyFrpCredential(IGateKeeperService gatekeeper,
-            byte[] userCredential, int credentialType,
+            LockscreenCredential userCredential,
             ICheckCredentialProgressCallback progressCallback) {
         PersistentData persistentData = mStorage.readPersistentDataBlock();
         if (persistentData.type == PersistentData.TYPE_SP) {
@@ -733,11 +736,11 @@ public class SyntheticPasswordManager {
 
 
     public void migrateFrpPasswordLocked(long handle, UserInfo userInfo, int requestedQuality) {
-        if (mStorage.getPersistentDataBlock() != null
+        if (mStorage.getPersistentDataBlockManager() != null
                 && LockPatternUtils.userOwnsFrpCredential(mContext, userInfo)) {
             PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle,
                     userInfo.id));
-            if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            if (pwd.credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 int weaverSlot = loadWeaverSlot(handle, userInfo.id);
                 if (weaverSlot != INVALID_WEAVER_SLOT) {
                     synchronizeWeaverFrpPassword(pwd, requestedQuality, userInfo.id, weaverSlot);
@@ -750,10 +753,10 @@ public class SyntheticPasswordManager {
 
     private void synchronizeFrpPassword(PasswordData pwd,
             int requestedQuality, int userId) {
-        if (mStorage.getPersistentDataBlock() != null
+        if (mStorage.getPersistentDataBlockManager() != null
                 && LockPatternUtils.userOwnsFrpCredential(mContext,
                 mUserManager.getUserInfo(userId))) {
-            if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            if (pwd.credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_SP, userId, requestedQuality,
                         pwd.toBytes());
             } else {
@@ -764,10 +767,10 @@ public class SyntheticPasswordManager {
 
     private void synchronizeWeaverFrpPassword(PasswordData pwd, int requestedQuality, int userId,
             int weaverSlot) {
-        if (mStorage.getPersistentDataBlock() != null
+        if (mStorage.getPersistentDataBlockManager() != null
                 && LockPatternUtils.userOwnsFrpCredential(mContext,
                 mUserManager.getUserInfo(userId))) {
-            if (pwd.passwordType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            if (pwd.credentialType != LockPatternUtils.CREDENTIAL_TYPE_NONE) {
                 mStorage.writePersistentDataBlock(PersistentData.TYPE_SP_WEAVER, weaverSlot,
                         requestedQuality, pwd.toBytes());
             } else {
@@ -881,18 +884,20 @@ public class SyntheticPasswordManager {
      * Decrypt a synthetic password by supplying the user credential and corresponding password
      * blob handle generated previously. If the decryption is successful, initiate a GateKeeper
      * verification to referesh the SID & Auth token maintained by the system.
-     * Note: the credential type is not validated here since there are call sites where the type is
-     * unknown. Caller might choose to validate it by examining AuthenticationResult.credentialType
      */
     public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            long handle, byte[] credential, int userId,
+            long handle, @NonNull LockscreenCredential credential, int userId,
             ICheckCredentialProgressCallback progressCallback) {
-        if (credential == null) {
-            credential = DEFAULT_PASSWORD;
-        }
         AuthenticationResult result = new AuthenticationResult();
         PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, handle, userId));
-        result.credentialType = pwd.passwordType;
+
+        if (!credential.checkAgainstStoredType(pwd.credentialType)) {
+            Slog.e(TAG, String.format("Credential type mismatch: expected %d actual %d",
+                    pwd.credentialType, credential.getType()));
+            result.gkResponse = VerifyCredentialResponse.ERROR;
+            return result;
+        }
+
         byte[] pwdToken = computePasswordToken(credential, pwd);
 
         final byte[] applicationId;
@@ -937,13 +942,11 @@ public class SyntheticPasswordManager {
                     }
                     if (reenrollResponse.getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
                         pwd.passwordHandle = reenrollResponse.getPayload();
+                        // Use the reenrollment opportunity to update credential type
+                        // (getting rid of CREDENTIAL_TYPE_PASSWORD_OR_PIN)
+                        pwd.credentialType = credential.getType();
                         saveState(PASSWORD_DATA_NAME, pwd.toBytes(), handle, userId);
-                        synchronizeFrpPassword(pwd,
-                                pwd.passwordType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN
-                                ? DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
-                                : DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
-                                /* TODO(roosa): keep the same password quality */,
-                                userId);
+                        synchronizeFrpPassword(pwd, 0, userId);
                     } else {
                         Log.w(TAG, "Fail to re-enroll user password for user " + userId);
                         // continue the flow anyway
@@ -1225,7 +1228,8 @@ public class SyntheticPasswordManager {
         return String.format("%s%x", LockPatternUtils.SYNTHETIC_PASSWORD_KEY_PREFIX, handle);
     }
 
-    private byte[] computePasswordToken(byte[] password, PasswordData data) {
+    private byte[] computePasswordToken(LockscreenCredential credential, PasswordData data) {
+        final byte[] password = credential.isNone() ? DEFAULT_PASSWORD : credential.getCredential();
         return scrypt(password, data.salt, 1 << data.scryptN, 1 << data.scryptR, 1 << data.scryptP,
                 PASSWORD_TOKEN_LENGTH);
     }
