@@ -152,7 +152,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         hiddenActivity.setHidden(true);
         mDisplayContent.getConfiguration().windowConfiguration.setRotation(
                 mDisplayContent.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
 
         // Ensure that we are animating the target activity as well
         assertTrue(mController.isAnimatingTask(homeActivity.getTask()));
@@ -181,7 +181,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mDisplayContent.getConfiguration().windowConfiguration.setRotation(
                 mDisplayContent.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeAppWindow);
         mController.startAnimation();
 
         // Ensure that we are animating the app and wallpaper target
@@ -210,7 +210,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         mDisplayContent.getConfiguration().windowConfiguration.setRotation(
                 mDisplayContent.getRotation());
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
         mController.startAnimation();
 
         // Cancel the animation and ensure the controller is still running
@@ -242,7 +242,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         doReturn(true).when(mDisplayContent.mWallpaperController).isWallpaperVisible();
 
         // Start and finish the animation
-        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+        mController.initialize(ACTIVITY_TYPE_HOME, new SparseBooleanArray(), homeActivity);
         mController.startAnimation();
         // Reset at this point since we may remove adapters that couldn't be created
         reset(mController);

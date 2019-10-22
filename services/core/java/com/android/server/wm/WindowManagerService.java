@@ -2652,11 +2652,11 @@ public class WindowManagerService extends IWindowManager.Stub
     void initializeRecentsAnimation(int targetActivityType,
             IRecentsAnimationRunner recentsAnimationRunner,
             RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId,
-            SparseBooleanArray recentTaskIds) {
+            SparseBooleanArray recentTaskIds, ActivityRecord targetActivity) {
         mRecentsAnimationController = new RecentsAnimationController(this, recentsAnimationRunner,
                 callbacks, displayId);
         mRoot.getDisplayContent(displayId).mAppTransition.updateBooster();
-        mRecentsAnimationController.initialize(targetActivityType, recentTaskIds);
+        mRecentsAnimationController.initialize(targetActivityType, recentTaskIds, targetActivity);
     }
 
     @VisibleForTesting
