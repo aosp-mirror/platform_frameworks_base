@@ -33,6 +33,8 @@ import static com.android.server.DeviceIdleController.LIGHT_STATE_OVERRIDE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_PRE_IDLE;
 import static com.android.server.DeviceIdleController.LIGHT_STATE_WAITING_FOR_NETWORK;
 import static com.android.server.DeviceIdleController.MSG_REPORT_STATIONARY_STATUS;
+import static com.android.server.DeviceIdleController.MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR;
+import static com.android.server.DeviceIdleController.MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR;
 import static com.android.server.DeviceIdleController.STATE_ACTIVE;
 import static com.android.server.DeviceIdleController.STATE_IDLE;
 import static com.android.server.DeviceIdleController.STATE_IDLE_MAINTENANCE;
@@ -180,7 +182,9 @@ public class DeviceIdleControllerTest {
                 mHandler = controller.new MyHandler(getContext().getMainLooper());
                 spyOn(mHandler);
                 doNothing().when(mHandler).handleMessage(argThat((message) ->
-                        message.what != MSG_REPORT_STATIONARY_STATUS));
+                        message.what != MSG_REPORT_STATIONARY_STATUS
+                        && message.what != MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR
+                        && message.what != MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR));
                 doAnswer(new Answer<Boolean>() {
                     @Override
                     public Boolean answer(InvocationOnMock invocation) throws Throwable {
@@ -189,7 +193,9 @@ public class DeviceIdleControllerTest {
                         return true;
                     }
                 }).when(mHandler).sendMessageDelayed(
-                        argThat((message) -> message.what == MSG_REPORT_STATIONARY_STATUS),
+                        argThat((message) -> message.what == MSG_REPORT_STATIONARY_STATUS
+                                || message.what == MSG_UPDATE_PRE_IDLE_TIMEOUT_FACTOR
+                                || message.what == MSG_RESET_PRE_IDLE_TIMEOUT_FACTOR),
                         anyLong());
             }
 
@@ -1734,13 +1740,11 @@ public class DeviceIdleControllerTest {
             }
             //TODO(b/123045185): Mocked Handler of DeviceIdleController to make message loop
             //workable in this test class
-            mDeviceIdleController.updatePreIdleFactor();
             float expectedfactor = mDeviceIdleController.getPreIdleTimeoutByMode(mode);
             float curfactor = mDeviceIdleController.getPreIdleTimeoutFactor();
             assertEquals("Pre idle time factor of mode [" + mode + "].",
                     expectedfactor, curfactor, delta);
             mDeviceIdleController.resetPreIdleTimeoutMode();
-            mDeviceIdleController.updatePreIdleFactor();
 
             checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_INACTIVE);
             checkNextAlarmTimeWithNewPreIdleFactor(expectedfactor, STATE_IDLE_PENDING);
@@ -2088,14 +2092,11 @@ public class DeviceIdleControllerTest {
                         mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK, ret);
             }
             if (ret == mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK) {
-                mDeviceIdleController.updatePreIdleFactor();
                 long newAlarm = mDeviceIdleController.getNextAlarmTime();
                 long newDelay = (long) ((alarm - now) * factor);
                 assertTrue("setPreIdleTimeoutFactor: " + factor,
                         Math.abs(newDelay - (newAlarm - now)) <  errorTolerance);
                 mDeviceIdleController.resetPreIdleTimeoutMode();
-                mDeviceIdleController.updatePreIdleFactor();
-                mDeviceIdleController.maybeDoImmediateMaintenance();
                 newAlarm = mDeviceIdleController.getNextAlarmTime();
                 assertTrue("resetPreIdleTimeoutMode from: " + factor,
                         Math.abs(newAlarm - alarm) < errorTolerance);
@@ -2106,19 +2107,14 @@ public class DeviceIdleControllerTest {
                 assertTrue("setPreIdleTimeoutFactor: " + factor + " before step to idle",
                         Math.abs(newDelay - (newAlarm - now)) <  errorTolerance);
                 mDeviceIdleController.resetPreIdleTimeoutMode();
-                mDeviceIdleController.updatePreIdleFactor();
-                mDeviceIdleController.maybeDoImmediateMaintenance();
             }
         } else {
             mDeviceIdleController.setPreIdleTimeoutFactor(factor);
-            mDeviceIdleController.updatePreIdleFactor();
             long newAlarm = mDeviceIdleController.getNextAlarmTime();
             assertTrue("setPreIdleTimeoutFactor: " + factor
                     + " shounld not change next alarm" ,
                     (newAlarm == alarm));
             mDeviceIdleController.resetPreIdleTimeoutMode();
-            mDeviceIdleController.updatePreIdleFactor();
-            mDeviceIdleController.maybeDoImmediateMaintenance();
         }
     }
 
@@ -2138,18 +2134,15 @@ public class DeviceIdleControllerTest {
             long alarm = mDeviceIdleController.getNextAlarmTime();
             mDeviceIdleController.setIdleStartTimeForTest(
                     now - (long) (mConstants.IDLE_TIMEOUT * 0.6));
-            mDeviceIdleController.maybeDoImmediateMaintenance();
             long newAlarm = mDeviceIdleController.getNextAlarmTime();
             assertTrue("maintenance not reschedule IDLE_TIMEOUT * 0.6",
                     newAlarm == alarm);
             mDeviceIdleController.setIdleStartTimeForTest(
                     now - (long) (mConstants.IDLE_TIMEOUT * 1.2));
-            mDeviceIdleController.maybeDoImmediateMaintenance();
             newAlarm = mDeviceIdleController.getNextAlarmTime();
             assertTrue("maintenance not reschedule IDLE_TIMEOUT * 1.2",
                     (newAlarm - now) < minuteInMillis);
             mDeviceIdleController.resetPreIdleTimeoutMode();
-            mDeviceIdleController.updatePreIdleFactor();
         }
     }
 }
