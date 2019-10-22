@@ -53,7 +53,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.content.Context;
@@ -1542,7 +1541,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
         };
 
-        final AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
         for (int i = 0; i < permissionCount; i++) {
             final String permName = pkg.requestedPermissions.get(i);
             final BasePermission bp;
@@ -1608,16 +1606,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
             // If this permission was granted by default, make sure it is.
             if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
+                // PermissionPolicyService will handle the app op for runtime permissions later.
                 grantRuntimePermissionInternal(permName, packageName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
-                // Allow app op later as we are holding mPackages
-                // PermissionPolicyService will handle the app op for foreground/background
-                // permissions.
-                String appOp = AppOpsManager.permissionToOp(permName);
-                if (appOp != null) {
-                    mHandler.post(() -> appOpsManager.setUidMode(appOp, uid,
-                            AppOpsManager.MODE_ALLOWED));
-                }
             // If permission review is enabled the permissions for a legacy apps
             // are represented as constantly granted runtime ones, so don't revoke.
             } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
@@ -4233,8 +4224,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
-                @PermissionInfo.Protection int protectionLevel) {
+        public @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtection(
+                @PermissionInfo.Protection int protection) {
             ArrayList<PermissionInfo> matchingPermissions = new ArrayList<>();
 
             synchronized (PermissionManagerService.this.mLock) {
@@ -4244,7 +4235,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
                     if (bp.perm != null && bp.perm.info != null
-                            && bp.protectionLevel == protectionLevel) {
+                            && bp.perm.info.getProtection() == protection) {
                         matchingPermissions.add(bp.perm.info);
                     }
                 }
