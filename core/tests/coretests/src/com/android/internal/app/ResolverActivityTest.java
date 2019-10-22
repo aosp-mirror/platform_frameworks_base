@@ -38,6 +38,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.espresso.Espresso;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -82,6 +83,7 @@ public class ResolverActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
         waitForIdle();
 
         assertThat(activity.getAdapter().getCount(), is(2));
@@ -214,6 +216,7 @@ public class ResolverActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
         waitForIdle();
 
         // The other entry is filtered to the last used slot
@@ -251,6 +254,7 @@ public class ResolverActivityTest {
                 Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
         waitForIdle();
 
         // The other entry is filtered to the other profile slot
@@ -296,6 +300,7 @@ public class ResolverActivityTest {
                 .thenReturn(resolvedComponentInfos.get(1).getResolveInfoAt(0));
 
         final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        Espresso.registerIdlingResources(activity.getLabelIdlingResource());
         waitForIdle();
 
         // The other entry is filtered to the other profile slot
