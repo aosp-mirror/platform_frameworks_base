@@ -187,7 +187,8 @@ class ActivityMetricsLogger {
         private int startingWindowDelayMs = INVALID_DELAY;
         private int bindApplicationDelayMs = INVALID_DELAY;
         private int reason = APP_TRANSITION_TIMEOUT;
-        private int numUndrawnActivities;
+        // TODO(b/132736359) The number may need to consider the visibility change.
+        private int numUndrawnActivities = 1;
         private boolean loggedStartingWindowDrawn;
         private boolean launchTraceActive;
 
@@ -201,9 +202,6 @@ class ActivityMetricsLogger {
                 return;
             }
             launchedActivity = r;
-            if (!r.noDisplay) {
-                numUndrawnActivities++;
-            }
         }
     }
 
