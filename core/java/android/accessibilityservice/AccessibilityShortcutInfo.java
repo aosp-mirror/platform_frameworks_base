@@ -141,6 +141,16 @@ public final class AccessibilityShortcutInfo {
     }
 
     /**
+     * The {@link ComponentName} of the accessibility shortcut target.
+     *
+     * @return The component name
+     */
+    @NonNull
+    public ComponentName getComponentName() {
+        return mComponentName;
+    }
+
+    /**
      * The localized summary of the accessibility shortcut target.
      *
      * @return The localized summary if available, and {@code null} if a summary

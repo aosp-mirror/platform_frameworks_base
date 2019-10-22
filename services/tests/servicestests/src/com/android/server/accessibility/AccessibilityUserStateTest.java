@@ -73,7 +73,7 @@ public class AccessibilityUserStateTest {
 
     @Mock private AccessibilityUserState.ServiceInfoChangeListener mMockListener;
 
-    @Mock private Context mContext;
+    @Mock private Context mMockContext;
 
     private MockContentResolver mMockResolver;
 
@@ -85,11 +85,11 @@ public class AccessibilityUserStateTest {
         FakeSettingsProvider.clearSettingsProvider();
         mMockResolver = new MockContentResolver();
         mMockResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
-        when(mContext.getContentResolver()).thenReturn(mMockResolver);
+        when(mMockContext.getContentResolver()).thenReturn(mMockResolver);
         when(mMockServiceInfo.getComponentName()).thenReturn(COMPONENT_NAME);
         when(mMockConnection.getServiceInfo()).thenReturn(mMockServiceInfo);
 
-        mUserState = new AccessibilityUserState(USER_ID, mContext, mMockListener);
+        mUserState = new AccessibilityUserState(USER_ID, mMockContext, mMockListener);
     }
 
     @After
@@ -109,11 +109,11 @@ public class AccessibilityUserStateTest {
         mUserState.setInteractiveUiTimeoutLocked(30);
         mUserState.mEnabledServices.add(COMPONENT_NAME);
         mUserState.mTouchExplorationGrantedServices.add(COMPONENT_NAME);
+        mUserState.mAccessibilityShortcutKeyTargets.add(COMPONENT_NAME.flattenToString());
+        mUserState.mAccessibilityButtonTargets.add(COMPONENT_NAME.flattenToString());
         mUserState.setTouchExplorationEnabledLocked(true);
         mUserState.setDisplayMagnificationEnabledLocked(true);
         mUserState.setNavBarMagnificationEnabledLocked(true);
-        mUserState.setServiceAssignedToAccessibilityButtonLocked(COMPONENT_NAME);
-        mUserState.setNavBarMagnificationAssignedToAccessibilityButtonLocked(true);
         mUserState.setAutoclickEnabledLocked(true);
         mUserState.setUserNonInteractiveUiTimeoutLocked(30);
         mUserState.setUserInteractiveUiTimeoutLocked(30);
@@ -128,11 +128,11 @@ public class AccessibilityUserStateTest {
         assertEquals(0, mUserState.getInteractiveUiTimeoutLocked());
         assertTrue(mUserState.mEnabledServices.isEmpty());
         assertTrue(mUserState.mTouchExplorationGrantedServices.isEmpty());
+        assertTrue(mUserState.mAccessibilityShortcutKeyTargets.isEmpty());
+        assertTrue(mUserState.mAccessibilityButtonTargets.isEmpty());
         assertFalse(mUserState.isTouchExplorationEnabledLocked());
         assertFalse(mUserState.isDisplayMagnificationEnabledLocked());
         assertFalse(mUserState.isNavBarMagnificationEnabledLocked());
-        assertNull(mUserState.getServiceAssignedToAccessibilityButtonLocked());
-        assertFalse(mUserState.isNavBarMagnificationAssignedToAccessibilityButtonLocked());
         assertFalse(mUserState.isAutoclickEnabledLocked());
         assertEquals(0, mUserState.getUserNonInteractiveUiTimeoutLocked());
         assertEquals(0, mUserState.getUserInteractiveUiTimeoutLocked());
@@ -285,6 +285,19 @@ public class AccessibilityUserStateTest {
         assertTrue(mUserState.setSoftKeyboardModeLocked(SHOW_MODE_HIDDEN, COMPONENT_NAME));
 
         verify(mMockConnection).notifySoftKeyboardShowModeChangedLocked(eq(SHOW_MODE_HIDDEN));
+    }
+
+    @Test
+    public void isShortcutTargetInstalledLocked_returnTrue() {
+        mUserState.mInstalledServices.add(mMockServiceInfo);
+        assertTrue(mUserState.isShortcutTargetInstalledLocked(COMPONENT_NAME.flattenToString()));
+    }
+
+    @Test
+    public void isShortcutTargetInstalledLocked_invalidTarget_returnFalse() {
+        final ComponentName invalidTarget =
+                new ComponentName("com.android.server.accessibility", "InvalidTarget");
+        assertFalse(mUserState.isShortcutTargetInstalledLocked(invalidTarget.flattenToString()));
     }
 
     private int getSecureIntForUser(String key, int userId) {

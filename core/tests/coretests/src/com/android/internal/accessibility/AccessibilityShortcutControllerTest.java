@@ -20,6 +20,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHO
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
+import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -49,8 +50,10 @@ import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.media.Ringtone;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -157,9 +160,12 @@ public class AccessibilityShortcutControllerTest {
         when(mFrameworkObjectProvider.getRingtone(eq(mContext), any())).thenReturn(mRingtone);
 
         when(mResources.getString(anyInt())).thenReturn("Howdy %s");
+        when(mResources.getString(R.string.config_defaultAccessibilityService)).thenReturn(null);
         when(mResources.getIntArray(anyInt())).thenReturn(VIBRATOR_PATTERN_INT);
 
         ResolveInfo resolveInfo = mock(ResolveInfo.class);
+        resolveInfo.serviceInfo = mock(ServiceInfo.class);
+        resolveInfo.serviceInfo.applicationInfo = mApplicationInfo;
         when(resolveInfo.loadLabel(anyObject())).thenReturn("Service name");
         when(mServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
         when(mServiceInfo.getComponentName())
@@ -200,42 +206,47 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_enabledButNoServiceWhenCreated_shouldReturnFalse() {
+    public void testShortcutAvailable_enabledButNoServiceWhenCreated_shouldReturnFalse()
+            throws Exception {
         configureNoShortcutService();
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         assertFalse(getController().isAccessibilityShortcutAvailable(false));
     }
 
     @Test
-    public void testShortcutAvailable_enabledWithValidServiceWhenCreated_shouldReturnTrue() {
+    public void testShortcutAvailable_enabledWithValidServiceWhenCreated_shouldReturnTrue()
+            throws Exception {
         configureValidShortcutService();
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         assertTrue(getController().isAccessibilityShortcutAvailable(false));
     }
 
     @Test
-    public void testShortcutAvailable_disabledWithValidServiceWhenCreated_shouldReturnFalse() {
+    public void testShortcutAvailable_disabledWithValidServiceWhenCreated_shouldReturnFalse()
+            throws Exception {
         configureValidShortcutService();
         configureShortcutEnabled(DISABLED_BUT_LOCK_SCREEN_ON);
         assertFalse(getController().isAccessibilityShortcutAvailable(false));
     }
 
     @Test
-    public void testShortcutAvailable_onLockScreenButDisabledThere_shouldReturnFalse() {
+    public void testShortcutAvailable_onLockScreenButDisabledThere_shouldReturnFalse()
+            throws Exception {
         configureValidShortcutService();
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         assertFalse(getController().isAccessibilityShortcutAvailable(true));
     }
 
     @Test
-    public void testShortcutAvailable_onLockScreenAndEnabledThere_shouldReturnTrue() {
+    public void testShortcutAvailable_onLockScreenAndEnabledThere_shouldReturnTrue()
+            throws Exception {
         configureValidShortcutService();
         configureShortcutEnabled(ENABLED_INCLUDING_LOCK_SCREEN);
         assertTrue(getController().isAccessibilityShortcutAvailable(true));
     }
 
     @Test
-    public void testShortcutAvailable_onLockScreenAndLockScreenPreferenceUnset() {
+    public void testShortcutAvailable_onLockScreenAndLockScreenPreferenceUnset() throws Exception {
         // When the user hasn't specified a lock screen preference, we allow from the lock screen
         // as long as the user has agreed to enable the shortcut
         configureValidShortcutService();
@@ -249,17 +260,19 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_whenServiceIdBecomesNull_shouldReturnFalse() {
+    public void testShortcutAvailable_whenServiceIdBecomesNull_shouldReturnFalse()
+            throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
-        Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "");
+        configureNoShortcutService();
         accessibilityShortcutController.onSettingsChanged();
         assertFalse(accessibilityShortcutController.isAccessibilityShortcutAvailable(false));
     }
 
     @Test
-    public void testShortcutAvailable_whenServiceIdBecomesNonNull_shouldReturnTrue() {
+    public void testShortcutAvailable_whenServiceIdBecomesNonNull_shouldReturnTrue()
+            throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureNoShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
@@ -269,7 +282,8 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_whenShortcutBecomesDisabled_shouldReturnFalse() {
+    public void testShortcutAvailable_whenShortcutBecomesDisabled_shouldReturnFalse()
+            throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
@@ -279,7 +293,8 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_whenShortcutBecomesEnabled_shouldReturnTrue() {
+    public void testShortcutAvailable_whenShortcutBecomesEnabled_shouldReturnTrue()
+            throws Exception {
         configureShortcutEnabled(DISABLED);
         configureValidShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
@@ -289,7 +304,8 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_whenLockscreenBecomesDisabled_shouldReturnFalse() {
+    public void testShortcutAvailable_whenLockscreenBecomesDisabled_shouldReturnFalse()
+            throws Exception {
         configureShortcutEnabled(ENABLED_INCLUDING_LOCK_SCREEN);
         configureValidShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
@@ -299,7 +315,8 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_whenLockscreenBecomesEnabled_shouldReturnTrue() {
+    public void testShortcutAvailable_whenLockscreenBecomesEnabled_shouldReturnTrue()
+            throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
@@ -370,7 +387,7 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testClickingDisableButtonInDialog_shouldClearShortcutId() {
+    public void testClickingDisableButtonInDialog_shouldClearShortcutId() throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
         Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 0);
@@ -458,7 +475,22 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testOnAccessibilityShortcut_showsWarningDialog_shouldTtsSpokenPrompt() {
+    public void testOnAccessibilityShortcut_sdkGreaterThanQ_reqA11yButton_callsServiceWithNoToast()
+            throws Exception {
+        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
+        configureValidShortcutService();
+        configureApplicationTargetSdkVersion(Build.VERSION_CODES.R);
+        configureRequestAccessibilityButton();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1);
+        getController().performAccessibilityShortcut();
+
+        verifyZeroInteractions(mToast);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+    }
+
+    @Test
+    public void testOnAccessibilityShortcut_showsWarningDialog_shouldTtsSpokenPrompt()
+            throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
         configureTtsSpokenPromptEnabled();
@@ -482,7 +514,8 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testOnAccessibilityShortcut_showsWarningDialog_ttsInitFail_noSpokenPrompt() {
+    public void testOnAccessibilityShortcut_showsWarningDialog_ttsInitFail_noSpokenPrompt()
+            throws Exception {
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
         configureValidShortcutService();
         configureTtsSpokenPromptEnabled();
@@ -500,19 +533,28 @@ public class AccessibilityShortcutControllerTest {
         verify(mRingtone).play();
     }
 
-    private void configureNoShortcutService() {
+    private void configureNoShortcutService() throws Exception {
+        when(mAccessibilityManagerService
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
+                .thenReturn(Collections.emptyList());
         Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "");
     }
 
-    private void configureValidShortcutService() {
+    private void configureValidShortcutService() throws Exception {
+        when(mAccessibilityManagerService
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
+                .thenReturn(Collections.singletonList(SERVICE_NAME_STRING));
         Settings.Secure.putString(
                 mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, SERVICE_NAME_STRING);
     }
 
-    private void configureFirstFrameworkFeature() {
+    private void configureFirstFrameworkFeature() throws Exception {
         ComponentName featureComponentName =
                 (ComponentName) AccessibilityShortcutController.getFrameworkShortcutFeaturesMap()
                         .keySet().toArray()[0];
+        when(mAccessibilityManagerService
+                .getAccessibilityShortcutTargets(ACCESSIBILITY_SHORTCUT_KEY))
+                .thenReturn(Collections.singletonList(featureComponentName.flattenToString()));
         Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
                 featureComponentName.flattenToString());
     }
@@ -550,6 +592,15 @@ public class AccessibilityShortcutControllerTest {
     private void configureTtsSpokenPromptEnabled() {
         mServiceInfo.flags |= AccessibilityServiceInfo
                 .FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK;
+    }
+
+    private void configureRequestAccessibilityButton() {
+        mServiceInfo.flags |= AccessibilityServiceInfo
+                .FLAG_REQUEST_ACCESSIBILITY_BUTTON;
+    }
+
+    private void configureApplicationTargetSdkVersion(int versionCode) {
+        mApplicationInfo.targetSdkVersion = versionCode;
     }
 
     private void configureHandlerCallbackInvocation() {

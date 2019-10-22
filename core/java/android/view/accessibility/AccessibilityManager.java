@@ -117,7 +117,7 @@ public final class AccessibilityManager {
      * Activity action: Launch UI to manage which accessibility service or feature is assigned
      * to the navigation bar Accessibility button.
      * <p>
-     * Input: Nothing.
+     * Input: {@link #EXTRA_SHORTCUT_TYPE} is the shortcut type.
      * </p>
      * <p>
      * Output: Nothing.
@@ -128,6 +128,42 @@ public final class AccessibilityManager {
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
+
+    /**
+     * Used as an int extra field in {@link #ACTION_CHOOSE_ACCESSIBILITY_BUTTON} intent to specify
+     * the shortcut type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_SHORTCUT_TYPE =
+            "com.android.internal.intent.extra.SHORTCUT_TYPE";
+
+    /**
+     * Used as an int value for {@link #EXTRA_SHORTCUT_TYPE} to represent the accessibility button
+     * shortcut type.
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_BUTTON = 0;
+
+    /**
+     * Used as an int value for {@link #EXTRA_SHORTCUT_TYPE} to represent hardware key shortcut,
+     * such as volume key button.
+     *
+     * @hide
+     */
+    public static final int ACCESSIBILITY_SHORTCUT_KEY = 1;
+
+    /**
+     * Annotations for the shortcut type.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            ACCESSIBILITY_BUTTON,
+            ACCESSIBILITY_SHORTCUT_KEY
+    })
+    public @interface ShortcutType {}
 
     /**
      * Annotations for content flag of UI.
@@ -1242,27 +1278,28 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Get the component name of the service currently assigned to the accessibility shortcut.
+     * Returns the list of shortcut target names currently assigned to the given shortcut.
      *
-     * @return The flattened component name
+     * @param shortcutType The shortcut type.
+     * @return The list of shortcut target names.
      * @hide
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
-    @Nullable
-    public String getAccessibilityShortcutService() {
+    @NonNull
+    public List<String> getAccessibilityShortcutTargets(@ShortcutType int shortcutType) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
         }
         if (service != null) {
             try {
-                return service.getAccessibilityShortcutService();
+                return service.getAccessibilityShortcutTargets(shortcutType);
             } catch (RemoteException re) {
                 re.rethrowFromSystemServer();
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     /**

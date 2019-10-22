@@ -73,7 +73,7 @@ interface IAccessibilityManager {
     void performAccessibilityShortcut();
 
     // Requires Manifest.permission.MANAGE_ACCESSIBILITY
-    String getAccessibilityShortcutService();
+    List<String> getAccessibilityShortcutTargets(int shortcutType);
 
     // System process only
     boolean sendFingerprintGesture(int gestureKeyCode);
