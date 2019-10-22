@@ -403,8 +403,7 @@ class ActivityMetricsLogger {
 
         if (launchedActivity != null && launchedActivity.mDrawn) {
             // Launched activity is already visible. We cannot measure windows drawn delay.
-            reset(true /* abort */, info, "launched activity already visible",
-                0L /* timestampNs */);
+            abort(info, "launched activity already visible");
             return;
         }
 
@@ -422,8 +421,7 @@ class ActivityMetricsLogger {
         if ((!isLoggableResultCode(resultCode) || launchedActivity == null || !processSwitch
                 || windowingMode == WINDOWING_MODE_UNDEFINED) && !otherWindowModesLaunching) {
             // Failed to launch or it was not a process switch, so we don't care about the timing.
-            reset(true /* abort */, info, "failed to launch or not a process switch",
-                0L /* timestampNs */);
+            abort(info, "failed to launch or not a process switch");
             return;
         } else if (otherWindowModesLaunching) {
             // Don't log this windowing mode but continue with the other windowing modes.
@@ -469,8 +467,7 @@ class ActivityMetricsLogger {
         final WindowingModeTransitionInfoSnapshot infoSnapshot =
                 new WindowingModeTransitionInfoSnapshot(info);
         if (allWindowsDrawn() && mLoggedTransitionStarting) {
-            reset(false /* abort */, info, "notifyWindowsDrawn - all windows drawn",
-                timestampNs /* timestampNs */);
+            reset(false /* abort */, info, "notifyWindowsDrawn - all windows drawn", timestampNs);
         }
         return infoSnapshot;
     }
@@ -544,10 +541,11 @@ class ActivityMetricsLogger {
         mHandler.obtainMessage(MSG_CHECK_VISIBILITY, args).sendToTarget();
     }
 
-    private boolean hasVisibleNonFinishingActivity(TaskRecord t) {
+    /** @return {@code true} if the given task has an activity will be drawn. */
+    private static boolean hasActivityToBeDrawn(TaskRecord t) {
         for (int i = t.getChildCount() - 1; i >= 0; --i) {
             final ActivityRecord r = t.getChildAt(i);
-            if (r.visible && !r.finishing) {
+            if (r.visible && !r.mDrawn && !r.finishing) {
                 return true;
             }
         }
@@ -574,19 +572,20 @@ class ActivityMetricsLogger {
                 return;
             }
 
-            // Check if there is any activity in the task that is visible and not finishing. If the
-            // launched activity finished before it is drawn and if there is another activity in
-            // the task then that activity will be draw on screen.
-            if (hasVisibleNonFinishingActivity(t)) {
+            // If the task of the launched activity contains any activity to be drawn, then the
+            // window drawn event should report later to complete the transition. Otherwise all
+            // activities in this task may be finished, invisible or drawn, so the transition event
+            // should be cancelled.
+            if (hasActivityToBeDrawn(t)) {
                 return;
             }
 
             if (DEBUG_METRICS) Slog.i(TAG, "notifyVisibilityChanged to invisible activity=" + r);
             logAppTransitionCancel(info);
-            mWindowingModeTransitionInfo.remove(r.getWindowingMode());
-            if (mWindowingModeTransitionInfo.size() == 0) {
-                reset(true /* abort */, info, "notifyVisibilityChanged to invisible",
-                    0L /* timestampNs */);
+            // Abort if this is the only one active transition.
+            if (mWindowingModeTransitionInfo.size() == 1
+                    && mWindowingModeTransitionInfo.get(r.getWindowingMode()) != null) {
+                abort(info, "notifyVisibilityChanged to invisible");
             }
         }
     }
@@ -622,19 +621,25 @@ class ActivityMetricsLogger {
                 && mWindowingModeTransitionInfo.size() > 0;
     }
 
+    /** Aborts tracking of current launch metrics. */
+    private void abort(WindowingModeTransitionInfo info, String cause) {
+        reset(true /* abort */, info, cause, 0L /* timestampNs */);
+    }
+
     private void reset(boolean abort, WindowingModeTransitionInfo info, String cause,
-        long timestampNs) {
+            long timestampNs) {
+        final boolean isAnyTransitionActive = isAnyTransitionActive();
         if (DEBUG_METRICS) {
-            Slog.i(TAG,
-                "reset abort=" + abort + ",cause=" + cause + ",timestamp=" + timestampNs);
+            Slog.i(TAG, "reset abort=" + abort + " cause=" + cause + " timestamp=" + timestampNs
+                    + " active=" + isAnyTransitionActive);
         }
-        if (!abort && isAnyTransitionActive()) {
+        if (!abort && isAnyTransitionActive) {
             logAppTransitionMultiEvents();
         }
         stopLaunchTrace(info);
 
         // Ignore reset-after reset.
-        if (isAnyTransitionActive()) {
+        if (isAnyTransitionActive) {
             // LaunchObserver callbacks.
             if (abort) {
                 launchObserverNotifyActivityLaunchCancelled(info);
