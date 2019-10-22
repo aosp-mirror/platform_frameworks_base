@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.storage.StorageManager;
 import android.permission.PermissionManager.SplitPermissionInfo;
 import android.text.TextUtils;
@@ -33,6 +34,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimingsTraceLog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -411,7 +413,13 @@ public class SystemConfig {
     }
 
     SystemConfig() {
-        readAllPermissions();
+        TimingsTraceLog log = new TimingsTraceLog(TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+        log.traceBegin("readAllPermissions");
+        try {
+            readAllPermissions();
+        } finally {
+            log.traceEnd();
+        }
     }
 
     private void readAllPermissions() {
