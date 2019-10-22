@@ -74,6 +74,7 @@ import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
 import android.view.textclassifier.TextClassificationManager;
 
 import com.android.internal.compat.IPlatformCompat;
+import com.android.internal.compat.IPlatformCompatNative;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -3231,6 +3232,7 @@ public abstract class Context {
             //@hide ROLE_CONTROLLER_SERVICE,
             CAMERA_SERVICE,
             //@hide: PLATFORM_COMPAT_SERVICE,
+            //@hide: PLATFORM_COMPAT_NATIVE_SERVICE,
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
@@ -4594,6 +4596,14 @@ public abstract class Context {
      * @hide
      */
     public static final String PLATFORM_COMPAT_SERVICE = "platform_compat";
+
+    /**
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link IPlatformCompatNative} IBinder for native code communicating with the platform compat
+     * service.
+     * @hide
+     */
+    public static final String PLATFORM_COMPAT_NATIVE_SERVICE = "platform_compat_native";
 
     /**
      * Service to capture a bugreport.
