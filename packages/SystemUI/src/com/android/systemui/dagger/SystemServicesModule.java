@@ -58,12 +58,13 @@ public class SystemServicesModule {
 
     @Singleton
     @Provides
-    static IActivityManager providesIActivityManager() {
+    static IActivityManager provideIActivityManager() {
         return ActivityManager.getService();
     }
 
     @Provides
-    static IWallpaperManager provideWallPaperManager() {
+    @Nullable
+    static IWallpaperManager provideIWallPaperManager() {
         return IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE));
     }
@@ -109,13 +110,13 @@ public class SystemServicesModule {
     }
 
     @Provides
-    static WallpaperManager providesWallpaperManager(Context context) {
+    static WallpaperManager provideWallpaperManager(Context context) {
         return (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
     }
 
     @Singleton
     @Provides
-    static WindowManager providesWindowManager(Context context) {
+    static WindowManager provideWindowManager(Context context) {
         return context.getSystemService(WindowManager.class);
     }
 
