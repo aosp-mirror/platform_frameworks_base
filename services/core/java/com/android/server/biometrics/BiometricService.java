@@ -988,18 +988,6 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private String getErrorString(int modality, int error, int vendorCode) {
-        for (AuthenticatorWrapper authenticator : mAuthenticators) {
-            if (authenticator.modality == modality) {
-                // TODO(b/141025588): Refactor IBiometricServiceReceiver.aidl#onError(...) to not
-                // ask for a String error message, but derive it from the error code instead.
-                return "";
-            }
-        }
-        Slog.w(TAG, "Unable to get error string for modality: " + modality);
-        return null;
-    }
-
     private void logDialogDismissed(int reason) {
         if (reason == BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED) {
             // Explicit auth, authentication confirmed.
