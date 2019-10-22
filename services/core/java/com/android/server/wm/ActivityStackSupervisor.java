@@ -2247,7 +2247,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                     // Complete + brief == give a summary.  Isn't that obvious?!?
                     if (lastTask.intent != null) {
                         pw.print(prefix); pw.print("  ");
-                                pw.println(lastTask.intent.toInsecureStringWithClip());
+                                pw.println(lastTask.intent.toInsecureString());
                     }
                 }
             }

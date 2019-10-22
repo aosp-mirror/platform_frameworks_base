@@ -256,7 +256,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         if (intent != null) {
             intent.getIntent().writeToProto(proto, ServiceRecordProto.INTENT, false, true, false,
-                    true);
+                    false);
         }
         proto.write(ServiceRecordProto.PACKAGE_NAME, packageName);
         proto.write(ServiceRecordProto.PROCESS_NAME, processName);
@@ -358,7 +358,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("intent={");
-                pw.print(intent.getIntent().toShortString(false, true, false, true));
+                pw.print(intent.getIntent().toShortString(false, true, false, false));
                 pw.println('}');
         pw.print(prefix); pw.print("packageName="); pw.println(packageName);
         pw.print(prefix); pw.print("processName="); pw.println(processName);

@@ -751,7 +751,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 pw.print(" launchedFromPackage="); pw.print(launchedFromPackage);
                 pw.print(" userId="); pw.println(mUserId);
         pw.print(prefix); pw.print("app="); pw.println(app);
-        pw.print(prefix); pw.println(intent.toInsecureStringWithClip());
+        pw.print(prefix); pw.println(intent.toInsecureString());
         pw.print(prefix); pw.print("rootOfTask="); pw.print(isRootOfTask());
                 pw.print(" task="); pw.println(task);
         pw.print(prefix); pw.print("taskAffinity="); pw.println(taskAffinity);
@@ -846,7 +846,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 if (intent == null) {
                     pw.println("null");
                 } else {
-                    pw.println(intent.toShortString(false, true, false, true));
+                    pw.println(intent.toShortString(false, true, false, false));
                 }
             }
         }

@@ -2371,14 +2371,14 @@ class TaskRecord extends ConfigurationContainer {
         if (intent != null) {
             StringBuilder sb = new StringBuilder(128);
             sb.append(prefix); sb.append("intent={");
-            intent.toShortString(sb, false, true, false, true);
+            intent.toShortString(sb, false, true, false, false);
             sb.append('}');
             pw.println(sb.toString());
         }
         if (affinityIntent != null) {
             StringBuilder sb = new StringBuilder(128);
             sb.append(prefix); sb.append("affinityIntent={");
-            affinityIntent.toShortString(sb, false, true, false, true);
+            affinityIntent.toShortString(sb, false, true, false, false);
             sb.append('}');
             pw.println(sb.toString());
         }

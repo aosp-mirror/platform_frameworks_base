@@ -1069,9 +1069,8 @@ public class ClipData implements Parcelable {
             if (!first) {
                 b.append(' ');
             }
-            mItems.get(0).toShortString(b);
-            if (mItems.size() > 1) {
-                b.append(" ...");
+            for (int i=0; i<mItems.size(); i++) {
+                b.append("{...}");
             }
         }
     }
