@@ -720,6 +720,8 @@ public final class BatteryService extends SystemService {
         event.putInt(BatteryManager.EXTRA_SCALE, BATTERY_SCALE);
         event.putInt(BatteryManager.EXTRA_PLUGGED, mPlugType);
         event.putInt(BatteryManager.EXTRA_VOLTAGE, mHealthInfo.batteryVoltage);
+        event.putInt(BatteryManager.EXTRA_TEMPERATURE, mHealthInfo.batteryTemperature);
+        event.putInt(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounter);
         event.putLong(BatteryManager.EXTRA_EVENT_TIMESTAMP, now);
 
         boolean queueWasEmpty = mBatteryLevelsEventQueue.isEmpty();

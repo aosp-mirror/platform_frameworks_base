@@ -38,15 +38,18 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.biometrics.Authenticator;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.face.FaceManager;
 import android.os.Bundle;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper.RunWithLooper;
 
+import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -89,9 +92,9 @@ public class AuthControllerTest extends SysuiTestCase {
 
         when(context.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE))
-            .thenReturn(true);
+                .thenReturn(true);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
-            .thenReturn(true);
+                .thenReturn(true);
 
         when(mDialog1.getOpPackageName()).thenReturn("Dialog1");
         when(mDialog2.getOpPackageName()).thenReturn("Dialog2");
@@ -170,20 +173,34 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testOnAuthenticationSucceededInvoked_whenSystemRequested() {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
-        mAuthController.onBiometricAuthenticated(true, null /* failureReason */);
+        mAuthController.onBiometricAuthenticated();
         verify(mDialog1).onAuthenticationSucceeded();
     }
 
     @Test
-    public void testOnAuthenticationFailedInvoked_whenSystemRequested() {
+    public void testOnAuthenticationFailedInvoked_whenBiometricRejected() {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
-        final String failureReason = "failure reason";
-        mAuthController.onBiometricAuthenticated(false, failureReason);
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_NONE,
+                BiometricConstants.BIOMETRIC_PAUSED_REJECTED,
+                0 /* vendorCode */);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(mDialog1).onAuthenticationFailed(captor.capture());
 
-        assertEquals(captor.getValue(), failureReason);
+        assertEquals(captor.getValue(), mContext.getString(R.string.biometric_not_recognized));
+    }
+
+    @Test
+    public void testOnAuthenticationFailedInvoked_whenBiometricTimedOut() {
+        showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
+        final int error = BiometricConstants.BIOMETRIC_ERROR_TIMEOUT;
+        final int vendorCode = 0;
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
+
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        verify(mDialog1).onAuthenticationFailed(captor.capture());
+
+        assertEquals(captor.getValue(), FaceManager.getErrorString(mContext, error, vendorCode));
     }
 
     @Test
@@ -199,27 +216,27 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnErrorInvoked_whenSystemRequested() {
+    public void testOnErrorInvoked_whenSystemRequested() throws Exception {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = 1;
-        final String errMessage = "error message";
-        mAuthController.onBiometricError(error, errMessage);
+        final int vendorCode = 0;
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
 
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(mDialog1).onError(captor.capture());
 
-        assertEquals(captor.getValue(), errMessage);
+        assertEquals(captor.getValue(), FaceManager.getErrorString(mContext, error, vendorCode));
     }
 
     @Test
     public void testErrorLockout_whenCredentialAllowed_AnimatesToCredentialUI() {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
-        final String errorString = "lockout";
+        final int vendorCode = 0;
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(true);
 
-        mAuthController.onBiometricError(error, errorString);
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
         verify(mDialog1, never()).onError(anyString());
         verify(mDialog1).animateToCredentialUI();
     }
@@ -228,11 +245,11 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testErrorLockoutPermanent_whenCredentialAllowed_AnimatesToCredentialUI() {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-        final String errorString = "lockout_permanent";
+        final int vendorCode = 0;
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(true);
 
-        mAuthController.onBiometricError(error, errorString);
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
         verify(mDialog1, never()).onError(anyString());
         verify(mDialog1).animateToCredentialUI();
     }
@@ -241,12 +258,12 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testErrorLockout_whenCredentialNotAllowed_sendsOnError() {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT;
-        final String errorString = "lockout";
+        final int vendorCode = 0;
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
 
-        mAuthController.onBiometricError(error, errorString);
-        verify(mDialog1).onError(eq(errorString));
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
+        verify(mDialog1).onError(eq(FaceManager.getErrorString(mContext, error, vendorCode)));
         verify(mDialog1, never()).animateToCredentialUI();
     }
 
@@ -254,12 +271,12 @@ public class AuthControllerTest extends SysuiTestCase {
     public void testErrorLockoutPermanent_whenCredentialNotAllowed_sendsOnError() {
         showDialog(Authenticator.TYPE_BIOMETRIC, BiometricPrompt.TYPE_FACE);
         final int error = BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-        final String errorString = "lockout_permanent";
+        final int vendorCode = 0;
 
         when(mDialog1.isAllowDeviceCredentials()).thenReturn(false);
 
-        mAuthController.onBiometricError(error, errorString);
-        verify(mDialog1).onError(eq(errorString));
+        mAuthController.onBiometricError(BiometricAuthenticator.TYPE_FACE, error, vendorCode);
+        verify(mDialog1).onError(eq(FaceManager.getErrorString(mContext, error, vendorCode)));
         verify(mDialog1, never()).animateToCredentialUI();
     }
 

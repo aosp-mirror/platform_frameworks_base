@@ -247,7 +247,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
                     this, mDefaultDisplay.mDisplayId,
-                    mStackSupervisor.mRecentTasks.getRecentTaskIds());
+                    mStackSupervisor.mRecentTasks.getRecentTaskIds(), targetActivity);
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation

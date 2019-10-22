@@ -63,6 +63,8 @@ public class UsbDevice implements Parcelable {
     private final boolean mHasAudioPlayback;
     private final boolean mHasAudioCapture;
     private final boolean mHasMidi;
+    private final boolean mHasVideoPlayback;
+    private final boolean mHasVideoCapture;
 
     /** All interfaces on the device. Initialized on first call to getInterfaceList */
     @UnsupportedAppUsage
@@ -77,7 +79,8 @@ public class UsbDevice implements Parcelable {
             int protocol, @Nullable String manufacturerName, @Nullable String productName,
             @NonNull String version, @NonNull UsbConfiguration[] configurations,
             @NonNull IUsbSerialReader serialNumberReader,
-            boolean hasAudioPlayback, boolean hasAudioCapture, boolean hasMidi) {
+            boolean hasAudioPlayback, boolean hasAudioCapture, boolean hasMidi,
+            boolean hasVideoPlayback, boolean hasVideoCapture) {
         mName = Preconditions.checkNotNull(name);
         mVendorId = vendorId;
         mProductId = productId;
@@ -92,6 +95,8 @@ public class UsbDevice implements Parcelable {
         mHasAudioPlayback = hasAudioPlayback;
         mHasAudioCapture = hasAudioCapture;
         mHasMidi = hasMidi;
+        mHasVideoPlayback = hasVideoPlayback;
+        mHasVideoCapture = hasVideoCapture;
 
         // Make sure the binder belongs to the system
         if (ActivityThread.isSystem()) {
@@ -236,6 +241,16 @@ public class UsbDevice implements Parcelable {
         return mHasMidi;
     }
 
+    /** @hide */
+    public boolean getHasVideoPlayback() {
+        return mHasVideoPlayback;
+    }
+
+    /** @hide */
+    public boolean getHasVideoCapture() {
+        return mHasVideoCapture;
+    }
+
     /**
      * Returns the {@link UsbConfiguration} at the given index.
      *
@@ -316,6 +331,8 @@ public class UsbDevice implements Parcelable {
                 + ", mHasAudioPlayback=" + mHasAudioPlayback
                 + ", mHasAudioCapture=" + mHasAudioCapture
                 + ", mHasMidi=" + mHasMidi
+                + ", mHasVideoCapture=" + mHasVideoCapture
+                + ", mHasVideoPlayback=" + mHasVideoPlayback
                 + ", mConfigurations=[");
         for (int i = 0; i < mConfigurations.length; i++) {
             builder.append("\n");
@@ -345,10 +362,12 @@ public class UsbDevice implements Parcelable {
             boolean hasAudioPlayback = in.readInt() == 1;
             boolean hasAudioCapture = in.readInt() == 1;
             boolean hasMidi = in.readInt() == 1;
-
+            boolean hasVideoPlayback = in.readInt() == 1;
+            boolean hasVideoCapture = in.readInt() == 1;
             UsbDevice device = new UsbDevice(name, vendorId, productId, clasz, subClass, protocol,
                     manufacturerName, productName, version, configurations, serialNumberReader,
-                    hasAudioPlayback, hasAudioCapture, hasMidi);
+                    hasAudioPlayback, hasAudioCapture, hasMidi,
+                    hasVideoPlayback, hasVideoCapture);
 
             return device;
         }
@@ -377,6 +396,8 @@ public class UsbDevice implements Parcelable {
         parcel.writeInt(mHasAudioPlayback ? 1 : 0);
         parcel.writeInt(mHasAudioCapture ? 1 : 0);
         parcel.writeInt(mHasMidi ? 1 : 0);
+        parcel.writeInt(mHasVideoPlayback ? 1 : 0);
+        parcel.writeInt(mHasVideoCapture ? 1 : 0);
     }
 
     public static int getDeviceId(String name) {
@@ -407,6 +428,8 @@ public class UsbDevice implements Parcelable {
         private final boolean mHasAudioPlayback;
         private final boolean mHasAudioCapture;
         private final boolean mHasMidi;
+        private final boolean mHasVideoPlayback;
+        private final boolean mHasVideoCapture;
 
         // Temporary storage for serial number. Serial number reader need to be wrapped in a
         // IUsbSerialReader as they might be used as PII.
@@ -416,7 +439,8 @@ public class UsbDevice implements Parcelable {
                 int protocol, @Nullable String manufacturerName, @Nullable String productName,
                 @NonNull String version, @NonNull UsbConfiguration[] configurations,
                 @Nullable String serialNumber,
-                boolean hasAudioPlayback, boolean hasAudioCapture, boolean hasMidi) {
+                boolean hasAudioPlayback, boolean hasAudioCapture, boolean hasMidi,
+                boolean hasVideoPlayback, boolean hasVideoCapture) {
             mName = Preconditions.checkNotNull(name);
             mVendorId = vendorId;
             mProductId = productId;
@@ -431,6 +455,8 @@ public class UsbDevice implements Parcelable {
             mHasAudioPlayback = hasAudioPlayback;
             mHasAudioCapture = hasAudioCapture;
             mHasMidi = hasMidi;
+            mHasVideoPlayback = hasVideoPlayback;
+            mHasVideoCapture = hasVideoCapture;
         }
 
         /**
@@ -443,7 +469,8 @@ public class UsbDevice implements Parcelable {
         public UsbDevice build(@NonNull IUsbSerialReader serialReader) {
             return new UsbDevice(mName, mVendorId, mProductId, mClass, mSubclass, mProtocol,
                     mManufacturerName, mProductName, mVersion, mConfigurations, serialReader,
-                    mHasAudioPlayback, mHasAudioCapture, mHasMidi);
+                    mHasAudioPlayback, mHasAudioCapture, mHasMidi,
+                    mHasVideoPlayback, mHasVideoCapture);
         }
     }
 }

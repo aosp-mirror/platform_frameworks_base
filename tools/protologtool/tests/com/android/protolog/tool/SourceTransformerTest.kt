@@ -78,7 +78,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -88,7 +88,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 1780316587, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 1780316587, 9, "test %d %f " + "abc %s\n test", protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -100,8 +100,8 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); } /* ProtoLog.w(TEST_GROUP, "test %d %f", 100, 0.1); */ if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, "test %d %f", protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -111,7 +111,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { org.example.ProtoLogImpl.w(TEST_GROUP, -1741986185, 0, "test", (Object[]) null); }
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { org.example.ProtoLogImpl.w(TEST_GROUP, -1741986185, 0, "test", (Object[]) null); }
                 }
             }
             """.trimIndent()
@@ -121,7 +121,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, null, protoLogParam0, protoLogParam1); }
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; org.example.ProtoLogImpl.w(TEST_GROUP, 1698911065, 9, null, protoLogParam0, protoLogParam1); }
                 }
             }
             """.trimIndent()
@@ -131,7 +131,7 @@ class SourceTransformerTest {
 
             class Test {
                 void test() {
-                    if (org.example.ProtoLogImpl.isEnabled(TEST_GROUP)) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 1780316587, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
+                    if (org.example.ProtoLogCache.TEST_GROUP_enabled) { long protoLogParam0 = 100; double protoLogParam1 = 0.1; String protoLogParam2 = String.valueOf("test"); org.example.ProtoLogImpl.w(TEST_GROUP, 1780316587, 9, null, protoLogParam0, protoLogParam1, protoLogParam2); 
             
             }
                 }
@@ -165,8 +165,9 @@ class SourceTransformerTest {
     }
 
     private val processor: ProtoLogCallProcessor = Mockito.mock(ProtoLogCallProcessor::class.java)
-    private val implPath = "org.example.ProtoLogImpl"
-    private val sourceJarWriter = SourceTransformer(implPath, processor)
+    private val implName = "org.example.ProtoLogImpl"
+    private val cacheName = "org.example.ProtoLogCache"
+    private val sourceJarWriter = SourceTransformer(implName, cacheName, processor)
 
     private fun <T> any(type: Class<T>): T = Mockito.any<T>(type)
 
@@ -191,8 +192,7 @@ class SourceTransformerTest {
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
-                ifStmt.condition.toString())
+        assertEquals("$cacheName.TEST_GROUP_enabled", ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(3, ifStmt.thenStmt.childNodes.size)
         val methodCall = ifStmt.thenStmt.findAll(MethodCallExpr::class.java)[0] as MethodCallExpr
@@ -234,8 +234,7 @@ class SourceTransformerTest {
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(3, ifStmts.size)
         val ifStmt = ifStmts[1]
-        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
-                ifStmt.condition.toString())
+        assertEquals("$cacheName.TEST_GROUP_enabled", ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(3, ifStmt.thenStmt.childNodes.size)
         val methodCall = ifStmt.thenStmt.findAll(MethodCallExpr::class.java)[0] as MethodCallExpr
@@ -273,8 +272,7 @@ class SourceTransformerTest {
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
-                ifStmt.condition.toString())
+        assertEquals("$cacheName.TEST_GROUP_enabled", ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(4, ifStmt.thenStmt.childNodes.size)
         val methodCall = ifStmt.thenStmt.findAll(MethodCallExpr::class.java)[1] as MethodCallExpr
@@ -311,8 +309,7 @@ class SourceTransformerTest {
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
-                ifStmt.condition.toString())
+        assertEquals("$cacheName.TEST_GROUP_enabled", ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(1, ifStmt.thenStmt.childNodes.size)
         val methodCall = ifStmt.thenStmt.findAll(MethodCallExpr::class.java)[0] as MethodCallExpr
@@ -346,8 +343,7 @@ class SourceTransformerTest {
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
-                ifStmt.condition.toString())
+        assertEquals("$cacheName.TEST_GROUP_enabled", ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(3, ifStmt.thenStmt.childNodes.size)
         val methodCall = ifStmt.thenStmt.findAll(MethodCallExpr::class.java)[0] as MethodCallExpr
@@ -385,8 +381,7 @@ class SourceTransformerTest {
         val ifStmts = code.findAll(IfStmt::class.java)
         assertEquals(1, ifStmts.size)
         val ifStmt = ifStmts[0]
-        assertEquals("$implPath.${Constants.IS_ENABLED_METHOD}(TEST_GROUP)",
-                ifStmt.condition.toString())
+        assertEquals("$cacheName.TEST_GROUP_enabled", ifStmt.condition.toString())
         assertFalse(ifStmt.elseStmt.isPresent)
         assertEquals(4, ifStmt.thenStmt.childNodes.size)
         val methodCall = ifStmt.thenStmt.findAll(MethodCallExpr::class.java)[1] as MethodCallExpr

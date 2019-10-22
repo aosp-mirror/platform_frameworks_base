@@ -137,7 +137,7 @@ public class BiometricManager {
     public boolean hasEnrolledBiometrics(int userId) {
         if (mService != null) {
             try {
-                return mService.hasEnrolledBiometrics(userId);
+                return mService.hasEnrolledBiometrics(userId, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in hasEnrolledBiometrics(): " + e);
                 return false;

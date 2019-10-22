@@ -20,6 +20,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.RESET_FACE_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -538,7 +539,7 @@ public class FaceService extends BiometricServiceBase {
 
         // TODO: refactor out common code here
         @Override // Binder call
-        public boolean isHardwareDetected(long deviceId, String opPackageName) {
+        public boolean isHardwareDetected(String opPackageName) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
                     Binder.getCallingUid(), Binder.getCallingPid(),
@@ -752,8 +753,7 @@ public class FaceService extends BiometricServiceBase {
         public void onError(long deviceId, int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onError(cookie, error,
-                        FaceManager.getErrorString(getContext(), error, vendorCode));
+                getWrapperReceiver().onError(cookie, TYPE_FACE, error, vendorCode);
             }
         }
     }

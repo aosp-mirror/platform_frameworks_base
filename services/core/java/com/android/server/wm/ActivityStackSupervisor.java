@@ -2086,7 +2086,6 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final TaskRecord task = r.getTaskRecord();
         final ActivityStack stack = task.getStack();
 
-        r.mLaunchTaskBehind = false;
         mRecentTasks.add(task);
         mService.getTaskChangeNotificationController().notifyTaskStackChanged();
         stack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);

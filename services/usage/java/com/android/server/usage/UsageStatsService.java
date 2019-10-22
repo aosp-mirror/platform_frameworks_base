@@ -141,6 +141,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_UID_STATE_CHANGED = 3;
     static final int MSG_REPORT_EVENT_TO_ALL_USERID = 4;
     static final int MSG_UNLOCKED_USER = 5;
+    static final int MSG_PACKAGE_REMOVED = 6;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -148,7 +149,6 @@ public class UsageStatsService extends SystemService implements
     UserManager mUserManager;
     PackageManager mPackageManager;
     PackageManagerInternal mPackageManagerInternal;
-    PackageMonitor mPackageMonitor;
     IDeviceIdleController mDeviceIdleController;
     // Do not use directly. Call getDpmInternal() instead
     DevicePolicyManagerInternal mDpmInternal;
@@ -163,6 +163,8 @@ public class UsageStatsService extends SystemService implements
 
     /** Manages app time limit observers */
     AppTimeLimitController mAppTimeLimit;
+
+    private final PackageMonitor mPackageMonitor = new MyPackageMonitor();
 
     // A map maintaining a queue of events to be reported per user.
     private final SparseArray<LinkedList<Event>> mReportedEvents = new SparseArray<>();
@@ -242,6 +244,8 @@ public class UsageStatsService extends SystemService implements
                 }, mHandler.getLooper());
 
         mAppStandby.addListener(mStandbyChangeListener);
+
+        mPackageMonitor.register(getContext(), null, UserHandle.ALL, true);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
@@ -617,7 +621,7 @@ public class UsageStatsService extends SystemService implements
             final AtomicFile af = new AtomicFile(pendingEventsFiles[i]);
             try {
                 try (FileInputStream in = af.openRead()) {
-                    UsageStatsProto.readPendingEvents(in, pendingEvents);
+                    UsageStatsProtoV2.readPendingEvents(in, pendingEvents);
                 }
             } catch (IOException e) {
                 // Even if one file read fails, exit here to keep all events in order on disk -
@@ -647,11 +651,11 @@ public class UsageStatsService extends SystemService implements
         FileOutputStream fos = null;
         try {
             fos = af.startWrite();
-            UsageStatsProto.writePendingEvents(fos, pendingEvents);
+            UsageStatsProtoV2.writePendingEvents(fos, pendingEvents);
             af.finishWrite(fos);
             fos = null;
             pendingEvents.clear();
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             Slog.e(TAG, "Failed to write " + pendingEventsFile.getAbsolutePath()
                     + " for user " + userId);
         } finally {
@@ -843,6 +847,26 @@ public class UsageStatsService extends SystemService implements
     }
 
     /**
+     * Called by the Handler for message MSG_PACKAGE_REMOVED.
+     */
+    private void onPackageRemoved(int userId, String packageName) {
+        synchronized (mLock) {
+            final long timeRemoved = System.currentTimeMillis();
+            if (!mUserUnlockedStates.get(userId, false)) {
+                // If user is not unlocked and a package is removed for them, we will handle it
+                // when the user service is initialized and package manager is queried.
+                return;
+            }
+            final UserUsageStatsService userService = mUserState.get(userId);
+            if (userService == null) {
+                return;
+            }
+
+            userService.onPackageRemoved(packageName, timeRemoved);
+        }
+    }
+
+    /**
      * Called by the Binder stub.
      */
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime,
@@ -1030,21 +1054,13 @@ public class UsageStatsService extends SystemService implements
                                 ipw.decreaseIndent();
                             }
                         } else {
-                            final int user;
-                            try {
-                                user = Integer.valueOf(args[i + 1]);
-                            } catch (NumberFormatException nfe) {
-                                ipw.println("invalid user specified.");
-                                return;
+                            final int user = parseUserIdFromArgs(args, i, ipw);
+                            if (user != UserHandle.USER_NULL) {
+                                final String[] remainingArgs = Arrays.copyOfRange(
+                                        args, i + 2, args.length);
+                                // dump everything for the specified user
+                                mUserState.get(user).dumpFile(ipw, remainingArgs);
                             }
-                            if (mUserState.indexOfKey(user) < 0) {
-                                ipw.println("the specified user does not exist.");
-                                return;
-                            }
-                            final String[] remainingArgs = Arrays.copyOfRange(
-                                    args, i + 2, args.length);
-                            // dump everything for the specified user
-                            mUserState.get(user).dumpFile(ipw, remainingArgs);
                         }
                         return;
                     } else if ("database-info".equals(arg)) {
@@ -1059,19 +1075,11 @@ public class UsageStatsService extends SystemService implements
                                 ipw.decreaseIndent();
                             }
                         } else {
-                            final int user;
-                            try {
-                                user = Integer.valueOf(args[i + 1]);
-                            } catch (NumberFormatException nfe) {
-                                ipw.println("invalid user specified.");
-                                return;
+                            final int user = parseUserIdFromArgs(args, i, ipw);
+                            if (user != UserHandle.USER_NULL) {
+                                // dump info only for the specified user
+                                mUserState.get(user).dumpDatabaseInfo(ipw);
                             }
-                            if (mUserState.indexOfKey(user) < 0) {
-                                ipw.println("the specified user does not exist.");
-                                return;
-                            }
-                            // dump info only for the specified user
-                            mUserState.get(user).dumpDatabaseInfo(ipw);
                         }
                         return;
                     } else if ("appstandby".equals(arg)) {
@@ -1079,15 +1087,18 @@ public class UsageStatsService extends SystemService implements
                         return;
                     } else if ("stats-directory".equals(arg)) {
                         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-                        final int userId;
-                        try {
-                            userId = Integer.valueOf(args[i + 1]);
-                        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                            ipw.println("invalid user specified.");
-                            return;
+                        final int userId = parseUserIdFromArgs(args, i, ipw);
+                        if (userId != UserHandle.USER_NULL) {
+                            ipw.println(new File(Environment.getDataSystemCeDirectory(userId),
+                                    "usagestats").getAbsolutePath());
                         }
-                        ipw.println(new File(Environment.getDataSystemCeDirectory(userId),
-                                "usagestats").getAbsolutePath());
+                        return;
+                    } else if ("mappings".equals(arg)) {
+                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                        final int userId = parseUserIdFromArgs(args, i, ipw);
+                        if (userId != UserHandle.USER_NULL) {
+                            mUserState.get(userId).dumpMappings(ipw);
+                        }
                         return;
                     } else if (arg != null && !arg.startsWith("-")) {
                         // Anything else that doesn't start with '-' is a pkg to filter
@@ -1126,6 +1137,21 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    private int parseUserIdFromArgs(String[] args, int index, IndentingPrintWriter ipw) {
+        final int userId;
+        try {
+            userId = Integer.valueOf(args[index + 1]);
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            ipw.println("invalid user specified.");
+            return UserHandle.USER_NULL;
+        }
+        if (mUserState.indexOfKey(userId) < 0) {
+            ipw.println("the specified user does not exist.");
+            return UserHandle.USER_NULL;
+        }
+        return userId;
+    }
+
     class H extends Handler {
         public H(Looper looper) {
             super(looper);
@@ -1157,7 +1183,9 @@ public class UsageStatsService extends SystemService implements
                 case MSG_REMOVE_USER:
                     onUserRemoved(msg.arg1);
                     break;
-
+                case MSG_PACKAGE_REMOVED:
+                    onPackageRemoved(msg.arg1, (String) msg.obj);
+                    break;
                 case MSG_UID_STATE_CHANGED: {
                     final int uid = msg.arg1;
                     final int procState = msg.arg2;
@@ -2103,6 +2131,15 @@ public class UsageStatsService extends SystemService implements
         @Override
         public AppUsageLimitData getAppUsageLimit(String packageName, UserHandle user) {
             return mAppTimeLimit.getAppUsageLimit(packageName, user);
+        }
+    }
+
+    private class MyPackageMonitor extends PackageMonitor {
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            mHandler.obtainMessage(MSG_PACKAGE_REMOVED, getChangingUserId(), 0, packageName)
+                    .sendToTarget();
+            super.onPackageRemoved(packageName, uid);
         }
     }
 }

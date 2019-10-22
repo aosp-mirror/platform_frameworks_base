@@ -78,7 +78,7 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         mRecentsAnimationController = mock(RecentsAnimationController.class);
         mService.mWindowManager.setRecentsAnimationController(mRecentsAnimationController);
         doNothing().when(mService.mWindowManager).initializeRecentsAnimation(
-                anyInt(), any(), any(), anyInt(), any());
+                anyInt(), any(), any(), anyInt(), any(), any());
         doReturn(true).when(mService.mWindowManager).canStartRecentsAnimation();
 
         final RecentTasks recentTasks = mService.getRecentTasks();
@@ -385,7 +385,8 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 return null;
             }).when(mService.mWindowManager).initializeRecentsAnimation(
                     anyInt() /* targetActivityType */, any() /* recentsAnimationRunner */,
-                    any() /* callbacks */, anyInt() /* displayId */, any() /* recentTaskIds */);
+                    any() /* callbacks */, anyInt() /* displayId */, any() /* recentTaskIds */,
+                    any() /* targetActivity */);
         }
 
         Intent recentsIntent = new Intent();

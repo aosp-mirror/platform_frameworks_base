@@ -213,6 +213,9 @@ filegroup {
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
 
+        // AIDL from frameworks/base/native/
+        ":platform-compat-native-aidl",
+
         // AIDL sources from external directories
         ":dumpstate_aidl",
         ":framework_native_aidl",
@@ -1052,6 +1055,7 @@ droidstubs {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args,
+    write_sdk_values: true,
 }
 
 droidstubs {
@@ -1061,6 +1065,7 @@ droidstubs {
         "core/res/AndroidManifest.xml",
     ],
     args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi ",
+    write_sdk_values: true,
 }
 
 droiddoc {
@@ -1084,7 +1089,6 @@ droiddoc {
     ],
     proofread_file: "offline-sdk-docs-proofrerad.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
-    write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-preview-index.html",
 }
 
@@ -1102,7 +1106,6 @@ droiddoc {
     ],
     proofread_file: "offline-sdk-referenceonly-docs-proofrerad.txt",
     args: framework_docs_only_args + " -offlinemode -title \"Android SDK\" -referenceonly",
-    write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
 }
@@ -1122,7 +1125,6 @@ droiddoc {
     proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
     args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
     " -offlinemode -title \"Android System SDK\" -referenceonly",
-    write_sdk_values: true,
     static_doc_index_redirect: "docs/docs-documentation-redirect.html",
     static_doc_properties: "docs/source.properties",
 }

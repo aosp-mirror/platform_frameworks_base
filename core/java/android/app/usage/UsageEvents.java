@@ -312,6 +312,11 @@ public final class UsageEvents implements Parcelable {
         public static final int VALID_FLAG_BITS = FLAG_IS_PACKAGE_INSTANT_APP;
 
         /**
+         * @hide
+         */
+        private static final int UNASSIGNED_TOKEN = -1;
+
+        /**
          * {@hide}
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -320,8 +325,18 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
+        public int mPackageToken = UNASSIGNED_TOKEN;
+
+        /**
+         * {@hide}
+         */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public String mClass;
+
+        /**
+         * {@hide}
+         */
+        public int mClassToken = UNASSIGNED_TOKEN;
 
         /**
          * {@hide}
@@ -336,7 +351,17 @@ public final class UsageEvents implements Parcelable {
         /**
          * {@hide}
          */
+        public int mTaskRootPackageToken = UNASSIGNED_TOKEN;
+
+        /**
+         * {@hide}
+         */
         public String mTaskRootClass;
+
+        /**
+         * {@hide}
+         */
+        public int mTaskRootClassToken = UNASSIGNED_TOKEN;
 
         /**
          * {@hide}
@@ -363,6 +388,11 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public String mShortcutId;
+
+        /**
+         * {@hide}
+         */
+        public int mShortcutIdToken = UNASSIGNED_TOKEN;
 
         /**
          * Action type passed to ChooserActivity
@@ -400,6 +430,11 @@ public final class UsageEvents implements Parcelable {
          * {@hide}
          */
         public String mNotificationChannelId;
+
+        /**
+         * {@hide}
+         */
+        public int mNotificationChannelIdToken = UNASSIGNED_TOKEN;
 
         /** @hide */
         @EventFlags

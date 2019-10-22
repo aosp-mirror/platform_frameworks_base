@@ -53,7 +53,8 @@ object ProtoLogTool {
 
         command.javaSourceArgs.map { path ->
             executor.submitCallable {
-                val transformer = SourceTransformer(command.protoLogImplClassNameArg, processor)
+                val transformer = SourceTransformer(command.protoLogImplClassNameArg,
+                        command.protoLogCacheClassNameArg, processor)
                 val file = File(path)
                 val text = file.readText()
                 val outSrc = try {
@@ -80,8 +81,51 @@ object ProtoLogTool {
 
         executor.shutdown()
 
+        val cacheSplit = command.protoLogCacheClassNameArg.split(".")
+        val cacheName = cacheSplit.last()
+        val cachePackage = cacheSplit.dropLast(1).joinToString(".")
+        val cachePath = "gen/${cacheSplit.joinToString("/")}.java"
+
+        outJar.putNextEntry(ZipEntry(cachePath))
+        outJar.write(generateLogGroupCache(cachePackage, cacheName, groups,
+                command.protoLogImplClassNameArg, command.protoLogGroupsClassNameArg).toByteArray())
+
         outJar.close()
         out.close()
+    }
+
+    fun generateLogGroupCache(
+        cachePackage: String,
+        cacheName: String,
+        groups: Map<String, LogGroup>,
+        protoLogImplClassName: String,
+        protoLogGroupsClassName: String
+    ): String {
+        val fields = groups.values.map {
+            "public static boolean ${it.name}_enabled = false;"
+        }.joinToString("\n")
+
+        val updates = groups.values.map {
+            "${it.name}_enabled = " +
+                    "$protoLogImplClassName.isEnabled($protoLogGroupsClassName.${it.name});"
+        }.joinToString("\n")
+
+        return """
+            package $cachePackage;
+
+            public class $cacheName {
+${fields.replaceIndent("                ")}
+
+                static {
+                    $protoLogImplClassName.sCacheUpdater = $cacheName::update;
+                    update();
+                }
+
+                static void update() {
+${updates.replaceIndent("                    ")}
+                }
+            }
+        """.trimIndent()
     }
 
     private fun tryParse(code: String, fileName: String): CompilationUnit {

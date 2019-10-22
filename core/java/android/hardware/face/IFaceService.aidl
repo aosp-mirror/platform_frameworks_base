@@ -67,7 +67,7 @@ interface IFaceService {
     List<Face> getEnrolledFaces(int userId, String opPackageName);
 
     // Determine if HAL is loaded and ready
-    boolean isHardwareDetected(long deviceId, String opPackageName);
+    boolean isHardwareDetected(String opPackageName);
 
     // Get a pre-enrollment authentication token
     long generateChallenge(IBinder token);

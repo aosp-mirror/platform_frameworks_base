@@ -691,8 +691,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     public boolean isHardwareDetected() {
         if (mService != null) {
             try {
-                long deviceId = 0; /* TODO: plumb hardware id to FPMS */
-                return mService.isHardwareDetected(deviceId, mContext.getOpPackageName());
+                return mService.isHardwareDetected(mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

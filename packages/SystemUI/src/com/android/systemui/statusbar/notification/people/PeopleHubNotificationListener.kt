@@ -64,14 +64,14 @@ class PeopleHubDataSourceImpl @Inject constructor(
         })
     }
 
-    private fun removeVisibleEntry(entry: NotificationEntry?) {
-        if (entry?.extractPersonKey()?.let(peopleHubManager::removeActivePerson) == true) {
+    private fun removeVisibleEntry(entry: NotificationEntry) {
+        if (entry.extractPersonKey()?.let(peopleHubManager::removeActivePerson) == true) {
             updateUi()
         }
     }
 
-    private fun addVisibleEntry(entry: NotificationEntry?) {
-        if (entry?.extractPerson()?.let(peopleHubManager::addActivePerson) == true) {
+    private fun addVisibleEntry(entry: NotificationEntry) {
+        if (entry.extractPerson()?.let(peopleHubManager::addActivePerson) == true) {
             updateUi()
         }
     }
@@ -134,7 +134,7 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
 
     val context = row.context
     val pm = context.packageManager
-    val appInfo = pm.getApplicationInfo(sbn.packageName, 0)
+    val appInfo = pm.getApplicationInfoAsUser(sbn.packageName, 0, sbn.user)
 
     val badgedAvatar = object : Drawable() {
         override fun draw(canvas: Canvas) {

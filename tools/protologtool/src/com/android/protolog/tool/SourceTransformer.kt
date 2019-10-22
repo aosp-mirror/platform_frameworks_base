@@ -16,7 +16,6 @@
 
 package com.android.protolog.tool
 
-import com.android.protolog.tool.Constants.IS_ENABLED_METHOD
 import com.android.server.protolog.common.LogDataType
 import com.github.javaparser.StaticJavaParser
 import com.github.javaparser.ast.CompilationUnit
@@ -45,6 +44,7 @@ import com.github.javaparser.printer.PrettyPrinterConfiguration
 
 class SourceTransformer(
     protoLogImplClassName: String,
+    protoLogCacheClassName: String,
     private val protoLogCallProcessor: ProtoLogCallProcessor
 ) : ProtoLogCallVisitor {
     override fun processCall(
@@ -91,10 +91,9 @@ class SourceTransformer(
             // Replace call to a stub method with an actual implementation.
             // Out: com.android.server.protolog.ProtoLogImpl.e(GROUP, 1234, null, arg)
             newCall.setScope(protoLogImplClassNode)
-            // Create a call to ProtoLogImpl.isEnabled(GROUP)
-            // Out: com.android.server.protolog.ProtoLogImpl.isEnabled(GROUP)
-            val isLogEnabled = MethodCallExpr(protoLogImplClassNode, IS_ENABLED_METHOD,
-                NodeList<Expression>(newCall.arguments[0].clone()))
+            // Create a call to ProtoLog$Cache.GROUP_enabled
+            // Out: com.android.server.protolog.ProtoLog$Cache.GROUP_enabled
+            val isLogEnabled = FieldAccessExpr(protoLogCacheClassNode, "${group.name}_enabled")
             if (argTypes.size != call.arguments.size - 2) {
                 throw InvalidProtoLogCallException(
                         "Number of arguments (${argTypes.size} does not mach format" +
@@ -211,6 +210,8 @@ class SourceTransformer(
 
     private val protoLogImplClassNode =
             StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogImplClassName)
+    private val protoLogCacheClassNode =
+            StaticJavaParser.parseExpression<FieldAccessExpr>(protoLogCacheClassName)
     private var processedCode: MutableList<String> = mutableListOf()
     private var offsets: IntArray = IntArray(0)
     private var fileName: String = ""

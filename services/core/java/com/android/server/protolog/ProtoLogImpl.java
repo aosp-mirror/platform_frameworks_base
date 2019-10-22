@@ -45,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.IllegalFormatConversionException;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -57,8 +56,18 @@ import java.util.stream.Collectors;
 public class ProtoLogImpl {
     private static final TreeMap<String, IProtoLogGroup> LOG_GROUPS = new TreeMap<>();
 
+    /**
+     * A runnable to update the cached output of {@link #isEnabled}.
+     *
+     * Must be invoked after every action that could change the result of {@link #isEnabled}, eg.
+     * starting / stopping proto log, or enabling / disabling log groups.
+     */
+    static Runnable sCacheUpdater = () -> { };
+
     private static void addLogGroupEnum(IProtoLogGroup[] config) {
-        Arrays.stream(config).forEach(group -> LOG_GROUPS.put(group.name(), group));
+        for (IProtoLogGroup group : config) {
+            LOG_GROUPS.put(group.name(), group);
+        }
     }
 
     static {
@@ -112,7 +121,7 @@ public class ProtoLogImpl {
 
     /** Returns true iff logging is enabled for the given {@code IProtoLogGroup}. */
     public static boolean isEnabled(IProtoLogGroup group) {
-        return group.isLogToProto()
+        return group.isLogToLogcat()
                 || (group.isLogToProto() && getSingleInstance().isProtoEnabled());
     }
 
@@ -303,6 +312,7 @@ public class ProtoLogImpl {
             mProtoLogEnabled = true;
             mProtoLogEnabledLockFree = true;
         }
+        sCacheUpdater.run();
     }
 
     /**
@@ -327,6 +337,7 @@ public class ProtoLogImpl {
                 throw new IllegalStateException("logging enabled while waiting for flush.");
             }
         }
+        sCacheUpdater.run();
     }
 
     /**
@@ -351,6 +362,7 @@ public class ProtoLogImpl {
                 return -1;
             }
         }
+        sCacheUpdater.run();
         return 0;
     }
 

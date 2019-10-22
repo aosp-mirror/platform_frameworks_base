@@ -52,6 +52,7 @@ abstract class UsbACEndpoint extends UsbDescriptor {
                                                 int length, byte type) {
         UsbInterfaceDescriptor interfaceDesc = parser.getCurInterface();
         int subClass = interfaceDesc.getUsbSubclass();
+        // TODO shouldn't this switch on subtype?
         switch (subClass) {
             case AUDIO_AUDIOCONTROL:
                 if (UsbDescriptorParser.DEBUG) {

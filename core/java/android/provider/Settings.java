@@ -7319,6 +7319,19 @@ public final class Settings {
         public static final String SILENCE_CALL_TOUCH_COUNT = "silence_call_touch_count";
 
         /**
+         * Number of successful "Motion Sense" tap gestures to pause media.
+         * @hide
+         */
+        public static final String AWARE_TAP_PAUSE_GESTURE_COUNT = "aware_tap_pause_gesture_count";
+
+        /**
+         * Number of touch interactions to pause media when a "Motion Sense" gesture could
+         * have been used.
+         * @hide
+         */
+        public static final String AWARE_TAP_PAUSE_TOUCH_COUNT = "aware_tap_pause_touch_count";
+
+        /**
          * The current night mode that has been selected by the user.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.

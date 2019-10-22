@@ -16,6 +16,9 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
+
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -27,6 +30,8 @@ import android.hardware.biometrics.Authenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,6 +39,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
@@ -229,15 +235,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void onBiometricAuthenticated(boolean authenticated, String failureReason) {
-        if (DEBUG) Log.d(TAG, "onBiometricAuthenticated: " + authenticated
-                + " reason: " + failureReason);
-
-        if (authenticated) {
-            mCurrentDialog.onAuthenticationSucceeded();
-        } else {
-            mCurrentDialog.onAuthenticationFailed(failureReason);
-        }
+    public void onBiometricAuthenticated() {
+        mCurrentDialog.onAuthenticationSucceeded();
     }
 
     @Override
@@ -247,16 +246,45 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         mCurrentDialog.onHelp(message);
     }
 
-    @Override
-    public void onBiometricError(int errorCode, String error) {
-        if (DEBUG) Log.d(TAG, "onBiometricError: " + errorCode + ", " + error);
+    private String getErrorString(int modality, int error, int vendorCode) {
+        switch (modality) {
+            case TYPE_FACE:
+                return FaceManager.getErrorString(mContext, error, vendorCode);
 
-        final boolean isLockout = errorCode == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
-                || errorCode == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+            case TYPE_FINGERPRINT:
+                return FingerprintManager.getErrorString(mContext, error, vendorCode);
+
+            default:
+                return "";
+        }
+    }
+
+    @Override
+    public void onBiometricError(int modality, int error, int vendorCode) {
+        if (DEBUG) {
+            Log.d(TAG, String.format("onBiometricError(%d, %d, %d)", modality, error, vendorCode));
+        }
+
+        final boolean isLockout = (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT)
+                || (error == BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT);
+
+        // TODO(b/141025588): Create separate methods for handling hard and soft errors.
+        final boolean isSoftError = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED
+                || error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT);
+
         if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
+            if (DEBUG) Log.d(TAG, "onBiometricError, lockout");
             mCurrentDialog.animateToCredentialUI();
+        } else if (isSoftError) {
+            final String errorMessage = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED)
+                    ? mContext.getString(R.string.biometric_not_recognized)
+                    : getErrorString(modality, error, vendorCode);
+            if (DEBUG) Log.d(TAG, "onBiometricError, soft error: " + errorMessage);
+            mCurrentDialog.onAuthenticationFailed(errorMessage);
         } else {
-            mCurrentDialog.onError(error);
+            final String errorMessage = getErrorString(modality, error, vendorCode);
+            if (DEBUG) Log.d(TAG, "onBiometricError, hard error: " + errorMessage);
+            mCurrentDialog.onError(errorMessage);
         }
     }
 

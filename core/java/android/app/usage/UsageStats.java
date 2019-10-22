@@ -35,6 +35,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 /**
@@ -48,6 +49,11 @@ public final class UsageStats implements Parcelable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public String mPackageName;
+
+    /**
+     * {@hide}
+     */
+    public int mPackageToken = -1;
 
     /**
      * {@hide}
@@ -139,6 +145,11 @@ public final class UsageStats implements Parcelable {
      * {@hide}
      */
     public ArrayMap<String, ArrayMap<String, Integer>> mChooserCounts = new ArrayMap<>();
+
+    /**
+     * {@hide}
+     */
+    public SparseArray<SparseIntArray> mChooserCountsObfuscated = new SparseArray<>();
 
     /**
      * {@hide}
