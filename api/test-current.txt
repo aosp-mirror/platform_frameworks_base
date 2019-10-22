@@ -2455,6 +2455,36 @@ package android.provider {
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
   }
 
+  public static final class Telephony.CellBroadcasts implements android.provider.BaseColumns {
+    field public static final String CID = "cid";
+    field public static final String CMAS_CATEGORY = "cmas_category";
+    field public static final String CMAS_CERTAINTY = "cmas_certainty";
+    field public static final String CMAS_MESSAGE_CLASS = "cmas_message_class";
+    field public static final String CMAS_RESPONSE_TYPE = "cmas_response_type";
+    field public static final String CMAS_SEVERITY = "cmas_severity";
+    field public static final String CMAS_URGENCY = "cmas_urgency";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final String DEFAULT_SORT_ORDER = "date DESC";
+    field public static final String DELIVERY_TIME = "date";
+    field public static final String ETWS_WARNING_TYPE = "etws_warning_type";
+    field public static final String GEOGRAPHICAL_SCOPE = "geo_scope";
+    field public static final String GEOMETRIES = "geometries";
+    field public static final String LAC = "lac";
+    field public static final String LANGUAGE_CODE = "language";
+    field public static final String MAXIMUM_WAIT_TIME = "maximum_wait_time";
+    field public static final String MESSAGE_BODY = "body";
+    field public static final String MESSAGE_BROADCASTED = "message_broadcasted";
+    field public static final String MESSAGE_FORMAT = "format";
+    field @RequiresPermission(android.Manifest.permission.READ_CELL_BROADCASTS) @NonNull public static final android.net.Uri MESSAGE_HISTORY_URI;
+    field public static final String MESSAGE_PRIORITY = "priority";
+    field public static final String MESSAGE_READ = "read";
+    field public static final String PLMN = "plmn";
+    field public static final String RECEIVED_TIME = "received_time";
+    field public static final String SERIAL_NUMBER = "serial_number";
+    field public static final String SERVICE_CATEGORY = "service_category";
+    field public static final String SLOT_INDEX = "slot_index";
+  }
+
   public static final class Telephony.Sms.Intents {
     field public static final String SMS_CARRIER_PROVISION_ACTION = "android.provider.Telephony.SMS_CARRIER_PROVISION";
   }
