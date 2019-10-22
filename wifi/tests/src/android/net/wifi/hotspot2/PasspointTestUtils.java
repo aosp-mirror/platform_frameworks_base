@@ -132,7 +132,6 @@ public class PasspointTestUtils {
      */
     public static PasspointConfiguration createConfig() {
         PasspointConfiguration config = new PasspointConfiguration();
-        config.setUpdateIdentifier(1234);
         config.setHomeSp(createHomeSp());
         config.setAaaServerTrustedNames(
                 new String[] {"trusted.fqdn.com", "another-trusted.fqdn.com"});
@@ -145,7 +144,6 @@ public class PasspointTestUtils {
         trustRootCertList.put("trustRoot.cert2.com",
                 new byte[CERTIFICATE_FINGERPRINT_BYTES]);
         config.setTrustRootCertList(trustRootCertList);
-        config.setUpdateIdentifier(1);
         config.setCredentialPriority(120);
         config.setSubscriptionCreationTimeInMillis(231200);
         config.setSubscriptionExpirationTimeInMillis(2134232);
@@ -158,6 +156,17 @@ public class PasspointTestUtils {
         friendlyNames.put("en", "ServiceName1");
         friendlyNames.put("kr", "ServiceName2");
         config.setServiceFriendlyNames(friendlyNames);
+        return config;
+    }
+
+    /**
+     * Helper function for creating an R2 {@link PasspointConfiguration} for testing.
+     *
+     * @return {@link PasspointConfiguration}
+     */
+    public static PasspointConfiguration createR2Config() {
+        PasspointConfiguration config = createConfig();
+        config.setUpdateIdentifier(1234);
         return config;
     }
 }
