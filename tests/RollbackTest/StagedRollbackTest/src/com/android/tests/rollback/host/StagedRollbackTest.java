@@ -94,7 +94,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Reboot device to activate staged package
         getDevice().reboot();
-        getDevice().waitForDeviceAvailable();
 
         runPhase("testNativeWatchdogTriggersRollback_Phase2");
 
@@ -134,7 +133,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         Thread.sleep(5000);
         // Reboot device to activate staged package
         getDevice().reboot();
-        getDevice().waitForDeviceAvailable();
 
         // Verify rollback was enabled
         runPhase("testNetworkFailedRollback_Phase2");
@@ -180,7 +178,6 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         Thread.sleep(5000);
         // Reboot device to activate staged package
         getDevice().reboot();
-        getDevice().waitForDeviceAvailable();
 
         // Verify rollback was enabled
         runPhase("testNetworkPassedDoesNotRollback_Phase2");
