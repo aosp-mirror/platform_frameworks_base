@@ -16,4 +16,4 @@
 
 package android.media.midi;
 
-parcelable MidiDeviceInfo cpp_header "media/MidiDeviceInfo.h";
+parcelable MidiDeviceInfo cpp_header "MidiDeviceInfo.h";
