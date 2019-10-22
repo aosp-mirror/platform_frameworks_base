@@ -5205,6 +5205,8 @@
     <string name="autofill_save_no">No thanks</string>
     <!-- Label for the autofill update button [CHAR LIMIT=NONE] -->
     <string name="autofill_update_yes">Update</string>
+    <!-- Label for the autofill continue button [CHAR LIMIT=NONE] -->
+    <string name="autofill_continue_yes">Continue</string>
 
     <!-- Label for the type of data being saved for autofill when it represent user credentials with a password [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_password">password</string>
@@ -5212,6 +5214,12 @@
     <string name="autofill_save_type_address">address</string>
     <!-- Label for the type of data being saved for autofill when it represents a credit card [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_credit_card">credit card</string>
+    <!-- Label for the type of data being saved for autofill when it represents a debit card [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_debit_card">debit card</string>
+    <!-- Label for the type of data being saved for autofill when it represents a payment card [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_payment_card">payment card</string>
+    <!-- Label for the type of data being saved for autofill when it represents a card that does not a specified type or cannot identify what the type is for [CHAR LIMIT=NONE] -->
+    <string name="autofill_save_type_generic_card">card</string>
     <!-- Label for the type of data being saved for autofill when it represents an username [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_username">username</string>
     <!-- Label for the type of data being saved for autofill when it represents an email address [CHAR LIMIT=NONE] -->

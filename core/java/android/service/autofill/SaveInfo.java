@@ -181,6 +181,23 @@ public final class SaveInfo implements Parcelable {
     public static final int SAVE_DATA_TYPE_EMAIL_ADDRESS = 0x10;
 
     /**
+     * Type used when the {@link FillResponse} represents a debit card.
+     */
+    public static final int SAVE_DATA_TYPE_DEBIT_CARD = 0x20;
+
+    /**
+     * Type used when the {@link FillResponse} represents a payment card except for credit and
+     * debit cards.
+     */
+    public static final int SAVE_DATA_TYPE_PAYMENT_CARD = 0x40;
+
+    /**
+     * Type used when the {@link FillResponse} represents a card that does not a specified card or
+     * cannot identify what the card is for.
+     */
+    public static final int SAVE_DATA_TYPE_GENERIC_CARD = 0x80;
+
+    /**
      * Style for the negative button of the save UI to cancel the
      * save operation. In this case, the user tapping the negative
      * button signals that they would prefer to not save the filled
@@ -207,6 +224,30 @@ public final class SaveInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @interface NegativeButtonStyle{}
 
+    /**
+     * Style for the positive button of save UI to request the save operation.
+     * In this case, the user tapping the positive button signals that they
+     * agrees to save the filled content.
+     */
+    public static final int POSITIVE_BUTTON_STYLE_SAVE = 0;
+
+    /**
+     * Style for the positive button of save UI to have next action before the save operation.
+     * This could be useful if the filled content contains sensitive personally identifiable
+     * information and then requires user confirmation or verification. In this case, the user
+     * tapping the positive button signals that they would complete the next required action
+     * to save the filled content.
+     */
+    public static final int POSITIVE_BUTTON_STYLE_CONTINUE = 1;
+
+    /** @hide */
+    @IntDef(prefix = { "POSITIVE_BUTTON_STYLE_" }, value = {
+            POSITIVE_BUTTON_STYLE_SAVE,
+            POSITIVE_BUTTON_STYLE_CONTINUE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface PositiveButtonStyle{}
+
     /** @hide */
     @IntDef(flag = true, prefix = { "SAVE_DATA_TYPE_" }, value = {
             SAVE_DATA_TYPE_GENERIC,
@@ -214,7 +255,10 @@ public final class SaveInfo implements Parcelable {
             SAVE_DATA_TYPE_ADDRESS,
             SAVE_DATA_TYPE_CREDIT_CARD,
             SAVE_DATA_TYPE_USERNAME,
-            SAVE_DATA_TYPE_EMAIL_ADDRESS
+            SAVE_DATA_TYPE_EMAIL_ADDRESS,
+            SAVE_DATA_TYPE_DEBIT_CARD,
+            SAVE_DATA_TYPE_PAYMENT_CARD,
+            SAVE_DATA_TYPE_GENERIC_CARD
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface SaveDataType{}
@@ -266,6 +310,7 @@ public final class SaveInfo implements Parcelable {
 
     private final @SaveDataType int mType;
     private final @NegativeButtonStyle int mNegativeButtonStyle;
+    private final @PositiveButtonStyle int mPositiveButtonStyle;
     private final IntentSender mNegativeActionListener;
     private final AutofillId[] mRequiredIds;
     private final AutofillId[] mOptionalIds;
@@ -281,6 +326,7 @@ public final class SaveInfo implements Parcelable {
         mType = builder.mType;
         mNegativeButtonStyle = builder.mNegativeButtonStyle;
         mNegativeActionListener = builder.mNegativeActionListener;
+        mPositiveButtonStyle = builder.mPositiveButtonStyle;
         mRequiredIds = builder.mRequiredIds;
         mOptionalIds = builder.mOptionalIds;
         mDescription = builder.mDescription;
@@ -310,6 +356,11 @@ public final class SaveInfo implements Parcelable {
     /** @hide */
     public @Nullable IntentSender getNegativeActionListener() {
         return mNegativeActionListener;
+    }
+
+    /** @hide */
+    public @PositiveButtonStyle int getPositiveActionStyle() {
+        return mPositiveButtonStyle;
     }
 
     /** @hide */
@@ -374,6 +425,7 @@ public final class SaveInfo implements Parcelable {
 
         private final @SaveDataType int mType;
         private @NegativeButtonStyle int mNegativeButtonStyle = NEGATIVE_BUTTON_STYLE_CANCEL;
+        private @PositiveButtonStyle int mPositiveButtonStyle = POSITIVE_BUTTON_STYLE_SAVE;
         private IntentSender mNegativeActionListener;
         private final AutofillId[] mRequiredIds;
         private AutofillId[] mOptionalIds;
@@ -394,8 +446,9 @@ public final class SaveInfo implements Parcelable {
          * can be any combination of {@link SaveInfo#SAVE_DATA_TYPE_GENERIC},
          * {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
          * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD},
-         * {@link SaveInfo#SAVE_DATA_TYPE_USERNAME}, or
-         * {@link SaveInfo#SAVE_DATA_TYPE_EMAIL_ADDRESS}.
+         * {@link SaveInfo#SAVE_DATA_TYPE_DEBIT_CARD}, {@link SaveInfo#SAVE_DATA_TYPE_PAYMENT_CARD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_GENERIC_CARD}, {@link SaveInfo#SAVE_DATA_TYPE_USERNAME},
+         * or {@link SaveInfo#SAVE_DATA_TYPE_EMAIL_ADDRESS}.
          * @param requiredIds ids of all required views that will trigger a save request.
          *
          * <p>See {@link SaveInfo} for more info.
@@ -418,8 +471,9 @@ public final class SaveInfo implements Parcelable {
          * can be any combination of {@link SaveInfo#SAVE_DATA_TYPE_GENERIC},
          * {@link SaveInfo#SAVE_DATA_TYPE_PASSWORD},
          * {@link SaveInfo#SAVE_DATA_TYPE_ADDRESS}, {@link SaveInfo#SAVE_DATA_TYPE_CREDIT_CARD},
-         * {@link SaveInfo#SAVE_DATA_TYPE_USERNAME}, or
-         * {@link SaveInfo#SAVE_DATA_TYPE_EMAIL_ADDRESS}.
+         * {@link SaveInfo#SAVE_DATA_TYPE_DEBIT_CARD}, {@link SaveInfo#SAVE_DATA_TYPE_PAYMENT_CARD},
+         * {@link SaveInfo#SAVE_DATA_TYPE_GENERIC_CARD}, {@link SaveInfo#SAVE_DATA_TYPE_USERNAME},
+         * or {@link SaveInfo#SAVE_DATA_TYPE_EMAIL_ADDRESS}.
          *
          * <p>See {@link SaveInfo} for more info.
          */
@@ -523,12 +577,41 @@ public final class SaveInfo implements Parcelable {
         public @NonNull Builder setNegativeAction(@NegativeButtonStyle int style,
                 @Nullable IntentSender listener) {
             throwIfDestroyed();
+            Preconditions.checkArgumentInRange(style, NEGATIVE_BUTTON_STYLE_CANCEL,
+                    NEGATIVE_BUTTON_STYLE_REJECT, "style");
             if (style != NEGATIVE_BUTTON_STYLE_CANCEL
                     && style != NEGATIVE_BUTTON_STYLE_REJECT) {
                 throw new IllegalArgumentException("Invalid style: " + style);
             }
             mNegativeButtonStyle = style;
             mNegativeActionListener = listener;
+            return this;
+        }
+
+        /**
+         * Sets the style for the positive save action.
+         *
+         * <p>This allows an autofill service to customize the style of the
+         * positive action in the save UI. Note that selecting the positive
+         * action regardless of its style would dismiss the save UI and calling
+         * into the {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback) save request}.
+         * The service should take the next action if selecting style
+         * {@link #POSITIVE_BUTTON_STYLE_CONTINUE}. The default style is
+         * {@link #POSITIVE_BUTTON_STYLE_SAVE}
+         *
+         * @param style The action style.
+         * @return This builder.
+         *
+         * @see #POSITIVE_BUTTON_STYLE_SAVE
+         * @see #POSITIVE_BUTTON_STYLE_CONTINUE
+         *
+         * @throws IllegalArgumentException If the style is invalid
+         */
+        public @NonNull Builder setPositiveAction(@PositiveButtonStyle int style) {
+            throwIfDestroyed();
+            Preconditions.checkArgumentInRange(style, POSITIVE_BUTTON_STYLE_SAVE,
+                    POSITIVE_BUTTON_STYLE_CONTINUE, "style");
+            mPositiveButtonStyle = style;
             return this;
         }
 
@@ -717,8 +800,10 @@ public final class SaveInfo implements Parcelable {
         final StringBuilder builder = new StringBuilder("SaveInfo: [type=")
                 .append(DebugUtils.flagsToString(SaveInfo.class, "SAVE_DATA_TYPE_", mType))
                 .append(", requiredIds=").append(Arrays.toString(mRequiredIds))
-                .append(", style=").append(DebugUtils.flagsToString(SaveInfo.class,
-                        "NEGATIVE_BUTTON_STYLE_", mNegativeButtonStyle));
+                .append(", negative style=").append(DebugUtils.flagsToString(SaveInfo.class,
+                        "NEGATIVE_BUTTON_STYLE_", mNegativeButtonStyle))
+                .append(", positive style=").append(DebugUtils.flagsToString(SaveInfo.class,
+                        "POSITIVE_BUTTON_STYLE_", mPositiveButtonStyle));
         if (mOptionalIds != null) {
             builder.append(", optionalIds=").append(Arrays.toString(mOptionalIds));
         }
@@ -763,6 +848,7 @@ public final class SaveInfo implements Parcelable {
         parcel.writeParcelableArray(mOptionalIds, flags);
         parcel.writeInt(mNegativeButtonStyle);
         parcel.writeParcelable(mNegativeActionListener, flags);
+        parcel.writeInt(mPositiveButtonStyle);
         parcel.writeCharSequence(mDescription);
         parcel.writeParcelable(mCustomDescription, flags);
         parcel.writeParcelable(mValidator, flags);
@@ -794,6 +880,7 @@ public final class SaveInfo implements Parcelable {
             }
 
             builder.setNegativeAction(parcel.readInt(), parcel.readParcelable(null));
+            builder.setPositiveAction(parcel.readInt());
             builder.setDescription(parcel.readCharSequence());
             final CustomDescription customDescripton = parcel.readParcelable(null);
             if (customDescripton != null) {
