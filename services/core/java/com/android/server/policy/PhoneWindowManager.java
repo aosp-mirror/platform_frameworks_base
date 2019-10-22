@@ -386,6 +386,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     BurnInProtectionHelper mBurnInProtectionHelper;
     private DisplayFoldController mDisplayFoldController;
     AppOpsManager mAppOpsManager;
+    PackageManager mPackageManager;
     private boolean mHasFeatureAuto;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
@@ -1555,10 +1556,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void launchAllAppsAction() {
         Intent intent = new Intent(Intent.ACTION_ALL_APPS);
         if (mHasFeatureLeanback) {
-            final PackageManager pm = mContext.getPackageManager();
             Intent intentLauncher = new Intent(Intent.ACTION_MAIN);
             intentLauncher.addCategory(Intent.CATEGORY_HOME);
-            ResolveInfo resolveInfo = pm.resolveActivityAsUser(intentLauncher,
+            ResolveInfo resolveInfo = mPackageManager.resolveActivityAsUser(intentLauncher,
                     PackageManager.MATCH_SYSTEM_ONLY,
                     mCurrentUserId);
             if (resolveInfo != null) {
@@ -1753,10 +1753,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
-        mHasFeatureWatch = mContext.getPackageManager().hasSystemFeature(FEATURE_WATCH);
-        mHasFeatureLeanback = mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK);
-        mHasFeatureAuto = mContext.getPackageManager().hasSystemFeature(FEATURE_AUTOMOTIVE);
-        mHasFeatureHdmiCec = mContext.getPackageManager().hasSystemFeature(FEATURE_HDMI_CEC);
+        mPackageManager = mContext.getPackageManager();
+        mHasFeatureWatch = mPackageManager.hasSystemFeature(FEATURE_WATCH);
+        mHasFeatureLeanback = mPackageManager.hasSystemFeature(FEATURE_LEANBACK);
+        mHasFeatureAuto = mPackageManager.hasSystemFeature(FEATURE_AUTOMOTIVE);
+        mHasFeatureHdmiCec = mPackageManager.hasSystemFeature(FEATURE_HDMI_CEC);
         mAccessibilityShortcutController =
                 new AccessibilityShortcutController(mContext, new Handler(), mCurrentUserId);
         mLogger = new MetricsLogger();
@@ -1994,7 +1995,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
-        if (mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
+        if (mPackageManager.hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE;
         }
     }
@@ -2138,7 +2139,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         ApplicationInfo appInfo;
         try {
-            appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+            appInfo = mPackageManager.getApplicationInfoAsUser(
                             attrs.packageName,
                             0 /* flags */,
                             UserHandle.getUserId(callingUid));
@@ -4914,7 +4915,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
                     int theme;
-                    if (mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK)) {
+                    if (mPackageManager.hasSystemFeature(FEATURE_LEANBACK)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
                     } else {
                         theme = 0;
@@ -4943,7 +4944,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             return true;
                         }
                     };
-                    if (mContext.getPackageManager().isDeviceUpgrading()) {
+                    if (mPackageManager.isDeviceUpgrading()) {
                         mBootMsgDialog.setTitle(R.string.android_upgrading_title);
                     } else {
                         mBootMsgDialog.setTitle(R.string.android_start_title);
@@ -5203,7 +5204,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         ActivityInfo ai = null;
-        ResolveInfo info = mContext.getPackageManager().resolveActivityAsUser(
+        ResolveInfo info = mPackageManager.resolveActivityAsUser(
                 intent,
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
                 mCurrentUserId);
