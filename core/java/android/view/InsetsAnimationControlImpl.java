@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.InsetsState.INSET_SIDE_BOTTOM;
+import static android.view.InsetsState.INSET_SIDE_FLOATING;
 import static android.view.InsetsState.INSET_SIDE_LEFT;
 import static android.view.InsetsState.INSET_SIDE_RIGHT;
 import static android.view.InsetsState.INSET_SIDE_TOP;
@@ -151,6 +152,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         updateLeashesForSide(INSET_SIDE_RIGHT, offset.right, mPendingInsets.right, params, state);
         updateLeashesForSide(INSET_SIDE_BOTTOM, offset.bottom, mPendingInsets.bottom, params,
                 state);
+        updateLeashesForSide(INSET_SIDE_FLOATING, 0 /* offset */, 0 /* inset */, params, state);
+
         SyncRtSurfaceTransactionApplier applier = mTransactionApplierSupplier.get();
         applier.scheduleApply(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
@@ -238,7 +241,9 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             // If the system is controlling the insets source, the leash can be null.
             if (leash != null) {
                 surfaceParams.add(new SurfaceParams(leash, 1f /* alpha */, mTmpMatrix,
-                        null /* windowCrop */, 0 /* layer */, 0f /* cornerRadius*/, inset != 0));
+                        null /* windowCrop */, 0 /* layer */, 0f /* cornerRadius*/,
+                        side == INSET_SIDE_FLOATING
+                                ? consumer.isVisible() : inset != 0 /* visible */));
             }
         }
     }
