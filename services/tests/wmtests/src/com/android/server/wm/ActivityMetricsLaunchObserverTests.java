@@ -208,9 +208,6 @@ public class ActivityMetricsLaunchObserverTests extends ActivityTestsBase {
 
         notifyWindowsDrawn(mTrampolineActivity);
 
-        assertWithMessage("Trampoline activity is drawn but the top activity is not yet")
-                .that(mActivityMetricsLogger.allWindowsDrawn()).isFalse();
-
         notifyWindowsDrawn(mTopActivity);
 
         verifyAsync(mLaunchObserver).onActivityLaunchFinished(eqProto(mTrampolineActivity),
