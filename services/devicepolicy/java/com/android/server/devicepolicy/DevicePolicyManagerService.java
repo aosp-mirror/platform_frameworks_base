@@ -4183,7 +4183,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean passwordQualityInvocationOrderCheckEnabled(String packageName, int userId) {
         try {
             return mIPlatformCompat.isChangeEnabledByPackageName(ADMIN_APP_PASSWORD_COMPLEXITY,
-                    packageName);
+                    packageName, userId);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
         }
