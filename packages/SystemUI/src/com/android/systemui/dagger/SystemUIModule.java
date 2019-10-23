@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -46,11 +47,13 @@ public abstract class SystemUIModule {
     @Nullable
     static KeyguardLiftController provideKeyguardLiftController(Context context,
             StatusBarStateController statusBarStateController,
-            AsyncSensorManager asyncSensorManager) {
+            AsyncSensorManager asyncSensorManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             return null;
         }
-        return new KeyguardLiftController(statusBarStateController, asyncSensorManager);
+        return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
+                keyguardUpdateMonitor);
     }
 
 
