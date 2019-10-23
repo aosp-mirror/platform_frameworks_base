@@ -55,7 +55,11 @@ import java.util.Arrays;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+import dagger.Lazy;
+
+@Singleton
 public class PowerUI extends SystemUI {
 
     static final String TAG = "PowerUI";
@@ -101,11 +105,14 @@ public class PowerUI extends SystemUI {
     private IThermalEventListener mSkinThermalEventListener;
     private IThermalEventListener mUsbThermalEventListener;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final Lazy<StatusBar> mStatusBarLazy;
 
     @Inject
-    public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher) {
+    public PowerUI(Context context, BroadcastDispatcher broadcastDispatcher,
+            Lazy<StatusBar> statusBarLazy) {
         super(context);
         mBroadcastDispatcher = broadcastDispatcher;
+        mStatusBarLazy = statusBarLazy;
     }
 
     public void start() {
@@ -663,8 +670,7 @@ public class PowerUI extends SystemUI {
             int status = temp.getStatus();
 
             if (status >= Temperature.THROTTLING_EMERGENCY) {
-                StatusBar statusBar = getComponent(StatusBar.class);
-                if (statusBar != null && !statusBar.isDeviceInVrMode()) {
+                if (!mStatusBarLazy.get().isDeviceInVrMode()) {
                     mWarnings.showHighTemperatureWarning();
                     Slog.d(TAG, "SkinThermalEventListener: notifyThrottling was called "
                             + ", current skin status = " + status

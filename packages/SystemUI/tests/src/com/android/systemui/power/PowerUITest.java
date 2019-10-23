@@ -22,7 +22,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.anyObject;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,6 +59,8 @@ import org.mockito.MockitoAnnotations;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import dagger.Lazy;
+
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
@@ -86,6 +87,8 @@ public class PowerUITest extends SysuiTestCase {
     private IThermalEventListener mUsbThermalEventListener;
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
+    @Mock private Lazy<StatusBar> mStatusBarLazy;
+    @Mock private StatusBar mStatusBar;
 
     @Before
     public void setup() {
@@ -93,7 +96,8 @@ public class PowerUITest extends SysuiTestCase {
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
         mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
 
-        mContext.putComponent(StatusBar.class, mock(StatusBar.class));
+        when(mStatusBarLazy.get()).thenReturn(mStatusBar);
+
         mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
         createPowerUi();
@@ -682,7 +686,7 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     private void createPowerUi() {
-        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher);
+        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mStatusBarLazy);
         mPowerUI.mComponents = mContext.getComponents();
         mPowerUI.mThermalService = mThermalServiceMock;
     }
