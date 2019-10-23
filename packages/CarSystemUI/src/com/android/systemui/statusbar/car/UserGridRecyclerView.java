@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.car;
 
 import static android.content.DialogInterface.BUTTON_NEGATIVE;
 import static android.content.DialogInterface.BUTTON_POSITIVE;
+import static android.os.UserManager.DISALLOW_ADD_USER;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
@@ -145,7 +146,8 @@ public class UserGridRecyclerView extends RecyclerView {
         userRecords.add(createStartGuestUserRecord());
 
         // Add add user record if the foreground user can add users
-        if (mCarUserManagerHelper.canForegroundUserAddUsers()) {
+        UserHandle fgUserHandle = UserHandle.of(ActivityManager.getCurrentUser());
+        if (!mUserManager.hasUserRestriction(DISALLOW_ADD_USER, fgUserHandle)) {
             userRecords.add(createAddUserRecord());
         }
 
@@ -285,7 +287,7 @@ public class UserGridRecyclerView extends RecyclerView {
         }
 
         private void handleAddUserClicked() {
-            if (mCarUserManagerHelper.isUserLimitReached()) {
+            if (!mUserManager.canAddMoreUsers()) {
                 mAddUserView.setEnabled(true);
                 showMaxUserLimitReachedDialog();
             } else {
