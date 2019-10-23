@@ -3204,6 +3204,14 @@ public class Notification implements Parcelable
     }
 
     /**
+     * Sets the {@link BubbleMetadata} for this notification.
+     * @hide
+     */
+    public void setBubbleMetadata(BubbleMetadata data) {
+        mBubbleMetadata = data;
+    }
+
+    /**
      * Returns whether the platform is allowed (by the app developer) to generate contextual actions
      * for this notification.
      */
