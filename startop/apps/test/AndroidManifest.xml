@@ -73,6 +73,18 @@
         </activity>
 
         <activity
+            android:label="Initialization Check Overhead Test"
+            android:name=".InitCheckOverheadBenchmarkActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:label="TextView Layout Test"
             android:name=".TextViewInflationActivity"
             android:exported="true" >
