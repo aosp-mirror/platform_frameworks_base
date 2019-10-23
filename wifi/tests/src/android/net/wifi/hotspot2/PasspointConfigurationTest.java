@@ -183,7 +183,7 @@ public class PasspointConfigurationTest {
         PasspointConfiguration config = PasspointTestUtils.createConfig();
 
         assertTrue(config.validate());
-        assertTrue(config.validateForR2());
+        assertFalse(config.isOsuProvisioned());
     }
 
     /**
@@ -241,7 +241,6 @@ public class PasspointConfigurationTest {
         config.setPolicy(null);
 
         assertTrue(config.validate());
-        assertTrue(config.validateForR2());
     }
 
     /**
@@ -271,7 +270,6 @@ public class PasspointConfigurationTest {
         config.setAaaServerTrustedNames(null);
 
         assertTrue(config.validate());
-        assertTrue(config.validateForR2());
     }
 
     /**
@@ -347,5 +345,18 @@ public class PasspointConfigurationTest {
         PasspointConfiguration sourceConfig = PasspointTestUtils.createConfig();
         PasspointConfiguration copyConfig = new PasspointConfiguration(sourceConfig);
         assertTrue(copyConfig.equals(sourceConfig));
+    }
+
+    /**
+     * Verify that a configuration containing all fields is valid for R2.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void validateFullR2Config() throws Exception {
+        PasspointConfiguration config = PasspointTestUtils.createR2Config();
+        assertTrue(config.validate());
+        assertTrue(config.validateForR2());
+        assertTrue(config.isOsuProvisioned());
     }
 }

@@ -54,6 +54,8 @@ public class ConfigParserTest {
             "assets/hsr1/HSR1ProfileWithInvalidContentType.base64";
     private static final String PASSPOINT_INSTALLATION_FILE_WITHOUT_PROFILE =
             "assets/hsr1/HSR1ProfileWithoutProfile.base64";
+    private static final String PASSPOINT_INSTALLATION_FILE_WITH_UPDATE_ID =
+            "assets/hsr1/HSR1ProfileWithUpdateIdentifier.base64";
 
     /**
      * Read the content of the given resource file into a String.
@@ -201,4 +203,22 @@ public class ConfigParserTest {
         assertNull(ConfigParser.parsePasspointConfig(
                 "application/x-wifi-config", configStr.getBytes()));
     }
+
+    /**
+     * Verify a valid installation file is parsed successfully with the matching contents, and that
+     * Update identifier is cleared.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void parseConfigFileWithUpdateIdentifier() throws Exception {
+        String configStr = loadResourceFile(PASSPOINT_INSTALLATION_FILE_WITH_UPDATE_ID);
+        PasspointConfiguration expectedConfig = generateConfigurationFromProfile();
+        PasspointConfiguration actualConfig =
+                ConfigParser.parsePasspointConfig(
+                        "application/x-wifi-config", configStr.getBytes());
+        // Expected configuration does not contain an update identifier
+        assertTrue(actualConfig.equals(expectedConfig));
+    }
+
 }
