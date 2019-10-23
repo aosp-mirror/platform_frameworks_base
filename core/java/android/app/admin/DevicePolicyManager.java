@@ -8351,6 +8351,24 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device owners to set the user's master location setting.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with
+     * @param locationEnabled whether location should be enabled or disabled
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setLocationEnabled(@NonNull ComponentName admin, boolean locationEnabled) {
+        throwIfParentInstance("setLocationEnabled");
+        if (mService != null) {
+            try {
+                mService.setLocationEnabled(admin, locationEnabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Called by profile or device owners to update {@link android.provider.Settings.Secure}
      * settings. Validation that the value of the setting is in the correct form for the setting
      * type should be performed by the caller.
@@ -8377,6 +8395,11 @@ public class DevicePolicyManager {
      * Starting from Android Q, the device and profile owner can also call
      * {@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY} to restrict unknown sources for
      * all users.
+     * </strong>
+     *
+     * <strong>Note: Starting from Android R, apps should no longer call this method with the
+     * setting {@link android.provider.Settings.Secure#LOCATION_MODE}, which is deprecated. Instead,
+     * device owners should call {@link #setLocationEnabled(ComponentName, boolean)}.
      * </strong>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.

@@ -16,14 +16,11 @@
 
 package com.android.internal.widget;
 
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
-import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
+import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -61,9 +58,6 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     // Stores raw credential bytes, or null if credential has been zeroized. An empty password
     // is represented as a byte array of length 0.
     private byte[] mCredential;
-    // Store the quality of the password, this is used to distinguish between pin
-    // (PASSWORD_QUALITY_NUMERIC) and password (PASSWORD_QUALITY_ALPHABETIC).
-    private final int mQuality;
 
     /**
      * Private constructor, use static builder methods instead.
@@ -72,15 +66,18 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      * LockscreenCredential will only store the reference internally without copying. This is to
      * minimize the number of extra copies introduced.
      */
-    private LockscreenCredential(int type, int quality, byte[] credential) {
+    private LockscreenCredential(int type, byte[] credential) {
         Preconditions.checkNotNull(credential);
         if (type == CREDENTIAL_TYPE_NONE) {
             Preconditions.checkArgument(credential.length == 0);
         } else {
+            // Do not allow constructing a CREDENTIAL_TYPE_PASSWORD_OR_PIN object.
+            Preconditions.checkArgument(type == CREDENTIAL_TYPE_PIN
+                    || type == CREDENTIAL_TYPE_PASSWORD
+                    || type == CREDENTIAL_TYPE_PATTERN);
             Preconditions.checkArgument(credential.length > 0);
         }
         mType = type;
-        mQuality = quality;
         mCredential = credential;
     }
 
@@ -88,8 +85,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      * Creates a LockscreenCredential object representing empty password.
      */
     public static LockscreenCredential createNone() {
-        return new LockscreenCredential(CREDENTIAL_TYPE_NONE, PASSWORD_QUALITY_UNSPECIFIED,
-                new byte[0]);
+        return new LockscreenCredential(CREDENTIAL_TYPE_NONE, new byte[0]);
     }
 
     /**
@@ -97,7 +93,6 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      */
     public static LockscreenCredential createPattern(@NonNull List<LockPatternView.Cell> pattern) {
         return new LockscreenCredential(CREDENTIAL_TYPE_PATTERN,
-                PASSWORD_QUALITY_SOMETHING,
                 LockPatternUtils.patternToByteArray(pattern));
     }
 
@@ -106,16 +101,25 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
      */
     public static LockscreenCredential createPassword(@NonNull CharSequence password) {
         return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
-                PASSWORD_QUALITY_ALPHABETIC,
                 charSequenceToByteArray(password));
+    }
+
+    /**
+     * Creates a LockscreenCredential object representing a managed password for profile with
+     * unified challenge. This credentiall will have type {@code CREDENTIAL_TYPE_PASSWORD} for now.
+     * TODO: consider add a new credential type for this. This can then supersede the
+     * isLockTiedToParent argument in various places in LSS.
+     */
+    public static LockscreenCredential createManagedPassword(@NonNull byte[] password) {
+        return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
+                Arrays.copyOf(password, password.length));
     }
 
     /**
      * Creates a LockscreenCredential object representing the given numeric PIN.
      */
     public static LockscreenCredential createPin(@NonNull CharSequence pin) {
-        return new LockscreenCredential(CREDENTIAL_TYPE_PASSWORD,
-                PASSWORD_QUALITY_NUMERIC,
+        return new LockscreenCredential(CREDENTIAL_TYPE_PIN,
                 charSequenceToByteArray(pin));
     }
 
@@ -143,39 +147,17 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         }
     }
 
-    /**
-     * Create a LockscreenCredential object based on raw credential and type
-     * TODO: Remove once LSS.setUserPasswordMetrics accepts a LockscreenCredential
-     */
-    public static LockscreenCredential createRaw(int type, byte[] credential) {
-        if (type == CREDENTIAL_TYPE_NONE) {
-            return createNone();
-        } else {
-            return new LockscreenCredential(type, PASSWORD_QUALITY_UNSPECIFIED, credential);
-        }
-    }
-
     private void ensureNotZeroized() {
         Preconditions.checkState(mCredential != null, "Credential is already zeroized");
     }
     /**
      * Returns the type of this credential. Can be one of {@link #CREDENTIAL_TYPE_NONE},
-     * {@link #CREDENTIAL_TYPE_PATTERN} or {@link #CREDENTIAL_TYPE_PASSWORD}.
-     *
-     * TODO: Remove once credential type is internal. Callers should use {@link #isNone},
-     * {@link #isPattern} and {@link #isPassword} instead.
+     * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} or
+     * {@link #CREDENTIAL_TYPE_PASSWORD}.
      */
     public int getType() {
         ensureNotZeroized();
         return mType;
-    }
-
-    /**
-     * Returns the quality type of the credential
-     */
-    public int getQuality() {
-        ensureNotZeroized();
-        return mQuality;
     }
 
     /**
@@ -200,9 +182,11 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         if (isPattern()) {
             return StorageManager.CRYPT_TYPE_PATTERN;
         }
+        if (isPin()) {
+            return StorageManager.CRYPT_TYPE_PIN;
+        }
         if (isPassword()) {
-            return mQuality == PASSWORD_QUALITY_NUMERIC
-                    ? StorageManager.CRYPT_TYPE_PIN : StorageManager.CRYPT_TYPE_PASSWORD;
+            return StorageManager.CRYPT_TYPE_PASSWORD;
         }
         throw new IllegalStateException("Unhandled credential type");
     }
@@ -219,7 +203,13 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         return mType == CREDENTIAL_TYPE_PATTERN;
     }
 
-    /** Returns whether this is a password credential */
+    /** Returns whether this is a numeric pin credential */
+    public boolean isPin() {
+        ensureNotZeroized();
+        return mType == CREDENTIAL_TYPE_PIN;
+    }
+
+    /** Returns whether this is an alphabetic password credential */
     public boolean isPassword() {
         ensureNotZeroized();
         return mType == CREDENTIAL_TYPE_PASSWORD;
@@ -233,7 +223,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
 
     /** Create a copy of the credential */
     public LockscreenCredential duplicate() {
-        return new LockscreenCredential(mType, mQuality,
+        return new LockscreenCredential(mType,
                 mCredential != null ? Arrays.copyOf(mCredential, mCredential.length) : null);
     }
 
@@ -263,7 +253,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
             }
             return;
         }
-        if (isPassword()) {
+        if (isPassword() || isPin()) {
             if (size() < LockPatternUtils.MIN_LOCK_PASSWORD_SIZE) {
                 throw new IllegalArgumentException("password must not be null and at least "
                         + "of length " + LockPatternUtils.MIN_LOCK_PASSWORD_SIZE);
@@ -272,10 +262,22 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         }
     }
 
+    /**
+     * Check if this credential's type matches one that's retrieved from disk. The nuance here is
+     * that the framework used to not distinguish between PIN and password, so this method will
+     * allow a PIN/Password LockscreenCredential to match against the legacy
+     * {@link #CREDENTIAL_TYPE_PASSWORD_OR_PIN} stored on disk.
+     */
+    public boolean checkAgainstStoredType(int storedCredentialType) {
+        if (storedCredentialType == CREDENTIAL_TYPE_PASSWORD_OR_PIN) {
+            return getType() == CREDENTIAL_TYPE_PASSWORD || getType() == CREDENTIAL_TYPE_PIN;
+        }
+        return getType() == storedCredentialType;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mType);
-        dest.writeInt(mQuality);
         dest.writeByteArray(mCredential);
     }
 
@@ -284,8 +286,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
 
         @Override
         public LockscreenCredential createFromParcel(Parcel source) {
-            return new LockscreenCredential(source.readInt(), source.readInt(),
-                    source.createByteArray());
+            return new LockscreenCredential(source.readInt(), source.createByteArray());
         }
 
         @Override
@@ -307,7 +308,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
     @Override
     public int hashCode() {
         // Effective Java — Item 9
-        return ((17 + mType) * 31 + mQuality) * 31 + mCredential.hashCode();
+        return (17 + mType) * 31 + mCredential.hashCode();
     }
 
     @Override
@@ -315,8 +316,7 @@ public class LockscreenCredential implements Parcelable, AutoCloseable {
         if (o == this) return true;
         if (!(o instanceof LockscreenCredential)) return false;
         final LockscreenCredential other = (LockscreenCredential) o;
-        return mType == other.mType && mQuality == other.mQuality
-                && Arrays.equals(mCredential, other.mCredential);
+        return mType == other.mType && Arrays.equals(mCredential, other.mCredential);
     }
 
     /**

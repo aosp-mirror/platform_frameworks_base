@@ -88,6 +88,7 @@ public class LockSettingsShellCommandTest {
 
     @Test
     public void testWrongPassword() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
         when(mLockPatternUtils.checkCredential(
@@ -101,6 +102,7 @@ public class LockSettingsShellCommandTest {
 
     @Test
     public void testChangePin() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
         when(mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)).thenReturn(
@@ -128,6 +130,7 @@ public class LockSettingsShellCommandTest {
 
     @Test
     public void testChangePassword() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(true);
         when(mLockPatternUtils.getKeyguardStoredPasswordQuality(mUserId)).thenReturn(
@@ -155,6 +158,7 @@ public class LockSettingsShellCommandTest {
 
     @Test
     public void testChangePattern() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.checkCredential(
@@ -181,6 +185,7 @@ public class LockSettingsShellCommandTest {
 
     @Test
     public void testClear() throws Exception {
+        when(mLockPatternUtils.isSecure(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPatternEnabled(mUserId)).thenReturn(true);
         when(mLockPatternUtils.isLockPasswordEnabled(mUserId)).thenReturn(false);
         when(mLockPatternUtils.checkCredential(

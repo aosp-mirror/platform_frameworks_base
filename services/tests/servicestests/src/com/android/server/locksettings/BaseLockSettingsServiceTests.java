@@ -52,6 +52,7 @@ import android.test.AndroidTestCase;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.wm.WindowManagerInternal;
@@ -104,6 +105,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     FaceManager mFaceManager;
     PackageManager mPackageManager;
     protected boolean mHasSecureLockScreen;
+    FakeSettings mSettings;
 
     @Override
     protected void setUp() throws Exception {
@@ -125,6 +127,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mFingerprintManager = mock(FingerprintManager.class);
         mFaceManager = mock(FaceManager.class);
         mPackageManager = mock(PackageManager.class);
+        mSettings = new FakeSettings();
 
         LocalServices.removeServiceForTest(LockSettingsInternal.class);
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -162,7 +165,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
                 mSpManager, mAuthSecretService, mGsiService, mRecoverableKeyStoreManager,
-                mUserManagerInternal, mDeviceStateCache);
+                mUserManagerInternal, mDeviceStateCache, mSettings);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
@@ -195,6 +198,7 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
         mockBiometricsHardwareFingerprintsAndTemplates(PRIMARY_USER_ID);
         mockBiometricsHardwareFingerprintsAndTemplates(MANAGED_PROFILE_USER_ID);
 
+        mSettings.setDeviceProvisioned(true);
         mLocalService = LocalServices.getService(LockSettingsInternal.class);
     }
 
@@ -307,4 +311,22 @@ public abstract class BaseLockSettingsServiceTests extends AndroidTestCase {
     protected static void assertArrayNotEquals(byte[] expected, byte[] actual) {
         assertFalse(Arrays.equals(expected, actual));
     }
+
+    protected LockscreenCredential newPassword(String password) {
+        return LockscreenCredential.createPasswordOrNone(password);
+    }
+
+    protected LockscreenCredential newPin(String pin) {
+        return LockscreenCredential.createPinOrNone(pin);
+    }
+
+    protected LockscreenCredential newPattern(String pattern) {
+        return LockscreenCredential.createPattern(LockPatternUtils.byteArrayToPattern(
+                pattern.getBytes()));
+    }
+
+    protected LockscreenCredential nonePassword() {
+        return LockscreenCredential.createNone();
+    }
+
 }

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger;
 
+import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.power.PowerUI;

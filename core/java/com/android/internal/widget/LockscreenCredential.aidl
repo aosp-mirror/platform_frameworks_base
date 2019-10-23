@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
-
-import android.app.Activity;
-import android.app.Service;
+package com.android.internal.widget;
 
 /**
- * Interface necessary to make Dagger happy. See {@link ContextComponentResolver}.
+ * A class representing a lockscreen credential.
  */
-public interface ContextComponentHelper {
-    /** Turns a classname into an instance of the class or returns null. */
-    Activity resolveActivity(String className);
+parcelable LockscreenCredential;
 
-    /** Turns a classname into an instance of the class or returns null. */
-    Service resolveService(String className);
-
-    /** Turns a classname into an instance of the class or returns null. */
-    SystemUI resolveSystemUI(String className);
-}

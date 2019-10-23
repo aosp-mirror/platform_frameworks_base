@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger;
 
-import android.app.Activity;
+import android.app.Service;
 
-import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.ImageWallpaper;
+import com.android.systemui.doze.DozeService;
+import com.android.systemui.keyguard.KeyguardService;
 
 import dagger.Binds;
 import dagger.Module;
@@ -26,19 +28,25 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /**
- * Services and Activities that are injectable should go here.
+ * Services that are injectable should go here.
  */
 @Module
-public abstract class ActivityBinder {
-    /** Inject into TunerActivity. */
+public abstract class ServiceBinder {
+    /** */
     @Binds
     @IntoMap
-    @ClassKey(TunerActivity.class)
-    public abstract Activity bindTunerActivity(TunerActivity activity);
+    @ClassKey(DozeService.class)
+    public abstract Service bindDozeService(DozeService service);
 
-    /** Inject into ForegroundServicesDialog. */
+    /** */
     @Binds
     @IntoMap
-    @ClassKey(ForegroundServicesDialog.class)
-    public abstract Activity bindForegroundServicesDialog(ForegroundServicesDialog activity);
+    @ClassKey(ImageWallpaper.class)
+    public abstract Service bindImageWallpaper(ImageWallpaper service);
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(KeyguardService.class)
+    public abstract Service bindKeyguardService(KeyguardService service);
 }

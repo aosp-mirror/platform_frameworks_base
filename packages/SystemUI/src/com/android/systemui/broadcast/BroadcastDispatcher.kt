@@ -26,13 +26,12 @@ import android.os.UserHandle
 import android.util.Log
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.Dependency.BG_LOOPER_NAME
-import com.android.systemui.Dependency.MAIN_HANDLER_NAME
 import com.android.systemui.Dumpable
+import com.android.systemui.dagger.qualifiers.BgLooper
+import com.android.systemui.dagger.qualifiers.MainHandler
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 data class ReceiverData(
@@ -61,8 +60,8 @@ private const val DEBUG = false
 @Singleton
 open class BroadcastDispatcher @Inject constructor (
     private val context: Context,
-    @Named(MAIN_HANDLER_NAME) private val mainHandler: Handler,
-    @Named(BG_LOOPER_NAME) private val bgLooper: Looper
+    @MainHandler private val mainHandler: Handler,
+    @BgLooper private val bgLooper: Looper
 ) : Dumpable {
 
     // Only modify in BG thread

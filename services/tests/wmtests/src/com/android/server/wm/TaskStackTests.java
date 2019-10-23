@@ -21,12 +21,15 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -119,7 +122,7 @@ public class TaskStackTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
 
         assertNotNull(stack);
         assertNotNull(task);
@@ -135,10 +138,10 @@ public class TaskStackTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer_deferRemoval() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task = WindowTestUtils.createTestTask(stack);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Stack removal is deferred if one of its child is animating.
-        task.setLocalIsAnimating(true);
+        doReturn(true).when(task).isSelfAnimating();
 
         stack.removeIfPossible();
         // For the case of deferred removal the task controller will still be connected to the its
@@ -157,8 +160,7 @@ public class TaskStackTests extends WindowTestsBase {
     public void testReparent() {
         // Create first stack on primary display.
         final TaskStack stack1 = createTaskStackOnDisplay(mDisplayContent);
-        final WindowTestUtils.TestTask task1 = WindowTestUtils.createTestTask(stack1);
-        task1.mOnDisplayChangedCalled = false;
+        final Task task1 = createTaskInStack(stack1, 0 /* userId */);
 
         // Create second display and put second stack on it.
         final DisplayContent dc = createNewDisplay();
@@ -170,7 +172,7 @@ public class TaskStackTests extends WindowTestsBase {
         final int stack1PositionInParent = stack1.getParent().mChildren.indexOf(stack1);
         final int stack2PositionInParent = stack1.getParent().mChildren.indexOf(stack2);
         assertEquals(stack1PositionInParent, stack2PositionInParent + 1);
-        assertTrue(task1.mOnDisplayChangedCalled);
+        verify(task1, times(1)).onDisplayChanged(any());
     }
 
     @Test

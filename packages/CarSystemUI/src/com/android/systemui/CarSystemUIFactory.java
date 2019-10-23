@@ -20,6 +20,7 @@ import android.content.Context;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.navigationbar.car.CarFacetButtonController;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;

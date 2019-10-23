@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.BG_HANDLER_NAME;
-
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -50,6 +48,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.settings.CurrentUserTracker;
 
 import java.io.FileDescriptor;
@@ -57,7 +56,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /**
@@ -102,7 +100,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     /**
      */
     @Inject
-    public SecurityControllerImpl(Context context, @Named(BG_HANDLER_NAME) Handler bgHandler) {
+    public SecurityControllerImpl(Context context, @BgHandler Handler bgHandler) {
         this(context, bgHandler, null);
     }
 

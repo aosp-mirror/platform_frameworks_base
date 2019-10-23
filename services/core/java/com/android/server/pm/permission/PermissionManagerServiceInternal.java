@@ -291,8 +291,8 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     public abstract @Nullable BasePermission getPermissionTEMP(@NonNull String permName);
 
     /** Get all permission that have a certain protection level */
-    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtectionLevel(
-            @PermissionInfo.Protection int protectionLevel);
+    public abstract @NonNull ArrayList<PermissionInfo> getAllPermissionWithProtection(
+            @PermissionInfo.Protection int protection);
 
     /**
      * Returns the delegate used to influence permission checking.

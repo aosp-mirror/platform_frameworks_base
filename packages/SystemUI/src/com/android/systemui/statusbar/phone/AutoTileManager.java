@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.provider.Settings.Secure;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
+import com.android.systemui.dagger.qualifiers.BgHandler;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.SecureSetting;
@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Manages which tiles should be automatically added to QS.
@@ -58,7 +57,7 @@ public class AutoTileManager {
 
     @Inject
     public AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
-            @Named(Dependency.BG_HANDLER_NAME) Handler handler,
+            @BgHandler Handler handler,
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,

@@ -17,9 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.Dependency.BG_HANDLER;
-import static com.android.systemui.Dependency.BG_HANDLER_NAME;
 import static com.android.systemui.Dependency.MAIN_LOOPER;
-import static com.android.systemui.Dependency.MAIN_LOOPER_NAME;
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
 import android.annotation.MainThread;
@@ -41,6 +39,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.CarrierTextController;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.MainLooper;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.NetworkController;
 
@@ -77,8 +77,8 @@ public class QSCarrierGroup extends LinearLayout implements
     @Inject
     public QSCarrierGroup(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
             NetworkController networkController, ActivityStarter activityStarter,
-            @Named(BG_HANDLER_NAME) Handler handler,
-            @Named(MAIN_LOOPER_NAME) Looper looper) {
+            @BgHandler Handler handler,
+            @MainLooper Looper looper) {
         super(context, attrs);
         mNetworkController = networkController;
         mActivityStarter = activityStarter;

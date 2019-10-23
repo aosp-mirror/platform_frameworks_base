@@ -25,8 +25,8 @@ import android.provider.Settings;
 import android.util.MathUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.DependencyProvider;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.MainResources;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.tuner.TunerService;
@@ -59,7 +59,7 @@ public class DozeParameters implements TunerService.Tunable,
 
     @Inject
     protected DozeParameters(
-            @DependencyProvider.MainResources Resources resources,
+            @MainResources Resources resources,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             AlwaysOnDisplayPolicy alwaysOnDisplayPolicy,
             PowerManager powerManager,

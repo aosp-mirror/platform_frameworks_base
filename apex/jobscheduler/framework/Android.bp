@@ -1,5 +1,5 @@
 filegroup {
-    name: "jobscheduler-framework-source",
+    name: "framework-jobscheduler-sources",
     srcs: [
         "java/**/*.java",
         "java/android/app/job/IJobCallback.aidl",
@@ -12,13 +12,12 @@ filegroup {
 
 java_library {
     name: "jobscheduler-framework",
-    installable: true,
+    installable: false,
+    compile_dex: true,
     sdk_version: "core_platform",
-
     srcs: [
-        ":jobscheduler-framework-source",
+        ":framework-jobscheduler-sources",
     ],
-
     aidl: {
         export_include_dirs: [
             "java",

@@ -31,8 +31,21 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertEquals(0, empty.size());
         assertNotNull(empty.getCredential());
 
+        assertFalse(empty.isPin());
         assertFalse(empty.isPassword());
         assertFalse(empty.isPattern());
+    }
+
+    public void testPinCredential() {
+        LockscreenCredential pin = LockscreenCredential.createPin("3456");
+
+        assertTrue(pin.isPin());
+        assertEquals(4, pin.size());
+        assertTrue(Arrays.equals("3456".getBytes(), pin.getCredential()));
+
+        assertFalse(pin.isNone());
+        assertFalse(pin.isPassword());
+        assertFalse(pin.isPattern());
     }
 
     public void testPasswordCredential() {
@@ -43,6 +56,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertTrue(Arrays.equals("password".getBytes(), password.getCredential()));
 
         assertFalse(password.isNone());
+        assertFalse(password.isPin());
         assertFalse(password.isPattern());
     }
 
@@ -60,6 +74,7 @@ public class LockscreenCredentialTest extends AndroidTestCase {
         assertTrue(Arrays.equals("12369".getBytes(), pattern.getCredential()));
 
         assertFalse(pattern.isNone());
+        assertFalse(pattern.isPin());
         assertFalse(pattern.isPassword());
     }
 
@@ -72,6 +87,15 @@ public class LockscreenCredentialTest extends AndroidTestCase {
                 LockscreenCredential.createPasswordOrNone("abcd"));
     }
 
+    public void testPinOrNoneCredential() {
+        assertEquals(LockscreenCredential.createNone(),
+                LockscreenCredential.createPinOrNone(null));
+        assertEquals(LockscreenCredential.createNone(),
+                LockscreenCredential.createPinOrNone(""));
+        assertEquals(LockscreenCredential.createPin("1357"),
+                LockscreenCredential.createPinOrNone("1357"));
+    }
+
     public void testSanitize() {
         LockscreenCredential password = LockscreenCredential.createPassword("password");
         password.zeroize();
@@ -80,9 +104,12 @@ public class LockscreenCredentialTest extends AndroidTestCase {
             password.isNone();
             fail("Sanitized credential still accessible");
         } catch (IllegalStateException expected) { }
-
         try {
             password.isPattern();
+            fail("Sanitized credential still accessible");
+        } catch (IllegalStateException expected) { }
+        try {
+            password.isPin();
             fail("Sanitized credential still accessible");
         } catch (IllegalStateException expected) { }
         try {

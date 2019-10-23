@@ -30,7 +30,6 @@ import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -214,7 +213,7 @@ class LockSettingsStorage {
     private CredentialHash readPasswordHashIfExists(int userId) {
         byte[] stored = readFile(getLockPasswordFilename(userId));
         if (!ArrayUtils.isEmpty(stored)) {
-            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+            return new CredentialHash(stored, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN);
         }
         return null;
     }
@@ -268,10 +267,6 @@ class LockSettingsStorage {
 
     public boolean hasPattern(int userId) {
         return hasFile(getLockPatternFilename(userId));
-    }
-
-    public boolean hasCredential(int userId) {
-        return hasPassword(userId) || hasPattern(userId);
     }
 
     private boolean hasFile(String name) {
@@ -360,11 +355,15 @@ class LockSettingsStorage {
     public void writeCredentialHash(CredentialHash hash, int userId) {
         byte[] patternHash = null;
         byte[] passwordHash = null;
-
-        if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD) {
+        if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN
+                || hash.type == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+                || hash.type == LockPatternUtils.CREDENTIAL_TYPE_PIN) {
             passwordHash = hash.hash;
         } else if (hash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
             patternHash = hash.hash;
+        } else {
+            Preconditions.checkArgument(hash.type == LockPatternUtils.CREDENTIAL_TYPE_NONE,
+                    "Unknown credential type");
         }
         writeFile(getLockPasswordFilename(userId), passwordHash);
         writeFile(getLockPatternFilename(userId), patternHash);
@@ -523,8 +522,8 @@ class LockSettingsStorage {
         mCache.clear();
     }
 
-    @Nullable
-    public PersistentDataBlockManagerInternal getPersistentDataBlock() {
+    @Nullable @VisibleForTesting
+    PersistentDataBlockManagerInternal getPersistentDataBlockManager() {
         if (mPersistentDataBlockManagerInternal == null) {
             mPersistentDataBlockManagerInternal =
                     LocalServices.getService(PersistentDataBlockManagerInternal.class);
@@ -534,7 +533,7 @@ class LockSettingsStorage {
 
     public void writePersistentDataBlock(int persistentType, int userId, int qualityForUi,
             byte[] payload) {
-        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlock();
+        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlockManager();
         if (persistentDataBlock == null) {
             return;
         }
@@ -543,7 +542,7 @@ class LockSettingsStorage {
     }
 
     public PersistentData readPersistentDataBlock() {
-        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlock();
+        PersistentDataBlockManagerInternal persistentDataBlock = getPersistentDataBlockManager();
         if (persistentDataBlock == null) {
             return PersistentData.NONE;
         }
@@ -699,7 +698,7 @@ class LockSettingsStorage {
             }
 
             if (upgradeVersion != DATABASE_VERSION) {
-                Log.w(TAG, "Failed to upgrade database!");
+                Slog.w(TAG, "Failed to upgrade database!");
             }
         }
     }

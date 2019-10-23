@@ -34,6 +34,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.TimingsTraceLog;
 
+import com.android.systemui.dagger.ContextComponentHelper;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;

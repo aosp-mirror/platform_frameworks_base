@@ -40,6 +40,10 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.qualifiers.BgHandler;
+import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.MainHandler;
+import com.android.systemui.dagger.qualifiers.MainLooper;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -148,16 +152,16 @@ public class Dependency {
     /**
      * Key for getting a the main looper.
      */
-    public static final String MAIN_LOOPER_NAME = "main_looper";
+    private static final String MAIN_LOOPER_NAME = "main_looper";
 
     /**
      * Key for getting a background Looper for background work.
      */
-    public static final String BG_LOOPER_NAME = "background_looper";
+    private static final String BG_LOOPER_NAME = "background_looper";
     /**
      * Key for getting a background Handler for background work.
      */
-    public static final String BG_HANDLER_NAME = "background_handler";
+    private static final String BG_HANDLER_NAME = "background_handler";
     /**
      * Key for getting a Handler for receiving time tick broadcasts on.
      */
@@ -165,7 +169,7 @@ public class Dependency {
     /**
      * Generic handler on the main thread.
      */
-    public static final String MAIN_HANDLER_NAME = "main_handler";
+    private static final String MAIN_HANDLER_NAME = "main_handler";
 
     /**
      * An email address to send memory leak reports to by default.
@@ -300,10 +304,10 @@ public class Dependency {
     @Inject Lazy<AutoHideController> mAutoHideController;
     @Inject Lazy<ForegroundServiceNotificationListener> mForegroundServiceNotificationListener;
     @Inject Lazy<PrivacyItemController> mPrivacyItemController;
-    @Inject @Named(BG_LOOPER_NAME) Lazy<Looper> mBgLooper;
-    @Inject @Named(BG_HANDLER_NAME) Lazy<Handler> mBgHandler;
-    @Inject @Named(MAIN_LOOPER_NAME) Lazy<Looper> mMainLooper;
-    @Inject @Named(MAIN_HANDLER_NAME) Lazy<Handler> mMainHandler;
+    @Inject @BgLooper Lazy<Looper> mBgLooper;
+    @Inject @BgHandler Lazy<Handler> mBgHandler;
+    @Inject @MainLooper Lazy<Looper> mMainLooper;
+    @Inject @MainHandler Lazy<Handler> mMainHandler;
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
     @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;

@@ -274,6 +274,7 @@ public class ResolverListController {
             // Fall into normal sort when number of ranked elements
             // needed is not smaller than size of input list.
             sort(inputList);
+            return;
         }
         try {
             long beforeRank = System.currentTimeMillis();

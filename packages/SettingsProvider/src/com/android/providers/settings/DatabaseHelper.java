@@ -1497,21 +1497,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 94) {
-            // Add wireless charging started sound setting
-            if (mUserHandle == UserHandle.USER_SYSTEM) {
-                db.beginTransaction();
-                SQLiteStatement stmt = null;
-                try {
-                    stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
-                            + " VALUES(?,?);");
-                    loadStringSetting(stmt, Settings.Global.CHARGING_STARTED_SOUND,
-                            R.string.def_wireless_charging_started_sound);
-                    db.setTransactionSuccessful();
-                } finally {
-                    db.endTransaction();
-                    if (stmt != null) stmt.close();
-                }
-            }
+            // charging sound moved to SettingsProvider version 184
             upgradeVersion = 95;
         }
 
@@ -2562,8 +2548,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_car_dock_sound);
             loadStringSetting(stmt, Settings.Global.CAR_UNDOCK_SOUND,
                     R.string.def_car_undock_sound);
-            loadStringSetting(stmt, Settings.Global.CHARGING_STARTED_SOUND,
-                    R.string.def_wireless_charging_started_sound);
 
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
                     R.integer.def_dock_audio_media_enabled);

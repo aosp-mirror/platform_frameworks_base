@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -27,6 +28,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,7 +37,7 @@ import java.util.EnumMap;
 import java.util.Locale;
 
 /**
- * Describes the state of any Wifi connection that is active or
+ * Describes the state of any Wi-Fi connection that is active or
  * is in the process of being set up.
  */
 public class WifiInfo implements Parcelable {
@@ -94,6 +97,47 @@ public class WifiInfo implements Parcelable {
      * Received Signal Strength Indicator
      */
     private int mRssi;
+
+    /**
+     * Wi-Fi unknown technology
+     */
+    public static final int WIFI_TECHNOLOGY_UNKNOWN = 0;
+
+    /**
+     * Wi-Fi 802.11a/b/g
+     */
+    public static final int WIFI_TECHNOLOGY_LEGACY = 1;
+
+    /**
+     * Wi-Fi 802.11n
+     */
+    public static final int WIFI_TECHNOLOGY_11N = 4;
+
+    /**
+     * Wi-Fi 802.11ac
+     */
+    public static final int WIFI_TECHNOLOGY_11AC = 5;
+
+    /**
+     * Wi-Fi 802.11ax
+     */
+    public static final int WIFI_TECHNOLOGY_11AX = 6;
+
+    /** @hide */
+    @IntDef(prefix = { "WIFI_TECHNOLOGY_" }, value = {
+            WIFI_TECHNOLOGY_UNKNOWN,
+            WIFI_TECHNOLOGY_LEGACY,
+            WIFI_TECHNOLOGY_11N,
+            WIFI_TECHNOLOGY_11AC,
+            WIFI_TECHNOLOGY_11AX
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiTechnology{}
+
+    /**
+     * Wi-Fi technology for the connection
+     */
+    private @WifiTechnology int mWifiTechnology;
 
     /**
      * The unit in which links speeds are expressed.
@@ -286,6 +330,7 @@ public class WifiInfo implements Parcelable {
             txSuccessRate = source.txSuccessRate;
             rxSuccessRate = source.rxSuccessRate;
             score = source.score;
+            mWifiTechnology = source.mWifiTechnology;
         }
     }
 
@@ -371,6 +416,22 @@ public class WifiInfo implements Parcelable {
         if (rssi > MAX_RSSI)
             rssi = MAX_RSSI;
         mRssi = rssi;
+    }
+
+    /**
+     * Sets the Wi-Fi technology
+     * @hide
+     */
+    public void setWifiTechnology(@WifiTechnology int wifiTechnology) {
+        mWifiTechnology = wifiTechnology;
+    }
+
+    /**
+     * Get connection Wi-Fi technology
+     * @return the connection Wi-Fi technology
+     */
+    public @WifiTechnology int getWifiTechnology() {
+        return mWifiTechnology;
     }
 
     /**
@@ -679,6 +740,7 @@ public class WifiInfo implements Parcelable {
                 .append(", MAC: ").append(mMacAddress == null ? none : mMacAddress)
                 .append(", Supplicant state: ")
                 .append(mSupplicantState == null ? none : mSupplicantState)
+                .append(", Wi-Fi technology: ").append(mWifiTechnology)
                 .append(", RSSI: ").append(mRssi)
                 .append(", Link speed: ").append(mLinkSpeed).append(LINK_SPEED_UNITS)
                 .append(", Tx Link speed: ").append(mTxLinkSpeed).append(LINK_SPEED_UNITS)
@@ -734,6 +796,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mNetworkSuggestionOrSpecifierPackageName);
         dest.writeString(mFqdn);
         dest.writeString(mProviderFriendlyName);
+        dest.writeInt(mWifiTechnology);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -775,6 +838,7 @@ public class WifiInfo implements Parcelable {
                 info.mNetworkSuggestionOrSpecifierPackageName = in.readString();
                 info.mFqdn = in.readString();
                 info.mProviderFriendlyName = in.readString();
+                info.mWifiTechnology = in.readInt();
                 return info;
             }
 

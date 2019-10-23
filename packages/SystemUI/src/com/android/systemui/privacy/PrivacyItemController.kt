@@ -22,25 +22,20 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
-import android.os.UserHandle
-import android.os.UserManager
+import android.os.*
 import android.provider.DeviceConfig
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags
-import com.android.systemui.Dependency.BG_HANDLER_NAME
-import com.android.systemui.Dependency.MAIN_HANDLER_NAME
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.appops.AppOpItem
 import com.android.systemui.appops.AppOpsController
-import com.android.systemui.Dumpable
+import com.android.systemui.dagger.qualifiers.BgHandler
+import com.android.systemui.dagger.qualifiers.MainHandler
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 fun isPermissionsHubEnabled() = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
@@ -50,8 +45,8 @@ fun isPermissionsHubEnabled() = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_P
 class PrivacyItemController @Inject constructor(
     val context: Context,
     private val appOpsController: AppOpsController,
-    @Named(MAIN_HANDLER_NAME) private val uiHandler: Handler,
-    @Named(BG_HANDLER_NAME) private val bgHandler: Handler
+    @MainHandler private val uiHandler: Handler,
+    @BgHandler private val bgHandler: Handler
 ) : Dumpable {
 
     @VisibleForTesting

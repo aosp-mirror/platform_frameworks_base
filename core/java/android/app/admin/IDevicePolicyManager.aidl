@@ -258,6 +258,8 @@ interface IDevicePolicyManager {
     void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
+    void setLocationEnabled(in ComponentName who, boolean locationEnabled);
+
     boolean setTime(in ComponentName who, long millis);
     boolean setTimeZone(in ComponentName who, String timeZone);
 

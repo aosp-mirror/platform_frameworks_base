@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,9 +28,9 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
@@ -67,7 +65,7 @@ public final class SmartReplyConstants {
     private final KeyValueListParser mParser = new KeyValueListParser(',');
 
     @Inject
-    public SmartReplyConstants(@Named(MAIN_HANDLER_NAME) Handler handler, Context context) {
+    public SmartReplyConstants(@MainHandler Handler handler, Context context) {
         mHandler = handler;
         mContext = context;
         final Resources resources = mContext.getResources();

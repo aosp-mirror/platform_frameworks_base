@@ -59,8 +59,8 @@ public abstract class LockSettingsInternal {
      *
      * @return true if password is set.
      */
-    public abstract boolean setLockCredentialWithToken(byte[] credential, int type,
-            long tokenHandle, byte[] token, int requestedQuality, int userId);
+    public abstract boolean setLockCredentialWithToken(LockscreenCredential credential,
+            long tokenHandle, byte[] token, int userId);
 
     public abstract boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId);
 

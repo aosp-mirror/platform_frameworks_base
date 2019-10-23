@@ -1774,6 +1774,7 @@
   <java-symbol type="dimen" name="display_cutout_touchable_region_size" />
   <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="dimen" name="quick_qs_total_height" />
+  <java-symbol type="dimen" name="quick_qs_total_height_with_media" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />
@@ -3355,6 +3356,7 @@
   <java-symbol type="string" name="autofill_update_title_with_2types" />
   <java-symbol type="string" name="autofill_update_title_with_3types" />
   <java-symbol type="string" name="autofill_update_yes" />
+  <java-symbol type="string" name="autofill_continue_yes" />
   <java-symbol type="string" name="autofill_save_accessibility_title " />
   <java-symbol type="string" name="autofill_save_title" />
   <java-symbol type="string" name="autofill_save_title_with_type" />
@@ -3365,6 +3367,9 @@
   <java-symbol type="string" name="autofill_save_type_password" />
   <java-symbol type="string" name="autofill_save_type_address" />
   <java-symbol type="string" name="autofill_save_type_credit_card" />
+  <java-symbol type="string" name="autofill_save_type_debit_card" />
+  <java-symbol type="string" name="autofill_save_type_payment_card" />
+  <java-symbol type="string" name="autofill_save_type_generic_card" />
   <java-symbol type="string" name="autofill_save_type_username" />
   <java-symbol type="string" name="autofill_save_type_email_address" />
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
@@ -3865,5 +3870,7 @@
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
+
+  <java-symbol type="bool" name="config_showBuiltinWirelessChargingAnim" />
 
 </resources>

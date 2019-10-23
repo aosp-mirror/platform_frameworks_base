@@ -853,6 +853,7 @@ message GlobalSettingsProto {
         optional SettingProto low_battery_sounds_enabled = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto trusted = 13;
         optional SettingProto unlock = 14;
+        optional SettingProto wireless_charging_started = 15;
     }
     optional Sounds sounds = 110;
 

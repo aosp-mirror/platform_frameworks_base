@@ -27,6 +27,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.AppComponentFactory;
 
+import com.android.systemui.dagger.ContextComponentHelper;
+
 import javax.inject.Inject;
 
 /**

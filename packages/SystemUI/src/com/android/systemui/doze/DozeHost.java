@@ -68,6 +68,12 @@ public interface DozeHost {
      */
     void prepareForGentleSleep(Runnable onDisplayOffCallback);
 
+    /**
+     * Cancel pending {@code onDisplayOffCallback} callback.
+     * @see #prepareForGentleSleep(Runnable)
+     */
+    void cancelGentleSleep();
+
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
     /**

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<!-- Layout for QQS media controls -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qqs_media_controls"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="10dp"
+    >
+    <!-- Top line: icon + artist name -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:gravity="center"
+        >
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/icon"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="5dp"
+        />
+        <TextView
+            android:id="@+id/header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:singleLine="true"
+        />
+    </LinearLayout>
+
+    <!-- Second line: song name -->
+    <TextView
+        android:id="@+id/header_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:fontFamily="@*android:string/config_bodyFontFamily"
+        android:gravity="center"/>
+
+    <!-- Bottom section: controls -->
+    <LinearLayout
+        android:id="@+id/media_actions"
+        android:orientation="horizontal"
+        android:layoutDirection="ltr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        >
+        <ImageButton
+            style="@android:style/Widget.Material.Button.Borderless.Small"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:layout_marginEnd="2dp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:id="@+id/action0"
+        />
+        <ImageButton
+            style="@android:style/Widget.Material.Button.Borderless.Small"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:layout_marginEnd="2dp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:id="@+id/action1"
+        />
+        <ImageButton
+            style="@android:style/Widget.Material.Button.Borderless.Small"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="8dp"
+            android:layout_marginEnd="2dp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:id="@+id/action2"
+        />
+    </LinearLayout>
+</LinearLayout>

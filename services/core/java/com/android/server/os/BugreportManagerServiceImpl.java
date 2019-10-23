@@ -25,7 +25,6 @@ import android.os.Binder;
 import android.os.BugreportParams;
 import android.os.IDumpstate;
 import android.os.IDumpstateListener;
-import android.os.IDumpstateToken;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -60,13 +59,6 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mBugreportWhitelistedPackages =
                 SystemConfig.getInstance().getBugreportWhitelistedPackages();
-    }
-
-    @Override
-    @RequiresPermission(android.Manifest.permission.DUMP)
-    public IDumpstateToken setListener(String name, IDumpstateListener listener,
-            boolean getSectionDetails) {
-        throw new UnsupportedOperationException("setListener is not allowed on this service");
     }
 
     @Override

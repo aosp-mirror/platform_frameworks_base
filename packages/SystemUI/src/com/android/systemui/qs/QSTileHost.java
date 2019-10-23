@@ -30,11 +30,12 @@ import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.DumpController;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.dagger.qualifiers.BgLooper;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -61,7 +62,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -94,8 +94,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     public QSTileHost(Context context,
             StatusBarIconController iconController,
             QSFactoryImpl defaultFactory,
-            @Named(Dependency.MAIN_HANDLER_NAME) Handler mainHandler,
-            @Named(Dependency.BG_LOOPER_NAME) Looper bgLooper,
+            @MainHandler Handler mainHandler,
+            @BgLooper Looper bgLooper,
             PluginManager pluginManager,
             TunerService tunerService,
             Provider<AutoTileManager> autoTiles,

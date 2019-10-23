@@ -23,6 +23,7 @@ import android.content.Context;
 
 import com.android.systemui.car.CarNotificationEntryManager;
 import com.android.systemui.car.CarNotificationInterruptionStateProvider;
+import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
 import com.android.systemui.power.EnhancedEstimates;

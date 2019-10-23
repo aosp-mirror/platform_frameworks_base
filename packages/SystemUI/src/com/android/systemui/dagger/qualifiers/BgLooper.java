@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.dagger.qualifiers;
 
-import dagger.Binds;
-import dagger.Module;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-/**
- * Dagger Module that collects related sub-modules together.
- */
-@Module(includes = {ActivityBinder.class, ServiceBinder.class, SystemUIBinder.class})
-public abstract class ComponentBinder {
-    /** */
-    @Binds
-    public abstract ContextComponentHelper bindComponentHelper(
-            ContextComponentResolver componentHelper);
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface BgLooper {
 }

@@ -48,12 +48,12 @@ import android.os.UserManagerInternal;
 import android.permission.PermissionControllerManager;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LongSparseLongArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
@@ -67,6 +67,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal.OnInitializedCallback;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -144,7 +145,7 @@ public final class PermissionPolicyService extends SystemService {
         };
 
         final ArrayList<PermissionInfo> dangerousPerms =
-                permManagerInternal.getAllPermissionWithProtectionLevel(
+                permManagerInternal.getAllPermissionWithProtection(
                         PermissionInfo.PROTECTION_DANGEROUS);
 
         try {
@@ -152,7 +153,7 @@ public final class PermissionPolicyService extends SystemService {
             for (int i = 0; i < numDangerousPerms; i++) {
                 PermissionInfo perm = dangerousPerms.get(i);
 
-                if (perm.isRestricted() || perm.backgroundPermission != null) {
+                if (perm.isRuntime()) {
                     appOpsService.startWatchingMode(getSwitchOp(perm.name), null, appOpsListener);
                 }
                 if (perm.isSoftRestricted()) {
@@ -389,8 +390,7 @@ public final class PermissionPolicyService extends SystemService {
         private final @NonNull PackageManager mPackageManager;
         private final @NonNull AppOpsManager mAppOpsManager;
 
-        /** All uid that need to be synchronized */
-        private final @NonNull SparseIntArray mAllUids = new SparseIntArray();
+        private final @NonNull ArrayMap<String, PermissionInfo> mRuntimePermissionInfos;
 
         /**
          * All ops that need to be flipped to allow.
@@ -428,6 +428,18 @@ public final class PermissionPolicyService extends SystemService {
             mContext = context;
             mPackageManager = context.getPackageManager();
             mAppOpsManager = context.getSystemService(AppOpsManager.class);
+
+            mRuntimePermissionInfos = new ArrayMap<>();
+            PermissionManagerServiceInternal permissionManagerInternal = LocalServices.getService(
+                    PermissionManagerServiceInternal.class);
+            List<PermissionInfo> permissionInfos =
+                    permissionManagerInternal.getAllPermissionWithProtection(
+                            PermissionInfo.PROTECTION_DANGEROUS);
+            int permissionInfosSize = permissionInfos.size();
+            for (int i = 0; i < permissionInfosSize; i++) {
+                PermissionInfo permissionInfo = permissionInfos.get(i);
+                mRuntimePermissionInfos.put(permissionInfo.name, permissionInfo);
+            }
         }
 
         /**
@@ -489,7 +501,7 @@ public final class PermissionPolicyService extends SystemService {
          * Note: Called with the package lock held. Do <u>not</u> call into app-op manager.
          */
         private void addAppOps(@NonNull PackageInfo packageInfo, @NonNull String permissionName) {
-            PermissionInfo permissionInfo = getPermissionInfo(permissionName);
+            PermissionInfo permissionInfo = mRuntimePermissionInfos.get(permissionName);
             if (permissionInfo == null) {
                 return;
             }
@@ -499,8 +511,7 @@ public final class PermissionPolicyService extends SystemService {
 
         private void addPermissionAppOp(@NonNull PackageInfo packageInfo,
                 @NonNull PermissionInfo permissionInfo) {
-            // TODO: Sync all permissions in the future.
-            if (!permissionInfo.isRestricted() && permissionInfo.backgroundPermission == null) {
+            if (!permissionInfo.isRuntime()) {
                 return;
             }
 
@@ -525,7 +536,7 @@ public final class PermissionPolicyService extends SystemService {
             boolean shouldGrantAppOp = shouldGrantAppOp(packageInfo, permissionInfo);
             if (shouldGrantAppOp) {
                 if (permissionInfo.backgroundPermission != null) {
-                    PermissionInfo backgroundPermissionInfo = getPermissionInfo(
+                    PermissionInfo backgroundPermissionInfo = mRuntimePermissionInfos.get(
                             permissionInfo.backgroundPermission);
                     boolean shouldGrantBackgroundAppOp = backgroundPermissionInfo != null
                             && shouldGrantAppOp(packageInfo, backgroundPermissionInfo);
@@ -549,15 +560,6 @@ public final class PermissionPolicyService extends SystemService {
                 case MODE_IGNORED:
                     mOpsToIgnore.add(opToChange);
                     break;
-            }
-        }
-
-        @Nullable
-        private PermissionInfo getPermissionInfo(@NonNull String permissionName) {
-            try {
-                return mPackageManager.getPermissionInfo(permissionName, 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                return null;
             }
         }
 
@@ -637,8 +639,6 @@ public final class PermissionPolicyService extends SystemService {
             } catch (NameNotFoundException e) {
                 return;
             }
-
-            mAllUids.put(pkg.applicationInfo.uid, pkg.applicationInfo.uid);
 
             if (pkg.requestedPermissions == null) {
                 return;

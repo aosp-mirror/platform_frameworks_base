@@ -16,8 +16,6 @@
 
 package com.android.systemui.navigationbar.car;
 
-import static com.android.systemui.Dependency.MAIN_HANDLER_NAME;
-
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.inputmethodservice.InputMethodService;
@@ -35,6 +33,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+import com.android.systemui.dagger.qualifiers.MainHandler;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NavigationBarController;
@@ -47,7 +46,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import dagger.Lazy;
 
@@ -96,7 +94,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             WindowManager windowManager,
             DeviceProvisionedController deviceProvisionedController,
             Lazy<FacetButtonTaskStackListener> facetButtonTaskStackListener,
-            @Named(MAIN_HANDLER_NAME) Handler mainHandler,
+            @MainHandler Handler mainHandler,
             Lazy<KeyguardStateController> keyguardStateController,
             Lazy<CarFacetButtonController> facetButtonController,
             Lazy<NavigationBarController> navigationBarController,

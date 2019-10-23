@@ -168,6 +168,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
@@ -1957,6 +1958,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         ConnectivityManager getConnectivityManager() {
             return mContext.getSystemService(ConnectivityManager.class);
+        }
+
+        LocationManager getLocationManager() {
+            return mContext.getSystemService(LocationManager.class);
         }
 
         IWindowManager getIWindowManager() {
@@ -10895,6 +10900,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             mInjector.binderWithCleanCallingIdentity(() ->
                 mInjector.settingsSystemPutStringForUser(setting, value, callingUserId));
+        }
+    }
+
+    @Override
+    public void setLocationEnabled(ComponentName who, boolean locationEnabled) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        int userId = mInjector.userHandleGetCallingUserId();
+
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            if (!isDeviceOwner(who, userId) && !isCurrentUserDemo()) {
+                throw new SecurityException(
+                        "Permission denial: Profile owners cannot update location settings");
+            }
+        }
+
+        long ident = mInjector.binderClearCallingIdentity();
+        try {
+            mInjector.getLocationManager().setLocationEnabledForUser(
+                    locationEnabled, UserHandle.of(userId));
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.SET_SECURE_SETTING)
+                    .setAdmin(who)
+                    .setStrings(Settings.Secure.LOCATION_MODE, Integer.toString(
+                            locationEnabled ? Settings.Secure.LOCATION_MODE_ON
+                                    : Settings.Secure.LOCATION_MODE_OFF))
+                    .write();
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
     }
 
