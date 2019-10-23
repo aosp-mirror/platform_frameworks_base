@@ -21,7 +21,8 @@ import static android.content.pm.parsing.library.SharedLibraryNames.ANDROID_TEST
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
-import android.content.pm.PackageParser.Package;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ParsedPackage;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -54,25 +55,25 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long REMOVE_ANDROID_TEST_BASE = 133396946L;
 
-    private static boolean isChangeEnabled(Package pkg) {
+    private static boolean isChangeEnabled(AndroidPackage pkg) {
         // Do not ask platform compat for system apps to prevent a boot time regression in tests.
         // b/142558883.
-        if (!pkg.applicationInfo.isSystemApp()) {
+        if (!pkg.isSystem()) {
             IPlatformCompat platformCompat = IPlatformCompat.Stub.asInterface(
                     ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
             try {
                 return platformCompat.isChangeEnabled(REMOVE_ANDROID_TEST_BASE,
-                        pkg.applicationInfo);
+                        pkg.toAppInfo());
             } catch (RemoteException | NullPointerException e) {
                 Log.e(TAG, "Failed to get a response from PLATFORM_COMPAT_SERVICE", e);
             }
         }
         // Fall back to previous behaviour.
-        return pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.Q;
+        return pkg.getTargetSdkVersion() > Build.VERSION_CODES.Q;
     }
 
     @Override
-    public void updatePackage(ParsedPackage parsedPackage) {
+    public void updatePackage(ParsedPackage pkg) {
         // Packages targeted at <= Q expect the classes in the android.test.base library
         // to be accessible so this maintains backward compatibility by adding the
         // android.test.base library to those packages.
@@ -82,7 +83,7 @@ public class AndroidTestBaseUpdater extends PackageSharedLibraryUpdater {
             // If a package already depends on android.test.runner then add a dependency on
             // android.test.base because android.test.runner depends on classes from the
             // android.test.base library.
-            prefixImplicitDependency(parsedPackage, ANDROID_TEST_RUNNER, ANDROID_TEST_BASE);
+            prefixImplicitDependency(pkg, ANDROID_TEST_RUNNER, ANDROID_TEST_BASE);
         }
     }
 }

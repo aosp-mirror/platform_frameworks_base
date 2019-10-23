@@ -340,6 +340,10 @@ public class ComponentParseUtils {
             this.componentName = null;
         }
 
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
         public String getPackageName() {
             return packageName;
         }

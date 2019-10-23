@@ -456,7 +456,7 @@ public class NativeLibraryHelper {
      * @param useIsaSubdir Whether or not to set up a sub dir for the ISA.
      * @return ABI code if installation succeeds or error code if installation fails.
      */
-    public static int configureNativeBinariesForSupportedAbi(Package pkg, Handle handle,
+    public static int configureNativeBinariesForSupportedAbi(AndroidPackage pkg, Handle handle,
             File libraryRoot, String[] abiList, boolean useIsaSubdir) {
         // TODO(b/136132412): Implement this.
         return -1;

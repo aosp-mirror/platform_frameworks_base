@@ -310,7 +310,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
 
         final String nativeLibraryRootStr = initialLibraryPaths.nativeLibraryRootDir;
         final boolean useIsaSpecificSubdirs = initialLibraryPaths.nativeLibraryRootRequiresIsa;
-        final boolean onIncremental = isIncrementalPath(pkg.codePath);
+        final boolean onIncremental = isIncrementalPath(pkg.getCodePath());
 
         String primaryCpuAbi = null;
         String secondaryCpuAbi = null;

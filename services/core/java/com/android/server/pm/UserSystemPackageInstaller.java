@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
+import android.content.pm.parsing.AndroidPackage;
 import android.content.res.Resources;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -191,8 +192,8 @@ class UserSystemPackageInstaller {
                     return;
                 }
                 final boolean install =
-                        (userWhitelist == null || userWhitelist.contains(pkg.packageName))
-                        && !pkg.applicationInfo.hiddenUntilInstalled;
+                        (userWhitelist == null || userWhitelist.contains(pkg.getPackageName()))
+                        && !pkg.isHiddenUntilInstalled();
                 if (isConsideredUpgrade && !isFirstBoot && !install) {
                     return; // To be careful, we don’t uninstall apps during OTAs
                 }
@@ -366,7 +367,7 @@ class UserSystemPackageInstaller {
      * @param isSystemUser whether the user is USER_SYSTEM (which gets special treatment).
      */
     @VisibleForTesting
-    static boolean shouldInstallPackage(PackageParser.Package sysPkg,
+    static boolean shouldInstallPackage(AndroidPackage sysPkg,
             @NonNull ArrayMap<String, Long> userTypeWhitelist,
             @NonNull Set<String> userWhitelist, boolean isImplicitWhitelistMode,
             boolean isSystemUser) {

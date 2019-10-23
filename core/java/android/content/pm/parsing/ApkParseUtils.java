@@ -384,16 +384,6 @@ public class ApkParseUtils {
             return parseInput.error(PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME);
         }
 
-        // TODO: Remove when manifest overlaying removed
-        if (callback != null) {
-            String[] overlayPaths = callback.getOverlayPaths(pkgName, apkPath);
-            if (overlayPaths != null && overlayPaths.length > 0) {
-                for (String overlayPath : overlayPaths) {
-                    res.getAssets().addOverlayPath(overlayPath);
-                }
-            }
-        }
-
         TypedArray manifestArray = null;
 
         try {

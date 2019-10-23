@@ -27,7 +27,11 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.AndroidPackage;
+import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
+import android.content.pm.parsing.ComponentParseUtils.ParsedActivityIntentInfo;
+import android.content.pm.parsing.PackageImpl;
+import android.content.pm.parsing.ParsingPackage;
 import android.os.Build;
 import android.os.Process;
 import android.util.ArrayMap;
@@ -75,30 +79,25 @@ public class AppsFilterTest {
         return pkg;
     }
 
-    private static PackageBuilder pkg(String packageName, IntentFilter... filters) {
-        final ActivityInfo activityInfo = new ActivityInfo();
-        final PackageBuilder packageBuilder = pkg(packageName).addActivity(
-                pkg -> new PackageParser.ParseComponentArgs(pkg, new String[1], 0, 0, 0, 0, 0, 0,
-                        new String[]{packageName}, 0, 0, 0), activityInfo);
+    private static ParsingPackage pkg(String packageName, IntentFilter... filters) {
+        ParsedActivity activity = new ParsedActivity();
+        activity.setPackageName(packageName);
         for (IntentFilter filter : filters) {
-            packageBuilder.addActivityIntentInfo(0 /* index */, activity -> {
-                final PackageParser.ActivityIntentInfo info =
-                        new PackageParser.ActivityIntentInfo(activity);
-                if (filter.countActions() > 0) {
-                    filter.actionsIterator().forEachRemaining(info::addAction);
-                }
-                if (filter.countCategories() > 0) {
-                    filter.actionsIterator().forEachRemaining(info::addCategory);
-                }
-                if (filter.countDataAuthorities() > 0) {
-                    filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
-                }
-                if (filter.countDataSchemes() > 0) {
-                    filter.schemesIterator().forEachRemaining(info::addDataScheme);
-                }
-                activityInfo.exported = true;
-                return info;
-            });
+            final ParsedActivityIntentInfo info = new ParsedActivityIntentInfo(packageName, null);
+            if (filter.countActions() > 0) {
+                filter.actionsIterator().forEachRemaining(info::addAction);
+            }
+            if (filter.countCategories() > 0) {
+                filter.actionsIterator().forEachRemaining(info::addAction);
+            }
+            if (filter.countDataAuthorities() > 0) {
+                filter.authoritiesIterator().forEachRemaining(info::addDataAuthority);
+            }
+            if (filter.countDataSchemes() > 0) {
+                filter.schemesIterator().forEachRemaining(info::addDataScheme);
+            }
+            activity.addIntent(info);
+            activity.exported = true;
         }
 
         return pkg(packageName)
@@ -159,7 +158,7 @@ public class AppsFilterTest {
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.some.other.package",
                         new Intent("TEST_ACTION"))
-                        .setApplicationInfoTargetSdkVersion(Build.VERSION_CODES.P),
+                        .setTargetSdkVersion(Build.VERSION_CODES.P),
                 DUMMY_CALLING_UID);
 
         when(mFeatureConfigMock.packageIsEnabled(calling.pkg)).thenReturn(false);
@@ -310,25 +309,25 @@ public class AppsFilterTest {
     }
 
     private PackageSetting simulateAddPackage(AppsFilter filter,
-            PackageBuilder newPkgBuilder, int appId) {
+            ParsingPackage newPkgBuilder, int appId) {
         return simulateAddPackage(filter, newPkgBuilder, appId, null);
     }
 
     private PackageSetting simulateAddPackage(AppsFilter filter,
-            PackageBuilder newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
-        PackageParser.Package newPkg = newPkgBuilder.build();
+            ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
+        AndroidPackage newPkg = newPkgBuilder.hideAsParsed().hideAsFinal();
 
         final PackageSettingBuilder settingBuilder = new PackageSettingBuilder()
                 .setPackage(newPkg)
                 .setAppId(appId)
-                .setName(newPkg.packageName)
+                .setName(newPkg.getPackageName())
                 .setCodePath("/")
                 .setResourcePath("/")
                 .setPVersionCode(1L);
         final PackageSetting setting =
                 (action == null ? settingBuilder : action.withBuilder(settingBuilder)).build();
         filter.addPackage(setting, mExisting);
-        mExisting.put(newPkg.packageName, setting);
+        mExisting.put(newPkg.getPackageName(), setting);
         return setting;
     }
 

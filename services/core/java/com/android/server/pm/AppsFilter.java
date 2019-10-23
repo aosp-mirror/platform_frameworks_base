@@ -26,11 +26,14 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.parsing.AndroidPackage;
 import android.content.pm.parsing.ComponentParseUtils;
+import android.content.pm.parsing.ComponentParseUtils.ParsedActivity;
 import android.content.pm.parsing.ComponentParseUtils.ParsedComponent;
 import android.content.pm.parsing.ComponentParseUtils.ParsedIntentInfo;
 import android.content.pm.parsing.ComponentParseUtils.ParsedProvider;
+import android.content.pm.parsing.ComponentParseUtils.ParsedService;
 import android.net.Uri;
 import android.os.Process;
 import android.os.Trace;
@@ -50,6 +53,7 @@ import com.android.server.FgThread;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -120,7 +124,7 @@ public class AppsFilter {
         boolean isGloballyEnabled();
 
         /** @return true if the feature is enabled for the given package. */
-        boolean packageIsEnabled(PackageParser.Package pkg);
+        boolean packageIsEnabled(AndroidPackage pkg);
     }
 
     private static class FeatureConfigImpl implements FeatureConfig {
@@ -159,11 +163,12 @@ public class AppsFilter {
         }
 
         @Override
-        public boolean packageIsEnabled(PackageParser.Package pkg) {
+        public boolean packageIsEnabled(AndroidPackage pkg) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "packageIsEnabled");
             try {
+                // TODO(b/135203078): Do not use toAppInfo
                 return mInjector.getCompatibility().isChangeEnabled(
-                        PackageManager.FILTER_APPLICATION_QUERY, pkg.applicationInfo);
+                        PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfo());
             } finally {
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
@@ -192,12 +197,12 @@ public class AppsFilter {
     }
 
     /** Returns true if the querying package may query for the potential target package */
-    private static boolean canQueryViaIntent(PackageParser.Package querying,
-            PackageParser.Package potentialTarget) {
-        if (querying.mQueriesIntents == null) {
+    private static boolean canQueryViaIntent(AndroidPackage querying,
+            AndroidPackage potentialTarget) {
+        if (querying.getQueriesIntents() == null) {
             return false;
         }
-        for (Intent intent : querying.mQueriesIntents) {
+        for (Intent intent : querying.getQueriesIntents()) {
             if (matches(intent, potentialTarget)) {
                 return true;
             }
@@ -205,41 +210,40 @@ public class AppsFilter {
         return false;
     }
 
-    private static boolean matches(Intent intent, PackageParser.Package potentialTarget) {
-        for (int p = potentialTarget.providers.size() - 1; p >= 0; p--) {
-            PackageParser.Provider provider = potentialTarget.providers.get(p);
-            if (!provider.info.exported) {
+    private static boolean matches(Intent intent, AndroidPackage potentialTarget) {
+        for (int p = ArrayUtils.size(potentialTarget.getProviders()) - 1; p >= 0; p--) {
+            ParsedProvider provider = potentialTarget.getProviders().get(p);
+            if (!provider.isExported()) {
                 continue;
             }
-            final ProviderInfo providerInfo = provider.info;
             final Uri data = intent.getData();
             if ("content".equalsIgnoreCase(intent.getScheme())
                     && data != null
-                    && Objects.equals(providerInfo.authority, data.getAuthority())) {
+                    && Objects.equals(provider.getAuthority(), data.getAuthority())) {
                 return true;
             }
         }
-        for (int s = potentialTarget.services.size() - 1; s >= 0; s--) {
-            PackageParser.Service service = potentialTarget.services.get(s);
-            if (!service.info.exported) {
+        for (int s = ArrayUtils.size(potentialTarget.getServices()) - 1; s >= 0; s--) {
+            ParsedService service = potentialTarget.getServices().get(s);
+            if (!service.exported) {
                 continue;
             }
             if (matchesAnyFilter(intent, service)) {
                 return true;
             }
         }
-        for (int a = potentialTarget.activities.size() - 1; a >= 0; a--) {
-            PackageParser.Activity activity = potentialTarget.activities.get(a);
-            if (!activity.info.exported) {
+        for (int a = ArrayUtils.size(potentialTarget.getActivities()) - 1; a >= 0; a--) {
+            ParsedActivity activity = potentialTarget.getActivities().get(a);
+            if (!activity.exported) {
                 continue;
             }
             if (matchesAnyFilter(intent, activity)) {
                 return true;
             }
         }
-        for (int r = potentialTarget.receivers.size() - 1; r >= 0; r--) {
-            PackageParser.Activity receiver = potentialTarget.receivers.get(r);
-            if (!receiver.info.exported) {
+        for (int r = ArrayUtils.size(potentialTarget.getReceivers()) - 1; r >= 0; r--) {
+            ParsedActivity receiver = potentialTarget.getReceivers().get(r);
+            if (!receiver.exported) {
                 continue;
             }
             if (matchesAnyFilter(intent, receiver)) {
@@ -250,9 +254,9 @@ public class AppsFilter {
     }
 
     private static boolean matchesAnyFilter(
-            Intent intent, Component<? extends IntentInfo> component) {
-        ArrayList<? extends IntentInfo> intents = component.intents;
-        for (int i = intents.size() - 1; i >= 0; i--) {
+            Intent intent, ParsedComponent<? extends ParsedIntentInfo> component) {
+        List<? extends ParsedIntentInfo> intents = component.intents;
+        for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
             IntentFilter intentFilter = intents.get(i);
             if (intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
                     intent.getData(), intent.getCategories(), "AppsFilter") > 0) {
@@ -290,7 +294,7 @@ public class AppsFilter {
             ArrayMap<String, PackageSetting> existingSettings) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
         try {
-            final PackageParser.Package newPkg = newPkgSetting.pkg;
+            final AndroidPackage newPkg = newPkgSetting.pkg;
             if (newPkg == null) {
                 // nothing to add
                 return;
@@ -299,10 +303,10 @@ public class AppsFilter {
             final boolean newIsForceQueryable =
                     mForceQueryable.contains(newPkgSetting.appId)
                             /* shared user that is already force queryable */
-                            || newPkg.mForceQueryable
+                            || newPkg.isForceQueryable()
                             || (newPkgSetting.isSystem() && (mSystemAppsQueryable
                             || ArrayUtils.contains(mForceQueryableByDevicePackageNames,
-                            newPkg.packageName)));
+                            newPkg.getPackageName())));
             if (newIsForceQueryable) {
                 mForceQueryable.add(newPkgSetting.appId);
             }
@@ -312,14 +316,14 @@ public class AppsFilter {
                 if (existingSetting.appId == newPkgSetting.appId || existingSetting.pkg == null) {
                     continue;
                 }
-                final PackageParser.Package existingPkg = existingSetting.pkg;
+                final AndroidPackage existingPkg = existingSetting.pkg;
                 // let's evaluate the ability of already added packages to see this new package
                 if (!newIsForceQueryable) {
                     if (canQueryViaIntent(existingPkg, newPkg)) {
                         mQueriesViaIntent.add(existingSetting.appId, newPkgSetting.appId);
                     }
-                    if (existingPkg.mQueriesPackages != null
-                            && existingPkg.mQueriesPackages.contains(newPkg.packageName)) {
+                    if (existingPkg.getQueriesPackages() != null
+                            && existingPkg.getQueriesPackages().contains(newPkg.getPackageName())) {
                         mQueriesViaPackage.add(existingSetting.appId, newPkgSetting.appId);
                     }
                 }
@@ -328,8 +332,8 @@ public class AppsFilter {
                     if (canQueryViaIntent(newPkg, existingPkg)) {
                         mQueriesViaIntent.add(newPkgSetting.appId, existingSetting.appId);
                     }
-                    if (newPkg.mQueriesPackages != null
-                            && newPkg.mQueriesPackages.contains(existingPkg.packageName)) {
+                    if (newPkg.getQueriesPackages() != null
+                            && newPkg.getQueriesPackages().contains(existingPkg.getPackageName())) {
                         mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
                     }
                 }
@@ -459,14 +463,14 @@ public class AppsFilter {
 
             // This package isn't technically installed and won't be written to settings, so we can
             // treat it as filtered until it's available again.
-            final PackageParser.Package targetPkg = targetPkgSetting.pkg;
+            final AndroidPackage targetPkg = targetPkgSetting.pkg;
             if (targetPkg == null) {
                 if (DEBUG_LOGGING) {
                     Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
                 }
                 return true;
             }
-            final String targetName = targetPkg.packageName;
+            final String targetName = targetPkg.getPackageName();
             final int callingAppId;
             if (callingPkgSetting != null) {
                 callingAppId = callingPkgSetting.appId;
@@ -535,9 +539,10 @@ public class AppsFilter {
     private static boolean callingPkgInstruments(PackageSetting callingPkgSetting,
             PackageSetting targetPkgSetting,
             String targetName) {
-        final ArrayList<PackageParser.Instrumentation> inst = callingPkgSetting.pkg.instrumentation;
-        for (int i = inst.size() - 1; i >= 0; i--) {
-            if (inst.get(i).info.targetPackage == targetName) {
+        final List<ComponentParseUtils.ParsedInstrumentation> inst =
+                callingPkgSetting.pkg.getInstrumentations();
+        for (int i = ArrayUtils.size(inst) - 1; i >= 0; i--) {
+            if (Objects.equals(inst.get(i).getTargetPackage(), targetName)) {
                 if (DEBUG_LOGGING) {
                     log(callingPkgSetting, targetPkgSetting, "instrumentation");
                 }

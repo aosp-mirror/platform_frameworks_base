@@ -277,7 +277,7 @@ public interface AndroidPackage extends Parcelable {
 
     String getRealPackage();
 
-    // TODO(b/135203078): Rename to getRequiredFeatures? Somewhat ambigious whether "Req" is
+    // TODO(b/135203078): Rename to getRequiredFeatures? Somewhat ambiguous whether "Req" is
     //  required or requested.
     @Nullable
     List<FeatureInfo> getReqFeatures();

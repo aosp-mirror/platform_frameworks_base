@@ -808,14 +808,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private int checkPermissionImpl(String permName, String pkgName, int userId) {
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(pkgName);
+        final AndroidPackage pkg = mPackageManagerInt.getPackage(pkgName);
         if (pkg == null) {
             return PackageManager.PERMISSION_DENIED;
         }
         return checkPermissionInternal(pkg, true, permName, userId);
     }
 
-    private int checkPermissionInternal(@NonNull Package pkg, boolean isPackageExplicit,
+    private int checkPermissionInternal(@NonNull AndroidPackage pkg, boolean isPackageExplicit,
             @NonNull String permissionName, @UserIdInt int userId) {
         final int callingUid = getCallingUid();
         if (isPackageExplicit || pkg.getSharedUserId() == null) {
@@ -885,7 +885,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     private int checkUidPermissionImpl(String permName, int uid) {
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(uid);
+        final AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
         return checkUidPermissionInternal(pkg, uid, permName);
     }
 
@@ -896,7 +896,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
      *
      * @see SystemConfig#getSystemPermissions()
      */
-    private int checkUidPermissionInternal(@Nullable Package pkg, int uid,
+    private int checkUidPermissionInternal(@Nullable AndroidPackage pkg, int uid,
             @NonNull String permissionName) {
         if (pkg != null) {
             final int userId = UserHandle.getUserId(uid);
@@ -3102,7 +3102,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         // expect single system package
         String systemPackageName = ArrayUtils.firstOrNull(mPackageManagerInt.getKnownPackageNames(
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM));
-        final PackageParser.Package systemPackage =
+        final AndroidPackage systemPackage =
                 mPackageManagerInt.getPackage(systemPackageName);
 
         // check if the package is allow to use this signature permission.  A package is allowed to
@@ -3189,9 +3189,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!allowed && bp.isInstaller()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM),
-                    pkg.packageName) || ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                            PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER,
-                    UserHandle.USER_SYSTEM), pkg.packageName)) {
+                    pkg.getPackageName()) || ArrayUtils.contains(
+                            mPackageManagerInt.getKnownPackageNames(
+                                    PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER,
+                    UserHandle.USER_SYSTEM), pkg.getPackageName())) {
                 // If this permission is to be granted to the system installer and
                 // this app is an installer, then it gets the permission.
                 allowed = true;
@@ -3199,7 +3200,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!allowed && bp.isVerifier()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_VERIFIER, UserHandle.USER_SYSTEM),
-                    pkg.packageName)) {
+                    pkg.getPackageName())) {
                 // If this permission is to be granted to the system verifier and
                 // this app is a verifier, then it gets the permission.
                 allowed = true;
@@ -3217,7 +3218,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!allowed && bp.isSetup()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_SETUP_WIZARD, UserHandle.USER_SYSTEM),
-                    pkg.packageName)) {
+                    pkg.getPackageName())) {
                 // If this permission is to be granted to the system setup wizard and
                 // this app is a setup wizard, then it gets the permission.
                 allowed = true;
@@ -3225,28 +3226,28 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!allowed && bp.isSystemTextClassifier()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER,
-                    UserHandle.USER_SYSTEM), pkg.packageName)) {
+                    UserHandle.USER_SYSTEM), pkg.getPackageName())) {
                 // Special permissions for the system default text classifier.
                 allowed = true;
             }
             if (!allowed && bp.isConfigurator()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_CONFIGURATOR,
-                    UserHandle.USER_SYSTEM), pkg.packageName)) {
+                    UserHandle.USER_SYSTEM), pkg.getPackageName())) {
                 // Special permissions for the device configurator.
                 allowed = true;
             }
             if (!allowed && bp.isWellbeing()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_WELLBEING, UserHandle.USER_SYSTEM),
-                    pkg.packageName)) {
+                    pkg.getPackageName())) {
                 // Special permission granted only to the OEM specified wellbeing app
                 allowed = true;
             }
             if (!allowed && bp.isDocumenter()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_DOCUMENTER, UserHandle.USER_SYSTEM),
-                    pkg.packageName)) {
+                    pkg.getPackageName())) {
                 // If this permission is to be granted to the documenter and
                 // this app is the documenter, then it gets the permission.
                 allowed = true;
@@ -3254,7 +3255,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!allowed && bp.isIncidentReportApprover()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_INCIDENT_REPORT_APPROVER,
-                    UserHandle.USER_SYSTEM), pkg.packageName)) {
+                    UserHandle.USER_SYSTEM), pkg.getPackageName())) {
                 // If this permission is to be granted to the incident report approver and
                 // this app is the incident report approver, then it gets the permission.
                 allowed = true;
@@ -3262,14 +3263,14 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!allowed && bp.isAppPredictor()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                             PackageManagerInternal.PACKAGE_APP_PREDICTOR, UserHandle.USER_SYSTEM),
-                    pkg.packageName)) {
+                    pkg.getPackageName())) {
                 // Special permissions for the system app predictor.
                 allowed = true;
             }
             if (!allowed && bp.isTelephony()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                         PackageManagerInternal.PACKAGE_TELEPHONY, UserHandle.USER_SYSTEM),
-                    pkg.packageName)) {
+                    pkg.getPackageName())) {
                 // Special permissions for the system telephony apps.
                 allowed = true;
             }
@@ -4183,9 +4184,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 for (int i = 0; i < numTotalPermissions; i++) {
                     BasePermission bp = mSettings.mPermissions.valueAt(i);
 
-                    if (bp.perm != null && bp.perm.info != null
-                            && bp.perm.info.getProtection() == protection) {
-                        matchingPermissions.add(bp.perm.info);
+                    if (bp.perm != null && bp.perm.getProtection() == protection) {
+                        matchingPermissions.add(
+                                PackageInfoUtils.generatePermissionInfo(bp.perm, 0));
                     }
                 }
             }

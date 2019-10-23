@@ -337,7 +337,7 @@ public final class SELinuxMMAC {
         }
     }
 
-    private static int getTargetSdkVersionForSeInfo(PackageParser.Package pkg,
+    private static int getTargetSdkVersionForSeInfo(AndroidPackage pkg,
             SharedUserSetting sharedUserSetting, PlatformCompat compatibility) {
         // Apps which share a sharedUserId must be placed in the same selinux domain. If this
         // package is the first app installed as this shared user, set seInfoTargetSdkVersion to its
@@ -350,11 +350,11 @@ public final class SELinuxMMAC {
         if ((sharedUserSetting != null) && (sharedUserSetting.packages.size() != 0)) {
             return sharedUserSetting.seInfoTargetSdkVersion;
         }
-        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.applicationInfo)) {
+        if (compatibility.isChangeEnabled(SELINUX_LATEST_CHANGES, pkg.toAppInfo())) {
             return android.os.Build.VERSION_CODES.R;
         }
 
-        return pkg.applicationInfo.targetSdkVersion;
+        return pkg.getTargetSdkVersion();
     }
 
     /**
@@ -368,7 +368,7 @@ public final class SELinuxMMAC {
      * @param compatibility     the PlatformCompat service to ask about state of compat changes.
      * @return String representing the resulting seinfo.
      */
-    public static String getSeInfo(PackageParser.Package pkg, SharedUserSetting sharedUserSetting,
+    public static String getSeInfo(AndroidPackage pkg, SharedUserSetting sharedUserSetting,
             PlatformCompat compatibility) {
         final int targetSdkVersion = getTargetSdkVersionForSeInfo(pkg, sharedUserSetting,
                 compatibility);

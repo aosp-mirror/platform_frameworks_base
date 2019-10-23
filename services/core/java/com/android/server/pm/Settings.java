@@ -4168,6 +4168,15 @@ public final class Settings {
         return userState.isMatch(componentInfo, flags);
     }
 
+    boolean isEnabledAndMatchLPr(AndroidPackage pkg, ParsedComponent component, int flags,
+            int userId) {
+        final PackageSetting ps = mPackages.get(component.getPackageName());
+        if (ps == null) return false;
+
+        final PackageUserState userState = ps.readUserState(userId);
+        return userState.isMatch(pkg.isSystem(), pkg.isEnabled(), component, flags);
+    }
+
     boolean isOrphaned(String packageName) {
         final PackageSetting pkg = mPackages.get(packageName);
         if (pkg == null) {

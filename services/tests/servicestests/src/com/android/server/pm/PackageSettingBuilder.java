@@ -39,7 +39,7 @@ class PackageSettingBuilder {
     private long[] mUsesStaticLibrariesVersions;
     private String mVolumeUuid;
     private SparseArray<PackageUserState> mUserStates = new SparseArray<>();
-    private PackageParser.Package mPkg;
+    private AndroidPackage mPkg;
     private int mAppId;
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
