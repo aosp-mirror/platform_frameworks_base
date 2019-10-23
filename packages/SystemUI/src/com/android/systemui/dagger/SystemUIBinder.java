@@ -16,6 +16,7 @@
 
 package com.android.systemui.dagger;
 
+import com.android.systemui.LatencyTester;
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.pip.PipUI;
@@ -48,6 +49,12 @@ public abstract class SystemUIBinder {
     @ClassKey(KeyguardViewMediator.class)
     public abstract SystemUI bindKeyguardViewMediator(KeyguardViewMediator sysui);
 
+    /** Inject into LatencyTests. */
+    @Binds
+    @IntoMap
+    @ClassKey(LatencyTester.class)
+    public abstract SystemUI bindLatencyTester(LatencyTester sysui);
+
     /** Inject into PipUI. */
     @Binds
     @IntoMap
@@ -65,6 +72,7 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(Recents.class)
     public abstract SystemUI bindRecents(Recents sysui);
+
 
     /** Inject into VolumeUI. */
     @Binds
