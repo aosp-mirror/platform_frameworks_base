@@ -150,9 +150,9 @@ message DisplayContentProto {
     // Will be removed soon.
     optional PinnedStackControllerProto pinned_stack_controller = 5 [deprecated=true];
     /* non app windows */
-    repeated WindowTokenProto above_app_windows = 6;
-    repeated WindowTokenProto below_app_windows = 7;
-    repeated WindowTokenProto ime_windows = 8;
+    repeated WindowTokenProto above_app_windows = 6 [deprecated=true];
+    repeated WindowTokenProto below_app_windows = 7 [deprecated=true];
+    repeated WindowTokenProto ime_windows = 8 [deprecated=true];
     optional int32 dpi = 9;
     optional .android.view.DisplayInfoProto display_info = 10;
     optional int32 rotation = 11;
@@ -165,7 +165,32 @@ message DisplayContentProto {
     repeated IdentifierProto closing_apps = 18;
     repeated IdentifierProto changing_apps = 19;
     repeated WindowTokenProto overlay_windows = 20;
+    optional DisplayAreaProto root_display_area = 21;
 }
+
+/* represents DisplayArea object */
+message DisplayAreaProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional WindowContainerProto window_container = 1;
+    optional string name = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    repeated DisplayAreaChildProto children = 3;
+}
+
+/* represents a generic child of a DisplayArea */
+message DisplayAreaChildProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    /* At most one of the following should be present: */
+
+    /* represents a DisplayArea child */
+    optional DisplayAreaProto display_area = 1;
+    /* represents a WindowToken child */
+    optional WindowTokenProto window = 2;
+    /* represents an unknown child - the class name is recorded */
+    repeated string unknown = 3;
+}
+
 
 /* represents DisplayFrames */
 message DisplayFramesProto {
