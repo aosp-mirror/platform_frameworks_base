@@ -1748,8 +1748,30 @@ public class UserManager {
         }
     }
 
-    /** {@hide} */
-    public boolean isUserUnlockingOrUnlocked(UserHandle user) {
+    /**
+     * Return whether the provided user is already running in an
+     * "unlocked" state or in the process of unlocking.
+     * <p>
+     * On devices with direct boot, a user is unlocked only after they've
+     * entered their credentials (such as a lock pattern or PIN). On devices
+     * without direct boot, a user is unlocked as soon as it starts.
+     * <p>
+     * When a user is locked, only device-protected data storage is available.
+     * When a user is unlocked, both device-protected and credential-protected
+     * private app data storage is available.
+     *
+     * <p>Requires {@code android.permission.MANAGE_USERS} or
+     * {@code android.permission.INTERACT_ACROSS_USERS}, otherwise specified {@link UserHandle user}
+     * must be the calling user or a profile associated with it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.INTERACT_ACROSS_USERS
+    })
+    public boolean isUserUnlockingOrUnlocked(@NonNull UserHandle user) {
         return isUserUnlockingOrUnlocked(user.getIdentifier());
     }
 
@@ -2565,6 +2587,22 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Checks if the 2 provided user handles belong to the same profile group.
+     *
+     * @param user one of the two user handles to check.
+     * @param otherUser one of the two user handles to check.
+     * @return true if the two users are in the same profile group.
+     *
+     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public boolean isSameProfileGroup(@NonNull UserHandle user, @NonNull UserHandle otherUser) {
+        return isSameProfileGroup(user.getIdentifier(), otherUser.getIdentifier());
     }
 
     /**
