@@ -248,6 +248,18 @@ public class ZygoteInit {
 
         InputStream is;
         try {
+            // If we are profiling the boot image, avoid preloading classes.
+            // Can't use device_config since we are the zygote.
+            String prop = SystemProperties.get(
+                    "persist.device_config.runtime_native_boot.profilebootclasspath", "");
+            // Might be empty if the property is unset since the default is "".
+            if (prop.length() == 0) {
+                prop = SystemProperties.get("dalvik.vm.profilebootclasspath", "");
+            }
+            if ("true".equals(prop)) {
+                return;
+            }
+
             is = new FileInputStream(PRELOADED_CLASSES);
         } catch (FileNotFoundException e) {
             Log.e(TAG, "Couldn't find " + PRELOADED_CLASSES + ".");
