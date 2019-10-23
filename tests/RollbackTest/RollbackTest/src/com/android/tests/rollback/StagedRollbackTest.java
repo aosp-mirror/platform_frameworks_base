@@ -52,6 +52,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Tests for rollback of staged installs.
  * <p>
@@ -123,6 +125,13 @@ public class StagedRollbackTest {
         assertThat(rollback).packagesContainsExactly(
                 Rollback.from(TestApp.A2).to(TestApp.A1));
         assertThat(rollback.isStaged()).isTrue();
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(5), false);
+        RollbackUtils.sendCrashBroadcast(TestApp.A, 4);
+        // Sleep for a while to make sure we don't trigger rollback
+        Thread.sleep(TimeUnit.SECONDS.toMillis(30));
     }
 
     /**
@@ -132,11 +141,8 @@ public class StagedRollbackTest {
      */
     @Test
     public void testBadApkOnly_Phase3() throws Exception {
-        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
-                PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
-                Integer.toString(5), false);
-
-        RollbackUtils.sendCrashBroadcast(TestApp.A, 5);
+        // One more crash to trigger rollback
+        RollbackUtils.sendCrashBroadcast(TestApp.A, 1);
 
         // We expect the device to be rebooted automatically. Wait for that to happen.
         Thread.sleep(30 * 1000);
