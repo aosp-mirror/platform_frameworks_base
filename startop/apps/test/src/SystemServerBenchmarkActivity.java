@@ -17,28 +17,20 @@
 package com.android.startop.test;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
 public class SystemServerBenchmarkActivity extends Activity implements BenchmarkRunner {
-    private GridLayout benchmarkList;
+    protected GridLayout mBenchmarkList;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.system_server_benchmark_page);
 
-        benchmarkList = findViewById(R.id.benchmark_list);
+        mBenchmarkList = findViewById(R.id.benchmark_list);
 
         SystemServerBenchmarks.initializeBenchmarks(this, this);
     }
@@ -49,7 +41,7 @@ public class SystemServerBenchmarkActivity extends Activity implements Benchmark
      * @param name A short name that shows up in the UI or benchmark results
      */
     public void addBenchmark(CharSequence name, Runnable thunk) {
-        Context context = benchmarkList.getContext();
+        Context context = mBenchmarkList.getContext();
         Button button = new Button(context);
         TextView mean = new TextView(context);
         TextView stdev = new TextView(context);
@@ -68,8 +60,8 @@ public class SystemServerBenchmarkActivity extends Activity implements Benchmark
             });
         });
 
-        benchmarkList.addView(button);
-        benchmarkList.addView(mean);
-        benchmarkList.addView(stdev);
+        mBenchmarkList.addView(button);
+        mBenchmarkList.addView(mean);
+        mBenchmarkList.addView(stdev);
     }
 }
