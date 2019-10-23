@@ -1018,7 +1018,14 @@ public class AudioService extends IAudioService.Stub
 
         synchronized (mAudioPolicies) {
             for (AudioPolicyProxy policy : mAudioPolicies.values()) {
-                policy.connectMixes();
+                final int status = policy.connectMixes();
+                if (status != AudioSystem.SUCCESS) {
+                    // note that PERMISSION_DENIED may also indicate trouble getting to APService
+                    Log.e(TAG, "onAudioServerDied: error "
+                            + AudioSystem.audioSystemErrorToString(status)
+                            + " when connecting mixes for policy " + policy.toLogFriendlyString());
+                    policy.release();
+                }
             }
         }
 
@@ -7019,16 +7026,8 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void binderDied() {
-            synchronized (mAudioPolicies) {
-                Log.i(TAG, "audio policy " + mPolicyCallback + " died");
-                release();
-                mAudioPolicies.remove(mPolicyCallback.asBinder());
-            }
-            if (mIsVolumeController) {
-                synchronized (mExtVolumeControllerLock) {
-                    mExtVolumeController = null;
-                }
-            }
+            Log.i(TAG, "audio policy " + mPolicyCallback + " died");
+            release();
         }
 
         String getRegistrationId() {
@@ -7052,9 +7051,20 @@ public class AudioService extends IAudioService.Stub
                     Log.e(TAG, "Fail to unregister Audiopolicy callback from MediaProjection");
                 }
             }
+            if (mIsVolumeController) {
+                synchronized (mExtVolumeControllerLock) {
+                    mExtVolumeController = null;
+                }
+            }
             final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, false);
             Binder.restoreCallingIdentity(identity);
+            synchronized (mAudioPolicies) {
+                mAudioPolicies.remove(mPolicyCallback.asBinder());
+            }
+            try {
+                mPolicyCallback.notifyUnregistration();
+            } catch (RemoteException e) { }
         }
 
         boolean hasMixAffectingUsage(int usage, int excludedFlags) {
@@ -7105,7 +7115,7 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        int connectMixes() {
+        @AudioSystem.AudioSystemError int connectMixes() {
             final long identity = Binder.clearCallingIdentity();
             int status = AudioSystem.registerPolicyMixes(mMixes, true);
             Binder.restoreCallingIdentity(identity);
