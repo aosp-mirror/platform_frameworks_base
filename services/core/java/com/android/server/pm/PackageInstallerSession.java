@@ -66,6 +66,7 @@ import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.parsing.ApkLiteParseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
@@ -1677,7 +1678,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         for (File addedFile : addedFiles) {
             final ApkLite apk;
             try {
-                apk = PackageParser.parseApkLite(
+                apk = ApkLiteParseUtils.parseApkLite(
                         addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw PackageManagerException.from(e);
@@ -1776,7 +1777,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             ApplicationInfo appInfo = pkgInfo.applicationInfo;
             try {
                 existing = PackageParser.parsePackageLite(new File(appInfo.getCodePath()), 0);
-                existingBase = PackageParser.parseApkLite(new File(appInfo.getBaseCodePath()),
+                existingBase = ApkLiteParseUtils.parseApkLite(new File(appInfo.getBaseCodePath()),
                         PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw PackageManagerException.from(e);

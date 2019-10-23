@@ -199,7 +199,7 @@ class UserSystemPackageInstaller {
                 final boolean changed = pmInt.setInstalled(pkg, userId, install);
                 if (changed) {
                     Slog.i(TAG, (install ? "Installed " : "Uninstalled ")
-                            + pkg.packageName + " for user " + userId);
+                            + pkg.getPackageName() + " for user " + userId);
                 }
             });
         }
@@ -220,7 +220,7 @@ class UserSystemPackageInstaller {
 
         // Check whether all whitelisted packages are indeed on the system.
         for (String pkgName : allWhitelistedPackages) {
-            PackageParser.Package pkg = pmInt.getPackage(pkgName);
+            AndroidPackage pkg = pmInt.getPackage(pkgName);
             if (pkg == null) {
                 Slog.w(TAG, pkgName + " is whitelisted but not present.");
             } else if (!pkg.isSystem()) {
@@ -234,8 +234,8 @@ class UserSystemPackageInstaller {
         }
         final boolean doWtf = isEnforceMode(mode);
         pmInt.forEachPackage(pkg -> {
-            if (pkg.isSystem() && !allWhitelistedPackages.contains(pkg.manifestPackageName)) {
-                final String msg = "System package " + pkg.manifestPackageName
+            if (pkg.isSystem() && !allWhitelistedPackages.contains(pkg.getManifestPackageName())) {
+                final String msg = "System package " + pkg.getManifestPackageName()
                         + " is not whitelisted using 'install-in-user-type' in SystemConfig "
                         + "for any user types!";
                 if (doWtf) {
@@ -344,7 +344,7 @@ class UserSystemPackageInstaller {
             if (shouldInstallPackage(pkg, mWhitelistedPackagesForUserTypes,
                     whitelistedPackages, isImplicitWhitelistMode, isSystemUser)) {
                 // Although the whitelist uses manifest names, this function returns packageNames.
-                installPackages.add(pkg.packageName);
+                installPackages.add(pkg.getPackageName());
             }
         });
         return installPackages;
@@ -371,7 +371,7 @@ class UserSystemPackageInstaller {
             @NonNull Set<String> userWhitelist, boolean isImplicitWhitelistMode,
             boolean isSystemUser) {
 
-        final String pkgName = sysPkg.manifestPackageName;
+        final String pkgName = sysPkg.getManifestPackageName();
         boolean install = (isImplicitWhitelistMode && !userTypeWhitelist.containsKey(pkgName))
                 || userWhitelist.contains(pkgName);
 

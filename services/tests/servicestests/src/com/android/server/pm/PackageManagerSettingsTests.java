@@ -403,10 +403,6 @@ public class PackageManagerSettingsTests {
 
     private static final String PACKAGE_NAME = "com.android.bar";
     private static final String REAL_PACKAGE_NAME = "com.android.foo";
-    private static final String PARENT_PACKAGE_NAME = "com.android.bar.parent";
-    private static final String CHILD_PACKAGE_NAME_01 = "com.android.bar.child01";
-    private static final String CHILD_PACKAGE_NAME_02 = "com.android.bar.child02";
-    private static final String CHILD_PACKAGE_NAME_03 = "com.android.bar.child03";
     private static final File INITIAL_CODE_PATH =
             new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-1");
     private static final File UPDATED_CODE_PATH =
@@ -416,10 +412,6 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testPackageStateCopy01() {
-        final List<String> childPackageNames = new ArrayList<>();
-        childPackageNames.add(CHILD_PACKAGE_NAME_01);
-        childPackageNames.add(CHILD_PACKAGE_NAME_02);
-        childPackageNames.add(CHILD_PACKAGE_NAME_03);
         final PackageSetting origPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME,
                 REAL_PACKAGE_NAME,
@@ -432,8 +424,6 @@ public class PackageManagerSettingsTests {
                 INITIAL_VERSION_CODE,
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_HAS_CODE,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
-                PARENT_PACKAGE_NAME,
-                childPackageNames,
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -443,10 +433,6 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testPackageStateCopy02() {
-        final List<String> childPackageNames = new ArrayList<>();
-        childPackageNames.add(CHILD_PACKAGE_NAME_01);
-        childPackageNames.add(CHILD_PACKAGE_NAME_02);
-        childPackageNames.add(CHILD_PACKAGE_NAME_03);
         final PackageSetting origPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
@@ -459,8 +445,6 @@ public class PackageManagerSettingsTests {
                 INITIAL_VERSION_CODE,
                 ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_HAS_CODE,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED|ApplicationInfo.PRIVATE_FLAG_HIDDEN,
-                PARENT_PACKAGE_NAME,
-                childPackageNames,
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -476,8 +460,6 @@ public class PackageManagerSettingsTests {
                 UPDATED_VERSION_CODE,
                 0 /*pkgFlags*/,
                 0 /*pkgPrivateFlags*/,
-                null /*parentPkgName*/,
-                null /*childPkgNames*/,
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -505,7 +487,6 @@ public class PackageManagerSettingsTests {
                 "armeabi" /*secondaryCpuAbi*/,
                 0 /*pkgFlags*/,
                 0 /*pkgPrivateFlags*/,
-                null /*childPkgNames*/,
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -539,7 +520,6 @@ public class PackageManagerSettingsTests {
                 "armeabi" /*secondaryCpuAbi*/,
                 ApplicationInfo.FLAG_SYSTEM /*pkgFlags*/,
                 ApplicationInfo.PRIVATE_FLAG_PRIVILEGED /*pkgPrivateFlags*/,
-                null /*childPkgNames*/,
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -579,7 +559,6 @@ public class PackageManagerSettingsTests {
                     "armeabi" /*secondaryCpuAbi*/,
                     0 /*pkgFlags*/,
                     0 /*pkgPrivateFlags*/,
-                    null /*childPkgNames*/,
                     UserManagerService.getInstance(),
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/);
@@ -612,8 +591,6 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
-                null /*parentPkgName*/,
-                null /*childPkgNames*/,
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -653,8 +630,6 @@ public class PackageManagerSettingsTests {
                 true /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
-                null /*parentPkgName*/,
-                null /*childPkgNames*/,
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -700,8 +675,6 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
-                null /*parentPkgName*/,
-                null /*childPkgNames*/,
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -744,8 +717,6 @@ public class PackageManagerSettingsTests {
                 false /*allowInstall*/,
                 false /*instantApp*/,
                 false /*virtualPreload*/,
-                null /*parentPkgName*/,
-                null /*childPkgNames*/,
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -802,9 +773,6 @@ public class PackageManagerSettingsTests {
     private void verifySettingCopy(PackageSetting origPkgSetting, PackageSetting testPkgSetting) {
         assertThat(origPkgSetting, is(not(testPkgSetting)));
         assertThat(origPkgSetting.appId, is(testPkgSetting.appId));
-        // different but equal objects
-        assertNotSame(origPkgSetting.childPackageNames, testPkgSetting.childPackageNames);
-        assertThat(origPkgSetting.childPackageNames, is(testPkgSetting.childPackageNames));
         assertSame(origPkgSetting.codePath, testPkgSetting.codePath);
         assertThat(origPkgSetting.codePath, is(testPkgSetting.codePath));
         assertSame(origPkgSetting.codePathString, testPkgSetting.codePathString);
@@ -828,8 +796,6 @@ public class PackageManagerSettingsTests {
         // mOldCodePaths is _not_ copied
         // assertNotSame(origPkgSetting.mOldCodePaths, testPkgSetting.mOldCodePaths);
         // assertThat(origPkgSetting.mOldCodePaths, is(not(testPkgSetting.mOldCodePaths)));
-        assertSame(origPkgSetting.parentPackageName, testPkgSetting.parentPackageName);
-        assertThat(origPkgSetting.parentPackageName, is(testPkgSetting.parentPackageName));
         assertSame(origPkgSetting.pkg, testPkgSetting.pkg);
         // No equals() method for this object
         // assertThat(origPkgSetting.pkg, is(testPkgSetting.pkg));
@@ -881,8 +847,6 @@ public class PackageManagerSettingsTests {
                 INITIAL_VERSION_CODE,
                 pkgFlags,
                 0 /*privateFlags*/,
-                null /*parentPackageName*/,
-                null /*childPackageNames*/,
                 sharedUserId,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);
@@ -901,8 +865,6 @@ public class PackageManagerSettingsTests {
                 INITIAL_VERSION_CODE,
                 0,
                 0 /*privateFlags*/,
-                null /*parentPackageName*/,
-                null /*childPackageNames*/,
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/);

@@ -39,7 +39,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -53,9 +52,6 @@ public abstract class PackageSettingBase extends SettingBase {
 
     public final String name;
     final String realName;
-
-    String parentPackageName;
-    List<String> childPackageNames;
 
     /**
      * Path where this package was found on disk. For monolithic packages
@@ -138,14 +134,10 @@ public abstract class PackageSettingBase extends SettingBase {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             long pVersionCode, int pkgFlags, int pkgPrivateFlags,
-            String parentPackageName, List<String> childPackageNames,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions) {
         super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
-        this.parentPackageName = parentPackageName;
-        this.childPackageNames = (childPackageNames != null)
-                ? new ArrayList<>(childPackageNames) : null;
         this.usesStaticLibraries = usesStaticLibraries;
         this.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
         this.codePath = codePath;
@@ -235,8 +227,6 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     private void doCopy(PackageSettingBase orig) {
-        childPackageNames = (orig.childPackageNames != null)
-                ? new ArrayList<>(orig.childPackageNames) : null;
         codePath = orig.codePath;
         codePathString = orig.codePathString;
         cpuAbiOverrideString = orig.cpuAbiOverrideString;
@@ -247,7 +237,6 @@ public abstract class PackageSettingBase extends SettingBase {
         lastUpdateTime = orig.lastUpdateTime;
         legacyNativeLibraryPathString = orig.legacyNativeLibraryPathString;
         // Intentionally skip mOldCodePaths; it's not relevant for copies
-        parentPackageName = orig.parentPackageName;
         primaryCpuAbiString = orig.primaryCpuAbiString;
         resourcePath = orig.resourcePath;
         resourcePathString = orig.resourcePathString;
@@ -670,8 +659,6 @@ public abstract class PackageSettingBase extends SettingBase {
 
     protected PackageSettingBase updateFrom(PackageSettingBase other) {
         super.copyFrom(other);
-        this.parentPackageName = other.parentPackageName;
-        this.childPackageNames = other.childPackageNames;
         this.codePath = other.codePath;
         this.codePathString = other.codePathString;
         this.resourcePath = other.resourcePath;

@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.os.Build;
@@ -51,17 +50,29 @@ public class AppsFilterTest {
 
     private ArrayMap<String, PackageSetting> mExisting = new ArrayMap<>();
 
-    private static PackageBuilder pkg(String packageName) {
-        return new PackageBuilder(packageName)
-                .setApplicationInfoTargetSdkVersion(Build.VERSION_CODES.R);
+    private static ParsingPackage pkg(String packageName) {
+        return PackageImpl.forParsing(packageName)
+                .setTargetSdkVersion(Build.VERSION_CODES.R);
     }
 
-    private static PackageBuilder pkg(String packageName, Intent... queries) {
-        return pkg(packageName).setQueriesIntents(queries);
+    private static ParsingPackage pkg(String packageName, Intent... queries) {
+        ParsingPackage pkg = pkg(packageName);
+        if (queries != null) {
+            for (Intent intent : queries) {
+                pkg.addQueriesIntent(intent);
+            }
+        }
+        return pkg;
     }
 
-    private static PackageBuilder pkg(String packageName, String... queriesPackages) {
-        return pkg(packageName).setQueriesPackages(queriesPackages);
+    private static ParsingPackage pkg(String packageName, String... queriesPackages) {
+        ParsingPackage pkg = pkg(packageName);
+        if (queriesPackages != null) {
+            for (String queryPackageName : queriesPackages) {
+                pkg.addQueriesPackage(queryPackageName);
+            }
+        }
+        return pkg;
     }
 
     private static PackageBuilder pkg(String packageName, IntentFilter... filters) {
@@ -89,7 +100,9 @@ public class AppsFilterTest {
                 return info;
             });
         }
-        return packageBuilder;
+
+        return pkg(packageName)
+                .addActivity(activity);
     }
 
     @Before
@@ -98,7 +111,7 @@ public class AppsFilterTest {
 
         MockitoAnnotations.initMocks(this);
         when(mFeatureConfigMock.isGloballyEnabled()).thenReturn(true);
-        when(mFeatureConfigMock.packageIsEnabled(any(PackageParser.Package.class)))
+        when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
                 .thenReturn(true);
     }
 
@@ -238,7 +251,7 @@ public class AppsFilterTest {
 
     @Test
     public void testNoQueries_FeatureOff_DoesntFilter() {
-        when(mFeatureConfigMock.packageIsEnabled(any(PackageParser.Package.class)))
+        when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
                 .thenReturn(false);
         final AppsFilter appsFilter =
                 new AppsFilter(mFeatureConfigMock, new String[]{}, false);
