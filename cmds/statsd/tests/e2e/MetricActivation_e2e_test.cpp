@@ -290,14 +290,14 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     std::unique_ptr<LogEvent> event;
 
     event = CreateAppCrashEvent(111, bucketStartTimeNs + 5);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 5);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 0);
 
     // Activated by battery save mode.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
@@ -312,12 +312,12 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
 
     // First processed event.
     event = CreateAppCrashEvent(222, bucketStartTimeNs + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 15);
 
     // Activated by screen on event.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + 20);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 20);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -330,7 +330,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     // 2nd processed event.
     // The activation by screen_on event expires, but the one by battery save mode is still active.
     event = CreateAppCrashEvent(333, bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -344,11 +344,11 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
 
     // 3rd processed event.
     event = CreateAppCrashEvent(444, bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
 
     // All activations expired.
     event = CreateAppCrashEvent(555, bucketStartTimeNs + NS_PER_SEC * 60 * 8);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 8);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
@@ -364,7 +364,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     // Re-activate metric via screen on.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -379,7 +379,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
 
     // 4th processed event.
     event = CreateAppCrashEvent(666, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
@@ -509,14 +509,14 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     std::unique_ptr<LogEvent> event;
 
     event = CreateAppCrashEvent(111, bucketStartTimeNs + 5);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 5);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 0);
 
     // Activated by battery save mode.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
@@ -532,12 +532,12 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     // First processed event.
     event = CreateAppCrashEvent(222, bucketStartTimeNs + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 15);
 
     // Activated by screen on event.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + 20);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 20);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -551,7 +551,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     // 2nd processed event.
     // The activation by screen_on event expires, but the one by battery save mode is still active.
     event = CreateAppCrashEvent(333, bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(),bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -566,11 +566,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     // 3rd processed event.
     event = CreateAppCrashEvent(444, bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
 
     // All activations expired.
     event = CreateAppCrashEvent(555, bucketStartTimeNs + NS_PER_SEC * 60 * 8);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 8);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
@@ -587,7 +587,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     // Re-activate metric via screen on.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -603,11 +603,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     // 4th processed event.
     event = CreateAppCrashEvent(666, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -623,11 +623,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     // 5th processed event.
     event = CreateAppCrashEvent(777, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
 
     // Cancel battery saver mode activation.
     event = CreateScreenBrightnessChangedEvent(64, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 60);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 60);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -643,7 +643,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     // Screen-on activation expired.
     event = CreateAppCrashEvent(888, bucketStartTimeNs + NS_PER_SEC * 60 * 13);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 13);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
@@ -658,11 +658,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_EQ(eventDeactivationMap[3][0], eventActivationMap[0]);
 
     event = CreateAppCrashEvent(999, bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 5);
@@ -678,7 +678,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
 
     // Cancel battery saver mode activation.
     event = CreateScreenBrightnessChangedEvent(140, bucketStartTimeNs + NS_PER_SEC * 60 * 16);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 16);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 6);
@@ -835,14 +835,14 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     std::unique_ptr<LogEvent> event;
 
     event = CreateAppCrashEvent(111, bucketStartTimeNs + 5);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 5);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 0);
 
     // Activated by battery save mode.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
@@ -859,12 +859,12 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     // First processed event.
     event = CreateAppCrashEvent(222, bucketStartTimeNs + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 15);
 
     // Activated by screen on event.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + 20);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 20);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -879,7 +879,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     // 2nd processed event.
     // The activation by screen_on event expires, but the one by battery save mode is still active.
     event = CreateAppCrashEvent(333, bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -895,11 +895,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     // 3rd processed event.
     event = CreateAppCrashEvent(444, bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
 
     // All activations expired.
     event = CreateAppCrashEvent(555, bucketStartTimeNs + NS_PER_SEC * 60 * 8);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 8);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
@@ -917,7 +917,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     // Re-activate metric via screen on.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -934,11 +934,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     // 4th processed event.
     event = CreateAppCrashEvent(666, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -955,11 +955,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     // 5th processed event.
     event = CreateAppCrashEvent(777, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
 
     // Cancel battery saver mode and screen on activation.
     event = CreateScreenBrightnessChangedEvent(64, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 60);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 60);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
@@ -976,7 +976,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     // Screen-on activation expired.
     event = CreateAppCrashEvent(888, bucketStartTimeNs + NS_PER_SEC * 60 * 13);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 13);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 4);
@@ -991,11 +991,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_EQ(eventDeactivationMap[4][0], eventActivationMap[2]);
 
     event = CreateAppCrashEvent(999, bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 5);
@@ -1012,7 +1012,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
 
     // Cancel battery saver mode and screen on activation.
     event = CreateScreenBrightnessChangedEvent(140, bucketStartTimeNs + NS_PER_SEC * 60 * 16);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 16);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 6);
@@ -1170,11 +1170,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     // Event that should be ignored.
     event = CreateAppCrashEvent(111, bucketStartTimeNs + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 1);
 
     // Activate metric via screen on for 2 minutes.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON, bucketStartTimeNs + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
@@ -1186,11 +1186,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     // 1st processed event.
     event = CreateAppCrashEvent(222, bucketStartTimeNs + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 15);
 
     // Enable battery saver mode activation for 5 minutes.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
@@ -1201,12 +1201,12 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     // 2nd processed event.
     event = CreateAppCrashEvent(333, bucketStartTimeNs + NS_PER_SEC * 60 + 40);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 + 40);
 
     // Cancel battery saver mode and screen on activation.
     int64_t firstDeactivation = bucketStartTimeNs + NS_PER_SEC * 61;
     event = CreateScreenBrightnessChangedEvent(64, firstDeactivation);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), firstDeactivation);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     // New broadcast since the config is no longer active.
@@ -1217,11 +1217,11 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     // Should be ignored
     event = CreateAppCrashEvent(444, bucketStartTimeNs + NS_PER_SEC * 61 + 80);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 61 + 80);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);
@@ -1233,12 +1233,12 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     // 3rd processed event.
     event = CreateAppCrashEvent(555, bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 80);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 80);
 
     // Cancel battery saver mode activation.
     int64_t secondDeactivation = bucketStartTimeNs + NS_PER_SEC * 60 * 13;
     event = CreateScreenBrightnessChangedEvent(140, secondDeactivation);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), secondDeactivation);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 4);
@@ -1248,7 +1248,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
 
     // Should be ignored.
     event = CreateAppCrashEvent(666, bucketStartTimeNs + NS_PER_SEC * 60 * 13 + 80);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 13 + 80);
 
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
@@ -1388,9 +1388,9 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     std::unique_ptr<LogEvent> event;
 
     event = CreateAppCrashEvent(111, bucketStartTimeNs + 5);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 5);
     event = CreateMoveToForegroundEvent(1111, bucketStartTimeNs + 5);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 5);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_FALSE(metricProducer2->mIsActive);
@@ -1398,7 +1398,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // Activated by battery save mode.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 1);
     EXPECT_EQ(activeConfigsBroadcast.size(), 1);
@@ -1424,14 +1424,14 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // First processed event.
     event = CreateAppCrashEvent(222, bucketStartTimeNs + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 15);
     event = CreateMoveToForegroundEvent(2222, bucketStartTimeNs + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 15);
 
     // Activated by screen on event.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + 20);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 20);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -1455,9 +1455,9 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     // 2nd processed event.
     // The activation by screen_on event expires, but the one by battery save mode is still active.
     event = CreateAppCrashEvent(333, bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
     event = CreateMoveToForegroundEvent(3333, bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 2 + 25);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(eventActivationMap[0]->state, ActivationState::kActive);
@@ -1482,15 +1482,15 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // 3rd processed event.
     event = CreateAppCrashEvent(444, bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
     event = CreateMoveToForegroundEvent(4444, bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 5 + 25);
 
     // All activations expired.
     event = CreateAppCrashEvent(555, bucketStartTimeNs + NS_PER_SEC * 60 * 8);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 8);
     event = CreateMoveToForegroundEvent(5555, bucketStartTimeNs + NS_PER_SEC * 60 * 8);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 8);
     EXPECT_FALSE(metricsManager->isActive());
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 2);
@@ -1517,7 +1517,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     // Re-activate metric via screen on.
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 10 + 10);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 3);
     EXPECT_EQ(activeConfigsBroadcast.size(), 1);
@@ -1543,13 +1543,13 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // 4th processed event.
     event = CreateAppCrashEvent(666, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
     event = CreateMoveToForegroundEvent(6666, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 1);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 3);
     EXPECT_EQ(activeConfigsBroadcast.size(), 1);
@@ -1575,13 +1575,13 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // 5th processed event.
     event = CreateAppCrashEvent(777, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
     event = CreateMoveToForegroundEvent(7777, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 40);
 
     // Cancel battery saver mode and screen on activation.
     event = CreateScreenBrightnessChangedEvent(64, bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 60);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(),bucketStartTimeNs + NS_PER_SEC * 60 * 11 + 60);
     EXPECT_FALSE(metricsManager->isActive());
     // New broadcast since the config is no longer active.
     EXPECT_EQ(broadcastCount, 4);
@@ -1607,9 +1607,9 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // Screen-on activation expired.
     event = CreateAppCrashEvent(888, bucketStartTimeNs + NS_PER_SEC * 60 * 13);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 13);
     event = CreateMoveToForegroundEvent(8888, bucketStartTimeNs + NS_PER_SEC * 60 * 13);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 13);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 4);
     EXPECT_EQ(activeConfigsBroadcast.size(), 0);
@@ -1633,13 +1633,13 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(eventDeactivationMap2[4][0], eventActivationMap2[2]);
 
     event = CreateAppCrashEvent(999, bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
     event = CreateMoveToForegroundEvent(9999, bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 14 + 1);
 
     // Re-enable battery saver mode activation.
     event = CreateBatterySaverOnEvent(bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + NS_PER_SEC * 60 * 15 + 15);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 5);
     EXPECT_EQ(activeConfigsBroadcast.size(), 1);
@@ -1665,7 +1665,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
 
     // Cancel battery saver mode and screen on activation.
     event = CreateScreenBrightnessChangedEvent(140, bucketStartTimeNs + NS_PER_SEC * 60 * 16);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(),bucketStartTimeNs + NS_PER_SEC * 60 * 16);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_EQ(broadcastCount, 6);
     EXPECT_EQ(activeConfigsBroadcast.size(), 0);

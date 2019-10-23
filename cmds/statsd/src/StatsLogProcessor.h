@@ -147,6 +147,8 @@ private:
 
     sp<AlarmMonitor> mPeriodicAlarmMonitor;
 
+    void OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs);
+
     void resetIfConfigTtlExpiredLocked(const int64_t timestampNs);
 
     void OnConfigUpdatedLocked(
@@ -176,8 +178,7 @@ private:
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
-    void flushIfNecessaryLocked(int64_t timestampNs, const ConfigKey& key,
-                                MetricsManager& metricsManager);
+    void flushIfNecessaryLocked(const ConfigKey& key, MetricsManager& metricsManager);
 
     // Maps the isolated uid in the log event to host uid if the log event contains uid fields.
     void mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const;

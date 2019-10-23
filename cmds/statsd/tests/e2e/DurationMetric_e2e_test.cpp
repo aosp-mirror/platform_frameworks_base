@@ -271,19 +271,19 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     // Turn screen off.
     event = CreateScreenStateChangedEvent(
             android::view::DISPLAY_STATE_OFF, bucketStartTimeNs + 2 * NS_PER_SEC); // 0:02
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), bucketStartTimeNs + 2 * NS_PER_SEC);
 
     // Turn screen on.
     const int64_t durationStartNs = bucketStartTimeNs + 5 * NS_PER_SEC; // 0:05
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON, durationStartNs);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), durationStartNs);
 
     // Activate metric.
     const int64_t activationStartNs = bucketStartTimeNs + 5 * NS_PER_SEC; // 0:10
     const int64_t activationEndNs =
             activationStartNs + event_activation1->ttl_seconds() * NS_PER_SEC; // 0:40
     event = CreateAppCrashEvent(111, activationStartNs);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), activationStartNs);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 1);
@@ -296,7 +296,7 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     // Expire activation.
     const int64_t expirationNs = activationEndNs + 7 * NS_PER_SEC;
     event = CreateScreenBrightnessChangedEvent(64, expirationNs); // 0:47
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), expirationNs);
     EXPECT_FALSE(metricsManager->isActive());
     EXPECT_FALSE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 2);
@@ -310,24 +310,24 @@ TEST(DurationMetricE2eTest, TestWithActivation) {
     // Turn off screen 10 seconds after activation expiration.
     const int64_t durationEndNs = activationEndNs + 10 * NS_PER_SEC; // 0:50
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF, durationEndNs);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(),durationEndNs);
 
     // Turn screen on.
     const int64_t duration2StartNs = durationEndNs + 5 * NS_PER_SEC; // 0:55
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_ON, duration2StartNs);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), duration2StartNs);
 
     // Turn off screen.
     const int64_t duration2EndNs = duration2StartNs + 10 * NS_PER_SEC; // 1:05
     event = CreateScreenStateChangedEvent(android::view::DISPLAY_STATE_OFF, duration2EndNs);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), duration2EndNs);
 
     // Activate metric.
     const int64_t activation2StartNs = duration2EndNs + 5 * NS_PER_SEC; // 1:10
     const int64_t activation2EndNs =
             activation2StartNs + event_activation1->ttl_seconds() * NS_PER_SEC; // 1:40
     event = CreateAppCrashEvent(211, activation2StartNs);
-    processor.OnLogEvent(event.get());
+    processor.OnLogEvent(event.get(), activation2StartNs);
     EXPECT_TRUE(metricsManager->isActive());
     EXPECT_TRUE(metricProducer->mIsActive);
     EXPECT_EQ(broadcastCount, 3);

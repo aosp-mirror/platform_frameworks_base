@@ -200,6 +200,10 @@ void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs) {
 }
 
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
+    OnLogEvent(event, getElapsedRealtimeNs());
+}
+
+void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
 
 #ifdef VERY_VERBOSE_PRINTING
@@ -207,9 +211,9 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         ALOGI("%s", event->ToString().c_str());
     }
 #endif
-    const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
+    const int64_t eventElapsedTimeNs = event->GetElapsedTimestampNs();
 
-    resetIfConfigTtlExpiredLocked(currentTimestampNs);
+    resetIfConfigTtlExpiredLocked(eventElapsedTimeNs);
 
     StatsdStats::getInstance().noteAtomLogged(
         event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
@@ -264,15 +268,16 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
             uidsWithActiveConfigsChanged.insert(uid);
             StatsdStats::getInstance().noteActiveStatusChanged(pair.first, isCurActive);
         }
-        flushIfNecessaryLocked(event->GetElapsedTimestampNs(), pair.first, *(pair.second));
+        flushIfNecessaryLocked(pair.first, *(pair.second));
     }
 
+    // Don't use the event timestamp for the guardrail.
     for (int uid : uidsWithActiveConfigsChanged) {
         // Send broadcast so that receivers can pull data.
         auto lastBroadcastTime = mLastActivationBroadcastTimes.find(uid);
         if (lastBroadcastTime != mLastActivationBroadcastTimes.end()) {
-            if (currentTimestampNs - lastBroadcastTime->second <
-                    StatsdStats::kMinActivationBroadcastPeriodNs) {
+            if (elapsedRealtimeNs - lastBroadcastTime->second <
+                StatsdStats::kMinActivationBroadcastPeriodNs) {
                 StatsdStats::getInstance().noteActivationBroadcastGuardrailHit(uid);
                 VLOG("StatsD would've sent an activation broadcast but the rate limit stopped us.");
                 return;
@@ -282,13 +287,13 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         if (activeConfigs != activeConfigsPerUid.end()) {
             if (mSendActivationBroadcast(uid, activeConfigs->second)) {
                 VLOG("StatsD sent activation notice for uid %d", uid);
-                mLastActivationBroadcastTimes[uid] = currentTimestampNs;
+                mLastActivationBroadcastTimes[uid] = elapsedRealtimeNs;
             }
         } else {
             std::vector<int64_t> emptyActiveConfigs;
             if (mSendActivationBroadcast(uid, emptyActiveConfigs)) {
                 VLOG("StatsD sent EMPTY activation notice for uid %d", uid);
-                mLastActivationBroadcastTimes[uid] = currentTimestampNs;
+                mLastActivationBroadcastTimes[uid] = elapsedRealtimeNs;
             }
         }
     }
@@ -550,22 +555,23 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     }
 }
 
-void StatsLogProcessor::flushIfNecessaryLocked(
-    int64_t timestampNs, const ConfigKey& key, MetricsManager& metricsManager) {
+void StatsLogProcessor::flushIfNecessaryLocked(const ConfigKey& key,
+                                               MetricsManager& metricsManager) {
+    int64_t elapsedRealtimeNs = getElapsedRealtimeNs();
     auto lastCheckTime = mLastByteSizeTimes.find(key);
     if (lastCheckTime != mLastByteSizeTimes.end()) {
-        if (timestampNs - lastCheckTime->second < StatsdStats::kMinByteSizeCheckPeriodNs) {
+        if (elapsedRealtimeNs - lastCheckTime->second < StatsdStats::kMinByteSizeCheckPeriodNs) {
             return;
         }
     }
 
     // We suspect that the byteSize() computation is expensive, so we set a rate limit.
     size_t totalBytes = metricsManager.byteSize();
-    mLastByteSizeTimes[key] = timestampNs;
+    mLastByteSizeTimes[key] = elapsedRealtimeNs;
     bool requestDump = false;
-    if (totalBytes >
-        StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
-        metricsManager.dropData(timestampNs);
+    if (totalBytes > StatsdStats::kMaxMetricsBytesPerConfig) {
+        // Too late. We need to start clearing data.
+        metricsManager.dropData(elapsedRealtimeNs);
         StatsdStats::getInstance().noteDataDropped(key, totalBytes);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if ((totalBytes > StatsdStats::kBytesPerConfigTriggerGetData) ||
@@ -580,7 +586,8 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         // Send broadcast so that receivers can pull data.
         auto lastBroadcastTime = mLastBroadcastTimes.find(key);
         if (lastBroadcastTime != mLastBroadcastTimes.end()) {
-            if (timestampNs - lastBroadcastTime->second < StatsdStats::kMinBroadcastPeriodNs) {
+            if (elapsedRealtimeNs - lastBroadcastTime->second <
+                    StatsdStats::kMinBroadcastPeriodNs) {
                 VLOG("StatsD would've sent a broadcast but the rate limit stopped us.");
                 return;
             }
@@ -588,7 +595,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         if (mSendBroadcast(key)) {
             mOnDiskDataConfigs.erase(key);
             VLOG("StatsD triggered data fetch for %s", key.ToString().c_str());
-            mLastBroadcastTimes[key] = timestampNs;
+            mLastBroadcastTimes[key] = elapsedRealtimeNs;
             StatsdStats::getInstance().noteBroadcastSent(key);
         }
     }
