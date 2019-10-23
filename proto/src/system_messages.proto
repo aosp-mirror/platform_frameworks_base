@@ -249,6 +249,8 @@ message SystemMessage {
     NOTE_NETWORK_LOGGED_IN = 744;
     // A partial connectivity network was detected during network validation
     NOTE_NETWORK_PARTIAL_CONNECTIVITY = 745;
+    // Private DNS is broken in strict mode
+    NOTE_NETWORK_PRIVATE_DNS_BROKEN = 746;
 
     // Notify the user that their work profile has been deleted
     // Package: android
