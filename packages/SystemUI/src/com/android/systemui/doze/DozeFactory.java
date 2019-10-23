@@ -57,6 +57,7 @@ public class DozeFactory {
     private final ProximitySensor mProximitySensor;
     private final DelayedWakeLock.Builder mDelayedWakeLockBuilder;
     private final Handler mHandler;
+    private final BiometricUnlockController mBiometricUnlockController;
 
     @Inject
     public DozeFactory(FalsingManager falsingManager, DozeLog dozeLog,
@@ -65,7 +66,8 @@ public class DozeFactory {
             WakefulnessLifecycle wakefulnessLifecycle, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DockManager dockManager, @Nullable IWallpaperManager wallpaperManager,
             ProximitySensor proximitySensor,
-            DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler) {
+            DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
+            BiometricUnlockController biometricUnlockController) {
         mFalsingManager = falsingManager;
         mDozeLog = dozeLog;
         mDozeParameters = dozeParameters;
@@ -79,6 +81,7 @@ public class DozeFactory {
         mProximitySensor = proximitySensor;
         mDelayedWakeLockBuilder = delayedWakeLockBuilder;
         mHandler = handler;
+        mBiometricUnlockController = biometricUnlockController;
     }
 
     /** Creates a DozeMachine with its parts for {@code dozeService}. */
@@ -107,9 +110,7 @@ public class DozeFactory {
                 createDozeScreenBrightness(dozeService, wrappedService, mAsyncSensorManager, host,
                         mDozeParameters, mHandler),
                 new DozeWallpaperState(
-                        mWallpaperManager,
-                        getBiometricUnlockController(dozeService),
-                        mDozeParameters),
+                        mWallpaperManager, mBiometricUnlockController, mDozeParameters),
                 new DozeDockHandler(dozeService, machine, host, config, mHandler, mDockManager),
                 new DozeAuthRemover(dozeService)
         });
@@ -148,11 +149,5 @@ public class DozeFactory {
         Application appCandidate = service.getApplication();
         final SystemUIApplication app = (SystemUIApplication) appCandidate;
         return app.getComponent(DozeHost.class);
-    }
-
-    public static BiometricUnlockController getBiometricUnlockController(DozeService service) {
-        Application appCandidate = service.getApplication();
-        final SystemUIApplication app = (SystemUIApplication) appCandidate;
-        return app.getComponent(BiometricUnlockController.class);
     }
 }

@@ -356,7 +356,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private VolumeComponent mVolumeComponent;
     private BrightnessMirrorController mBrightnessMirrorController;
     private boolean mBrightnessMirrorVisible;
-    protected BiometricUnlockController mBiometricUnlockController;
+    private BiometricUnlockController mBiometricUnlockController;
     private final LightBarController mLightBarController;
     private final Lazy<LockscreenWallpaper> mLockscreenWallpaperLazy;
     protected LockscreenWallpaper mLockscreenWallpaper;
@@ -398,6 +398,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final StatusBarWindowViewController.Builder mStatusBarWindowViewControllerBuilder;
     private final NotifLog mNotifLog;
     private final DozeParameters mDozeParameters;
+    private final Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
 
     // expanded notifications
     protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -691,7 +692,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             NotifLog notifLog,
             DozeParameters dozeParameters,
             ScrimController scrimController,
-            Lazy<LockscreenWallpaper> lockscreenWallpaperLazy) {
+            Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
+            Lazy<BiometricUnlockController> biometricUnlockControllerLazy) {
         super(context);
         mFeatureFlags = featureFlags;
         mLightBarController = lightBarController;
@@ -751,6 +753,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDozeParameters = dozeParameters;
         mScrimController = scrimController;
         mLockscreenWallpaperLazy = lockscreenWallpaperLazy;
+        mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
 
         mBubbleExpandListener =
                 (isExpanding, key) -> {
@@ -1370,11 +1373,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void startKeyguard() {
         Trace.beginSection("StatusBar#startKeyguard");
-        mBiometricUnlockController = new BiometricUnlockController(mContext,
-                mDozeScrimController, mKeyguardViewMediator,
-                mScrimController, this, mKeyguardStateController, new Handler(),
-                mKeyguardUpdateMonitor, mKeyguardBypassController, mDozeParameters);
-        putComponent(BiometricUnlockController.class, mBiometricUnlockController);
+        mBiometricUnlockController = mBiometricUnlockControllerLazy.get();
         mStatusBarKeyguardViewManager = mKeyguardViewMediator.registerStatusBar(this,
                 getBouncerContainer(), mNotificationPanel, mBiometricUnlockController,
                 mStatusBarWindow.findViewById(R.id.lock_icon_container), mStackScroller,

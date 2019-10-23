@@ -106,6 +106,7 @@ import com.android.systemui.statusbar.notification.logging.NotifLog;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -299,6 +300,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DozeParameters dozeParameters,
             ScrimController scrimController,
             Lazy<LockscreenWallpaper> lockscreenWallpaperLazy,
+            Lazy<BiometricUnlockController> biometricUnlockControllerLazy,
 
             /* Car Settings injected components. */
             NavigationBarViewFactory navigationBarViewFactory) {
@@ -361,7 +363,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 notifLog,
                 dozeParameters,
                 scrimController,
-                lockscreenWallpaperLazy);
+                lockscreenWallpaperLazy,
+                biometricUnlockControllerLazy);
         mScrimController = scrimController;
         mNavigationBarViewFactory = navigationBarViewFactory;
     }
