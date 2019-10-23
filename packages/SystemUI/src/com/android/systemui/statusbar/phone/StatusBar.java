@@ -156,6 +156,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dagger.SystemUIBinder;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.fragments.ExtensionFragmentListener;
@@ -246,14 +247,11 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Singleton;
 
 import dagger.Lazy;
 import dagger.Subcomponent;
 
-@Singleton
 public class StatusBar extends SystemUI implements DemoMode,
         ActivityStarter, KeyguardStateController.Callback,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
@@ -626,7 +624,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             AppOpsManager.OP_COARSE_LOCATION,
             AppOpsManager.OP_FINE_LOCATION};
 
-    @Inject
+    /**
+     * Public constructor for StatusBar.
+     *
+     * StatusBar is considered optional, and therefore can not be marked as @Inject directly.
+     * Instead, an @Provide method is included in {@link SystemUIBinder}.
+     */
     public StatusBar(
             Context context,
             FeatureFlags featureFlags,

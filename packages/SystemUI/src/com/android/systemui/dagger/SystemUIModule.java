@@ -26,11 +26,13 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.sensors.AsyncSensorManager;
 
 import javax.inject.Singleton;
 
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 
@@ -65,4 +67,7 @@ public abstract class SystemUIModule {
     static SysUiState provideSysUiState() {
         return new SysUiState();
     }
+
+    @BindsOptionalOf
+    abstract StatusBar optionalStatusBar();
 }

@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Service;
 
 import com.android.systemui.SystemUI;
+import com.android.systemui.recents.RecentsImplementation;
 
 /**
  * Interface necessary to make Dagger happy. See {@link ContextComponentResolver}.
@@ -27,6 +28,9 @@ import com.android.systemui.SystemUI;
 public interface ContextComponentHelper {
     /** Turns a classname into an instance of the class or returns null. */
     Activity resolveActivity(String className);
+
+    /** Turns a classname into an instance of the class or returns null. */
+    RecentsImplementation resolveRecents(String className);
 
     /** Turns a classname into an instance of the class or returns null. */
     Service resolveService(String className);
