@@ -131,6 +131,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
         mInitialized = true;
         reinflateViews(layoutInflater);
+        mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
         mConfigurationController.addCallback(mConfigurationListener);
     }
 
@@ -171,10 +172,6 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
 
         if (oldPeopleHubPos != -1) {
             mParent.addView(mPeopleHubView, oldPeopleHubPos);
-        }
-
-        if (!mInitialized) {
-            mPeopleHubViewAdapter.bindView(mPeopleHubViewBoundary);
         }
     }
 

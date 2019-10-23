@@ -57,7 +57,7 @@ public interface ExtensionController {
         ExtensionBuilder<T> withCallback(Consumer<T> callback);
         ExtensionBuilder<T> withUiMode(int mode, Supplier<T> def);
         ExtensionBuilder<T> withFeature(String feature, Supplier<T> def);
-        Extension build();
+        Extension<T> build();
     }
 
     public interface PluginConverter<T, P> {

@@ -138,6 +138,14 @@ public class NotificationEntryManager implements
         mNotificationEntryListeners.add(listener);
     }
 
+    /**
+     * Removes a {@link NotificationEntryListener} previously registered via
+     * {@link #addNotificationEntryListener(NotificationEntryListener)}.
+     */
+    public void removeNotificationEntryListener(NotificationEntryListener listener) {
+        mNotificationEntryListeners.remove(listener);
+    }
+
     /** Sets the {@link NotificationRemoveInterceptor}. */
     public void setNotificationRemoveInterceptor(NotificationRemoveInterceptor interceptor) {
         mRemoveInterceptor = interceptor;

@@ -28,10 +28,17 @@ fun <S, T> DataListener<T>.contraMap(mapper: (S) -> T): DataListener<S> = object
 
 /** Boundary between a View and data pipeline, as seen by the View. */
 interface DataSource<out T> {
-    fun setListener(listener: DataListener<T>)
+    fun registerListener(listener: DataListener<T>): Subscription
+}
+
+/** Represents a registration with a [DataSource]. */
+interface Subscription {
+    /** Removes the previously registered [DataListener] from the [DataSource] */
+    fun unsubscribe()
 }
 
 /** Transform all data coming out of this [DataSource] using the given [mapper]. */
 fun <S, T> DataSource<S>.map(mapper: (S) -> T): DataSource<T> = object : DataSource<T> {
-    override fun setListener(listener: DataListener<T>) = setListener(listener.contraMap(mapper))
+    override fun registerListener(listener: DataListener<T>) =
+            registerListener(listener.contraMap(mapper))
 }

@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -78,8 +79,10 @@ public class NotificationListControllerTest extends SysuiTestCase {
 
     // TODO: Remove this once EntryManager no longer needs to be mocked
     private NotificationData mNotificationData =
-            new NotificationData(new NotificationSectionsFeatureManager(
-                    new DeviceConfigProxyFake(), mContext), mock(NotifLog.class));
+            new NotificationData(
+                    new NotificationSectionsFeatureManager(new DeviceConfigProxyFake(), mContext),
+                    mock(NotifLog.class),
+                    mock(PeopleNotificationIdentifier.class));
 
     private int mNextNotifId = 0;
 

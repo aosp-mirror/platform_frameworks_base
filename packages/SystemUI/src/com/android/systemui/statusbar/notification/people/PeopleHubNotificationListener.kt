@@ -17,11 +17,14 @@
 package com.android.systemui.statusbar.notification.people
 
 import android.app.Notification
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.PixelFormat
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.os.UserHandle
+import android.service.notification.StatusBarNotification
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -30,59 +33,112 @@ import com.android.internal.statusbar.NotificationVisibility
 import com.android.internal.widget.MessagingGroup
 import com.android.launcher3.icons.BaseIconFactory
 import com.android.systemui.R
+import com.android.systemui.plugins.NotificationPersonExtractorPlugin
 import com.android.systemui.statusbar.notification.NotificationEntryListener
 import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.policy.ExtensionController
 import java.util.ArrayDeque
 import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val MAX_STORED_INACTIVE_PEOPLE = 10
 
-@Singleton
-class PeopleHubDataSourceImpl @Inject constructor(
-    notificationEntryManager: NotificationEntryManager,
-    private val peopleHubManager: PeopleHubManager
-) : DataSource<PeopleHubModel> {
+interface NotificationPersonExtractor {
+    fun extractPerson(sbn: StatusBarNotification): PersonModel?
+    fun extractPersonKey(sbn: StatusBarNotification): String?
+}
 
-    private var dataListener: DataListener<PeopleHubModel>? = null
+@Singleton
+class NotificationPersonExtractorPluginBoundary @Inject constructor(
+    extensionController: ExtensionController,
+    private val context: Context
+) : NotificationPersonExtractor {
+
+    private var plugin: NotificationPersonExtractorPlugin? = null
 
     init {
-        notificationEntryManager.addNotificationEntryListener(object : NotificationEntryListener {
-            override fun onEntryInflated(entry: NotificationEntry, inflatedFlags: Int) =
-                    addVisibleEntry(entry)
+        plugin = extensionController
+                .newExtension(NotificationPersonExtractorPlugin::class.java)
+                .withPlugin(NotificationPersonExtractorPlugin::class.java)
+                .withCallback { extractor ->
+                    plugin = extractor
+                }
+                .build()
+                .get()
+    }
 
-            override fun onEntryReinflated(entry: NotificationEntry) = addVisibleEntry(entry)
+    override fun extractPerson(sbn: StatusBarNotification) =
+            plugin?.extractPerson(sbn)?.let { data ->
+                val badged = addBadgeToDrawable(data.avatar, context, sbn.packageName, sbn.user)
+                PersonModel(data.key, data.name, badged, data.clickIntent)
+            }
 
-            override fun onPostEntryUpdated(entry: NotificationEntry) = addVisibleEntry(entry)
+    override fun extractPersonKey(sbn: StatusBarNotification) = plugin?.extractPersonKey(sbn)
+}
 
-            override fun onEntryRemoved(
-                entry: NotificationEntry,
-                visibility: NotificationVisibility?,
-                removedByUser: Boolean
-            ) = removeVisibleEntry(entry)
-        })
+@Singleton
+class PeopleHubDataSourceImpl @Inject constructor(
+    private val notificationEntryManager: NotificationEntryManager,
+    private val peopleHubManager: PeopleHubManager,
+    private val extractor: NotificationPersonExtractor
+) : DataSource<PeopleHubModel> {
+
+    private val dataListeners = mutableListOf<DataListener<PeopleHubModel>>()
+
+    private val notificationEntryListener = object : NotificationEntryListener {
+        override fun onEntryInflated(entry: NotificationEntry, inflatedFlags: Int) =
+                addVisibleEntry(entry)
+
+        override fun onEntryReinflated(entry: NotificationEntry) = addVisibleEntry(entry)
+
+        override fun onPostEntryUpdated(entry: NotificationEntry) = addVisibleEntry(entry)
+
+        override fun onEntryRemoved(
+            entry: NotificationEntry,
+            visibility: NotificationVisibility?,
+            removedByUser: Boolean
+        ) = removeVisibleEntry(entry)
     }
 
     private fun removeVisibleEntry(entry: NotificationEntry) {
-        if (entry.extractPersonKey()?.let(peopleHubManager::removeActivePerson) == true) {
+        val key = extractor.extractPersonKey(entry.sbn) ?: entry.extractPersonKey()
+        if (key?.let(peopleHubManager::removeActivePerson) == true) {
             updateUi()
         }
     }
 
     private fun addVisibleEntry(entry: NotificationEntry) {
-        if (entry.extractPerson()?.let(peopleHubManager::addActivePerson) == true) {
+        val personModel = extractor.extractPerson(entry.sbn) ?: entry.extractPerson()
+        if (personModel?.let(peopleHubManager::addActivePerson) == true) {
             updateUi()
         }
     }
 
-    override fun setListener(listener: DataListener<PeopleHubModel>) {
-        this.dataListener = listener
-        updateUi()
+    override fun registerListener(listener: DataListener<PeopleHubModel>): Subscription {
+        val registerWithNotificationEntryManager = dataListeners.isEmpty()
+        dataListeners.add(listener)
+        if (registerWithNotificationEntryManager) {
+            notificationEntryManager.addNotificationEntryListener(notificationEntryListener)
+        } else {
+            listener.onDataChanged(peopleHubManager.getPeopleHubModel())
+        }
+        return object : Subscription {
+            override fun unsubscribe() {
+                dataListeners.remove(listener)
+                if (dataListeners.isEmpty()) {
+                    notificationEntryManager
+                            .removeNotificationEntryListener(notificationEntryListener)
+                }
+            }
+        }
     }
 
     private fun updateUi() {
-        dataListener?.onDataChanged(peopleHubManager.getPeopleHubModel())
+        val model = peopleHubManager.getPeopleHubModel()
+        for (listener in dataListeners) {
+            listener.onDataChanged(model)
+        }
     }
 }
 
@@ -124,19 +180,25 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
     if (!isMessagingNotification()) {
         return null
     }
-
     val clickIntent = sbn.notification.contentIntent
     val extras = sbn.notification.extras
     val name = extras.getString(Notification.EXTRA_CONVERSATION_TITLE)
             ?: extras.getString(Notification.EXTRA_TITLE)
             ?: return null
     val drawable = extractAvatarFromRow(this) ?: return null
+    val badgedAvatar = addBadgeToDrawable(drawable, row.context, sbn.packageName, sbn.user)
+    return PersonModel(key, name, badgedAvatar, clickIntent)
+}
 
-    val context = row.context
+private fun addBadgeToDrawable(
+    drawable: Drawable,
+    context: Context,
+    packageName: String,
+    user: UserHandle
+): Drawable {
     val pm = context.packageManager
-    val appInfo = pm.getApplicationInfoAsUser(sbn.packageName, 0, sbn.user)
-
-    val badgedAvatar = object : Drawable() {
+    val appInfo = pm.getApplicationInfoAsUser(packageName, 0, user)
+    return object : Drawable() {
         override fun draw(canvas: Canvas) {
             val iconBounds = getBounds()
             val factory = object : BaseIconFactory(
@@ -146,7 +208,7 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
                     true) {}
             val badge = factory.createBadgedIconBitmap(
                     appInfo.loadIcon(pm),
-                    sbn.user,
+                    user,
                     true,
                     appInfo.isInstantApp,
                     null)
@@ -156,7 +218,7 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
                         colorFilter = drawable.colorFilter
                         val badgeWidth = TypedValue.applyDimension(
                                 TypedValue.COMPLEX_UNIT_DIP,
-                                16f,
+                                15f,
                                 context.resources.displayMetrics
                         ).toInt()
                         setBounds(
@@ -181,8 +243,6 @@ private fun NotificationEntry.extractPerson(): PersonModel? {
         @PixelFormat.Opacity
         override fun getOpacity(): Int = PixelFormat.OPAQUE
     }
-
-    return PersonModel(key, name, badgedAvatar, clickIntent)
 }
 
 private fun extractAvatarFromRow(entry: NotificationEntry): Drawable? =

@@ -24,14 +24,24 @@ abstract class PeopleHubModule {
 
     @Binds
     abstract fun peopleHubSectionFooterViewController(
-        viewAdapter: PeopleHubSectionFooterViewAdapterImpl
+        impl: PeopleHubSectionFooterViewAdapterImpl
     ): PeopleHubSectionFooterViewAdapter
 
     @Binds
-    abstract fun peopleHubDataSource(s: PeopleHubDataSourceImpl): DataSource<PeopleHubModel>
+    abstract fun peopleHubDataSource(impl: PeopleHubDataSourceImpl): DataSource<PeopleHubModel>
 
     @Binds
     abstract fun peopleHubViewModelFactoryDataSource(
-        dataSource: PeopleHubViewModelFactoryDataSourceImpl
+        impl: PeopleHubViewModelFactoryDataSourceImpl
     ): DataSource<PeopleHubViewModelFactory>
+
+    @Binds
+    abstract fun peopleNotificationIdentifier(
+        impl: PeopleNotificationIdentifierImpl
+    ): PeopleNotificationIdentifier
+
+    @Binds
+    abstract fun notificationPersonExtractor(
+        pluginImpl: NotificationPersonExtractorPluginBoundary
+    ): NotificationPersonExtractor
 }
