@@ -1,0 +1,33 @@
+{
+  "presubmit": [
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.app.usage"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.usage"
+        },
+        {
+          "exclude-filter": "com.android.server.usage.StorageStatsServiceTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsUsageStatsTestCases",
+      "options": [
+        {
+          "include-filter": "android.app.usage.cts.UsageStatsTest"
+        }
+      ]
+    }
+  ]
+}
