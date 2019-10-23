@@ -334,8 +334,6 @@ final class UsageStatsProto {
             proto.write(IntervalStatsProto.UsageStats.PACKAGE_INDEX, packageIndex + 1);
         } else {
             // Package not in Stringpool for some reason, write full string instead
-            Slog.w(TAG, "UsageStats package name (" + usageStats.mPackageName
-                    + ") not found in IntervalStats string cache");
             proto.write(IntervalStatsProto.UsageStats.PACKAGE, usageStats.mPackageName);
         }
         // Time attributes stored as an offset of the beginTime.
@@ -430,8 +428,6 @@ final class UsageStatsProto {
             proto.write(IntervalStatsProto.Event.PACKAGE_INDEX, packageIndex + 1);
         } else {
             // Package not in Stringpool for some reason, write full string instead
-            Slog.w(TAG, "Usage event package name (" + event.mPackage
-                    + ") not found in IntervalStats string cache");
             proto.write(IntervalStatsProto.Event.PACKAGE, event.mPackage);
         }
         if (event.mClass != null) {
@@ -440,8 +436,6 @@ final class UsageStatsProto {
                 proto.write(IntervalStatsProto.Event.CLASS_INDEX, classIndex + 1);
             } else {
                 // Class not in Stringpool for some reason, write full string instead
-                Slog.w(TAG, "Usage event class name (" + event.mClass
-                        + ") not found in IntervalStats string cache");
                 proto.write(IntervalStatsProto.Event.CLASS, event.mClass);
             }
         }
@@ -454,10 +448,6 @@ final class UsageStatsProto {
             if (taskRootPackageIndex >= 0) {
                 proto.write(IntervalStatsProto.Event.TASK_ROOT_PACKAGE_INDEX,
                         taskRootPackageIndex + 1);
-            } else {
-                // Task root package not in Stringpool for some reason.
-                Slog.w(TAG, "Usage event task root package name (" + event.mTaskRootPackage
-                        + ") not found in IntervalStats string cache");
             }
         }
         if (event.mTaskRootClass != null) {
@@ -465,10 +455,6 @@ final class UsageStatsProto {
             if (taskRootClassIndex >= 0) {
                 proto.write(IntervalStatsProto.Event.TASK_ROOT_CLASS_INDEX,
                         taskRootClassIndex + 1);
-            } else {
-                // Task root class not in Stringpool for some reason.
-                Slog.w(TAG, "Usage event task root class name (" + event.mTaskRootClass
-                        + ") not found in IntervalStats string cache");
             }
         }
         switch (event.mEventType) {
@@ -496,9 +482,6 @@ final class UsageStatsProto {
                                 channelIndex + 1);
                     } else {
                         // Channel not in Stringpool for some reason, write full string instead
-                        Slog.w(TAG, "Usage event notification channel name ("
-                                + event.mNotificationChannelId
-                                + ") not found in IntervalStats string cache");
                         proto.write(IntervalStatsProto.Event.NOTIFICATION_CHANNEL,
                                 event.mNotificationChannelId);
                     }
