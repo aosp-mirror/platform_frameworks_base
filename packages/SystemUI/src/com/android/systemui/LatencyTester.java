@@ -16,6 +16,8 @@
 
 package com.android.systemui;
 
+import static android.os.PowerManager.WAKE_REASON_UNKNOWN;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,21 +30,32 @@ import android.os.SystemClock;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
-import com.android.systemui.statusbar.phone.StatusBar;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Class that only runs on debuggable builds that listens to broadcasts that simulate actions in the
  * system that are used for testing the latency.
  */
+@Singleton
 public class LatencyTester extends SystemUI {
 
-    private static final String ACTION_FINGERPRINT_WAKE =
+    private static final String
+            ACTION_FINGERPRINT_WAKE =
             "com.android.systemui.latency.ACTION_FINGERPRINT_WAKE";
-    private static final String ACTION_TURN_ON_SCREEN =
+    private static final String
+            ACTION_TURN_ON_SCREEN =
             "com.android.systemui.latency.ACTION_TURN_ON_SCREEN";
+    private final BiometricUnlockController mBiometricUnlockController;
+    private final PowerManager mPowerManager;
 
-    public LatencyTester(Context context) {
+    @Inject
+    public LatencyTester(Context context, BiometricUnlockController biometricUnlockController,
+            PowerManager powerManager) {
         super(context);
+        mBiometricUnlockController = biometricUnlockController;
+        mPowerManager = powerManager;
     }
 
     @Override
@@ -68,19 +81,17 @@ public class LatencyTester extends SystemUI {
     }
 
     private void fakeTurnOnScreen() {
-        PowerManager powerManager = mContext.getSystemService(PowerManager.class);
         if (LatencyTracker.isEnabled(mContext)) {
             LatencyTracker.getInstance(mContext).onActionStart(
                     LatencyTracker.ACTION_TURN_ON_SCREEN);
         }
-        powerManager.wakeUp(SystemClock.uptimeMillis(), "android.policy:LATENCY_TESTS");
+        mPowerManager.wakeUp(
+                SystemClock.uptimeMillis(), WAKE_REASON_UNKNOWN, "android.policy:LATENCY_TESTS");
     }
 
     private void fakeWakeAndUnlock() {
-        BiometricUnlockController biometricUnlockController = getComponent(StatusBar.class)
-                .getBiometricUnlockController();
-        biometricUnlockController.onBiometricAcquired(BiometricSourceType.FINGERPRINT);
-        biometricUnlockController.onBiometricAuthenticated(
+        mBiometricUnlockController.onBiometricAcquired(BiometricSourceType.FINGERPRINT);
+        mBiometricUnlockController.onBiometricAuthenticated(
                 KeyguardUpdateMonitor.getCurrentUser(), BiometricSourceType.FINGERPRINT);
     }
 }
