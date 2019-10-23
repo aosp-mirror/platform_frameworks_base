@@ -163,7 +163,7 @@ public class NotificationMediaManager implements Dumpable {
                 if (!isPlaybackActive(state.getState())) {
                     clearCurrentMediaNotification();
                 }
-                dispatchUpdateMediaMetaData(true /* changed */, true /* allowAnimation */);
+                findAndUpdateMediaNotifications();
             }
         }
 
@@ -199,6 +199,16 @@ public class NotificationMediaManager implements Dumpable {
         mStatusBarWindowController = statusBarWindowController;
         mEntryManager = notificationEntryManager;
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
+            @Override
+            public void onPendingEntryAdded(NotificationEntry entry) {
+                findAndUpdateMediaNotifications();
+            }
+
+            @Override
+            public void onPreEntryUpdated(NotificationEntry entry) {
+                findAndUpdateMediaNotifications();
+            }
+
             @Override
             public void onEntryRemoved(
                     NotificationEntry entry,
@@ -272,16 +282,12 @@ public class NotificationMediaManager implements Dumpable {
         boolean metaDataChanged = false;
 
         synchronized (mEntryManager.getNotificationData()) {
-            ArrayList<NotificationEntry> activeNotifications =
-                    mEntryManager.getNotificationData().getActiveNotifications();
-            final int N = activeNotifications.size();
+            Set<NotificationEntry> allNotifications = mEntryManager.getAllNotifs();
 
             // Promote the media notification with a controller in 'playing' state, if any.
             NotificationEntry mediaNotification = null;
             MediaController controller = null;
-            for (int i = 0; i < N; i++) {
-                final NotificationEntry entry = activeNotifications.get(i);
-
+            for (NotificationEntry entry : allNotifications) {
                 if (entry.isMediaNotification()) {
                     final MediaSession.Token token =
                             entry.getSbn().getNotification().extras.getParcelable(
@@ -319,8 +325,7 @@ public class NotificationMediaManager implements Dumpable {
                             // now to see if we have one like this
                             final String pkg = aController.getPackageName();
 
-                            for (int i = 0; i < N; i++) {
-                                final NotificationEntry entry = activeNotifications.get(i);
+                            for (NotificationEntry entry : allNotifications) {
                                 if (entry.getSbn().getPackageName().equals(pkg)) {
                                     if (DEBUG_MEDIA) {
                                         Log.v(TAG, "DEBUG_MEDIA: found controller matching "

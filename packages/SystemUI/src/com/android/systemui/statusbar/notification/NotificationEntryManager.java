@@ -53,8 +53,10 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -558,6 +560,15 @@ public class NotificationEntryManager implements
      */
     public Iterable<NotificationEntry> getPendingNotificationsIterator() {
         return mPendingNotifications.values();
+    }
+
+    /**
+     * @return all notification we're currently aware of (both pending and visible notifications)
+     */
+    public Set<NotificationEntry> getAllNotifs() {
+        Set<NotificationEntry> allNotifs = new HashSet<>(mPendingNotifications.values());
+        allNotifs.addAll(mNotificationData.getActiveNotifications());
+        return allNotifs;
     }
 
     /**

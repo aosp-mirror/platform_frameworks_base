@@ -1526,7 +1526,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                         .start();
             }
         }
-        mMediaManager.findAndUpdateMediaNotifications();
     }
 
     private void updateReportRejectedTouchVisibility() {
