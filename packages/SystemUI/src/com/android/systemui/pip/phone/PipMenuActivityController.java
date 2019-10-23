@@ -508,12 +508,12 @@ public class PipMenuActivityController {
     }
 
     /**
-     * Handles touch event sent from pip input consumer.
+     * Handles a pointer event sent from pip input consumer.
      */
-    void handleTouchEvent(MotionEvent ev) {
+    void handlePointerEvent(MotionEvent ev) {
         if (mToActivityMessenger != null) {
             Message m = Message.obtain();
-            m.what = PipMenuActivity.MESSAGE_TOUCH_EVENT;
+            m.what = PipMenuActivity.MESSAGE_POINTER_EVENT;
             m.obj = ev;
             try {
                 mToActivityMessenger.send(m);
