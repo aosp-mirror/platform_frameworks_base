@@ -271,7 +271,7 @@ public class NetworkCapabilitiesTest {
             .addCapability(NET_CAPABILITY_NOT_METERED);
         assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
-        assertParcelSane(netCap, 11);
+        assertParcelSane(netCap, 12);
     }
 
     @Test
