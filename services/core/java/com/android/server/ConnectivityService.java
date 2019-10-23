@@ -26,6 +26,7 @@ import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
+import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_PRIVDNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_PARTIAL;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_RESULT_VALID;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
@@ -526,6 +527,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * obj  = network
      */
     private static final int EVENT_SET_ACCEPT_PARTIAL_CONNECTIVITY = 45;
+
+    /**
+     * Event for NetworkMonitor to inform ConnectivityService that the probe status has changed.
+     * Both of the arguments are bitmasks, and the value of bits come from
+     * INetworkMonitor.NETWORK_VALIDATION_PROBE_*.
+     * arg1 = A bitmask to describe which probes are completed.
+     * arg2 = A bitmask to describe which probes are successful.
+     */
+    public static final int EVENT_PROBE_STATUS_CHANGED = 46;
 
     /**
      * Argument for {@link #EVENT_PROVISIONING_NOTIFICATION} to indicate that the notification
@@ -2663,6 +2673,41 @@ public class ConnectivityService extends IConnectivityManager.Stub
             switch (msg.what) {
                 default:
                     return false;
+                case EVENT_PROBE_STATUS_CHANGED: {
+                    final Integer netId = (Integer) msg.obj;
+                    final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
+                    if (nai == null) {
+                        break;
+                    }
+                    final boolean probePrivateDnsCompleted =
+                            ((msg.arg1 & NETWORK_VALIDATION_PROBE_PRIVDNS) != 0);
+                    final boolean privateDnsBroken =
+                            ((msg.arg2 & NETWORK_VALIDATION_PROBE_PRIVDNS) == 0);
+                    if (probePrivateDnsCompleted) {
+                        if (nai.networkCapabilities.isPrivateDnsBroken() != privateDnsBroken) {
+                            nai.networkCapabilities.setPrivateDnsBroken(privateDnsBroken);
+                            final int oldScore = nai.getCurrentScore();
+                            updateCapabilities(oldScore, nai, nai.networkCapabilities);
+                        }
+                        // Only show the notification when the private DNS is broken and the
+                        // PRIVATE_DNS_BROKEN notification hasn't shown since last valid.
+                        if (privateDnsBroken && !nai.networkMisc.hasShownBroken) {
+                            showNetworkNotification(nai, NotificationType.PRIVATE_DNS_BROKEN);
+                        }
+                        nai.networkMisc.hasShownBroken = privateDnsBroken;
+                    } else if (nai.networkCapabilities.isPrivateDnsBroken()) {
+                        // If probePrivateDnsCompleted is false but nai.networkCapabilities says
+                        // private DNS is broken, it means this network is being reevaluated.
+                        // Either probing private DNS is not necessary any more or it hasn't been
+                        // done yet. In either case, the networkCapabilities should be updated to
+                        // reflect the new status.
+                        nai.networkCapabilities.setPrivateDnsBroken(false);
+                        final int oldScore = nai.getCurrentScore();
+                        updateCapabilities(oldScore, nai, nai.networkCapabilities);
+                        nai.networkMisc.hasShownBroken = false;
+                    }
+                    break;
+                }
                 case EVENT_NETWORK_TESTED: {
                     final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
                     if (nai == null) break;
@@ -2705,14 +2750,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         if (oldScore != nai.getCurrentScore()) sendUpdatedScoreToFactories(nai);
                         if (valid) {
                             handleFreshlyValidatedNetwork(nai);
-                            // Clear NO_INTERNET, PARTIAL_CONNECTIVITY and LOST_INTERNET
-                            // notifications if network becomes valid.
+                            // Clear NO_INTERNET, PRIVATE_DNS_BROKEN, PARTIAL_CONNECTIVITY and
+                            // LOST_INTERNET notifications if network becomes valid.
                             mNotifier.clearNotification(nai.network.netId,
                                     NotificationType.NO_INTERNET);
                             mNotifier.clearNotification(nai.network.netId,
                                     NotificationType.LOST_INTERNET);
                             mNotifier.clearNotification(nai.network.netId,
                                     NotificationType.PARTIAL_CONNECTIVITY);
+                            mNotifier.clearNotification(nai.network.netId,
+                                    NotificationType.PRIVATE_DNS_BROKEN);
+                            // If network becomes valid, the hasShownBroken should be reset for
+                            // that network so that the notification will be fired when the private
+                            // DNS is broken again.
+                            nai.networkMisc.hasShownBroken = false;
                         }
                     } else if (partialConnectivityChanged) {
                         updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
@@ -2860,6 +2911,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
                     EVENT_PRIVATE_DNS_CONFIG_RESOLVED,
                     0, mNetId, PrivateDnsConfig.fromParcel(config)));
+        }
+
+        @Override
+        public void notifyProbeStatusChanged(int probesCompleted, int probesSucceeded) {
+            mTrackerHandler.sendMessage(mTrackerHandler.obtainMessage(
+                    EVENT_PROBE_STATUS_CHANGED,
+                    probesCompleted, probesSucceeded, new Integer(mNetId)));
         }
 
         @Override
@@ -3679,6 +3737,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // High priority because it is only displayed for explicitly selected networks.
                 highPriority = true;
                 break;
+            case PRIVATE_DNS_BROKEN:
+                action = Settings.ACTION_WIRELESS_SETTINGS;
+                // High priority because we should let user know why there is no internet.
+                highPriority = true;
+                break;
             case LOST_INTERNET:
                 action = ConnectivityManager.ACTION_PROMPT_LOST_VALIDATION;
                 // High priority because it could help the user avoid unexpected data usage.
@@ -3696,7 +3759,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         Intent intent = new Intent(action);
-        if (type != NotificationType.LOGGED_IN) {
+        if (type != NotificationType.LOGGED_IN && type != NotificationType.PRIVATE_DNS_BROKEN) {
             intent.setData(Uri.fromParts("netId", Integer.toString(nai.network.netId), null));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setClassName("com.android.settings",
@@ -5162,6 +5225,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ns.assertValidFromUid(Binder.getCallingUid());
     }
 
+    private void ensureValid(NetworkCapabilities nc) {
+        ensureValidNetworkSpecifier(nc);
+        if (nc.isPrivateDnsBroken()) {
+            throw new IllegalArgumentException("Can't request broken private DNS");
+        }
+    }
+
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
@@ -5195,7 +5265,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (timeoutMs < 0) {
             throw new IllegalArgumentException("Bad timeout specified");
         }
-        ensureValidNetworkSpecifier(networkCapabilities);
+        ensureValid(networkCapabilities);
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId(), type);
@@ -5337,7 +5407,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // There is no need to do this for requests because an app without CHANGE_NETWORK_STATE
         // can't request networks.
         restrictBackgroundRequestForCaller(nc);
-        ensureValidNetworkSpecifier(nc);
+        ensureValid(nc);
 
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
@@ -5355,7 +5425,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!hasWifiNetworkListenPermission(networkCapabilities)) {
             enforceAccessPermission();
         }
-        ensureValidNetworkSpecifier(networkCapabilities);
+        ensureValid(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
                 Binder.getCallingPid(), Binder.getCallingUid());
 
@@ -5841,6 +5911,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             newNc.removeCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY);
         }
+        newNc.setPrivateDnsBroken(nai.networkCapabilities.isPrivateDnsBroken());
 
         return newNc;
     }

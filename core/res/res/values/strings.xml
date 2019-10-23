@@ -3434,6 +3434,15 @@
     <!-- A notification is shown when the user connects to a Wi-Fi network and the system detects that that network has no Internet access. This is the notification's message. -->
     <string name="wifi_no_internet_detailed">Tap for options</string>
 
+    <!-- A notification is shown when the user connects to a mobile network without internet access. This is the notification's title. -->
+    <string name="mobile_no_internet">Mobile network has no internet access</string>
+
+    <!-- A notification is shown when the user connects to a non-mobile and non-wifi network without internet access. This is the notification's title. -->
+    <string name="other_networks_no_internet">Network has no internet access</string>
+
+    <!-- A notification is shown when connected network without internet due to private dns validation failed. This is the notification's message. [CHAR LIMIT=NONE] -->
+    <string name="private_dns_broken_detailed">Private DNS server cannot be accessed</string>
+
     <!-- A notification is shown after the user logs in to a captive portal network, to indicate that the network should now have internet connectivity. This is the message of notification. [CHAR LIMIT=50] -->
     <string name="captive_portal_logged_in_detailed">Connected</string>
     <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's title. [CHAR LIMIT=50] -->
