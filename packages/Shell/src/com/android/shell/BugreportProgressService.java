@@ -97,6 +97,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -193,9 +194,7 @@ public class BugreportProgressService extends Service {
      * <p>
      * Must be a path supported by its FileProvider.
      */
-    // TODO: use the same variable for both dir
-    private static final String SCREENSHOT_DIR = "bugreports";
-    private static final String BUGREPORT_DIR = "/bugreports";
+    private static final String BUGREPORT_DIR = "bugreports";
 
     private static final String NOTIFICATION_CHANNEL_ID = "bugreports";
 
@@ -230,7 +229,7 @@ public class BugreportProgressService extends Service {
 
     private final BugreportInfoDialog mInfoDialog = new BugreportInfoDialog();
 
-    private File mScreenshotsDir;
+    private File mBugreportsDir;
 
     private BugreportManager mBugreportManager;
 
@@ -263,11 +262,12 @@ public class BugreportProgressService extends Service {
         mScreenshotHandler = new ScreenshotHandler("BugreportProgressServiceScreenshotThread");
         startSelfIntent = new Intent(this, this.getClass());
 
-        mScreenshotsDir = new File(getFilesDir(), SCREENSHOT_DIR);
-        if (!mScreenshotsDir.exists()) {
-            Log.i(TAG, "Creating directory " + mScreenshotsDir + " to store temporary screenshots");
-            if (!mScreenshotsDir.mkdir()) {
-                Log.w(TAG, "Could not create directory " + mScreenshotsDir);
+        mBugreportsDir = new File(getFilesDir(), BUGREPORT_DIR);
+        if (!mBugreportsDir.exists()) {
+            Log.i(TAG, "Creating directory " + mBugreportsDir
+                    + " to store bugreports and screenshots");
+            if (!mBugreportsDir.mkdir()) {
+                Log.w(TAG, "Could not create directory " + mBugreportsDir);
             }
         }
         final Configuration conf = mContext.getResources().getConfiguration();
@@ -372,7 +372,7 @@ public class BugreportProgressService extends Service {
         @Override
         public void onFinished() {
             mInfo.renameBugreportFile();
-            mInfo.renameScreenshots(mScreenshotsDir);
+            mInfo.renameScreenshots();
             synchronized (mLock) {
                 sendBugreportFinishedBroadcastLocked();
             }
@@ -406,7 +406,7 @@ public class BugreportProgressService extends Service {
                         mInfo.bugreportFile);
             } else {
                 trackInfoWithIdLocked();
-                cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE);
+                cleanupOldFiles(MIN_KEEP_COUNT, MIN_KEEP_AGE, mBugreportsDir);
                 final Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
                 intent.putExtra(EXTRA_BUGREPORT, bugreportFilePath);
                 intent.putExtra(EXTRA_SCREENSHOT, getScreenshotForIntent(mInfo));
@@ -418,7 +418,8 @@ public class BugreportProgressService extends Service {
 
     private static void sendRemoteBugreportFinishedBroadcast(Context context,
             String bugreportFileName, File bugreportFile) {
-        cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE);
+        cleanupOldFiles(REMOTE_BUGREPORT_FILES_AMOUNT, REMOTE_MIN_KEEP_AGE,
+                bugreportFile.getParentFile());
         final Intent intent = new Intent(DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH);
         final Uri bugreportUri = getUri(context, bugreportFile);
         final String bugreportHash = generateFileHash(bugreportFileName);
@@ -468,12 +469,12 @@ public class BugreportProgressService extends Service {
         return fileHash;
     }
 
-    static void cleanupOldFiles(final int minCount, final long minAge) {
+    static void cleanupOldFiles(final int minCount, final long minAge, File bugreportsDir) {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    FileUtils.deleteOlderFiles(new File(BUGREPORT_DIR), minCount, minAge);
+                    FileUtils.deleteOlderFiles(bugreportsDir, minCount, minAge);
                 } catch (RuntimeException e) {
                     Log.e(TAG, "RuntimeException deleting old files", e);
                 }
@@ -604,18 +605,25 @@ public class BugreportProgressService extends Service {
         String name = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
 
         BugreportInfo info = new BugreportInfo(mContext, baseName, name,
-                shareTitle, shareDescription, bugreportType);
+                shareTitle, shareDescription, bugreportType, mBugreportsDir);
+        ParcelFileDescriptor bugreportFd;
+        ParcelFileDescriptor screenshotFd;
 
-        ParcelFileDescriptor bugreportFd = info.createBugreportFd();
-        if (bugreportFd == null) {
-            Log.e(TAG, "Bugreport parcel file descriptor is null.");
-            return;
-        }
-        ParcelFileDescriptor screenshotFd = info.createScreenshotFd();
-        if (screenshotFd == null) {
-            Log.e(TAG, "Screenshot parcel file descriptor is null. Deleting bugreport file");
-            FileUtils.closeQuietly(bugreportFd);
-            info.bugreportFile.delete();
+        try {
+            bugreportFd = info.createAndGetBugreportFd();
+            if (bugreportFd == null) {
+                Log.e(TAG, "Bugreport parcel file descriptor is null.");
+                return;
+            }
+            screenshotFd = info.createAndGetDefaultScreenshotFd();
+            if (screenshotFd == null) {
+                Log.e(TAG, "Screenshot parcel file descriptor is null. Deleting bugreport file");
+                FileUtils.closeQuietly(bugreportFd);
+                info.bugreportFile.delete();
+                return;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error in generating bugreport files: ", e);
             return;
         }
         mBugreportManager = (BugreportManager) mContext.getSystemService(
@@ -639,19 +647,22 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private static ParcelFileDescriptor createReadWriteFile(File file) {
+    private static ParcelFileDescriptor getFd(File file) {
         try {
-            file.createNewFile();
-            file.setReadable(true, true);
-            file.setWritable(true, true);
-
-            ParcelFileDescriptor fd = ParcelFileDescriptor.open(file,
+            return ParcelFileDescriptor.open(file,
                     ParcelFileDescriptor.MODE_WRITE_ONLY | ParcelFileDescriptor.MODE_APPEND);
-            return fd;
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
             Log.i(TAG, "Error in generating bugreports: ", e);
         }
         return null;
+    }
+
+    private static void createReadWriteFile(File file) throws IOException {
+        if (!file.exists()) {
+            file.createNewFile();
+            file.setReadable(true, true);
+            file.setWritable(true, true);
+        }
     }
 
     /**
@@ -874,7 +885,7 @@ public class BugreportProgressService extends Service {
             return;
         }
         final String screenshotPath =
-                new File(mScreenshotsDir, info.getPathNextScreenshot()).getAbsolutePath();
+                new File(mBugreportsDir, info.getPathNextScreenshot()).getAbsolutePath();
 
         Message.obtain(mScreenshotHandler, MSG_SCREENSHOT_REQUEST, id, UNUSED_ARG2, screenshotPath)
                 .sendToTarget();
@@ -921,7 +932,7 @@ public class BugreportProgressService extends Service {
             info.addScreenshot(screenshotFile);
             if (info.finished) {
                 Log.d(TAG, "Screenshot finished after bugreport; updating share notification");
-                info.renameScreenshots(mScreenshotsDir);
+                info.renameScreenshots();
                 sendBugreportNotification(info, mTakingScreenshot);
             }
             msg = mContext.getString(R.string.bugreport_screenshot_taken);
@@ -1030,11 +1041,10 @@ public class BugreportProgressService extends Service {
     /**
      * Build {@link Intent} that can be used to share the given bugreport.
      */
-    private static Intent buildSendIntent(Context context, BugreportInfo info,
-            File screenshotsDir) {
+    private static Intent buildSendIntent(Context context, BugreportInfo info) {
         // Rename files (if required) before sharing
         info.renameBugreportFile();
-        info.renameScreenshots(screenshotsDir);
+        info.renameScreenshots();
         // Files are kept on private storage, so turn into Uris that we can
         // grant temporary permissions for.
         final Uri bugreportUri;
@@ -1120,7 +1130,7 @@ public class BugreportProgressService extends Service {
 
         addDetailsToZipFile(info);
 
-        final Intent sendIntent = buildSendIntent(mContext, info, mScreenshotsDir);
+        final Intent sendIntent = buildSendIntent(mContext, info);
         if (sendIntent == null) {
             Log.w(TAG, "Stopping progres on ID " + id + " because share intent could not be built");
             synchronized (mLock) {
@@ -1813,24 +1823,37 @@ public class BugreportProgressService extends Service {
          */
         BugreportInfo(Context context, String baseName, String name,
                 @Nullable String shareTitle, @Nullable String shareDescription,
-                @BugreportParams.BugreportMode int type) {
+                @BugreportParams.BugreportMode int type, File bugreportsDir) {
             this.context = context;
             this.name = this.initialName = name;
             this.shareTitle = shareTitle == null ? "" : shareTitle;
             this.shareDescription = shareDescription == null ? "" : shareDescription;
             this.type = type;
             this.baseName = baseName;
+            createBugreportFile(bugreportsDir);
+            createScreenshotFile(bugreportsDir);
         }
 
-        ParcelFileDescriptor createBugreportFd() {
-            bugreportFile = new File(BUGREPORT_DIR, getFileName(this, ".zip"));
-            return createReadWriteFile(bugreportFile);
+        void createBugreportFile(File bugreportsDir) {
+            bugreportFile = new File(bugreportsDir, getFileName(this, ".zip"));
         }
 
-        ParcelFileDescriptor createScreenshotFd() {
-            File screenshotFile = new File(BUGREPORT_DIR, getScreenshotName("default"));
+        void createScreenshotFile(File bugreportsDir) {
+            File screenshotFile = new File(bugreportsDir, getScreenshotName("default"));
             addScreenshot(screenshotFile);
-            return createReadWriteFile(screenshotFile);
+        }
+
+        ParcelFileDescriptor createAndGetBugreportFd() throws IOException {
+            createReadWriteFile(bugreportFile);
+            return getFd(bugreportFile);
+        }
+
+        ParcelFileDescriptor createAndGetDefaultScreenshotFd() throws IOException {
+            if (screenshotFiles.isEmpty()) {
+                return null;
+            }
+            createReadWriteFile(screenshotFiles.get(0));
+            return getFd(screenshotFiles.get(0));
         }
 
         /**
@@ -1859,7 +1882,7 @@ public class BugreportProgressService extends Service {
          * Rename all screenshots files so that they contain the new {@code name} instead of the
          * {@code initialName} if user has changed it.
          */
-        void renameScreenshots(File screenshotDir) {
+        void renameScreenshots() {
             if (TextUtils.isEmpty(name)) {
                 return;
             }
@@ -1869,7 +1892,7 @@ public class BugreportProgressService extends Service {
                 final String newName = oldName.replaceFirst(initialName, name);
                 final File newFile;
                 if (!newName.equals(oldName)) {
-                    final File renamedFile = new File(screenshotDir, newName);
+                    final File renamedFile = new File(oldFile.getParentFile(), newName);
                     Log.d(TAG, "Renaming screenshot file " + oldFile + " to " + renamedFile);
                     newFile = oldFile.renameTo(renamedFile) ? renamedFile : oldFile;
                 } else {
@@ -1889,7 +1912,8 @@ public class BugreportProgressService extends Service {
          * Rename bugreport file to include the name given by user via UI
          */
         void renameBugreportFile() {
-            File newBugreportFile = new File(BUGREPORT_DIR, getFileName(this, ".zip"));
+            File newBugreportFile = new File(bugreportFile.getParentFile(),
+                    getFileName(this, ".zip"));
             if (!newBugreportFile.getPath().equals(bugreportFile.getPath())) {
                 if (bugreportFile.renameTo(newBugreportFile)) {
                     bugreportFile = newBugreportFile;
