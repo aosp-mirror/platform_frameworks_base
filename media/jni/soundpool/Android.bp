@@ -3,11 +3,16 @@ cc_library_shared {
 
     srcs: [
         "android_media_SoundPool.cpp",
+        "Sound.cpp",
+        "SoundDecoder.cpp",
+        "SoundManager.cpp",
         "SoundPool.cpp",
-        "SoundPoolThread.cpp",
+        "Stream.cpp",
+        "StreamManager.cpp",
     ],
 
     shared_libs: [
+        "libaudioutils",
         "liblog",
         "libcutils",
         "libutils",
