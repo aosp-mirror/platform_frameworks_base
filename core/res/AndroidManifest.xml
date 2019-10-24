@@ -4647,6 +4647,13 @@
                 android:protectionLevel="normal" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
 
+    <!-- @hide Allow the caller to collect debugging data from processes that otherwise
+        would require USAGE_STATS. Before sharing this data with other apps, holders
+        of this permission are REQUIRED to themselves check that the caller has
+        PACKAGE_USAGE_STATS and OP_GET_USAGE_STATS. -->
+    <permission android:name="android.permission.PEEK_DROPBOX_DATA"
+        android:protectionLevel="signature|privileged" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
