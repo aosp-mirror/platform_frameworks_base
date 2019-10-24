@@ -7826,6 +7826,7 @@ public class NotificationManagerService extends SystemService {
                 R.array.config_allowedManagedServicesOnLowRamDevices)) {
             if (whitelisted.equals(pkg)) {
                 canUseManagedServices = true;
+                break;
             }
         }
 
