@@ -29,7 +29,6 @@ import android.telephony.TelephonyManager;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
 import android.telephony.euicc.EuiccManager.OtaStatus;
-import android.util.ArraySet;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -250,18 +249,6 @@ public abstract class EuiccService extends Service {
 
     /** Start of implementation-specific error results. */
     public static final int RESULT_FIRST_USER = 1;
-
-    /**
-     * List of all valid resolution actions for validation purposes.
-     * @hide
-     */
-    public static final ArraySet<String> RESOLUTION_ACTIONS;
-    static {
-        RESOLUTION_ACTIONS = new ArraySet<>();
-        RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_DEACTIVATE_SIM);
-        RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_NO_PRIVILEGES);
-        RESOLUTION_ACTIONS.add(EuiccService.ACTION_RESOLVE_RESOLVABLE_ERRORS);
-    }
 
     /**
      * Boolean extra for resolution actions indicating whether the user granted consent.
