@@ -7331,6 +7331,9 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final DisplayContent dc = mRoot.getDisplayContent(displayId);
                 if (dc != null && dc.mInputMethodTarget != null) {
+                    // If there was a pending IME show(), reset it as IME has been
+                    // requested to be hidden.
+                    dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
                     dc.mInputMethodTarget.hideInsets(WindowInsets.Type.ime(), true /* fromIme */);
                 }
             }

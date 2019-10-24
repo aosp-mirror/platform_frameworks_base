@@ -56,8 +56,6 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
         if (mIsImeLayoutDrawn && mShowImeRunner != null) {
             // Show IME if InputMethodService requested to be shown and it's layout has finished.
             mShowImeRunner.run();
-            mIsImeLayoutDrawn = false;
-            mShowImeRunner = null;
         }
     }
 
@@ -74,8 +72,17 @@ class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 mDisplayContent.mInputMethodTarget.showInsets(
                         WindowInsets.Type.ime(), true /* fromIme */);
             }
-            mImeTargetFromIme = null;
+            abortShowImePostLayout();
         };
+    }
+
+    /**
+     * Abort any pending request to show IME post layout.
+     */
+    void abortShowImePostLayout() {
+        mImeTargetFromIme = null;
+        mIsImeLayoutDrawn = false;
+        mShowImeRunner = null;
     }
 
     private boolean isImeTargetFromDisplayContentAndImeSame() {
