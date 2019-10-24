@@ -1314,7 +1314,8 @@ public class UserManager {
     }
 
     /**
-     * Returns whether switching users is currently allowed.
+     * Returns whether switching users is currently allowed for the user this process is running
+     * under.
      * <p>
      * Switching users is not allowed in the following cases:
      * <li>the user is in a phone call</li>
@@ -1329,10 +1330,24 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @UserSwitchabilityResult int getUserSwitchability() {
-        final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
-        final boolean systemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
+        return getUserSwitchability(Process.myUserHandle());
+    }
+
+    /**
+     * Returns whether switching users is currently allowed for the provided user.
+     * <p>
+     * Switching users is not allowed in the following cases:
+     * <li>the user is in a phone call</li>
+     * <li>{@link #DISALLOW_USER_SWITCH} is set</li>
+     * <li>system user hasn't been unlocked yet</li>
+     *
+     * @return A {@link UserSwitchabilityResult} flag indicating if the user is switchable.
+     * @hide
+     */
+    @RequiresPermission(allOf = {Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    public @UserSwitchabilityResult int getUserSwitchability(UserHandle userHandle) {
         final TelephonyManager tm =
                 (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -1340,12 +1355,22 @@ public class UserManager {
         if (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE) {
             flags |= SWITCHABILITY_STATUS_USER_IN_CALL;
         }
-        if (hasUserRestriction(DISALLOW_USER_SWITCH)) {
+        if (hasUserRestriction(DISALLOW_USER_SWITCH, userHandle)) {
             flags |= SWITCHABILITY_STATUS_USER_SWITCH_DISALLOWED;
         }
-        if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
-            flags |= SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
+
+        // System User is always unlocked in Headless System User Mode, so ignore this flag
+        if (!isHeadlessSystemUserMode()) {
+            final boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
+            final boolean systemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
+
+            if (!allowUserSwitchingWhenSystemUserLocked && !systemUserUnlocked) {
+                flags |= SWITCHABILITY_STATUS_SYSTEM_USER_LOCKED;
+            }
         }
+
         return flags;
     }
 
