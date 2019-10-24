@@ -511,6 +511,12 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "framework-tethering-shared-srcs",
+    srcs: [
+        "core/java/android/util/LocalLog.java",
+    ],
+}
 // Build ext.jar
 // ============================================================
 java_library {
