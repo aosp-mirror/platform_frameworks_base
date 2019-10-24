@@ -22,11 +22,11 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.HomeControlsPlugin;
+import com.android.systemui.plugins.NPVPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -44,7 +44,7 @@ public class ControlsTile extends QSTileImpl<BooleanState> {
     private ControlsDetailAdapter mDetailAdapter;
     private final ActivityStarter mActivityStarter;
     private PluginManager mPluginManager;
-    private HomeControlsPlugin mPlugin;
+    private NPVPlugin mPlugin;
     private Intent mHomeAppIntent;
 
     @Inject
@@ -81,7 +81,7 @@ public class ControlsTile extends QSTileImpl<BooleanState> {
     public void setDetailListening(boolean listening) {
         if (mPlugin == null) return;
 
-        mPlugin.setVisible(listening);
+        mPlugin.setListening(listening);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class ControlsTile extends QSTileImpl<BooleanState> {
 
     private class ControlsDetailAdapter implements DetailAdapter {
         private View mDetailView;
-        protected LinearLayout mHomeControlsLayout;
+        protected FrameLayout mHomeControlsLayout;
 
         public CharSequence getTitle() {
             return "Controls";
@@ -157,24 +157,30 @@ public class ControlsTile extends QSTileImpl<BooleanState> {
         }
 
         public View createDetailView(Context context, View convertView, final ViewGroup parent) {
-            mHomeControlsLayout = (LinearLayout) LayoutInflater.from(context).inflate(
-                R.layout.home_controls, parent, false);
+            if (convertView != null) return convertView;
+
+            mHomeControlsLayout = (FrameLayout) LayoutInflater.from(context).inflate(
+                    R.layout.home_controls, parent, false);
             mHomeControlsLayout.setVisibility(View.VISIBLE);
+            parent.addView(mHomeControlsLayout);
+
             mPluginManager.addPluginListener(
-                    new PluginListener<HomeControlsPlugin>() {
+                    new PluginListener<NPVPlugin>() {
                         @Override
-                        public void onPluginConnected(HomeControlsPlugin plugin,
+                        public void onPluginConnected(NPVPlugin plugin,
                                                       Context pluginContext) {
                             mPlugin = plugin;
-                            mPlugin.sendParentGroup(mHomeControlsLayout);
-                            mPlugin.setVisible(true);
+                            mPlugin.attachToRoot(mHomeControlsLayout);
+                            mPlugin.setListening(true);
                         }
 
                         @Override
-                        public void onPluginDisconnected(HomeControlsPlugin plugin) {
+                        public void onPluginDisconnected(NPVPlugin plugin) {
+                            mPlugin.setListening(false);
+                            mHomeControlsLayout.removeAllViews();
 
                         }
-                    }, HomeControlsPlugin.class, false);
+                    }, NPVPlugin.class, false);
             return mHomeControlsLayout;
         }
 
