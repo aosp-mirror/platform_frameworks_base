@@ -1233,9 +1233,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         PowerManager.WakeLock mWakeLock;
 
         private Receiver(ILocationListener listener, PendingIntent intent, int pid, int uid,
-                String packageName, WorkSource workSource, boolean hideFromAppOps,
-                @NonNull String listenerIdentifier) {
-            super(new CallerIdentity(uid, pid, packageName, listenerIdentifier),
+                String packageName, @Nullable String featureId, WorkSource workSource,
+                boolean hideFromAppOps, @NonNull String listenerIdentifier) {
+            super(new CallerIdentity(uid, pid, packageName, featureId, listenerIdentifier),
                     "LocationListener");
             mListener = listener;
             mPendingIntent = intent;
@@ -1360,7 +1360,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (!currentlyMonitoring) {
                 if (allowMonitoring) {
                     return mAppOps.startOpNoThrow(op, mCallerIdentity.mUid,
-                            mCallerIdentity.mPackageName) == AppOpsManager.MODE_ALLOWED;
+                            mCallerIdentity.mPackageName, false, mCallerIdentity.mFeatureId, null)
+                            == AppOpsManager.MODE_ALLOWED;
                 }
             } else {
                 if (!allowMonitoring
@@ -1545,11 +1546,11 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
-            String listenerIdentifier) {
+            String featureId, String listenerIdentifier) {
         Preconditions.checkNotNull(listenerIdentifier);
 
         return mGnssManagerService == null ? false : mGnssManagerService.addGnssBatchingCallback(
-                callback, packageName, listenerIdentifier);
+                callback, packageName, featureId, listenerIdentifier);
     }
 
     @Override
@@ -1712,10 +1713,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private boolean reportLocationAccessNoThrow(int pid, int uid, String packageName,
-            int allowedResolutionLevel, @Nullable String message) {
+            @Nullable String featureId, int allowedResolutionLevel, @Nullable String message) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
-            if (mAppOps.noteOpNoThrow(op, uid, packageName, null, message)
+            if (mAppOps.noteOpNoThrow(op, uid, packageName, featureId, message)
                     != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
@@ -2149,12 +2150,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private Receiver getReceiverLocked(ILocationListener listener, int pid, int uid,
-            String packageName, WorkSource workSource, boolean hideFromAppOps,
-            @NonNull String listenerIdentifier) {
+            String packageName, @Nullable String featureId, WorkSource workSource,
+            boolean hideFromAppOps, @NonNull String listenerIdentifier) {
         IBinder binder = listener.asBinder();
         Receiver receiver = mReceivers.get(binder);
         if (receiver == null) {
-            receiver = new Receiver(listener, null, pid, uid, packageName, workSource,
+            receiver = new Receiver(listener, null, pid, uid, packageName, featureId, workSource,
                     hideFromAppOps, listenerIdentifier);
             if (!receiver.linkToListenerDeathNotificationLocked(
                     receiver.getListener().asBinder())) {
@@ -2167,10 +2168,11 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private Receiver getReceiverLocked(PendingIntent intent, int pid, int uid, String packageName,
-            WorkSource workSource, boolean hideFromAppOps, @NonNull String listenerIdentifier) {
+            @Nullable String featureId, WorkSource workSource, boolean hideFromAppOps,
+            @NonNull String listenerIdentifier) {
         Receiver receiver = mReceivers.get(intent);
         if (receiver == null) {
-            receiver = new Receiver(null, intent, pid, uid, packageName, workSource,
+            receiver = new Receiver(null, intent, pid, uid, packageName, featureId, workSource,
                     hideFromAppOps, listenerIdentifier);
             mReceivers.put(intent, receiver);
         }
@@ -2233,7 +2235,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void requestLocationUpdates(LocationRequest request, ILocationListener listener,
-            PendingIntent intent, String packageName, String listenerIdentifier) {
+            PendingIntent intent, String packageName, String featureId,
+            String listenerIdentifier) {
         Preconditions.checkNotNull(listenerIdentifier);
 
         synchronized (mLock) {
@@ -2289,11 +2292,11 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                 Receiver receiver;
                 if (intent != null) {
-                    receiver = getReceiverLocked(intent, pid, uid, packageName, workSource,
-                            hideFromAppOps, listenerIdentifier);
+                    receiver = getReceiverLocked(intent, pid, uid, packageName, featureId,
+                            workSource, hideFromAppOps, listenerIdentifier);
                 } else {
-                    receiver = getReceiverLocked(listener, pid, uid, packageName, workSource,
-                            hideFromAppOps, listenerIdentifier);
+                    receiver = getReceiverLocked(listener, pid, uid, packageName, featureId,
+                            workSource, hideFromAppOps, listenerIdentifier);
                 }
                 requestLocationUpdatesLocked(sanitizedRequest, receiver, uid, packageName);
             } finally {
@@ -2362,9 +2365,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             Receiver receiver;
             if (intent != null) {
-                receiver = getReceiverLocked(intent, pid, uid, packageName, null, false, "");
+                receiver = getReceiverLocked(intent, pid, uid, packageName, null, null, false, "");
             } else {
-                receiver = getReceiverLocked(listener, pid, uid, packageName, null, false, "");
+                receiver = getReceiverLocked(listener, pid, uid, packageName, null, null, false,
+                        "");
             }
 
             long identity = Binder.clearCallingIdentity();
@@ -2408,7 +2412,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public Location getLastLocation(LocationRequest r, String packageName) {
+    public Location getLastLocation(LocationRequest r, String packageName, String featureId) {
         synchronized (mLock) {
             LocationRequest request = r != null ? r : DEFAULT_LOCATION_REQUEST;
             int allowedResolutionLevel = getCallerAllowedResolutionLevel();
@@ -2483,8 +2487,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
                 // Don't report location access if there is no last location to deliver.
                 if (lastLocation != null) {
-                    if (!reportLocationAccessNoThrow(pid, uid, packageName, allowedResolutionLevel,
-                            null)) {
+                    if (!reportLocationAccessNoThrow(pid, uid, packageName, featureId,
+                            allowedResolutionLevel, null)) {
                         if (D) {
                             Log.d(TAG, "not returning last loc for no op app: " + packageName);
                         }
@@ -2501,9 +2505,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean getCurrentLocation(LocationRequest locationRequest,
             ICancellationSignal remoteCancellationSignal, ILocationListener listener,
-            String packageName, String listenerIdentifier) {
+            String packageName, String featureId, String listenerIdentifier) {
         // side effect of validating locationRequest and packageName
-        Location lastLocation = getLastLocation(locationRequest, packageName);
+        Location lastLocation = getLastLocation(locationRequest, packageName, featureId);
         if (lastLocation != null) {
             long locationAgeMs = TimeUnit.NANOSECONDS.toMillis(
                     SystemClock.elapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos());
@@ -2538,7 +2542,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        requestLocationUpdates(locationRequest, listener, null, packageName, listenerIdentifier);
+        requestLocationUpdates(locationRequest, listener, null, packageName, featureId,
+                listenerIdentifier);
         CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
                 remoteCancellationSignal);
         if (cancellationSignal != null) {
@@ -2588,7 +2593,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            String packageName, String listenerIdentifier) {
+            String packageName, String featureId, String listenerIdentifier) {
         Preconditions.checkNotNull(listenerIdentifier);
 
         if (request == null) request = DEFAULT_LOCATION_REQUEST;
@@ -2636,7 +2641,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             mGeofenceManager.addFence(sanitizedRequest, geofence, intent, allowedResolutionLevel,
-                    uid, packageName, listenerIdentifier);
+                    uid, packageName, featureId, listenerIdentifier);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -2672,9 +2677,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean registerGnssStatusCallback(IGnssStatusListener listener, String packageName) {
+    public boolean registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
+            String featureId) {
         return mGnssManagerService == null ? false : mGnssManagerService.registerGnssStatusCallback(
-                listener, packageName);
+                listener, packageName, featureId);
     }
 
     @Override
@@ -2684,12 +2690,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean addGnssMeasurementsListener(IGnssMeasurementsListener listener,
-            String packageName, String listenerIdentifier) {
+            String packageName, String featureId, String listenerIdentifier) {
         Preconditions.checkNotNull(listenerIdentifier);
 
         return mGnssManagerService == null ? false
-                : mGnssManagerService.addGnssMeasurementsListener(listener, packageName,
-                        listenerIdentifier);
+                : mGnssManagerService.addGnssMeasurementsListener(listener, packageName, featureId,
+                       listenerIdentifier);
     }
 
     @Override
@@ -2717,12 +2723,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
-            String packageName, String listenerIdentifier) {
+            String packageName, String featureId, String listenerIdentifier) {
         Preconditions.checkNotNull(listenerIdentifier);
 
         return mGnssManagerService == null ? false
                 : mGnssManagerService.addGnssNavigationMessageListener(listener, packageName,
-                        listenerIdentifier);
+                        featureId, listenerIdentifier);
     }
 
     @Override
@@ -3028,6 +3034,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                             receiver.mCallerIdentity.mPid,
                             receiver.mCallerIdentity.mUid,
                             receiver.mCallerIdentity.mPackageName,
+                            receiver.mCallerIdentity.mFeatureId,
                             receiver.mAllowedResolutionLevel,
                             "Location sent to " + receiver.mCallerIdentity.mListenerIdentifier)) {
                         if (D) {

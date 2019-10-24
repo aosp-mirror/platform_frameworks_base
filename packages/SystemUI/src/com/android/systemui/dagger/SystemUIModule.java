@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -36,7 +37,9 @@ import dagger.Provides;
  * A dagger module for injecting components of System UI that are not overridden by the System UI
  * implementation.
  */
-@Module(includes = {AssistModule.class, ComponentBinder.class, PeopleHubModule.class})
+@Module(includes = {AssistModule.class,
+                    ComponentBinder.class,
+                    PeopleHubModule.class})
 public abstract class SystemUIModule {
 
     @Singleton
@@ -44,11 +47,13 @@ public abstract class SystemUIModule {
     @Nullable
     static KeyguardLiftController provideKeyguardLiftController(Context context,
             StatusBarStateController statusBarStateController,
-            AsyncSensorManager asyncSensorManager) {
+            AsyncSensorManager asyncSensorManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FACE)) {
             return null;
         }
-        return new KeyguardLiftController(statusBarStateController, asyncSensorManager);
+        return new KeyguardLiftController(statusBarStateController, asyncSensorManager,
+                keyguardUpdateMonitor);
     }
 
 

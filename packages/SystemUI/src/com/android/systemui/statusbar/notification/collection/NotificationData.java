@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.logging.NotifEvent;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -76,12 +77,16 @@ public class NotificationData {
     private final Ranking mTmpRanking = new Ranking();
     private final boolean mUsePeopleFiltering;
     private final NotifLog mNotifLog;
+    private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
 
     @Inject
-    public NotificationData(NotificationSectionsFeatureManager sectionsFeatureManager,
-            NotifLog notifLog) {
+    public NotificationData(
+            NotificationSectionsFeatureManager sectionsFeatureManager,
+            NotifLog notifLog,
+            PeopleNotificationIdentifier peopleNotificationIdentifier) {
         mUsePeopleFiltering = sectionsFeatureManager.isFilteringEnabled();
         mNotifLog = notifLog;
+        mPeopleNotificationIdentifier = peopleNotificationIdentifier;
     }
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
@@ -460,8 +465,7 @@ public class NotificationData {
     }
 
     private boolean isPeopleNotification(NotificationEntry e) {
-        return e.getSbn().getNotification().getNotificationStyle()
-                == Notification.MessagingStyle.class;
+        return mPeopleNotificationIdentifier.isPeopleNotification(e.getSbn());
     }
 
     public void dump(PrintWriter pw, String indent) {

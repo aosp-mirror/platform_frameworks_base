@@ -132,6 +132,7 @@ public class PipTouchHandler {
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinMinimize;
     private boolean mMovementWithinDismiss;
+    private PipAccessibilityInteractionConnection mConnection;
 
     // Touch state
     private final PipTouchState mTouchState;
@@ -213,9 +214,10 @@ public class PipTouchHandler {
         // Register the listener for input consumer touch events
         inputConsumerController.setInputListener(this::handleTouchEvent);
         inputConsumerController.setRegistrationListener(this::onRegistrationChanged);
-        onRegistrationChanged(inputConsumerController.isRegistered());
 
         mPipBoundsHandler = pipBoundsHandler;
+        mConnection = new PipAccessibilityInteractionConnection(mMotionHelper,
+                this::onAccessibilityShowMenu, mHandler);
     }
 
     public void setTouchEnabled(boolean enabled) {
@@ -339,9 +341,7 @@ public class PipTouchHandler {
 
     private void onRegistrationChanged(boolean isRegistered) {
         mAccessibilityManager.setPictureInPictureActionReplacingConnection(isRegistered
-                ? new PipAccessibilityInteractionConnection(mMotionHelper,
-                        this::onAccessibilityShowMenu, mHandler) : null);
-
+                ? mConnection : null);
         if (!isRegistered && mTouchState.isUserInteracting()) {
             // If the input consumer is unregistered while the user is interacting, then we may not
             // get the final TOUCH_UP event, so clean up the dismiss target as well
@@ -409,27 +409,15 @@ public class PipTouchHandler {
             }
             case MotionEvent.ACTION_HOVER_ENTER:
             case MotionEvent.ACTION_HOVER_MOVE: {
-                if (mAccessibilityManager.isEnabled() && !mSendingHoverAccessibilityEvents) {
-                    AccessibilityEvent event = AccessibilityEvent.obtain(
-                            AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
-                    event.setImportantForAccessibility(true);
-                    event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
-                    event.setWindowId(
-                            AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID);
-                    mAccessibilityManager.sendAccessibilityEvent(event);
+                if (!shouldDeliverToMenu && !mSendingHoverAccessibilityEvents) {
+                    sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
                     mSendingHoverAccessibilityEvents = true;
                 }
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
-                if (mAccessibilityManager.isEnabled() && mSendingHoverAccessibilityEvents) {
-                    AccessibilityEvent event = AccessibilityEvent.obtain(
-                            AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-                    event.setImportantForAccessibility(true);
-                    event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
-                    event.setWindowId(
-                            AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID);
-                    mAccessibilityManager.sendAccessibilityEvent(event);
+                if (!shouldDeliverToMenu && mSendingHoverAccessibilityEvents) {
+                    sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                     mSendingHoverAccessibilityEvents = false;
                 }
                 break;
@@ -445,10 +433,23 @@ public class PipTouchHandler {
                 mMenuController.pokeMenu();
             }
 
-            mMenuController.handleTouchEvent(cloneEvent);
+            mMenuController.handlePointerEvent(cloneEvent);
         }
 
         return true;
+    }
+
+    private void sendAccessibilityHoverEvent(int type) {
+        if (!mAccessibilityManager.isEnabled()) {
+            return;
+        }
+
+        AccessibilityEvent event = AccessibilityEvent.obtain(type);
+        event.setImportantForAccessibility(true);
+        event.setSourceNodeId(AccessibilityNodeInfo.ROOT_NODE_ID);
+        event.setWindowId(
+                AccessibilityWindowInfo.PICTURE_IN_PICTURE_ACTION_REPLACER_WINDOW_ID);
+        mAccessibilityManager.sendAccessibilityEvent(event);
     }
 
     /**
@@ -523,6 +524,10 @@ public class PipTouchHandler {
      * Sets the menu visibility.
      */
     private void setMenuState(int menuState, boolean resize) {
+        if (mMenuState == menuState && !resize) {
+            return;
+        }
+
         if (menuState == MENU_STATE_FULL && mMenuState != MENU_STATE_FULL) {
             // Save the current snap fraction and if we do not drag or move the PiP, then
             // we store back to this snap fraction.  Otherwise, we'll reset the snap
@@ -571,6 +576,9 @@ public class PipTouchHandler {
         }
         mMenuState = menuState;
         updateMovementBounds(menuState);
+        // If pip menu has dismissed, we should register the A11y ActionReplacingConnection for pip
+        // as well, or it can't handle a11y focus and pip menu can't perform any action.
+        onRegistrationChanged(menuState == MENU_STATE_NONE);
         if (menuState != MENU_STATE_CLOSE) {
             MetricsLoggerWrapper.logPictureInPictureMenuVisible(mContext, menuState == MENU_STATE_FULL);
         }

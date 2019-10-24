@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -152,7 +153,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
     }
 
     public void addFence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            int allowedResolutionLevel, int uid, String packageName,
+            int allowedResolutionLevel, int uid, String packageName, @Nullable String featureId,
             @NonNull String listenerIdentifier) {
         if (D) {
             Slog.d(TAG, "addFence: request=" + request + ", geofence=" + geofence
@@ -160,8 +161,8 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
         }
 
         GeofenceState state = new GeofenceState(geofence,
-                request.getExpireAt(), allowedResolutionLevel, uid, packageName, listenerIdentifier,
-                intent);
+                request.getExpireAt(), allowedResolutionLevel, uid, packageName, featureId,
+                listenerIdentifier, intent);
         synchronized (mLock) {
             // first make sure it doesn't already exist
             for (int i = mFences.size() - 1; i >= 0; i--) {
@@ -304,7 +305,7 @@ public class GeofenceManager implements LocationListener, PendingIntent.OnFinish
                 int op = LocationManagerService.resolutionLevelToOp(state.mAllowedResolutionLevel);
                 if (op >= 0) {
                     if (mAppOps.noteOpNoThrow(AppOpsManager.OP_FINE_LOCATION, state.mUid,
-                            state.mPackageName, null, state.mListenerIdentifier)
+                            state.mPackageName, state.mFeatureId, state.mListenerIdentifier)
                             != AppOpsManager.MODE_ALLOWED) {
                         if (D) {
                             Slog.d(TAG, "skipping geofence processing for no op app: "

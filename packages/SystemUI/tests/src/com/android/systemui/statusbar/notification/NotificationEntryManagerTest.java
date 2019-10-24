@@ -82,6 +82,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
+import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -148,8 +149,12 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         private final CountDownLatch mCountDownLatch;
 
         TestableNotificationEntryManager() {
-            super(new NotificationData(mock(NotificationSectionsFeatureManager.class),
-                    mock(NotifLog.class)), mock(NotifLog.class));
+            super(
+                    new NotificationData(
+                            mock(NotificationSectionsFeatureManager.class),
+                            mock(NotifLog.class),
+                            mock(PeopleNotificationIdentifier.class)),
+                    mock(NotifLog.class));
             mCountDownLatch = new CountDownLatch(1);
         }
 

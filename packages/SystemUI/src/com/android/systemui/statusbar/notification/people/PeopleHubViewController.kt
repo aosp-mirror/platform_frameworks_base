@@ -60,8 +60,9 @@ class PeopleHubSectionFooterViewAdapterImpl @Inject constructor(
     private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubViewModelFactory>
 ) : PeopleHubSectionFooterViewAdapter {
 
-    override fun bindView(viewBoundary: PeopleHubSectionFooterViewBoundary) =
-            dataSource.setListener(PeopleHubDataListenerImpl(viewBoundary))
+    override fun bindView(viewBoundary: PeopleHubSectionFooterViewBoundary) {
+        dataSource.registerListener(PeopleHubDataListenerImpl(viewBoundary))
+    }
 }
 
 private class PeopleHubDataListenerImpl(
@@ -92,8 +93,8 @@ class PeopleHubViewModelFactoryDataSourceImpl @Inject constructor(
     private val dataSource: DataSource<@JvmSuppressWildcards PeopleHubModel>
 ) : DataSource<PeopleHubViewModelFactory> {
 
-    override fun setListener(listener: DataListener<PeopleHubViewModelFactory>) =
-            dataSource.setListener(PeopleHubModelListenerImpl(activityStarter, listener))
+    override fun registerListener(listener: DataListener<PeopleHubViewModelFactory>) =
+            dataSource.registerListener(PeopleHubModelListenerImpl(activityStarter, listener))
 }
 
 private class PeopleHubModelListenerImpl(

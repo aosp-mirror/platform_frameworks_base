@@ -89,6 +89,10 @@ import java.util.Vector;
  * of audio/video files and streams. An example on how to use the methods in
  * this class can be found in {@link android.widget.VideoView}.
  *
+ * <p>MediaPlayer is not thread-safe. Creation of and all access to player instances
+ * should be on the same thread. If registering <a href="#Callbacks">callbacks</a>,
+ * the thread must have a Looper.
+ *
  * <p>Topics covered here are:
  * <ol>
  * <li><a href="#StateDiagram">State Diagram</a>
@@ -305,7 +309,7 @@ import java.util.Vector;
  *         </li>
  *     <li>When the playback reaches the end of stream, the playback completes.
  *         <ul>
- *         <li>If the looping mode was being set to <var>true</var>with
+ *         <li>If the looping mode was being set to <var>true</var> with
  *         {@link #setLooping(boolean)}, the MediaPlayer object shall remain in
  *         the <em>Started</em> state.</li>
  *         <li>If the looping mode was set to <var>false
@@ -554,13 +558,13 @@ import java.util.Vector;
  * possible runtime errors during playback or streaming. Registration for
  * these events is done by properly setting the appropriate listeners (via calls
  * to
- * {@link #setOnPreparedListener(OnPreparedListener)}setOnPreparedListener,
- * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}setOnVideoSizeChangedListener,
- * {@link #setOnSeekCompleteListener(OnSeekCompleteListener)}setOnSeekCompleteListener,
- * {@link #setOnCompletionListener(OnCompletionListener)}setOnCompletionListener,
- * {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)}setOnBufferingUpdateListener,
- * {@link #setOnInfoListener(OnInfoListener)}setOnInfoListener,
- * {@link #setOnErrorListener(OnErrorListener)}setOnErrorListener, etc).
+ * {@link #setOnPreparedListener(OnPreparedListener) setOnPreparedListener},
+ * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener) setOnVideoSizeChangedListener},
+ * {@link #setOnSeekCompleteListener(OnSeekCompleteListener) setOnSeekCompleteListener},
+ * {@link #setOnCompletionListener(OnCompletionListener) setOnCompletionListener},
+ * {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener) setOnBufferingUpdateListener},
+ * {@link #setOnInfoListener(OnInfoListener) setOnInfoListener},
+ * {@link #setOnErrorListener(OnErrorListener) setOnErrorListener}, etc).
  * In order to receive the respective callback
  * associated with these listeners, applications are required to create
  * MediaPlayer objects on a thread with its own Looper running (main UI

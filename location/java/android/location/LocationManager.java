@@ -515,7 +515,8 @@ public class LocationManager {
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public Location getLastLocation() {
         try {
-            return mService.getLastLocation(null, mContext.getPackageName());
+            return mService.getLastLocation(null, mContext.getPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -547,7 +548,8 @@ public class LocationManager {
                 provider, 0, 0, true);
 
         try {
-            return mService.getLastLocation(request, mContext.getPackageName());
+            return mService.getLastLocation(request, mContext.getPackageName(),
+                    mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -641,7 +643,7 @@ public class LocationManager {
 
         try {
             if (mService.getCurrentLocation(currentLocationRequest, remoteCancellationSignal,
-                    listenerTransport, mContext.getPackageName(),
+                    listenerTransport, mContext.getPackageName(), mContext.getFeatureId(),
                     getListenerIdentifier(consumer))) {
                 listenerTransport.register(mContext.getSystemService(AlarmManager.class),
                         remoteCancellationSignal);
@@ -1085,7 +1087,8 @@ public class LocationManager {
             boolean registered = false;
             try {
                 mService.requestLocationUpdates(locationRequest, transport, null,
-                        mContext.getPackageName(), getListenerIdentifier(listener));
+                        mContext.getPackageName(), mContext.getFeatureId(),
+                        getListenerIdentifier(listener));
                 registered = true;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1130,7 +1133,8 @@ public class LocationManager {
 
         try {
             mService.requestLocationUpdates(locationRequest, null, pendingIntent,
-                    mContext.getPackageName(), getListenerIdentifier(pendingIntent));
+                    mContext.getPackageName(), mContext.getFeatureId(),
+                    getListenerIdentifier(pendingIntent));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1594,7 +1598,7 @@ public class LocationManager {
         LocationRequest request = new LocationRequest().setExpireIn(expiration);
         try {
             mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
-                    getListenerIdentifier(intent));
+                    mContext.getFeatureId(), getListenerIdentifier(intent));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1672,7 +1676,7 @@ public class LocationManager {
 
         try {
             mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
-                    getListenerIdentifier(intent));
+                    mContext.getFeatureId(), getListenerIdentifier(intent));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2748,7 +2752,7 @@ public class LocationManager {
 
             mListenerTransport = new GnssStatusListener();
             return mService.registerGnssStatusCallback(mListenerTransport,
-                    mContext.getPackageName());
+                    mContext.getPackageName(), mContext.getFeatureId());
         }
 
         @Override
@@ -2808,7 +2812,8 @@ public class LocationManager {
 
             mListenerTransport = new GnssMeasurementsListener();
             return mService.addGnssMeasurementsListener(mListenerTransport,
-                    mContext.getPackageName(), "gnss measurement callback");
+                    mContext.getPackageName(), mContext.getFeatureId(),
+                    "gnss measurement callback");
         }
 
         @Override
@@ -2844,7 +2849,8 @@ public class LocationManager {
 
             mListenerTransport = new GnssNavigationMessageListener();
             return mService.addGnssNavigationMessageListener(mListenerTransport,
-                    mContext.getPackageName(), "gnss navigation callback");
+                    mContext.getPackageName(), mContext.getFeatureId(),
+                    "gnss navigation callback");
         }
 
         @Override
@@ -2880,7 +2886,7 @@ public class LocationManager {
 
             mListenerTransport = new BatchedLocationCallback();
             return mService.addGnssBatchingCallback(mListenerTransport, mContext.getPackageName(),
-                     "batched location callback");
+                     mContext.getFeatureId(), "batched location callback");
         }
 
         @Override

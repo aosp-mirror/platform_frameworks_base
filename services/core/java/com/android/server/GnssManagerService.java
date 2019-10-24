@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -300,7 +301,7 @@ public class GnssManagerService {
      * @return true if callback is successfully added, false otherwise
      */
     public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
-            @NonNull String listenerIdentity) {
+            @Nullable String featureId, @NonNull String listenerIdentity) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.LOCATION_HARDWARE,
                 "Location Hardware permission not granted to access hardware batching");
@@ -319,7 +320,7 @@ public class GnssManagerService {
 
         CallerIdentity callerIdentity =
                 new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(), packageName,
-                        listenerIdentity);
+                        featureId, listenerIdentity);
         synchronized (mGnssBatchingLock) {
             mGnssBatchingCallback = callback;
             mGnssBatchingDeathCallback =
@@ -497,6 +498,7 @@ public class GnssManagerService {
     private <TListener extends IInterface> boolean addGnssDataListenerLocked(
             TListener listener,
             String packageName,
+            @Nullable String featureId,
             @NonNull String listenerIdentifier,
             RemoteListenerHelper<TListener> gnssDataProvider,
             ArrayMap<IBinder,
@@ -517,7 +519,7 @@ public class GnssManagerService {
 
         CallerIdentity callerIdentity =
                 new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(), packageName,
-                        listenerIdentifier);
+                        featureId, listenerIdentifier);
         LinkedListener<TListener> linkedListener =
                 new LocationManagerServiceUtils.LinkedListener<>(
                         listener, listenerIdentifier, callerIdentity, binderDeathCallback);
@@ -605,11 +607,13 @@ public class GnssManagerService {
      * @param packageName name of requesting package
      * @return true if listener is successfully registered, false otherwise
      */
-    public boolean registerGnssStatusCallback(IGnssStatusListener listener, String packageName) {
+    public boolean registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
+            @Nullable String featureId) {
         synchronized (mGnssStatusListeners) {
             return addGnssDataListenerLocked(
                     listener,
                     packageName,
+                    featureId,
                     "Gnss status",
                     mGnssStatusProvider,
                     mGnssStatusListeners,
@@ -636,12 +640,13 @@ public class GnssManagerService {
      * @return true if listener is successfully added, false otherwise
      */
     public boolean addGnssMeasurementsListener(
-            IGnssMeasurementsListener listener, String packageName,
+            IGnssMeasurementsListener listener, String packageName, @Nullable String featureId,
             @NonNull String listenerIdentifier) {
         synchronized (mGnssMeasurementsListeners) {
             return addGnssDataListenerLocked(
                     listener,
                     packageName,
+                    featureId,
                     listenerIdentifier,
                     mGnssMeasurementsProvider,
                     mGnssMeasurementsListeners,
@@ -695,11 +700,12 @@ public class GnssManagerService {
      */
     public boolean addGnssNavigationMessageListener(
             IGnssNavigationMessageListener listener, String packageName,
-            @NonNull String listenerIdentifier) {
+            @Nullable String featureId, @NonNull String listenerIdentifier) {
         synchronized (mGnssNavigationMessageListeners) {
             return addGnssDataListenerLocked(
                     listener,
                     packageName,
+                    featureId,
                     listenerIdentifier,
                     mGnssNavigationMessageProvider,
                     mGnssNavigationMessageListeners,

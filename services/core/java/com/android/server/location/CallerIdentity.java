@@ -17,6 +17,7 @@
 package com.android.server.location;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 /**
  * Represents the calling process's uid, pid, and package name.
@@ -25,13 +26,15 @@ public class CallerIdentity {
     public final int mUid;
     public final int mPid;
     public final String mPackageName;
+    public final @Nullable String mFeatureId;
     public final @NonNull String mListenerIdentifier;
 
-    public CallerIdentity(int uid, int pid, String packageName,
+    public CallerIdentity(int uid, int pid, String packageName, @Nullable String featureId,
             @NonNull String listenerIdentifier) {
         mUid = uid;
         mPid = pid;
         mPackageName = packageName;
+        mFeatureId = featureId;
         mListenerIdentifier = listenerIdentifier;
     }
 }

@@ -65,6 +65,7 @@ public final class PasspointConfiguration implements Parcelable {
      * Configurations under HomeSp subtree.
      */
     private HomeSp mHomeSp = null;
+
     /**
      * Set the Home SP (Service Provider) information.
      *
@@ -248,7 +249,10 @@ public final class PasspointConfiguration implements Parcelable {
         mSubscriptionExpirationTimeInMillis = subscriptionExpirationTimeInMillis;
     }
     /**
-     * @hide
+     *  Utility method to get the time this subscription will expire. It is in the format of number
+     *  of milliseconds since January 1, 1970, 00:00:00 GMT.
+     *
+     *  @return The time this subscription will expire, or Long.MIN_VALUE to indicate unset value
      */
     public long getSubscriptionExpirationTimeInMillis() {
         return mSubscriptionExpirationTimeInMillis;
@@ -521,6 +525,8 @@ public final class PasspointConfiguration implements Parcelable {
                 .append("\n");
         builder.append("UsageLimitDataLimit: ").append(mUsageLimitDataLimit).append("\n");
         builder.append("UsageLimitTimeLimit: ").append(mUsageLimitTimeLimitInMinutes).append("\n");
+        builder.append("Provisioned by a subscription server: ")
+                .append(isOsuProvisioned() ? "Yes" : "No").append("\n");
         if (mHomeSp != null) {
             builder.append("HomeSP Begin ---\n");
             builder.append(mHomeSp);
@@ -727,5 +733,15 @@ public final class PasspointConfiguration implements Parcelable {
             }
         }
         return true;
+    }
+
+    /**
+     * Indicates if the Passpoint Configuration was provisioned by a subscription (OSU) server,
+     * which means that it's an R2 (or R3) profile.
+     *
+     * @return true if the Passpoint Configuration was provisioned by a subscription server.
+     */
+    public boolean isOsuProvisioned() {
+        return getUpdateIdentifier() != Integer.MIN_VALUE;
     }
 }

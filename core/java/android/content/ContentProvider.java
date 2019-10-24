@@ -834,6 +834,23 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
+     * Retrieves a Non-Nullable Context this provider is running in, this is intended to be called
+     * after {@link #onCreate}. When called before context was created, an IllegalStateException
+     * will be thrown.
+     * <p>
+     * Note A provider must be declared in the manifest and created automatically by the system,
+     * and context is only available after {@link #onCreate} is called.
+     */
+    @NonNull
+    public final Context requireContext() {
+        final Context ctx = getContext();
+        if (ctx == null) {
+            throw new IllegalStateException("Cannot find context from the provider.");
+        }
+        return ctx;
+    }
+
+    /**
      * Set the calling package, returning the current value (or {@code null})
      * which can be used later to restore the previous state.
      */

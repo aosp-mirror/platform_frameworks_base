@@ -102,6 +102,9 @@ abstract class CarSystemUIModule {
             CarSystemUIRootComponent systemUIRootComponent);
 
     @Binds
+    public abstract StatusBar bindStatusBar(CarStatusBar statusBar);
+
+    @Binds
     @IntoMap
     @ClassKey(StatusBar.class)
     public abstract SystemUI providesStatusBar(CarStatusBar statusBar);

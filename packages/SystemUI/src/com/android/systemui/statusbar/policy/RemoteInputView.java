@@ -679,8 +679,8 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                         }
                     };
 
-            InputConnection ic = InputConnectionCompat.createWrapper(
-                    inputConnection, outAttrs, callback);
+            InputConnection ic = inputConnection == null ? null :
+                    InputConnectionCompat.createWrapper(inputConnection, outAttrs, callback);
 
             Context userContext = null;
             try {
