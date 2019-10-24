@@ -2822,12 +2822,12 @@ public class AppOpsManager {
                             LongSparseArray.StringParcelling.class);
 
             return new OpFeatureEntry.Builder(source.readBoolean(),
-                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
-                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
-                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
-                    (LongSparseLongArray) longSparseLongArrayParcelling.unparcel(source),
-                    (LongSparseArray<String>) longSparseStringArrayParcelling.unparcel(source),
-                    (LongSparseArray<String>) longSparseStringArrayParcelling.unparcel(source));
+                    longSparseLongArrayParcelling.unparcel(source),
+                    longSparseLongArrayParcelling.unparcel(source),
+                    longSparseLongArrayParcelling.unparcel(source),
+                    longSparseLongArrayParcelling.unparcel(source),
+                    longSparseStringArrayParcelling.unparcel(source),
+                    longSparseStringArrayParcelling.unparcel(source));
         }
     }
 

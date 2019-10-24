@@ -289,22 +289,22 @@ public class LongSparseLongArray implements Cloneable {
     /**
      * @hide
      */
-    public static class Parcelling implements com.android.internal.util.Parcelling {
+    public static class Parcelling implements
+            com.android.internal.util.Parcelling<LongSparseLongArray> {
         @Override
-        public void parcel(Object item, Parcel dest, int parcelFlags) {
-            if (item == null) {
+        public void parcel(LongSparseLongArray array, Parcel dest, int parcelFlags) {
+            if (array == null) {
                 dest.writeInt(-1);
                 return;
             }
 
-            LongSparseLongArray array = (LongSparseLongArray) item;
             dest.writeInt(array.mSize);
             dest.writeLongArray(array.mKeys);
             dest.writeLongArray(array.mValues);
         }
 
         @Override
-        public Object unparcel(Parcel source) {
+        public LongSparseLongArray unparcel(Parcel source) {
             int size = source.readInt();
             if (size == -1) {
                 return null;
