@@ -26,6 +26,7 @@ import static android.system.OsConstants.AF_INET6;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.NETLINK_INET_DIAG;
 
+import android.annotation.Nullable;
 import android.net.util.SocketUtils;
 import android.system.ErrnoException;
 import android.util.Log;
@@ -53,7 +54,35 @@ public class InetDiagMessage extends NetlinkMessage {
     private static final int TIMEOUT_MS = 500;
 
     public static byte[] InetDiagReqV2(int protocol, InetSocketAddress local,
-                                       InetSocketAddress remote, int family, short flags) {
+            InetSocketAddress remote, int family, short flags) {
+        return InetDiagReqV2(protocol, local, remote, family, flags, 0 /* pad */,
+                0 /* idiagExt */, StructInetDiagReqV2.INET_DIAG_REQ_V2_ALL_STATES);
+    }
+
+    /**
+     * Construct an inet_diag_req_v2 message. This method will throw {@code NullPointerException}
+     * if local and remote are not both null or both non-null.
+     *
+     * @param protocol the request protocol type. This should be set to one of IPPROTO_TCP,
+     *                 IPPROTO_UDP, or IPPROTO_UDPLITE.
+     * @param local local socket address of the target socket. This will be packed into a
+     *              {@Code StructInetDiagSockId}. Request to diagnose for all sockets if both of
+     *              local or remote address is null.
+     * @param remote remote socket address of the target socket. This will be packed into a
+     *              {@Code StructInetDiagSockId}. Request to diagnose for all sockets if both of
+     *              local or remote address is null.
+     * @param family the ip family of the request message. This should be set to either AF_INET or
+     *               AF_INET6 for IPv4 or IPv6 sockets respectively.
+     * @param flags message flags. See &lt;linux_src&gt;/include/uapi/linux/netlink.h.
+     * @param pad for raw socket protocol specification.
+     * @param idiagExt a set of flags defining what kind of extended information to report.
+     * @param state a bit mask that defines a filter of socket states.
+     *
+     * @return bytes array representation of the message
+     **/
+    public static byte[] InetDiagReqV2(int protocol, @Nullable InetSocketAddress local,
+            @Nullable InetSocketAddress remote, int family, short flags, int pad, int idiagExt,
+            int state) throws NullPointerException {
         final byte[] bytes = new byte[StructNlMsgHdr.STRUCT_SIZE + StructInetDiagReqV2.STRUCT_SIZE];
         final ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
         byteBuffer.order(ByteOrder.nativeOrder());
@@ -63,9 +92,9 @@ public class InetDiagMessage extends NetlinkMessage {
         nlMsgHdr.nlmsg_type = SOCK_DIAG_BY_FAMILY;
         nlMsgHdr.nlmsg_flags = flags;
         nlMsgHdr.pack(byteBuffer);
+        final StructInetDiagReqV2 inetDiagReqV2 =
+                new StructInetDiagReqV2(protocol, local, remote, family, pad, idiagExt, state);
 
-        final StructInetDiagReqV2 inetDiagReqV2 = new StructInetDiagReqV2(protocol, local, remote,
-                family);
         inetDiagReqV2.pack(byteBuffer);
         return bytes;
     }

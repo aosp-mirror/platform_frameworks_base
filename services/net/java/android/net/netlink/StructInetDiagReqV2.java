@@ -16,10 +16,10 @@
 
 package android.net.netlink;
 
-import static java.nio.ByteOrder.BIG_ENDIAN;
+import android.annotation.Nullable;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 /**
  * struct inet_diag_req_v2
@@ -40,41 +40,58 @@ import java.nio.ByteOrder;
 public class StructInetDiagReqV2 {
     public static final int STRUCT_SIZE = 8 + StructInetDiagSockId.STRUCT_SIZE;
 
-    private final byte sdiag_family;
-    private final byte sdiag_protocol;
-    private final StructInetDiagSockId id;
-    private final int INET_DIAG_REQ_V2_ALL_STATES = (int) 0xffffffff;
-
+    private final byte mSdiagFamily;
+    private final byte mSdiagProtocol;
+    private final byte mIdiagExt;
+    private final byte mPad;
+    private final StructInetDiagSockId mId;
+    private final int mState;
+    public static final int INET_DIAG_REQ_V2_ALL_STATES = (int) 0xffffffff;
 
     public StructInetDiagReqV2(int protocol, InetSocketAddress local, InetSocketAddress remote,
-                               int family) {
-        sdiag_family = (byte) family;
-        sdiag_protocol = (byte) protocol;
-        id = new StructInetDiagSockId(local, remote);
+            int family) {
+        this(protocol, local, remote, family, 0 /* pad */, 0 /* extension */,
+                INET_DIAG_REQ_V2_ALL_STATES);
+    }
+
+    public StructInetDiagReqV2(int protocol, @Nullable InetSocketAddress local,
+            @Nullable InetSocketAddress remote, int family, int pad, int extension, int state)
+            throws NullPointerException {
+        mSdiagFamily = (byte) family;
+        mSdiagProtocol = (byte) protocol;
+        // Request for all sockets if no specific socket is requested. Specify the local and remote
+        // socket address information for target request socket.
+        if ((local == null) != (remote == null)) {
+            throw new NullPointerException("Local and remote must be both null or both non-null");
+        }
+        mId = ((local != null && remote != null) ? new StructInetDiagSockId(local, remote) : null);
+        mPad = (byte) pad;
+        mIdiagExt = (byte) extension;
+        mState = state;
     }
 
     public void pack(ByteBuffer byteBuffer) {
         // The ByteOrder must have already been set by the caller.
-        byteBuffer.put((byte) sdiag_family);
-        byteBuffer.put((byte) sdiag_protocol);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 0);
-        byteBuffer.putInt(INET_DIAG_REQ_V2_ALL_STATES);
-        id.pack(byteBuffer);
+        byteBuffer.put((byte) mSdiagFamily);
+        byteBuffer.put((byte) mSdiagProtocol);
+        byteBuffer.put((byte) mIdiagExt);
+        byteBuffer.put((byte) mPad);
+        byteBuffer.putInt(mState);
+        if (mId != null) mId.pack(byteBuffer);
     }
 
     @Override
     public String toString() {
-        final String familyStr = NetlinkConstants.stringForAddressFamily(sdiag_family);
-        final String protocolStr = NetlinkConstants.stringForAddressFamily(sdiag_protocol);
+        final String familyStr = NetlinkConstants.stringForAddressFamily(mSdiagFamily);
+        final String protocolStr = NetlinkConstants.stringForAddressFamily(mSdiagProtocol);
 
         return "StructInetDiagReqV2{ "
                 + "sdiag_family{" + familyStr + "}, "
                 + "sdiag_protocol{" + protocolStr + "}, "
-                + "idiag_ext{" + 0 + ")}, "
-                + "pad{" + 0 + "}, "
-                + "idiag_states{" + Integer.toHexString(INET_DIAG_REQ_V2_ALL_STATES) + "}, "
-                + id.toString()
+                + "idiag_ext{" + mIdiagExt + ")}, "
+                + "pad{" + mPad + "}, "
+                + "idiag_states{" + Integer.toHexString(mState) + "}, "
+                + ((mId != null) ? mId.toString() : "inet_diag_sockid=null")
                 + "}";
     }
 }
