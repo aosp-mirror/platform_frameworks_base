@@ -19,6 +19,8 @@ java_defaults {
     platform_apis: true,
     srcs: [
         "src/**/*.java",
+        ":framework-tethering-shared-srcs",
+        ":services-tethering-shared-srcs",
     ],
     static_libs: [
         "androidx.annotation_annotation",
@@ -59,4 +61,12 @@ android_app {
     use_embedded_native_libs: true,
     // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkPermissionConfig"],
+}
+
+// This group will be removed when tethering migration is done.
+filegroup {
+    name: "tethering-services-srcs",
+    srcs: [
+        "src/com/android/server/connectivity/tethering/TetheringConfiguration.java",
+    ],
 }
