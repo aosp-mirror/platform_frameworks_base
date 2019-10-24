@@ -1,9 +1,9 @@
 package com.android.server.usage;
 
+import android.annotation.UserIdInt;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.Context;
 import android.os.Looper;
 
@@ -30,6 +30,24 @@ public interface AppStandbyInternal {
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | InvocationTargetException | ClassNotFoundException e) {
             throw new RuntimeException("Unable to instantiate AppStandbyController!", e);
+        }
+    }
+
+    /**
+     * Listener interface for notifications that an app's idle state changed.
+     */
+    abstract static class AppIdleStateChangeListener {
+
+        /** Callback to inform listeners that the idle state has changed to a new bucket. */
+        public abstract void onAppIdleStateChanged(String packageName, @UserIdInt int userId,
+                boolean idle, int bucket, int reason);
+
+        /**
+         * Optional callback to inform the listener that the app has transitioned into
+         * an active state due to user interaction.
+         */
+        public void onUserInteractionStarted(String packageName, @UserIdInt int userId) {
+            // No-op by default
         }
     }
 

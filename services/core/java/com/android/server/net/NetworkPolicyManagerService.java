@@ -229,6 +229,8 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import libcore.io.IoUtils;
 
@@ -396,6 +398,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private NetworkStatsManagerInternal mNetworkStats;
     private final INetworkManagementService mNetworkManager;
     private UsageStatsManagerInternal mUsageStats;
+    private AppStandbyInternal mAppStandby;
     private final Clock mClock;
     private final UserManager mUserManager;
     private final CarrierConfigManager mCarrierConfigManager;
@@ -734,6 +737,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
 
             mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+            mAppStandby = LocalServices.getService(AppStandbyInternal.class);
             mNetworkStats = LocalServices.getService(NetworkStatsManagerInternal.class);
 
             synchronized (mUidRulesFirstLock) {
@@ -868,7 +872,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mContext.getSystemService(ConnectivityManager.class).registerNetworkCallback(
                     new NetworkRequest.Builder().build(), mNetworkCallback);
 
-            mUsageStats.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
+            mAppStandby.addListener(new NetPolicyAppIdleStateChangeListener());
 
             // Listen for subscriber changes
             mContext.getSystemService(SubscriptionManager.class).addOnSubscriptionsChangedListener(
@@ -4375,9 +4379,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return newUidRules;
     }
 
-    private class AppIdleStateChangeListener
-            extends UsageStatsManagerInternal.AppIdleStateChangeListener {
-
+    private class NetPolicyAppIdleStateChangeListener extends AppIdleStateChangeListener {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle, int bucket,
                 int reason) {

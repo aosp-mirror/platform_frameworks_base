@@ -35,8 +35,6 @@ import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
-import android.app.usage.UsageStatsManagerInternal;
-import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -70,6 +68,8 @@ import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateControllerProto;
+import com.android.server.usage.AppStandbyInternal;
+import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -574,9 +574,8 @@ public final class QuotaController extends StateController {
         mContext.registerReceiverAsUser(mPackageAddedReceiver, UserHandle.ALL, filter, null, null);
 
         // Set up the app standby bucketing tracker
-        UsageStatsManagerInternal usageStats = LocalServices.getService(
-                UsageStatsManagerInternal.class);
-        usageStats.addAppIdleStateChangeListener(new StandbyTracker());
+        AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
+        appStandby.addListener(new StandbyTracker());
 
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
