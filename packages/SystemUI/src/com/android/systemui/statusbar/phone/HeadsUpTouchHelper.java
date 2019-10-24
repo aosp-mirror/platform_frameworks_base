@@ -77,9 +77,12 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 ExpandableView child = mCallback.getChildAtRawPosition(x, y);
                 mTouchingHeadsUpView = false;
                 if (child instanceof ExpandableNotificationRow) {
-                    mPickedChild = (ExpandableNotificationRow) child;
+                    ExpandableNotificationRow pickedChild = (ExpandableNotificationRow) child;
                     mTouchingHeadsUpView = !mCallback.isExpanded()
-                            && mPickedChild.isHeadsUp() && mPickedChild.isPinned();
+                            && pickedChild.isHeadsUp() && pickedChild.isPinned();
+                    if (mTouchingHeadsUpView) {
+                        mPickedChild = pickedChild;
+                    }
                 } else if (child == null && !mCallback.isExpanded()) {
                     // We might touch above the visible heads up child, but then we still would
                     // like to capture it.
