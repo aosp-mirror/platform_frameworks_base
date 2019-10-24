@@ -530,7 +530,9 @@ public class WifiManager {
     @SystemApi
     public static final String EXTRA_PREVIOUS_WIFI_AP_STATE = "previous_wifi_state";
     /**
-     * The interface used for the softap.
+     * The lookup key for a String extra that stores the interface name used for the Soft AP.
+     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
+     * Retrieve its value with {@link android.content.Intent#getStringExtra(String)}.
      *
      * @hide
      */
@@ -538,9 +540,10 @@ public class WifiManager {
     public static final String EXTRA_WIFI_AP_INTERFACE_NAME =
             "android.net.wifi.extra.WIFI_AP_INTERFACE_NAME";
     /**
-     * The intended ip mode for this softap.
-     * @see #IFACE_IP_MODE_TETHERED
-     * @see #IFACE_IP_MODE_LOCAL_ONLY
+     * The lookup key for an int extra that stores the intended IP mode for this Soft AP.
+     * One of {@link #IFACE_IP_MODE_TETHERED} or {@link #IFACE_IP_MODE_LOCAL_ONLY}.
+     * This extra is included in the broadcast {@link #WIFI_AP_STATE_CHANGED_ACTION}.
+     * Retrieve its value with {@link android.content.Intent#getIntExtra(String, int)}.
      *
      * @hide
      */
@@ -2697,12 +2700,13 @@ public class WifiManager {
     }
 
     /**
-     * Start SoftAp mode with the specified configuration.
-     * Note that starting in access point mode disables station
-     * mode operation
-     * @param wifiConfig SSID, security and channel details as
-     *        part of WifiConfiguration
-     * @return {@code true} if the operation succeeds, {@code false} otherwise
+     * Start Soft AP (hotspot) mode with the specified configuration.
+     * Note that starting Soft AP mode may disable station mode operation if the device does not
+     * support concurrency.
+     * @param wifiConfig SSID, security and channel details as part of WifiConfiguration, or null to
+     *                   use the persisted Soft AP configuration that was previously set using
+     *                   {@link #setWifiApConfiguration(WifiConfiguration)}.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
      * @hide
      */
