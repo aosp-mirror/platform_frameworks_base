@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry.
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
 import java.io.FileDescriptor;
@@ -121,6 +122,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final UserManager mUserManager;
     private final KeyguardManager mKeyguardManager;
     private final StatusBarStateController mStatusBarStateController;
+    private final RemoteInputUriController mRemoteInputUriController;
 
     protected RemoteInputController mRemoteInputController;
     protected NotificationLifetimeExtender.NotificationSafeToRemoveCallback
@@ -260,7 +262,8 @@ public class NotificationRemoteInputManager implements Dumpable {
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController,
             StatusBarStateController statusBarStateController,
-            @MainHandler Handler mainHandler) {
+            @MainHandler Handler mainHandler,
+            RemoteInputUriController remoteInputUriController) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
@@ -273,6 +276,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         addLifetimeExtenders();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mStatusBarStateController = statusBarStateController;
+        mRemoteInputUriController = remoteInputUriController;
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
@@ -300,7 +304,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     /** Initializes this component with the provided dependencies. */
     public void setUpWithCallback(Callback callback, RemoteInputController.Delegate delegate) {
         mCallback = callback;
-        mRemoteInputController = new RemoteInputController(delegate);
+        mRemoteInputController = new RemoteInputController(delegate, mRemoteInputUriController);
         mRemoteInputController.addCallback(new RemoteInputController.Callback() {
             @Override
             public void onRemoteInputSent(NotificationEntry entry) {

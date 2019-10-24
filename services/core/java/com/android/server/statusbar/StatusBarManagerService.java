@@ -1364,12 +1364,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void grantInlineReplyUriPermission(String key, Uri uri) {
+    public void grantInlineReplyUriPermission(String key, Uri uri, UserHandle user,
+            String packageName) {
         enforceStatusBarService();
         int callingUid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         try {
-            mNotificationDelegate.grantInlineReplyUriPermission(key, uri, callingUid);
+            mNotificationDelegate.grantInlineReplyUriPermission(key, uri, user, packageName,
+                    callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearInlineReplyUriPermissions(String key) {
+        enforceStatusBarService();
+        int callingUid = Binder.getCallingUid();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.clearInlineReplyUriPermissions(key, callingUid);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

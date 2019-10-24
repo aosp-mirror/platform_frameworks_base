@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
+import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.tv.TvStatusBar;
@@ -273,7 +274,8 @@ public abstract class SystemUIBinder {
             PowerManager powerManager,
             DozeScrimController dozeScrimController,
             CommandQueue commandQueue,
-            PluginManager pluginManager) {
+            PluginManager pluginManager,
+            RemoteInputUriController remoteInputUriController) {
         return new StatusBar(
                 context,
                 featureFlags,
@@ -340,7 +342,8 @@ public abstract class SystemUIBinder {
                 powerManager,
                 dozeScrimController,
                 commandQueue,
-                pluginManager);
+                pluginManager,
+                remoteInputUriController);
     }
 
 }

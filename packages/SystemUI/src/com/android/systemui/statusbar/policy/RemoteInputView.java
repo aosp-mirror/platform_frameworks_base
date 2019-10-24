@@ -173,12 +173,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     protected Intent prepareRemoteInputFromData(String contentType, Uri data) {
         HashMap<String, Uri> results = new HashMap<>();
         results.put(contentType, data);
-        try {
-            mStatusBarManagerService.grantInlineReplyUriPermission(
-                    mEntry.getSbn().getKey(), data);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to grant URI permissions:" + e.getMessage(), e);
-        }
+        mController.grantInlineReplyUriPermission(mEntry.getSbn(), data);
         Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         RemoteInput.addDataResultToIntent(mRemoteInput, fillInIntent, results);
 
