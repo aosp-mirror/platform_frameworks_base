@@ -71,6 +71,15 @@ public class Credentials {
     /** Key containing suffix of lockdown VPN profile. */
     public static final String LOCKDOWN_VPN = "LOCKDOWN_VPN";
 
+    /** Name of CA certificate usage. */
+    public static final String CERTIFICATE_USAGE_CA = "ca";
+
+    /** Name of User certificate usage. */
+    public static final String CERTIFICATE_USAGE_USER = "user";
+
+    /** Name of WIFI certificate usage. */
+    public static final String CERTIFICATE_USAGE_WIFI = "wifi";
+
     /** Data type for public keys. */
     public static final String EXTRA_PUBLIC_KEY = "KEY";
 
@@ -89,6 +98,11 @@ public class Credentials {
      * system.
      */
     public static final String EXTRA_INSTALL_AS_UID = "install_as_uid";
+
+    /**
+     * Intent extra: type of the certificate to install
+     */
+    public static final String EXTRA_CERTIFICATE_USAGE = "certificate_install_usage";
 
     /**
      * Intent extra: name for the user's key pair.
