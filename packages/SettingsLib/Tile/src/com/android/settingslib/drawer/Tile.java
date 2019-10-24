@@ -23,6 +23,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITLE_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
@@ -79,6 +80,7 @@ public abstract class Tile implements Parcelable {
     }
 
     Tile(Parcel in) {
+        final boolean isProviderTile = in.readBoolean();
         mComponentPackage = in.readString();
         mComponentName = in.readString();
         mIntent = new Intent().setClassName(mComponentPackage, mComponentName);
@@ -97,6 +99,7 @@ public abstract class Tile implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeBoolean(this instanceof ProviderTile);
         dest.writeString(mComponentPackage);
         dest.writeString(mComponentName);
         final int size = userHandle.size();
@@ -117,6 +120,12 @@ public abstract class Tile implements Parcelable {
      * Human-readable description of the tile
      */
     public abstract String getDescription();
+
+    protected abstract ComponentInfo getComponentInfo(Context context);
+
+    protected abstract CharSequence getComponentLabel(Context context);
+
+    protected abstract int getComponentIcon(ComponentInfo info);
 
     public String getPackageName() {
         return mComponentPackage;
@@ -164,6 +173,13 @@ public abstract class Tile implements Parcelable {
     }
 
     /**
+     * Check whether tile has a switch.
+     */
+    public boolean hasSwitch() {
+        return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_SWITCH_URI);
+    }
+
+    /**
      * Title of the tile that is shown to the user.
      */
     public CharSequence getTitle(Context context) {
@@ -194,8 +210,6 @@ public abstract class Tile implements Parcelable {
         }
         return title;
     }
-
-    protected abstract CharSequence getComponentLabel(Context context);
 
     /**
      * Overrides the summary. This can happen when injected tile wants to provide dynamic summary.
@@ -293,7 +307,7 @@ public abstract class Tile implements Parcelable {
             // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
             // level is too complex because we don't have a strong threading contract for this class
             if (!mMetaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                iconResId = componentInfo.icon;
+                iconResId = getComponentIcon(componentInfo);
             }
         }
         if (iconResId != 0) {
@@ -345,11 +359,12 @@ public abstract class Tile implements Parcelable {
         }
     }
 
-    protected abstract ComponentInfo getComponentInfo(Context context);
-
     public static final Creator<Tile> CREATOR = new Creator<Tile>() {
         public Tile createFromParcel(Parcel source) {
-            return new ActivityTile(source);
+            final boolean isProviderTile = source.readBoolean();
+            // reset the Parcel pointer before delegating to the real constructor.
+            source.setDataPosition(0);
+            return isProviderTile ? new ProviderTile(source) : new ActivityTile(source);
         }
 
         public Tile[] newArray(int size) {
@@ -358,7 +373,7 @@ public abstract class Tile implements Parcelable {
     };
 
     /**
-     * Check whether title is only have primary profile
+     * Check whether tile only has primary profile.
      */
     public boolean isPrimaryProfileOnly() {
         String profile = mMetaData != null

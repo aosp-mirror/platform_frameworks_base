@@ -16,11 +16,15 @@
 
 package com.android.settingslib.drawer;
 
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.util.Log;
 
@@ -28,43 +32,60 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Description of a single dashboard tile which is generated from an activity.
+ * Description of a single dashboard tile which is generated from a content provider.
  */
-public class ActivityTile extends Tile {
-    private static final String TAG = "ActivityTile";
+public class ProviderTile extends Tile {
+    private static final String TAG = "ProviderTile";
 
-    public ActivityTile(ComponentInfo info, String category) {
+    private static final boolean DEBUG_TIMING = false;
+
+    private String mAuthority;
+    private String mKey;
+
+    public ProviderTile(ComponentInfo info, String category, Bundle metaData) {
         super(info, category);
-        setMetaData(info.metaData);
+        setMetaData(metaData);
+        mAuthority = ((ProviderInfo) info).authority;
+        mKey = metaData.getString(META_DATA_PREFERENCE_KEYHINT);
     }
 
-    ActivityTile(Parcel in) {
+    ProviderTile(Parcel in) {
         super(in);
+        mAuthority = ((ProviderInfo) mComponentInfo).authority;
+        mKey = getMetaData().getString(META_DATA_PREFERENCE_KEYHINT);
     }
 
     @Override
     public int getId() {
-        return Objects.hash(getPackageName(), getComponentName());
+        return Objects.hash(mAuthority, mKey);
     }
 
     @Override
     public String getDescription() {
-        return getPackageName() + "/" + getComponentName();
+        return mAuthority + "/" + mKey;
     }
 
     @Override
     protected ComponentInfo getComponentInfo(Context context) {
         if (mComponentInfo == null) {
+            final long startTime = System.currentTimeMillis();
             final PackageManager pm = context.getApplicationContext().getPackageManager();
             final Intent intent = getIntent();
             final List<ResolveInfo> infoList =
-                    pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
+                    pm.queryIntentContentProviders(intent, 0 /* flags */);
             if (infoList != null && !infoList.isEmpty()) {
-                mComponentInfo = infoList.get(0).activityInfo;
-                setMetaData(mComponentInfo.metaData);
+                final ProviderInfo providerInfo = infoList.get(0).providerInfo;
+                mComponentInfo = providerInfo;
+                setMetaData(TileUtils.getSwitchDataFromProvider(context, providerInfo.authority,
+                        mKey));
             } else {
                 Log.e(TAG, "Cannot find package info for "
                         + intent.getComponent().flattenToString());
+            }
+
+            if (DEBUG_TIMING) {
+                Log.d(TAG, "getComponentInfo took "
+                        + (System.currentTimeMillis() - startTime) + " ms");
             }
         }
         return mComponentInfo;
@@ -72,15 +93,13 @@ public class ActivityTile extends Tile {
 
     @Override
     protected CharSequence getComponentLabel(Context context) {
-        final PackageManager pm = context.getPackageManager();
-        final ComponentInfo info = getComponentInfo(context);
-        return info == null
-                ? null
-                : info.loadLabel(pm);
+        // Getting provider label for a tile title isn't supported.
+        return null;
     }
 
     @Override
-    protected int getComponentIcon(ComponentInfo componentInfo) {
-        return componentInfo.icon;
+    protected int getComponentIcon(ComponentInfo info) {
+        // Getting provider icon for a tile title isn't supported.
+        return 0;
     }
 }

@@ -16,12 +16,14 @@
 package com.android.settingslib.drawer;
 
 import android.app.ActivityManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +32,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -96,13 +99,12 @@ public class TileUtils {
      * {@link #EXTRA_SETTINGS_ACTION}
      * The value must be from {@link CategoryKey}.
      */
-    private static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
+    static final String EXTRA_CATEGORY_KEY = "com.android.settings.category";
 
     /**
      * The key used to get the package name of the icon resource for the preference.
      */
-    private static final String EXTRA_PREFERENCE_ICON_PACKAGE =
-            "com.android.settings.icon_package";
+    static final String EXTRA_PREFERENCE_ICON_PACKAGE = "com.android.settings.icon_package";
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
@@ -187,6 +189,17 @@ public class TileUtils {
      */
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the content provider providing the switch that should be displayed for the
+     * preference.
+     *
+     * This works with {@link #META_DATA_PREFERENCE_KEYHINT} which should also be set in the
+     * AndroidManifest.xml
+     */
+    public static final String META_DATA_PREFERENCE_SWITCH_URI =
+            "com.android.settings.switch_uri";
 
     /**
      * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile,
@@ -279,6 +292,7 @@ public class TileUtils {
             intent.setPackage(SETTING_PKG);
         }
         getActivityTiles(context, user, addedCache, defaultCategory, outTiles, intent);
+        getProviderTiles(context, user, addedCache, defaultCategory, outTiles, intent);
     }
 
     private static void getActivityTiles(Context context,
@@ -298,6 +312,30 @@ public class TileUtils {
         }
     }
 
+    private static void getProviderTiles(Context context,
+            UserHandle user, Map<Pair<String, String>, Tile> addedCache,
+            String defaultCategory, List<Tile> outTiles, Intent intent) {
+        final PackageManager pm = context.getPackageManager();
+        final List<ResolveInfo> results = pm.queryIntentContentProvidersAsUser(intent,
+                0 /* flags */, user.getIdentifier());
+        for (ResolveInfo resolved : results) {
+            if (!resolved.system) {
+                // Do not allow any app to add to settings, only system ones.
+                continue;
+            }
+            final ProviderInfo providerInfo = resolved.providerInfo;
+            final List<Bundle> switchData = getSwitchDataFromProvider(context,
+                    providerInfo.authority);
+            if (switchData == null || switchData.isEmpty()) {
+                continue;
+            }
+            for (Bundle metaData : switchData) {
+                getTile(user, addedCache, defaultCategory, outTiles, intent, metaData,
+                        providerInfo);
+            }
+        }
+    }
+
     private static void getTile(UserHandle user, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, List<Tile> outTiles, Intent intent, Bundle metaData,
             ComponentInfo componentInfo) {
@@ -313,10 +351,16 @@ public class TileUtils {
             categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
         }
 
-        final Pair<String, String> key = new Pair<>(componentInfo.packageName, componentInfo.name);
+        final boolean isProvider = componentInfo instanceof ProviderInfo;
+        final Pair<String, String> key = isProvider
+                ? new Pair<>(((ProviderInfo) componentInfo).authority,
+                        metaData.getString(META_DATA_PREFERENCE_KEYHINT))
+                : new Pair<>(componentInfo.packageName, componentInfo.name);
         Tile tile = addedCache.get(key);
         if (tile == null) {
-            tile = new ActivityTile(componentInfo, categoryKey);
+            tile = isProvider
+                    ? new ProviderTile(componentInfo, categoryKey, metaData)
+                    : new ActivityTile(componentInfo, categoryKey);
             addedCache.put(key, tile);
         } else {
             tile.setMetaData(metaData);
@@ -330,20 +374,75 @@ public class TileUtils {
         }
     }
 
+    /** Returns the switch data of the key specified from the provider */
+    // TODO(b/144732809): rearrange methods by access level modifiers
+    static Bundle getSwitchDataFromProvider(Context context, String authority, String key) {
+        final Map<String, IContentProvider> providerMap = new ArrayMap<>();
+        final Uri uri = buildUri(authority, SwitchesProvider.METHOD_GET_SWITCH_DATA, key);
+        return getBundleFromUri(context, uri, providerMap, null /* bundle */);
+    }
+
+    /** Returns all switch data from the provider */
+    private static List<Bundle> getSwitchDataFromProvider(Context context, String authority) {
+        final Map<String, IContentProvider> providerMap = new ArrayMap<>();
+        final Uri uri = buildUri(authority, SwitchesProvider.METHOD_GET_SWITCH_DATA);
+        final Bundle result = getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        return result != null
+                ? result.getParcelableArrayList(SwitchesProvider.EXTRA_SWITCH_DATA)
+                : null;
+    }
+
     /**
      * Returns the complete uri from the meta data key of the tile.
-
+     *
+     * A complete uri should contain at least one path segment and be one of the following types:
+     *      content://authority/method
+     *      content://authority/method/key
+     *
+     * If the uri from the tile is not complete, build a uri by the default method and the
+     * preference key.
+     *
      * @param tile          Tile which contains meta data
      * @param metaDataKey   Key mapping to the uri in meta data
+     * @param defaultMethod Method to be attached to the uri by default if it has no path segment
      * @return Uri associated with the key
      */
-    public static Uri getCompleteUri(Tile tile, String metaDataKey) {
+    public static Uri getCompleteUri(Tile tile, String metaDataKey, String defaultMethod) {
         final String uriString = tile.getMetaData().getString(metaDataKey);
         if (TextUtils.isEmpty(uriString)) {
             return null;
         }
 
-        return Uri.parse(uriString);
+        final Uri uri = Uri.parse(uriString);
+        final List<String> pathSegments = uri.getPathSegments();
+        if (pathSegments != null && !pathSegments.isEmpty()) {
+            return uri;
+        }
+
+        final String key = tile.getMetaData().getString(META_DATA_PREFERENCE_KEYHINT);
+        if (TextUtils.isEmpty(key)) {
+            Log.w(LOG_TAG, "Please specify the meta-data " + META_DATA_PREFERENCE_KEYHINT
+                    + " in AndroidManifest.xml for " + uriString);
+            return buildUri(uri.getAuthority(), defaultMethod);
+        }
+        return buildUri(uri.getAuthority(), defaultMethod, key);
+    }
+
+    static Uri buildUri(String authority, String method, String key) {
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority)
+                .appendPath(method)
+                .appendPath(key)
+                .build();
+    }
+
+    private static Uri buildUri(String authority, String method) {
+        return new Uri.Builder()
+                .scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority)
+                .appendPath(method)
+                .build();
     }
 
     /**
@@ -357,7 +456,7 @@ public class TileUtils {
      */
     public static Pair<String, Integer> getIconFromUri(Context context, String packageName,
             Uri uri, Map<String, IContentProvider> providerMap) {
-        final Bundle bundle = getBundleFromUri(context, uri, providerMap, null);
+        final Bundle bundle = getBundleFromUri(context, uri, providerMap, null /* bundle */);
         if (bundle == null) {
             return null;
         }
@@ -388,22 +487,62 @@ public class TileUtils {
      */
     public static String getTextFromUri(Context context, Uri uri,
             Map<String, IContentProvider> providerMap, String key) {
-        final Bundle bundle = getBundleFromUri(context, uri, providerMap, null);
+        final Bundle bundle = getBundleFromUri(context, uri, providerMap, null /* bundle */);
         return (bundle != null) ? bundle.getString(key) : null;
+    }
+
+    /**
+     * Gets boolean associated with the input key from the content provider.
+     *
+     * @param context     context
+     * @param uri         URI for the content provider
+     * @param providerMap Maps URI authorities to providers
+     * @param key         Key mapping to the text in bundle returned by the content provider
+     * @return Boolean associated with the key, if returned by the content provider
+     */
+    public static boolean getBooleanFromUri(Context context, Uri uri,
+            Map<String, IContentProvider> providerMap, String key) {
+        final Bundle bundle = getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        return (bundle != null) ? bundle.getBoolean(key) : false;
+    }
+
+    /**
+     * Puts boolean associated with the input key to the content provider.
+     *
+     * @param context     context
+     * @param uri         URI for the content provider
+     * @param providerMap Maps URI authorities to providers
+     * @param key         Key mapping to the text in bundle returned by the content provider
+     * @param value       Boolean associated with the key
+     * @return Bundle associated with the action, if returned by the content provider
+     */
+    public static Bundle putBooleanToUri(Context context, Uri uri,
+            Map<String, IContentProvider> providerMap, String key, boolean value) {
+        final Bundle bundle = new Bundle();
+        bundle.putBoolean(key, value);
+        return getBundleFromUri(context, uri, providerMap, bundle);
     }
 
     private static Bundle getBundleFromUri(Context context, Uri uri,
             Map<String, IContentProvider> providerMap, Bundle bundle) {
-        if (uri == null) {
+        final Pair<String, String> args = getMethodAndKey(uri);
+        if (args == null) {
             return null;
         }
-        final String method = getMethodFromUri(uri);
+        final String method = args.first;
+        final String key = args.second;
         if (TextUtils.isEmpty(method)) {
             return null;
         }
         final IContentProvider provider = getProviderFromUri(context, uri, providerMap);
         if (provider == null) {
             return null;
+        }
+        if (!TextUtils.isEmpty(key)) {
+            if (bundle == null) {
+                bundle = new Bundle();
+            }
+            bundle.putString(META_DATA_PREFERENCE_KEYHINT, key);
         }
         try {
             return provider.call(context.getPackageName(), context.getFeatureId(),
@@ -428,15 +567,17 @@ public class TileUtils {
         return providerMap.get(authority);
     }
 
-    /** Returns the first path segment of the uri if it exists as the method, otherwise null. */
-    private static String getMethodFromUri(Uri uri) {
+    /** Returns method and key of the complete uri. */
+    private static Pair<String, String> getMethodAndKey(Uri uri) {
         if (uri == null) {
             return null;
         }
-        List<String> pathSegments = uri.getPathSegments();
-        if ((pathSegments == null) || pathSegments.isEmpty()) {
+        final List<String> pathSegments = uri.getPathSegments();
+        if (pathSegments == null || pathSegments.isEmpty()) {
             return null;
         }
-        return pathSegments.get(0);
+        final String method = pathSegments.get(0);
+        final String key = pathSegments.size() > 1 ? pathSegments.get(1) : null;
+        return Pair.create(method, key);
     }
 }
