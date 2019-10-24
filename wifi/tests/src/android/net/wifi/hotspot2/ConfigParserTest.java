@@ -87,17 +87,17 @@ public class ConfigParserTest {
 
         // HomeSP configuration.
         HomeSp homeSp = new HomeSp();
-        homeSp.setFriendlyName("Century House");
-        homeSp.setFqdn("mi6.co.uk");
+        homeSp.setFriendlyName("Example Network");
+        homeSp.setFqdn("hotspot.example.net");
         homeSp.setRoamingConsortiumOis(new long[] {0x112233L, 0x445566L});
         config.setHomeSp(homeSp);
 
         // Credential configuration.
         Credential credential = new Credential();
-        credential.setRealm("shaken.stirred.com");
+        credential.setRealm("example.com");
         Credential.UserCredential userCredential = new Credential.UserCredential();
-        userCredential.setUsername("james");
-        userCredential.setPassword("Ym9uZDAwNw==");
+        userCredential.setUsername("user");
+        userCredential.setPassword("cGFzc3dvcmQ=");
         userCredential.setEapType(21);
         userCredential.setNonEapInnerMethod("MS-CHAP-V2");
         credential.setUserCredential(userCredential);
@@ -108,8 +108,8 @@ public class ConfigParserTest {
         certCredential.setCertSha256Fingerprint(certSha256Fingerprint);
         credential.setCertCredential(certCredential);
         Credential.SimCredential simCredential = new Credential.SimCredential();
-        simCredential.setImsi("imsi");
-        simCredential.setEapType(24);
+        simCredential.setImsi("123456*");
+        simCredential.setEapType(23);
         credential.setSimCredential(simCredential);
         credential.setCaCertificate(FakeKeys.CA_CERT0);
         config.setCredential(credential);
@@ -220,5 +220,4 @@ public class ConfigParserTest {
         // Expected configuration does not contain an update identifier
         assertTrue(actualConfig.equals(expectedConfig));
     }
-
 }
