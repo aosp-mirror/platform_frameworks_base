@@ -212,13 +212,15 @@ fun ClassPrinter.generateBuilder() {
         "Object"
     }
 
+    val maybeFinal = if_(classAst.isFinal, "final ")
+
     +"/**"
     +" * A builder for {@link $ClassName}"
     if (FeatureFlag.BUILDER.hidden) +" * @hide"
     +" */"
     +"@SuppressWarnings(\"WeakerAccess\")"
     +GENERATED_MEMBER_HEADER
-    !"public static class $BuilderClass$genericArgs"
+    !"public static ${maybeFinal}class $BuilderClass$genericArgs"
     if (BuilderSupertype != "Object") {
         appendSameLine(" extends $BuilderSupertype")
     }
@@ -359,7 +361,7 @@ private fun ClassPrinter.generateBuilderSetters(visibility: String) {
 
 private fun ClassPrinter.generateBuilderBuild() {
     +"/** Builds the instance. This builder should not be touched after calling this! */"
-    "public $ClassType build()" {
+    "public @$NonNull $ClassType build()" {
         +"checkNotUsed();"
         +"mBuilderFieldsSet |= ${bitAtExpr(fields.size)}; // Mark builder used"
         +""
