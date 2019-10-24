@@ -152,8 +152,228 @@ cc_defaults {
 }
 
 // ------------------------
+// APEX
+// ------------------------
+
+cc_library_headers {
+    name: "android_graphics_apex_headers",
+
+    host_supported: true,
+    export_include_dirs: [
+        "apex/include",
+    ],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    }
+}
+
+cc_defaults {
+    name: "android_graphics_apex",
+    host_supported: true,
+    cflags: [
+        "-Wno-unused-parameter",
+        "-Wno-non-virtual-dtor",
+        "-Wno-maybe-uninitialized",
+        "-Wno-parentheses",
+        "-Wall",
+        "-Werror",
+        "-Wno-error=deprecated-declarations",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+
+    cppflags: ["-Wno-conversion-null"],
+
+    srcs: [
+        "apex/android_matrix.cpp",
+        "apex/android_paint.cpp",
+        "apex/android_region.cpp",
+    ],
+
+    header_libs: [ "android_graphics_apex_headers" ],
+
+    target: {
+        android: {
+            srcs: [ // sources that depend on android only libraries
+                "apex/android_bitmap.cpp",
+                "apex/android_canvas.cpp",
+                "apex/jni_runtime.cpp",
+                "apex/renderthread.cpp",
+            ],
+        },
+    },
+}
+
+// ------------------------
+// Android Graphics JNI
+// ------------------------
+
+cc_library_headers {
+    name: "android_graphics_jni_headers",
+
+    host_supported: true,
+    export_include_dirs: [
+        "jni",
+    ],
+    target: {
+        windows: {
+            enabled: true,
+        },
+    }
+}
+
+cc_defaults {
+    name: "android_graphics_jni",
+    host_supported: true,
+    cflags: [
+        "-Wno-unused-parameter",
+        "-Wno-non-virtual-dtor",
+        "-Wno-maybe-uninitialized",
+        "-Wno-parentheses",
+
+        "-DGL_GLEXT_PROTOTYPES",
+        "-DEGL_EGLEXT_PROTOTYPES",
+
+        "-DU_USING_ICU_NAMESPACE=0",
+
+        "-Wall",
+        "-Werror",
+        "-Wno-error=deprecated-declarations",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+
+    cppflags: ["-Wno-conversion-null"],
+
+    srcs: [
+        "jni/android_graphics_animation_NativeInterpolatorFactory.cpp",
+        "jni/android_graphics_animation_RenderNodeAnimator.cpp",
+        "jni/android_graphics_Canvas.cpp",
+        "jni/android_graphics_ColorSpace.cpp",
+        "jni/android_graphics_drawable_AnimatedVectorDrawable.cpp",
+        "jni/android_graphics_drawable_VectorDrawable.cpp",
+        "jni/android_graphics_HardwareRendererObserver.cpp",
+        "jni/android_graphics_Matrix.cpp",
+        "jni/android_graphics_Picture.cpp",
+        "jni/android_graphics_DisplayListCanvas.cpp",
+        "jni/android_graphics_RenderNode.cpp",
+        "jni/android_nio_utils.cpp",
+        "jni/android_util_PathParser.cpp",
+
+        "jni/Bitmap.cpp",
+        "jni/BitmapFactory.cpp",
+        "jni/ByteBufferStreamAdaptor.cpp",
+        "jni/Camera.cpp",
+        "jni/CanvasProperty.cpp",
+        "jni/ColorFilter.cpp",
+        "jni/CreateJavaOutputStreamAdaptor.cpp",
+        "jni/FontFamily.cpp",
+        "jni/FontUtils.cpp",
+        "jni/Graphics.cpp",
+        "jni/ImageDecoder.cpp",
+        "jni/Interpolator.cpp",
+        "jni/MaskFilter.cpp",
+        "jni/NinePatch.cpp",
+        "jni/NinePatchPeeker.cpp",
+        "jni/Paint.cpp",
+        "jni/PaintFilter.cpp",
+        "jni/Path.cpp",
+        "jni/PathEffect.cpp",
+        "jni/PathMeasure.cpp",
+        "jni/Picture.cpp",
+        "jni/Region.cpp",
+        "jni/Shader.cpp",
+        "jni/Typeface.cpp",
+        "jni/Utils.cpp",
+        "jni/YuvToJpegEncoder.cpp",
+        "jni/fonts/Font.cpp",
+        "jni/fonts/FontFamily.cpp",
+        "jni/text/LineBreaker.cpp",
+        "jni/text/MeasuredText.cpp",
+    ],
+
+    header_libs: [ "android_graphics_jni_headers" ],
+
+    include_dirs: [
+        "external/skia/include/private",
+        "external/skia/src/codec",
+        "external/skia/src/core",
+        "external/skia/src/effects",
+        "external/skia/src/image",
+        "external/skia/src/images",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "libbinder",
+        "libcutils",
+        "libharfbuzz_ng",
+        "liblog",
+        "libminikin",
+        "libnativehelper",
+        "libz",
+        "libziparchive",
+        "libjpeg",
+    ],
+
+    target: {
+        android: {
+            srcs: [ // sources that depend on android only libraries
+                "jni/AnimatedImageDrawable.cpp",
+                "jni/android_graphics_TextureLayer.cpp",
+                "jni/android_graphics_HardwareRenderer.cpp",
+                "jni/BitmapRegionDecoder.cpp",
+                "jni/GIFMovie.cpp",
+                "jni/GraphicsStatsService.cpp",
+                "jni/Movie.cpp",
+                "jni/MovieImpl.cpp",
+                "jni/pdf/PdfDocument.cpp",
+                "jni/pdf/PdfEditor.cpp",
+                "jni/pdf/PdfRenderer.cpp",
+                "jni/pdf/PdfUtils.cpp",
+            ],
+            shared_libs: [
+                "libandroidfw",
+                "libmediandk",
+                "libnativedisplay",
+                "libnativewindow",
+                "libstatspull",
+                "libstatssocket",
+                "libpdfium",
+            ],
+            static_libs: [
+                "libgif",
+                "libstatslog",
+            ],
+        },
+        host: {
+            cflags: [
+                "-Wno-unused-const-variable",
+                "-Wno-unused-function",
+            ],
+            static_libs: [
+                "libandroidfw",
+            ],
+        }
+    },
+}
+
+// ------------------------
 // library
 // ------------------------
+
+cc_library_headers {
+    name: "libhwui_internal_headers",
+
+    host_supported: true,
+    export_include_dirs: [
+        ".",
+    ],
+    header_libs: [ "android_graphics_jni_headers" ],
+    export_header_lib_headers: [ "android_graphics_jni_headers" ],
+}
 
 cc_defaults {
     name: "libhwui_defaults",
@@ -205,11 +425,8 @@ cc_defaults {
         export_proto_headers: true,
     },
 
-    export_include_dirs: ["."],
-
     target: {
         android: {
-
             srcs: [
                 "hwui/AnimatedImageThread.cpp",
                 "pipeline/skia/ATraceMemoryDump.cpp",
@@ -274,7 +491,10 @@ cc_library {
     host_supported: true,
     defaults: [
         "libhwui_defaults",
+        "android_graphics_apex",
+        "android_graphics_jni",
     ],
+    export_header_lib_headers: ["android_graphics_apex_headers"],
 }
 
 cc_library_static {

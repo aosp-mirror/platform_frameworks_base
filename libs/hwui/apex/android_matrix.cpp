@@ -15,7 +15,7 @@
  */
 
 #include "android/graphics/matrix.h"
-#include "Matrix.h"
+#include "android_graphics_Matrix.h"
 
 bool AMatrix_getContents(JNIEnv* env, jobject matrixObj, float values[9]) {
     static_assert(SkMatrix::kMScaleX == 0, "SkMatrix unexpected index");
