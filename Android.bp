@@ -1599,6 +1599,17 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-ims-common-shared-srcs",
+    srcs: [
+        "core/java/android/os/AsyncResult.java",
+        "core/java/android/os/RegistrantList.java",
+        "core/java/android/os/Registrant.java",
+        "core/java/com/android/internal/os/SomeArgs.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+    ],
+}
+
+filegroup {
     name: "framework-wifistack-shared-srcs",
     srcs: [
         ":framework-annotations",
