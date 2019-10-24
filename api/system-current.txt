@@ -9384,14 +9384,17 @@ package android.telephony.ims {
   }
 
   public class ImsUtListener {
+    method public void onLineIdentificationSupplementaryServiceResponse(int, @NonNull android.telephony.ims.ImsSsInfo);
     method public void onSupplementaryServiceIndication(android.telephony.ims.ImsSsData);
     method public void onUtConfigurationCallBarringQueried(int, android.telephony.ims.ImsSsInfo[]);
     method public void onUtConfigurationCallForwardQueried(int, android.telephony.ims.ImsCallForwardInfo[]);
     method public void onUtConfigurationCallWaitingQueried(int, android.telephony.ims.ImsSsInfo[]);
-    method public void onUtConfigurationQueried(int, android.os.Bundle);
+    method @Deprecated public void onUtConfigurationQueried(int, android.os.Bundle);
     method public void onUtConfigurationQueryFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void onUtConfigurationUpdateFailed(int, android.telephony.ims.ImsReasonInfo);
     method public void onUtConfigurationUpdated(int);
+    field @Deprecated public static final String BUNDLE_KEY_CLIR = "queryClir";
+    field @Deprecated public static final String BUNDLE_KEY_SSINFO = "imsSsInfo";
   }
 
   public abstract class ImsVideoCallProvider {
