@@ -18,6 +18,7 @@ package com.android.settingslib.drawer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -33,7 +34,7 @@ import java.util.Objects;
 public class ActivityTile extends Tile {
     private static final String TAG = "ActivityTile";
 
-    public ActivityTile(ComponentInfo info, String category) {
+    public ActivityTile(ActivityInfo info, String category) {
         super(info, category);
         setMetaData(info.metaData);
     }

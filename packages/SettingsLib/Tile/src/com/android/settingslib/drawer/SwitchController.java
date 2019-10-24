@@ -108,7 +108,7 @@ public abstract class SwitchController {
     Bundle getBundle() {
         final MetaData metaData = getMetaData();
         if (metaData == null) {
-            throw new IllegalArgumentException("Should not return null in getMetaData()");
+            throw new NullPointerException("Should not return null in getMetaData()");
         }
 
         final Bundle bundle = metaData.build();
