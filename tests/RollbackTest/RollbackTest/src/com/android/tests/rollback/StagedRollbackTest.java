@@ -218,7 +218,7 @@ public class StagedRollbackTest {
         String networkStack = getNetworkStackPackageName();
 
         rm.expireRollbackForPackage(networkStack);
-        Uninstall.packages(networkStack);
+        uninstallNetworkStackPackage();
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         networkStack)).isNull();
@@ -250,6 +250,12 @@ public class StagedRollbackTest {
         ComponentName comp = intent.resolveSystemService(
                 InstrumentationRegistry.getContext().getPackageManager(), 0);
         return comp.getPackageName();
+    }
+
+    private void uninstallNetworkStackPackage() {
+        // Since the host side use shell command to install the network stack package, uninstall
+        // must be done by shell command as well. Otherwise uninstall by a different user will fail.
+        runShellCommand("pm uninstall " + getNetworkStackPackageName());
     }
 
     @Test
@@ -294,7 +300,7 @@ public class StagedRollbackTest {
         String networkStack = getNetworkStackPackageName();
 
         rm.expireRollbackForPackage(networkStack);
-        Uninstall.packages(networkStack);
+        uninstallNetworkStackPackage();
 
         assertThat(getUniqueRollbackInfoForPackage(rm.getAvailableRollbacks(),
                         networkStack)).isNull();
