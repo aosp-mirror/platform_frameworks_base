@@ -4737,6 +4737,7 @@ package android.net.wifi {
     method @Deprecated public boolean hasNoInternetAccess();
     method @Deprecated public boolean isEphemeral();
     method @Deprecated public boolean isNoInternetAccessExpected();
+    field @Deprecated public boolean allowAutojoin;
     field @Deprecated public String creatorName;
     field @Deprecated public int creatorUid;
     field @Deprecated public String lastUpdateName;
@@ -4759,6 +4760,7 @@ package android.net.wifi {
 
   public class WifiManager {
     method @RequiresPermission("android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE") public void addOnWifiUsabilityStatsListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.WifiManager.OnWifiUsabilityStatsListener);
+    method @RequiresPermission("android.permission.NETWORK_SETTINGS") public void allowAutojoin(int, boolean);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(@NonNull android.net.wifi.WifiConfiguration, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void connect(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @Deprecated @RequiresPermission(anyOf={"android.permission.NETWORK_SETTINGS", android.Manifest.permission.NETWORK_SETUP_WIZARD, "android.permission.NETWORK_STACK"}) public void disable(int, @Nullable android.net.wifi.WifiManager.ActionListener);

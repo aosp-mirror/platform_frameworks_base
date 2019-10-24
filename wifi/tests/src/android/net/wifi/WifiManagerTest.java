@@ -1489,6 +1489,16 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
     }
 
     /**
+     * Test behavior of {@link WifiManager#allowAutojoin(int, boolean)}
+     * @throws Exception
+     */
+    @Test
+    public void testAllowAutojoin() throws Exception {
+        mWifiManager.allowAutojoin(1, true);
+        verify(mWifiService).allowAutojoin(eq(1), eq(true));
+    }
+
+    /**
      * Test behavior of {@link WifiManager#disconnect()}
      * @throws Exception
      */

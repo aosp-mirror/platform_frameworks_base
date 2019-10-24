@@ -3869,6 +3869,29 @@ public class WifiManager {
     }
 
     /**
+     * Sets the user choice for allowing auto-join to a network.
+     * The updated choice will be made available through the updated config supplied by the
+     * CONFIGURED_NETWORKS_CHANGED broadcast.
+     *
+     * @param netId the id of the network to allow/disallow autojoin for.
+     * @param choice true to allow autojoin, false to disallow autojoin
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void allowAutojoin(int netId, boolean choice) {
+        try {
+            IWifiManager iWifiManager = getIWifiManager();
+            if (iWifiManager == null) {
+                throw new RemoteException("Wifi service is not running");
+            }
+            iWifiManager.allowAutojoin(netId, choice);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Disable ephemeral Network
      *
      * @param SSID, in the format of WifiConfiguration's SSID.
