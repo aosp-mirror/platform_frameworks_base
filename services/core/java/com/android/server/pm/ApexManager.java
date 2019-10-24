@@ -38,6 +38,7 @@ import android.sysprop.ApexProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -217,7 +218,8 @@ abstract class ApexManager {
      * An implementation of {@link ApexManager} that should be used in case device supports updating
      * APEX packages.
      */
-    private static class ApexManagerImpl extends ApexManager {
+    @VisibleForTesting
+    static class ApexManagerImpl extends ApexManager {
         private final IApexService mApexService;
         private final Context mContext;
         private final Object mLock = new Object();
