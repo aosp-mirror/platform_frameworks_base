@@ -166,6 +166,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             mMediaCarousel = new LinearLayout(mContext);
             mMediaCarousel.setOrientation(LinearLayout.HORIZONTAL);
             mediaScrollView.addView(mMediaCarousel, lpCarousel);
+            mediaScrollView.setVisibility(View.GONE);
         } else {
             mMediaCarousel = null;
         }
@@ -239,6 +240,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             } else {
                 mMediaCarousel.addView(player.getView(), lp); // add at end
             }
+            mMediaPlayers.add(player);
         } else if (player.isPlaying()) {
             // move it to the front
             mMediaCarousel.removeView(player.getView());
@@ -248,7 +250,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         Log.d(TAG, "setting player session");
         player.setMediaSession(token, icon, iconColor, bgColor, actionsContainer,
                 notif.getNotification());
-        mMediaPlayers.add(player);
+
+        if (mMediaPlayers.size() > 0) {
+            ((View) mMediaCarousel.getParent()).setVisibility(View.VISIBLE);
+        }
     }
 
     protected View getMediaPanel() {
