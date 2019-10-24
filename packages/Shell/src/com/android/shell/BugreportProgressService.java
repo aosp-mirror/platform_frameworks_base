@@ -126,8 +126,6 @@ import java.util.zip.ZipOutputStream;
  * <li>This service calls startBugreport() and passes in local file descriptors to receive
  * bugreport artifacts.
  * </ol>
- *
- * TODO: There are multiple threads involved.  Add synchronization accordingly.
  */
 public class BugreportProgressService extends Service {
     private static final String TAG = "BugreportProgressService";
@@ -219,6 +217,7 @@ public class BugreportProgressService extends Service {
     private final Object mLock = new Object();
 
     /** Managed bugreport info (keyed by id) */
+    @GuardedBy("mLock")
     private final SparseArray<BugreportInfo> mBugreportInfos = new SparseArray<>();
 
     private Context mContext;
@@ -317,23 +316,26 @@ public class BugreportProgressService extends Service {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
-        final int size = mBugreportInfos.size();
-        if (size == 0) {
-            writer.println("No monitored processes");
-            return;
-        }
-        writer.print("Foreground id: "); writer.println(mForegroundId);
-        writer.println("\n");
-        writer.println("Monitored dumpstate processes");
-        writer.println("-----------------------------");
-        for (int i = 0; i < size; i++) {
-            writer.print("#"); writer.println(i + 1);
-            writer.println(getInfo(mBugreportInfos.keyAt(i)));
+        synchronized (mLock) {
+            final int size = mBugreportInfos.size();
+            if (size == 0) {
+                writer.println("No monitored processes");
+                return;
+            }
+            writer.print("Foreground id: "); writer.println(mForegroundId);
+            writer.println("\n");
+            writer.println("Monitored dumpstate processes");
+            writer.println("-----------------------------");
+            for (int i = 0; i < size; i++) {
+                writer.print("#");
+                writer.println(i + 1);
+                writer.println(getInfoLocked(mBugreportInfos.keyAt(i)));
+            }
         }
     }
 
     private static String getFileName(BugreportInfo info, String suffix) {
-        return String.format("%s-%s%s", info.baseName, info.name, suffix);
+        return String.format("%s-%s%s", info.baseName, info.getName(), suffix);
     }
 
     private final class BugreportCallbackImpl extends BugreportCallback {
@@ -573,7 +575,8 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private BugreportInfo getInfo(int id) {
+    @GuardedBy("mLock")
+    private BugreportInfo getInfoLocked(int id) {
         final BugreportInfo bugreportInfo = mBugreportInfos.get(id);
         if (bugreportInfo == null) {
             Log.w(TAG, "Not monitoring bugreports with ID " + id);
@@ -669,12 +672,12 @@ public class BugreportProgressService extends Service {
      * Updates the system notification for a given bugreport.
      */
     private void updateProgress(BugreportInfo info) {
-        if (info.progress < 0) {
-            Log.e(TAG, "Invalid progress value for " + info);
+        if (info.getProgress() < 0) {
+            Log.e(TAG, "Invalid progress values for " + info);
             return;
         }
 
-        if (info.finished) {
+        if (info.isFinished()) {
             Log.w(TAG, "Not sending progress notification because bugreport has finished already ("
                     + info + ")");
             return;
@@ -683,7 +686,7 @@ public class BugreportProgressService extends Service {
         final NumberFormat nf = NumberFormat.getPercentInstance();
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
-        final String percentageText = nf.format((double) info.progress / 100);
+        final String percentageText = nf.format((double) info.getProgress() / 100);
 
         String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
 
@@ -691,18 +694,19 @@ public class BugreportProgressService extends Service {
         if (mIsWatch) {
             nf.setMinimumFractionDigits(0);
             nf.setMaximumFractionDigits(0);
-            final String watchPercentageText = nf.format((double) info.progress / 100);
+            final String watchPercentageText = nf.format((double) info.getProgress() / 100);
             title = title + "\n" + watchPercentageText;
         }
 
         final String name =
-                info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
+                info.getName() != null ? info.getName()
+                        : mContext.getString(R.string.bugreport_unnamed);
 
         final Notification.Builder builder = newBaseNotification(mContext)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(name)
-                .setProgress(100 /* max value of progress percentage */, info.progress, false)
+                .setProgress(100 /* max value of progress percentage */, info.getProgress(), false)
                 .setOngoing(true);
 
         // Wear and ATV bugreport doesn't need the bug info dialog, screenshot and cancel action.
@@ -731,10 +735,10 @@ public class BugreportProgressService extends Service {
                 .setActions(infoAction, screenshotAction, cancelAction);
         }
         // Show a debug log, every LOG_PROGRESS_STEP percent.
-        final int progress = info.progress;
+        final int progress = info.getProgress();
 
-        if ((info.progress == 0) || (info.progress >= 100) ||
-                ((progress / LOG_PROGRESS_STEP) != (mLastProgressPercent / LOG_PROGRESS_STEP))) {
+        if ((info.getProgress() == 0) || (info.getProgress() >= 100)
+                || ((progress / LOG_PROGRESS_STEP) != (mLastProgressPercent / LOG_PROGRESS_STEP))) {
             Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
         }
         mLastProgressPercent = progress;
@@ -779,10 +783,10 @@ public class BugreportProgressService extends Service {
             mBugreportInfos.remove(id);
         }
         // Must stop foreground service first, otherwise notif.cancel() will fail below.
-        stopForegroundWhenDone(id);
+        stopForegroundWhenDoneLocked(id);
         Log.d(TAG, "stopProgress(" + id + "): cancel notification");
         NotificationManager.from(mContext).cancel(id);
-        stopSelfWhenDone();
+        stopSelfWhenDoneLocked();
     }
 
     /**
@@ -792,13 +796,13 @@ public class BugreportProgressService extends Service {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL);
         Log.v(TAG, "cancel: ID=" + id);
         mInfoDialog.cancel();
-        final BugreportInfo info = getInfo(id);
-        if (info != null && !info.finished) {
-            Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
-            mBugreportManager.cancelBugreport();
-            deleteScreenshots(info);
-        }
         synchronized (mLock) {
+            final BugreportInfo info = getInfoLocked(id);
+            if (info != null && !info.isFinished()) {
+                Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
+                mBugreportManager.cancelBugreport();
+                deleteScreenshots(info);
+            }
             stopProgressLocked(id);
         }
     }
@@ -809,7 +813,10 @@ public class BugreportProgressService extends Service {
      */
     private void launchBugreportInfoDialog(int id) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS);
-        final BugreportInfo info = getInfo(id);
+        final BugreportInfo info;
+        synchronized (mLock) {
+            info = getInfoLocked(id);
+        }
         if (info == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
@@ -843,7 +850,11 @@ public class BugreportProgressService extends Service {
      */
     private void takeScreenshot(int id) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT);
-        if (getInfo(id) == null) {
+        BugreportInfo info;
+        synchronized (mLock) {
+            info = getInfoLocked(id);
+        }
+        if (info == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
             // non-interactive mode (where the bugerport will be shared upon completion).
@@ -878,9 +889,11 @@ public class BugreportProgressService extends Service {
             mServiceHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
             return;
         }
-
+        final BugreportInfo info;
         // It's time to take the screenshot: let the proper thread handle it
-        final BugreportInfo info = getInfo(id);
+        synchronized (mLock) {
+            info = getInfoLocked(id);
+        }
         if (info == null) {
             return;
         }
@@ -896,11 +909,11 @@ public class BugreportProgressService extends Service {
      * SCREENSHOT button is enabled or disabled accordingly.
      */
     private void setTakingScreenshot(boolean flag) {
-        synchronized (BugreportProgressService.this) {
+        synchronized (mLock) {
             mTakingScreenshot = flag;
             for (int i = 0; i < mBugreportInfos.size(); i++) {
-                final BugreportInfo info = getInfo(mBugreportInfos.keyAt(i));
-                if (info.finished) {
+                final BugreportInfo info = getInfoLocked(mBugreportInfos.keyAt(i));
+                if (info.isFinished()) {
                     Log.d(TAG, "Not updating progress for " + info.id + " while taking screenshot"
                             + " because share notification was already sent");
                     continue;
@@ -921,7 +934,10 @@ public class BugreportProgressService extends Service {
 
     private void handleScreenshotResponse(Message resultMsg) {
         final boolean taken = resultMsg.arg2 != 0;
-        final BugreportInfo info = getInfo(resultMsg.arg1);
+        final BugreportInfo info;
+        synchronized (mLock) {
+            info = getInfoLocked(resultMsg.arg1);
+        }
         if (info == null) {
             return;
         }
@@ -930,7 +946,7 @@ public class BugreportProgressService extends Service {
         final String msg;
         if (taken) {
             info.addScreenshot(screenshotFile);
-            if (info.finished) {
+            if (info.isFinished()) {
                 Log.d(TAG, "Screenshot finished after bugreport; updating share notification");
                 info.renameScreenshots();
                 sendBugreportNotification(info, mTakingScreenshot);
@@ -956,9 +972,10 @@ public class BugreportProgressService extends Service {
     /**
      * Stop running on foreground once there is no more active bugreports being watched.
      */
-    private void stopForegroundWhenDone(int id) {
+    @GuardedBy("mLock")
+    private void stopForegroundWhenDoneLocked(int id) {
         if (id != mForegroundId) {
-            Log.d(TAG, "stopForegroundWhenDone(" + id + "): ignoring since foreground id is "
+            Log.d(TAG, "stopForegroundWhenDoneLocked(" + id + "): ignoring since foreground id is "
                     + mForegroundId);
             return;
         }
@@ -971,8 +988,8 @@ public class BugreportProgressService extends Service {
         final int total = mBugreportInfos.size();
         if (total > 0) {
             for (int i = 0; i < total; i++) {
-                final BugreportInfo info = getInfo(mBugreportInfos.keyAt(i));
-                if (!info.finished) {
+                final BugreportInfo info = getInfoLocked(mBugreportInfos.keyAt(i));
+                if (!info.isFinished()) {
                     updateProgress(info);
                     break;
                 }
@@ -983,7 +1000,8 @@ public class BugreportProgressService extends Service {
     /**
      * Finishes the service when it's not monitoring any more processes.
      */
-    private void stopSelfWhenDone() {
+    @GuardedBy("mLock")
+    private void stopSelfWhenDoneLocked() {
         if (mBugreportInfos.size() > 0) {
             if (DEBUG) Log.d(TAG, "Staying alive, waiting for IDs " + mBugreportInfos);
             return;
@@ -996,12 +1014,14 @@ public class BugreportProgressService extends Service {
      * Wraps up bugreport generation and triggers a notification to share the bugreport.
      */
     private void onBugreportFinished(BugreportInfo info) {
-        Log.d(TAG, "Bugreport finished with title: " + info.title
+        Log.d(TAG, "Bugreport finished with title: " + info.getTitle()
                 + " and shareDescription:  " + info.shareDescription);
-        info.finished = true;
+        info.setFinished(true);
 
-        // Stop running on foreground, otherwise share notification cannot be dismissed.
-        stopForegroundWhenDone(info.id);
+        synchronized (mLock) {
+            // Stop running on foreground, otherwise share notification cannot be dismissed.
+            stopForegroundWhenDoneLocked(info.id);
+        }
 
         triggerLocalNotification(mContext, info);
     }
@@ -1063,8 +1083,8 @@ public class BugreportProgressService extends Service {
         intent.addCategory(Intent.CATEGORY_DEFAULT);
         intent.setType(mimeType);
 
-        final String subject = !TextUtils.isEmpty(info.title) ?
-                info.title : bugreportUri.getLastPathSegment();
+        final String subject = !TextUtils.isEmpty(info.getTitle())
+                ? info.getTitle() : bugreportUri.getLastPathSegment();
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
         // EXTRA_TEXT should be an ArrayList, but some clients are expecting a single String.
@@ -1075,9 +1095,9 @@ public class BugreportProgressService extends Service {
             .append("\nSerial number: ")
             .append(SystemProperties.get("ro.serialno"));
         int descriptionLength = 0;
-        if (!TextUtils.isEmpty(info.description)) {
-            messageBody.append("\nDescription: ").append(info.description);
-            descriptionLength = info.description.length();
+        if (!TextUtils.isEmpty(info.getDescription())) {
+            messageBody.append("\nDescription: ").append(info.getDescription());
+            descriptionLength = info.getDescription().length();
         }
         intent.putExtra(Intent.EXTRA_TEXT, messageBody.toString());
         final ClipData clipData = new ClipData(null, new String[] { mimeType },
@@ -1118,12 +1138,17 @@ public class BugreportProgressService extends Service {
      */
     private void shareBugreport(int id, BugreportInfo sharedInfo) {
         MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE);
-        BugreportInfo info = getInfo(id);
+        BugreportInfo info;
+        synchronized (mLock) {
+            info = getInfoLocked(id);
+        }
         if (info == null) {
             // Service was terminated but notification persisted
             info = sharedInfo;
-            Log.d(TAG, "shareBugreport(): no info for ID " + id + " on managed processes ("
-                    + mBugreportInfos + "), using info from intent instead (" + info + ")");
+            synchronized (mLock) {
+                Log.d(TAG, "shareBugreport(): no info for ID " + id + " on managed processes ("
+                        + mBugreportInfos + "), using info from intent instead (" + info + ")");
+            }
         } else {
             Log.v(TAG, "shareBugReport(): id " + id + " info = " + info);
         }
@@ -1195,10 +1220,10 @@ public class BugreportProgressService extends Service {
                 mContext.getString(R.string.bugreport_finished_pending_screenshot_text)
                 : mContext.getString(R.string.bugreport_finished_text);
         final String title;
-        if (TextUtils.isEmpty(info.title)) {
+        if (TextUtils.isEmpty(info.getTitle())) {
             title = mContext.getString(R.string.bugreport_finished_title, info.id);
         } else {
-            title = info.title;
+            title = info.getTitle();
             if (!TextUtils.isEmpty(info.shareDescription)) {
                 if(!takingScreenshot) content = info.shareDescription;
             }
@@ -1212,8 +1237,8 @@ public class BugreportProgressService extends Service {
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setDeleteIntent(newCancelIntent(mContext, info));
 
-        if (!TextUtils.isEmpty(info.name)) {
-            builder.setSubText(info.name);
+        if (!TextUtils.isEmpty(info.getName())) {
+            builder.setSubText(info.getName());
         }
 
         Log.v(TAG, "Sending 'Share' notification for ID " + info.id + ": " + title);
@@ -1306,13 +1331,14 @@ public class BugreportProgressService extends Service {
         }
     }
 
+    @GuardedBy("mLock")
     private void addDetailsToZipFileLocked(BugreportInfo info) {
         if (info.bugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
             Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
             return;
         }
-        if (TextUtils.isEmpty(info.title) && TextUtils.isEmpty(info.description)) {
+        if (TextUtils.isEmpty(info.getTitle()) && TextUtils.isEmpty(info.getDescription())) {
             Log.d(TAG, "Not touching zip file since neither title nor description are set");
             return;
         }
@@ -1345,8 +1371,8 @@ public class BugreportProgressService extends Service {
             }
 
             // Then add the user-provided info.
-            addEntry(zos, "title.txt", info.title);
-            addEntry(zos, "description.txt", info.description);
+            addEntry(zos, "title.txt", info.getTitle());
+            addEntry(zos, "description.txt", info.getDescription());
         } catch (IOException e) {
             Log.e(TAG, "exception zipping file " + tmpZip, e);
             Toast.makeText(mContext, R.string.bugreport_add_details_to_zip_failed,
@@ -1356,7 +1382,7 @@ public class BugreportProgressService extends Service {
             // Make sure it only tries to add details once, even it fails the first time.
             info.addedDetailsToZip = true;
             info.addingDetailsToZip = false;
-            stopForegroundWhenDone(info.id);
+            stopForegroundWhenDoneLocked(info.id);
         }
 
         if (!tmpZip.renameTo(info.bugreportFile)) {
@@ -1509,24 +1535,27 @@ public class BugreportProgressService extends Service {
      * Updates the user-provided details of a bugreport.
      */
     private void updateBugreportInfo(int id, String name, String title, String description) {
-        final BugreportInfo info = getInfo(id);
+        final BugreportInfo info;
+        synchronized (mLock) {
+            info = getInfoLocked(id);
+        }
         if (info == null) {
             return;
         }
-        if (title != null && !title.equals(info.title)) {
+        if (title != null && !title.equals(info.getTitle())) {
             Log.d(TAG, "updating bugreport title: " + title);
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_TITLE_CHANGED);
         }
-        info.title = title;
-        if (description != null && !description.equals(info.description)) {
+        info.setTitle(title);
+        if (description != null && !description.equals(info.getDescription())) {
             Log.d(TAG, "updating bugreport description: " + description.length() + " chars");
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED);
         }
-        info.description = description;
-        if (name != null && !name.equals(info.name)) {
+        info.setDescription(description);
+        if (name != null && !name.equals(info.getName())) {
             Log.d(TAG, "updating bugreport name: " + name);
             MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_NAME_CHANGED);
-            info.name = name;
+            info.setName(name);
             updateProgress(info);
         }
     }
@@ -1641,14 +1670,14 @@ public class BugreportProgressService extends Service {
 
             // Then set fields.
             mId = info.id;
-            if (!TextUtils.isEmpty(info.name)) {
-                mInfoName.setText(info.name);
+            if (!TextUtils.isEmpty(info.getName())) {
+                mInfoName.setText(info.getName());
             }
-            if (!TextUtils.isEmpty(info.title)) {
-                mInfoTitle.setText(info.title);
+            if (!TextUtils.isEmpty(info.getTitle())) {
+                mInfoTitle.setText(info.getTitle());
             }
-            if (!TextUtils.isEmpty(info.description)) {
-                mInfoDescription.setText(info.description);
+            if (!TextUtils.isEmpty(info.getDescription())) {
+                mInfoDescription.setText(info.getDescription());
             }
 
             // And finally display it.
@@ -1667,7 +1696,7 @@ public class BugreportProgressService extends Service {
                     @Override
                     public void onClick(View view) {
                         MetricsLogger.action(context, MetricsEvent.ACTION_BUGREPORT_DETAILS_SAVED);
-                        sanitizeName(info.name);
+                        sanitizeName(info.getName());
                         final String name = mInfoName.getText().toString();
                         final String title = mInfoTitle.getText().toString();
                         final String description = mInfoDescription.getText().toString();
@@ -1818,6 +1847,8 @@ public class BugreportProgressService extends Service {
          */
         int type;
 
+        private final Object mLock = new Object();
+
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_REQUESTED.
          */
@@ -1854,6 +1885,78 @@ public class BugreportProgressService extends Service {
             }
             createReadWriteFile(screenshotFiles.get(0));
             return getFd(screenshotFiles.get(0));
+        }
+
+        void setFinished(boolean isFinished) {
+            synchronized (mLock) {
+                this.finished = isFinished;
+            }
+        }
+
+        boolean isFinished() {
+            synchronized (mLock) {
+                return finished;
+            }
+        }
+
+        void setTitle(String title) {
+            synchronized (mLock) {
+                this.title = title;
+            }
+        }
+
+        String getTitle() {
+            synchronized (mLock) {
+                return title;
+            }
+        }
+
+        void setName(String name) {
+            synchronized (mLock) {
+                this.name = name;
+            }
+        }
+
+        String getName() {
+            synchronized (mLock) {
+                return name;
+            }
+        }
+
+        void setDescription(String description) {
+            synchronized (mLock) {
+                this.description = description;
+            }
+        }
+
+        String getDescription() {
+            synchronized (mLock) {
+                return description;
+            }
+        }
+
+        void setProgress(int progress) {
+            synchronized (mLock) {
+                this.progress = progress;
+            }
+        }
+
+        int getProgress() {
+            synchronized (mLock) {
+                return progress;
+            }
+        }
+
+        void setLastUpdate(long lastUpdate) {
+            synchronized (mLock) {
+                this.lastUpdate = lastUpdate;
+            }
+        }
+
+        long getLastUpdate() {
+            synchronized (mLock) {
+                return lastUpdate;
+            }
         }
 
         /**
@@ -1925,9 +2028,9 @@ public class BugreportProgressService extends Service {
             if (context == null) {
                 // Restored from Parcel
                 return formattedLastUpdate == null ?
-                        Long.toString(lastUpdate) : formattedLastUpdate;
+                        Long.toString(getLastUpdate()) : formattedLastUpdate;
             }
-            return DateUtils.formatDateTime(context, lastUpdate,
+            return DateUtils.formatDateTime(context, getLastUpdate(),
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
         }
 
@@ -2048,13 +2151,13 @@ public class BugreportProgressService extends Service {
             progress = CAPPED_PROGRESS;
         }
         if (DEBUG) {
-            if (progress != info.progress) {
-                Log.v(TAG, "Updating progress for name " + info.name + "(id: " + info.id
-                        + ") from " + info.progress + " to " + progress);
+            if (progress != info.getProgress()) {
+                Log.v(TAG, "Updating progress for name " + info.getName() + "(id: " + info.id
+                        + ") from " + info.getProgress() + " to " + progress);
             }
         }
-        info.progress = progress;
-        info.lastUpdate = System.currentTimeMillis();
+        info.setProgress(progress);
+        info.setLastUpdate(System.currentTimeMillis());
 
         updateProgress(info);
     }
