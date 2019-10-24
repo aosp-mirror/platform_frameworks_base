@@ -928,7 +928,8 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide RequiresPermission " +
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo "
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*"
 
 // http://b/129765390 Rewrite links to "platform" or "technotes" folders
 // which are siblings (and thus outside of) {@docRoot}.
