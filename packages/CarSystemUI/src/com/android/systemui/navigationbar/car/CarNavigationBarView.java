@@ -24,7 +24,6 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 /**
@@ -36,7 +35,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 public class CarNavigationBarView extends LinearLayout {
     private View mNavButtons;
     private CarNavigationButton mNotificationsButton;
-    private CarStatusBar mCarStatusBar;
+    private CarNavigationBarController.NotificationsShadeController mNotificationsShadeController;
     private Context mContext;
     private View mLockScreenButtons;
     // used to wire in open/close gestures for notifications
@@ -82,8 +81,9 @@ public class CarNavigationBarView extends LinearLayout {
         return super.onInterceptTouchEvent(ev);
     }
 
-    public void setStatusBar(CarStatusBar carStatusBar) {
-        mCarStatusBar = carStatusBar;
+    public void setNotificationsPanelController(
+            CarNavigationBarController.NotificationsShadeController controller) {
+        mNotificationsShadeController = controller;
     }
 
     /**
@@ -104,7 +104,9 @@ public class CarNavigationBarView extends LinearLayout {
     }
 
     protected void onNotificationsClick(View v) {
-        mCarStatusBar.togglePanel();
+        if (mNotificationsShadeController != null) {
+            mNotificationsShadeController.togglePanel();
+        }
     }
 
     /**
