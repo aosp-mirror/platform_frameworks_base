@@ -39,6 +39,7 @@ import libcore.io.Streams;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -68,6 +69,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
 
 /**
  * This is a class for reading and writing Exif tags in a JPEG file or a RAW image file.
@@ -502,9 +504,11 @@ public class ExifInterface {
     // 3.7. eXIf Exchangeable Image File (Exif) Profile
     private static final byte[] PNG_CHUNK_TYPE_EXIF = new byte[]{(byte) 0x65, (byte) 0x58,
             (byte) 0x49, (byte) 0x66};
+    private static final byte[] PNG_CHUNK_TYPE_IHDR = new byte[]{(byte) 0x49, (byte) 0x48,
+            (byte) 0x44, (byte) 0x52};
     private static final byte[] PNG_CHUNK_TYPE_IEND = new byte[]{(byte) 0x49, (byte) 0x45,
             (byte) 0x4e, (byte) 0x44};
-    private static final int PNG_CHUNK_LENGTH_BYTE_LENGTH = 4;
+    private static final int PNG_CHUNK_TYPE_BYTE_LENGTH = 4;
     private static final int PNG_CHUNK_CRC_BYTE_LENGTH = 4;
 
     // See https://developers.google.com/speed/webp/docs/riff_container, Section "WebP File Header"
@@ -1948,7 +1952,7 @@ public class ExifInterface {
      * {@link #setAttribute(String,String)} to set all attributes to write and
      * make a single call rather than multiple calls for each attribute.
      * <p>
-     * This method is only supported for JPEG files.
+     * This method is only supported for JPEG and PNG files.
      * <p class="note">
      * Note: after calling this method, any attempts to obtain range information
      * from {@link #getAttributeRange(String)} or {@link #getThumbnailRange()}
@@ -1957,8 +1961,9 @@ public class ExifInterface {
      * </p>
      */
     public void saveAttributes() throws IOException {
-        if (!mIsSupportedFile || mMimeType != IMAGE_TYPE_JPEG) {
-            throw new IOException("ExifInterface only supports saving attributes on JPEG formats.");
+        if (!mIsSupportedFile || (mMimeType != IMAGE_TYPE_JPEG && mMimeType != IMAGE_TYPE_PNG)) {
+            throw new IOException("ExifInterface only supports saving attributes on JPEG or PNG "
+                    + "formats.");
         }
         if (mIsInputStream || (mSeekableFileDescriptor == null && mFilename == null)) {
             throw new IOException(
@@ -1987,7 +1992,11 @@ public class ExifInterface {
                     throw new IOException("Couldn't rename to " + tempFile.getAbsolutePath());
                 }
             } else if (mSeekableFileDescriptor != null) {
-                tempFile = File.createTempFile("temp", "jpg");
+                if (mMimeType == IMAGE_TYPE_JPEG) {
+                    tempFile = File.createTempFile("temp", "jpg");
+                } else if (mMimeType == IMAGE_TYPE_PNG) {
+                    tempFile = File.createTempFile("temp", "png");
+                }
                 Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
                 in = new FileInputStream(mSeekableFileDescriptor);
                 out = new FileOutputStream(tempFile);
@@ -2013,7 +2022,11 @@ public class ExifInterface {
             }
             try (BufferedInputStream bufferedIn = new BufferedInputStream(in);
                  BufferedOutputStream bufferedOut = new BufferedOutputStream(out)) {
-                saveJpegAttributes(bufferedIn, bufferedOut);
+                if (mMimeType == IMAGE_TYPE_JPEG) {
+                    saveJpegAttributes(bufferedIn, bufferedOut);
+                } else if (mMimeType == IMAGE_TYPE_PNG) {
+                    savePngAttributes(bufferedIn, bufferedOut);
+                }
             }
         } catch (Exception e) {
             if (mFilename != null) {
@@ -3185,27 +3198,33 @@ public class ExifInterface {
         in.skipBytes(PNG_SIGNATURE.length);
         bytesRead += PNG_SIGNATURE.length;
 
+        // Each chunk is made up of four parts:
+        //   1) Length: 4-byte unsigned integer indicating the number of bytes in the
+        //   Chunk Data field. Excludes Chunk Type and CRC bytes.
+        //   2) Chunk Type: 4-byte chunk type code.
+        //   3) Chunk Data: The data bytes. Can be zero-length.
+        //   4) CRC: 4-byte data calculated on the preceding bytes in the chunk. Always
+        //   present.
+        // --> 4 (length bytes) + 4 (type bytes) + X (data bytes) + 4 (CRC bytes)
+        // See PNG (Portable Network Graphics) Specification, Version 1.2,
+        // 3.2. Chunk layout
         try {
             while (true) {
-                // Each chunk is made up of four parts:
-                //   1) Length: 4-byte unsigned integer indicating the number of bytes in the
-                //   Chunk Data field. Excludes Chunk Type and CRC bytes.
-                //   2) Chunk Type: 4-byte chunk type code.
-                //   3) Chunk Data: The data bytes. Can be zero-length.
-                //   4) CRC: 4-byte data calculated on the preceding bytes in the chunk. Always
-                //   present.
-                // --> 4 (length bytes) + 4 (type bytes) + X (data bytes) + 4 (CRC bytes)
-                // See PNG (Portable Network Graphics) Specification, Version 1.2,
-                // 3.2. Chunk layout
                 int length = in.readInt();
                 bytesRead += 4;
 
-                byte[] type = new byte[PNG_CHUNK_LENGTH_BYTE_LENGTH];
+                byte[] type = new byte[PNG_CHUNK_TYPE_BYTE_LENGTH];
                 if (in.read(type) != type.length) {
                     throw new IOException("Encountered invalid length while parsing PNG chunk"
                             + "type");
                 }
-                bytesRead += PNG_CHUNK_LENGTH_BYTE_LENGTH;
+                bytesRead += PNG_CHUNK_TYPE_BYTE_LENGTH;
+
+                // The first chunk must be the IHDR chunk
+                if (bytesRead == 16 && !Arrays.equals(type, PNG_CHUNK_TYPE_IHDR)) {
+                    throw new IOException("Encountered invalid PNG file--IHDR chunk should appear"
+                            + "as the first chunk");
+                }
 
                 if (Arrays.equals(type, PNG_CHUNK_TYPE_IEND)) {
                     // IEND marks the end of the image.
@@ -3217,9 +3236,25 @@ public class ExifInterface {
                         throw new IOException("Failed to read given length for given PNG chunk "
                                 + "type: " + byteArrayToHexString(type));
                     }
+
+                    // Compare CRC values for potential data corruption.
+                    int dataCrcValue = in.readInt();
+                    // Cyclic Redundancy Code used to check for corruption of the data
+                    CRC32 crc = new CRC32();
+                    crc.update(type);
+                    crc.update(data);
+                    if ((int) crc.getValue() != dataCrcValue) {
+                        throw new IOException("Encountered invalid CRC value for PNG-EXIF chunk."
+                                + "\n recorded CRC value: " + dataCrcValue + ", calculated CRC "
+                                + "value: " + crc.getValue());
+                    }
+
                     readExifSegment(data, IFD_TYPE_PRIMARY);
 
                     validateImages();
+
+                    // Save offset values for handleThumbnailFromJfif() function
+                    mExifOffset = bytesRead;
                     break;
                 } else {
                     // Skip to next chunk
@@ -3227,8 +3262,6 @@ public class ExifInterface {
                     bytesRead += length + PNG_CHUNK_CRC_BYTE_LENGTH;
                 }
             }
-            // Save offset values for handleThumbnailFromJfif() function
-            mExifOffset = bytesRead;
         } catch (EOFException e) {
             // Should not reach here. Will only reach here if the file is corrupted or
             // does not follow the PNG specifications
@@ -3401,6 +3434,62 @@ public class ExifInterface {
                 }
             }
         }
+    }
+
+    private void savePngAttributes(InputStream inputStream, OutputStream outputStream)
+            throws IOException {
+        if (DEBUG) {
+            Log.d(TAG, "savePngAttributes starting with (inputStream: " + inputStream
+                    + ", outputStream: " + outputStream + ")");
+        }
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        ByteOrderedDataOutputStream dataOutputStream =
+                new ByteOrderedDataOutputStream(outputStream, ByteOrder.BIG_ENDIAN);
+        // Copy PNG signature bytes
+        copy(dataInputStream, dataOutputStream, PNG_SIGNATURE.length);
+        // EXIF chunk can appear anywhere between the first (IHDR) and last (IEND) chunks, except
+        // between IDAT chunks.
+        // Adhering to these rules,
+        //   1) if EXIF chunk did not exist in the original file, it will be stored right after the
+        //      first chunk,
+        //   2) if EXIF chunk existed in the original file, it will be stored in the same location.
+        if (mExifOffset == 0) {
+            // Copy IHDR chunk bytes
+            int ihdrChunkLength = dataInputStream.readInt();
+            dataOutputStream.writeInt(ihdrChunkLength);
+            copy(dataInputStream, dataOutputStream, PNG_CHUNK_TYPE_BYTE_LENGTH
+                    + ihdrChunkLength + PNG_CHUNK_CRC_BYTE_LENGTH);
+        } else {
+            // Copy up until the point where EXIF chunk length information is stored.
+            int copyLength = mExifOffset - PNG_SIGNATURE.length
+                    - 4 /* PNG EXIF chunk length bytes */
+                    - PNG_CHUNK_TYPE_BYTE_LENGTH;
+            copy(dataInputStream, dataOutputStream, copyLength);
+            // Skip to the start of the chunk after the EXIF chunk
+            int exifChunkLength = dataInputStream.readInt();
+            dataInputStream.skipBytes(PNG_CHUNK_TYPE_BYTE_LENGTH + exifChunkLength
+                    + PNG_CHUNK_CRC_BYTE_LENGTH);
+        }
+        // Write EXIF data
+        try (ByteArrayOutputStream exifByteArrayOutputStream = new ByteArrayOutputStream()) {
+            // A byte array is needed to calculate the CRC value of this chunk which requires
+            // the chunk type bytes and the chunk data bytes.
+            ByteOrderedDataOutputStream exifDataOutputStream =
+                    new ByteOrderedDataOutputStream(exifByteArrayOutputStream,
+                            ByteOrder.BIG_ENDIAN);
+            // Store Exif data in separate byte array
+            writeExifSegment(exifDataOutputStream, 0);
+            byte[] exifBytes =
+                    ((ByteArrayOutputStream) exifDataOutputStream.mOutputStream).toByteArray();
+            // Write EXIF chunk data
+            dataOutputStream.write(exifBytes);
+            // Write EXIF chunk CRC
+            CRC32 crc = new CRC32();
+            crc.update(exifBytes, 4 /* skip length bytes */, exifBytes.length - 4);
+            dataOutputStream.writeInt((int) crc.getValue());
+        }
+        // Copy the rest of the file
+        Streams.copy(dataInputStream, dataOutputStream);
     }
 
     // Reads the given EXIF byte area and save its tag data into attributes.
@@ -4102,7 +4191,7 @@ public class ExifInterface {
         }
 
         // Calculate IFD offsets.
-        int position = 8;
+        int position = 8; // 8 bytes are for TIFF headers
         for (int ifdType = 0; ifdType < EXIF_TAGS.length; ++ifdType) {
             if (!mAttributes[ifdType].isEmpty()) {
                 ifdOffsets[ifdType] = position;
@@ -4117,13 +4206,16 @@ public class ExifInterface {
             position += mThumbnailLength;
         }
 
-        // Calculate the total size
-        int totalSize = position + 8;  // eight bytes is for header part.
+        int totalSize = position;
+        if (mMimeType == IMAGE_TYPE_JPEG) {
+            // Add 8 bytes for APP1 size and identifier data
+            totalSize += 8;
+        }
         if (DEBUG) {
-            Log.d(TAG, "totalSize length: " + totalSize);
             for (int i = 0; i < EXIF_TAGS.length; ++i) {
-                Log.d(TAG, String.format("index: %d, offsets: %d, tag count: %d, data sizes: %d",
-                        i, ifdOffsets[i], mAttributes[i].size(), ifdDataSizes[i]));
+                Log.d(TAG, String.format("index: %d, offsets: %d, tag count: %d, data sizes: %d, "
+                                + "total size: %d", i, ifdOffsets[i], mAttributes[i].size(),
+                        ifdDataSizes[i], totalSize));
             }
         }
 
@@ -4141,9 +4233,17 @@ public class ExifInterface {
                     ifdOffsets[IFD_TYPE_INTEROPERABILITY], mExifByteOrder));
         }
 
+        if (mMimeType == IMAGE_TYPE_JPEG) {
+            // Write JPEG specific data (APP1 size, APP1 identifier)
+            dataOutputStream.writeUnsignedShort(totalSize);
+            dataOutputStream.write(IDENTIFIER_EXIF_APP1);
+        } else if (mMimeType == IMAGE_TYPE_PNG) {
+            // Write PNG specific data (chunk size, chunk type)
+            dataOutputStream.writeInt(totalSize);
+            dataOutputStream.write(PNG_CHUNK_TYPE_EXIF);
+        }
+
         // Write TIFF Headers. See JEITA CP-3451C Section 4.5.2. Table 1.
-        dataOutputStream.writeUnsignedShort(totalSize);
-        dataOutputStream.write(IDENTIFIER_EXIF_APP1);
         dataOutputStream.writeShort(mExifByteOrder == ByteOrder.BIG_ENDIAN
                 ? BYTE_ALIGN_MM : BYTE_ALIGN_II);
         dataOutputStream.setByteOrder(mExifByteOrder);
@@ -4219,7 +4319,7 @@ public class ExifInterface {
      * Determines the data format of EXIF entry value.
      *
      * @param entryValue The value to be determined.
-     * @return Returns two data formats gussed as a pair in integer. If there is no two candidate
+     * @return Returns two data formats guessed as a pair in integer. If there is no two candidate
                data formats for the given entry value, returns {@code -1} in the second of the pair.
      */
     private static Pair<Integer, Integer> guessDataFormat(String entryValue) {
@@ -4541,7 +4641,7 @@ public class ExifInterface {
     // An output stream to write EXIF data area, which can be written in either little or big endian
     // order.
     private static class ByteOrderedDataOutputStream extends FilterOutputStream {
-        private final OutputStream mOutputStream;
+        final OutputStream mOutputStream;
         private ByteOrder mByteOrder;
 
         public ByteOrderedDataOutputStream(OutputStream out, ByteOrder byteOrder) {
@@ -4654,6 +4754,25 @@ public class ExifInterface {
             }
         }
         return false;
+    }
+
+    /**
+     * Copies the given number of the bytes from {@code in} to {@code out}. Neither stream is
+     * closed.
+     */
+    private static void copy(InputStream in, OutputStream out, int numBytes) throws IOException {
+        int remainder = numBytes;
+        byte[] buffer = new byte[8192];
+        while (remainder > 0) {
+            int bytesToRead = Math.min(remainder, 8192);
+            int bytesRead = in.read(buffer, 0, bytesToRead);
+            if (bytesRead != bytesToRead) {
+                throw new IOException("Failed to copy the given amount of bytes from the input"
+                        + "stream to the output stream.");
+            }
+            remainder -= bytesRead;
+            out.write(buffer, 0, bytesRead);
+        }
     }
 
     /**
