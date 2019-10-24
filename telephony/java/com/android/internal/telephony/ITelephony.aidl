@@ -1603,6 +1603,18 @@ interface ITelephony {
     String[] getForbiddenPlmns(int subId, int appType, String callingPackage);
 
     /**
+     * Set the forbidden PLMN list from the givven app type (ex APPTYPE_USIM) on a particular
+     * subscription.
+     *
+     * @param subId subId the id of the subscription
+     * @param appType appType the uicc app type, must be USIM or SIM.
+     * @param fplmns plmns the Forbiden plmns list that needed to be written to the SIM.
+     * @param content callingPackage the op Package name.
+     * @return number of fplmns that is successfully written to the SIM
+     */
+    int setForbiddenPlmns(int subId, int appType, in List<String> fplmns, String callingPackage);
+
+    /**
      * Check if phone is in emergency callback mode
      * @return true if phone is in emergency callback mode
      * @param subId the subscription ID that this action applies to.
