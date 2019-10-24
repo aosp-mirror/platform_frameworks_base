@@ -337,9 +337,14 @@ public class MediaRecorder implements AudioRouting,
 
         /**
          * Audio source for capturing broadcast radio tuner output.
+         * Capturing the radio tuner output requires the
+         * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT} permission.
+         * This permission is reserved for use by system components and is not available to
+         * third-party applications.
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT)
         public static final int RADIO_TUNER = 1998;
 
         /**
