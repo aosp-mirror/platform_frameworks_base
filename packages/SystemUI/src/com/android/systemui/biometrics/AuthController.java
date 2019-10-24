@@ -93,8 +93,11 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                         Log.w(TAG, "Evicting client due to: " + topPackage);
                         mCurrentDialog.dismissWithoutCallback(true /* animate */);
                         mCurrentDialog = null;
-                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
-                        mReceiver = null;
+                        if (mReceiver != null) {
+                            mReceiver.onDialogDismissed(
+                                    BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                            mReceiver = null;
+                        }
                     }
                 }
             } catch (RemoteException e) {
@@ -105,6 +108,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Override
     public void onTryAgainPressed() {
+        if (mReceiver == null) {
+            Log.e(TAG, "onTryAgainPressed: Receiver is null");
+            return;
+        }
         try {
             mReceiver.onTryAgainPressed();
         } catch (RemoteException e) {
@@ -114,6 +121,10 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Override
     public void onDeviceCredentialPressed() {
+        if (mReceiver == null) {
+            Log.e(TAG, "onDeviceCredentialPressed: Receiver is null");
+            return;
+        }
         try {
             mReceiver.onDeviceCredentialPressed();
         } catch (RemoteException e) {
@@ -161,7 +172,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     private void sendResultAndCleanUp(@DismissedReason int reason) {
         if (mReceiver == null) {
-            Log.e(TAG, "Receiver is null");
+            Log.e(TAG, "sendResultAndCleanUp: Receiver is null");
             return;
         }
         try {
