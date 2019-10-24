@@ -544,4 +544,10 @@ public abstract class WindowManagerInternal {
      */
     public abstract @Nullable KeyInterceptionInfo
             getKeyInterceptionInfoFromToken(IBinder inputToken);
+
+    /**
+     * Clears the snapshot cache of running activities so they show the splash-screen
+     * the next time the activities are opened.
+     */
+    public abstract void clearSnapshotCache();
 }
