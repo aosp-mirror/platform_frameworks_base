@@ -33,6 +33,7 @@ import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,7 +51,6 @@ import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.MediaTransferManager;
 
 /**
  * Single media player for carousel in QSPanel
@@ -101,6 +101,12 @@ public class QSMediaPlayer {
         mToken = token;
         mController = new MediaController(mContext, token);
         MediaMetadata mMediaMetadata = mController.getMetadata();
+
+        if (mMediaMetadata == null) {
+            Log.e(TAG, "Media metadata was null");
+            return;
+        }
+
         Notification.Builder builder = Notification.Builder.recoverBuilder(mContext, notif);
 
         // Album art
@@ -151,18 +157,17 @@ public class QSMediaPlayer {
         // Album name
         TextView albumName = headerView.findViewById(com.android.internal.R.id.header_text);
         String albumString = mMediaMetadata.getString(MediaMetadata.METADATA_KEY_ALBUM);
-        if (!albumString.isEmpty()) {
+        if (TextUtils.isEmpty(albumString)) {
+            albumName.setVisibility(View.GONE);
+            separator.setVisibility(View.GONE);
+        } else {
             albumName.setText(albumString);
             albumName.setTextColor(iconColor);
             albumName.setVisibility(View.VISIBLE);
             separator.setVisibility(View.VISIBLE);
-        } else {
-            albumName.setVisibility(View.GONE);
-            separator.setVisibility(View.GONE);
         }
 
         // Transfer chip
-        MediaTransferManager mediaTransferManager = new MediaTransferManager(mContext);
         View transferBackgroundView = headerView.findViewById(
                 com.android.internal.R.id.media_seamless);
         LinearLayout viewLayout = (LinearLayout) transferBackgroundView;
