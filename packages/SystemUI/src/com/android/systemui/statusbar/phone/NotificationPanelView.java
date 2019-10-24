@@ -55,7 +55,6 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
@@ -243,7 +242,7 @@ public class NotificationPanelView extends PanelView implements
     private View mQsNavbarScrim;
     protected NotificationsQuickSettingsContainer mNotificationContainerParent;
     protected NotificationStackScrollLayout mNotificationStackScroller;
-    protected LinearLayout mHomeControlsLayout;
+    protected FrameLayout mHomeControlsLayout;
     private boolean mAnimateNextPositionUpdate;
 
     private int mTrackingPointer;

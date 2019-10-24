@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/home_controls_layout"
     android:layout_width="match_parent"
@@ -8,6 +8,5 @@
     android:visibility="gone"
     android:padding="8dp"
     android:layout_margin="5dp"
-    android:background="?android:attr/colorBackgroundFloating"
-    android:orientation="vertical">
-</LinearLayout>
+    android:background="?android:attr/colorBackgroundFloating">
+</FrameLayout>

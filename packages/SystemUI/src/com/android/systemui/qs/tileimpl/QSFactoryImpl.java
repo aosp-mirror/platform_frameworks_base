@@ -145,7 +145,7 @@ public class QSFactoryImpl implements QSFactory {
                 return mBluetoothTileProvider.get();
             case "controls":
                 if (Settings.System.getInt(mHost.getContext().getContentResolver(),
-                        "qs_controls_tile_enabled", 0) == 1) {
+                        "npv_plugin_flag", 0) == 3) {
                     return mControlsTileProvider.get();
                 } else return null;
             case "cell":
