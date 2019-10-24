@@ -587,6 +587,46 @@ public class MediaRecorder implements AudioRouting,
     }
 
     /**
+     * Indicates that this capture request is privacy sensitive and that
+     * any concurrent capture is not permitted.
+     * <p>
+     * The default is not privacy sensitive except when the audio source set with
+     * {@link #setAudioSource(int)} is {@link AudioSource#VOICE_COMMUNICATION} or
+     * {@link AudioSource#CAMCORDER}.
+     * <p>
+     * Always takes precedence over default from audio source when set explicitly.
+     * <p>
+     * Using this API is only permitted when the audio source is one of:
+     * <ul>
+     * <li>{@link AudioSource#MIC}</li>
+     * <li>{@link AudioSource#CAMCORDER}</li>
+     * <li>{@link AudioSource#VOICE_RECOGNITION}</li>
+     * <li>{@link AudioSource#VOICE_COMMUNICATION}</li>
+     * <li>{@link AudioSource#UNPROCESSED}</li>
+     * <li>{@link AudioSource#VOICE_PERFORMANCE}</li>
+     * </ul>
+     * Invoking {@link #prepare()} will throw an IOException if this
+     * condition is not met.
+     * <p>
+     * Must be called after {@link #setAudioSource(int)} and before {@link #setOutputFormat(int)}.
+     * @param privacySensitive True if capture from this MediaRecorder must be marked as privacy
+     * sensitive, false otherwise.
+     * @throws IllegalStateException if called before {@link #setAudioSource(int)}
+     * or after {@link #setOutputFormat(int)}
+     */
+    public native void setPrivacySensitive(boolean privacySensitive);
+
+    /**
+     * Returns whether this MediaRecorder is marked as privacy sensitive or not with
+     * regard to audio capture.
+     * <p>
+     * See {@link #setPrivacySensitive(boolean)}
+     * <p>
+     * @return true if privacy sensitive, false otherwise
+     */
+    public native boolean isPrivacySensitive();
+
+    /**
      * Sets the video source to be used for recording. If this method is not
      * called, the output file will not contain an video track. The source needs
      * to be specified before setting recording-parameters or encoders. Call
