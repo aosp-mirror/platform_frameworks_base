@@ -116,6 +116,14 @@ final class AccessibilityController {
         return result;
     }
 
+    /**
+     * Sets a callback for observing which windows are touchable for the purposes
+     * of accessibility on specified display.
+     *
+     * @param displayId The logical display id.
+     * @param callback The callback.
+     * @return {@code false} if display id is not valid or an embedded display.
+     */
     public boolean setWindowsForAccessibilityCallbackLocked(int displayId,
             WindowsForAccessibilityCallback callback) {
         if (callback != null) {
@@ -129,7 +137,7 @@ final class AccessibilityController {
                 if (display.getType() == Display.TYPE_VIRTUAL && dc.getParentWindow() != null) {
                     // The window observer of this embedded display had been set from
                     // window manager after setting its parent window.
-                    return true;
+                    return false;
                 } else {
                     throw new IllegalStateException(
                             "Windows for accessibility callback of display "
