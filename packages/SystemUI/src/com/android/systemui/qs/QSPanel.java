@@ -57,6 +57,7 @@ import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.QSHost.Callback;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -69,6 +70,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -84,6 +86,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
+    private String mCachedSpecs = "";
     protected final View mBrightnessView;
     private final H mHandler = new H();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -101,6 +104,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private QSDetail.Callback mCallback;
     private BrightnessController mBrightnessController;
     private DumpController mDumpController;
+    private final QSLogger mQSLogger;
     protected QSTileHost mHost;
 
     protected QSSecurityFooter mFooter;
@@ -140,23 +144,17 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
     };
 
-    public QSPanel(Context context) {
-        this(context, null);
-    }
-
-    public QSPanel(Context context, AttributeSet attrs) {
-        this(context, attrs, null);
-    }
-
-    public QSPanel(Context context, AttributeSet attrs, DumpController dumpController) {
-        this(context, attrs, dumpController, Dependency.get(BroadcastDispatcher.class));
-    }
-
     @Inject
-    public QSPanel(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            DumpController dumpController, BroadcastDispatcher broadcastDispatcher) {
+    public QSPanel(
+            @Named(VIEW_CONTEXT) Context context,
+            AttributeSet attrs,
+            DumpController dumpController,
+            BroadcastDispatcher broadcastDispatcher,
+            QSLogger qsLogger
+    ) {
         super(context, attrs);
         mContext = context;
+        mQSLogger = qsLogger;
 
         setOrientation(VERTICAL);
 
@@ -166,6 +164,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.qs_paged_tile_layout, this, false);
+        mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), mCachedSpecs);
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout);
 
@@ -521,6 +520,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
+        mQSLogger.logPanelExpanded(expanded, getDumpableTag());
         mExpanded = expanded;
         if (!mExpanded && mTileLayout instanceof PagedTileLayout) {
             ((PagedTileLayout) mTileLayout).setCurrentItem(0, false);
@@ -547,11 +547,18 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mListening == listening) return;
         mListening = listening;
         if (mTileLayout != null) {
+            mQSLogger.logAllTilesChangeListening(listening, getDumpableTag(), mCachedSpecs);
             mTileLayout.setListening(listening);
         }
         if (mListening) {
             refreshAllTiles();
         }
+    }
+
+    private String getTilesSpecs() {
+        return mRecords.stream()
+                .map(tileRecord ->  tileRecord.tile.getTileSpec())
+                .collect(Collectors.joining(","));
     }
 
     public void setListening(boolean listening, boolean expanded) {
@@ -611,6 +618,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             record.tile.removeCallback(record.callback);
         }
         mRecords.clear();
+        mCachedSpecs = "";
         for (QSTile tile : tiles) {
             addTile(tile, collapsedView);
         }
@@ -675,6 +683,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         r.tileView.init(r.tile);
         r.tile.refreshState();
         mRecords.add(r);
+        mCachedSpecs = getTilesSpecs();
 
         if (mTileLayout != null) {
             mTileLayout.addTile(r);

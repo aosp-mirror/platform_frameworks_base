@@ -32,9 +32,10 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 
-import javax.inject.Inject;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+
+import javax.inject.Inject;
 
 /**
  * Quick Settings tile for: Night Mode / Dark Theme / Dark Mode.
@@ -138,10 +139,6 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
     @Override
     public Intent getLongClickIntent() {
         return new Intent(Settings.ACTION_DARK_THEME_SETTINGS);
-    }
-
-    @Override
-    protected void handleSetListening(boolean listening) {
     }
 
     @Override

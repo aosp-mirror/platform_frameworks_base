@@ -23,6 +23,7 @@ import static junit.framework.TestCase.assertFalse;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -45,6 +46,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -95,6 +97,8 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private StatusBar mStatusBar;
     @Mock
+    private QSLogger mQSLogger;
+    @Mock
     private CustomTile mCustomTile;
 
     private Handler mHandler;
@@ -108,7 +112,7 @@ public class QSTileHostTest extends SysuiTestCase {
         mHandler = new Handler(mLooper.getLooper());
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpController,
-                mBroadcastDispatcher, mStatusBar);
+                mBroadcastDispatcher, mStatusBar, mQSLogger);
         setUpTileFactory();
         Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
                 "", ActivityManager.getCurrentUser());
@@ -187,6 +191,7 @@ public class QSTileHostTest extends SysuiTestCase {
         assertEquals(1, mQSTileHost.getTiles().size());
         QSTile element = CollectionUtils.firstOrNull(mQSTileHost.getTiles());
         assertTrue(element instanceof TestTile1);
+        verify(mQSLogger).logTileAdded("spec1");
     }
 
     @Test
@@ -200,6 +205,9 @@ public class QSTileHostTest extends SysuiTestCase {
         QSTile[] elements = mQSTileHost.getTiles().toArray(new QSTile[0]);
         assertTrue(elements[0] instanceof TestTile1);
         assertTrue(elements[1] instanceof TestTile2);
+
+        verify(mQSLogger).logTileAdded("spec1");
+        verify(mQSLogger).logTileAdded("spec2");
     }
 
     @Test
@@ -210,6 +218,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "default");
         assertEquals(1, mQSTileHost.getTiles().size());
         assertEquals(mCustomTile, CollectionUtils.firstOrNull(mQSTileHost.getTiles()));
+
+        verify(mQSLogger).logTileAdded(CUSTOM_TILE_SPEC);
     }
 
     private static class TestQSTileHost extends QSTileHost {
@@ -217,10 +227,10 @@ public class QSTileHostTest extends SysuiTestCase {
                 QSFactoryImpl defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpController dumpController,
-                BroadcastDispatcher broadcastDispatcher, StatusBar statusBar) {
+                BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpController, broadcastDispatcher,
-                    Optional.of(statusBar));
+                    Optional.of(statusBar), qsLogger);
         }
 
         @Override
@@ -278,9 +288,6 @@ public class QSTileHostTest extends SysuiTestCase {
         public Intent getLongClickIntent() {
             return null;
         }
-
-        @Override
-        protected void handleSetListening(boolean listening) {}
 
         @Override
         public CharSequence getTileLabel() {

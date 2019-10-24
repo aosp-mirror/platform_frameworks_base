@@ -130,6 +130,7 @@ public class AirplaneModeTile extends QSTileImpl<BooleanState> {
     }
 
     public void handleSetListening(boolean listening) {
+        super.handleSetListening(listening);
         if (mListening == listening) return;
         mListening = listening;
         if (listening) {

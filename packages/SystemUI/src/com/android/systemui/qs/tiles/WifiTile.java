@@ -84,10 +84,6 @@ public class WifiTile extends QSTileImpl<SignalState> {
     }
 
     @Override
-    public void handleSetListening(boolean listening) {
-    }
-
-    @Override
     public void setDetailListening(boolean listening) {
         if (listening) {
             mWifiController.addAccessPointCallback(mDetailAdapter);
