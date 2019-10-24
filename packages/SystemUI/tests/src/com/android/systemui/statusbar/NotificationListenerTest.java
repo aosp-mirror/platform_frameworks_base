@@ -37,7 +37,6 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +53,6 @@ public class NotificationListenerTest extends SysuiTestCase {
 
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListenerService.RankingMap mRanking;
-    @Mock private NotificationData mNotificationData;
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
@@ -74,8 +72,6 @@ public class NotificationListenerTest extends SysuiTestCase {
                 new Handler(TestableLooper.get(this).getLooper()));
         mContext.addMockSystemService(NotificationManager.class, mNotificationManager);
 
-        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
-
         mListener = new NotificationListener(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
@@ -90,7 +86,7 @@ public class NotificationListenerTest extends SysuiTestCase {
 
     @Test
     public void testNotificationUpdateCallsUpdateNotification() {
-        when(mNotificationData.get(mSbn.getKey()))
+        when(mEntryManager.getActiveNotificationUnfiltered(mSbn.getKey()))
                 .thenReturn(
                         new NotificationEntryBuilder()
                                 .setSbn(mSbn)

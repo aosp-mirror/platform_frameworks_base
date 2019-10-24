@@ -73,8 +73,8 @@ public class SmartReplyController {
     public void smartActionClicked(
             NotificationEntry entry, int actionIndex, Notification.Action action,
             boolean generatedByAssistant) {
-        final int count = mEntryManager.getNotificationData().getActiveNotifications().size();
-        final int rank = mEntryManager.getNotificationData().getRank(entry.getKey());
+        final int count = mEntryManager.getActiveNotificationsCount();
+        final int rank = entry.getRanking().getRank();
         NotificationVisibility.NotificationLocation location =
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(

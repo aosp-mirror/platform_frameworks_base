@@ -43,9 +43,9 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -113,7 +113,7 @@ public class NotificationLogger implements StateListener {
         public void run() {
             mLastVisibilityReportUptimeMs = SystemClock.uptimeMillis();
 
-            // 1. Loop over mNotificationData entries:
+            // 1. Loop over active entries:
             //   A. Keep list of visible notifications.
             //   B. Keep list of previously hidden, now visible notifications.
             // 2. Compute no-longer visible notifications by removing currently
@@ -121,8 +121,7 @@ public class NotificationLogger implements StateListener {
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
-            ArrayList<NotificationEntry> activeNotifications = mEntryManager
-                    .getNotificationData().getActiveNotifications();
+            List<NotificationEntry> activeNotifications = mEntryManager.getVisibleNotifications();
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
                 NotificationEntry entry = activeNotifications.get(i);
@@ -403,7 +402,7 @@ public class NotificationLogger implements StateListener {
      */
     public void onExpansionChanged(String key, boolean isUserAction, boolean isExpanded) {
         NotificationVisibility.NotificationLocation location =
-                getNotificationLocation(mEntryManager.getNotificationData().get(key));
+                getNotificationLocation(mEntryManager.getActiveNotificationUnfiltered(key));
         mExpansionStateLogger.onExpansionChanged(key, isUserAction, isExpanded, location);
     }
 

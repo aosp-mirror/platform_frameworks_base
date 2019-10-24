@@ -26,7 +26,6 @@ import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.Notification.BubbleMetadata;
 import android.app.NotificationChannel;
@@ -39,8 +38,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
-
-import androidx.test.InstrumentationRegistry;
 
 import com.android.systemui.TestableDependency;
 import com.android.systemui.bubbles.BubbleController;
@@ -72,7 +69,6 @@ public class NotificationTestHelper {
     private static final String GROUP_KEY = "gruKey";
 
     private final Context mContext;
-    private final Instrumentation mInstrumentation;
     private int mId;
     private final NotificationGroupManager mGroupManager;
     private ExpandableNotificationRow mRow;
@@ -83,7 +79,7 @@ public class NotificationTestHelper {
         dependency.injectMockDependency(NotificationMediaManager.class);
         dependency.injectMockDependency(BubbleController.class);
         dependency.injectMockDependency(StatusBarWindowController.class);
-        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        dependency.injectMockDependency(SmartReplyController.class);
         StatusBarStateController stateController = mock(StatusBarStateController.class);
         mGroupManager = new NotificationGroupManager(stateController);
         mHeadsUpManager = new HeadsUpManagerPhone(mContext, stateController,

@@ -139,8 +139,7 @@ public class ForegroundServiceController {
         // Update appOp if there's an associated pending or visible notification:
         final String foregroundKey = getStandardLayoutKey(userId, packageName);
         if (foregroundKey != null) {
-            final NotificationEntry entry = mEntryManager.getPendingOrCurrentNotif(
-                    foregroundKey);
+            final NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(foregroundKey);
             if (entry != null
                     && uid == entry.getSbn().getUid()
                     && packageName.equals(entry.getSbn().getPackageName())) {

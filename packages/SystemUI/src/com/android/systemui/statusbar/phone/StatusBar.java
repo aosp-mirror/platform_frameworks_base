@@ -1228,7 +1228,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mContext,
                         mAllowNotificationLongPress,
                         mKeyguardBypassController,
-                        mStatusBarStateController);
+                        mStatusBarStateController,
+                        mNotificationLogger);
 
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
@@ -2494,8 +2495,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (DUMPTRUCK) {
-            synchronized (mEntryManager.getNotificationData()) {
-                mEntryManager.getNotificationData().dump(pw, "  ");
+            synchronized (mEntryManager) {
+                mEntryManager.dump(pw, "  ");
             }
 
             if (false) {
@@ -2753,11 +2754,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     public void resetUserExpandedStates() {
-        ArrayList<NotificationEntry> activeNotifications = mEntryManager.getNotificationData()
-                .getActiveNotifications();
-        final int notificationCount = activeNotifications.size();
-        for (int i = 0; i < notificationCount; i++) {
-            NotificationEntry entry = activeNotifications.get(i);
+        for (NotificationEntry entry : mEntryManager.getVisibleNotifications()) {
             entry.resetUserExpansion();
         }
     }
@@ -2857,8 +2854,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         try {
             // consider the transition from peek to expanded to be a panel open,
             // but not one that clears notification effects.
-            int notificationLoad = mEntryManager.getNotificationData()
-                    .getActiveNotifications().size();
+            int notificationLoad = mEntryManager.getActiveNotificationsCount();
             mBarService.onPanelRevealed(false, notificationLoad);
         } catch (RemoteException ex) {
             // Won't fail unless the world has ended.
@@ -2876,8 +2872,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     !mPresenter.isPresenterFullyCollapsed() &&
                             (mState == StatusBarState.SHADE
                                     || mState == StatusBarState.SHADE_LOCKED);
-            int notificationLoad = mEntryManager.getNotificationData().getActiveNotifications()
-                    .size();
+            int notificationLoad = mEntryManager.getActiveNotificationsCount();
             if (pinnedHeadsUp && mPresenter.isPresenterFullyCollapsed()) {
                 notificationLoad = 1;
             }
@@ -3860,10 +3855,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void showScreenPinningRequest(int taskId, boolean allowCancel) {
         mScreenPinningRequest.showPrompt(taskId, allowCancel);
-    }
-
-    public boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
     }
 
     @Override

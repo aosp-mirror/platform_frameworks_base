@@ -3562,8 +3562,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void updateShowEmptyShadeView() {
         boolean showEmptyShadeView =
-                mBarState != StatusBarState.KEYGUARD &&
-                        mEntryManager.getNotificationData().getActiveNotifications().size() == 0;
+                mBarState != StatusBarState.KEYGUARD && mEntryManager.hasActiveNotifications();
         showEmptyShadeView(showEmptyShadeView);
     }
 

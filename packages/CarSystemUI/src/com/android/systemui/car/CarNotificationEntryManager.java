@@ -19,8 +19,9 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.logging.NotifLog;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -35,8 +36,12 @@ import javax.inject.Singleton;
 public class CarNotificationEntryManager extends NotificationEntryManager {
 
     @Inject
-    public CarNotificationEntryManager(NotificationData notificationData, NotifLog notifLog) {
-        super(notificationData, notifLog);
+    public CarNotificationEntryManager(
+            NotifLog notifLog,
+            NotificationGroupManager groupManager,
+            NotificationRankingManager rankingManager,
+            KeyguardEnvironment keyguardEnvironment) {
+        super(notifLog, groupManager, rankingManager, keyguardEnvironment);
     }
 
     @Override

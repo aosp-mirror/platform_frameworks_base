@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
@@ -126,7 +127,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 updatePublicMode();
                 // The filtering needs to happen before the update call below in order to make sure
                 // the presenter has the updated notifications from the new user
-                getEntryManager().getNotificationData().filterAndSort("user switched");
+                getEntryManager().reapplyFilterAndSort("user switched");
                 mPresenter.onUserSwitched(mCurrentUserId);
 
                 for (UserChangedListener listener : mListeners) {
@@ -148,17 +149,17 @@ public class NotificationLockscreenUserManagerImpl implements
                     }
                 }
                 if (notificationKey != null) {
-                    final int count =
-                            getEntryManager().getNotificationData().getActiveNotifications().size();
-                    final int rank = getEntryManager().getNotificationData().getRank(notificationKey);
+                    NotificationEntry entry =
+                            getEntryManager().getActiveNotificationUnfiltered(notificationKey);
+                    final int count = getEntryManager().getActiveNotificationsCount();
+                    final int rank = entry != null ? entry.getRanking().getRank() : 0;
                     NotificationVisibility.NotificationLocation location =
-                            NotificationLogger.getNotificationLocation(
-                                    getEntryManager().getNotificationData().get(notificationKey));
+                            NotificationLogger.getNotificationLocation(entry);
                     final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                             rank, count, true, location);
                     try {
                         mBarService.onNotificationClick(notificationKey, nv);
-                    } catch (RemoteException e) {
+                    } catch (RemoteException exception) {
                         /* ignore */
                     }
                 }
@@ -311,9 +312,9 @@ public class NotificationLockscreenUserManagerImpl implements
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return true;
         }
-        return isLockscreenPublicMode(mCurrentUserId)
-                && getEntryManager().getNotificationData().getVisibilityOverride(key) ==
-                        Notification.VISIBILITY_SECRET;
+        NotificationEntry visibleEntry = getEntryManager().getActiveNotificationUnfiltered(key);
+        return isLockscreenPublicMode(mCurrentUserId) && visibleEntry != null
+                && visibleEntry.getRanking().getVisibilityOverride() == VISIBILITY_SECRET;
     }
 
     public boolean shouldShowOnKeyguard(NotificationEntry entry) {
@@ -326,8 +327,7 @@ public class NotificationLockscreenUserManagerImpl implements
                 && hideSilentNotificationsOnLockscreen()) {
             exceedsPriorityThreshold = entry.getBucket() != BUCKET_SILENT;
         } else {
-            exceedsPriorityThreshold =
-                    !getEntryManager().getNotificationData().isAmbient(entry.getKey());
+            exceedsPriorityThreshold = !entry.getRanking().isAmbient();
         }
         return mShowLockscreenNotifications && exceedsPriorityThreshold;
     }
@@ -467,8 +467,9 @@ public class NotificationLockscreenUserManagerImpl implements
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return true;
         }
-        return getEntryManager().getNotificationData().getVisibilityOverride(key) ==
-                Notification.VISIBILITY_PRIVATE;
+        NotificationEntry entry = getEntryManager().getActiveNotificationUnfiltered(key);
+        return entry != null
+                && entry.getRanking().getVisibilityOverride() == Notification.VISIBILITY_PRIVATE;
     }
 
     private void updateCurrentProfilesCache() {

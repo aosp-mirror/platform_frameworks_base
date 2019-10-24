@@ -99,7 +99,8 @@ public interface NotificationEntryListener {
     /**
      * Called whenever notification ranking changes, in response to
      * {@link NotificationListenerService#onNotificationRankingUpdate}. This is called after
-     * NotificationData has processed the update and notifications have been re-sorted and filtered.
+     * NotificationEntryManager has processed the update and notifications have been re-sorted
+     * and filtered.
      *
      * @param rankingMap provides access to ranking information on currently active notifications
      */

@@ -33,7 +33,7 @@ import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -74,7 +74,7 @@ abstract class SystemUIDefaultModule {
     abstract DockManager bindDockManager(DockManagerImpl dockManager);
 
     @Binds
-    abstract NotificationData.KeyguardEnvironment bindKeyguardEnvironment(
+    abstract NotificationEntryManager.KeyguardEnvironment bindKeyguardEnvironment(
             KeyguardEnvironmentImpl keyguardEnvironment);
 
     @Binds

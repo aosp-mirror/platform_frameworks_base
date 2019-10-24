@@ -102,8 +102,7 @@ public class NotificationMediaManager implements Dumpable {
     }
 
 
-    // Late binding
-    private NotificationEntryManager mEntryManager;
+    private final NotificationEntryManager mEntryManager;
 
     // Late binding, also @Nullable due to being in com.android.systemui.statusbar.phone package
     @Nullable
@@ -258,8 +257,9 @@ public class NotificationMediaManager implements Dumpable {
         if (mMediaNotificationKey == null) {
             return null;
         }
-        synchronized (mEntryManager.getNotificationData()) {
-            NotificationEntry entry = mEntryManager.getNotificationData().get(mMediaNotificationKey);
+        synchronized (mEntryManager) {
+            NotificationEntry entry = mEntryManager
+                    .getActiveNotificationUnfiltered(mMediaNotificationKey);
             if (entry == null || entry.expandedIcon == null) {
                 return null;
             }
@@ -281,8 +281,9 @@ public class NotificationMediaManager implements Dumpable {
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
-        synchronized (mEntryManager.getNotificationData()) {
-            Set<NotificationEntry> allNotifications = mEntryManager.getAllNotifs();
+        synchronized (mEntryManager) {
+            Set<NotificationEntry> allNotifications =
+                    mEntryManager.getPendingAndActiveNotifications();
 
             // Promote the media notification with a controller in 'playing' state, if any.
             NotificationEntry mediaNotification = null;

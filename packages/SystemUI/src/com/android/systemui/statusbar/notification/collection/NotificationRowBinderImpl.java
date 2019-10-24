@@ -32,7 +32,6 @@ import android.view.ViewGroup;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -61,7 +60,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             Dependency.get(NotificationGroupManager.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
-    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
     private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
             Dependency.get(NotificationInterruptionStateProvider.class);
 
@@ -81,16 +79,20 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
-    private final NotificationLogger mNotificationLogger = Dependency.get(NotificationLogger.class);
+    private final NotificationLogger mNotificationLogger;
 
-    public NotificationRowBinderImpl(Context context, boolean allowLongPress,
+    public NotificationRowBinderImpl(
+            Context context,
+            boolean allowLongPress,
             KeyguardBypassController keyguardBypassController,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            NotificationLogger logger) {
         mContext = context;
         mMessagingUtil = new NotificationMessagingUtil(context);
         mAllowLongPress = allowLongPress;
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
+        mNotificationLogger = logger;
     }
 
     private NotificationRemoteInputManager getRemoteInputManager() {

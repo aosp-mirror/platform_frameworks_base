@@ -102,7 +102,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     public void testAppOps_appOpAddedToForegroundNotif() {
         // GIVEN a notification associated with a foreground service
         NotificationEntry entry = addFgEntry();
-        when(mEntryManager.getPendingOrCurrentNotif(entry.getKey())).thenReturn(entry);
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(entry);
 
         // WHEN we are notified of a new app op for this notification
         mFsc.onAppOpChanged(
@@ -123,7 +123,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         // GIVEN a foreground service associated notification that already has the correct app op
         NotificationEntry entry = addFgEntry();
         entry.mActiveAppOps.add(AppOpsManager.OP_CAMERA);
-        when(mEntryManager.getPendingOrCurrentNotif(entry.getKey())).thenReturn(entry);
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(entry);
 
         // WHEN we are notified of the same app op for this notification
         mFsc.onAppOpChanged(
@@ -143,7 +143,7 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
     public void testAppOps_appOpNotAddedToUnrelatedNotif() {
         // GIVEN no notification entries correspond to the newly updated appOp
         NotificationEntry entry = addFgEntry();
-        when(mEntryManager.getPendingOrCurrentNotif(entry.getKey())).thenReturn(null);
+        when(mEntryManager.getPendingOrActiveNotif(entry.getKey())).thenReturn(null);
 
         // WHEN a new app op is detected
         mFsc.onAppOpChanged(

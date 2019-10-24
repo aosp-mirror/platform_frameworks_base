@@ -75,7 +75,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class StatusBarNotificationPresenter implements NotificationPresenter,
         ConfigurationController.ConfigurationListener,
@@ -252,8 +252,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void updateNotificationOnUiModeChanged() {
-        ArrayList<NotificationEntry> userNotifications
-                = mEntryManager.getNotificationData().getNotificationsForCurrentUser();
+        List<NotificationEntry> userNotifications =
+                mEntryManager.getActiveNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
             NotificationEntry entry = userNotifications.get(i);
             ExpandableNotificationRow row = entry.getRow();
@@ -264,8 +264,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     private void updateNotificationsOnDensityOrFontScaleChanged() {
-        ArrayList<NotificationEntry> userNotifications =
-                mEntryManager.getNotificationData().getNotificationsForCurrentUser();
+        List<NotificationEntry> userNotifications =
+                mEntryManager.getActiveNotificationsForCurrentUser();
         for (int i = 0; i < userNotifications.size(); i++) {
             NotificationEntry entry = userNotifications.get(i);
             entry.onDensityOrFontScaleChanged();
@@ -326,7 +326,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
     }
 
     public boolean hasActiveNotifications() {
-        return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
+        return mEntryManager.hasActiveNotifications();
     }
 
     public boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn) {

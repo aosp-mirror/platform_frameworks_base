@@ -52,7 +52,6 @@ import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.collection.NotificationData;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -100,11 +99,9 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mDependency.injectMockDependency(NotificationGutsManager.class);
         mDependency.injectMockDependency(StatusBarWindowController.class);
         mDependency.injectMockDependency(InitController.class);
-        NotificationData notificationData = mock(NotificationData.class);
-        when(notificationData.getNotificationsForCurrentUser()).thenReturn(new ArrayList<>());
         NotificationEntryManager entryManager =
                 mDependency.injectMockDependency(NotificationEntryManager.class);
-        when(entryManager.getNotificationData()).thenReturn(notificationData);
+        when(entryManager.getActiveNotificationsForCurrentUser()).thenReturn(new ArrayList<>());
 
         StatusBarWindowView statusBarWindowView = mock(StatusBarWindowView.class);
         when(statusBarWindowView.getResources()).thenReturn(mContext.getResources());

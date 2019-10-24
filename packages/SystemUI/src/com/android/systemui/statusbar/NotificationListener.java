@@ -110,8 +110,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                 }
 
                 String key = sbn.getKey();
-                boolean isUpdate =
-                        mEntryManager.getNotificationData().get(key) != null;
+                boolean isUpdate = mEntryManager.getActiveNotificationUnfiltered(key) != null;
                 // In case we don't allow child notifications, we ignore children of
                 // notifications that have a summary, since` we're not going to show them
                 // anyway. This is true also when the summary is canceled,
@@ -126,8 +125,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                     if (isUpdate) {
                         mEntryManager.removeNotification(key, rankingMap, UNDEFINED_DISMISS_REASON);
                     } else {
-                        mEntryManager.getNotificationData()
-                                .updateRanking(rankingMap, "onNotificationPosted");
+                        mEntryManager.updateRanking(rankingMap, "onNotificationPosted");
                     }
                     return;
                 }
