@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Process;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.Pair;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -43,6 +44,38 @@ import java.util.Map;
 public class OverlayActorEnforcer {
 
     private final VerifyCallback mVerifyCallback;
+
+    /**
+     * @return nullable actor result with {@link ActorState} failure status
+     */
+    static Pair<String, ActorState> getPackageNameForActor(String actorUriString,
+            Map<String, Map<String, String>> namedActors) {
+        if (namedActors.isEmpty()) {
+            return Pair.create(null, ActorState.NO_NAMED_ACTORS);
+        }
+
+        Uri actorUri = Uri.parse(actorUriString);
+
+        String actorScheme = actorUri.getScheme();
+        List<String> actorPathSegments = actorUri.getPathSegments();
+        if (!"overlay".equals(actorScheme) || CollectionUtils.size(actorPathSegments) != 1) {
+            return Pair.create(null, ActorState.INVALID_OVERLAYABLE_ACTOR_NAME);
+        }
+
+        String actorNamespace = actorUri.getAuthority();
+        Map<String, String> namespace = namedActors.get(actorNamespace);
+        if (namespace == null) {
+            return Pair.create(null, ActorState.MISSING_NAMESPACE);
+        }
+
+        String actorName = actorPathSegments.get(0);
+        String packageName = namespace.get(actorName);
+        if (TextUtils.isEmpty(packageName)) {
+            return Pair.create(null, ActorState.MISSING_ACTOR_NAME);
+        }
+
+        return Pair.create(packageName, ActorState.ALLOWED);
+    }
 
     public OverlayActorEnforcer(@NonNull VerifyCallback verifyCallback) {
         mVerifyCallback = verifyCallback;
@@ -141,31 +174,14 @@ public class OverlayActorEnforcer {
             }
         }
 
-        Map<String, ? extends Map<String, String>> namedActors = mVerifyCallback.getNamedActors();
-        if (namedActors.isEmpty()) {
-            return ActorState.NO_NAMED_ACTORS;
+        Map<String, Map<String, String>> namedActors = mVerifyCallback.getNamedActors();
+        Pair<String, ActorState> actorUriPair = getPackageNameForActor(actor, namedActors);
+        ActorState actorUriState = actorUriPair.second;
+        if (actorUriState != ActorState.ALLOWED) {
+            return actorUriState;
         }
 
-        Uri actorUri = Uri.parse(actor);
-
-        String actorScheme = actorUri.getScheme();
-        List<String> actorPathSegments = actorUri.getPathSegments();
-        if (!"overlay".equals(actorScheme) || CollectionUtils.size(actorPathSegments) != 1) {
-            return ActorState.INVALID_OVERLAYABLE_ACTOR_NAME;
-        }
-
-        String actorNamespace = actorUri.getAuthority();
-        Map<String, String> namespace = namedActors.get(actorNamespace);
-        if (namespace == null) {
-            return ActorState.MISSING_NAMESPACE;
-        }
-
-        String actorName = actorPathSegments.get(0);
-        String packageName = namespace.get(actorName);
-        if (TextUtils.isEmpty(packageName)) {
-            return ActorState.MISSING_ACTOR_NAME;
-        }
-
+        String packageName = actorUriPair.first;
         PackageInfo packageInfo = mVerifyCallback.getPackageInfo(packageName, userId);
         if (packageInfo == null) {
             return ActorState.MISSING_APP_INFO;
@@ -192,7 +208,7 @@ public class OverlayActorEnforcer {
      * For easier logging/debugging, a set of all possible failure/success states when running
      * enforcement.
      */
-    private enum ActorState {
+    enum ActorState {
         ALLOWED,
         INVALID_ACTOR,
         MISSING_NAMESPACE,
@@ -244,7 +260,7 @@ public class OverlayActorEnforcer {
          * value maps actor name to package name
          */
         @NonNull
-        Map<String, ? extends Map<String, String>> getNamedActors();
+        Map<String, Map<String, String>> getNamedActors();
 
         /**
          * @return true if the target package has declared an overlayable

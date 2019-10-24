@@ -18,6 +18,8 @@ package android.content.pm.parsing;
 
 import static android.os.Build.VERSION_CODES.DONUT;
 
+import static java.util.Collections.emptyMap;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
@@ -55,11 +57,13 @@ import android.util.SparseArray;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.server.SystemConfig;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,6 +130,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     private String overlayCategory;
     private int overlayPriority;
     private boolean overlayIsStatic;
+    private Map<String, String> overlayables = emptyMap();
 
     private String staticSharedLibName;
     private long staticSharedLibVersion;
@@ -475,7 +480,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
 
     @Override
     public Map<String, ArraySet<PublicKey>> getKeySetMapping() {
-        return keySetMapping == null ? Collections.emptyMap() : keySetMapping;
+        return keySetMapping == null ? emptyMap() : keySetMapping;
     }
 
     @Override
@@ -769,6 +774,13 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     @Override
     public PackageImpl addOriginalPackage(String originalPackage) {
         this.originalPackages = ArrayUtils.add(this.originalPackages, originalPackage);
+        return this;
+    }
+
+    @Override
+    public ParsingPackage addOverlayable(String overlayableName, String actorName) {
+        this.overlayables = CollectionUtils.add(this.overlayables,
+                TextUtils.safeIntern(overlayableName), TextUtils.safeIntern(actorName));
         return this;
     }
 
@@ -2125,6 +2137,11 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
     }
 
     @Override
+    public Map<String, String> getOverlayables() {
+        return overlayables;
+    }
+
+    @Override
     public boolean isOverlayIsStatic() {
         return overlayIsStatic;
     }
@@ -2291,7 +2308,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         appInfo.metaData = appMetaData;
         appInfo.minAspectRatio = minAspectRatio;
         appInfo.minSdkVersion = minSdkVersion;
-        appInfo.name = name;
+        appInfo.name = className;
         if (appInfo.name != null) {
             appInfo.name = appInfo.name.trim();
         }
@@ -2957,6 +2974,7 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         dest.writeString(this.overlayCategory);
         dest.writeInt(this.overlayPriority);
         dest.writeBoolean(this.overlayIsStatic);
+        dest.writeMap(this.overlayables);
         dest.writeString(this.staticSharedLibName);
         dest.writeLong(this.staticSharedLibVersion);
         dest.writeStringList(this.libraryNames);
@@ -3100,6 +3118,8 @@ public final class PackageImpl implements ParsingPackage, ParsedPackage, Android
         this.overlayCategory = in.readString();
         this.overlayPriority = in.readInt();
         this.overlayIsStatic = in.readBoolean();
+        this.overlayables = new HashMap<>();
+        in.readMap(overlayables, boot);
         this.staticSharedLibName = TextUtils.safeIntern(in.readString());
         this.staticSharedLibVersion = in.readLong();
         this.libraryNames = in.createStringArrayList();
