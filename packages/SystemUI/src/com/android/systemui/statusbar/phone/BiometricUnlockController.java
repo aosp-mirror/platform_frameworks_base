@@ -47,10 +47,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Controller which coordinates all the biometric unlocking actions with the UI.
  */
+@Singleton
 public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
 
     private static final String TAG = "BiometricUnlockCtrl";
