@@ -78,6 +78,7 @@ import android.util.MemoryIntArray;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.ILockSettings;
 
 import java.io.IOException;
@@ -2506,7 +2507,7 @@ public final class Settings {
                         boolean prefixCached = false;
                         int size = mValues.size();
                         for (int i = 0; i < size; ++i) {
-                            if (mValues.keyAt(i).startsWith(prefix + "/")) {
+                            if (mValues.keyAt(i).startsWith(prefix)) {
                                 prefixCached = true;
                                 break;
                             }
@@ -2521,7 +2522,7 @@ public final class Settings {
                             } else {
                                 for (int i = 0; i < size; ++i) {
                                     String key = mValues.keyAt(i);
-                                    if (key.startsWith(prefix + "/")) {
+                                    if (key.startsWith(prefix)) {
                                         keyValues.put(key, mValues.get(key));
                                     }
                                 }
@@ -13678,10 +13679,10 @@ public final class Settings {
         }
 
         /**
-         * Look up a list of names in the database, based on a common prefix.
+         * Look up a list of names in the database, within the specified namespace.
          *
          * @param resolver to access the database with
-         * @param prefix to apply to all of the names which will be fetched
+         * @param namespace to which the names belong
          * @param names to look up in the table
          * @return a non null, but possibly empty, map from name to value for any of the names that
          *         were found during lookup.
@@ -13690,16 +13691,17 @@ public final class Settings {
          */
         @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
         static Map<String, String> getStrings(@NonNull ContentResolver resolver,
-                @NonNull String prefix, @NonNull List<String> names) {
-            List<String> concatenatedNames = new ArrayList<>(names.size());
+                @NonNull String namespace, @NonNull List<String> names) {
+            List<String> compositeNames = new ArrayList<>(names.size());
             for (String name : names) {
-                concatenatedNames.add(prefix + "/" + name);
+                compositeNames.add(createCompositeName(namespace, name));
             }
 
+            String prefix = createPrefix(namespace);
             ArrayMap<String, String> rawKeyValues = sNameValueCache.getStringsForPrefix(
-                    resolver, prefix, concatenatedNames);
+                    resolver, prefix, compositeNames);
             int size = rawKeyValues.size();
-            int substringLength = prefix.length() + 1;
+            int substringLength = prefix.length();
             ArrayMap<String, String> keyValues = new ArrayMap<>(size);
             for (int i = 0; i < size; ++i) {
                 keyValues.put(rawKeyValues.keyAt(i).substring(substringLength),
@@ -13709,7 +13711,7 @@ public final class Settings {
         }
 
         /**
-         * Store a name/value pair into the database.
+         * Store a name/value pair into the database within the specified namespace.
          * <p>
          * Also the method takes an argument whether to make the value the default for this setting.
          * If the system already specified a default value, then the one passed in here will
@@ -13717,6 +13719,7 @@ public final class Settings {
          * </p>
          *
          * @param resolver to access the database with.
+         * @param namespace to store the name/value pair in.
          * @param name to store.
          * @param value to associate with the name.
          * @param makeDefault whether to make the value the default one.
@@ -13727,10 +13730,10 @@ public final class Settings {
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
-        static boolean putString(@NonNull ContentResolver resolver, @NonNull String name,
-                @Nullable String value, boolean makeDefault) {
-            return sNameValueCache.putStringForUser(resolver, name, value, null, makeDefault,
-                    resolver.getUserId());
+        static boolean putString(@NonNull ContentResolver resolver, @NonNull String namespace,
+                @NonNull String name, @Nullable String value, boolean makeDefault) {
+            return sNameValueCache.putStringForUser(resolver, createCompositeName(namespace, name),
+                    value, null, makeDefault, resolver.getUserId());
         }
 
         /**
@@ -13741,21 +13744,21 @@ public final class Settings {
          *
          * @param resolver Handle to the content resolver.
          * @param resetMode The reset mode to use.
-         * @param prefix Optionally, to limit which which pairs are reset.
+         * @param namespace Optionally, to limit which which namespace is reset.
          *
-         * @see #putString(ContentResolver, String, String, boolean)
+         * @see #putString(ContentResolver, String, String, String, boolean)
          *
          * @hide
          */
         @RequiresPermission(Manifest.permission.WRITE_DEVICE_CONFIG)
         static void resetToDefaults(@NonNull ContentResolver resolver, @ResetMode int resetMode,
-                @Nullable String prefix) {
+                @Nullable String namespace) {
             try {
                 Bundle arg = new Bundle();
                 arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
                 arg.putInt(CALL_METHOD_RESET_MODE_KEY, resetMode);
-                if (prefix != null) {
-                    arg.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
+                if (namespace != null) {
+                    arg.putString(Settings.CALL_METHOD_PREFIX_KEY, createPrefix(namespace));
                 }
                 IContentProvider cp = sProviderHolder.getProvider(resolver);
                 cp.call(resolver.getPackageName(), sProviderHolder.mUri.getAuthority(),
@@ -13763,6 +13766,17 @@ public final class Settings {
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't reset to defaults for " + DeviceConfig.CONTENT_URI, e);
             }
+        }
+
+        private static String createCompositeName(@NonNull String namespace, @NonNull String name) {
+            Preconditions.checkNotNull(namespace);
+            Preconditions.checkNotNull(name);
+            return createPrefix(namespace) + name;
+        }
+
+        private static String createPrefix(@NonNull String namespace) {
+            Preconditions.checkNotNull(namespace);
+            return namespace + "/";
         }
     }
 
